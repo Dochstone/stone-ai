@@ -1,7 +1,7 @@
 /**
  * ProfileScreen — User info, stats, palette selector, language, TON wallet, channel link.
+ * FAQ moved to separate FaqScreen.
  */
-
 import { useState } from 'react'
 import { useStore, PALETTES } from '../../store/useStore'
 import { Card, Tag, Divider, GlowBtn, GlitchTitle, TonIcon } from '../ui'
@@ -12,19 +12,9 @@ const LANGS = [
   { id: 'zh', flag: '🇨🇳', name: 'ZH' },
 ]
 
-const FAQ_DATA = [
-  { q: 'Какие модели бесплатно?', a: '6 Lite моделей бесплатно: GPT-4o mini, Claude Haiku 4.5, Gemini 2.0 Flash, DeepSeek R1, Llama 4, Mistral Large. 20 запросов/день.' },
-  { q: 'Что такое Premium модели?', a: '5 топовых моделей: GPT-4.1, Claude Opus 4, Grok 3, Gemini 2.5 Pro, Perplexity Pro. Доступны по подписке PLUS или MAX, либо через Pass.' },
-  { q: 'Чем PLUS отличается от MAX?', a: 'PLUS: 10 Premium/день, без Opus. MAX: 30 Premium/день + 5 Opus/день, API доступ.' },
-  { q: 'Что такое Day Pass / Week Pass?', a: 'Разовые пакеты. Day Pass (79⭐) = 15 Premium на 24 часа. Week Pass (299⭐) = 50 Premium на 7 дней.' },
-  { q: 'Как оплатить?', a: '3 способа: ⭐ Stars, 💎 TON, 💲 USDT TRC-20/TON.' },
-  { q: 'Данные сохраняются?', a: 'FREE: 24ч. PLUS: 30 дней. MAX: бессрочно + экспорт.' },
-]
-
 export function ProfileScreen() {
   const { user, palette, setPaletteId, models, setScreen } = useStore()
   const [lang, setLang] = useState('ru')
-  const [faqOpen, setFaqOpen] = useState<number | null>(null)
   const p = palette
 
   return (
@@ -50,14 +40,11 @@ export function ProfileScreen() {
             <div style={{ fontFamily: 'sans-serif', fontSize: 16, fontWeight: 700, color: '#e0f0e8' }}>
               {user.firstName || 'User'}
             </div>
-            <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#3a6a50' }}>
+            <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#5a8a70' }}>
               @{user.username || 'anonymous'}
             </div>
           </div>
-          <Tag
-            text={user.plan === 'free' ? 'FREE' : user.plan.toUpperCase()}
-            accent={user.plan === 'free' ? '#3a6a50' : '#aaff00'}
-          />
+          <Tag text={user.plan === 'free' ? 'FREE' : user.plan.toUpperCase()} accent={user.plan === 'free' ? '#5a8a70' : '#aaff00'} />
         </div>
       </Card>
 
@@ -78,12 +65,8 @@ export function ProfileScreen() {
             borderRight: i < 2 ? '1px solid rgba(0,255,136,0.08)' : 'none',
             background: 'rgba(0,255,136,0.02)',
           }}>
-            <div style={{
-              fontFamily: "'Orbitron',sans-serif", fontSize: 16, fontWeight: 900, color: '#00ff88',
-            }}>{s.value}</div>
-            <div style={{
-              fontFamily: 'monospace', fontSize: 9, color: '#3a6a50', marginTop: 3, textTransform: 'uppercase',
-            }}>{s.label}</div>
+            <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 16, fontWeight: 900, color: '#00ff88' }}>{s.value}</div>
+            <div style={{ fontFamily: 'monospace', fontSize: 9, color: '#5a8a70', marginTop: 3, textTransform: 'uppercase' }}>{s.label}</div>
           </div>
         ))}
       </div>
@@ -94,7 +77,7 @@ export function ProfileScreen() {
 
       {/* Palette selector */}
       <Card accent={p.primary}>
-        <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#3a6a50', marginBottom: 10, textTransform: 'uppercase' }}>
+        <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70', marginBottom: 10, textTransform: 'uppercase' }}>
           🎨 palette
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -112,7 +95,7 @@ export function ProfileScreen() {
               </div>
               <div style={{
                 fontFamily: 'monospace', fontSize: 10, fontWeight: 700,
-                color: palette.id === pl.id ? pl.primary : '#3a6a50', textAlign: 'center',
+                color: palette.id === pl.id ? pl.primary : '#5a8a70', textAlign: 'center',
               }}>{pl.name}</div>
             </button>
           ))}
@@ -123,7 +106,7 @@ export function ProfileScreen() {
 
       {/* Language selector */}
       <Card accent={p.primary}>
-        <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#3a6a50', marginBottom: 8, textTransform: 'uppercase' }}>
+        <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70', marginBottom: 8, textTransform: 'uppercase' }}>
           🌐 language
         </div>
         <div style={{ display: 'flex', gap: 6 }}>
@@ -132,7 +115,7 @@ export function ProfileScreen() {
               flex: 1, padding: '8px 0', borderRadius: 8, cursor: 'pointer',
               background: lang === l.id ? 'rgba(0,255,136,0.1)' : 'rgba(0,255,136,0.02)',
               border: `1px solid ${lang === l.id ? 'rgba(0,255,136,0.3)' : 'rgba(0,255,136,0.06)'}`,
-              color: lang === l.id ? '#00ff88' : '#3a6a50',
+              color: lang === l.id ? '#00ff88' : '#5a8a70',
               fontFamily: 'monospace', fontSize: 12, fontWeight: 700, transition: 'all 0.2s',
             }}>
               <div style={{ fontSize: 18, marginBottom: 2 }}>{l.flag}</div>
@@ -144,59 +127,23 @@ export function ProfileScreen() {
 
       <div style={{ height: 10 }} />
 
-      {/* FAQ section */}
-      <Divider label="FAQ" />
-      <div style={{ height: 8 }} />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {FAQ_DATA.map((item, i) => (
-          <Card key={i} accent="#00ff88" onClick={() => setFaqOpen(faqOpen === i ? null : i)}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{
-                width: 28, height: 28, borderRadius: 8, flexShrink: 0,
-                background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.15)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontFamily: 'monospace', fontSize: 12, fontWeight: 700, color: '#00ff88',
-              }}>{faqOpen === i ? '−' : '+'}</div>
-              <div style={{ fontFamily: 'sans-serif', fontSize: 13, fontWeight: 600, color: '#e0f0e8', flex: 1 }}>
-                {item.q}
-              </div>
-            </div>
-            <div style={{
-              maxHeight: faqOpen === i ? 120 : 0,
-              opacity: faqOpen === i ? 1 : 0,
-              marginTop: faqOpen === i ? 10 : 0,
-              overflow: 'hidden',
-              transition: 'all 0.4s cubic-bezier(0.16,1,0.3,1)',
-            }}>
-              <div style={{
-                padding: '10px 12px', background: 'rgba(0,255,136,0.03)',
-                borderRadius: 10, border: '1px solid rgba(0,255,136,0.06)',
-                fontFamily: 'sans-serif', fontSize: 12, color: '#5a8a70', lineHeight: 1.6,
-              }}>{item.a}</div>
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      <div style={{ height: 16 }} />
-
       {/* Support card */}
       <Card accent="#00e5ff" featured>
         <div style={{ textAlign: 'center', marginBottom: 12 }}>
           <span style={{ fontSize: 32 }}>🛟</span>
           <div style={{ fontFamily: 'sans-serif', fontSize: 16, fontWeight: 700, color: '#e0f0e8', marginTop: 6 }}>
-            Не нашёл ответ?
+            Нужна помощь?
           </div>
         </div>
         <div onClick={() => window.open('https://t.me/stonemvp', '_blank')} style={{
-          display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
-          background: 'rgba(0,229,255,0.06)', borderRadius: 10,
-          border: '1px solid rgba(0,229,255,0.12)', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', gap: 10,
+          padding: '10px 12px', background: 'rgba(0,229,255,0.06)',
+          borderRadius: 10, border: '1px solid rgba(0,229,255,0.12)', cursor: 'pointer',
         }}>
           <span style={{ fontSize: 18 }}>💬</span>
           <div style={{ flex: 1 }}>
             <div style={{ fontFamily: 'sans-serif', fontSize: 13, fontWeight: 600, color: '#e0f0e8' }}>Написать в Telegram</div>
-            <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#3a6a50' }}>@stonemvp</div>
+            <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70' }}>@stonemvp</div>
           </div>
           <Tag text="→" accent="#00e5ff" />
         </div>
@@ -210,7 +157,7 @@ export function ProfileScreen() {
           <span style={{ fontSize: 20 }}>📡</span>
           <div style={{ flex: 1 }}>
             <div style={{ fontFamily: 'sans-serif', fontSize: 13, fontWeight: 700, color: '#e0f0e8' }}>Stone AI Channel</div>
-            <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#3a6a50' }}>@stoneAIC</div>
+            <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70' }}>@stoneAIC</div>
           </div>
           <Tag text="join →" accent="#39ff14" />
         </div>
@@ -221,10 +168,10 @@ export function ProfileScreen() {
       {/* App info */}
       <div style={{
         textAlign: 'center', padding: '12px 0',
-        fontFamily: 'monospace', fontSize: 10, color: '#1a3a28',
+        fontFamily: 'monospace', fontSize: 10, color: '#3a6a50',
       }}>
         Stone AI v1.1 &bull; 11 models &bull; Stars / TON / USDT
       </div>
     </div>
   )
-}
+                }
