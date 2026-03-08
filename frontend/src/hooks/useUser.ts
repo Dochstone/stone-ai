@@ -1,5 +1,6 @@
 /**
  * User hook — fetches profile, plan, limits from backend.
+ * Models are loaded independently so they work even without auth.
  */
 
 import { useEffect } from 'react'
@@ -11,8 +12,16 @@ export function useUser() {
 
   useEffect(() => {
     async function init() {
+      // 1) Always load models (no auth required)
       try {
-        // Fetch user profile
+        const modelsData = await apiGet<any>('/api/models')
+        setModels(modelsData.models)
+      } catch (e) {
+        console.error('Failed to load models:', e)
+      }
+
+      // 2) Try to load user profile (requires Telegram auth)
+      try {
         const data = await apiGet<any>('/api/user/me')
         setUser({
           tgId: data.user.tg_id,
@@ -26,10 +35,6 @@ export function useUser() {
           totalRequests: data.stats.total_requests,
           hasPass: !!data.pass,
         })
-
-        // Fetch models
-        const modelsData = await apiGet<any>('/api/models')
-        setModels(modelsData.models)
       } catch (e) {
         console.error('Failed to init user:', e)
         // Use defaults in dev mode
