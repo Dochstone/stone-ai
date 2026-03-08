@@ -1,6 +1,7 @@
 /**
  * Stone AI — Main App component.
  * Routes between screens, initializes Telegram WebApp.
+ * Premium design with animated background.
  */
 
 import { useEffect } from 'react'
@@ -34,29 +35,74 @@ export default function App() {
         justifyContent: 'center',
         height: '100vh',
         gap: 16,
+        background: '#050505',
+        position: 'relative',
+        overflow: 'hidden',
       }}>
+        {/* Background glow */}
         <div style={{
-          fontSize: 48,
-          animation: 'pulse 2s infinite',
+          position: 'absolute',
+          top: '30%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 300,
+          height: 300,
+          borderRadius: '50%',
+          background: `radial-gradient(circle, rgba(${palette.primaryRgb},0.1) 0%, transparent 70%)`,
+          animation: 'pulse 3s ease-in-out infinite',
+        }} />
+
+        <div style={{
+          fontSize: 56,
+          animation: 'float 3s ease-in-out infinite',
+          filter: `drop-shadow(0 0 30px rgba(${palette.primaryRgb},0.5))`,
+          zIndex: 1,
         }}>
           🤖
         </div>
+
         <div style={{
-          background: `linear-gradient(135deg, ${palette.primary}, ${palette.secondary})`,
+          background: `linear-gradient(135deg, ${palette.primary}, ${palette.secondary}, ${palette.accent3})`,
+          backgroundSize: '200% 200%',
+          animation: 'gradientMove 3s ease infinite',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
-          fontSize: 24,
-          fontWeight: 800,
+          fontSize: 28,
+          fontWeight: 900,
+          letterSpacing: '-0.5px',
+          zIndex: 1,
         }}>
           Stone AI
         </div>
-        <div style={{ color: '#555', fontSize: 13 }}>Загрузка...</div>
-        <style>{`
-          @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.7; }
-          }
-        `}</style>
+
+        <div style={{
+          color: 'rgba(255,255,255,0.3)',
+          fontSize: 13,
+          zIndex: 1,
+          fontWeight: 500,
+        }}>
+          Загрузка...
+        </div>
+
+        {/* Loading bar */}
+        <div style={{
+          width: 120,
+          height: 2,
+          background: 'rgba(255,255,255,0.06)',
+          borderRadius: 2,
+          overflow: 'hidden',
+          zIndex: 1,
+          marginTop: 4,
+        }}>
+          <div style={{
+            height: '100%',
+            width: '40%',
+            background: `linear-gradient(90deg, ${palette.primary}, ${palette.secondary})`,
+            borderRadius: 2,
+            animation: 'shimmer 1.5s ease-in-out infinite',
+            backgroundSize: '200% 100%',
+          }} />
+        </div>
       </div>
     )
   }
@@ -75,15 +121,18 @@ export default function App() {
         }
       `}</style>
 
+      {/* Animated background */}
+      {screen !== 'chat' && <div className="animated-bg" />}
+
       {/* Screens */}
-      <div style={{ paddingBottom: screen === 'chat' ? 0 : 56 }}>
+      <div style={{ paddingBottom: screen === 'chat' ? 0 : 60 }}>
         {screen === 'home' && <HomeScreen />}
         {screen === 'chat' && <ChatScreen />}
         {screen === 'plans' && <PlansScreen />}
         {screen === 'profile' && <ProfileScreen />}
       </div>
 
-      {/* Bottom nav (hide in chat) */}
+      {/* Bottom nav */}
       <BottomNav />
     </>
   )
