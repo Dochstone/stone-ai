@@ -10,36 +10,36 @@ import { haptic } from '../../utils/telegram'
 // Subscription data
 const SUBS: Record<string, any[]> = {
   stars: [
-    { id: 'plus_stars', name: 'PLUS', icon: '⚡', price: '469', unit: '⭐/мес', hint: '100 Premium • ≈ $7.5/мес', tier: 'plus', popular: true },
-    { id: 'max_stars', name: 'MAX', icon: '👑', price: '1499', unit: '⭐/мес', hint: '500 Premium • ≈ $24/мес', tier: 'max' },
+    { id: 'plus_stars', name: 'PLUS', icon: '⚡', price: '699', unit: '⭐/мес', hint: '10 Premium/день (без Opus) • ≈ $11.2/мес', tier: 'plus', popular: true },
+    { id: 'max_stars', name: 'MAX', icon: '👑', price: '1999', unit: '⭐/мес', hint: '30 Premium + 5 Opus/день • ≈ $32/мес', tier: 'max' },
   ],
   ton: [
-    { id: 'plus_ton_1m', name: 'PLUS 1 мес', icon: '⚡', price: '6', unit: 'TON', hint: '100 Premium/день', tier: 'plus', popular: true },
-    { id: 'plus_ton_3m', name: 'PLUS 3 мес', icon: '⚡', price: '14.5', unit: 'TON', hint: '−20% экономия', tier: 'plus' },
-    { id: 'max_ton_1m', name: 'MAX 1 мес', icon: '👑', price: '19', unit: 'TON', hint: '500 Premium/день', tier: 'max' },
-    { id: 'max_ton_3m', name: 'MAX 3 мес', icon: '👑', price: '46', unit: 'TON', hint: '−19% экономия', tier: 'max' },
+    { id: 'plus_ton_1m', name: 'PLUS 1 мес', icon: '⚡', price: '9', unit: 'TON', hint: '10 Premium/день', tier: 'plus', popular: true },
+    { id: 'plus_ton_3m', name: 'PLUS 3 мес', icon: '⚡', price: '22', unit: 'TON', hint: '−18% экономия', tier: 'plus' },
+    { id: 'max_ton_1m', name: 'MAX 1 мес', icon: '👑', price: '26', unit: 'TON', hint: '30 Premium + 5 Opus/день', tier: 'max' },
+    { id: 'max_ton_3m', name: 'MAX 3 мес', icon: '👑', price: '63', unit: 'TON', hint: '−19% экономия', tier: 'max' },
   ],
   usdt: [
-    { id: 'plus_usdt_1m', name: 'PLUS 1 мес', icon: '⚡', price: '7.99', unit: 'USDT', hint: 'TRC-20/TON', tier: 'plus', popular: true },
-    { id: 'plus_usdt_3m', name: 'PLUS 3 мес', icon: '⚡', price: '18.99', unit: 'USDT', hint: '−21% экономия', tier: 'plus' },
-    { id: 'max_usdt_1m', name: 'MAX 1 мес', icon: '👑', price: '24.99', unit: 'USDT', hint: 'TRC-20/TON', tier: 'max' },
-    { id: 'max_usdt_3m', name: 'MAX 3 мес', icon: '👑', price: '59.99', unit: 'USDT', hint: '−20% экономия', tier: 'max' },
+    { id: 'plus_usdt_1m', name: 'PLUS 1 мес', icon: '⚡', price: '11.99', unit: 'USDT', hint: 'TRC-20/TON', tier: 'plus', popular: true },
+    { id: 'plus_usdt_3m', name: 'PLUS 3 мес', icon: '⚡', price: '28.99', unit: 'USDT', hint: '−21% экономия', tier: 'plus' },
+    { id: 'max_usdt_1m', name: 'MAX 1 мес', icon: '👑', price: '34.99', unit: 'USDT', hint: 'TRC-20/TON', tier: 'max' },
+    { id: 'max_usdt_3m', name: 'MAX 3 мес', icon: '👑', price: '84.99', unit: 'USDT', hint: '−20% экономия', tier: 'max' },
   ],
 }
 
 const PASSES: Record<string, any[]> = {
   stars: [
-    { id: 'day_pass', name: 'Day Pass', icon: '🎫', price: '59', unit: '⭐', hint: '15 Premium • 24 часа' },
-    { id: 'week_pass', name: 'Week Pass', icon: '🎟️', price: '229', unit: '⭐', hint: '80 Premium • 7 дней', popular: true },
-    { id: 'single_query', name: '1 запрос', icon: '💬', price: '6', unit: '⭐', hint: '1 Premium запрос' },
+    { id: 'day_pass', name: 'Day Pass', icon: '🎫', price: '79', unit: '⭐', hint: '15 Premium • 24 часа' },
+    { id: 'week_pass', name: 'Week Pass', icon: '🎟️', price: '299', unit: '⭐', hint: '50 Premium • 7 дней', popular: true },
+    { id: 'single_query', name: '1 запрос', icon: '💬', price: '9', unit: '⭐', hint: '1 Premium запрос' },
   ],
   ton: [
-    { id: 'day_pass_ton', name: 'Day Pass', icon: '🎫', price: '0.5', unit: 'TON', hint: '15 Premium • 24 часа' },
-    { id: 'week_pass_ton', name: 'Week Pass', icon: '🎟️', price: '1.8', unit: 'TON', hint: '80 Premium • 7 дней', popular: true },
+    { id: 'day_pass_ton', name: 'Day Pass', icon: '🎫', price: '0.65', unit: 'TON', hint: '15 Premium • 24 часа' },
+    { id: 'week_pass_ton', name: 'Week Pass', icon: '🎟️', price: '2.4', unit: 'TON', hint: '50 Premium • 7 дней', popular: true },
   ],
   usdt: [
-    { id: 'day_pass_usdt', name: 'Day Pass', icon: '🎫', price: '0.99', unit: 'USDT', hint: '15 Premium • 24 часа' },
-    { id: 'week_pass_usdt', name: 'Week Pass', icon: '🎟️', price: '3.49', unit: 'USDT', hint: '80 Premium • 7 дней', popular: true },
+    { id: 'day_pass_usdt', name: 'Day Pass', icon: '🎫', price: '1.29', unit: 'USDT', hint: '15 Premium • 24 часа' },
+    { id: 'week_pass_usdt', name: 'Week Pass', icon: '🎟️', price: '4.79', unit: 'USDT', hint: '50 Premium • 7 дней', popular: true },
   ],
 }
 
@@ -335,7 +335,7 @@ export function PlansScreen() {
           <span style={{ fontSize: 16, marginRight: 4 }}>💡</span>
           <b style={{ color: '#aaff00' }}>Подписка выгоднее!</b>
           <br /><span style={{ color: 'rgba(255,255,255,0.4)' }}>
-            PLUS за 469⭐/мес = 15.6⭐/день vs Day Pass 59⭐/день
+            PLUS за 699⭐/мес = 23.3⭐/день vs Day Pass 79⭐/день
           </span>
         </div>
       )}
