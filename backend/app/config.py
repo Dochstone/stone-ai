@@ -1,6 +1,7 @@
-"""Stone AI — Configuration from environment variables."""
+"""Stone AI - Configuration from environment variables."""
 
 from pydantic_settings import BaseSettings
+from pydantic import field_validator
 from functools import lru_cache
 
 
@@ -30,9 +31,9 @@ class Settings(BaseSettings):
     # === Limits ===
     free_lite_daily: int = 20
     free_premium_daily: int = 0
-    plus_lite_daily: int = -1   # unlimited
-    plus_premium_daily: int = 10  # 10 premium/day
-    max_lite_daily: int = -1    # unlimited
+    plus_lite_daily: int = -1    # unlimited
+    plus_premium_daily: int = 10
+    max_lite_daily: int = -1     # unlimited
     max_premium_daily: int = 30  # 30 premium/day
     max_opus_daily: int = 5      # Opus only on MAX
 
@@ -55,6 +56,14 @@ class Settings(BaseSettings):
     cryptobot_api_token: str = ""
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def fix_db_url_for_asyncpg(cls, v: str) -> str:
+        """Railway gives postgresql://, SQLAlchemy async needs postgresql+asyncpg://"""
+        if v and "asyncpg" not in v:
+            return v.replace("postgresql://", "postgresql+asyncpg://")
+        return v
 
 
 @lru_cache()
