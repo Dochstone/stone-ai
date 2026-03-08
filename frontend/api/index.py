@@ -1,4 +1,4 @@
-"""Stone AI — Vercel Serverless API.
+"""Stone AI - Vercel Serverless API.
 
 All endpoints: /api/models, /api/user/me, /api/chat (SSE streaming).
 Runs as a single Vercel Python serverless function.
@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 import httpx
 
-# ─── App setup ───
+# --- App setup ---
 
 app = FastAPI(title="Stone AI API", version="1.0.0")
 
@@ -25,25 +25,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ─── Config ───
+# --- Config ---
 
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-# ─── Model data ───
+# --- Model data ---
 
 MODELS_INFO = [
-    {"id": "gpt-4o-mini", "name": "GPT-4o mini", "company": "OpenAI", "tier": "lite", "icon": "\ud83e\udd16", "desc": "\u0411\u044b\u0441\u0442\u0440\u044b\u0439 \u0438 \u0434\u0435\u0448\u0451\u0432\u044b\u0439"},
-    {"id": "claude-haiku-4.5", "name": "Claude Haiku 4.5", "company": "Anthropic", "tier": "lite", "icon": "\ud83e\udde0", "desc": "\u0411\u044b\u0441\u0442\u0440\u044b\u0439 Claude"},
-    {"id": "gemini-2.0-flash", "name": "Gemini 2.0 Flash", "company": "Google", "tier": "lite", "icon": "\ud83d\udc8e", "desc": "\u0421\u043a\u043e\u0440\u043e\u0441\u0442\u043d\u043e\u0439"},
-    {"id": "deepseek-r1", "name": "DeepSeek R1", "company": "DeepSeek", "tier": "lite", "icon": "\ud83c\udf0a", "desc": "Reasoning"},
-    {"id": "llama-4-maverick", "name": "Llama 4", "company": "Meta", "tier": "lite", "icon": "\ud83e\udd99", "desc": "Open-source 400B"},
-    {"id": "mistral-large-25", "name": "Mistral Large", "company": "Mistral AI", "tier": "lite", "icon": "\ud83c\udf00", "desc": "\u0415\u0432\u0440\u043e\u043f\u0435\u0439\u0441\u043a\u0438\u0439"},
-    {"id": "gpt-4.1", "name": "GPT-4.1", "company": "OpenAI", "tier": "premium", "icon": "\ud83e\udd16", "desc": "Flagship 2025"},
-    {"id": "claude-opus-4", "name": "Claude Opus 4", "company": "Anthropic", "tier": "premium", "icon": "\ud83e\udde0", "desc": "\u041b\u0443\u0447\u0448\u0438\u0439 \u0432 \u043a\u043e\u0434\u0435"},
+    {"id": "gpt-4o-mini", "name": "GPT-4o mini", "company": "OpenAI", "tier": "lite", "icon": "\U0001f916", "desc": "\u0411\u044b\u0441\u0442\u0440\u044b\u0439 \u0438 \u0434\u0435\u0448\u0451\u0432\u044b\u0439"},
+    {"id": "claude-haiku-4.5", "name": "Claude Haiku 4.5", "company": "Anthropic", "tier": "lite", "icon": "\U0001f9e0", "desc": "\u0411\u044b\u0441\u0442\u0440\u044b\u0439 Claude"},
+    {"id": "gemini-2.0-flash", "name": "Gemini 2.0 Flash", "company": "Google", "tier": "lite", "icon": "\U0001f48e", "desc": "\u0421\u043a\u043e\u0440\u043e\u0441\u0442\u043d\u043e\u0439"},
+    {"id": "deepseek-r1", "name": "DeepSeek R1", "company": "DeepSeek", "tier": "lite", "icon": "\U0001f30a", "desc": "Reasoning"},
+    {"id": "llama-4-maverick", "name": "Llama 4", "company": "Meta", "tier": "lite", "icon": "\U0001f999", "desc": "Open-source 400B"},
+    {"id": "mistral-large-25", "name": "Mistral Large", "company": "Mistral AI", "tier": "lite", "icon": "\U0001f300", "desc": "\u0415\u0432\u0440\u043e\u043f\u0435\u0439\u0441\u043a\u0438\u0439"},
+    {"id": "gpt-4.1", "name": "GPT-4.1", "company": "OpenAI", "tier": "premium", "icon": "\U0001f916", "desc": "Flagship 2025"},
+    {"id": "claude-opus-4", "name": "Claude Opus 4", "company": "Anthropic", "tier": "premium", "icon": "\U0001f9e0", "desc": "\u041b\u0443\u0447\u0448\u0438\u0439 \u0432 \u043a\u043e\u0434\u0435"},
     {"id": "grok-3", "name": "Grok 3", "company": "xAI", "tier": "premium", "icon": "\u26a1", "desc": "\u0422\u0432\u043e\u0440\u0447\u0435\u0441\u043a\u0438\u0439"},
-    {"id": "gemini-2.5-pro", "name": "Gemini 2.5 Pro", "company": "Google", "tier": "premium", "icon": "\ud83d\udd2e", "desc": "\u041c\u0443\u043b\u044c\u0442\u0438\u043c\u043e\u0434\u0430\u043b\u044c\u043d\u044b\u0439"},
-    {"id": "perplexity-sonar-pro", "name": "Perplexity Pro", "company": "Perplexity", "tier": "premium", "icon": "\ud83d\udd0d", "desc": "\u041f\u043e\u0438\u0441\u043a \u0432 \u0440\u0435\u0430\u043b\u044c\u043d\u043e\u043c \u0432\u0440\u0435\u043c\u0435\u043d\u0438"},
+    {"id": "gemini-2.5-pro", "name": "Gemini 2.5 Pro", "company": "Google", "tier": "premium", "icon": "\U0001f52e", "desc": "\u041c\u0443\u043b\u044c\u0442\u0438\u043c\u043e\u0434\u0430\u043b\u044c\u043d\u044b\u0439"},
+    {"id": "perplexity-sonar-pro", "name": "Perplexity Pro", "company": "Perplexity", "tier": "premium", "icon": "\U0001f50d", "desc": "\u041f\u043e\u0438\u0441\u043a \u0432 \u0440\u0435\u0430\u043b\u044c\u043d\u043e\u043c \u0432\u0440\u0435\u043c\u0435\u043d\u0438"},
 ]
 
 MODEL_MAP = {
@@ -75,7 +75,12 @@ TIER_MAP = {
 }
 
 
-# ─── Endpoints ───
+def _sse(data):
+    """Format SSE data line."""
+    return "data: " + json.dumps(data) + "\n\n"
+
+
+# --- Endpoints ---
 
 
 @app.get("/api/health")
@@ -91,13 +96,7 @@ async def list_models():
 
 @app.get("/api/user/me")
 async def get_user(request: Request):
-    """
-    Return user profile data.
-    In serverless mode, parses Telegram initData if available,
-    otherwise returns sensible defaults for dev/demo.
-    """
-    # TODO: Parse Authorization header for real Telegram initData validation
-    # For now, return demo user that lets the app work
+    """Return user profile data."""
     return {
         "user": {
             "tg_id": 0,
@@ -122,16 +121,12 @@ async def get_user(request: Request):
 
 @app.post("/api/chat")
 async def chat(request: Request):
-    """
-    Stream AI response via SSE.
-    Proxies to OpenRouter with the selected model.
-    """
+    """Stream AI response via SSE."""
     body = await request.json()
     model_id = body.get("model_id", "gpt-4o-mini")
     messages = body.get("messages", [])
     system_prompt = body.get("system_prompt")
 
-    # Check tier — block premium for free users (serverless MVP)
     tier = TIER_MAP.get(model_id, "premium")
     if tier == "premium":
         return JSONResponse(
@@ -147,7 +142,6 @@ async def chat(request: Request):
 
     openrouter_model = MODEL_MAP.get(model_id, "openai/gpt-4o-mini")
 
-    # Build messages
     api_messages = []
     if system_prompt:
         api_messages.append({"role": "system", "content": system_prompt})
@@ -160,7 +154,7 @@ async def chat(request: Request):
                     "POST",
                     OPENROUTER_URL,
                     headers={
-                        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                        "Authorization": "Bearer " + OPENROUTER_API_KEY,
                         "HTTP-Referer": "https://stone-ai-1.vercel.app",
                         "X-Title": "Stone AI",
                         "Content-Type": "application/json",
@@ -175,7 +169,7 @@ async def chat(request: Request):
                     if response.status_code != 200:
                         error_body = await response.aread()
                         error_msg = error_body.decode("utf-8", errors="replace")[:200]
-                        yield f'data: {json.dumps({"error": f"API error {response.status_code}: {error_msg}"})}\n\n'
+                        yield _sse({"error": "API error " + str(response.status_code) + ": " + error_msg})
                         return
 
                     tokens_in = 0
@@ -194,7 +188,7 @@ async def chat(request: Request):
                                 delta = choices[0].get("delta", {})
                                 content = delta.get("content")
                                 if content:
-                                    yield f'data: {json.dumps({"content": content})}\n\n'
+                                    yield _sse({"content": content})
                             usage = chunk.get("usage")
                             if usage:
                                 tokens_in = usage.get("prompt_tokens", 0)
@@ -202,14 +196,13 @@ async def chat(request: Request):
                         except json.JSONDecodeError:
                             continue
 
-            # Send usage + done
-            yield f'data: {json.dumps({"usage": {"tokens_in": tokens_in, "tokens_out": tokens_out}})}\n\n'
+            yield _sse({"usage": {"tokens_in": tokens_in, "tokens_out": tokens_out}})
             yield "data: [DONE]\n\n"
 
         except httpx.TimeoutException:
-            yield f'data: {json.dumps({"error": "\u041c\u043e\u0434\u0435\u043b\u044c \u043d\u0435 \u043e\u0442\u0432\u0435\u0442\u0438\u043b\u0430 \u2014 \u043f\u043e\u043f\u0440\u043e\u0431\u0443\u0439\u0442\u0435 \u0435\u0449\u0451 \u0440\u0430\u0437"})}\n\n'
+            yield _sse({"error": "\u041c\u043e\u0434\u0435\u043b\u044c \u043d\u0435 \u043e\u0442\u0432\u0435\u0442\u0438\u043b\u0430 \u2014 \u043f\u043e\u043f\u0440\u043e\u0431\u0443\u0439\u0442\u0435 \u0435\u0449\u0451 \u0440\u0430\u0437"})
         except Exception as e:
-            yield f'data: {json.dumps({"error": f"\u041e\u0448\u0438\u0431\u043a\u0430: {str(e)}"})}\n\n'
+            yield _sse({"error": "\u041e\u0448\u0438\u0431\u043a\u0430: " + str(e)})
 
     return StreamingResponse(
         generate(),
