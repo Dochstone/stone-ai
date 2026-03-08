@@ -7,50 +7,71 @@ load_dotenv()
 
 
 class Settings:
-    # Telegram
-    BOT_TOKEN: str = os.getenv("BOT_TOKEN", "")
-    WEBAPP_URL: str = os.getenv("WEBAPP_URL", "https://stone-ai-1.vercel.app")
+    """Application settings loaded from environment variables."""
 
-    # OpenRouter
-    OPENROUTER_API_KEY: str = os.getenv("OPENROUTER_API_KEY", "")
-    OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1/chat/completions"
+    def __init__(self):
+        # Telegram
+        self.bot_token = os.getenv("BOT_TOKEN", "")
+        self.webapp_url = os.getenv("WEBAPP_URL", "https://stone-ai-1.vercel.app")
 
-    # Database (Railway gives postgresql://, we need postgresql+asyncpg://)
-    _raw_db_url = os.getenv(
-        "DATABASE_URL",
-        "postgresql+asyncpg://postgres:postgres@localhost:5432/stoneai"
-    )
-    DATABASE_URL: str = _raw_db_url.replace(
-        "postgresql://", "postgresql+asyncpg://"
-    ) if _raw_db_url and "asyncpg" not in _raw_db_url else _raw_db_url
+        # OpenRouter
+        self.openrouter_api_key = os.getenv("OPENROUTER_API_KEY", "")
+        self.openrouter_base_url = "https://openrouter.ai/api/v1/chat/completions"
 
-    # CORS
-    CORS_ORIGINS: list[str] = [
-        "https://stone-ai-1.vercel.app",
-        "https://stone-ai.vercel.app",
-        "http://localhost:5173",
-        "http://localhost:3000",
-    ]
+        # Database (Railway gives postgresql://, we need postgresql+asyncpg://)
+        raw_db_url = os.getenv(
+            "DATABASE_URL",
+            "postgresql+asyncpg://postgres:postgres@localhost:5432/stoneai"
+        )
+        if raw_db_url and "asyncpg" not in raw_db_url:
+            self.database_url = raw_db_url.replace(
+                "postgresql://", "postgresql+asyncpg://"
+            )
+        else:
+            self.database_url = raw_db_url
 
-    # Limits
-    FREE_LITE_DAILY: int = 20
-    FREE_PREMIUM_DAILY: int = 0
-    PLUS_LITE_DAILY: int = -1  # unlimited
-    PLUS_PREMIUM_DAILY: int = 10  # 10 premium/day for PLUS
-    MAX_LITE_DAILY: int = -1   # unlimited
-    MAX_PREMIUM_DAILY: int = 30  # 30 premium/day for MAX
-    MAX_OPUS_DAILY: int = 5     # Opus only on MAX, 5/day
+        # Security
+        self.secret_key = os.getenv("SECRET_KEY", "change-me")
 
-    # Stars Pricing
-    PLUS_STARS: int = 699
-    MAX_STARS: int = 1999
-    DAY_PASS_STARS: int = 79
-    WEEK_PASS_STARS: int = 299
-    SINGLE_QUERY_STARS: int = 9
+        # CORS
+        self.cors_origins = [
+            "https://stone-ai-1.vercel.app",
+            "https://stone-ai.vercel.app",
+            "http://localhost:5173",
+            "http://localhost:3000",
+        ]
 
-    # Day/Week Pass limits
-    DAY_PASS_PREMIUM_LIMIT: int = 15
-    WEEK_PASS_PREMIUM_LIMIT: int = 50
+        # === Limits ===
+        self.free_lite_daily = 20
+        self.free_premium_daily = 0
+        self.plus_lite_daily = -1    # unlimited
+        self.plus_premium_daily = 10
+        self.max_lite_daily = -1     # unlimited
+        self.max_premium_daily = 30
+        self.max_opus_daily = 5
+
+        # === Stars Pricing ===
+        self.plus_stars = 699
+        self.max_stars = 1999
+        self.day_pass_stars = 79
+        self.week_pass_stars = 299
+        self.single_query_stars = 9
+
+        # === Pass Limits ===
+        self.day_pass_premium_limit = 15
+        self.week_pass_premium_limit = 50
+
+        # TON (Phase 2)
+        self.ton_wallet_address = os.getenv("TON_WALLET_ADDRESS", "")
+        self.tonapi_key = os.getenv("TONAPI_KEY", "")
+
+        # CryptoBot (Phase 3)
+        self.cryptobot_api_token = os.getenv("CRYPTOBOT_API_TOKEN", "")
 
 
-settings = Settings()
+def get_settings() -> Settings:
+    """Get application settings (singleton)."""
+    return _settings
+
+
+_settings = Settings()
