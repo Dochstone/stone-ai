@@ -2,6 +2,11 @@
 
 All endpoints: /api/models, /api/user/me, /api/chat (SSE streaming).
 Runs as a single Vercel Python serverless function.
+
+UPDATED: New pricing model (March 2026)
+- PLUS: 699â­, 10 premium/day, NO Opus
+- MAX: 1999â­, 30 premium/day + 5 Opus/day
+- Day Pass: 79â­ (15 req), Week Pass: 299â­ (50 req)
 """
 
 import json
@@ -13,9 +18,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 import httpx
 
+
 # --- App setup ---
 
-app = FastAPI(title="Stone AI API", version="1.0.0")
+app = FastAPI(title="Stone AI API", version="1.1.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -25,10 +31,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # --- Config ---
 
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+
 
 # --- Model data ---
 
@@ -40,7 +48,7 @@ MODELS_INFO = [
     {"id": "llama-4-maverick", "name": "Llama 4", "company": "Meta", "tier": "lite", "icon": "\U0001f999", "desc": "Open-source 400B"},
     {"id": "mistral-large-25", "name": "Mistral Large", "company": "Mistral AI", "tier": "lite", "icon": "\U0001f300", "desc": "\u0415\u0432\u0440\u043e\u043f\u0435\u0439\u0441\u043a\u0438\u0439"},
     {"id": "gpt-4.1", "name": "GPT-4.1", "company": "OpenAI", "tier": "premium", "icon": "\U0001f916", "desc": "Flagship 2025"},
-    {"id": "claude-opus-4", "name": "Claude Opus 4", "company": "Anthropic", "tier": "premium", "icon": "\U0001f9e0", "desc": "\u041b\u0443\u0447\u0448\u0438\u0439 \u0432 \u043a\u043e\u0434\u0435"},
+    {"id": "claude-opus-4", "name": "Claude Opus 4", "company": "Anthropic", "tier": "premium", "icon": "\U0001f9e0", "desc": "\u041b\u0443\u0447\u0448\u0438\u0439 \u0432 \u043a\u043e\u0434\u0435", "opus": True},
     {"id": "grok-3", "name": "Grok 3", "company": "xAI", "tier": "premium", "icon": "\u26a1", "desc": "\u0422\u0432\u043e\u0440\u0447\u0435\u0441\u043a\u0438\u0439"},
     {"id": "gemini-2.5-pro", "name": "Gemini 2.5 Pro", "company": "Google", "tier": "premium", "icon": "\U0001f52e", "desc": "\u041c\u0443\u043b\u044c\u0442\u0438\u043c\u043e\u0434\u0430\u043b\u044c\u043d\u044b\u0439"},
     {"id": "perplexity-sonar-pro", "name": "Perplexity Pro", "company": "Perplexity", "tier": "premium", "icon": "\U0001f50d", "desc": "\u041f\u043e\u0438\u0441\u043a \u0432 \u0440\u0435\u0430\u043b\u044c\u043d\u043e\u043c \u0432\u0440\u0435\u043c\u0435\u043d\u0438"},
@@ -74,6 +82,16 @@ TIER_MAP = {
     "perplexity-sonar-pro": "premium",
 }
 
+# NEW LIMITS â based on unit economics analysis
+LIMITS = {
+    "free":  {"lite": 20, "premium": 0, "opus": 0},
+    "plus":  {"lite": -1, "premium": 10, "opus": 0},   # NO Opus in PLUS!
+    "max":   {"lite": -1, "premium": 30, "opus": 5},    # 30 prem + 5 Opus/day
+}
+
+# Opus model IDs (cost ~$0.127/req â restricted to MAX only)
+OPUS_MODELS = {"claude-opus-4"}
+
 
 def _sse(data):
     """Format SSE data line."""
@@ -82,10 +100,9 @@ def _sse(data):
 
 # --- Endpoints ---
 
-
 @app.get("/api/health")
 async def health():
-    return {"status": "ok", "version": "1.0.0"}
+    return {"status": "ok", "version": "1.1.0"}
 
 
 @app.get("/api/models")
@@ -96,7 +113,9 @@ async def list_models():
 
 @app.get("/api/user/me")
 async def get_user(request: Request):
-    """Return user profile data."""
+    """Return user profile data.
+    TODO: Read from DB after Telegram WebApp auth is implemented.
+    """
     return {
         "user": {
             "tg_id": 0,
@@ -107,10 +126,12 @@ async def get_user(request: Request):
         "usage": {
             "lite_today": 0,
             "premium_today": 0,
+            "opus_today": 0,
         },
         "limits": {
             "lite": 20,
             "premium": 0,
+            "opus": 0,
         },
         "stats": {
             "total_requests": 0,
@@ -128,7 +149,17 @@ async def chat(request: Request):
     system_prompt = body.get("system_prompt")
 
     tier = TIER_MAP.get(model_id, "premium")
+    is_opus = model_id in OPUS_MODELS
+
+    # --- Access control ---
     if tier == "premium":
+        # TODO: Check actual user plan from DB
+        # For now, block premium for unauthenticated users
+        if is_opus:
+            return JSONResponse(
+                status_code=403,
+                content={"detail": "Claude Opus 4 \u0434\u043e\u0441\u0442\u0443\u043f\u0435\u043d \u0442\u043e\u043b\u044c\u043a\u043e \u043d\u0430 \u0442\u0430\u0440\u0438\u0444\u0435 MAX"},
+            )
         return JSONResponse(
             status_code=403,
             content={"detail": "Premium \u043c\u043e\u0434\u0435\u043b\u0438 \u0434\u043e\u0441\u0442\u0443\u043f\u043d\u044b \u043f\u043e \u043f\u043e\u0434\u043f\u0438\u0441\u043a\u0435 PLUS/MAX"},
@@ -178,9 +209,11 @@ async def chat(request: Request):
                     async for line in response.aiter_lines():
                         if not line.startswith("data: "):
                             continue
+
                         data_str = line[6:]
                         if data_str.strip() == "[DONE]":
                             break
+
                         try:
                             chunk = json.loads(data_str)
                             choices = chunk.get("choices", [])
@@ -189,6 +222,7 @@ async def chat(request: Request):
                                 content = delta.get("content")
                                 if content:
                                     yield _sse({"content": content})
+
                             usage = chunk.get("usage")
                             if usage:
                                 tokens_in = usage.get("prompt_tokens", 0)
