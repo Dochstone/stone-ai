@@ -1,5 +1,6 @@
 /**
  * ChatScreen — conversation with AI model, streaming responses.
+ * Premium design with glass effects and smooth animations.
  */
 
 import { useState, useRef, useEffect } from 'react'
@@ -16,6 +17,7 @@ export function ChatScreen() {
 
   const currentModel = models.find((m) => m.id === modelId)
   const p = palette
+  const isLite = currentModel?.tier === 'lite'
 
   // Auto-scroll
   useEffect(() => {
@@ -41,63 +43,100 @@ export function ChatScreen() {
       display: 'flex',
       flexDirection: 'column',
       height: '100vh',
-      background: '#0a0a0a',
+      background: '#050505',
+      position: 'relative',
     }}>
-      {/* Chat header */}
+      {/* Subtle gradient background */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '200px',
+        background: `radial-gradient(ellipse at 50% 0%, rgba(${p.primaryRgb},0.06) 0%, transparent 70%)`,
+        pointerEvents: 'none',
+        zIndex: 0,
+      }} />
+
+      {/* Chat header — glass */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         gap: 10,
-        padding: '12px 16px',
-        borderBottom: `1px solid rgba(${p.primaryRgb},0.1)`,
-        background: 'rgba(10,10,10,0.95)',
-        backdropFilter: 'blur(20px)',
+        padding: '14px 16px',
+        borderBottom: `1px solid rgba(${p.primaryRgb},0.08)`,
+        background: 'rgba(5,5,5,0.9)',
+        backdropFilter: 'blur(30px)',
+        WebkitBackdropFilter: 'blur(30px)',
+        position: 'relative',
+        zIndex: 10,
       }}>
         <button
           onClick={() => { haptic('light'); setScreen('home') }}
           style={{
-            background: 'none',
-            border: 'none',
+            background: 'rgba(255,255,255,0.06)',
+            border: '1px solid rgba(255,255,255,0.08)',
             color: p.primary,
-            fontSize: 18,
+            fontSize: 16,
             cursor: 'pointer',
-            padding: '4px 8px',
+            padding: '6px 10px',
+            borderRadius: 10,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
           ←
         </button>
-        <span style={{ fontSize: 22 }}>{currentModel?.icon || '🤖'}</span>
-        <div style={{ flex: 1 }}>
-          <div style={{ color: '#fff', fontSize: 14, fontWeight: 700 }}>
+
+        <span style={{
+          fontSize: 26,
+          filter: `drop-shadow(0 0 8px rgba(${p.primaryRgb},0.3))`,
+        }}>{currentModel?.icon || '🤖'}</span>
+
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{
+            color: '#fff',
+            fontSize: 15,
+            fontWeight: 700,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}>
             {currentModel?.name || modelId}
           </div>
-          <div style={{ fontSize: 11, color: '#888' }}>
-            {currentModel?.company}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 1 }}>
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+              {currentModel?.company}
+            </span>
             <span style={{
-              marginLeft: 6,
-              fontSize: 9,
-              padding: '1px 5px',
-              borderRadius: 3,
-              background: currentModel?.tier === 'lite' ? 'rgba(0,255,136,0.15)' : 'rgba(191,90,242,0.15)',
-              color: currentModel?.tier === 'lite' ? '#00ff88' : '#bf5af2',
+              fontSize: 8,
+              fontWeight: 800,
+              padding: '1px 6px',
+              borderRadius: 4,
+              background: isLite ? 'rgba(0,255,136,0.12)' : 'rgba(191,90,242,0.12)',
+              color: isLite ? '#00ff88' : '#bf5af2',
+              border: `1px solid ${isLite ? 'rgba(0,255,136,0.2)' : 'rgba(191,90,242,0.2)'}`,
+              letterSpacing: '0.5px',
             }}>
-              {currentModel?.tier === 'lite' ? 'FREE' : 'PRO'}
+              {isLite ? 'FREE' : 'PRO'}
             </span>
           </div>
         </div>
+
         <button
           onClick={() => { haptic('light'); clearMessages() }}
           style={{
-            background: 'rgba(255,255,255,0.06)',
-            border: 'none',
-            color: '#888',
-            fontSize: 12,
-            padding: '6px 12px',
-            borderRadius: 8,
+            background: 'rgba(255,59,48,0.08)',
+            border: '1px solid rgba(255,59,48,0.15)',
+            color: '#ff3b30',
+            fontSize: 14,
+            padding: '6px 10px',
+            borderRadius: 10,
             cursor: 'pointer',
           }}
         >
-          🗑️
+          🗑
         </button>
       </div>
 
@@ -106,16 +145,39 @@ export function ChatScreen() {
         flex: 1,
         overflowY: 'auto',
         padding: '16px',
-        paddingBottom: '140px',
+        paddingBottom: '80px',
+        position: 'relative',
+        zIndex: 1,
       }}>
         {messages.length === 0 && (
           <div style={{
             textAlign: 'center',
-            color: '#555',
-            marginTop: '30vh',
+            color: 'rgba(255,255,255,0.3)',
+            marginTop: '25vh',
+            animation: 'fadeIn 0.8s ease-out',
           }}>
-            <div style={{ fontSize: 48, marginBottom: 12 }}>{currentModel?.icon || '🤖'}</div>
-            <div style={{ fontSize: 14 }}>Задай вопрос {currentModel?.name}</div>
+            <div style={{
+              fontSize: 56,
+              marginBottom: 16,
+              filter: `drop-shadow(0 0 20px rgba(${p.primaryRgb},0.3))`,
+              animation: 'float 4s ease-in-out infinite',
+            }}>
+              {currentModel?.icon || '🤖'}
+            </div>
+            <div style={{
+              fontSize: 16,
+              fontWeight: 600,
+              color: 'rgba(255,255,255,0.5)',
+              marginBottom: 6,
+            }}>
+              Задай вопрос {currentModel?.name}
+            </div>
+            <div style={{
+              fontSize: 12,
+              color: 'rgba(255,255,255,0.25)',
+            }}>
+              {isLite ? 'Бесплатно, до 20 запросов в день' : 'Premium модель'}
+            </div>
           </div>
         )}
 
@@ -125,28 +187,45 @@ export function ChatScreen() {
             style={{
               display: 'flex',
               justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
-              marginBottom: 12,
+              marginBottom: 14,
+              animation: 'fadeIn 0.3s ease-out',
             }}
           >
-            <div style={{
-              maxWidth: '85%',
-              padding: '10px 14px',
-              borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-              background: msg.role === 'user'
-                ? `rgba(${p.primaryRgb},0.15)`
-                : 'rgba(255,255,255,0.06)',
-              border: msg.role === 'user'
-                ? `1px solid rgba(${p.primaryRgb},0.2)`
-                : '1px solid rgba(255,255,255,0.08)',
-              color: '#e0e0e0',
-              fontSize: 14,
-              lineHeight: 1.5,
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word',
-            }}>
+            {/* AI avatar */}
+            {msg.role === 'assistant' && (
+              <div style={{
+                width: 28,
+                height: 28,
+                borderRadius: '50%',
+                background: `rgba(${p.primaryRgb},0.1)`,
+                border: `1px solid rgba(${p.primaryRgb},0.2)`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 14,
+                marginRight: 8,
+                flexShrink: 0,
+                marginTop: 2,
+              }}>
+                {currentModel?.icon || '🤖'}
+              </div>
+            )}
+
+            <div
+              className={msg.role === 'user' ? 'msg-user' : 'msg-assistant'}
+              style={{
+                maxWidth: '82%',
+                padding: '10px 14px',
+                color: '#e0e0e0',
+                fontSize: 14,
+                lineHeight: 1.55,
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+              }}
+            >
               {msg.content}
               {msg.role === 'assistant' && !msg.content && isStreaming && (
-                <span style={{ opacity: 0.5 }}>▌</span>
+                <span style={{ opacity: 0.5, animation: 'typing 1s infinite' }}>▌</span>
               )}
             </div>
           </div>
@@ -154,25 +233,28 @@ export function ChatScreen() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input bar */}
+      {/* Input bar — glass */}
       <div style={{
         position: 'fixed',
-        bottom: 56,
+        bottom: 0,
         left: 0,
         right: 0,
-        padding: '8px 12px',
-        background: 'rgba(10,10,10,0.95)',
-        borderTop: `1px solid rgba(${p.primaryRgb},0.1)`,
-        backdropFilter: 'blur(20px)',
+        padding: '10px 12px env(safe-area-inset-bottom, 10px)',
+        background: 'rgba(5,5,5,0.9)',
+        borderTop: `1px solid rgba(${p.primaryRgb},0.08)`,
+        backdropFilter: 'blur(30px)',
+        WebkitBackdropFilter: 'blur(30px)',
+        zIndex: 10,
       }}>
         <div style={{
           display: 'flex',
           alignItems: 'flex-end',
           gap: 8,
-          background: 'rgba(255,255,255,0.06)',
-          borderRadius: 20,
-          padding: '4px 4px 4px 14px',
-          border: '1px solid rgba(255,255,255,0.08)',
+          background: 'rgba(255,255,255,0.04)',
+          borderRadius: 22,
+          padding: '4px 4px 4px 16px',
+          border: `1px solid rgba(${p.primaryRgb},0.08)`,
+          transition: 'border-color 0.3s',
         }}>
           <textarea
             ref={inputRef}
@@ -186,7 +268,7 @@ export function ChatScreen() {
               background: 'none',
               border: 'none',
               color: '#fff',
-              fontSize: 14,
+              fontSize: 15,
               resize: 'none',
               outline: 'none',
               maxHeight: 120,
@@ -198,21 +280,23 @@ export function ChatScreen() {
             onClick={handleSend}
             disabled={isStreaming || !input.trim()}
             style={{
-              width: 36,
-              height: 36,
+              width: 38,
+              height: 38,
               borderRadius: '50%',
               border: 'none',
               background: input.trim()
                 ? `linear-gradient(135deg, ${p.primary}, ${p.secondary})`
-                : 'rgba(255,255,255,0.1)',
-              color: '#000',
-              fontSize: 16,
+                : 'rgba(255,255,255,0.06)',
+              color: input.trim() ? '#000' : '#555',
+              fontSize: 17,
+              fontWeight: 700,
               cursor: input.trim() ? 'pointer' : 'default',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               flexShrink: 0,
-              transition: 'background 0.2s',
+              transition: 'all 0.25s',
+              boxShadow: input.trim() ? `0 0 16px rgba(${p.primaryRgb},0.3)` : 'none',
             }}
           >
             {isStreaming ? '⏳' : '↑'}
