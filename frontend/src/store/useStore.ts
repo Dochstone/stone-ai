@@ -1,12 +1,12 @@
 /**
- * Global state with Zustand — user, chat, UI state.
+ * Global state with Zustand â user, chat, UI state.
  * Chat history persisted per-model in localStorage.
  */
 
 import { create } from 'zustand'
 import type { Lang } from '../i18n/translations'
 
-// ─── Types ───
+// âââ Types âââ
 
 export interface Model {
   id: string
@@ -49,7 +49,7 @@ export interface Palette {
   accent3Rgb: string
 }
 
-// ─── Palettes ───
+// âââ Palettes âââ
 
 export const PALETTES: Palette[] = [
   { id: 'matrix', name: 'Matrix', primary: '#00ff88', primaryRgb: '0,255,136', secondary: '#00e5ff', secondaryRgb: '0,229,255', accent3: '#39ff14', accent3Rgb: '57,255,20' },
@@ -57,7 +57,7 @@ export const PALETTES: Palette[] = [
   { id: 'sunset', name: 'Sunset', primary: '#ff6b6b', primaryRgb: '255,107,107', secondary: '#ffa500', secondaryRgb: '255,165,0', accent3: '#ff3e9d', accent3Rgb: '255,62,157' },
 ]
 
-// ─── Chat History Persistence ───
+// âââ Chat History Persistence âââ
 
 const STORAGE_KEY = 'stone_ai_chats'
 const MAX_MESSAGES_PER_MODEL = 100
@@ -75,7 +75,7 @@ function saveChatHistory(history: Record<string, ChatMsg[]>) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(history))
   } catch {
-    // localStorage full — clear oldest chats
+    // localStorage full â clear oldest chats
     try {
       const keys = Object.keys(history)
       if (keys.length > 3) {
@@ -87,20 +87,6 @@ function saveChatHistory(history: Record<string, ChatMsg[]>) {
   }
 }
 
-function loadLang(): Lang {
-  try {
-    const saved = localStorage.getItem('stone_ai_lang')
-    if (saved === 'en' || saved === 'ru' || saved === 'zh') return saved
-  } catch {}
-  // Auto-detect from Telegram language_code
-  try {
-    const tgLang = (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.language_code
-    if (tgLang?.startsWith('zh')) return 'zh'
-    if (tgLang?.startsWith('ru') || tgLang?.startsWith('uk') || tgLang?.startsWith('be')) return 'ru'
-  } catch {}
-  return 'en'
-}
-
 function loadPaletteId(): PaletteId {
   try {
     const id = localStorage.getItem('stone_ai_palette')
@@ -109,7 +95,7 @@ function loadPaletteId(): PaletteId {
   return 'matrix'
 }
 
-// ─── Store ───
+// âââ Store âââ
 
 interface AppState {
   // Navigation
@@ -118,7 +104,9 @@ interface AppState {
 
   // Palette
   paletteId: PaletteId
+  lang: Lang
   setPaletteId: (id: PaletteId) => void
+  setLang: (lang: Lang) => void
   palette: Palette
 
   // Model
@@ -127,7 +115,7 @@ interface AppState {
   models: Model[]
   setModels: (m: Model[]) => void
 
-  // Chat — per-model history
+  // Chat â per-model history
   chatHistory: Record<string, ChatMsg[]>
   messages: ChatMsg[]
   addMessage: (msg: ChatMsg) => void
@@ -136,9 +124,9 @@ interface AppState {
   isStreaming: boolean
   setStreaming: (v: boolean) => void
 
-  // Language
-  lang: Lang
-  setLang: (l: Lang) => void
+  // User
+  user: UserState
+  setUser: (u: Partial<UserState>) => void
 
   // UI
   loading: boolean
@@ -146,7 +134,6 @@ interface AppState {
 }
 
 const savedPaletteId = loadPaletteId()
-const savedLang = loadLang()
 const savedHistory = loadChatHistory()
 
 export const useStore = create<AppState>((set, get) => ({
@@ -156,13 +143,18 @@ export const useStore = create<AppState>((set, get) => ({
 
   // Palette
   paletteId: savedPaletteId,
+    lang: (localStorage.getItem('stone-lang') as Lang) || 'en',
   setPaletteId: (id) => {
     try { localStorage.setItem('stone_ai_palette', id) } catch {}
     set({ paletteId: id, palette: PALETTES.find(p => p.id === id) || PALETTES[0] })
   },
+    setLang: (lang) => {
+      set({ lang })
+      localStorage.setItem('stone-lang', lang)
+    },
   palette: PALETTES.find(p => p.id === savedPaletteId) || PALETTES[0],
 
-  // Model — switching model loads that model's chat history
+  // Model â switching model loads that model's chat history
   modelId: 'gpt-4o-mini',
   setModelId: (id) => {
     const state = get()
@@ -176,7 +168,7 @@ export const useStore = create<AppState>((set, get) => ({
   models: [],
   setModels: (models) => set({ models }),
 
-  // Chat — per-model with persistence
+  // Chat â per-model with persistence
   chatHistory: savedHistory,
   messages: savedHistory['gpt-4o-mini'] || [],
 
@@ -238,13 +230,6 @@ export const useStore = create<AppState>((set, get) => ({
     hasPass: false,
   },
   setUser: (u) => set((s) => ({ user: { ...s.user, ...u } })),
-
-  // Language
-  lang: savedLang,
-  setLang: (l) => {
-    try { localStorage.setItem('stone_ai_lang', l) } catch {}
-    set({ lang: l })
-  },
 
   // UI
   loading: true,
