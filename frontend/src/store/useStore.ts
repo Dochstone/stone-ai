@@ -4,6 +4,7 @@
  */
 
 import { create } from 'zustand'
+import type { Lang } from '../i18n/translations'
 
 // ─── Types ───
 
@@ -103,7 +104,9 @@ interface AppState {
 
   // Palette
   paletteId: PaletteId
+  lang: Lang
   setPaletteId: (id: PaletteId) => void
+  setLang: (lang: Lang) => void
   palette: Palette
 
   // Model
@@ -140,8 +143,10 @@ export const useStore = create<AppState>((set, get) => ({
 
   // Palette
   paletteId: savedPaletteId,
+  lang: savedLang,
   setPaletteId: (id) => {
-    try { localStorage.setItem('stone_ai_palette', id) } catch {}
+    try { localStorage.setItem('stone_ai_palette', id) },
+  setLang: (lang) => { localStorage.setItem('stone_lang', lang); set({ lang }) } catch {}
     set({ paletteId: id, palette: PALETTES.find(p => p.id === id) || PALETTES[0] })
   },
   palette: PALETTES.find(p => p.id === savedPaletteId) || PALETTES[0],
