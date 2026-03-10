@@ -1,420 +1,455 @@
 /**
- * PlansScreen — Tabs (Лимиты / Тарифы), model lists, subscription cards.
- * Uses UI components (Card, Tag, GlowBtn, etc.) + Stars payment integration.
+ * PlansScreen — subscription plans, passes, payment methods.
+ * Premium design with animated cards and glow effects.
+ * Stars payment is live; TON/USDT coming in Phase 2/3.
  */
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useStore } from '../../store/useStore'
 import { usePayment } from '../../hooks/usePayment'
-import { Card, Tag, Divider, GlowBtn, GlitchTitle } from '../ui'
-
-const MODEL_ACCENTS: Record<string, string> = {
-  'gpt-4o-mini': '#00ffaa', 'claude-haiku-4.5': '#c084fc',
-  'gemini-2.0-flash': '#00e5ff', 'deepseek-r1': '#00ffcc',
-  'llama-4-maverick': '#66ffcc', 'mistral-large-25': '#00ff88',
-  'gpt-4.1': '#00ffaa', 'claude-opus-4': '#bf5af2',
-  'grok-3': '#39ff14', 'gemini-2.5-pro': '#00e5ff',
-  'perplexity-sonar-pro': '#aaff00',
-}
-
-const TIER_INFO = {
-  plus: {
-    title: 'PLUS', icon: '⚡', color: '#aaff00',
-    subtitle: 'Для активных пользователей',
-    stars: 469,
-    product_id: 'plus_stars',
-    includes: [
-      '100 запросов к Premium моделям / день',
-      'Безлимитные Lite модели',
-      'История чатов 30 дней',
-      'Приоритет ответа',
-      'Системные промпты',
-    ],
-  },
-  max: {
-    title: 'MAX', icon: '👑', color: '#bf5af2',
-    subtitle: 'Для профи и бизнеса',
-    stars: 1499,
-    product_id: 'max_stars',
-    includes: [
-      '500 запросов к Premium моделям / день',
-      '50 Claude Opus 4 запросов / день',
-      'Безлимитные Lite модели',
-      'Бесконечная история + экспорт',
-      'Максимальный приоритет',
-      'API доступ для интеграций',
-    ],
-  },
-}
-
-const PASSES = [
-  { id: 'day_pass', name: 'Day Pass', icon: '🎫', stars: 59, tags: ['15 Premium', '24 часа'], hint: '$0.94' },
-  { id: 'week_pass', name: 'Week Pass', icon: '🎟️', stars: 229, tags: ['80 Premium', '7 дней'], hint: '$3.66' },
-  { id: 'single_query', name: '1 запрос', icon: '💬', stars: 6, tags: ['1 Premium', 'мгновенно'], hint: '$0.10' },
-]
-
-type DetailTier = 'plus' | 'max' | null
+import { useTranslation } from '../../i18n/useTranslation'
+import { haptic } from '../../utils/telegram'
 
 export function PlansScreen() {
-  const { models, user, setScreen } = useStore()
+  const { palette, user } = useStore()
   const { buyWithStars, paymentLoading, resetPayment } = usePayment()
-  const [tab, setTab] = useState<'info' | 'plans'>('info')
-  const [planView, setPlanView] = useState<'subs' | 'passes'>('subs')
-  const [detailTier, setDetailTier] = useState<DetailTier>(null)
-  const [toast, setToast] = useState<{ msg: string; type: 'ok' | 'err' | 'info' } | null>(null)
+  const { t } = useTranslation()
+  const p = palette
 
-  const liteModels = models.filter(m => m.tier === 'lite')
-  const premiumModels = models.filter(m => m.tier === 'premium')
+  // Subscription data — uses translations
+  const SUBS: Record<string, any[]> = useMemo(() => ({
+    stars: [
+      { id: 'plus_stars', name: 'PLUS', icon: '⚡', price: '469', unit: `⭐${t.plans_per_month}`, hint: `100 ${t.plans_premium_day} • ≈ $7.5${t.plans_per_month}`, tier: 'plus', popular: true },
+      { id: 'max_stars', name: 'MAX', icon: '👑', price: '1499', unit: `⭐${t.plans_per_month}`, hint: `500 ${t.plans_premium_day} • ≈ $24${t.plans_per_month}`, tier: 'max' },
+    ],
+    ton: [
+      { id: 'plus_ton_1m', name: `PLUS 1 ${t.plans_per_month.replace('/', '')}`, icon: '⚡', price: '6', unit: 'TON', hint: `100 ${t.plans_premium_day}`, tier: 'plus', popular: true },
+      { id: 'plus_ton_3m', name: `PLUS 3 ${t.plans_per_month.replace('/', '')}`, icon: '⚡', price: '14.5', unit: 'TON', hint: `−20% ${t.plans_savings}`, tier: 'plus' },
+      { id: 'max_ton_1m', name: `MAX 1 ${t.plans_per_month.replace('/', '')}`, icon: '👑', price: '19', unit: 'TON', hint: `500 ${t.plans_premium_day}`, tier: 'max' },
+      { id: 'max_ton_3m', name: `MAX 3 ${t.plans_per_month.replace('/', '')}`, icon: '👑', price: '46', unit: 'TON', hint: `−19% ${t.plans_savings}`, tier: 'max' },
+    ],
+    usdt: [
+      { id: 'plus_usdt_1m', name: `PLUS 1 ${t.plans_per_month.replace('/', '')}`, icon: '⚡', price: '7.99', unit: 'USDT', hint: 'TRC-20/TON', tier: 'plus', popular: true },
+      { id: 'plus_usdt_3m', name: `PLUS 3 ${t.plans_per_month.replace('/', '')}`, icon: '⚡', price: '18.99', unit: 'USDT', hint: `−21% ${t.plans_savings}`, tier: 'plus' },
+      { id: 'max_usdt_1m', name: `MAX 1 ${t.plans_per_month.replace('/', '')}`, icon: '👑', price: '24.99', unit: 'USDT', hint: 'TRC-20/TON', tier: 'max' },
+      { id: 'max_usdt_3m', name: `MAX 3 ${t.plans_per_month.replace('/', '')}`, icon: '👑', price: '59.99', unit: 'USDT', hint: `−20% ${t.plans_savings}`, tier: 'max' },
+    ],
+  }), [t])
 
-  const showToast = (msg: string, type: 'ok' | 'err' | 'info' = 'info') => {
+  const PASSES: Record<string, any[]> = useMemo(() => ({
+    stars: [
+      { id: 'day_pass', name: 'Day Pass', icon: '🎫', price: '59', unit: '⭐', hint: `15 Premium • 24 ${t.plans_hours}` },
+      { id: 'week_pass', name: 'Week Pass', icon: '🎟️', price: '229', unit: '⭐', hint: `80 Premium • 7 ${t.plans_days}`, popular: true },
+      { id: 'single_query', name: t.plans_1_query, icon: '💬', price: '6', unit: '⭐', hint: t.plans_1_premium_query },
+    ],
+    ton: [
+      { id: 'day_pass_ton', name: 'Day Pass', icon: '🎫', price: '0.5', unit: 'TON', hint: `15 Premium • 24 ${t.plans_hours}` },
+      { id: 'week_pass_ton', name: 'Week Pass', icon: '🎟️', price: '1.8', unit: 'TON', hint: `80 Premium • 7 ${t.plans_days}`, popular: true },
+    ],
+    usdt: [
+      { id: 'day_pass_usdt', name: 'Day Pass', icon: '🎫', price: '0.99', unit: 'USDT', hint: `15 Premium • 24 ${t.plans_hours}` },
+      { id: 'week_pass_usdt', name: 'Week Pass', icon: '🎟️', price: '3.49', unit: 'USDT', hint: `80 Premium • 7 ${t.plans_days}`, popular: true },
+    ],
+  }), [t])
+
+  const PAY_TABS = useMemo(() => [
+    { id: 'stars', label: '⭐ Stars', desc: t.plans_stars_desc },
+    { id: 'ton', label: '💎 TON', desc: t.plans_ton_soon },
+    { id: 'usdt', label: '💲 USDT', desc: t.plans_usdt_soon },
+  ], [t])
+
+  const [view, setView] = useState<'subs' | 'passes'>('subs')
+  const [payMethod, setPayMethod] = useState('stars')
+  const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null)
+
+  const items = view === 'subs' ? (SUBS[payMethod] || []) : (PASSES[payMethod] || [])
+
+  const showToast = (msg: string, type: 'success' | 'error' | 'info' = 'info') => {
     setToast({ msg, type })
     setTimeout(() => setToast(null), 3500)
   }
 
-  const handleBuy = async (productId: string, tierName?: string) => {
-    // Check if user already has this plan
-    if (tierName && user.plan === tierName) {
-      showToast(`У вас уже активна подписка ${tierName.toUpperCase()}`, 'info')
+  const handleBuy = async (item: any) => {
+    haptic('medium')
+
+    // TON/USDT not yet available
+    if (payMethod !== 'stars') {
+      showToast(t.plans_toast_ton_soon, 'info')
       return
     }
-    const result = await buyWithStars(productId)
+
+    // Check if user already has this plan
+    if (item.tier && user.plan === item.tier) {
+      showToast(t.plans_toast_already(item.tier.toUpperCase()), 'info')
+      return
+    }
+
+    const result = await buyWithStars(item.id)
+
     switch (result.status) {
       case 'success':
-        showToast('Оплата прошла! Обновляем...', 'ok')
+        showToast(t.plans_toast_success, 'success')
         setTimeout(() => window.location.reload(), 1500)
         break
       case 'cancelled':
-        showToast('Оплата отменена', 'info')
+        showToast(t.plans_toast_cancelled, 'info')
         break
       case 'failed':
-        showToast(result.error || 'Ошибка оплаты', 'err')
+        showToast(result.error || t.plans_toast_error, 'error')
         break
     }
+
     resetPayment()
   }
 
   return (
-    <div style={{ padding: '0 18px 90px' }}>
-      {/* Toast */}
+    <div style={{ padding: '20px 16px 100px', minHeight: '100vh', position: 'relative', zIndex: 1 }}>
+      {/* Toast notification */}
       {toast && (
         <div style={{
-          position: 'fixed', top: 16, left: 16, right: 16, zIndex: 100,
-          padding: '12px 16px', borderRadius: 12, fontSize: 12, fontWeight: 600,
-          textAlign: 'center', animation: 'slideUp 0.3s ease-out',
-          background: toast.type === 'ok' ? 'rgba(0,255,136,0.15)' : toast.type === 'err' ? 'rgba(255,59,48,0.15)' : 'rgba(255,255,255,0.1)',
-          color: toast.type === 'ok' ? '#00ff88' : toast.type === 'err' ? '#ff3b30' : 'rgba(255,255,255,0.8)',
-          border: `1px solid ${toast.type === 'ok' ? 'rgba(0,255,136,0.3)' : toast.type === 'err' ? 'rgba(255,59,48,0.3)' : 'rgba(255,255,255,0.15)'}`,
+          position: 'fixed',
+          top: 16,
+          left: 16,
+          right: 16,
+          zIndex: 100,
+          padding: '14px 18px',
+          borderRadius: 14,
+          fontSize: 13,
+          fontWeight: 600,
+          textAlign: 'center',
+          animation: 'slideUp 0.3s ease-out',
+          background: toast.type === 'success'
+            ? 'rgba(0,255,136,0.15)'
+            : toast.type === 'error'
+              ? 'rgba(255,59,48,0.15)'
+              : 'rgba(255,255,255,0.1)',
+          color: toast.type === 'success'
+            ? '#00ff88'
+            : toast.type === 'error'
+              ? '#ff3b30'
+              : 'rgba(255,255,255,0.8)',
+          border: `1px solid ${
+            toast.type === 'success'
+              ? 'rgba(0,255,136,0.3)'
+              : toast.type === 'error'
+                ? 'rgba(255,59,48,0.3)'
+                : 'rgba(255,255,255,0.15)'
+          }`,
           backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
         }}>
-          {toast.type === 'ok' ? '✅ ' : toast.type === 'err' ? '⚠️ ' : '💡 '}{toast.msg}
+          {toast.type === 'success' ? '✅ ' : toast.type === 'error' ? '⚠️ ' : '💡 '}
+          {toast.msg}
         </div>
       )}
 
       {/* Header */}
-      <div style={{ padding: '16px 0 8px' }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-          <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 20, fontWeight: 900, color: '#fff' }}>
-            {user.plan === 'free' ? 'FREE' : user.plan.toUpperCase()}
-          </span>
-          <GlitchTitle text="AI" size={20} />
-        </div>
-        <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#3a6a50', marginTop: 2 }}>sys.account()</div>
+      <div style={{
+        textAlign: 'center',
+        marginBottom: 24,
+        animation: 'fadeIn 0.5s ease-out',
+      }}>
+        <div style={{
+          fontSize: 36,
+          marginBottom: 8,
+          filter: `drop-shadow(0 0 16px rgba(${p.primaryRgb},0.4))`,
+        }}>💎</div>
+        <h2 style={{
+          fontSize: 24,
+          fontWeight: 900,
+          background: `linear-gradient(135deg, ${p.primary}, ${p.secondary})`,
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          margin: 0,
+        }}>
+          {t.plans_title}
+        </h2>
+        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, marginTop: 6 }}>
+          {t.plans_subtitle}
+        </p>
       </div>
 
-      {/* Tab switcher */}
+      {/* Current plan badge */}
+      {user.plan !== 'free' && (
+        <div
+          className="glass-card-accent"
+          style={{
+            padding: '12px 16px',
+            marginBottom: 16,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            animation: 'fadeIn 0.5s ease-out',
+          }}
+        >
+          <span>{user.plan === 'max' ? '👑' : '⚡'}</span>
+          <span style={{ color: '#fff', fontSize: 13, fontWeight: 700 }}>
+            {t.plans_active_sub(user.plan.toUpperCase())}
+          </span>
+        </div>
+      )}
+
+      {/* How it works — glass card */}
+      <div
+        className="glass-card-accent"
+        style={{
+          padding: 16,
+          marginBottom: 20,
+          fontSize: 13,
+          color: 'rgba(255,255,255,0.7)',
+          lineHeight: 1.6,
+          animation: 'slideUp 0.5s ease-out 0.1s both',
+        }}
+      >
+        <div style={{
+          fontWeight: 800,
+          color: p.primary,
+          marginBottom: 8,
+          fontSize: 14,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+        }}>
+          💡 {t.plans_how_title}
+        </div>
+        <div style={{ marginBottom: 6 }}>
+          <span style={{
+            display: 'inline-block',
+            background: 'rgba(0,255,136,0.1)',
+            color: '#00ff88',
+            padding: '2px 8px',
+            borderRadius: 6,
+            fontSize: 11,
+            fontWeight: 700,
+            marginRight: 6,
+          }}>FREE</span>
+          <b style={{ color: '#fff' }}>Lite</b> {t.plans_how_lite}
+        </div>
+        <div>
+          <span style={{
+            display: 'inline-block',
+            background: 'rgba(191,90,242,0.1)',
+            color: '#bf5af2',
+            padding: '2px 8px',
+            borderRadius: 6,
+            fontSize: 11,
+            fontWeight: 700,
+            marginRight: 6,
+          }}>PRO</span>
+          <b style={{ color: '#fff' }}>Premium</b> {t.plans_how_premium}
+        </div>
+      </div>
+
+      {/* Subs / Passes toggle */}
       <div style={{
-        display: 'flex', gap: 0, borderRadius: 10, overflow: 'hidden',
-        border: '1px solid rgba(0,255,136,0.12)', marginBottom: 12,
+        display: 'flex',
+        gap: 4,
+        background: 'rgba(255,255,255,0.04)',
+        borderRadius: 14,
+        padding: 4,
+        marginBottom: 16,
+        border: '1px solid rgba(255,255,255,0.06)',
+        animation: 'slideUp 0.5s ease-out 0.15s both',
       }}>
-        {[
-          { id: 'info' as const, label: '📊 Лимиты' },
-          { id: 'plans' as const, label: '💳 Тарифы' },
-        ].map((t, i) => (
-          <button key={t.id}
-            onClick={() => { setTab(t.id); setDetailTier(null) }}
+        {(['subs', 'passes'] as const).map((v) => (
+          <button
+            key={v}
+            onClick={() => { haptic('light'); setView(v) }}
             style={{
-              flex: 1, padding: '9px 0', border: 'none', cursor: 'pointer',
-              background: tab === t.id ? 'rgba(0,255,136,0.08)' : 'rgba(5,10,8,0.9)',
-              color: tab === t.id ? '#00ff88' : '#3a6a50',
-              fontFamily: 'monospace', fontSize: 11, fontWeight: 700, transition: 'all 0.2s',
-              borderRight: i === 0 ? '1px solid rgba(0,255,136,0.06)' : 'none',
-            }}>{t.label}</button>
+              flex: 1,
+              padding: '11px 0',
+              border: 'none',
+              borderRadius: 11,
+              background: view === v
+                ? `linear-gradient(135deg, rgba(${p.primaryRgb},0.15), rgba(${p.secondaryRgb},0.1))`
+                : 'transparent',
+              color: view === v ? '#fff' : 'rgba(255,255,255,0.4)',
+              fontWeight: view === v ? 700 : 500,
+              fontSize: 13,
+              cursor: 'pointer',
+              transition: 'all 0.25s',
+              boxShadow: view === v ? `0 0 12px rgba(${p.primaryRgb},0.1)` : 'none',
+            }}
+          >
+            {v === 'subs' ? `📋 ${t.plans_tab_subs}` : `🎫 ${t.plans_tab_passes}`}
+          </button>
         ))}
       </div>
 
-      {/* ── Info tab ── */}
-      {tab === 'info' && (
-        <>
-          <Card accent="#00ff88" featured>
-            <div style={{ textAlign: 'center', marginBottom: 12 }}>
-              <span style={{ fontSize: 36 }}>🆓</span>
-              <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 18, fontWeight: 900, color: '#fff', marginTop: 6 }}>
-                {user.plan === 'free' ? 'FREE план' : `${user.plan.toUpperCase()} план`}
-              </div>
-              <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#3a6a50', marginTop: 4 }}>
-                {user.plan === 'free' ? 'Lite модели — 20 запросов/день' : 'Все модели доступны'}
-              </div>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-              <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#3a6a50' }}>lite.requests.today</span>
-              <span style={{ fontFamily: 'monospace', fontSize: 12, fontWeight: 700, color: '#00ff88' }}>
-                {user.liteToday}/{user.liteLimitDay === -1 ? '∞' : user.liteLimitDay}
-              </span>
-            </div>
-            <div style={{ height: 6, borderRadius: 3, background: 'rgba(0,255,136,0.08)', overflow: 'hidden', marginBottom: 8 }}>
+      {/* Payment method tabs */}
+      <div style={{
+        display: 'flex',
+        gap: 8,
+        marginBottom: 20,
+        animation: 'slideUp 0.5s ease-out 0.2s both',
+      }}>
+        {PAY_TABS.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => { haptic('light'); setPayMethod(t.id) }}
+            style={{
+              flex: 1,
+              padding: '10px 0 8px',
+              border: payMethod === t.id
+                ? `1px solid rgba(${p.primaryRgb},0.3)`
+                : '1px solid rgba(255,255,255,0.06)',
+              borderRadius: 12,
+              background: payMethod === t.id
+                ? `rgba(${p.primaryRgb},0.08)`
+                : 'rgba(255,255,255,0.02)',
+              cursor: 'pointer',
+              transition: 'all 0.25s',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 2,
+              opacity: t.id !== 'stars' ? 0.5 : 1,
+            }}
+          >
+            <span style={{
+              fontSize: 13,
+              color: payMethod === t.id ? '#fff' : 'rgba(255,255,255,0.5)',
+              fontWeight: payMethod === t.id ? 700 : 500,
+            }}>{t.label}</span>
+            <span style={{
+              fontSize: 9,
+              color: payMethod === t.id ? p.primary : 'rgba(255,255,255,0.25)',
+            }}>{t.desc}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Plan cards */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {items.map((item, i) => {
+          const isLoading = paymentLoading === item.id
+          return (
+            <div
+              key={item.id}
+              className="glass-card"
+              style={{
+                padding: 18,
+                position: 'relative',
+                overflow: 'hidden',
+                border: item.popular
+                  ? `1px solid rgba(${p.primaryRgb},0.25)`
+                  : '1px solid rgba(255,255,255,0.06)',
+                background: item.popular
+                  ? `rgba(${p.primaryRgb},0.06)`
+                  : 'rgba(255,255,255,0.02)',
+                animation: `slideUp 0.4s ease-out ${0.25 + i * 0.08}s both`,
+                transition: 'transform 0.2s, box-shadow 0.2s',
+              }}
+            >
+              {/* Popular tag */}
+              {item.popular && <div className="popular-tag">POPULAR</div>}
+
+              {/* Tier glow line */}
               <div style={{
-                height: '100%', borderRadius: 3,
-                width: `${user.liteLimitDay > 0 ? Math.min((user.liteToday / user.liteLimitDay) * 100, 100) : 0}%`,
-                background: 'linear-gradient(90deg, #00ff88, #aaff00)',
-                boxShadow: '0 0 10px rgba(0,255,136,0.3)', transition: 'width 0.5s',
+                position: 'absolute',
+                bottom: 0,
+                left: '10%',
+                right: '10%',
+                height: 1,
+                background: `linear-gradient(90deg, transparent, ${item.tier === 'max' ? '#bf5af2' : p.primary}, transparent)`,
+                opacity: 0.3,
               }} />
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#3a6a50' }}>premium.requests</span>
-              <span style={{ fontFamily: 'monospace', fontSize: 12, fontWeight: 700, color: user.plan === 'free' ? '#ff6b6b' : '#bf5af2' }}>
-                {user.plan === 'free' ? '0 (нужна подписка)' : `${user.premiumToday}/${user.premiumLimitDay}`}
-              </span>
-            </div>
-          </Card>
 
-          <div style={{ height: 10 }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                <div style={{
+                  fontSize: 28,
+                  width: 48,
+                  height: 48,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: item.tier === 'max' ? 'rgba(191,90,242,0.1)' : `rgba(${p.primaryRgb},0.1)`,
+                  borderRadius: 14,
+                  border: `1px solid ${item.tier === 'max' ? 'rgba(191,90,242,0.2)' : `rgba(${p.primaryRgb},0.15)`}`,
+                }}>{item.icon}</div>
 
-          {/* Lite models */}
-          <Card accent="#00ff88">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-              <span style={{ fontFamily: 'monospace', fontSize: 10, fontWeight: 700, color: '#050a08', background: '#00ff88', padding: '2px 8px', borderRadius: 4 }}>LITE</span>
-              <span style={{ fontFamily: 'monospace', fontSize: 10, color: '#3a6a50', textTransform: 'uppercase', letterSpacing: '0.1em' }}>бесплатно &bull; 20 req/день</span>
-            </div>
-            {liteModels.map((m, i) => (
-              <div key={m.id} style={{
-                display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0',
-                borderBottom: i < liteModels.length - 1 ? '1px solid rgba(0,255,136,0.04)' : 'none',
-              }}>
-                <span style={{ fontSize: 18 }}>{m.icon}</span>
                 <div style={{ flex: 1 }}>
-                  <span style={{ fontFamily: 'sans-serif', fontSize: 13, fontWeight: 600, color: '#e0f0e8' }}>{m.name}</span>
-                  <span style={{ fontFamily: 'monospace', fontSize: 10, color: '#3a6a50', marginLeft: 6 }}>{m.company}</span>
-                </div>
-                <Tag text="FREE" accent="#00ff88" />
-              </div>
-            ))}
-          </Card>
-
-          <div style={{ height: 10 }} />
-
-          {/* Premium models */}
-          <Card accent="#bf5af2">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-              <span style={{ fontFamily: 'monospace', fontSize: 10, fontWeight: 700, color: '#050a08', background: '#bf5af2', padding: '2px 8px', borderRadius: 4 }}>PREMIUM</span>
-              <span style={{ fontFamily: 'monospace', fontSize: 10, color: '#3a6a50', textTransform: 'uppercase', letterSpacing: '0.1em' }}>подписка Plus / Max</span>
-            </div>
-            {premiumModels.map((m, i) => (
-              <div key={m.id} style={{
-                display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0',
-                borderBottom: i < premiumModels.length - 1 ? '1px solid rgba(0,255,136,0.04)' : 'none',
-              }}>
-                <span style={{ fontSize: 18, filter: 'grayscale(0.5)', opacity: 0.7 }}>{m.icon}</span>
-                <div style={{ flex: 1 }}>
-                  <span style={{ fontFamily: 'sans-serif', fontSize: 13, fontWeight: 600, color: '#5a8a70' }}>{m.name}</span>
-                  <span style={{ fontFamily: 'monospace', fontSize: 10, color: '#1a3a28', marginLeft: 6 }}>{m.company}</span>
-                </div>
-                <Tag text="🔒" accent="#3a6a50" />
-              </div>
-            ))}
-            <div style={{ marginTop: 10 }}>
-              <GlowBtn onClick={() => setTab('plans')}>⚡ Открыть Premium</GlowBtn>
-            </div>
-          </Card>
-        </>
-      )}
-
-      {/* ── Plans tab ── */}
-      {tab === 'plans' && (
-        <>
-          {detailTier ? (
-            <>
-              {/* Detail view */}
-              <button onClick={() => setDetailTier(null)} style={{
-                background: 'none', border: 'none', color: '#3a6a50',
-                fontFamily: 'monospace', fontSize: 12, cursor: 'pointer', padding: '4px 0 10px',
-              }}>← Назад</button>
-              {(() => {
-                const info = TIER_INFO[detailTier]
-                return (
-                  <Card accent={info.color} featured>
-                    <div style={{ textAlign: 'center', marginBottom: 14 }}>
-                      <span style={{ fontSize: 44 }}>{info.icon}</span>
-                      <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 24, fontWeight: 900, color: '#fff', marginTop: 6 }}>
-                        {info.title}
-                      </div>
-                      <div style={{ fontFamily: 'sans-serif', fontSize: 13, color: info.color, marginTop: 4 }}>
-                        {info.subtitle}
-                      </div>
-                    </div>
-                    <Divider label="что входит" />
-                    <div style={{ height: 8 }} />
-                    {info.includes.map((item, i) => (
-                      <div key={i} style={{
-                        display: 'flex', alignItems: 'flex-start', gap: 8, padding: '6px 0',
-                        borderBottom: i < info.includes.length - 1 ? '1px solid rgba(0,255,136,0.04)' : 'none',
+                  <div style={{
+                    color: '#fff',
+                    fontWeight: 800,
+                    fontSize: 16,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                  }}>
+                    {item.name}
+                    {item.tier && (
+                      <span style={{
+                        fontSize: 8,
+                        fontWeight: 700,
+                        padding: '2px 6px',
+                        borderRadius: 4,
+                        background: item.tier === 'max' ? 'rgba(191,90,242,0.12)' : 'rgba(170,255,0,0.12)',
+                        color: item.tier === 'max' ? '#bf5af2' : '#aaff00',
                       }}>
-                        <span style={{ color: info.color, fontSize: 12, flexShrink: 0, marginTop: 1 }}>✓</span>
-                        <span style={{ fontFamily: 'sans-serif', fontSize: 12, color: '#e0f0e8', lineHeight: 1.4 }}>{item}</span>
-                      </div>
-                    ))}
-                    <div style={{ height: 14 }} />
-                    <GlowBtn
-                      onClick={() => handleBuy(info.product_id, detailTier)}
-                      disabled={paymentLoading === info.product_id}
-                    >
-                      {paymentLoading === info.product_id
-                        ? '⏳ Загрузка...'
-                        : `⭐ Купить за ${info.stars}⭐/мес`}
-                    </GlowBtn>
-                  </Card>
-                )
-              })()}
-            </>
-          ) : (
-            <>
-              {/* How it works */}
-              <Card accent="#00ff88" style={{ marginBottom: 10 }}>
-                <div style={{ fontFamily: 'sans-serif', fontSize: 13, color: '#b0d0c0', lineHeight: 1.6 }}>
-                  <span style={{ fontWeight: 700, color: '#e0f0e8' }}>Как это работает?</span> Stone AI делит модели на 2 категории:
-                </div>
-                <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                  <div style={{ flex: 1, padding: 8, borderRadius: 8, background: 'rgba(0,255,136,0.04)', border: '1px solid rgba(0,255,136,0.1)' }}>
-                    <div style={{ fontFamily: 'monospace', fontSize: 9, fontWeight: 700, color: '#00ff88', textTransform: 'uppercase', marginBottom: 4 }}>Lite &bull; бесплатно</div>
-                    <div style={{ fontFamily: 'sans-serif', fontSize: 11, color: '#5a8a70', lineHeight: 1.4 }}>
-                      GPT-4o mini, Haiku, Flash, DeepSeek, Llama, Mistral — 20 req/день
-                    </div>
+                        {item.tier.toUpperCase()}
+                      </span>
+                    )}
                   </div>
-                  <div style={{ flex: 1, padding: 8, borderRadius: 8, background: 'rgba(191,90,242,0.04)', border: '1px solid rgba(191,90,242,0.1)' }}>
-                    <div style={{ fontFamily: 'monospace', fontSize: 9, fontWeight: 700, color: '#bf5af2', textTransform: 'uppercase', marginBottom: 4 }}>Premium &bull; подписка</div>
-                    <div style={{ fontFamily: 'sans-serif', fontSize: 11, color: '#5a8a70', lineHeight: 1.4 }}>
-                      GPT-4.1, Claude Opus 4, Grok 3, Gemini 2.5 Pro, Perplexity
-                    </div>
-                  </div>
+                  <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: 12, marginTop: 2 }}>{item.hint}</div>
                 </div>
-              </Card>
 
-              {/* Subs / Passes toggle */}
-              <div style={{
-                display: 'flex', gap: 0, borderRadius: 10, overflow: 'hidden',
-                border: '1px solid rgba(0,255,136,0.08)', marginBottom: 10,
-              }}>
-                {[
-                  { id: 'subs' as const, label: '📦 Подписки' },
-                  { id: 'passes' as const, label: '🎫 Пассы' },
-                ].map((t, i) => (
-                  <button key={t.id} onClick={() => setPlanView(t.id)} style={{
-                    flex: 1, padding: '10px 0', border: 'none', cursor: 'pointer',
-                    background: planView === t.id ? 'rgba(0,255,136,0.06)' : 'rgba(5,10,8,0.9)',
-                    color: planView === t.id ? '#aaff00' : '#3a6a50',
-                    fontFamily: 'monospace', fontSize: 11, fontWeight: 700, transition: 'all 0.2s',
-                    borderRight: i === 0 ? '1px solid rgba(0,255,136,0.06)' : 'none',
-                  }}>{t.label}</button>
-                ))}
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{
+                    color: p.primary,
+                    fontWeight: 900,
+                    fontSize: 22,
+                    lineHeight: 1,
+                    fontVariantNumeric: 'tabular-nums',
+                  }}>
+                    {item.price}
+                  </div>
+                  <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 10, marginTop: 2 }}>{item.unit}</div>
+                </div>
               </div>
 
-              {planView === 'subs' && (
-                <>
-                  {/* PLUS card */}
-                  <Card accent="#aaff00" featured onClick={() => setDetailTier('plus')} style={{ marginBottom: 8 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
-                      <span style={{ fontSize: 32 }}>⚡</span>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 18, fontWeight: 900, color: '#e0f0e8' }}>PLUS</div>
-                        <div style={{ fontFamily: 'sans-serif', fontSize: 11, color: '#aaff00', marginTop: 2 }}>Для активных пользователей</div>
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 14, fontWeight: 900, color: '#aaff00' }}>469⭐</div>
-                        <div style={{ fontFamily: 'monospace', fontSize: 9, color: '#3a6a50' }}>≈ $7.5/мес</div>
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 10 }}>
-                      {['100 Premium/день', '∞ Lite', 'Приоритет'].map(f => <Tag key={f} text={f} accent="#aaff00" />)}
-                    </div>
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <div style={{ flex: 1 }}>
-                        <GlowBtn onClick={(e: any) => { e.stopPropagation(); handleBuy('plus_stars', 'plus') }}
-                          disabled={paymentLoading === 'plus_stars'}>
-                          {paymentLoading === 'plus_stars' ? '⏳...' : '⭐ Купить'}
-                        </GlowBtn>
-                      </div>
-                      <button onClick={(e) => { e.stopPropagation(); setDetailTier('plus') }} style={{
-                        background: 'none', border: '1px solid rgba(170,255,0,0.2)', borderRadius: 8,
-                        color: '#aaff00', fontSize: 11, padding: '0 12px', cursor: 'pointer',
-                        fontFamily: 'monospace',
-                      }}>i</button>
-                    </div>
-                  </Card>
+              <button
+                className="btn-gradient"
+                disabled={isLoading}
+                onClick={() => handleBuy(item)}
+                style={{
+                  width: '100%',
+                  padding: '12px 0',
+                  fontSize: 14,
+                  letterSpacing: '0.5px',
+                  opacity: isLoading ? 0.6 : 1,
+                  cursor: isLoading ? 'wait' : 'pointer',
+                }}
+              >
+                {isLoading ? `⏳ ${t.plans_buying}` : t.plans_buy}
+              </button>
+            </div>
+          )
+        })}
+      </div>
 
-                  {/* MAX card */}
-                  <Card accent="#bf5af2" featured onClick={() => setDetailTier('max')} style={{ marginBottom: 8 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
-                      <span style={{ fontSize: 32 }}>👑</span>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 18, fontWeight: 900, color: '#e0f0e8' }}>MAX</div>
-                        <div style={{ fontFamily: 'sans-serif', fontSize: 11, color: '#bf5af2', marginTop: 2 }}>Для профи и бизнеса</div>
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 14, fontWeight: 900, color: '#bf5af2' }}>1499⭐</div>
-                        <div style={{ fontFamily: 'monospace', fontSize: 9, color: '#3a6a50' }}>≈ $24/мес</div>
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 10 }}>
-                      {['500 Premium/день', '50 Opus/день', 'API доступ'].map(f => <Tag key={f} text={f} accent="#bf5af2" />)}
-                    </div>
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <div style={{ flex: 1 }}>
-                        <GlowBtn onClick={(e: any) => { e.stopPropagation(); handleBuy('max_stars', 'max') }}
-                          disabled={paymentLoading === 'max_stars'}>
-                          {paymentLoading === 'max_stars' ? '⏳...' : '⭐ Купить'}
-                        </GlowBtn>
-                      </div>
-                      <button onClick={(e) => { e.stopPropagation(); setDetailTier('max') }} style={{
-                        background: 'none', border: '1px solid rgba(191,90,242,0.2)', borderRadius: 8,
-                        color: '#bf5af2', fontSize: 11, padding: '0 12px', cursor: 'pointer',
-                        fontFamily: 'monospace',
-                      }}>i</button>
-                    </div>
-                  </Card>
-                </>
-              )}
-
-              {planView === 'passes' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {PASSES.map(pass => (
-                    <Card key={pass.id} accent="#00ffcc">
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <span style={{ fontSize: 24 }}>{pass.icon}</span>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontFamily: 'sans-serif', fontSize: 14, fontWeight: 700, color: '#e0f0e8' }}>{pass.name}</div>
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
-                            {pass.tags.map(t => <Tag key={t} text={t} accent="#00ffcc" />)}
-                          </div>
-                        </div>
-                        <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                          <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 18, fontWeight: 900, color: '#00ffcc' }}>{pass.stars}⭐</div>
-                          <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#3a6a50' }}>{pass.hint}</div>
-                        </div>
-                      </div>
-                      <div style={{ marginTop: 10 }}>
-                        <GlowBtn
-                          onClick={() => handleBuy(pass.id)}
-                          disabled={paymentLoading === pass.id}
-                        >
-                          {paymentLoading === pass.id ? '⏳ Загрузка...' : '⭐ Купить'}
-                        </GlowBtn>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
-        </>
+      {/* Upsell for passes */}
+      {view === 'passes' && (
+        <div
+          className="glass-card"
+          style={{
+            marginTop: 18,
+            padding: 16,
+            fontSize: 12,
+            color: 'rgba(255,255,255,0.6)',
+            textAlign: 'center',
+            border: '1px solid rgba(170,255,0,0.12)',
+            background: 'rgba(170,255,0,0.03)',
+            animation: 'fadeIn 0.5s ease-out',
+          }}
+        >
+          <span style={{ fontSize: 16, marginRight: 4 }}>💡</span>
+          <b style={{ color: '#aaff00' }}>{t.plans_upsell_title}</b>
+          <br /><span style={{ color: 'rgba(255,255,255,0.4)' }}>
+            {t.plans_upsell_desc}
+          </span>
+        </div>
       )}
     </div>
   )

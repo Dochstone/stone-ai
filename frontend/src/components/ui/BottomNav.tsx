@@ -4,23 +4,27 @@
  */
 
 import { useStore } from '../../store/useStore'
+import { useTranslation } from '../../i18n/useTranslation'
 import { haptic } from '../../utils/telegram'
 
-const TABS = [
-  { id: 'home' as const, icon: '🏠', label: 'Главная' },
-  { id: 'chat' as const, icon: '💬', label: 'Чат' },
-  { id: 'plans' as const, icon: '💎', label: 'Тарифы' },
-  { id: 'profile' as const, icon: '👤', label: 'Профиль' },
-]
+type TabId = 'home' | 'chat' | 'plans' | 'profile'
 
 export function BottomNav() {
   const { screen, setScreen, palette } = useStore()
+  const { t } = useTranslation()
   const p = palette
+
+  const TABS: { id: TabId; icon: string; label: string }[] = [
+    { id: 'home', icon: '🏠', label: t.nav_home },
+    { id: 'chat', icon: '💬', label: t.nav_chat },
+    { id: 'plans', icon: '💎', label: t.nav_plans },
+    { id: 'profile', icon: '👤', label: t.nav_profile },
+  ]
 
   // Hide in chat mode
   if (screen === 'chat') return null
 
-  const activeIndex = TABS.findIndex(t => t.id === screen)
+  const activeIndex = TABS.findIndex(tab => tab.id === screen)
 
   return (
     <nav style={{

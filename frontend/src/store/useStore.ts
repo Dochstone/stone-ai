@@ -4,6 +4,7 @@
  */
 
 import { create } from 'zustand'
+import type { Lang } from '../i18n/translations'
 
 // ─── Types ───
 
@@ -86,6 +87,20 @@ function saveChatHistory(history: Record<string, ChatMsg[]>) {
   }
 }
 
+function loadLang(): Lang {
+  try {
+    const saved = localStorage.getItem('stone_ai_lang')
+    if (saved === 'en' || saved === 'ru' || saved === 'zh') return saved
+  } catch {}
+  // Auto-detect from Telegram language_code
+  try {
+    const tgLang = (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.language_code
+    if (tgLang?.startsWith('zh')) return 'zh'
+    if (tgLang?.startsWith('ru') || tgLang?.startsWith('uk') || tgLang?.startsWith('be')) return 'ru'
+  } catch {}
+  return 'en'
+}
+
 function loadPaletteId(): PaletteId {
   try {
     const id = localStorage.getItem('stone_ai_palette')
@@ -121,9 +136,9 @@ interface AppState {
   isStreaming: boolean
   setStreaming: (v: boolean) => void
 
-  // User
-  user: UserState
-  setUser: (u: Partial<UserState>) => void
+  // Language
+  lang: Lang
+  setLang: (l: Lang) => void
 
   // UI
   loading: boolean
@@ -131,6 +146,7 @@ interface AppState {
 }
 
 const savedPaletteId = loadPaletteId()
+const savedLang = loadLang()
 const savedHistory = loadChatHistory()
 
 export const useStore = create<AppState>((set, get) => ({
@@ -222,6 +238,13 @@ export const useStore = create<AppState>((set, get) => ({
     hasPass: false,
   },
   setUser: (u) => set((s) => ({ user: { ...s.user, ...u } })),
+
+  // Language
+  lang: savedLang,
+  setLang: (l) => {
+    try { localStorage.setItem('stone_ai_lang', l) } catch {}
+    set({ lang: l })
+  },
 
   // UI
   loading: true,

@@ -1,119 +1,141 @@
 /**
- * Stone AI — Main App with TopHeader, BottomNav, palette backgrounds.
- * Design: v4.5 prototype with premium aesthetic.
+ * Stone AI — Main App component.
+ * Routes between screens, initializes Telegram WebApp.
+ * Premium design with animated background.
  */
+
 import { useEffect } from 'react'
 import { useStore } from './store/useStore'
 import { useUser } from './hooks/useUser'
+import { useTranslation } from './i18n/useTranslation'
 import { initTelegramApp } from './utils/telegram'
-import { TopHeader, BottomNav, MatrixRain, OceanBg, SunsetBg } from './components/ui'
+
 import { HomeScreen } from './components/HomeScreen/HomeScreen'
 import { ChatScreen } from './components/ChatScreen/ChatScreen'
 import { PlansScreen } from './components/PlansScreen/PlansScreen'
 import { ProfileScreen } from './components/ProfileScreen/ProfileScreen'
-import { FaqScreen } from './components/FaqScreen/FaqScreen'
-
-// Global CSS keyframes + fonts
-const GLOBAL_CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
-@keyframes gradShift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
-@keyframes gradientBar { 0% { background-position: 0% 0; } 100% { background-position: 300% 0; } }
-@keyframes borderGlow { 0%,100% { border-color: rgba(var(--pr),0.12); } 50% { border-color: rgba(var(--pr),0.35); } }
-@keyframes pillGlow { 0%,100% { border-color: rgba(var(--pr),0.3); background: rgba(var(--pr),0.12); } 50% { border-color: rgba(var(--pr),0.55); background: rgba(var(--pr),0.2); } }
-* { box-sizing: border-box; }
-body { margin: 0; padding: 0; background: #050a08; }
-::-webkit-scrollbar { width: 3px; }
-::-webkit-scrollbar-track { background: #050a08; }
-::-webkit-scrollbar-thumb { background: #00ff4430; border-radius: 4px; }
-input::placeholder, textarea::placeholder { color: #3a6a50; }
-button:hover { opacity: 0.92; }
-`
+import { BottomNav } from './components/ui/BottomNav'
 
 export default function App() {
-  const { screen, setScreen, palette, loading, setLoading } = useStore()
-  useUser()
+  const { screen, loading, palette } = useStore()
+  const { t } = useTranslation()
 
+  // Init Telegram WebApp
   useEffect(() => {
     initTelegramApp()
-    // Add global styles
-    const style = document.createElement('style')
-    style.textContent = GLOBAL_CSS
-    document.head.appendChild(style)
-    // Mark loaded
-    const t = setTimeout(() => setLoading(false), 600)
-    return () => { clearTimeout(t); document.head.removeChild(style) }
   }, [])
 
-  const p = palette
-
-  /* FAQ now routes to its own screen, not plans */
-  const handleNav = (id: string) => {
-    setScreen(id as any)
-  }
+  // Fetch user data
+  useUser()
 
   if (loading) {
     return (
       <div style={{
-        minHeight: '100vh', background: '#050a08',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+        gap: 16,
+        background: '#050505',
+        position: 'relative',
+        overflow: 'hidden',
       }}>
+        {/* Background glow */}
         <div style={{
-          fontFamily: "'Orbitron',sans-serif", fontSize: 32, fontWeight: 900,
-          background: 'linear-gradient(135deg, #aaff00, #00ff88)',
-          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-          filter: 'drop-shadow(0 0 20px rgba(0,255,136,0.5))',
-        }}>STONE AI</div>
-        <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#5a8a70' }}>loading system...</div>
-        <div style={{
-          width: 120, height: 3, borderRadius: 2,
-          background: 'linear-gradient(90deg, #00ff88, #00e5ff, #39ff14, #00ffcc, #00ff88)',
-          backgroundSize: '300% 100%', animation: 'gradientBar 2s linear infinite',
+          position: 'absolute',
+          top: '30%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 300,
+          height: 300,
+          borderRadius: '50%',
+          background: `radial-gradient(circle, rgba(${palette.primaryRgb},0.1) 0%, transparent 70%)`,
+          animation: 'pulse 3s ease-in-out infinite',
         }} />
+
+        <div style={{
+          fontSize: 56,
+          animation: 'float 3s ease-in-out infinite',
+          filter: `drop-shadow(0 0 30px rgba(${palette.primaryRgb},0.5))`,
+          zIndex: 1,
+        }}>
+          🤖
+        </div>
+
+        <div style={{
+          background: `linear-gradient(135deg, ${palette.primary}, ${palette.secondary}, ${palette.accent3})`,
+          backgroundSize: '200% 200%',
+          animation: 'gradientMove 3s ease infinite',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          fontSize: 28,
+          fontWeight: 900,
+          letterSpacing: '-0.5px',
+          zIndex: 1,
+        }}>
+          Stone AI
+        </div>
+
+        <div style={{
+          color: 'rgba(255,255,255,0.3)',
+          fontSize: 13,
+          zIndex: 1,
+          fontWeight: 500,
+        }}>
+          {t.loading}
+        </div>
+
+        {/* Loading bar */}
+        <div style={{
+          width: 120,
+          height: 2,
+          background: 'rgba(255,255,255,0.06)',
+          borderRadius: 2,
+          overflow: 'hidden',
+          zIndex: 1,
+          marginTop: 4,
+        }}>
+          <div style={{
+            height: '100%',
+            width: '40%',
+            background: `linear-gradient(90deg, ${palette.primary}, ${palette.secondary})`,
+            borderRadius: 2,
+            animation: 'shimmer 1.5s ease-in-out infinite',
+            backgroundSize: '200% 100%',
+          }} />
+        </div>
       </div>
     )
   }
 
-  const renderScreen = () => {
-    switch (screen) {
-      case 'home': return <HomeScreen />
-      case 'chat': return <ChatScreen />
-      case 'plans': return <PlansScreen />
-      case 'faq': return <FaqScreen />
-      case 'profile': return <ProfileScreen />
-      default: return <HomeScreen />
-    }
-  }
-
   return (
-    <div style={{
-      minHeight: '100vh', background: '#050a08', color: '#e0f0e8',
-      fontFamily: "-apple-system, 'SF Pro Display', sans-serif",
-      maxWidth: 480, margin: '0 auto', position: 'relative', overflow: 'hidden',
-    }}>
-      {/* Palette-specific background */}
-      {p.id === 'matrix' && (<>
-        <MatrixRain primaryRgb={p.primaryRgb} primary={p.primary} />
-        <div style={{ position: 'fixed', inset: 0, zIndex: 2, pointerEvents: 'none', background: `repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(${p.primaryRgb},0.012) 2px, rgba(${p.primaryRgb},0.012) 4px)` }} />
-        <div style={{ position: 'fixed', top: '-5%', left: '-10%', width: 350, height: 350, borderRadius: '50%', background: `radial-gradient(circle, rgba(${p.primaryRgb},0.08) 0%, transparent 70%)`, filter: 'blur(60px)', pointerEvents: 'none', zIndex: 1 }} />
-      </>)}
-      {p.id === 'ocean' && <OceanBg primaryRgb={p.primaryRgb} secondaryRgb={p.secondaryRgb} primary={p.primary} />}
-      {p.id === 'sunset' && <SunsetBg primaryRgb={p.primaryRgb} secondaryRgb={p.secondaryRgb} />}
+    <>
+      {/* Dynamic CSS vars for palette */}
+      <style>{`
+        :root {
+          --primary: ${palette.primary};
+          --primary-rgb: ${palette.primaryRgb};
+          --secondary: ${palette.secondary};
+          --secondary-rgb: ${palette.secondaryRgb};
+          --accent3: ${palette.accent3};
+          --accent3-rgb: ${palette.accent3Rgb};
+        }
+      `}</style>
 
-      {/* Content */}
-      <div style={{ position: 'relative', zIndex: 10 }}>
-        <TopHeader primaryRgb={p.primaryRgb} primary={p.primary} />
-        {renderScreen()}
+      {/* Animated background */}
+      {screen !== 'chat' && <div className="animated-bg" />}
+
+      {/* Screens */}
+      <div style={{ paddingBottom: screen === 'chat' ? 0 : 60 }}>
+        {screen === 'home' && <HomeScreen />}
+        {screen === 'chat' && <ChatScreen />}
+        {screen === 'plans' && <PlansScreen />}
+        {screen === 'profile' && <ProfileScreen />}
       </div>
 
-      {/* Navigation */}
-      <BottomNav
-        active={screen}
-        onNavigate={handleNav}
-        primaryRgb={p.primaryRgb}
-        secondaryRgb={p.secondaryRgb}
-        primary={p.primary}
-      />
-    </div>
+      {/* Bottom nav */}
+      <BottomNav />
+    </>
   )
 }
