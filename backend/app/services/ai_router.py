@@ -15,8 +15,8 @@ OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 MODEL_MAP = {
     # ─── LITE (бесплатные) ───
     "gpt-4o-mini": "openai/gpt-4o-mini",
-    "claude-haiku-4.5": "anthropic/claude-3-5-haiku-latest",
-    "gemini-2.0-flash": "google/gemini-2.0-flash-001",
+    "claude-haiku-4.5": "anthropic/claude-haiku-4.5",
+    "gemini-2.0-flash": "google/gemini-2.0-flash",
     "deepseek-r1": "deepseek/deepseek-r1",
     "llama-4-maverick": "meta-llama/llama-4-maverick",
     "mistral-large-25": "mistralai/mistral-large-latest",
@@ -24,7 +24,7 @@ MODEL_MAP = {
     "gpt-4.1": "openai/gpt-4.1",
     "claude-opus-4": "anthropic/claude-opus-4",
     "grok-3": "x-ai/grok-3",
-    "gemini-2.5-pro": "google/gemini-2.5-pro-preview",
+    "gemini-2.5-pro": "google/gemini-2.5-pro",
     "perplexity-sonar-pro": "perplexity/sonar-pro",
 }
 

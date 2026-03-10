@@ -1,9 +1,12 @@
 /**
  * Global state with Zustand — user, chat, UI state.
+ * Chat history persisted per-model in localStorage.
  */
+
 import { create } from 'zustand'
 
 // ─── Types ───
+
 export interface Model {
   id: string
   name: string
@@ -31,7 +34,7 @@ export interface UserState {
   hasPass: boolean
 }
 
-type Screen = 'home' | 'chat' | 'plans' | 'faq' | 'profile'
+type Screen = 'home' | 'chat' | 'plans' | 'profile'
 type PaletteId = 'matrix' | 'ocean' | 'sunset'
 
 export interface Palette {
@@ -46,13 +49,53 @@ export interface Palette {
 }
 
 // ─── Palettes ───
+
 export const PALETTES: Palette[] = [
   { id: 'matrix', name: 'Matrix', primary: '#00ff88', primaryRgb: '0,255,136', secondary: '#00e5ff', secondaryRgb: '0,229,255', accent3: '#39ff14', accent3Rgb: '57,255,20' },
   { id: 'ocean', name: 'Ocean', primary: '#45AEF5', primaryRgb: '69,174,245', secondary: '#6366f1', secondaryRgb: '99,102,241', accent3: '#06b6d4', accent3Rgb: '6,182,212' },
   { id: 'sunset', name: 'Sunset', primary: '#ff6b6b', primaryRgb: '255,107,107', secondary: '#ffa500', secondaryRgb: '255,165,0', accent3: '#ff3e9d', accent3Rgb: '255,62,157' },
 ]
 
+// ─── Chat History Persistence ───
+
+const STORAGE_KEY = 'stone_ai_chats'
+const MAX_MESSAGES_PER_MODEL = 100
+
+function loadChatHistory(): Record<string, ChatMsg[]> {
+  try {
+    const data = localStorage.getItem(STORAGE_KEY)
+    return data ? JSON.parse(data) : {}
+  } catch {
+    return {}
+  }
+}
+
+function saveChatHistory(history: Record<string, ChatMsg[]>) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(history))
+  } catch {
+    // localStorage full — clear oldest chats
+    try {
+      const keys = Object.keys(history)
+      if (keys.length > 3) {
+        const trimmed: Record<string, ChatMsg[]> = {}
+        keys.slice(-3).forEach(k => { trimmed[k] = history[k] })
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed))
+      }
+    } catch {}
+  }
+}
+
+function loadPaletteId(): PaletteId {
+  try {
+    const id = localStorage.getItem('stone_ai_palette')
+    if (id === 'matrix' || id === 'ocean' || id === 'sunset') return id
+  } catch {}
+  return 'matrix'
+}
+
 // ─── Store ───
+
 interface AppState {
   // Navigation
   screen: Screen
@@ -69,7 +112,8 @@ interface AppState {
   models: Model[]
   setModels: (m: Model[]) => void
 
-  // Chat
+  // Chat — per-model history
+  chatHistory: Record<string, ChatMsg[]>
   messages: ChatMsg[]
   addMessage: (msg: ChatMsg) => void
   updateLastAssistant: (content: string) => void
@@ -86,36 +130,83 @@ interface AppState {
   setLoading: (v: boolean) => void
 }
 
+const savedPaletteId = loadPaletteId()
+const savedHistory = loadChatHistory()
+
 export const useStore = create<AppState>((set, get) => ({
   // Navigation
   screen: 'home',
   setScreen: (screen) => set({ screen }),
 
   // Palette
-  paletteId: 'matrix',
-  setPaletteId: (id) => set({ paletteId: id, palette: PALETTES.find(p => p.id === id) || PALETTES[0] }),
-  palette: PALETTES[0],
+  paletteId: savedPaletteId,
+  setPaletteId: (id) => {
+    try { localStorage.setItem('stone_ai_palette', id) } catch {}
+    set({ paletteId: id, palette: PALETTES.find(p => p.id === id) || PALETTES[0] })
+  },
+  palette: PALETTES.find(p => p.id === savedPaletteId) || PALETTES[0],
 
-  // Model
+  // Model — switching model loads that model's chat history
   modelId: 'gpt-4o-mini',
-  setModelId: (id) => set({ modelId: id }),
+  setModelId: (id) => {
+    const state = get()
+    // Save current model's messages before switching
+    const updatedHistory = { ...state.chatHistory, [state.modelId]: state.messages }
+    saveChatHistory(updatedHistory)
+    // Load new model's messages
+    const newMessages = updatedHistory[id] || []
+    set({ modelId: id, messages: newMessages, chatHistory: updatedHistory })
+  },
   models: [],
   setModels: (models) => set({ models }),
 
-  // Chat
-  messages: [],
-  addMessage: (msg) => set((s) => ({ messages: [...s.messages, msg] })),
-  updateLastAssistant: (content) => set((s) => {
-    const msgs = [...s.messages]
-    const last = msgs[msgs.length - 1]
-    if (last && last.role === 'assistant') {
-      msgs[msgs.length - 1] = { ...last, content: last.content + content }
-    }
-    return { messages: msgs }
-  }),
-  clearMessages: () => set({ messages: [] }),
+  // Chat — per-model with persistence
+  chatHistory: savedHistory,
+  messages: savedHistory['gpt-4o-mini'] || [],
+
+  addMessage: (msg) =>
+    set((s) => {
+      const newMessages = [...s.messages, msg]
+      // Trim if too long
+      const trimmed = newMessages.length > MAX_MESSAGES_PER_MODEL
+        ? newMessages.slice(-MAX_MESSAGES_PER_MODEL)
+        : newMessages
+      const updatedHistory = { ...s.chatHistory, [s.modelId]: trimmed }
+      saveChatHistory(updatedHistory)
+      return { messages: trimmed, chatHistory: updatedHistory }
+    }),
+
+  updateLastAssistant: (content) =>
+    set((s) => {
+      const msgs = [...s.messages]
+      const last = msgs[msgs.length - 1]
+      if (last && last.role === 'assistant') {
+        msgs[msgs.length - 1] = { ...last, content: last.content + content }
+      }
+      // Don't save to localStorage during streaming (too frequent), save on done
+      return { messages: msgs }
+    }),
+
+  clearMessages: () => {
+    const state = get()
+    const updatedHistory = { ...state.chatHistory }
+    delete updatedHistory[state.modelId]
+    saveChatHistory(updatedHistory)
+    set({ messages: [], chatHistory: updatedHistory })
+  },
+
   isStreaming: false,
-  setStreaming: (v) => set({ isStreaming: v }),
+  setStreaming: (v) => {
+    set({ isStreaming: v })
+    // When streaming stops, persist the final messages
+    if (!v) {
+      const state = get()
+      const updatedHistory = { ...state.chatHistory, [state.modelId]: state.messages }
+      saveChatHistory(updatedHistory)
+      // Also update chatHistory in state
+      set({ chatHistory: updatedHistory })
+    }
+  },
 
   // User
   user: {
@@ -136,4 +227,3 @@ export const useStore = create<AppState>((set, get) => ({
   loading: true,
   setLoading: (v) => set({ loading: v }),
 }))
-
