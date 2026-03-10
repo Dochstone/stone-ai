@@ -135,6 +135,7 @@ interface AppState {
 
 const savedPaletteId = loadPaletteId()
 const savedHistory = loadChatHistory()
+const savedLang = (localStorage.getItem('stone_lang') || 'ru') as Lang
 
 export const useStore = create<AppState>((set, get) => ({
   // Navigation
