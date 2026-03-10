@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react'
+import { useTranslation } from '../../i18n/useTranslation'
 import { useStore } from '../../store/useStore'
 import { usePayment } from '../../hooks/usePayment'
 import { Card, Tag, Divider, GlowBtn, GlitchTitle } from '../ui'
@@ -20,43 +21,44 @@ const MODEL_ACCENTS: Record<string, string> = {
 const TIER_INFO = {
   plus: {
     title: 'PLUS', icon: '⚡', color: '#aaff00',
-    subtitle: 'Для активных пользователей',
+    subtitle: t.plans_subtitle,
     stars: 469,
     product_id: 'plus_stars',
     includes: [
       '100 запросов к Premium моделям / день',
-      'Безлимитные Lite модели',
-      'История чатов 30 дней',
-      'Приоритет ответа',
-      'Системные промпты',
+      t.plans_f_unlim_lite,
+      t.plans_f_history7,
+      t.plans_f_priority,
+      t.plans_f_prompts,
     ],
   },
   max: {
     title: 'MAX', icon: '👑', color: '#bf5af2',
-    subtitle: 'Для профи и бизнеса',
+    subtitle: t.plans_f_pro_desc,
     stars: 1499,
     product_id: 'max_stars',
     includes: [
       '500 запросов к Premium моделям / день',
-      '50 Claude Opus 4 запросов / день',
-      'Безлимитные Lite модели',
-      'Бесконечная история + экспорт',
-      'Максимальный приоритет',
-      'API доступ для интеграций',
+      t.plans_f_50opus,
+      t.plans_f_unlim_lite,
+      t.plans_f_inf_history,
+      t.plans_f_max_priority,
+      t.plans_f_api,
     ],
   },
 }
 
 const PASSES = [
-  { id: 'day_pass', name: 'Day Pass', icon: '🎫', stars: 59, tags: ['15 Premium', '24 часа'], hint: '$0.94' },
-  { id: 'week_pass', name: 'Week Pass', icon: '🎟️', stars: 229, tags: ['80 Premium', '7 дней'], hint: '$3.66' },
-  { id: 'single_query', name: '1 запрос', icon: '💬', stars: 6, tags: ['1 Premium', 'мгновенно'], hint: '$0.10' },
+  { id: 'day_pass', name: 'Day Pass', icon: '🎫', stars: 59, tags: ['15 Premium', t.plans_24h], hint: '$0.94' },
+  { id: 'week_pass', name: 'Week Pass', icon: '🎟️', stars: 229, tags: ['80 Premium', t.plans_7d], hint: '$3.66' },
+  { id: 'single_query', name: t.plans_1_query, icon: '💬', stars: 6, tags: ['1 Premium', t.plans_instant], hint: '$0.10' },
 ]
 
 type DetailTier = 'plus' | 'max' | null
 
 export function PlansScreen() {
   const { models, user, setScreen } = useStore()
+  const { t } = useTranslation()
   const { buyWithStars, paymentLoading, resetPayment } = usePayment()
   const [tab, setTab] = useState<'info' | 'plans'>('info')
   const [planView, setPlanView] = useState<'subs' | 'passes'>('subs')
@@ -74,20 +76,20 @@ export function PlansScreen() {
   const handleBuy = async (productId: string, tierName?: string) => {
     // Check if user already has this plan
     if (tierName && user.plan === tierName) {
-      showToast(`У вас уже активна подписка ${tierName.toUpperCase()}`, 'info')
+      showToast(t.plans_toast_already, 'info')
       return
     }
     const result = await buyWithStars(productId)
     switch (result.status) {
       case 'success':
-        showToast('Оплата прошла! Обновляем...', 'ok')
+        showToast(t.plans_toast_success, 'ok')
         setTimeout(() => window.location.reload(), 1500)
         break
       case 'cancelled':
-        showToast('Оплата отменена', 'info')
+        showToast(t.plans_toast_cancelled, 'info')
         break
       case 'failed':
-        showToast(result.error || 'Ошибка оплаты', 'err')
+        showToast(result.error || t.plans_toast_error, 'err')
         break
     }
     resetPayment()
@@ -127,8 +129,8 @@ export function PlansScreen() {
         border: '1px solid rgba(0,255,136,0.12)', marginBottom: 12,
       }}>
         {[
-          { id: 'info' as const, label: '📊 Лимиты' },
-          { id: 'plans' as const, label: '💳 Тарифы' },
+          { id: 'info' as const, label: t.plans_limits_tab },
+          { id: 'plans' as const, label: t.plans_title },
         ].map((t, i) => (
           <button key={t.id}
             onClick={() => { setTab(t.id); setDetailTier(null) }}
@@ -149,10 +151,10 @@ export function PlansScreen() {
             <div style={{ textAlign: 'center', marginBottom: 12 }}>
               <span style={{ fontSize: 36 }}>🆓</span>
               <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 18, fontWeight: 900, color: '#fff', marginTop: 6 }}>
-                {user.plan === 'free' ? 'FREE план' : `${user.plan.toUpperCase()} план`}
+                {user.plan === 'free' ? t.plans_free_plan : `${user.plan.toUpperCase()} план`}
               </div>
               <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#3a6a50', marginTop: 4 }}>
-                {user.plan === 'free' ? 'Lite модели — 20 запросов/день' : 'Все модели доступны'}
+                {user.plan === 'free' ? t.plans_f_lite_models : t.plans_f_all_models}
               </div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
@@ -269,7 +271,7 @@ export function PlansScreen() {
                     >
                       {paymentLoading === info.product_id
                         ? '⏳ Загрузка...'
-                        : `⭐ Купить за ${info.stars}⭐/мес`}
+                        : `⭐ Купить за ${info.stars}⭐/{t.plans_per_month}`}
                     </GlowBtn>
                   </Card>
                 )
@@ -304,8 +306,8 @@ export function PlansScreen() {
                 border: '1px solid rgba(0,255,136,0.08)', marginBottom: 10,
               }}>
                 {[
-                  { id: 'subs' as const, label: '📦 Подписки' },
-                  { id: 'passes' as const, label: '🎫 Пассы' },
+                  { id: 'subs' as const, label: t.plans_tab_subs },
+                  { id: 'passes' as const, label: t.plans_tab_passes },
                 ].map((t, i) => (
                   <button key={t.id} onClick={() => setPlanView(t.id)} style={{
                     flex: 1, padding: '10px 0', border: 'none', cursor: 'pointer',
@@ -329,11 +331,11 @@ export function PlansScreen() {
                       </div>
                       <div style={{ textAlign: 'right' }}>
                         <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 14, fontWeight: 900, color: '#aaff00' }}>469⭐</div>
-                        <div style={{ fontFamily: 'monospace', fontSize: 9, color: '#3a6a50' }}>≈ $7.5/мес</div>
+                        <div style={{ fontFamily: 'monospace', fontSize: 9, color: '#3a6a50' }}>≈ $7.5/{t.plans_per_month}</div>
                       </div>
                     </div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 10 }}>
-                      {['100 Premium/день', '∞ Lite', 'Приоритет'].map(f => <Tag key={f} text={f} accent="#aaff00" />)}
+                      {[t.plans_f_100prem, '∞ Lite', t.plans_f_priority].map(f => <Tag key={f} text={f} accent="#aaff00" />)}
                     </div>
                     <div style={{ display: 'flex', gap: 8 }}>
                       <div style={{ flex: 1 }}>
@@ -360,11 +362,11 @@ export function PlansScreen() {
                       </div>
                       <div style={{ textAlign: 'right' }}>
                         <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 14, fontWeight: 900, color: '#bf5af2' }}>1499⭐</div>
-                        <div style={{ fontFamily: 'monospace', fontSize: 9, color: '#3a6a50' }}>≈ $24/мес</div>
+                        <div style={{ fontFamily: 'monospace', fontSize: 9, color: '#3a6a50' }}>≈ $24/{t.plans_per_month}</div>
                       </div>
                     </div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 10 }}>
-                      {['500 Premium/день', '50 Opus/день', 'API доступ'].map(f => <Tag key={f} text={f} accent="#bf5af2" />)}
+                      {[t.plans_f_500prem, '50 Opus/день', t.plans_f_api].map(f => <Tag key={f} text={f} accent="#bf5af2" />)}
                     </div>
                     <div style={{ display: 'flex', gap: 8 }}>
                       <div style={{ flex: 1 }}>
