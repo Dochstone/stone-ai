@@ -171,4 +171,70 @@ export function ChatScreen() {
               )}
             </div>
           </div>
-        ))}Ç≤Ú¢GóñÊrñÊFñ6F˜"¢˜–¢∂ó57G&V÷ñÊrbb÷W76vW2Ê∆VÊwFÇ‚bb÷W76vW5∂÷W76vW2Ê∆VÊwFÇ“”ÚÊ6ˆÁFVÁB””“rrbbÄ¢∆Fób7Gñ∆S◊∑≤Fó7∆ì¢vf∆WÇr¬v¢b¬FFñÊs¢sáÇr◊”‡¢∆Fób7Gñ∆S◊∑∞¢&6∂w&˜VÊC¢w&v&ÉÇ√b√"√„íír¿¢&˜&FW#¢sÇ6ˆ∆ñB&v&É√#SR√3b√„Çír¿¢&˜&FW%&FóW3¢B¬FFñÊs¢sÇgÇr¿¢Fó7∆ì¢vf∆WÇr¬v¢R¿¢◊”‡¢µ≥¬¬%“Ê÷Ü¢”‚Ä¢∆Fób∂Wì◊∂ß“7Gñ∆S◊∑∞¢vñGFÉ¢b¬ÜVñváC¢b¬&˜&FW%&FóW3¢sSRr¿¢&6∂w&˜VÊC¢r3fcÉÇr¿¢Êñ÷Fñˆ„¢&∆ñÊ≤„'2V6R÷ñ‚÷˜WBG∂¢¢„'◊2ñÊfñÊóFV¿¢&˜Ö6ÜF˜s¢sgÇ3fcÉÇr¿¢◊“Û‡¢íó–¢¬ˆFóc‡¢¬ˆFóc‡¢ó–¢∆Fób&Vc◊∂VÊE&Vg“Û‡¢¬ˆFóc‡†¢≤Ú¢ñÁWB&"¢˜–¢∆Fób7Gñ∆S◊∑∞¢˜6óFñˆ„¢vfóÜVBr¬&˜GFˆ”¢c¬∆VgC¢¬&ñváC¢¿¢FFñÊs¢sáÇgÇ'Çr¿¢&6∂w&˜VÊC¢v∆ñÊV"÷w&FñVÁBáFÚF˜¬3SÇìR¬G&Á7&VÁBír¿¢§ñÊFWÉ¢S¬÷ÖvñGFÉ¢CÉ¬÷&vñ„¢sWFÚr¿¢◊”‡¢∆Fób7Gñ∆S◊∑∞¢Fó7∆ì¢vf∆WÇr¬∆ñv‰óFV◊3¢v6VÁFW"r¬v¢Ç¿¢&6∂w&˜VÊC¢w&v&É√#SR√3b√„rír¿¢&˜&FW#¢sÇ6ˆ∆ñB&v&É√#SR√3b√„#"ír¿¢&˜&FW%&FóW3¢B¬FFñÊs¢sGÇGÇGÇGÇr¿¢◊”‡¢∆ñÁW@¢f«VS◊∂ñÁWG–¢ˆ‰6ÜÊvS◊∂R”‚6WDñÁWBÜRÁF&vWBÁf«VRó–¢ˆ‰∂WîF˜v„◊∂R”‚RÊ∂Wí””“tVÁFW"rbbRÁ6ÜñgD∂WíbbÜÊF∆U6VÊBÇó–¢∆6VÜˆ∆FW#“#‚VÁFW"VW'í‚‚‚ ¢7Gñ∆S◊∑∞¢f∆WÉ¢¬&6∂w&˜VÊC¢vÊˆÊRr¬&˜&FW#¢vÊˆÊRr¬˜WF∆ñÊS¢vÊˆÊRr¿¢6ˆ∆˜#¢r6ScSÇr¬fˆÁE6ó¶S¢2¬fˆÁDf÷ñ«ì¢v÷ˆÊ˜76Rr¬FFñÊs¢sáÇr¿¢◊–¢Û‡¢∆'WGFˆ‡¢ˆ‰6∆ñ6≥◊∂ÜÊF∆U6VÊG–¢7Gñ∆S◊∑∞¢vñGFÉ¢3b¬ÜVñváC¢3b¬&˜&FW%&FóW3¢¬&˜&FW#¢vÊˆÊRr¿¢&6∂w&˜VÊC¢ñÁWBÁG&ñ“Çíbbó57G&V÷ñÊrÚw&v&É√#SR√3b√„"ír¢w&v&É√#SR√3b√„bír¿¢7W'6˜#¢ñÁWBÁG&ñ“Çíbbó57G&V÷ñÊrÚwˆñÁFW"r¢vFVfV«Br¿¢fˆÁE6ó¶S¢b¿¢6ˆ∆˜#¢ñÁWBÁG&ñ“Çíbbó57G&V÷ñÊrÚr3fcÉÇr¢r36fSr¿¢G&Á6óFñˆ„¢v∆¬„'2r¿¢Fó7∆ì¢vf∆WÇr¬∆ñv‰óFV◊3¢v6VÁFW"r¬ßW7Fñgî6ˆÁFVÁC¢v6VÁFW"r¿¢&˜Ö6ÜF˜s¢ñÁWBÁG&ñ“Çíbbó57G&V÷ñÊrÚsÇ&v&É√#SR√3b√„"ír¢vÊˆÊRr¿¢◊”‡¢∂ó57G&V÷ñÊrÚ~(˚2r¢~(iw–¢¬ˆ'WGFˆ„‡¢¬ˆFóc‡¢¬ˆFóc‡¢¬ˆFóc‡¢êß–†
+        ))}
+
+        {/* Typing indicator */}
+        {isStreaming && messages.length > 0 && messages[messages.length - 1]?.content === '' && (
+          <div style={{ display: 'flex', gap: 6, padding: '8px 0' }}>
+            <div style={{
+              background: 'rgba(8,16,12,0.9)',
+              border: '1px solid rgba(0,255,136,0.08)',
+              borderRadius: 14, padding: '10px 16px',
+              display: 'flex', gap: 5,
+            }}>
+              {[0, 1, 2].map(j => (
+                <div key={j} style={{
+                  width: 6, height: 6, borderRadius: '50%',
+                  background: '#00ff88',
+                  animation: `blink 1.2s ease-in-out ${j * 0.2}s infinite`,
+                  boxShadow: '0 0 6px #00ff88',
+                }} />
+              ))}
+            </div>
+          </div>
+        )}
+        <div ref={endRef} />
+      </div>
+
+      {/* Input bar */}
+      <div style={{
+        position: 'fixed', bottom: 60, left: 0, right: 0,
+        padding: '8px 16px 12px',
+        background: 'linear-gradient(to top, #050a08 90%, transparent)',
+        zIndex: 50, maxWidth: 480, margin: '0 auto',
+      }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 8,
+          background: 'rgba(0,255,136,0.07)',
+          border: '1px solid rgba(0,255,136,0.22)',
+          borderRadius: 14, padding: '4px 4px 4px 14px',
+        }}>
+          <input
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
+            placeholder="> enter query..."
+            style={{
+              flex: 1, background: 'none', border: 'none', outline: 'none',
+              color: '#e0f0e8', fontSize: 13, fontFamily: 'monospace', padding: '8px 0',
+            }}
+          />
+          <button
+            onClick={handleSend}
+            style={{
+              width: 36, height: 36, borderRadius: 10, border: 'none',
+              background: input.trim() && !isStreaming ? 'rgba(0,255,136,0.2)' : 'rgba(0,255,136,0.06)',
+              cursor: input.trim() && !isStreaming ? 'pointer' : 'default',
+              fontSize: 16,
+              color: input.trim() && !isStreaming ? '#00ff88' : '#3a6a50',
+              transition: 'all 0.2s',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: input.trim() && !isStreaming ? '0 0 10px rgba(0,255,136,0.2)' : 'none',
+            }}>
+            {isStreaming ? '‚è≥' : '‚Üë'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
