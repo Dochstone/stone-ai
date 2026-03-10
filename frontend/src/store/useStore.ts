@@ -145,14 +145,13 @@ export const useStore = create<AppState>((set, get) => ({
   paletteId: savedPaletteId,
   lang: savedLang,
   setPaletteId: (id) => {
-    try { localStorage.setItem('stone_ai_palette', id) },
-  catch {}
+    try { localStorage.setItem('stone_ai_palette', id) } catch {}
     set({ paletteId: id, palette: PALETTES.find(p => p.id === id) || PALETTES[0] })
   },
-    setLang: (lang) => {
-      try { localStorage.setItem('stone_lang', lang) } catch {}
-      set({ lang })
-    },
+  setLang: (lang) => {
+    try { localStorage.setItem('stone_lang', lang) } catch {}
+    set({ lang })
+  },
   palette: PALETTES.find(p => p.id === savedPaletteId) || PALETTES[0],
 
   // Model — switching model loads that model's chat history
