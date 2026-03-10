@@ -18,47 +18,48 @@ const MODEL_ACCENTS: Record<string, string> = {
   'perplexity-sonar-pro': '#aaff00',
 }
 
-const TIER_INFO = {
-  plus: {
-    title: 'PLUS', icon: '⚡', color: '#aaff00',
-    subtitle: t.plans_subtitle,
-    stars: 469,
-    product_id: 'plus_stars',
-    includes: [
-      '100 запросов к Premium моделям / день',
-      t.plans_f_unlim_lite,
-      t.plans_f_history7,
-      t.plans_f_priority,
-      t.plans_f_prompts,
-    ],
-  },
-  max: {
-    title: 'MAX', icon: '👑', color: '#bf5af2',
-    subtitle: t.plans_f_pro_desc,
-    stars: 1499,
-    product_id: 'max_stars',
-    includes: [
-      '500 запросов к Premium моделям / день',
-      t.plans_f_50opus,
-      t.plans_f_unlim_lite,
-      t.plans_f_inf_history,
-      t.plans_f_max_priority,
-      t.plans_f_api,
-    ],
-  },
-}
-
-const PASSES = [
-  { id: 'day_pass', name: 'Day Pass', icon: '🎫', stars: 59, tags: ['15 Premium', t.plans_24h], hint: '$0.94' },
-  { id: 'week_pass', name: 'Week Pass', icon: '🎟️', stars: 229, tags: ['80 Premium', t.plans_7d], hint: '$3.66' },
-  { id: 'single_query', name: t.plans_1_query, icon: '💬', stars: 6, tags: ['1 Premium', t.plans_instant], hint: '$0.10' },
-]
 
 type DetailTier = 'plus' | 'max' | null
 
 export function PlansScreen() {
   const { models, user, setScreen } = useStore()
   const { t } = useTranslation()
+
+  const TIER_INFO = {
+    plus: {
+      title: 'PLUS', icon: '⚡', color: '#aaff00',
+      subtitle: t.plans_subtitle,
+      stars: 469,
+      product_id: 'plus_stars',
+      includes: [
+        '100 запросов к Premium моделям / день',
+        t.plans_f_unlim_lite,
+        t.plans_f_history7,
+        t.plans_f_priority,
+        t.plans_f_prompts,
+      ],
+    },
+    max: {
+      title: 'MAX', icon: '👑', color: '#bf5af2',
+      subtitle: t.plans_f_pro_desc,
+      stars: 1499,
+      product_id: 'max_stars',
+      includes: [
+        '500 запросов к Premium моделям / день',
+        t.plans_f_50opus,
+        t.plans_f_unlim_lite,
+        t.plans_f_inf_history,
+        t.plans_f_max_priority,
+        t.plans_f_api,
+      ],
+    },
+  }
+
+  const PASSES = [
+    { id: 'day_pass', name: 'Day Pass', icon: '🎫', stars: 59, tags: ['15 Premium', t.plans_24h], hint: '$0.94' },
+    { id: 'week_pass', name: 'Week Pass', icon: '🎟️', stars: 229, tags: ['80 Premium', t.plans_7d], hint: '$3.66' },
+    { id: 'single_query', name: t.plans_1_query, icon: '💬', stars: 6, tags: ['1 Premium', t.plans_instant], hint: '$0.10' },
+  ]
   const { buyWithStars, paymentLoading, resetPayment } = usePayment()
   const [tab, setTab] = useState<'info' | 'plans'>('info')
   const [planView, setPlanView] = useState<'subs' | 'passes'>('subs')
