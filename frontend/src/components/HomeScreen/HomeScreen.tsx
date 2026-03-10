@@ -22,6 +22,7 @@ const MODEL_ACCENTS: Record<string, string> = {
 
 export function HomeScreen() {
   const { models, modelId, setModelId, setScreen, user } = useStore()
+  const { t } = useTranslation()
   const currentModel = models.find(m => m.id === modelId) || models[0]
   const accent = currentModel ? MODEL_ACCENTS[currentModel.id] || '#00ff88' : '#00ff88'
 
@@ -60,7 +61,7 @@ export function HomeScreen() {
             {user.plan === 'free' ? 'PLUS / MAX →' : `${user.premiumToday}/${user.premiumLimitDay}`}
           </span>
         </div>
-        <GlowBtn onClick={() => setScreen('chat')}>💬 Начать чат</GlowBtn>
+        <GlowBtn onClick={() => setScreen('chat')}>{t.home_start_chat}</GlowBtn>
       </Card>
 
       <div style={{ height: 12 }} />
