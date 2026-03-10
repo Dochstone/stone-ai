@@ -127,6 +127,7 @@ export const translations = {
     plans_for_pro: 'For pros & business',
     plans_opus_day: '50 Opus/day',
     home_no_wallet: 'no wallet',
+    home_wallets: 'wallets',
   },
 
   // ─── RUSSIAN ───
