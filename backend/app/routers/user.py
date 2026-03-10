@@ -1,5 +1,6 @@
 """User endpoint — profile, limits, subscription status."""
 
+from datetime import datetime
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -48,7 +49,7 @@ async def get_me(
 
     return {
         "user": {
-            "tg_id": user.tg_id,
+            "tg_id": user.telegram_id,
             "username": user.username,
             "first_name": user.first_name,
             "language": user.language,
@@ -75,6 +76,6 @@ async def get_me(
         "stats": {
             "total_requests": user.total_requests,
             "total_tokens": user.total_tokens_used,
-            "days_active": (user.updated_at - user.created_at).days + 1 if user.updated_at else 1,
+            "days_active": (datetime.utcnow() - user.joined_at).days + 1 if user.joined_at else 1,
         },
     }

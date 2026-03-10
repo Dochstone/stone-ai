@@ -1,7 +1,14 @@
-"""User model — Telegram user with usage tracking."""
+"""User model — Telegram user with CRM data and AI usage tracking.
+
+Matches the existing 'users' table in Railway PostgreSQL.
+Existing CRM columns: telegram_id, username, first_name, joined_at,
+                      is_active, referrer_id, referral_code, referral_balance, balance
+New Stone AI columns:  language, daily_lite_used, daily_premium_used,
+                      total_requests, total_tokens_used
+"""
 
 from datetime import datetime
-from sqlalchemy import BigInteger, String, DateTime, Integer, func
+from sqlalchemy import BigInteger, String, DateTime, Integer, Float, Boolean, func, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
@@ -11,21 +18,24 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    tg_id: Mapped[int] = mapped_column(BigInteger, unique=True, index=True, nullable=False)
+
+    # ─── Existing CRM columns (match DB exactly) ───
+    telegram_id: Mapped[int] = mapped_column(BigInteger, unique=True, index=True, nullable=False)
     username: Mapped[str | None] = mapped_column(String(64), nullable=True)
     first_name: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    language: Mapped[str] = mapped_column(String(5), default="ru")
+    joined_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, server_default=text("true"))
+    referrer_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    referral_code: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    referral_balance: Mapped[float] = mapped_column(Float, server_default=text("0"))
+    balance: Mapped[float] = mapped_column(Float, server_default=text("0"))
 
-    # Daily counters (reset by cron at midnight)
-    daily_lite_used: Mapped[int] = mapped_column(Integer, default=0)
-    daily_premium_used: Mapped[int] = mapped_column(Integer, default=0)
-
-    # Stats
-    total_requests: Mapped[int] = mapped_column(Integer, default=0)
-    total_tokens_used: Mapped[int] = mapped_column(Integer, default=0)
-
-    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+    # ─── New Stone AI columns (will be added via migration) ───
+    language: Mapped[str | None] = mapped_column(String(5), nullable=True, server_default=text("'ru'"))
+    daily_lite_used: Mapped[int] = mapped_column(Integer, server_default=text("0"))
+    daily_premium_used: Mapped[int] = mapped_column(Integer, server_default=text("0"))
+    total_requests: Mapped[int] = mapped_column(Integer, server_default=text("0"))
+    total_tokens_used: Mapped[int] = mapped_column(Integer, server_default=text("0"))
 
     def __repr__(self):
-        return f"<User tg_id={self.tg_id} username={self.username}>"
+        return f"<User telegram_id={self.telegram_id} username={self.username}>"

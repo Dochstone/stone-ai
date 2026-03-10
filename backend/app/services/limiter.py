@@ -25,12 +25,12 @@ PASS_LIMITS = {
 async def get_or_create_user(db: AsyncSession, tg_user: dict) -> User:
     """Get existing user or create new one from Telegram data."""
     tg_id = tg_user["id"]
-    result = await db.execute(select(User).where(User.tg_id == tg_id))
+    result = await db.execute(select(User).where(User.telegram_id == tg_id))
     user = result.scalar_one_or_none()
 
     if not user:
         user = User(
-            tg_id=tg_id,
+            telegram_id=tg_id,
             username=tg_user.get("username"),
             first_name=tg_user.get("first_name"),
             language=tg_user.get("language_code", "ru"),
@@ -205,7 +205,7 @@ async def record_usage(
     db.add(usage)
 
     # Update user counters
-    result = await db.execute(select(User).where(User.tg_id == tg_id))
+    result = await db.execute(select(User).where(User.telegram_id == tg_id))
     user = result.scalar_one_or_none()
     if user:
         user.total_requests += 1
