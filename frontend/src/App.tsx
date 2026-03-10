@@ -1,5 +1,5 @@
 /**
- * Stone AI â Main App with TopHeader, BottomNav, palette backgrounds.
+ * Stone AI — Main App with TopHeader, BottomNav, palette backgrounds.
  * Design: v4.5 prototype with premium aesthetic.
  */
 import { useEffect } from 'react'
@@ -16,7 +16,6 @@ import { FaqScreen } from './components/FaqScreen/FaqScreen'
 // Global CSS keyframes + fonts
 const GLOBAL_CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-import { useTranslation } from './i18n/useTranslation'
 @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
 @keyframes gradShift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
 @keyframes gradientBar { 0% { background-position: 0% 0; } 100% { background-position: 300% 0; } }
@@ -33,7 +32,6 @@ button:hover { opacity: 0.92; }
 
 export default function App() {
   const { screen, setScreen, palette, loading, setLoading } = useStore()
-  const { t } = useTranslation()
   useUser()
 
   useEffect(() => {

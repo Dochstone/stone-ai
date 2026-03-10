@@ -1,22 +1,20 @@
 /**
- * Bottom navigation bar â 4 tabs with active indicator.
+ * Bottom navigation bar — 4 tabs with active indicator.
  * Premium design with glass blur and glow indicator.
  */
 
 import { useStore } from '../../store/useStore'
 import { haptic } from '../../utils/telegram'
-import { useTranslation } from '../../i18n/useTranslation'
 
 const TABS = [
-  { id: 'home' as const, icon: 'ð ', label: t.nav_home },
-  { id: 'chat' as const, icon: 'ð¬', label: t.nav_chat },
-  { id: 'plans' as const, icon: 'ð', label: t.nav_plans },
-  { id: 'profile' as const, icon: 'ð¤', label: t.nav_profile },
+  { id: 'home' as const, icon: '🏠', label: 'Главная' },
+  { id: 'chat' as const, icon: '💬', label: 'Чат' },
+  { id: 'plans' as const, icon: '💎', label: 'Тарифы' },
+  { id: 'profile' as const, icon: '👤', label: 'Профиль' },
 ]
 
 export function BottomNav() {
   const { screen, setScreen, palette } = useStore()
-  const { t } = useTranslation()
   const p = palette
 
   // Hide in chat mode
