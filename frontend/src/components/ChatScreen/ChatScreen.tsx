@@ -3,6 +3,7 @@
  * + Markdown rendering for assistant messages.
  */
 import { useState, useEffect, useRef } from 'react'
+import { useTranslation } from '../../i18n/useTranslation'
 import { useStore } from '../../store/useStore'
 import { useChat } from '../../hooks/useChat'
 import { Tag } from '../ui'
@@ -24,6 +25,7 @@ const MODEL_ACCENTS: Record<string, string> = {
 
 export function ChatScreen() {
   const { models, modelId, setModelId, messages, isStreaming, user } = useStore()
+  const { t } = useTranslation()
   const { sendMessage } = useChat()
   const [input, setInput] = useState('')
   const [showModels, setShowModels] = useState(false)
