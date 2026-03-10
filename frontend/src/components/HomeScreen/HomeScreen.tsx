@@ -150,7 +150,7 @@ export function HomeScreen() {
             <span style={{ fontSize: 22 }}>💎</span>
             <div style={{ flex: 1 }}>
               <div style={{ fontFamily: 'sans-serif', fontSize: 14, fontWeight: 700, color: '#e0f0e8' }}>{t.home_connect_wallet}</div>
-              <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70' }}>TON Connect &bull; 4 кошелька</div>
+              <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70' }}>{`TON Connect \u2022 4 ${t.home_wallets}`}</div>
             </div>
             <Tag text="connect →" accent="#00e5ff" />
           </div>
