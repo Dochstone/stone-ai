@@ -7,12 +7,6 @@ import { useStore } from '../../store/useStore'
 import { haptic } from '../../utils/telegram'
 import { useTranslation } from '../../i18n/useTranslation'
 
-const TABS = [
-  { id: 'home' as const, icon: '🏠', label: 'Главная' },
-  { id: 'chat' as const, icon: '💬', label: 'Чат' },
-  { id: 'plans' as const, icon: '💎', label: 'Тарифы' },
-  { id: 'profile' as const, icon: '👤', label: 'Профиль' },
-]
 
 export function BottomNav() {
   const { screen, setScreen, palette } = useStore()
