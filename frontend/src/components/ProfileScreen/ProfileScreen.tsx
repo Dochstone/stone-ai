@@ -3,6 +3,9 @@
  * FAQ moved to separate FaqScreen.
  */
 import { useState } from 'react'
+import { useTranslation } from '../../i18n/useTranslation'
+import { LANG_LABELS } from '../../i18n/translations'
+import type { Lang } from '../../i18n/translations'
 import { useStore, PALETTES } from '../../store/useStore'
 import { Card, Tag, Divider, GlowBtn, GlitchTitle, TonIcon } from '../ui'
 
@@ -13,9 +16,9 @@ const LANGS = [
 ]
 
 export function ProfileScreen() {
-  const { user, palette, setPaletteId, models, setScreen } = useStore()
-  const [lang, setLang] = useState('ru')
-  const p = palette
+  const { user, palette, setPaletteId, models, setScreen, lang, setLang } = useStore()
+  const { t } = useTranslation()
+    const p = palette
 
   return (
     <div style={{ padding: '0 18px 90px' }}>
@@ -132,7 +135,7 @@ export function ProfileScreen() {
         <div style={{ textAlign: 'center', marginBottom: 12 }}>
           <span style={{ fontSize: 32 }}>🛟</span>
           <div style={{ fontFamily: 'sans-serif', fontSize: 16, fontWeight: 700, color: '#e0f0e8', marginTop: 6 }}>
-            Нужна помощь?
+            {t.profile_need_help}?
           </div>
         </div>
         <div onClick={() => window.open('https://t.me/stonemvp', '_blank')} style={{
@@ -142,7 +145,7 @@ export function ProfileScreen() {
         }}>
           <span style={{ fontSize: 18 }}>💬</span>
           <div style={{ flex: 1 }}>
-            <div style={{ fontFamily: 'sans-serif', fontSize: 13, fontWeight: 600, color: '#e0f0e8' }}>Написать в Telegram</div>
+            <div style={{ fontFamily: 'sans-serif', fontSize: 13, fontWeight: 600, color: '#e0f0e8' }}>{t.profile_write_to} Telegram</div>
             <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70' }}>@stonemvp</div>
           </div>
           <Tag text="→" accent="#00e5ff" />
