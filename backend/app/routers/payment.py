@@ -1,5 +1,6 @@
 """Payment endpoints — Stars invoices (Phase 1), TON and USDT in later phases."""
 
+import logging
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -9,20 +10,22 @@ from app.database import get_db
 from app.middleware.auth import get_current_user
 from app.models import Subscription, Pass, Transaction
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/api/payment", tags=["payment"])
 
 
 # ─── Stars subscription products ───
 STARS_PRODUCTS = {
-    "plus_stars": {"plan": "plus", "price": 469, "duration_days": 30, "name": "PLUS"},
-    "max_stars": {"plan": "max", "price": 1499, "duration_days": 30, "name": "MAX"},
+    "plus_stars": {"plan": "plus", "price": 469, "duration_days": 30, "name": "PLUS подписка (1 мес)"},
+    "max_stars": {"plan": "max", "price": 1499, "duration_days": 30, "name": "MAX подписка (1 мес)"},
 }
 
 # ─── Stars pass products ───
 STARS_PASSES = {
-    "day_pass": {"price": 59, "type": "day", "requests": 15, "hours": 24, "name": "Day Pass"},
-    "week_pass": {"price": 229, "type": "week", "requests": 80, "hours": 168, "name": "Week Pass"},
-    "single_query": {"price": 6, "type": "single", "requests": 1, "hours": None, "name": "1 запрос"},
+    "day_pass": {"price": 59, "type": "day", "requests": 15, "hours": 24, "name": "Day Pass (24ч)"},
+    "week_pass": {"price": 229, "type": "week", "requests": 80, "hours": 168, "name": "Week Pass (7 дней)"},
+    "single_query": {"price": 6, "type": "single", "requests": 1, "hours": None, "name": "1 Premium запрос"},
 }
 
 
@@ -36,24 +39,42 @@ async def create_stars_invoice(
     tg_user: dict = Depends(get_current_user),
 ):
     """
-    Create a Telegram Stars invoice link.
+    Create a Telegram Stars invoice link via the bot.
 
-    This returns the invoice data that the frontend sends to WebApp.openInvoice().
-    The actual invoice creation happens via the bot (aiogram).
+    Returns { invoice_url } that the frontend opens via WebApp.openInvoice().
     """
     product = STARS_PRODUCTS.get(req.product_id) or STARS_PASSES.get(req.product_id)
     if not product:
         raise HTTPException(status_code=400, detail=f"Unknown product: {req.product_id}")
 
-    # Return invoice params — the bot will create the actual invoice
-    return {
-        "product_id": req.product_id,
-        "title": f"Stone AI — {product['name']}",
-        "description": f"{'Подписка' if req.product_id in STARS_PRODUCTS else 'Pass'} {product['name']}",
-        "amount": product["price"],
-        "currency": "XTR",
-        "payload": f"{req.product_id}:{tg_user['id']}",
-    }
+    # Import bot instance from main
+    from app.main import bot
+    if not bot:
+        raise HTTPException(status_code=503, detail="Bot not configured — Stars payments unavailable")
+
+    try:
+        from aiogram.types import LabeledPrice
+
+        invoice_url = await bot.create_invoice_link(
+            title=f"Stone AI — {product['name']}",
+            description=f"{product['name']} длЏ Stone AI",
+            payload=f"{req.product_id}:{tg_user['id']}",
+            provider_token="",  # Empty for Telegram Stars
+            currency="XTR",
+            prices=[LabeledPrice(label=product["name"], amount=product["price"])],
+        )
+
+        logger.info(f"Created Stars invoice: product={req.product_id}, user={tg_user['id']}, price={product['price']}⭐")
+
+        return {
+            "invoice_url": invoice_url,
+            "product_id": req.product_id,
+            "amount": product["price"],
+        }
+
+    except Exception as e:
+        logger.error(f"Failed to create Stars invoice: {e}")
+        raise HTTPException(status_code=500, detail=f"Не удалось создать инвойс: {str(e)}")
 
 
 @router.post("/stars/confirm")
@@ -72,6 +93,15 @@ async def confirm_stars_payment(
     # Handle subscription
     if product_id in STARS_PRODUCTS:
         product = STARS_PRODUCTS[product_id]
+
+        # Deactivate any existing subscription
+        from sqlalchemy import select, update
+        await db.execute(
+            update(Subscription)
+            .where(Subscription.user_tg_id == tg_id, Subscription.is_active == True)
+            .values(is_active=False)
+        )
+
         sub = Subscription(
             user_tg_id=tg_id,
             plan=product["plan"],
@@ -97,6 +127,7 @@ async def confirm_stars_payment(
         db.add(tx)
         await db.commit()
 
+        logger.info(f"Subscription activated: user={tg_id}, plan={product['plan']}, expires={sub.expires_at}")
         return {"status": "ok", "plan": product["plan"], "expires_at": sub.expires_at.isoformat()}
 
     # Handle pass
@@ -127,6 +158,7 @@ async def confirm_stars_payment(
         db.add(tx)
         await db.commit()
 
+        logger.info(f"Pass activated: user={tg_id}, type={product['type']}, requests={product['requests']}")
         return {"status": "ok", "pass_type": product["type"], "requests": product["requests"]}
 
     raise HTTPException(status_code=400, detail=f"Unknown product: {product_id}")

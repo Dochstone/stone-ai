@@ -56,14 +56,45 @@ async def cmd_help(message: Message):
 
 @router.message(Command("plan"))
 async def cmd_plan(message: Message):
-    # TODO: fetch actual plan from DB
-    await message.answer(
-        "📊 <b>Твой тариф: FREE</b>\n\n"
-        "• Lite модели: 20 запросов/день\n"
-        "• Premium модели: недоступны\n\n"
-        "Хочешь больше? Открой приложение и выбери подписку ⚡",
-        parse_mode="HTML",
-    )
+    """Show user's current plan from DB."""
+    from app.database import async_session
+    from app.services.limiter import get_user_plan, get_active_subscription, get_today_usage, LIMITS
+
+    tg_id = message.from_user.id
+
+    try:
+        async with async_session() as db:
+            plan = await get_user_plan(db, tg_id)
+            sub = await get_active_subscription(db, tg_id)
+            lite_today = await get_today_usage(db, tg_id, "lite")
+            premium_today = await get_today_usage(db, tg_id, "premium")
+            limits = LIMITS.get(plan, LIMITS["free"])
+
+        plan_emoji = {"free": "🆓", "plus": "⚡", "max": "👑"}.get(plan, "🆓")
+        plan_name = plan.upper()
+
+        lite_limit = "∞" if limits["lite"] == -1 else str(limits["lite"])
+        premium_limit = "∞" if limits["premium"] == -1 else str(limits["premium"])
+
+        text = f"📊 <b>Твой тариф: {plan_emoji} {plan_name}</b>\n\n"
+        text += f"• Lite модели: {lite_today}/{lite_limit} запросов сегодня\n"
+        text += f"• Premium модели: {premium_today}/{premium_limit} запросов сегодня\n"
+
+        if sub:
+            text += f"\n📅 Подписка до: {sub.expires_at.strftime('%d.%m.%Y')}\n"
+            text += f"💳 Оплата: {sub.payment_method.upper()}"
+        elif plan == "free":
+            text += "\n\nХочешь больше? Открой приложение и выбери подписку ⚡"
+
+    except Exception:
+        text = (
+            "📊 <b>Твой тариф: 🆓 FREE</b>\n\n"
+            "• Lite модели: 20 запросов/день\n"
+            "• Premium модели: недоступны\n\n"
+            "Хочешь больше? Открой приложение и выбери подписку ⚡"
+        )
+
+    await message.answer(text, parse_mode="HTML")
 
 
 @router.callback_query(F.data == "plans")
