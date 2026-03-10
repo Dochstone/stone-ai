@@ -32,7 +32,7 @@ export function PlansScreen() {
       stars: 469,
       product_id: 'plus_stars',
       includes: [
-        '100 запросов к Premium моделям / день',
+        t.plans_f_100prem,
         t.plans_f_unlim_lite,
         t.plans_f_history7,
         t.plans_f_priority,
@@ -45,7 +45,7 @@ export function PlansScreen() {
       stars: 1499,
       product_id: 'max_stars',
       includes: [
-        '500 запросов к Premium моделям / день',
+        t.plans_f_500prem,
         t.plans_f_50opus,
         t.plans_f_unlim_lite,
         t.plans_f_inf_history,
@@ -152,7 +152,7 @@ export function PlansScreen() {
             <div style={{ textAlign: 'center', marginBottom: 12 }}>
               <span style={{ fontSize: 36 }}>🆓</span>
               <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 18, fontWeight: 900, color: '#fff', marginTop: 6 }}>
-                {user.plan === 'free' ? t.plans_free_plan : `${user.plan.toUpperCase()} план`}
+                {user.plan === 'free' ? t.plans_free_plan : `${user.plan.toUpperCase()} ${t.plans_plan}`}
               </div>
               <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#3a6a50', marginTop: 4 }}>
                 {user.plan === 'free' ? t.plans_f_lite_models : t.plans_f_all_models}
@@ -175,7 +175,7 @@ export function PlansScreen() {
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#3a6a50' }}>premium.requests</span>
               <span style={{ fontFamily: 'monospace', fontSize: 12, fontWeight: 700, color: user.plan === 'free' ? '#ff6b6b' : '#bf5af2' }}>
-                {user.plan === 'free' ? '0 (нужна подписка)' : `${user.premiumToday}/${user.premiumLimitDay}`}
+                {user.plan === 'free' ? t.plans_need_sub : `${user.premiumToday}/${user.premiumLimitDay}`}
               </span>
             </div>
           </Card>
@@ -186,7 +186,7 @@ export function PlansScreen() {
           <Card accent="#00ff88">
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
               <span style={{ fontFamily: 'monospace', fontSize: 10, fontWeight: 700, color: '#050a08', background: '#00ff88', padding: '2px 8px', borderRadius: 4 }}>LITE</span>
-              <span style={{ fontFamily: 'monospace', fontSize: 10, color: '#3a6a50', textTransform: 'uppercase', letterSpacing: '0.1em' }}>бесплатно &bull; 20 req/день</span>
+              <span style={{ fontFamily: 'monospace', fontSize: 10, color: '#3a6a50', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{t.plans_free_daily}</span>
             </div>
             {liteModels.map((m, i) => (
               <div key={m.id} style={{
@@ -209,7 +209,7 @@ export function PlansScreen() {
           <Card accent="#bf5af2">
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
               <span style={{ fontFamily: 'monospace', fontSize: 10, fontWeight: 700, color: '#050a08', background: '#bf5af2', padding: '2px 8px', borderRadius: 4 }}>PREMIUM</span>
-              <span style={{ fontFamily: 'monospace', fontSize: 10, color: '#3a6a50', textTransform: 'uppercase', letterSpacing: '0.1em' }}>подписка Plus / Max</span>
+              <span style={{ fontFamily: 'monospace', fontSize: 10, color: '#3a6a50', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{t.plans_sub_required}</span>
             </div>
             {premiumModels.map((m, i) => (
               <div key={m.id} style={{
@@ -225,7 +225,7 @@ export function PlansScreen() {
               </div>
             ))}
             <div style={{ marginTop: 10 }}>
-              <GlowBtn onClick={() => setTab('plans')}>⚡ Открыть Premium</GlowBtn>
+              <GlowBtn onClick={() => setTab('plans')}>{`⚡ ${t.plans_open_premium}`}</GlowBtn>
             </div>
           </Card>
         </>
@@ -240,7 +240,7 @@ export function PlansScreen() {
               <button onClick={() => setDetailTier(null)} style={{
                 background: 'none', border: 'none', color: '#3a6a50',
                 fontFamily: 'monospace', fontSize: 12, cursor: 'pointer', padding: '4px 0 10px',
-              }}>← Назад</button>
+              }}>{`← ${t.plans_back}`}</button>
               {(() => {
                 const info = TIER_INFO[detailTier]
                 return (
@@ -254,7 +254,7 @@ export function PlansScreen() {
                         {info.subtitle}
                       </div>
                     </div>
-                    <Divider label="что входит" />
+                    <Divider label={t.plans_whats_included} />
                     <div style={{ height: 8 }} />
                     {info.includes.map((item, i) => (
                       <div key={i} style={{
@@ -271,8 +271,8 @@ export function PlansScreen() {
                       disabled={paymentLoading === info.product_id}
                     >
                       {paymentLoading === info.product_id
-                        ? '⏳ Загрузка...'
-                        : `⭐ Купить за ${info.stars}⭐/{t.plans_per_month}`}
+                        ? `\u23F3 ${t.plans_loading}`
+                        : `\u2B50 ${t.plans_buy_for} ${info.stars}\u2B50/{t.plans_per_month}`}
                     </GlowBtn>
                   </Card>
                 )
@@ -283,17 +283,17 @@ export function PlansScreen() {
               {/* How it works */}
               <Card accent="#00ff88" style={{ marginBottom: 10 }}>
                 <div style={{ fontFamily: 'sans-serif', fontSize: 13, color: '#b0d0c0', lineHeight: 1.6 }}>
-                  <span style={{ fontWeight: 700, color: '#e0f0e8' }}>Как это работает?</span> Stone AI делит модели на 2 категории:
+                  <span style={{ fontWeight: 700, color: '#e0f0e8' }}>{t.plans_how_title}</span> {t.plans_how_desc}
                 </div>
                 <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
                   <div style={{ flex: 1, padding: 8, borderRadius: 8, background: 'rgba(0,255,136,0.04)', border: '1px solid rgba(0,255,136,0.1)' }}>
-                    <div style={{ fontFamily: 'monospace', fontSize: 9, fontWeight: 700, color: '#00ff88', textTransform: 'uppercase', marginBottom: 4 }}>Lite &bull; бесплатно</div>
+                    <div style={{ fontFamily: 'monospace', fontSize: 9, fontWeight: 700, color: '#00ff88', textTransform: 'uppercase', marginBottom: 4 }}>{t.plans_lite_free}</div>
                     <div style={{ fontFamily: 'sans-serif', fontSize: 11, color: '#5a8a70', lineHeight: 1.4 }}>
-                      GPT-4o mini, Haiku, Flash, DeepSeek, Llama, Mistral — 20 req/день
+                      GPT-4o mini, Haiku, Flash, DeepSeek, Llama, Mistral — 20 {t.plans_req_day}
                     </div>
                   </div>
                   <div style={{ flex: 1, padding: 8, borderRadius: 8, background: 'rgba(191,90,242,0.04)', border: '1px solid rgba(191,90,242,0.1)' }}>
-                    <div style={{ fontFamily: 'monospace', fontSize: 9, fontWeight: 700, color: '#bf5af2', textTransform: 'uppercase', marginBottom: 4 }}>Premium &bull; подписка</div>
+                    <div style={{ fontFamily: 'monospace', fontSize: 9, fontWeight: 700, color: '#bf5af2', textTransform: 'uppercase', marginBottom: 4 }}>{t.plans_sub_required}</div>
                     <div style={{ fontFamily: 'sans-serif', fontSize: 11, color: '#5a8a70', lineHeight: 1.4 }}>
                       GPT-4.1, Claude Opus 4, Grok 3, Gemini 2.5 Pro, Perplexity
                     </div>
@@ -328,7 +328,7 @@ export function PlansScreen() {
                       <span style={{ fontSize: 32 }}>⚡</span>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 18, fontWeight: 900, color: '#e0f0e8' }}>PLUS</div>
-                        <div style={{ fontFamily: 'sans-serif', fontSize: 11, color: '#aaff00', marginTop: 2 }}>Для активных пользователей</div>
+                        <div style={{ fontFamily: 'sans-serif', fontSize: 11, color: '#aaff00', marginTop: 2 }}>{t.plans_for_active}</div>
                       </div>
                       <div style={{ textAlign: 'right' }}>
                         <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 14, fontWeight: 900, color: '#aaff00' }}>469⭐</div>
@@ -342,7 +342,7 @@ export function PlansScreen() {
                       <div style={{ flex: 1 }}>
                         <GlowBtn onClick={(e: any) => { e.stopPropagation(); handleBuy('plus_stars', 'plus') }}
                           disabled={paymentLoading === 'plus_stars'}>
-                          {paymentLoading === 'plus_stars' ? '⏳...' : '⭐ Купить'}
+                          {paymentLoading === 'plus_stars' ? '⏳...' : t.plans_buy_btn}
                         </GlowBtn>
                       </div>
                       <button onClick={(e) => { e.stopPropagation(); setDetailTier('plus') }} style={{
@@ -359,7 +359,7 @@ export function PlansScreen() {
                       <span style={{ fontSize: 32 }}>👑</span>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 18, fontWeight: 900, color: '#e0f0e8' }}>MAX</div>
-                        <div style={{ fontFamily: 'sans-serif', fontSize: 11, color: '#bf5af2', marginTop: 2 }}>Для профи и бизнеса</div>
+                        <div style={{ fontFamily: 'sans-serif', fontSize: 11, color: '#bf5af2', marginTop: 2 }}>{t.plans_for_pro}</div>
                       </div>
                       <div style={{ textAlign: 'right' }}>
                         <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 14, fontWeight: 900, color: '#bf5af2' }}>1499⭐</div>
@@ -367,13 +367,13 @@ export function PlansScreen() {
                       </div>
                     </div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 10 }}>
-                      {[t.plans_f_500prem, '50 Opus/день', t.plans_f_api].map(f => <Tag key={f} text={f} accent="#bf5af2" />)}
+                      {[t.plans_f_500prem, t.plans_opus_day, t.plans_f_api].map(f => <Tag key={f} text={f} accent="#bf5af2" />)}
                     </div>
                     <div style={{ display: 'flex', gap: 8 }}>
                       <div style={{ flex: 1 }}>
                         <GlowBtn onClick={(e: any) => { e.stopPropagation(); handleBuy('max_stars', 'max') }}
                           disabled={paymentLoading === 'max_stars'}>
-                          {paymentLoading === 'max_stars' ? '⏳...' : '⭐ Купить'}
+                          {paymentLoading === 'max_stars' ? `\u23F3 ${t.plans_loading}` : t.plans_buy_btn}
                         </GlowBtn>
                       </div>
                       <button onClick={(e) => { e.stopPropagation(); setDetailTier('max') }} style={{
@@ -408,7 +408,7 @@ export function PlansScreen() {
                           onClick={() => handleBuy(pass.id)}
                           disabled={paymentLoading === pass.id}
                         >
-                          {paymentLoading === pass.id ? '⏳ Загрузка...' : '⭐ Купить'}
+                          {paymentLoading === pass.id ? `\u23F3 ${t.plans_loading}` : t.plans_buy_btn}
                         </GlowBtn>
                       </div>
                     </Card>
