@@ -5,6 +5,7 @@
 
 import { useStore } from '../../store/useStore'
 import { haptic } from '../../utils/telegram'
+import { useTranslation } from '../../i18n/useTranslation'
 
 const TABS = [
   { id: 'home' as const, icon: '🏠', label: 'Главная' },
@@ -15,6 +16,13 @@ const TABS = [
 
 export function BottomNav() {
   const { screen, setScreen, palette } = useStore()
+  const { t } = useTranslation()
+  const TABS = [
+    { id: 'home' as const, label: t.nav_home, icon: '🏠' },
+    { id: 'chat' as const, label: t.nav_chat, icon: '💬' },
+    { id: 'plans' as const, label: t.nav_plans, icon: '⭐' },
+    { id: 'profile' as const, label: t.nav_profile, icon: '👤' },
+  ]
   const p = palette
 
   // Hide in chat mode
