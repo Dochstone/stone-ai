@@ -1,9 +1,8 @@
 """Stone AI — Main application entry point.
 
-Runs FastAPI (HTTP API) + aiogram (Telegram bot) together.
+FastAPI HTTP API server. Bot polling is handled by separate tgstone-bot service.
 """
 
-import asyncio
 import logging
 from contextlib import asynccontextmanager
 
@@ -50,20 +49,17 @@ async def lifespan(app: FastAPI):
     await init_db()
     logger.info("✅ Database initialized")
 
-    # Start bot polling in background
-    bot_task = None
-    if bot and dp:
-        bot_task = asyncio.create_task(dp.start_polling(bot))
-        logger.info("✅ Bot polling started")
+    # NOTE: Bot polling DISABLED here — separate tgstone-bot service handles polling.
+    # This backend exposes bot object for creating invoices (Stars payments).
+    # If you need payments in this service, switch to webhook mode instead.
+    if bot:
+        logger.info("✅ Bot initialized (no polling — API-only mode)")
     else:
         logger.warning("⚠️ Bot token not configured — running API only")
 
     yield
 
     # Shutdown
-    if bot_task:
-        dp.shutdown()
-        bot_task.cancel()
     if bot:
         await bot.session.close()
     logger.info("👋 Stone AI shut down")
@@ -82,6 +78,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         settings.webapp_url,
+        "https://stone-ai-1.vercel.app",
         "https://stone-ai.vercel.app",
         "http://localhost:5173",  # Vite dev
         "http://localhost:3000",
