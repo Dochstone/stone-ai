@@ -1,6 +1,7 @@
 /**
  * HomeScreen — Stone AI landing with usage, active model, model grid, quick actions.
  */
+import { useTranslation } from '../../i18n/useTranslation'
 import { useStore, type Model } from '../../store/useStore'
 import { Card, Tag, Divider, GlowBtn, GlitchTitle } from '../ui'
 
@@ -33,7 +34,7 @@ export function HomeScreen() {
           <GlitchTitle text="AI" size={28} />
         </div>
         <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#5a8a70', marginTop: 4 }}>
-          6 Lite бесплатно &bull; 5 Premium по подписке
+          {t.home_subtitle_lite} &bull; {t.home_subtitle_premium}
         </div>
       </div>
 
@@ -137,7 +138,7 @@ export function HomeScreen() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <span style={{ fontSize: 22 }}>💳</span>
             <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: 'sans-serif', fontSize: 14, fontWeight: 700, color: '#e0f0e8' }}>Premium подписки</div>
+              <div style={{ fontFamily: 'sans-serif', fontSize: 14, fontWeight: 700, color: '#e0f0e8' }}>{t.home_subscriptions}</div>
               <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70' }}>PLUS 699⭐ &bull; MAX 1999⭐ &bull; Day Pass 79⭐</div>
             </div>
             <Tag text="→" accent="#aaff00" />
@@ -147,7 +148,7 @@ export function HomeScreen() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <span style={{ fontSize: 22 }}>💎</span>
             <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: 'sans-serif', fontSize: 14, fontWeight: 700, color: '#e0f0e8' }}>Подключить кошелёк</div>
+              <div style={{ fontFamily: 'sans-serif', fontSize: 14, fontWeight: 700, color: '#e0f0e8' }}>{t.home_connect_wallet}</div>
               <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70' }}>TON Connect &bull; 4 кошелька</div>
             </div>
             <Tag text="connect →" accent="#00e5ff" />
@@ -193,7 +194,7 @@ export function HomeScreen() {
           <span style={{ fontSize: 20 }}>📡</span>
           <div style={{ flex: 1 }}>
             <div style={{ fontFamily: 'sans-serif', fontSize: 13, fontWeight: 700, color: '#e0f0e8' }}>Stone AI Channel</div>
-            <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70' }}>AI-разборы, кейсы, инструменты</div>
+            <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70' }}>{t.home_features}</div>
           </div>
           <Tag text="join →" accent="#39ff14" />
         </div>
