@@ -1,0 +1,219 @@
+/**
+ * ModelDetailScreen — full-screen model description with Use/Back buttons.
+ * Checks subscription status for premium models.
+ */
+
+import { useStore } from '../../store/useStore'
+import { useTranslation } from '../../i18n/useTranslation'
+import { haptic } from '../../utils/telegram'
+
+const MODEL_DESC_KEY: Record<string, string> = {
+  'gpt-4o-mini': 'mdesc_gpt4o_mini',
+  'claude-haiku-4.5': 'mdesc_claude_haiku',
+  'gemini-2.0-flash': 'mdesc_gemini_flash',
+  'deepseek-r1': 'mdesc_deepseek',
+  'llama-4-maverick': 'mdesc_llama',
+  'mistral-large-25': 'mdesc_mistral',
+  'gpt-4.1': 'mdesc_gpt41',
+  'claude-opus-4': 'mdesc_claude_opus',
+  'grok-3': 'mdesc_grok',
+  'gemini-2.5-pro': 'mdesc_gemini_pro',
+  'perplexity-sonar-pro': 'mdesc_perplexity',
+}
+
+export function ModelDetailScreen() {
+  const { selectedModel, user, setScreen, setModelId, setSelectedModel, palette } = useStore()
+  const { t } = useTranslation()
+  const p = palette
+
+  if (!selectedModel) {
+    setScreen('home')
+    return null
+  }
+
+  const model = selectedModel
+  const isPremium = model.tier === 'premium'
+  const hasSub = user.plan === 'plus' || user.plan === 'max'
+  const hasPass = user.hasPass
+  const canUsePremium = hasSub || hasPass
+  const descKey = MODEL_DESC_KEY[model.id] || 'mdesc_gpt4o_mini'
+  const description = (t as any)[descKey] || model.desc || ''
+
+  const handleUse = () => {
+    haptic('medium')
+    if (isPremium && !canUsePremium) {
+      // No subscription — redirect to plans
+      setScreen('plans')
+    } else {
+      // Has access — go to chat with this model
+      setModelId(model.id)
+      setSelectedModel(null)
+      setScreen('chat')
+    }
+  }
+
+  const handleBack = () => {
+    haptic('light')
+    setSelectedModel(null)
+    setScreen('home')
+  }
+
+  return (
+    <div style={{
+      padding: '20px 16px 100px',
+      minHeight: '100vh',
+      position: 'relative',
+      zIndex: 1,
+      animation: 'fadeIn 0.3s ease-out',
+    }}>
+      {/* Back button */}
+      <div
+        onClick={handleBack}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 6,
+          padding: '8px 14px',
+          borderRadius: 10,
+          background: 'rgba(255,255,255,0.05)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          color: 'rgba(255,255,255,0.6)',
+          fontSize: 13,
+          fontWeight: 600,
+          cursor: 'pointer',
+          marginBottom: 24,
+          transition: 'all 0.2s',
+        }}
+      >
+        \u2190 {t.model_detail_back}
+      </div>
+
+      {/* Model icon large */}
+      <div style={{
+        textAlign: 'center',
+        marginBottom: 24,
+      }}>
+        <div style={{
+          fontSize: 72,
+          marginBottom: 16,
+          filter: `drop-shadow(0 0 24px rgba(${p.primaryRgb},0.3))`,
+          animation: 'float 4s ease-in-out infinite',
+        }}>
+          {model.icon}
+        </div>
+        <h1 style={{
+          fontSize: 28,
+          fontWeight: 900,
+          color: '#fff',
+          margin: '0 0 6px',
+          letterSpacing: '-0.3px',
+        }}>
+          {model.name}
+        </h1>
+        <div style={{
+          fontSize: 14,
+          color: 'rgba(255,255,255,0.4)',
+          fontWeight: 500,
+        }}>
+          {model.company}
+        </div>
+      </div>
+
+      {/* Tier badge */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        gap: 8,
+        marginBottom: 24,
+      }}>
+        <span style={{
+          padding: '5px 14px',
+          borderRadius: 8,
+          fontSize: 11,
+          fontWeight: 800,
+          letterSpacing: '0.5px',
+          background: isPremium ? 'rgba(191,90,242,0.12)' : 'rgba(0,255,136,0.12)',
+          color: isPremium ? '#bf5af2' : '#00ff88',
+          border: `1px solid ${isPremium ? 'rgba(191,90,242,0.25)' : 'rgba(0,255,136,0.25)'}`,
+        }}>
+          {isPremium ? 'PRO' : 'FREE'}
+        </span>
+        <span style={{
+          padding: '5px 14px',
+          borderRadius: 8,
+          fontSize: 11,
+          fontWeight: 600,
+          background: 'rgba(255,255,255,0.05)',
+          color: 'rgba(255,255,255,0.5)',
+          border: '1px solid rgba(255,255,255,0.08)',
+        }}>
+          {isPremium ? t.model_detail_premium_model : t.model_detail_free_model}
+        </span>
+      </div>
+
+      {/* Description card */}
+      <div
+        className="glass-card-accent"
+        style={{
+          padding: '20px 18px',
+          marginBottom: 24,
+          animation: 'slideUp 0.4s ease-out 0.1s both',
+        }}
+      >
+        <div style={{
+          fontSize: 14,
+          lineHeight: 1.7,
+          color: 'rgba(255,255,255,0.75)',
+          whiteSpace: 'pre-line',
+        }}>
+          {description}
+        </div>
+      </div>
+
+      {/* Premium warning if needed */}
+      {isPremium && !canUsePremium && (
+        <div
+          className="glass-card"
+          style={{
+            padding: '14px 18px',
+            marginBottom: 24,
+            textAlign: 'center',
+            border: '1px solid rgba(255,199,0,0.2)',
+            background: 'rgba(255,199,0,0.05)',
+            animation: 'slideUp 0.4s ease-out 0.2s both',
+          }}
+        >
+          <span style={{ fontSize: 16, marginRight: 6 }}>\u26a0\ufe0f</span>
+          <span style={{ color: '#ffc700', fontSize: 13, fontWeight: 600 }}>
+            {t.model_detail_need_sub}
+          </span>
+        </div>
+      )}
+
+      {/* Action buttons */}
+      <div style={{
+        display: 'flex',
+        gap: 12,
+        animation: 'slideUp 0.4s ease-out 0.3s both',
+      }}>
+        <button
+          className="btn-gradient"
+          onClick={handleUse}
+          style={{
+            flex: 1,
+            padding: '14px 0',
+            fontSize: 15,
+            fontWeight: 800,
+            letterSpacing: '0.3px',
+            cursor: 'pointer',
+          }}
+        >
+          {isPremium && !canUsePremium
+            ? `\ud83d\udc8e ${t.model_detail_buy_sub}`
+            : `\u26a1 ${t.model_detail_use}`
+          }
+        </button>
+      </div>
+    </div>
+  )
+}
