@@ -12,6 +12,7 @@ import { ChatScreen } from './components/ChatScreen/ChatScreen'
 import { PlansScreen } from './components/PlansScreen/PlansScreen'
 import { ProfileScreen } from './components/ProfileScreen/ProfileScreen'
 import { FaqScreen } from './components/FaqScreen/FaqScreen'
+import { ModelDetailScreen } from './components/ModelDetailScreen/ModelDetailScreen'
 
 // Global CSS keyframes + fonts
 const GLOBAL_CSS = `
@@ -80,6 +81,7 @@ export default function App() {
       case 'chat': return <ChatScreen />
       case 'plans': return <PlansScreen />
       case 'faq': return <FaqScreen />
+        case 'model_detail': return <ModelDetailScreen />
       case 'profile': return <ProfileScreen />
       default: return <HomeScreen />
     }
