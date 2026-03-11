@@ -56,7 +56,7 @@ export function HomeScreen() {
       {/* Usage card */}
       <Card accent="#00ff88" featured>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-          <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#5a8a70' }}>lite.today</span>
+          <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#5a8a70' }}>{t.home_lite_today}</span>
           <span style={{ fontFamily: 'monospace', fontSize: 13, fontWeight: 700, color: '#00ff88' }}>
             {user.liteToday}/{user.liteLimitDay === -1 ? '∞' : user.liteLimitDay}
           </span>
@@ -70,7 +70,7 @@ export function HomeScreen() {
           }} />
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-          <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#5a8a70' }}>premium</span>
+          <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#5a8a70' }}>{t.home_premium}</span>
           <span style={{ fontFamily: 'monospace', fontSize: 12, fontWeight: 700, color: '#bf5af2' }}>
             {user.plan === 'free' ? 'PLUS / MAX →' : `${user.premiumToday}/${user.premiumLimitDay}`}
           </span>
@@ -90,7 +90,7 @@ export function HomeScreen() {
               borderRadius: 12, background: `${accent}10`, border: `1px solid ${accent}20`,
             }}>{currentModel.icon}</div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: 'monospace', fontSize: 9, color: '#5a8a70', textTransform: 'uppercase', marginBottom: 2 }}>active model</div>
+              <div style={{ fontFamily: 'monospace', fontSize: 9, color: '#5a8a70', textTransform: 'uppercase', marginBottom: 2 }}>{t.home_active_model}</div>
               <div style={{ fontFamily: 'sans-serif', fontSize: 15, fontWeight: 700, color: '#e0f0e8' }}>{currentModel.name}</div>
               <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70' }}>{currentModel.company} &bull; {MODEL_DESC[currentModel.id] || currentModel.desc}</div>
             </div>
@@ -100,7 +100,7 @@ export function HomeScreen() {
       )}
 
       <div style={{ height: 12 }} />
-      <Divider label="all.models" />
+      <Divider label={t.home_all_models_label} />
       <div style={{ height: 8 }} />
 
       {/* Model grid 2-column — SETS MODEL ON CLICK */}
@@ -144,7 +144,7 @@ export function HomeScreen() {
       </div>
 
       <div style={{ height: 12 }} />
-      <Divider label="quick.actions" />
+      <Divider label={t.home_quick_actions_label} />
       <div style={{ height: 8 }} />
 
       {/* Quick actions */}
