@@ -135,7 +135,7 @@ export function ChatScreen() {
               {currentModel?.name}
             </div>
             <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#5a8a70', marginTop: 4 }}>
-              ' + t.chat_type_question + '
+              {t.chat_type_question}
             </div>
           </div>
         )}
