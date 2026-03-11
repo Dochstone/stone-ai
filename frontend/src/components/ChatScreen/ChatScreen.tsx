@@ -215,7 +215,7 @@ export function ChatScreen() {
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
-            placeholder="> enter query..."
+            placeholder={t.chat_enter_query}
             style={{
               flex: 1, background: 'none', border: 'none', outline: 'none',
               color: '#e0f0e8', fontSize: 13, fontFamily: 'monospace', padding: '8px 0',
