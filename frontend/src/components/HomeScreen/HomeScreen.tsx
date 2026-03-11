@@ -1,189 +1,241 @@
 /**
- * HomeScreen — Stone AI landing with usage, active model, model grid, quick actions.
+ * HomeScreen — 3-column card grid with Lite/Premium sections.
+ * Click on model card opens ModelDetailScreen.
  */
-import { useTranslation } from '../../i18n/useTranslation'
-import { useStore, type Model } from '../../store/useStore'
-import { Card, Tag, Divider, GlowBtn, GlitchTitle } from '../ui'
 
-// Model accent colors
-const MODEL_ACCENTS: Record<string, string> = {
-  'gpt-4o-mini': '#00ffaa',
-  'claude-haiku-4.5': '#c084fc',
-  'gemini-2.0-flash': '#00e5ff',
-  'deepseek-r1': '#00ffcc',
-  'llama-4-maverick': '#66ffcc',
-  'mistral-large-25': '#00ff88',
-  'gpt-4.1': '#00ffaa',
-  'claude-opus-4': '#bf5af2',
-  'grok-3': '#39ff14',
-  'gemini-2.5-pro': '#00e5ff',
-  'perplexity-sonar-pro': '#aaff00',
-}
+import { useStore } from '../../store/useStore'
+import { useTranslation } from '../../i18n/useTranslation'
+import { haptic } from '../../utils/telegram'
 
 export function HomeScreen() {
-  const { models, modelId, setModelId, setScreen, user } = useStore()
+  const { palette, user, models, setScreen, setSelectedModel } = useStore()
   const { t } = useTranslation()
-  const currentModel = models.find(m => m.id === modelId) || models[0]
-  const accent = currentModel ? MODEL_ACCENTS[currentModel.id] || '#00ff88' : '#00ff88'
+  const p = palette
 
-  const MODEL_DESC: Record<string, string> = {
-    'gpt-4o-mini': t.mdesc_gpt4o_mini,
-    'claude-haiku-4.5': t.mdesc_claude_haiku,
-    'gemini-2.0-flash': t.mdesc_gemini_flash,
-    'deepseek-r1': t.mdesc_deepseek,
-    'llama-4-maverick': t.mdesc_llama,
-    'mistral-large-25': t.mdesc_mistral,
-    'gpt-4.1': t.mdesc_gpt41,
-    'claude-opus-4': t.mdesc_claude_opus,
-    'grok-3': t.mdesc_grok,
-    'gemini-2.5-pro': t.mdesc_gemini_pro,
-    'perplexity-sonar-pro': t.mdesc_perplexity,
+  const liteModels = models.filter((m) => m.tier === 'lite')
+  const premiumModels = models.filter((m) => m.tier === 'premium')
+
+  const handleModelClick = (model: typeof models[0]) => {
+    haptic('medium')
+    setSelectedModel(model)
+    setScreen('model_detail')
   }
 
   return (
-    <div style={{ padding: '0 18px 90px' }}>
-      {/* Header */}
-      <div style={{ padding: '20px 0 12px', textAlign: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, justifyContent: 'center' }}>
-          <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 28, fontWeight: 900, color: '#fff' }}>STONE</span>
-          <GlitchTitle text="AI" size={28} />
-        </div>
-        <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#5a8a70', marginTop: 4 }}>
-          {t.home_subtitle_lite} &bull; {t.home_subtitle_premium}
-        </div>
+    <div style={{ padding: '20px 12px 100px', minHeight: '100vh', position: 'relative', zIndex: 1 }}>
+
+      {/* Lite section header */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        marginBottom: 14,
+        animation: 'fadeIn 0.5s ease-out',
+      }}>
+        <span style={{
+          fontSize: 11,
+          fontWeight: 800,
+          padding: '3px 10px',
+          borderRadius: 6,
+          background: 'rgba(0,255,136,0.15)',
+          color: '#00ff88',
+          border: '1px solid rgba(0,255,136,0.25)',
+          letterSpacing: '0.5px',
+        }}>FREE</span>
+        <span style={{
+          fontSize: 18,
+          fontWeight: 800,
+          color: '#fff',
+        }}>{t.home_lite_free}</span>
+        <span style={{
+          marginLeft: 'auto',
+          fontSize: 13,
+          color: 'rgba(255,255,255,0.35)',
+          fontWeight: 500,
+        }}>{t.home_per_day}</span>
       </div>
 
-      {/* Usage card */}
-      <Card accent="#00ff88" featured>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-          <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#5a8a70' }}>{t.home_lite_today}</span>
-          <span style={{ fontFamily: 'monospace', fontSize: 13, fontWeight: 700, color: '#00ff88' }}>
-            {user.liteToday}/{user.liteLimitDay === -1 ? '∞' : user.liteLimitDay}
-          </span>
-        </div>
-        <div style={{ height: 6, borderRadius: 3, background: 'rgba(0,255,136,0.08)', overflow: 'hidden', marginBottom: 8 }}>
-          <div style={{
-            height: '100%', borderRadius: 3,
-            width: `${user.liteLimitDay > 0 ? Math.min((user.liteToday / user.liteLimitDay) * 100, 100) : 0}%`,
-            background: 'linear-gradient(90deg, #00ff88, #aaff00)',
-            boxShadow: '0 0 10px rgba(0,255,136,0.3)', transition: 'width 0.5s',
-          }} />
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-          <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#5a8a70' }}>{t.home_premium}</span>
-          <span style={{ fontFamily: 'monospace', fontSize: 12, fontWeight: 700, color: '#bf5af2' }}>
-            {user.plan === 'free' ? 'PLUS / MAX →' : `${user.premiumToday}/${user.premiumLimitDay}`}
-          </span>
-        </div>
-        <GlowBtn onClick={() => setScreen('chat')}>{t.home_start_chat}</GlowBtn>
-      </Card>
-
-      <div style={{ height: 12 }} />
-
-      {/* Active model */}
-      {currentModel && (
-        <Card accent={accent} onClick={() => setScreen('chat')}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{
-              fontSize: 36, width: 52, height: 52,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              borderRadius: 12, background: `${accent}10`, border: `1px solid ${accent}20`,
-            }}>{currentModel.icon}</div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: 'monospace', fontSize: 9, color: '#5a8a70', textTransform: 'uppercase', marginBottom: 2 }}>{t.home_active_model}</div>
-              <div style={{ fontFamily: 'sans-serif', fontSize: 15, fontWeight: 700, color: '#e0f0e8' }}>{currentModel.name}</div>
-              <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70' }}>{currentModel.company} &bull; {MODEL_DESC[currentModel.id] || currentModel.desc}</div>
-            </div>
-            <Tag text="online" accent="#00ff88" />
-          </div>
-        </Card>
-      )}
-
-      <div style={{ height: 12 }} />
-      <Divider label={t.home_all_models_label} />
-      <div style={{ height: 8 }} />
-
-      {/* Model grid 2-column — SETS MODEL ON CLICK */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-        {models.map(md => {
-          const mdAccent = MODEL_ACCENTS[md.id] || '#00ff88'
-          const isPremium = md.tier === 'premium'
-          return (
-            <Card key={md.id} accent={mdAccent} onClick={() => {
-              if (isPremium && user.plan === 'free') {
-                setScreen('plans')
-              } else {
-                setModelId(md.id)
-                setScreen('chat')
-              }
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{
-                  fontSize: 32,
-                  opacity: isPremium ? 0.7 : 1,
-                  filter: isPremium ? 'grayscale(0.3)' : 'none',
-                }}>{md.icon}</span>
-                <div>
-                  <span style={{
-                    fontFamily: 'sans-serif', fontSize: 12, fontWeight: 700,
-                    color: isPremium ? '#7aa090' : '#e0f0e8',
-                  }}>{md.name}</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
-                    <span style={{
-                      fontFamily: 'monospace', fontSize: 8, fontWeight: 700, color: '#050a08',
-                      background: isPremium ? '#bf5af2' : '#00ff88',
-                      padding: '1px 4px', borderRadius: 3,
-                    }}>{isPremium ? 'PRO' : 'FREE'}</span>
-                    <span style={{ fontFamily: 'monospace', fontSize: 9, color: '#5a8a70' }}>{MODEL_DESC[md.id] || md.desc}</span>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          )
-        })}
+      {/* Lite model grid — 3 columns */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: 10,
+        marginBottom: 32,
+      }}>
+        {liteModels.map((m, i) => (
+          <ModelCard
+            key={m.id}
+            model={m}
+            palette={p}
+            delay={i * 0.05}
+            onClick={() => handleModelClick(m)}
+          />
+        ))}
       </div>
 
-      <div style={{ height: 12 }} />
-      <Divider label={t.home_quick_actions_label} />
-      <div style={{ height: 8 }} />
-
-      {/* Quick actions */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <Card accent="#aaff00" onClick={() => setScreen('plans')}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ fontSize: 22 }}>💳</span>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: 'sans-serif', fontSize: 14, fontWeight: 700, color: '#e0f0e8' }}>{t.home_subscriptions}</div>
-              <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70' }}>PLUS 699⭐ &bull; MAX 1999⭐ &bull; Day Pass 79⭐</div>
-            </div>
-            <Tag text="→" accent="#aaff00" />
-          </div>
-        </Card>
-        <Card accent="#00e5ff" onClick={() => setScreen('profile')}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ fontSize: 22 }}>💎</span>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: 'sans-serif', fontSize: 14, fontWeight: 700, color: '#e0f0e8' }}>{t.home_connect_wallet}</div>
-              <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70' }}>{`TON Connect \u2022 4 ${t.home_wallets}`}</div>
-            </div>
-            <Tag text="connect →" accent="#00e5ff" />
-          </div>
-        </Card>
+      {/* Premium section header */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        marginBottom: 14,
+        animation: 'fadeIn 0.5s ease-out 0.3s both',
+      }}>
+        <span style={{ fontSize: 22 }}>💎</span>
+        <span style={{
+          fontSize: 18,
+          fontWeight: 800,
+          color: '#fff',
+        }}>{t.home_premium_sub}</span>
+        <span style={{
+          marginLeft: 'auto',
+          fontSize: 10,
+          fontWeight: 800,
+          padding: '3px 10px',
+          borderRadius: 6,
+          background: 'rgba(191,90,242,0.12)',
+          color: '#bf5af2',
+          border: '1px solid rgba(191,90,242,0.25)',
+          letterSpacing: '0.5px',
+        }}>PRO</span>
       </div>
 
-      <div style={{ height: 12 }} />
-
-      {/* Channel link */}
-      <Card accent="#39ff14" onClick={() => window.open('https://t.me/stoneAIC', '_blank')}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 20 }}>📡</span>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontFamily: 'sans-serif', fontSize: 13, fontWeight: 700, color: '#e0f0e8' }}>Stone AI Channel</div>
-            <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70' }}>{t.home_features}</div>
-          </div>
-          <Tag text="join →" accent="#39ff14" />
-        </div>
-      </Card>
+      {/* Premium model grid — 3 columns */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: 10,
+        marginBottom: 28,
+      }}>
+        {premiumModels.map((m, i) => (
+          <ModelCard
+            key={m.id}
+            model={m}
+            palette={p}
+            locked={user.plan === 'free' && !user.hasPass}
+            delay={i * 0.05}
+            onClick={() => handleModelClick(m)}
+          />
+        ))}
+      </div>
     </div>
   )
-      }
+}
+
+function ModelCard({
+  model,
+  palette,
+  locked,
+  delay = 0,
+  onClick,
+}: {
+  model: any
+  palette: any
+  locked?: boolean
+  delay?: number
+  onClick: () => void
+}) {
+  const isLite = model.tier === 'lite'
+
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        position: 'relative',
+        padding: '14px 8px 12px',
+        borderRadius: 16,
+        background: locked
+          ? 'rgba(255,255,255,0.02)'
+          : isLite
+            ? `rgba(${palette.primaryRgb},0.04)`
+            : 'rgba(191,90,242,0.03)',
+        border: locked
+          ? '1px solid rgba(255,255,255,0.06)'
+          : isLite
+            ? `1px solid rgba(${palette.primaryRgb},0.15)`
+            : '1px solid rgba(191,90,242,0.12)',
+        cursor: 'pointer',
+        textAlign: 'center',
+        transition: 'all 0.25s',
+        animation: `scaleIn 0.4s ease-out ${delay}s both`,
+        overflow: 'hidden',
+      }}
+    >
+      {/* Top glow line */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: '15%',
+        right: '15%',
+        height: 1,
+        background: `linear-gradient(90deg, transparent, ${isLite ? palette.primary : '#bf5af2'}, transparent)`,
+        opacity: locked ? 0.08 : 0.35,
+      }} />
+
+      {/* Badge (FREE / PRO) */}
+      <div style={{
+        position: 'absolute',
+        top: 7,
+        right: 7,
+        fontSize: 8,
+        fontWeight: 800,
+        padding: '2px 7px',
+        borderRadius: 5,
+        background: isLite ? 'rgba(0,255,136,0.15)' : 'rgba(191,90,242,0.15)',
+        color: isLite ? '#00ff88' : '#bf5af2',
+        border: `1px solid ${isLite ? 'rgba(0,255,136,0.25)' : 'rgba(191,90,242,0.25)'}`,
+        letterSpacing: '0.5px',
+      }}>
+        {isLite ? 'FREE' : 'PRO'}
+      </div>
+
+      {/* Lock icon for premium */}
+      {locked && (
+        <div style={{
+          position: 'absolute',
+          top: 7,
+          left: 7,
+          fontSize: 11,
+          opacity: 0.45,
+        }}>🔒</div>
+      )}
+
+      {/* Model icon — LARGE */}
+      <div style={{
+        fontSize: 42,
+        marginBottom: 8,
+        marginTop: 6,
+        filter: locked
+          ? 'grayscale(0.5) brightness(0.7)'
+          : `drop-shadow(0 0 12px rgba(${palette.primaryRgb},0.25))`,
+        transition: 'filter 0.3s',
+        lineHeight: 1,
+      }}>
+        {model.icon}
+      </div>
+
+      {/* Model name */}
+      <div style={{
+        fontSize: 12,
+        fontWeight: 700,
+        color: locked ? 'rgba(255,255,255,0.35)' : '#fff',
+        marginBottom: 2,
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        lineHeight: 1.3,
+      }}>
+        {model.name}
+      </div>
+
+      {/* Company */}
+      <div style={{
+        fontSize: 10,
+        color: locked ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.4)',
+        fontWeight: 500,
+      }}>
+        {model.company}
+      </div>
+    </div>
+  )
+}
