@@ -128,6 +128,17 @@ export const translations = {
     plans_opus_day: '50 Opus/day',
     home_no_wallet: 'no wallet',
     home_wallets: 'wallets',
+  mdesc_gpt4o_mini: 'Fast and affordable',
+  mdesc_claude_haiku: 'Fast Claude',
+  mdesc_gemini_flash: 'High-speed',
+  mdesc_deepseek: 'Reasoning',
+  mdesc_llama: 'Open-source 400B',
+  mdesc_mistral: 'European',
+  mdesc_gpt41: 'Flagship 2025',
+  mdesc_claude_opus: 'Best at code',
+  mdesc_grok: 'Creative',
+  mdesc_gemini_pro: 'Multimodal',
+  mdesc_perplexity: 'Real-time search',
   },
 
   // ─── RUSSIAN ───
