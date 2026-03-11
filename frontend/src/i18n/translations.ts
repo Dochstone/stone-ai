@@ -236,6 +236,7 @@ export const translations = {
     plans_for_pro: '\u0414\u043B\u044F \u043F\u0440\u043E\u0444\u0438 \u0438 \u0431\u0438\u0437\u043D\u0435\u0441\u0430',
     plans_opus_day: '50 Opus/\u0434\u0435\u043D\u044C',
     home_no_wallet: '\u043D\u0435\u0442 \u043A\u043E\u0448\u0435\u043B\u044C\u043A\u0430',
+    home_wallets: '\u043A\u043E\u0448\u0435\u043B\u044C\u043A\u0430',
   },
 
   // ─── CHINESE SIMPLIFIED ───
@@ -344,5 +345,6 @@ export const translations = {
     plans_for_pro: '\u9002\u5408\u4E13\u4E1A\u4EBA\u58EB\u548C\u4F01\u4E1A',
     plans_opus_day: '50 Opus/\u5929',
     home_no_wallet: '\u65E0\u94B1\u5305',
+    home_wallets: '\u4E2A\u94B1\u5305',
   },
 } as const
