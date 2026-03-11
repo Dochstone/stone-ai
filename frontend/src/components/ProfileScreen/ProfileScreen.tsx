@@ -59,9 +59,9 @@ export function ProfileScreen() {
         border: '1px solid rgba(0,255,136,0.12)', borderRadius: 12, overflow: 'hidden',
       }}>
         {[
-          { value: user.totalRequests, label: 'requests' },
-          { value: user.liteToday, label: 'lite today' },
-          { value: user.premiumToday, label: 'premium' },
+          { value: user.totalRequests, label: t.profile_requests_stat },
+          { value: user.liteToday, label: t.profile_lite_today_stat },
+          { value: user.premiumToday, label: t.profile_premium_stat },
         ].map((s, i) => (
           <div key={i} style={{
             flex: 1, textAlign: 'center', padding: '12px 8px',
@@ -75,14 +75,12 @@ export function ProfileScreen() {
       </div>
 
       <div style={{ height: 10 }} />
-      <Divider label="settings" />
+      <Divider label={t.profile_settings_label} />
       <div style={{ height: 8 }} />
 
       {/* Palette selector */}
       <Card accent={p.primary}>
-        <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70', marginBottom: 10, textTransform: 'uppercase' }}>
-          🎨 palette
-        </div>
+        <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70', marginBottom: 10, textTransform: 'uppercase' }}>{t.profile_palette_label}</div>
         <div style={{ display: 'flex', gap: 8 }}>
           {PALETTES.map(pl => (
             <button key={pl.id} onClick={() => setPaletteId(pl.id)} style={{
@@ -109,9 +107,7 @@ export function ProfileScreen() {
 
       {/* Language selector */}
       <Card accent={p.primary}>
-        <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70', marginBottom: 8, textTransform: 'uppercase' }}>
-          🌐 language
-        </div>
+        <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70', marginBottom: 8, textTransform: 'uppercase' }}>{t.profile_language_label}</div>
         <div style={{ display: 'flex', gap: 6 }}>
           {LANGS.map(l => (
             <button key={l.id} onClick={() => setLang(l.id)} style={{
