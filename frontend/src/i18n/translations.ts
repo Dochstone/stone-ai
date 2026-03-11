@@ -129,7 +129,32 @@ export const translations = {
     home_no_wallet: 'no wallet',
     home_wallets: 'wallets',
 
-    // FaqScreen
+    
+    // Navigation extra
+    nav_faq: 'FAQ',
+
+    // HomeScreen labels
+    home_active_model: 'active model',
+    home_all_models_label: 'all.models',
+    home_quick_actions_label: 'quick.actions',
+    home_online: 'online',
+    home_start_chat: 'Start chat',
+    home_premium_subs: 'Premium subscriptions',
+    home_connect_wallet: 'Connect wallet',
+
+    // ProfileScreen labels
+    profile_requests_stat: 'requests',
+    profile_lite_today_stat: 'lite today',
+    profile_premium_stat: 'premium',
+    profile_palette_label: 'palette',
+    profile_language_label: 'language',
+    profile_settings_label: 'settings',
+
+    // ChatScreen
+    chat_type_question: 'type your question below',
+    chat_enter_query: 'enter query...',
+
+// FaqScreen
     faq_subtitle: 'Frequently asked questions about Stone AI',
     faq_q1: 'Which models are free?',
     faq_a1: '6 Lite models are free: GPT-4o mini, Claude Haiku 4.5, Gemini 2.0 Flash, DeepSeek R1, Llama 4, Mistral Large. 20 requests/day.',
@@ -268,7 +293,32 @@ export const translations = {
     home_no_wallet: '\u043D\u0435\u0442 \u043A\u043E\u0448\u0435\u043B\u044C\u043A\u0430',
     home_wallets: '\u043A\u043E\u0448\u0435\u043B\u044C\u043A\u0430',
 
-    // FaqScreen
+    
+    // Navigation extra
+    nav_faq: 'FAQ',
+
+    // HomeScreen labels
+    home_active_model: '\u0430\u043A\u0442\u0438\u0432\u043D\u0430\u044F \u043C\u043E\u0434\u0435\u043B\u044C',
+    home_all_models_label: '\u0432\u0441\u0435.\u043C\u043E\u0434\u0435\u043B\u0438',
+    home_quick_actions_label: '\u0431\u044B\u0441\u0442\u0440.\u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F',
+    home_online: '\u043E\u043D\u043B\u0430\u0439\u043D',
+    home_start_chat: '\u041D\u0430\u0447\u0430\u0442\u044C \u0447\u0430\u0442',
+    home_premium_subs: 'Premium \u043F\u043E\u0434\u043F\u0438\u0441\u043A\u0438',
+    home_connect_wallet: '\u041F\u043E\u0434\u043A\u043B\u044E\u0447\u0438\u0442\u044C \u043A\u043E\u0448\u0435\u043B\u0451\u043A',
+
+    // ProfileScreen labels
+    profile_requests_stat: '\u0437\u0430\u043F\u0440\u043E\u0441\u044B',
+    profile_lite_today_stat: 'lite \u0441\u0435\u0433\u043E\u0434\u043D\u044F',
+    profile_premium_stat: 'premium',
+    profile_palette_label: '\u043F\u0430\u043B\u0438\u0442\u0440\u0430',
+    profile_language_label: '\u044F\u0437\u044B\u043A',
+    profile_settings_label: '\u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438',
+
+    // ChatScreen
+    chat_type_question: '\u0432\u0432\u0435\u0434\u0438\u0442\u0435 \u0432\u043E\u043F\u0440\u043E\u0441 \u043D\u0438\u0436\u0435',
+    chat_enter_query: '\u0432\u0432\u0435\u0434\u0438\u0442\u0435 \u0437\u0430\u043F\u0440\u043E\u0441...',
+
+// FaqScreen
     faq_subtitle: '\u0427\u0430\u0441\u0442\u044B\u0435 \u0432\u043E\u043F\u0440\u043E\u0441\u044B \u043E Stone AI',
     faq_q1: '\u041A\u0430\u043A\u0438\u0435 \u043C\u043E\u0434\u0435\u043B\u0438 \u0431\u0435\u0441\u043F\u043B\u0430\u0442\u043D\u043E?',
     faq_a1: '6 Lite \u043C\u043E\u0434\u0435\u043B\u0435\u0439 \u0431\u0435\u0441\u043F\u043B\u0430\u0442\u043D\u043E: GPT-4o mini, Claude Haiku 4.5, Gemini 2.0 Flash, DeepSeek R1, Llama 4, Mistral Large. 20 \u0437\u0430\u043F\u0440\u043E\u0441\u043E\u0432/\u0434\u0435\u043D\u044C.',
@@ -407,7 +457,32 @@ export const translations = {
     home_no_wallet: '\u65E0\u94B1\u5305',
     home_wallets: '\u4E2A\u94B1\u5305',
 
-    // FaqScreen
+    
+    // Navigation extra
+    nav_faq: 'FAQ',
+
+    // HomeScreen labels
+    home_active_model: '\u5F53\u524D\u6A21\u578B',
+    home_all_models_label: '\u6240\u6709\u6A21\u578B',
+    home_quick_actions_label: '\u5FEB\u6377\u64CD\u4F5C',
+    home_online: '\u5728\u7EBF',
+    home_start_chat: '\u5F00\u59CB\u804A\u5929',
+    home_premium_subs: 'Premium\u8BA2\u9605',
+    home_connect_wallet: '\u8FDE\u63A5\u94B1\u5305',
+
+    // ProfileScreen labels
+    profile_requests_stat: '\u8BF7\u6C42',
+    profile_lite_today_stat: 'lite \u4ECA\u65E5',
+    profile_premium_stat: 'premium',
+    profile_palette_label: '\u8C03\u8272\u677F',
+    profile_language_label: '\u8BED\u8A00',
+    profile_settings_label: '\u8BBE\u7F6E',
+
+    // ChatScreen
+    chat_type_question: '\u5728\u4E0B\u65B9\u8F93\u5165\u60A8\u7684\u95EE\u9898',
+    chat_enter_query: '\u8F93\u5165\u67E5\u8BE2...',
+
+// FaqScreen
     faq_subtitle: '\u5173\u4E8EStone AI\u7684\u5E38\u89C1\u95EE\u9898',
     faq_q1: '\u54EA\u4E9B\u6A21\u578B\u662F\u514D\u8D39\u7684\uFF1F',
     faq_a1: '6\u4E2ALite\u6A21\u578B\u514D\u8D39\uFF1AGPT-4o mini\u3001Claude Haiku 4.5\u3001Gemini 2.0 Flash\u3001DeepSeek R1\u3001Llama 4\u3001Mistral Large\u3002\u6BCF\u592920\u6B21\u8BF7\u6C42\u3002',
