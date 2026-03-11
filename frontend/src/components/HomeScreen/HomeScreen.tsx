@@ -173,36 +173,6 @@ export function HomeScreen() {
 
       <div style={{ height: 12 }} />
 
-      {/* Stats bar */}
-      <div style={{
-        display: 'flex', gap: 0,
-        border: '1px solid rgba(0,255,136,0.12)', borderRadius: 12, overflow: 'hidden',
-        animation: 'borderGlow 4s ease-in-out infinite',
-      }}>
-        {[
-          { value: user.totalRequests, label: 'requests' },
-          { value: user.liteToday, label: 'today' },
-          { value: models.length || 11, label: 'models' },
-        ].map((s, i) => (
-          <div key={i} style={{
-            flex: 1, textAlign: 'center', padding: '12px 8px',
-            borderRight: i < 2 ? '1px solid rgba(0,255,136,0.08)' : 'none',
-            background: 'rgba(0,255,136,0.02)',
-          }}>
-            <div style={{
-              fontFamily: "'Orbitron',sans-serif", fontSize: 16, fontWeight: 900, color: '#00ff88',
-              textShadow: '0 0 12px rgba(0,255,136,0.4)',
-            }}>{s.value}</div>
-            <div style={{
-              fontFamily: 'monospace', fontSize: 9, color: '#5a8a70',
-              marginTop: 3, textTransform: 'uppercase',
-            }}>{s.label}</div>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ height: 12 }} />
-
       {/* Channel link */}
       <Card accent="#39ff14" onClick={() => window.open('https://t.me/stoneAIC', '_blank')}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
