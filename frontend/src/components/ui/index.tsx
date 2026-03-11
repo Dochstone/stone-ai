@@ -3,6 +3,7 @@
  * Card, Tag, Divider, GlowBtn, GlitchTitle, MatrixRain, OceanBg, SunsetBg, TonIcon
  */
 import { useState, useEffect, useRef, type ReactNode, type CSSProperties } from 'react'
+import { useTranslation } from '../../i18n/useTranslation'
 
 // ─── Card ───
 interface CardProps { children: ReactNode; style?: CSSProperties; onClick?: () => void; accent?: string; featured?: boolean }
@@ -221,15 +222,17 @@ export function TopHeader({ primaryRgb, primary }: TopHeaderProps) {
 // ─── BottomNav ───
 interface BottomNavProps { active: string; onNavigate: (id: string) => void; primaryRgb: string; secondaryRgb: string; primary: string }
 
-const NAV_ITEMS = [
-  { id: 'home', icon: '🏠', label: 'Home' },
-  { id: 'plans', icon: '💳', label: 'Plans' },
-  { id: 'chat', icon: '💬', label: 'Chat', main: true },
-  { id: 'faq', icon: '❓', label: 'FAQ' },
-  { id: 'profile', icon: '👤', label: 'Profile' },
-]
+// NAV_ITEMS moved inside component for i18n
 
 export function BottomNav({ active, onNavigate, primaryRgb, secondaryRgb, primary }: BottomNavProps) {
+  const { t } = useTranslation()
+  const NAV_ITEMS = [
+    { id: 'home', icon: '🏠', label: t.nav_home },
+    { id: 'plans', icon: '💳', label: t.nav_plans },
+    { id: 'chat', icon: '💬', label: t.nav_chat, main: true },
+    { id: 'faq', icon: '❓', label: t.nav_faq },
+    { id: 'profile', icon: '👤', label: t.nav_profile },
+  ]
   return (
     <div style={{
       position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
