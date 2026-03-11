@@ -85,7 +85,7 @@ export function HomeScreen() {
         <Card accent={accent} onClick={() => setScreen('chat')}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{
-              fontSize: 24, width: 44, height: 44,
+              fontSize: 36, width: 52, height: 52,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               borderRadius: 12, background: `${accent}10`, border: `1px solid ${accent}20`,
             }}>{currentModel.icon}</div>
@@ -119,7 +119,7 @@ export function HomeScreen() {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{
-                  fontSize: 20,
+                  fontSize: 32,
                   opacity: isPremium ? 0.7 : 1,
                   filter: isPremium ? 'grayscale(0.3)' : 'none',
                 }}>{md.icon}</span>
