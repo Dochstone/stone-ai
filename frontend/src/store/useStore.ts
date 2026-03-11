@@ -35,7 +35,7 @@ export interface UserState {
   hasPass: boolean
 }
 
-type Screen = 'home' | 'chat' | 'plans' | 'profile'
+type Screen = 'home' | 'chat' | 'plans' | 'profile' | 'faq' | 'model_detail'
 type PaletteId = 'matrix' | 'ocean' | 'sunset'
 
 export interface Palette {
@@ -100,7 +100,9 @@ function loadPaletteId(): PaletteId {
 interface AppState {
   // Navigation
   screen: Screen
+  selectedModel: any | null
   setScreen: (s: Screen) => void
+  setSelectedModel: (m: any | null) => void
 
   // Palette
   paletteId: PaletteId
@@ -140,6 +142,7 @@ const savedLang = (localStorage.getItem('stone_lang') || 'ru') as Lang
 export const useStore = create<AppState>((set, get) => ({
   // Navigation
   screen: 'home',
+    selectedModel: null,
   setScreen: (screen) => set({ screen }),
 
   // Palette
