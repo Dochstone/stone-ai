@@ -26,6 +26,20 @@ export function HomeScreen() {
   const currentModel = models.find(m => m.id === modelId) || models[0]
   const accent = currentModel ? MODEL_ACCENTS[currentModel.id] || '#00ff88' : '#00ff88'
 
+  const MODEL_DESC: Record<string, string> = {
+    'gpt-4o-mini': t.mdesc_gpt4o_mini,
+    'claude-haiku-4.5': t.mdesc_claude_haiku,
+    'gemini-2.0-flash': t.mdesc_gemini_flash,
+    'deepseek-r1': t.mdesc_deepseek,
+    'llama-4-maverick': t.mdesc_llama,
+    'mistral-large-25': t.mdesc_mistral,
+    'gpt-4.1': t.mdesc_gpt41,
+    'claude-opus-4': t.mdesc_claude_opus,
+    'grok-3': t.mdesc_grok,
+    'gemini-2.5-pro': t.mdesc_gemini_pro,
+    'perplexity-sonar-pro': t.mdesc_perplexity,
+  }
+
   return (
     <div style={{ padding: '0 18px 90px' }}>
       {/* Header */}
@@ -78,7 +92,7 @@ export function HomeScreen() {
             <div style={{ flex: 1 }}>
               <div style={{ fontFamily: 'monospace', fontSize: 9, color: '#5a8a70', textTransform: 'uppercase', marginBottom: 2 }}>active model</div>
               <div style={{ fontFamily: 'sans-serif', fontSize: 15, fontWeight: 700, color: '#e0f0e8' }}>{currentModel.name}</div>
-              <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70' }}>{currentModel.company} &bull; {currentModel.desc}</div>
+              <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70' }}>{currentModel.company} &bull; {MODEL_DESC[currentModel.id] || currentModel.desc}</div>
             </div>
             <Tag text="online" accent="#00ff88" />
           </div>
@@ -120,7 +134,7 @@ export function HomeScreen() {
                       background: isPremium ? '#bf5af2' : '#00ff88',
                       padding: '1px 4px', borderRadius: 3,
                     }}>{isPremium ? 'PRO' : 'FREE'}</span>
-                    <span style={{ fontFamily: 'monospace', fontSize: 9, color: '#5a8a70' }}>{md.desc}</span>
+                    <span style={{ fontFamily: 'monospace', fontSize: 9, color: '#5a8a70' }}>{MODEL_DESC[md.id] || md.desc}</span>
                   </div>
                 </div>
               </div>
