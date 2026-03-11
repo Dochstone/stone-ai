@@ -121,7 +121,6 @@ export function PlansScreen() {
           </span>
           <GlitchTitle text="AI" size={20} />
         </div>
-        <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#3a6a50', marginTop: 2 }}>sys.account()</div>
       </div>
 
       {/* Tab switcher */}
@@ -159,7 +158,7 @@ export function PlansScreen() {
               </div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-              <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#3a6a50' }}>lite.requests.today</span>
+              <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#3a6a50' }}>{t.home_lite_today}</span>
               <span style={{ fontFamily: 'monospace', fontSize: 12, fontWeight: 700, color: '#00ff88' }}>
                 {user.liteToday}/{user.liteLimitDay === -1 ? '∞' : user.liteLimitDay}
               </span>
@@ -173,7 +172,7 @@ export function PlansScreen() {
               }} />
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#3a6a50' }}>premium.requests</span>
+              <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#3a6a50' }}>{t.home_premium}</span>
               <span style={{ fontFamily: 'monospace', fontSize: 12, fontWeight: 700, color: user.plan === 'free' ? '#ff6b6b' : '#bf5af2' }}>
                 {user.plan === 'free' ? t.plans_need_sub : `${user.premiumToday}/${user.premiumLimitDay}`}
               </span>
