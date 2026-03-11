@@ -28,7 +28,7 @@ export function FaqScreen() {
       <div style={{ padding: '16px 0 8px' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
           <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 20, fontWeight: 900, color: '#fff' }}>FAQ</span>
-          <GlitchTitle text="\u2753" size={20} />
+          <GlitchTitle text="❓" size={20} />
         </div>
         <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#5a8a70', marginTop: 4 }}>
           {t.faq_subtitle}
@@ -49,7 +49,7 @@ export function FaqScreen() {
                 border: `1px solid rgba(${p.primaryRgb},0.15)`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontFamily: 'monospace', fontSize: 12, fontWeight: 700, color: p.primary,
-              }}>{faqOpen === i ? '\u2212' : '+'}</div>
+              }}>{faqOpen === i ? '−' : '+'}</div>
               <div style={{ fontFamily: 'sans-serif', fontSize: 13, fontWeight: 600, color: '#e0f0e8', flex: 1 }}>
                 {item.q}
               </div>
@@ -78,7 +78,7 @@ export function FaqScreen() {
       {/* Support card */}
       <Card accent="#00e5ff" featured>
         <div style={{ textAlign: 'center', marginBottom: 12 }}>
-          <span style={{ fontSize: 32 }}>\uD83D\uDEDF</span>
+          <span style={{ fontSize: 32 }}>🛟</span>
           <div style={{ fontFamily: 'sans-serif', fontSize: 16, fontWeight: 700, color: '#e0f0e8', marginTop: 6 }}>
             {t.faq_support_title}
           </div>
@@ -88,12 +88,12 @@ export function FaqScreen() {
           padding: '10px 12px', background: 'rgba(0,229,255,0.06)',
           borderRadius: 10, border: '1px solid rgba(0,229,255,0.12)', cursor: 'pointer',
         }}>
-          <span style={{ fontSize: 18 }}>\uD83D\uDCAC</span>
+          <span style={{ fontSize: 18 }}>💬</span>
           <div style={{ flex: 1 }}>
             <div style={{ fontFamily: 'sans-serif', fontSize: 13, fontWeight: 600, color: '#e0f0e8' }}>{t.faq_support_tg}</div>
             <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70' }}>@stonemvp</div>
           </div>
-          <Tag text="\u2192" accent="#00e5ff" />
+          <Tag text="→" accent="#00e5ff" />
         </div>
       </Card>
 
@@ -102,12 +102,12 @@ export function FaqScreen() {
       {/* Channel link */}
       <Card accent="#39ff14" onClick={() => window.open('https://t.me/stoneAIC', '_blank')}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 20 }}>\uD83D\uDCE1</span>
+          <span style={{ fontSize: 20 }}>📡</span>
           <div style={{ flex: 1 }}>
             <div style={{ fontFamily: 'sans-serif', fontSize: 13, fontWeight: 700, color: '#e0f0e8' }}>Stone AI Channel</div>
             <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70' }}>@stoneAIC</div>
           </div>
-          <Tag text={t.faq_join + ' \u2192'} accent="#39ff14" />
+          <Tag text={t.faq_join + ' →'} accent="#39ff14" />
         </div>
       </Card>
     </div>
