@@ -1,17 +1,19 @@
 """Stone AI — Main application entry point.
 
-FastAPI HTTP API server. Bot polling is handled by separate tgstone-bot service.
+FastAPI HTTP API server with Telegram bot webhook handler.
 """
 
+import os
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.client.default import DefaultBotProperties
+from aiogram.types import Update
 
 from app.config import get_settings
 from app.database import init_db
@@ -49,11 +51,22 @@ async def lifespan(app: FastAPI):
     await init_db()
     logger.info("✅ Database initialized")
 
-    # NOTE: Bot polling DISABLED here — separate tgstone-bot service handles polling.
-    # This backend exposes bot object for creating invoices (Stars payments).
-    # If you need payments in this service, switch to webhook mode instead.
+    # Set webhook for Telegram bot
     if bot:
-        logger.info("✅ Bot initialized (no polling — API-only mode)")
+        railway_url = os.environ.get("RAILWAY_PUBLIC_DOMAIN", "")
+        if railway_url:
+            webhook_url = f"https://{railway_url}/webhook/{settings.bot_token}"
+        else:
+            webhook_url = f"https://stone-ai-production.up.railway.app/webhook/{settings.bot_token}"
+        try:
+            await bot.set_webhook(
+                url=webhook_url,
+                allowed_updates=["message", "callback_query", "pre_checkout_query"],
+            )
+            logger.info(f"✅ Webhook set: {webhook_url[:60]}...")
+        except Exception as e:
+            logger.error(f"❌ Failed to set webhook: {e}")
+        logger.info("✅ Bot initialized in webhook mode")
     else:
         logger.warning("⚠️ Bot token not configured — running API only")
 
@@ -104,6 +117,22 @@ async def root():
         "models": 11,
         "docs": "/docs",
     }
+
+
+# ─── Webhook endpoint for Telegram bot ───
+@app.post("/webhook/{token}")
+async def telegram_webhook(token: str, request: Request):
+    """Process incoming Telegram updates via webhook."""
+    if not bot or not dp:
+        return {"error": "Bot not configured"}
+
+    if token != settings.bot_token:
+        return {"error": "Invalid token"}
+
+    data = await request.json()
+    update = Update.model_validate(data, context={"bot": bot})
+    await dp.feed_update(bot=bot, update=update)
+    return {"ok": True}
 
 
 @app.get("/health")
