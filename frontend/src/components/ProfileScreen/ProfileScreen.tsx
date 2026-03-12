@@ -2,12 +2,13 @@
  * ProfileScreen — User info, stats, palette selector, language, TON wallet, channel link.
  * FAQ moved to separate FaqScreen.
  */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from '../../i18n/useTranslation'
 import { LANG_LABELS } from '../../i18n/translations'
 import type { Lang } from '../../i18n/translations'
 import { useStore, PALETTES } from '../../store/useStore'
 import { Card, Tag, Divider, GlowBtn, GlitchTitle, TonIcon } from '../ui'
+import { apiGet, apiPost } from '../../api/client'
 
 const LANGS = [
   { id: 'ru', flag: '🇷🇺', name: 'RU' },
@@ -126,6 +127,11 @@ export function ProfileScreen() {
 
       <div style={{ height: 10 }} />
 
+      {/* BYOK — Bring Your Own Key */}
+      <ByokCard palette={palette} />
+
+      <div style={{ height: 10 }} />
+
       {/* Support card */}
       <Card accent="#00e5ff" featured>
         <div style={{ textAlign: 'center', marginBottom: 12 }}>
@@ -173,4 +179,180 @@ export function ProfileScreen() {
       </div>
     </div>
   )
-                }
+}
+
+// ─── BYOK Component ───
+
+function ByokCard({ palette }: { palette: any }) {
+  const p = palette
+  const [status, setStatus] = useState<{ enabled: boolean; key_masked: string | null } | null>(null)
+  const [inputKey, setInputKey] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null)
+  const [open, setOpen] = useState(false)
+
+  useEffect(() => {
+    apiGet('/api/byok/status').then(setStatus).catch(() => {})
+  }, [])
+
+  const handleSave = async () => {
+    if (!inputKey.trim()) return
+    setLoading(true)
+    setMsg(null)
+    try {
+      const res = await apiPost('/api/byok/key', { key: inputKey.trim() })
+      setMsg({ text: res.message, ok: true })
+      setStatus({ enabled: true, key_masked: res.key_masked })
+      setInputKey('')
+    } catch (e: any) {
+      const detail = e.detail?.detail || e.message || 'Ошибка'
+      setMsg({ text: typeof detail === 'string' ? detail : 'Ошибка сохранения', ok: false })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    setLoading(true)
+    setMsg(null)
+    try {
+      const { getInitData } = await import('../../utils/telegram')
+      const initData = getInitData()
+      const API_BASE = (import.meta as any).env?.VITE_API_URL || ''
+      const r = await fetch(`${API_BASE}/api/byok/key`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(initData ? { Authorization: `tma ${initData}` } : {}),
+        },
+      })
+      const res = await r.json()
+      setMsg({ text: res.message || 'Ключ удалён', ok: true })
+      setStatus({ enabled: false, key_masked: null })
+    } catch {
+      setMsg({ text: 'Ошибка удаления', ok: false })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div style={{
+      background: status?.enabled
+        ? `rgba(${p.primaryRgb},0.07)`
+        : 'rgba(255,255,255,0.03)',
+      border: `1px solid ${status?.enabled ? `rgba(${p.primaryRgb},0.25)` : 'rgba(255,255,255,0.08)'}`,
+      borderRadius: 16,
+      padding: 16,
+      fontFamily: 'monospace',
+    }}>
+      {/* Header */}
+      <div
+        onClick={() => setOpen(o => !o)}
+        style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
+      >
+        <span style={{ fontSize: 22 }}>🔑</span>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#e0f0e8' }}>
+            Свой API ключ
+          </div>
+          <div style={{ fontSize: 10, color: '#5a8a70', marginTop: 2 }}>
+            {status?.enabled
+              ? `✅ Подключён · ${status.key_masked}`
+              : 'Используй свой OpenRouter ключ'}
+          </div>
+        </div>
+        <div style={{
+          fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 6,
+          background: status?.enabled ? `rgba(${p.primaryRgb},0.15)` : 'rgba(255,255,255,0.05)',
+          color: status?.enabled ? p.primary : '#5a8a70',
+        }}>
+          {status?.enabled ? 'BYOK' : open ? '▲' : '▼'}
+        </div>
+      </div>
+
+      {/* Expanded */}
+      {open && (
+        <div style={{ marginTop: 14 }}>
+          <div style={{ fontSize: 10, color: '#5a8a70', marginBottom: 8, lineHeight: 1.5 }}>
+            Подключи ключ с <span style={{ color: p.primary }}>openrouter.ai</span> — запросы пойдут через твою квоту.
+            Лимиты платформы отключатся. Доступны все Premium-модели.
+          </div>
+
+          {status?.enabled ? (
+            <div>
+              <div style={{
+                padding: '8px 12px', borderRadius: 8,
+                background: `rgba(${p.primaryRgb},0.06)`,
+                border: `1px solid rgba(${p.primaryRgb},0.15)`,
+                fontSize: 11, color: p.primary, marginBottom: 10,
+              }}>
+                🔐 {status.key_masked}
+              </div>
+              <button
+                onClick={handleDelete}
+                disabled={loading}
+                style={{
+                  width: '100%', padding: '9px 0', borderRadius: 10,
+                  border: '1px solid rgba(255,80,80,0.3)',
+                  background: 'rgba(255,80,80,0.08)',
+                  color: '#ff5050', fontWeight: 700, fontSize: 12,
+                  cursor: loading ? 'default' : 'pointer', opacity: loading ? 0.6 : 1,
+                }}
+              >
+                {loading ? '...' : '🗑 Удалить ключ'}
+              </button>
+            </div>
+          ) : (
+            <div>
+              <input
+                value={inputKey}
+                onChange={e => setInputKey(e.target.value)}
+                placeholder="sk-or-v1-..."
+                style={{
+                  width: '100%', padding: '10px 12px', borderRadius: 10,
+                  background: 'rgba(0,0,0,0.3)',
+                  border: `1px solid rgba(${p.primaryRgb},0.2)`,
+                  color: '#e0f0e8', fontSize: 12, fontFamily: 'monospace',
+                  outline: 'none', boxSizing: 'border-box', marginBottom: 8,
+                }}
+              />
+              <button
+                onClick={handleSave}
+                disabled={loading || !inputKey.trim()}
+                style={{
+                  width: '100%', padding: '10px 0', borderRadius: 10,
+                  border: 'none',
+                  background: inputKey.trim()
+                    ? `linear-gradient(135deg, ${p.primary}, ${p.secondary})`
+                    : 'rgba(255,255,255,0.05)',
+                  color: inputKey.trim() ? '#000' : '#444',
+                  fontWeight: 800, fontSize: 13,
+                  cursor: loading || !inputKey.trim() ? 'default' : 'pointer',
+                  opacity: loading ? 0.7 : 1,
+                }}
+              >
+                {loading ? '⏳ Проверка...' : '✅ Подключить'}
+              </button>
+            </div>
+          )}
+
+          {msg && (
+            <div style={{
+              marginTop: 8, padding: '8px 12px', borderRadius: 8, fontSize: 11,
+              background: msg.ok ? `rgba(${p.primaryRgb},0.1)` : 'rgba(255,80,80,0.1)',
+              color: msg.ok ? p.primary : '#ff5050',
+              border: `1px solid ${msg.ok ? `rgba(${p.primaryRgb},0.2)` : 'rgba(255,80,80,0.2)'}`,
+            }}>
+              {msg.text}
+            </div>
+          )}
+
+          <div style={{ fontSize: 10, color: '#3a5a4a', marginTop: 8, lineHeight: 1.4 }}>
+            Получи ключ на openrouter.ai → Keys → Create key
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
