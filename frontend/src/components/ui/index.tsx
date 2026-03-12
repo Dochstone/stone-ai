@@ -248,6 +248,7 @@ export function BottomNav({ active, onNavigate, primaryRgb, secondaryRgb, primar
             background: 'none', border: 'none', cursor: 'pointer',
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
             transition: 'all 0.2s', padding: '0 4px',
+            width: 60, textAlign: 'center',
             ...(it.main ? { marginTop: -14 } : {}),
           }}>
             {it.main ? (
