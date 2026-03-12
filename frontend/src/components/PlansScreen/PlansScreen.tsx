@@ -34,7 +34,7 @@ export function PlansScreen() {
   const [buying, setBuying] = useState(false)
 
   // VIP if total deposits > $10k
-  const isVip = (user as any).total_deposited_usd >= VIP_THRESHOLD_USD
+  const isVip = (user.totalDepositedUsd ?? 0) >= VIP_THRESHOLD_USD
   const creditPrice = isVip ? CREDIT_PRICE_VIP : CREDIT_PRICE_STANDARD
 
   const usd = parseFloat(amountUsd) || 0
