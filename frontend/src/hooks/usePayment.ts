@@ -3,7 +3,7 @@
  *
  * Flow: Click "Buy" → POST /api/payment/stars/create-invoice → get invoice_url
  *       → WebApp.openInvoice(url) → bot handles pre_checkout + successful_payment
- *       → bot calls /api/payment/stars/confirm → subscription/pass activated
+ *       → bot calls /api/payment/stars/confirm → credits added
  */
 
 import { useState, useCallback } from 'react'
@@ -17,30 +17,31 @@ interface PaymentResult {
   error?: string
 }
 
+interface TopUpPayload {
+  usd_amount: number
+  credits: number
+  method: 'stars' | 'fiat'
+}
+
 export function usePayment() {
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('idle')
-  const [paymentLoading, setPaymentLoading] = useState<string | null>(null) // product_id being purchased
+  const [paymentLoading, setPaymentLoading] = useState(false)
 
-  const buyWithStars = useCallback(async (productId: string): Promise<PaymentResult> => {
+  const buyWithStars = useCallback(async (payload: TopUpPayload): Promise<PaymentResult> => {
     setPaymentStatus('loading')
-    setPaymentLoading(productId)
+    setPaymentLoading(true)
 
     try {
-      // Step 1: Create invoice via backend → bot
-      const data = await apiPost<{ invoice_url: string; product_id: string; amount: number }>(
+      const data = await apiPost<{ invoice_url: string; stars: number; credits: number }>(
         '/api/payment/stars/create-invoice',
-        { product_id: productId }
+        payload
       )
 
-      if (!data.invoice_url) {
-        throw new Error('Не получен URL инвойса')
-      }
+      if (!data.invoice_url) throw new Error('Не получен URL инвойса')
 
-      // Step 2: Open Telegram Stars payment dialog
       haptic('medium')
       const result = await openInvoice(data.invoice_url)
 
-      // Step 3: Handle result
       if (result === 'paid') {
         setPaymentStatus('success')
         hapticNotification('success')
@@ -50,7 +51,7 @@ export function usePayment() {
         return { status: 'cancelled' }
       } else {
         setPaymentStatus('failed')
-        return { status: 'failed', error: `Статус оплаты: ${result}` }
+        return { status: 'failed', error: `Статус: ${result}` }
       }
     } catch (e: any) {
       setPaymentStatus('failed')
@@ -58,13 +59,13 @@ export function usePayment() {
       const errorMsg = e.detail || e.message || 'Ошибка оплаты'
       return { status: 'failed', error: typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg) }
     } finally {
-      setPaymentLoading(null)
+      setPaymentLoading(false)
     }
   }, [])
 
   const resetPayment = useCallback(() => {
     setPaymentStatus('idle')
-    setPaymentLoading(null)
+    setPaymentLoading(false)
   }, [])
 
   return {
