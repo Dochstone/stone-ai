@@ -138,7 +138,7 @@ function PromoBanner({ palette, onPlansClick }: { palette: any; onPlansClick: ()
     { icon: '🔍', text: 'Gemini 2.5 Pro · Perplexity · DeepSeek' },
     { icon: '🆓', text: '6 моделей бесплатно каждый день' },
     { icon: '🚀', text: 'Без VPN · Без регистраций · Внутри TG' },
-    { icon: '💼', text: 'API-доступ для бизнеса на тарифе MAX' },
+    { icon: '💎', text: 'Пополняй баланс и пользуйся без лимитов' },
   ]
 
   return (
@@ -243,9 +243,9 @@ function ModelCard({
       onClick={onClick}
       style={{
         background: isLocked
-          ? 'rgba(255,255,255,0.03)'
+          ? 'rgba(255,255,255,0.10)'
           : `rgba(${palette.primaryRgb},0.06)`,
-        border: `1px solid ${isLocked ? 'rgba(255,255,255,0.08)' : `rgba(${palette.primaryRgb},0.15)`}`,
+        border: `1px solid ${isLocked ? 'rgba(255,255,255,0.18)' : `rgba(${palette.primaryRgb},0.15)`}`,
         borderRadius: 14,
         padding: '14px 8px',
         textAlign: 'center',
