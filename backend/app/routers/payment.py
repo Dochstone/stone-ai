@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/payment", tags=["payment"])
 
 # Pricing
-CREDIT_PRICE_STANDARD = 1.22   # USD per credit
-CREDIT_PRICE_VIP = 1.12        # USD per credit (total deposited > $10,000)
+CREDIT_PRICE_STANDARD = 1.1    # USD per credit
+CREDIT_PRICE_VIP = 1.0         # USD per credit (total deposited > $10,000)
 VIP_THRESHOLD_USD = 10000.0
 STAR_PRICE_USD = 0.013          # 1 Telegram Star ≈ $0.013
 
