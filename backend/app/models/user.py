@@ -36,6 +36,9 @@ class User(Base):
     # ─── BYOK: Bring Your Own Key ───
     byok_openrouter_key: Mapped[str | None] = mapped_column(String(256), nullable=True)
     byok_enabled: Mapped[bool] = mapped_column(Boolean, server_default=text("false"))
+
+    # ─── Credits (new billing model) ───
+    credits: Mapped[int] = mapped_column(Integer, server_default=text("0"))
     daily_lite_used: Mapped[int] = mapped_column(Integer, server_default=text("0"))
     daily_premium_used: Mapped[int] = mapped_column(Integer, server_default=text("0"))
     total_requests: Mapped[int] = mapped_column(Integer, server_default=text("0"))
