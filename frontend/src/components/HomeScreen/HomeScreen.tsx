@@ -20,21 +20,23 @@ export function HomeScreen() {
     setScreen('chat')
   }
 
+  const liteUsedPct = user.liteLimitDay > 0
+    ? Math.min((user.liteToday / user.liteLimitDay) * 100, 100)
+    : 0
+
   return (
     <div style={{ padding: '16px 16px 80px', minHeight: '100vh' }}>
+
       {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: 24 }}>
+      <div style={{ textAlign: 'center', marginBottom: 20 }}>
         <h1 style={{
-          fontSize: 28,
-          fontWeight: 800,
+          fontSize: 28, fontWeight: 800, margin: 0,
           background: `linear-gradient(135deg, ${p.primary}, ${p.secondary})`,
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          margin: 0,
+          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
         }}>
           Stone AI
         </h1>
-        <p style={{ color: '#888', fontSize: 13, marginTop: 4 }}>
+        <p style={{ color: '#668877', fontSize: 13, marginTop: 4 }}>
           {t.home_subtitle(liteModels.length, premiumModels.length)}
         </p>
       </div>
@@ -44,70 +46,83 @@ export function HomeScreen() {
 
       {/* Usage card */}
       <div style={{
-        background: `rgba(${p.primaryRgb},0.06)`,
-        border: `1px solid rgba(${p.primaryRgb},0.15)`,
-        borderRadius: 16,
-        padding: 16,
-        marginBottom: 20,
+        background: 'rgba(8,16,12,0.95)',
+        border: `1px solid rgba(${p.primaryRgb},0.25)`,
+        borderRadius: 16, padding: 16, marginBottom: 20,
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-          <span style={{ color: '#aaa', fontSize: 13 }}>Бесплатных сегодня</span>
-          <span style={{ color: p.primary, fontWeight: 700, fontSize: 14 }}>
+        {/* Lite usage */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+          <span style={{ color: '#aab8aa', fontSize: 13 }}>Бесплатных сегодня</span>
+          <span style={{
+            color: liteUsedPct >= 100 ? '#ff6666' : p.primary,
+            fontWeight: 700, fontSize: 14,
+          }}>
             {user.liteToday}/{user.liteLimitDay === -1 ? '∞' : user.liteLimitDay}
           </span>
         </div>
         <div style={{
-          height: 4, background: 'rgba(255,255,255,0.1)',
-          borderRadius: 2, overflow: 'hidden', marginBottom: 12,
+          height: 5, background: 'rgba(255,255,255,0.08)',
+          borderRadius: 3, overflow: 'hidden', marginBottom: 14,
         }}>
           <div style={{
             height: '100%',
-            width: `${user.liteLimitDay > 0 ? Math.min((user.liteToday / user.liteLimitDay) * 100, 100) : 0}%`,
-            background: `linear-gradient(90deg, ${p.primary}, ${p.secondary})`,
-            borderRadius: 2, transition: 'width 0.3s',
+            width: `${liteUsedPct}%`,
+            background: liteUsedPct >= 100
+              ? 'linear-gradient(90deg, #ff6666, #ff4444)'
+              : `linear-gradient(90deg, ${p.primary}, ${p.secondary})`,
+            borderRadius: 3, transition: 'width 0.3s',
+            boxShadow: `0 0 8px rgba(${p.primaryRgb},0.5)`,
           }} />
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ color: '#aaa', fontSize: 13 }}>💎 Кредиты</span>
+
+        {/* Credits */}
+        <div style={{
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          background: `rgba(${p.primaryRgb},0.06)`,
+          border: `1px solid rgba(${p.primaryRgb},0.15)`,
+          borderRadius: 10, padding: '10px 14px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 16 }}>💎</span>
+            <span style={{ color: '#aab8aa', fontSize: 13 }}>Кредиты</span>
+          </div>
           {user.credits > 0 ? (
-            <span style={{ color: '#bf5af2', fontWeight: 700, fontSize: 14 }}>
-              {user.credits} кр.
+            <span style={{
+              color: p.primary, fontWeight: 800, fontSize: 16,
+              filter: `drop-shadow(0 0 6px rgba(${p.primaryRgb},0.5))`,
+            }}>
+              {user.credits.toLocaleString()} кр.
             </span>
           ) : (
             <span
               onClick={() => { haptic('light'); setScreen('plans') }}
-              style={{ color: '#aaff00', fontSize: 13, cursor: 'pointer' }}
+              style={{
+                background: `linear-gradient(135deg, ${p.primary}, ${p.secondary})`,
+                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                fontSize: 13, fontWeight: 700, cursor: 'pointer',
+              }}
             >
-              Купить →
+              Пополнить →
             </span>
           )}
         </div>
       </div>
 
       {/* Lite models */}
-      <h3 style={{ color: '#fff', fontSize: 15, marginBottom: 10 }}>
+      <h3 style={{ color: '#c0e8d0', fontSize: 14, marginBottom: 10, fontWeight: 700, letterSpacing: 0.5 }}>
         🆓 {t.home_lite_free}
       </h3>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: 10,
-        marginBottom: 24,
-      }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24 }}>
         {liteModels.map((m) => (
           <ModelCard key={m.id} model={m} palette={p} onClick={() => handleModelClick(m)} />
         ))}
       </div>
 
       {/* Premium models */}
-      <h3 style={{ color: '#fff', fontSize: 15, marginBottom: 10 }}>
+      <h3 style={{ color: '#c0e8d0', fontSize: 14, marginBottom: 10, fontWeight: 700, letterSpacing: 0.5 }}>
         💎 {t.home_premium_sub}
       </h3>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: 10,
-      }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
         {premiumModels.map((m) => (
           <ModelCard
             key={m.id}
@@ -117,8 +132,7 @@ export function HomeScreen() {
             canAfford={user.credits >= (user.creditCosts?.[m.id] || 0)}
             onClick={() => {
               if (user.credits < (user.creditCosts?.[m.id] || 0)) {
-                haptic('light')
-                setScreen('plans')
+                haptic('light'); setScreen('plans')
               } else {
                 handleModelClick(m)
               }
@@ -138,120 +152,88 @@ function PromoBanner({ palette, onPlansClick }: { palette: any; onPlansClick: ()
     { icon: '🔍', text: 'Gemini 2.5 Pro · Perplexity · DeepSeek' },
     { icon: '🆓', text: '6 моделей бесплатно каждый день' },
     { icon: '🚀', text: 'Без VPN · Без регистраций · Внутри TG' },
-    { icon: '💎', text: 'Пополняй баланс и пользуйся без лимитов' },
+    { icon: '💎', text: 'Пополняй баланс — без лимитов' },
   ]
 
   return (
     <div style={{
-      background: `linear-gradient(135deg, rgba(${p.primaryRgb},0.08), rgba(${p.secondaryRgb},0.05))`,
-      border: `1px solid rgba(${p.primaryRgb},0.2)`,
-      borderRadius: 16,
-      padding: 16,
-      marginBottom: 20,
-      position: 'relative',
-      overflow: 'hidden',
+      background: 'rgba(8,16,12,0.95)',
+      border: `1px solid rgba(${p.primaryRgb},0.3)`,
+      borderRadius: 16, padding: 16, marginBottom: 20,
+      position: 'relative', overflow: 'hidden',
     }}>
-      {/* Glow effect */}
+      {/* Glow */}
       <div style={{
-        position: 'absolute', top: -30, right: -30,
-        width: 120, height: 120, borderRadius: '50%',
-        background: `radial-gradient(circle, rgba(${p.primaryRgb},0.15), transparent 70%)`,
+        position: 'absolute', top: -40, right: -40,
+        width: 140, height: 140, borderRadius: '50%',
+        background: `radial-gradient(circle, rgba(${p.primaryRgb},0.12), transparent 70%)`,
         pointerEvents: 'none',
       }} />
 
       <div style={{
-        fontSize: 11,
-        fontWeight: 700,
-        color: p.primary,
-        letterSpacing: 1.5,
-        textTransform: 'uppercase',
-        marginBottom: 6,
+        fontSize: 11, fontWeight: 700, color: p.primary,
+        letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 6,
       }}>
         ✦ Stone AI — всё в одном
       </div>
 
-      <div style={{
-        fontSize: 15,
-        fontWeight: 800,
-        color: '#fff',
-        marginBottom: 12,
-        lineHeight: 1.3,
-      }}>
+      <div style={{ fontSize: 15, fontWeight: 800, color: '#fff', marginBottom: 12, lineHeight: 1.3 }}>
         Весь мировой AI<br />
         <span style={{
           background: `linear-gradient(135deg, ${p.primary}, ${p.secondary})`,
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
+          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
         }}>прямо в Telegram</span>
       </div>
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '6px 8px',
-        marginBottom: 14,
-      }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '7px 10px', marginBottom: 14 }}>
         {features.map((f, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-            <span style={{ fontSize: 13 }}>{f.icon}</span>
-            <span style={{ fontSize: 11, color: '#bbb', lineHeight: 1.3 }}>{f.text}</span>
+          <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+            <span style={{ fontSize: 13, flexShrink: 0 }}>{f.icon}</span>
+            <span style={{ fontSize: 11, color: '#99bbaa', lineHeight: 1.4 }}>{f.text}</span>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'flex', gap: 8 }}>
-        <button
-          onClick={onPlansClick}
-          style={{
-            flex: 1,
-            padding: '9px 0',
-            borderRadius: 10,
-            border: 'none',
-            background: `linear-gradient(135deg, ${p.primary}, ${p.secondary})`,
-            color: '#000',
-            fontWeight: 800,
-            fontSize: 13,
-            cursor: 'pointer',
-          }}
-        >
-          ⚡ Тарифы
-        </button>
-
-      </div>
+      <button
+        onClick={onPlansClick}
+        style={{
+          width: '100%', padding: '12px 0', borderRadius: 12, border: 'none',
+          background: `linear-gradient(135deg, ${p.primary}, ${p.secondary})`,
+          color: '#000', fontWeight: 800, fontSize: 14, cursor: 'pointer',
+          boxShadow: `0 4px 20px rgba(${p.primaryRgb},0.4)`,
+          letterSpacing: 0.5,
+        }}
+      >
+        ⚡ Пополнить баланс
+      </button>
     </div>
   )
 }
 
 function ModelCard({
-  model,
-  palette,
-  locked,
-  creditCost,
-  canAfford,
-  onClick,
+  model, palette, locked, creditCost, canAfford, onClick,
 }: {
-  model: any
-  palette: any
-  locked?: boolean
-  creditCost?: number
-  canAfford?: boolean
-  onClick: () => void
+  model: any; palette: any; locked?: boolean
+  creditCost?: number; canAfford?: boolean; onClick: () => void
 }) {
+  const p = palette
   const isLocked = locked ?? (creditCost !== undefined && creditCost > 0 && !canAfford)
+  const isPremium = model.tier === 'premium'
+
   return (
     <div
       onClick={onClick}
       style={{
-        background: isLocked
-          ? 'rgba(255,255,255,0.10)'
-          : `rgba(${palette.primaryRgb},0.06)`,
-        border: `1px solid ${isLocked ? 'rgba(255,255,255,0.18)' : `rgba(${palette.primaryRgb},0.15)`}`,
-        borderRadius: 14,
-        padding: '14px 8px',
-        textAlign: 'center',
-        cursor: 'pointer',
-        opacity: isLocked ? 0.6 : 1,
-        transition: 'transform 0.15s, opacity 0.15s',
+        background: 'rgba(8,16,12,0.95)',
+        border: `1px solid ${isLocked
+          ? 'rgba(255,255,255,0.1)'
+          : isPremium
+            ? 'rgba(191,90,242,0.3)'
+            : `rgba(${p.primaryRgb},0.25)`}`,
+        borderRadius: 14, padding: '14px 8px',
+        textAlign: 'center', cursor: 'pointer',
+        opacity: isLocked ? 0.55 : 1,
+        transition: 'transform 0.15s',
         position: 'relative',
       }}
     >
@@ -259,26 +241,26 @@ function ModelCard({
       <div style={{
         position: 'absolute', top: 6, right: 6,
         fontSize: 8, fontWeight: 700, padding: '2px 5px', borderRadius: 4,
-        background: model.tier === 'lite'
-          ? 'rgba(0,255,136,0.15)'
-          : 'rgba(191,90,242,0.15)',
-        color: model.tier === 'lite' ? '#00ff88' : '#bf5af2',
+        background: isPremium ? 'rgba(191,90,242,0.2)' : `rgba(${p.primaryRgb},0.15)`,
+        color: isPremium ? '#bf5af2' : p.primary,
       }}>
-        {model.tier === 'lite' ? 'FREE' : 'PRO'}
+        {isPremium ? 'PRO' : 'FREE'}
       </div>
 
       <div style={{ fontSize: 28, marginBottom: 6 }}>{model.icon}</div>
       <div style={{
-        fontSize: 11, fontWeight: 700, color: '#fff', marginBottom: 2,
+        fontSize: 11, fontWeight: 700, color: '#e0f8ec', marginBottom: 2,
         whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
       }}>
         {model.name}
       </div>
-      <div style={{ fontSize: 9, color: '#888' }}>{model.company}</div>
+      <div style={{ fontSize: 9, color: '#4a7a5a' }}>{model.company}</div>
       {creditCost !== undefined && creditCost > 0 && (
         <div style={{
-          fontSize: 9, fontWeight: 700, marginTop: 4,
-          color: canAfford ? '#bf5af2' : '#666',
+          fontSize: 9, fontWeight: 800, marginTop: 5,
+          color: canAfford ? '#bf5af2' : '#445544',
+          background: canAfford ? 'rgba(191,90,242,0.1)' : 'rgba(255,255,255,0.04)',
+          padding: '2px 6px', borderRadius: 5, display: 'inline-block',
         }}>
           {creditCost} кр.
         </div>
