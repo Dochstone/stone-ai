@@ -51,39 +51,34 @@ export function HomeScreen() {
         marginBottom: 20,
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-          <span style={{ color: '#aaa', fontSize: 13 }}>{t.home_lite_today}</span>
+          <span style={{ color: '#aaa', fontSize: 13 }}>Бесплатных сегодня</span>
           <span style={{ color: p.primary, fontWeight: 700, fontSize: 14 }}>
             {user.liteToday}/{user.liteLimitDay === -1 ? '∞' : user.liteLimitDay}
           </span>
         </div>
         <div style={{
-          height: 4,
-          background: 'rgba(255,255,255,0.1)',
-          borderRadius: 2,
-          overflow: 'hidden',
-          marginBottom: 12,
+          height: 4, background: 'rgba(255,255,255,0.1)',
+          borderRadius: 2, overflow: 'hidden', marginBottom: 12,
         }}>
           <div style={{
             height: '100%',
             width: `${user.liteLimitDay > 0 ? Math.min((user.liteToday / user.liteLimitDay) * 100, 100) : 0}%`,
             background: `linear-gradient(90deg, ${p.primary}, ${p.secondary})`,
-            borderRadius: 2,
-            transition: 'width 0.3s',
+            borderRadius: 2, transition: 'width 0.3s',
           }} />
         </div>
-
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <span style={{ color: '#aaa', fontSize: 13 }}>{t.home_premium}</span>
-          {user.plan === 'free' ? (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ color: '#aaa', fontSize: 13 }}>💎 Кредиты</span>
+          {user.credits > 0 ? (
+            <span style={{ color: '#bf5af2', fontWeight: 700, fontSize: 14 }}>
+              {user.credits} кр.
+            </span>
+          ) : (
             <span
               onClick={() => { haptic('light'); setScreen('plans') }}
               style={{ color: '#aaff00', fontSize: 13, cursor: 'pointer' }}
             >
-              PLUS / MAX →
-            </span>
-          ) : (
-            <span style={{ color: '#bf5af2', fontWeight: 700, fontSize: 14 }}>
-              {user.premiumToday}/{user.premiumLimitDay === -1 ? '∞' : user.premiumLimitDay}
+              Купить →
             </span>
           )}
         </div>
@@ -118,9 +113,10 @@ export function HomeScreen() {
             key={m.id}
             model={m}
             palette={p}
-            locked={user.plan === 'free' && !user.hasPass}
+            creditCost={user.creditCosts?.[m.id] || 0}
+            canAfford={user.credits >= (user.creditCosts?.[m.id] || 0)}
             onClick={() => {
-              if (user.plan === 'free' && !user.hasPass) {
+              if (user.credits < (user.creditCosts?.[m.id] || 0)) {
                 haptic('light')
                 setScreen('plans')
               } else {
@@ -241,39 +237,39 @@ function ModelCard({
   model,
   palette,
   locked,
+  creditCost,
+  canAfford,
   onClick,
 }: {
   model: any
   palette: any
   locked?: boolean
+  creditCost?: number
+  canAfford?: boolean
   onClick: () => void
 }) {
+  const isLocked = locked ?? (creditCost !== undefined && creditCost > 0 && !canAfford)
   return (
     <div
       onClick={onClick}
       style={{
-        background: locked
+        background: isLocked
           ? 'rgba(255,255,255,0.03)'
           : `rgba(${palette.primaryRgb},0.06)`,
-        border: `1px solid ${locked ? 'rgba(255,255,255,0.08)' : `rgba(${palette.primaryRgb},0.15)`}`,
+        border: `1px solid ${isLocked ? 'rgba(255,255,255,0.08)' : `rgba(${palette.primaryRgb},0.15)`}`,
         borderRadius: 14,
         padding: '14px 8px',
         textAlign: 'center',
         cursor: 'pointer',
-        opacity: locked ? 0.6 : 1,
+        opacity: isLocked ? 0.6 : 1,
         transition: 'transform 0.15s, opacity 0.15s',
         position: 'relative',
       }}
     >
       {/* Badge */}
       <div style={{
-        position: 'absolute',
-        top: 6,
-        right: 6,
-        fontSize: 8,
-        fontWeight: 700,
-        padding: '2px 5px',
-        borderRadius: 4,
+        position: 'absolute', top: 6, right: 6,
+        fontSize: 8, fontWeight: 700, padding: '2px 5px', borderRadius: 4,
         background: model.tier === 'lite'
           ? 'rgba(0,255,136,0.15)'
           : 'rgba(191,90,242,0.15)',
@@ -284,17 +280,20 @@ function ModelCard({
 
       <div style={{ fontSize: 28, marginBottom: 6 }}>{model.icon}</div>
       <div style={{
-        fontSize: 11,
-        fontWeight: 700,
-        color: '#fff',
-        marginBottom: 2,
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
+        fontSize: 11, fontWeight: 700, color: '#fff', marginBottom: 2,
+        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
       }}>
         {model.name}
       </div>
       <div style={{ fontSize: 9, color: '#888' }}>{model.company}</div>
+      {creditCost !== undefined && creditCost > 0 && (
+        <div style={{
+          fontSize: 9, fontWeight: 700, marginTop: 4,
+          color: canAfford ? '#bf5af2' : '#666',
+        }}>
+          {creditCost} кр.
+        </div>
+      )}
     </div>
   )
 }
