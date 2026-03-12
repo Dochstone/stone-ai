@@ -1,51 +1,65 @@
-"""Payment endpoints — Stars invoices for credits and legacy passes."""
+"""Payment endpoints — Stars + Fiat (YooKassa) invoices for credits."""
 
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from app.database import get_db
 from app.middleware.auth import get_current_user
-from app.models import Subscription, Pass, Transaction
-from app.services.credits import CREDIT_PACKAGES, add_credits
+from app.models import Transaction
+from app.services.credits import add_credits, get_user_credits
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/payment", tags=["payment"])
 
+# Pricing
+CREDIT_PRICE_STANDARD = 1.22   # USD per credit
+CREDIT_PRICE_VIP = 1.12        # USD per credit (total deposited > $10,000)
+VIP_THRESHOLD_USD = 10000.0
+STAR_PRICE_USD = 0.013          # 1 Telegram Star ≈ $0.013
 
-class InvoiceRequest(BaseModel):
-    product_id: str
+
+def credits_for_usd(usd: float, is_vip: bool) -> int:
+    price = CREDIT_PRICE_VIP if is_vip else CREDIT_PRICE_STANDARD
+    return max(0, int(usd / price))
 
 
-@router.get("/products")
-async def get_products():
-    """Return all available credit packages."""
-    return {
-        "credits": [
-            {
-                "id": pid,
-                "credits": p["credits"],
-                "price": p["price"],
-                "name": p["name"],
-                "popular": p["popular"],
-                "price_per_credit": round(p["price"] / p["credits"], 2),
-            }
-            for pid, p in CREDIT_PACKAGES.items()
-        ]
-    }
+class TopUpRequest(BaseModel):
+    usd_amount: float       # how much user wants to spend
+    credits: int            # how many credits to receive (pre-calculated by frontend)
+    method: str             # "stars" | "fiat"
 
 
 @router.post("/stars/create-invoice")
 async def create_stars_invoice(
-    req: InvoiceRequest,
+    req: TopUpRequest,
     tg_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
-    product = CREDIT_PACKAGES.get(req.product_id)
-    if not product:
-        raise HTTPException(status_code=400, detail=f"Unknown product: {req.product_id}")
+    if req.usd_amount < 1.0:
+        raise HTTPException(status_code=400, detail="Минимальная сумма $1")
+    if req.credits <= 0:
+        raise HTTPException(status_code=400, detail="Некорректное количество кредитов")
+
+    # Verify credits match the user's current price tier
+    from sqlalchemy import text
+    result = await db.execute(
+        text("SELECT total_deposited_usd FROM users WHERE tg_id = :tid"),
+        {"tid": tg_user["id"]}
+    )
+    row = result.fetchone()
+    is_vip = (row[0] or 0.0) >= VIP_THRESHOLD_USD if row else False
+    expected_credits = credits_for_usd(req.usd_amount, is_vip)
+
+    # Allow ±1 rounding difference
+    if abs(expected_credits - req.credits) > 1:
+        raise HTTPException(status_code=400, detail="Несоответствие суммы и кредитов")
+
+    stars_amount = max(1, round(req.usd_amount / STAR_PRICE_USD))
 
     from app.main import bot
     if not bot:
@@ -53,202 +67,81 @@ async def create_stars_invoice(
 
     try:
         from aiogram.types import LabeledPrice
-
         invoice_url = await bot.create_invoice_link(
-            title=f"Stone AI — {product['name']}",
-            description=f"{product['credits']} кредитов для Stone AI",
-            payload=f"{req.product_id}:{tg_user['id']}",
+            title="Stone AI — Пополнение кредитов",
+            description=f"{req.credits} кредитов · ${req.usd_amount:.2f}",
+            payload=f"credits:{req.credits}:{tg_user['id']}:{req.usd_amount}",
             provider_token="",
             currency="XTR",
-            prices=[LabeledPrice(label=product["name"], amount=product["price"])],
+            prices=[LabeledPrice(label=f"{req.credits} кредитов", amount=stars_amount)],
         )
-
-        logger.info(f"Invoice: product={req.product_id}, user={tg_user['id']}, price={product['price']}⭐")
-        return {"invoice_url": invoice_url, "product_id": req.product_id, "amount": product["price"]}
-
-    except Exception as e:
-        logger.error(f"Failed to create invoice: {e}")
-        raise HTTPException(status_code=500, detail=f"Не удалось создать инвойс: {str(e)}")
-
-
-@router.post("/stars/confirm")
-async def confirm_stars_payment(
-    product_id: str,
-    tg_id: int,
-    payment_id: str,
-    db: AsyncSession = Depends(get_db),
-):
-    """Called by bot after successful_payment. Adds credits to user."""
-    now = datetime.utcnow()
-
-    if product_id in CREDIT_PACKAGES:
-        product = CREDIT_PACKAGES[product_id]
-        new_balance = await add_credits(db, tg_id, product["credits"])
-
-        tx = Transaction(
-            user_tg_id=tg_id,
-            amount=product["price"],
-            currency="XTR",
-            amount_usd=product["price"] * 0.013,
-            product_type="credits",
-            product_id=product_id,
-            status="completed",
-            provider_id=payment_id,
-        )
-        db.add(tx)
-        await db.commit()
-
-        logger.info(f"Credits added: user={tg_id}, credits={product['credits']}, balance={new_balance}")
-        return {"status": "ok", "credits_added": product["credits"], "new_balance": new_balance}
-
-    raise HTTPException(status_code=400, detail=f"Unknown product: {product_id}")
-
-
-
-# ─── Stars subscription products ───
-STARS_PRODUCTS = {
-    "plus_stars": {"plan": "plus", "price": 469, "duration_days": 30, "name": "PLUS подписка (1 мес)"},
-    "max_stars": {"plan": "max", "price": 1499, "duration_days": 30, "name": "MAX подписка (1 мес)"},
-}
-
-# ─── Stars pass products ───
-STARS_PASSES = {
-    "day_pass": {"price": 59, "type": "day", "requests": 15, "hours": 24, "name": "Day Pass (24ч)"},
-    "week_pass": {"price": 229, "type": "week", "requests": 80, "hours": 168, "name": "Week Pass (7 дней)"},
-    "single_query": {"price": 6, "type": "single", "requests": 1, "hours": None, "name": "1 Premium запрос"},
-}
-
-
-class InvoiceRequest(BaseModel):
-    product_id: str  # e.g. "plus_stars", "day_pass"
-
-
-@router.post("/stars/create-invoice")
-async def create_stars_invoice(
-    req: InvoiceRequest,
-    tg_user: dict = Depends(get_current_user),
-):
-    """
-    Create a Telegram Stars invoice link via the bot.
-
-    Returns { invoice_url } that the frontend opens via WebApp.openInvoice().
-    """
-    product = STARS_PRODUCTS.get(req.product_id) or STARS_PASSES.get(req.product_id)
-    if not product:
-        raise HTTPException(status_code=400, detail=f"Unknown product: {req.product_id}")
-
-    # Import bot instance from main
-    from app.main import bot
-    if not bot:
-        raise HTTPException(status_code=503, detail="Bot not configured — Stars payments unavailable")
-
-    try:
-        from aiogram.types import LabeledPrice
-
-        invoice_url = await bot.create_invoice_link(
-            title=f"Stone AI — {product['name']}",
-            description=f"{product['name']} длЏ Stone AI",
-            payload=f"{req.product_id}:{tg_user['id']}",
-            provider_token="",  # Empty for Telegram Stars
-            currency="XTR",
-            prices=[LabeledPrice(label=product["name"], amount=product["price"])],
-        )
-
-        logger.info(f"Created Stars invoice: product={req.product_id}, user={tg_user['id']}, price={product['price']}⭐")
-
-        return {
-            "invoice_url": invoice_url,
-            "product_id": req.product_id,
-            "amount": product["price"],
-        }
+        logger.info(f"Stars invoice: user={tg_user['id']}, usd={req.usd_amount}, credits={req.credits}, stars={stars_amount}")
+        return {"invoice_url": invoice_url, "stars": stars_amount, "credits": req.credits}
 
     except Exception as e:
         logger.error(f"Failed to create Stars invoice: {e}")
-        raise HTTPException(status_code=500, detail=f"Не удалось создать инвойс: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Ошибка создания инвойса: {str(e)}")
 
 
 @router.post("/stars/confirm")
 async def confirm_stars_payment(
-    product_id: str,
+    credits: int,
     tg_id: int,
+    usd_amount: float,
     payment_id: str,
     db: AsyncSession = Depends(get_db),
 ):
-    """
-    Called by the bot after successful_payment to activate subscription/pass.
-    Internal endpoint — not exposed to frontend.
-    """
-    now = datetime.utcnow()
+    """Called by bot after successful_payment. Adds credits, updates total_deposited_usd."""
+    new_balance = await add_credits(db, tg_id, credits)
 
-    # Handle subscription
-    if product_id in STARS_PRODUCTS:
-        product = STARS_PRODUCTS[product_id]
+    # Update total_deposited_usd
+    from sqlalchemy import text
+    await db.execute(
+        text("UPDATE users SET total_deposited_usd = COALESCE(total_deposited_usd, 0) + :amt WHERE tg_id = :tid"),
+        {"amt": usd_amount, "tid": tg_id}
+    )
 
-        # Deactivate any existing subscription
-        from sqlalchemy import select, update
-        await db.execute(
-            update(Subscription)
-            .where(Subscription.user_tg_id == tg_id, Subscription.is_active == True)
-            .values(is_active=False)
-        )
+    tx = Transaction(
+        user_tg_id=tg_id,
+        amount=round(usd_amount / STAR_PRICE_USD),
+        currency="XTR",
+        amount_usd=usd_amount,
+        product_type="credits",
+        product_id="credits_topup",
+        status="completed",
+        provider_id=payment_id,
+    )
+    db.add(tx)
+    await db.commit()
 
-        sub = Subscription(
-            user_tg_id=tg_id,
-            plan=product["plan"],
-            payment_method="stars",
-            payment_id=payment_id,
-            is_active=True,
-            started_at=now,
-            expires_at=now + timedelta(days=product["duration_days"]),
-        )
-        db.add(sub)
+    logger.info(f"Credits added: user={tg_id}, credits={credits}, usd={usd_amount}, balance={new_balance}")
+    return {"status": "ok", "credits_added": credits, "new_balance": new_balance}
 
-        # Record transaction
-        tx = Transaction(
-            user_tg_id=tg_id,
-            amount=product["price"],
-            currency="XTR",
-            amount_usd=product["price"] * 0.013,  # ~$0.013 per Star
-            product_type="subscription",
-            product_id=product_id,
-            status="completed",
-            provider_id=payment_id,
-        )
-        db.add(tx)
-        await db.commit()
 
-        logger.info(f"Subscription activated: user={tg_id}, plan={product['plan']}, expires={sub.expires_at}")
-        return {"status": "ok", "plan": product["plan"], "expires_at": sub.expires_at.isoformat()}
+@router.post("/fiat/create-invoice")
+async def create_fiat_invoice(
+    req: TopUpRequest,
+    tg_user: dict = Depends(get_current_user),
+):
+    """YooKassa invoice — to be implemented."""
+    raise HTTPException(status_code=501, detail="Оплата картой скоро будет доступна")
 
-    # Handle pass
-    if product_id in STARS_PASSES:
-        product = STARS_PASSES[product_id]
-        new_pass = Pass(
-            user_tg_id=tg_id,
-            pass_type=product["type"],
-            payment_method="stars",
-            payment_id=payment_id,
-            requests_left=product["requests"],
-            is_active=True,
-            activated_at=now,
-            expires_at=now + timedelta(hours=product["hours"]) if product["hours"] else None,
-        )
-        db.add(new_pass)
 
-        tx = Transaction(
-            user_tg_id=tg_id,
-            amount=product["price"],
-            currency="XTR",
-            amount_usd=product["price"] * 0.013,
-            product_type="pass",
-            product_id=product_id,
-            status="completed",
-            provider_id=payment_id,
-        )
-        db.add(tx)
-        await db.commit()
+@router.get("/pricing")
+async def get_pricing(tg_user: dict = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    """Return credit pricing for current user."""
+    from sqlalchemy import text
+    result = await db.execute(
+        text("SELECT total_deposited_usd FROM users WHERE tg_id = :tid"),
+        {"tid": tg_user["id"]}
+    )
+    row = result.fetchone()
+    total_deposited = row[0] or 0.0 if row else 0.0
+    is_vip = total_deposited >= VIP_THRESHOLD_USD
 
-        logger.info(f"Pass activated: user={tg_id}, type={product['type']}, requests={product['requests']}")
-        return {"status": "ok", "pass_type": product["type"], "requests": product["requests"]}
-
-    raise HTTPException(status_code=400, detail=f"Unknown product: {product_id}")
+    return {
+        "credit_price_usd": CREDIT_PRICE_VIP if is_vip else CREDIT_PRICE_STANDARD,
+        "is_vip": is_vip,
+        "total_deposited_usd": total_deposited,
+        "vip_threshold_usd": VIP_THRESHOLD_USD,
+    }
