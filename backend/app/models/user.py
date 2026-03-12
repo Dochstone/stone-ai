@@ -39,6 +39,7 @@ class User(Base):
 
     # ─── Credits (new billing model) ───
     credits: Mapped[int] = mapped_column(Integer, server_default=text("0"))
+    total_deposited_usd: Mapped[float] = mapped_column(Numeric(12, 2), server_default=text("0"))
     daily_lite_used: Mapped[int] = mapped_column(Integer, server_default=text("0"))
     daily_premium_used: Mapped[int] = mapped_column(Integer, server_default=text("0"))
     total_requests: Mapped[int] = mapped_column(Integer, server_default=text("0"))
