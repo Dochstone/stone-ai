@@ -216,18 +216,7 @@ function PromoBanner({ palette, onPlansClick }: { palette: any; onPlansClick: ()
         >
           ⚡ Тарифы
         </button>
-        <div style={{
-          padding: '9px 12px',
-          borderRadius: 10,
-          background: 'rgba(255,255,255,0.06)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          fontSize: 11,
-          color: '#888',
-          display: 'flex',
-          alignItems: 'center',
-        }}>
-          от 469₽/мес
-        </div>
+
       </div>
     </div>
   )
