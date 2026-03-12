@@ -1,4 +1,4 @@
-"""Payment endpoints — Stars invoices (Phase 1), TON and USDT in later phases."""
+"""Payment endpoints — Stars invoices for credits and legacy passes."""
 
 import logging
 from datetime import datetime, timedelta
@@ -9,10 +9,100 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.middleware.auth import get_current_user
 from app.models import Subscription, Pass, Transaction
+from app.services.credits import CREDIT_PACKAGES, add_credits
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/payment", tags=["payment"])
+
+
+class InvoiceRequest(BaseModel):
+    product_id: str
+
+
+@router.get("/products")
+async def get_products():
+    """Return all available credit packages."""
+    return {
+        "credits": [
+            {
+                "id": pid,
+                "credits": p["credits"],
+                "price": p["price"],
+                "name": p["name"],
+                "popular": p["popular"],
+                "price_per_credit": round(p["price"] / p["credits"], 2),
+            }
+            for pid, p in CREDIT_PACKAGES.items()
+        ]
+    }
+
+
+@router.post("/stars/create-invoice")
+async def create_stars_invoice(
+    req: InvoiceRequest,
+    tg_user: dict = Depends(get_current_user),
+):
+    product = CREDIT_PACKAGES.get(req.product_id)
+    if not product:
+        raise HTTPException(status_code=400, detail=f"Unknown product: {req.product_id}")
+
+    from app.main import bot
+    if not bot:
+        raise HTTPException(status_code=503, detail="Bot not configured")
+
+    try:
+        from aiogram.types import LabeledPrice
+
+        invoice_url = await bot.create_invoice_link(
+            title=f"Stone AI — {product['name']}",
+            description=f"{product['credits']} кредитов для Stone AI",
+            payload=f"{req.product_id}:{tg_user['id']}",
+            provider_token="",
+            currency="XTR",
+            prices=[LabeledPrice(label=product["name"], amount=product["price"])],
+        )
+
+        logger.info(f"Invoice: product={req.product_id}, user={tg_user['id']}, price={product['price']}⭐")
+        return {"invoice_url": invoice_url, "product_id": req.product_id, "amount": product["price"]}
+
+    except Exception as e:
+        logger.error(f"Failed to create invoice: {e}")
+        raise HTTPException(status_code=500, detail=f"Не удалось создать инвойс: {str(e)}")
+
+
+@router.post("/stars/confirm")
+async def confirm_stars_payment(
+    product_id: str,
+    tg_id: int,
+    payment_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """Called by bot after successful_payment. Adds credits to user."""
+    now = datetime.utcnow()
+
+    if product_id in CREDIT_PACKAGES:
+        product = CREDIT_PACKAGES[product_id]
+        new_balance = await add_credits(db, tg_id, product["credits"])
+
+        tx = Transaction(
+            user_tg_id=tg_id,
+            amount=product["price"],
+            currency="XTR",
+            amount_usd=product["price"] * 0.013,
+            product_type="credits",
+            product_id=product_id,
+            status="completed",
+            provider_id=payment_id,
+        )
+        db.add(tx)
+        await db.commit()
+
+        logger.info(f"Credits added: user={tg_id}, credits={product['credits']}, balance={new_balance}")
+        return {"status": "ok", "credits_added": product["credits"], "new_balance": new_balance}
+
+    raise HTTPException(status_code=400, detail=f"Unknown product: {product_id}")
+
 
 
 # ─── Stars subscription products ───
