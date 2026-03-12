@@ -11,8 +11,8 @@ import { haptic } from '../../utils/telegram'
 
 // 1 Star ≈ $0.013
 const STAR_PRICE_USD = 0.013
-const CREDIT_PRICE_STANDARD = 1.22  // $ per credit
-const CREDIT_PRICE_VIP = 1.12       // $ per credit (total deposits > $10,000)
+const CREDIT_PRICE_STANDARD = 1.1   // $ per credit
+const CREDIT_PRICE_VIP = 1.0        // $ per credit (total deposits > $10,000)
 const VIP_THRESHOLD_USD = 10000
 
 const PREMIUM_MODELS = [
@@ -116,8 +116,8 @@ export function PlansScreen() {
 
       {/* Top-up block */}
       <div style={{
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.08)',
+        background: 'rgba(255,255,255,0.10)',
+        border: '1px solid rgba(255,255,255,0.18)',
         borderRadius: 16, padding: 16, marginBottom: 16,
       }}>
         <div style={{ fontSize: 11, color: '#888', fontWeight: 700, letterSpacing: 1, marginBottom: 14 }}>
@@ -142,7 +142,7 @@ export function PlansScreen() {
                 flex: 1, padding: '8px 0', borderRadius: 10, border: 'none',
                 background: amountUsd === String(a)
                   ? `linear-gradient(135deg, ${p.primary}, ${p.secondary})`
-                  : 'rgba(255,255,255,0.07)',
+                  : 'rgba(255,255,255,0.14)',
                 color: amountUsd === String(a) ? '#000' : '#aaa',
                 fontWeight: 700, fontSize: 13, cursor: 'pointer',
               }}
@@ -199,7 +199,7 @@ export function PlansScreen() {
                 flex: 1, padding: '10px 0', borderRadius: 10, border: 'none',
                 background: payMethod === method
                   ? `linear-gradient(135deg, ${p.primary}, ${p.secondary})`
-                  : 'rgba(255,255,255,0.07)',
+                  : 'rgba(255,255,255,0.14)',
                 color: payMethod === method ? '#000' : '#aaa',
                 fontWeight: 700, fontSize: 13, cursor: 'pointer',
               }}
@@ -231,8 +231,8 @@ export function PlansScreen() {
 
       {/* Premium model costs */}
       <div style={{
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.08)',
+        background: 'rgba(255,255,255,0.10)',
+        border: '1px solid rgba(255,255,255,0.18)',
         borderRadius: 14, padding: 14, marginBottom: 16,
       }}>
         <div style={{ fontSize: 11, color: '#888', marginBottom: 10, fontWeight: 700, letterSpacing: 1 }}>
@@ -269,8 +269,8 @@ export function PlansScreen() {
 
       {/* FAQ */}
       <div style={{
-        background: 'rgba(255,255,255,0.02)',
-        border: '1px solid rgba(255,255,255,0.06)',
+        background: 'rgba(255,255,255,0.08)',
+        border: '1px solid rgba(255,255,255,0.15)',
         borderRadius: 12, padding: 14,
       }}>
         <div style={{ fontSize: 11, color: '#888', fontWeight: 700, marginBottom: 10 }}>❓ КАК ЭТО РАБОТАЕТ</div>
