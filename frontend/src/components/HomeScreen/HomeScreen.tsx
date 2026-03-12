@@ -37,7 +37,7 @@ export function HomeScreen() {
           Stone AI
         </h1>
         <p style={{ color: '#668877', fontSize: 13, marginTop: 4 }}>
-          {t.home_subtitle(liteModels.length, premiumModels.length)}
+          Весь мировой AI · прямо в Telegram
         </p>
       </div>
 
@@ -178,11 +178,7 @@ function PromoBanner({ palette, onPlansClick }: { palette: any; onPlansClick: ()
       </div>
 
       <div style={{ fontSize: 15, fontWeight: 800, color: '#fff', marginBottom: 12, lineHeight: 1.3 }}>
-        Весь мировой AI<br />
-        <span style={{
-          background: `linear-gradient(135deg, ${p.primary}, ${p.secondary})`,
-          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-        }}>прямо в Telegram</span>
+        11 моделей · 1 бот · 0 лишних подписок
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '7px 10px', marginBottom: 14 }}>
