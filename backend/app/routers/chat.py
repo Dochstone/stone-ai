@@ -4,9 +4,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from app.database import get_db
 from app.middleware.auth import get_current_user
+from app.models.user import User
 from app.services.ai_router import stream_chat_response, get_model_tier, DEFAULT_MODEL
 from app.services.limiter import check_can_request, record_usage, get_or_create_user
 
@@ -40,32 +42,45 @@ async def chat(
     # Ensure user exists in DB
     await get_or_create_user(db, tg_user)
 
-    # Check rate limits
-    check = await check_can_request(db, tg_id, req.model_id)
-    if not check["allowed"]:
-        raise HTTPException(
-            status_code=429,
-            detail={
-                "error": check["reason"],
-                "plan": check["plan"],
-                "tier": check["tier"],
-                "used_today": check["used_today"],
-                "limit": check["limit"],
-            },
-        )
+    # Check if user has BYOK enabled — if yes, skip rate limits
+    result = await db.execute(select(User).where(User.telegram_id == tg_id))
+    db_user = result.scalar_one_or_none()
+    byok_key = None
+    using_byok = False
 
-    # System prompt only for subscribers
+    if db_user and db_user.byok_enabled and db_user.byok_openrouter_key:
+        byok_key = db_user.byok_openrouter_key
+        using_byok = True
+
+    if not using_byok:
+        # Check rate limits only for platform key users
+        check = await check_can_request(db, tg_id, req.model_id)
+        if not check["allowed"]:
+            raise HTTPException(
+                status_code=429,
+                detail={
+                    "error": check["reason"],
+                    "plan": check["plan"],
+                    "tier": check["tier"],
+                    "used_today": check["used_today"],
+                    "limit": check["limit"],
+                },
+            )
+        plan = check["plan"]
+    else:
+        plan = "byok"
+
+    # System prompt only for subscribers or BYOK users
     system_prompt = None
-    if req.system_prompt and check["plan"] in ("plus", "max"):
+    if req.system_prompt and (using_byok or plan in ("plus", "max")):
         system_prompt = req.system_prompt
 
     # Stream response
     async def generate():
         usage_data = {"tokens_in": 0, "tokens_out": 0}
 
-        async for chunk in stream_chat_response(req.model_id, req.messages, system_prompt):
+        async for chunk in stream_chat_response(req.model_id, req.messages, system_prompt, byok_key=byok_key):
             yield chunk
-            # Try to capture usage from the chunk
             if '"usage"' in chunk:
                 import json
                 try:
@@ -75,7 +90,7 @@ async def chat(
                 except Exception:
                     pass
 
-        # Record usage after streaming completes
+        # Record usage after streaming (for BYOK users too — stats only)
         await record_usage(
             db, tg_id, req.model_id,
             tokens_in=usage_data.get("tokens_in", 0),
@@ -89,6 +104,7 @@ async def chat(
         headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
-            "X-Accel-Buffering": "no",  # Nginx: don't buffer SSE
+            "X-Accel-Buffering": "no",
         },
     )
+
