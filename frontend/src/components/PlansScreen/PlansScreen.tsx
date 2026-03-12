@@ -1,6 +1,6 @@
 /**
  * PlansScreen — Credit top-up with free amount input.
- * Price: $1.22/credit (standard) | $1.12/credit (VIP, total deposits > $10,000)
+ * Price: $1.10/credit (standard) | $1.00/credit (VIP, total deposits > $10,000)
  * Lite models: free 20/day. Premium: credits per request.
  */
 
@@ -9,21 +9,71 @@ import { useStore } from '../../store/useStore'
 import { usePayment } from '../../hooks/usePayment'
 import { haptic } from '../../utils/telegram'
 
-// 1 Star ≈ $0.013
 const STAR_PRICE_USD = 0.013
-const CREDIT_PRICE_STANDARD = 1.1   // $ per credit
-const CREDIT_PRICE_VIP = 1.0        // $ per credit (total deposits > $10,000)
+const CREDIT_PRICE_STANDARD = 1.1
+const CREDIT_PRICE_VIP = 1.0
 const VIP_THRESHOLD_USD = 10000
 
 const PREMIUM_MODELS = [
-  { id: 'claude-opus-4',        name: 'Claude Opus 4',   icon: '🧠', company: 'Anthropic', credits: 34 },
-  { id: 'gpt-4.1',              name: 'GPT-4.1',         icon: '🤖', company: 'OpenAI',    credits: 15 },
-  { id: 'grok-3',               name: 'Grok 3',          icon: '⚡',  company: 'xAI',       credits: 19 },
-  { id: 'gemini-2.5-pro',       name: 'Gemini 2.5 Pro',  icon: '🔮', company: 'Google',    credits: 13 },
-  { id: 'perplexity-sonar-pro', name: 'Perplexity Pro',  icon: '🔍', company: 'Perplexity',credits: 19 },
+  {
+    id: 'claude-opus-4',
+    name: 'Claude Opus 4',
+    icon: '🧠',
+    company: 'Anthropic',
+    credits: 34,
+    desc: 'Лучший для сложного кода, архитектуры и глубокого анализа. Думает как senior-разработчик.',
+  },
+  {
+    id: 'gpt-4.1',
+    name: 'GPT-4.1',
+    icon: '🤖',
+    company: 'OpenAI',
+    credits: 15,
+    desc: 'Флагман OpenAI 2025. Универсал — справляется с любой задачей быстро и точно.',
+  },
+  {
+    id: 'grok-3',
+    name: 'Grok 3',
+    icon: '⚡',
+    company: 'xAI',
+    credits: 19,
+    desc: 'Прямой, без цензуры. Отлично для творческих задач, копирайтинга и нестандартных запросов.',
+  },
+  {
+    id: 'gemini-2.5-pro',
+    name: 'Gemini 2.5 Pro',
+    icon: '🔮',
+    company: 'Google',
+    credits: 13,
+    desc: 'Понимает текст, картинки, PDF и видео. Идеален для работы с большими документами.',
+  },
+  {
+    id: 'perplexity-sonar-pro',
+    name: 'Perplexity Pro',
+    icon: '🔍',
+    company: 'Perplexity',
+    credits: 19,
+    desc: 'Ищет в интернете в реальном времени. Актуальные новости, цены, факты — прямо сейчас.',
+  },
 ]
 
 const QUICK_AMOUNTS_USD = [5, 10, 25, 50]
+
+// Card wrapper — dark solid background like FAQ
+function SolidCard({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+  return (
+    <div style={{
+      background: 'rgba(8,16,12,0.95)',
+      border: '1px solid rgba(0,255,136,0.2)',
+      borderRadius: 16,
+      padding: 16,
+      marginBottom: 14,
+      ...style,
+    }}>
+      {children}
+    </div>
+  )
+}
 
 export function PlansScreen() {
   const { user, palette: p } = useStore()
@@ -32,8 +82,8 @@ export function PlansScreen() {
   const [amountUsd, setAmountUsd] = useState('')
   const [payMethod, setPayMethod] = useState<'stars' | 'fiat'>('stars')
   const [buying, setBuying] = useState(false)
+  const [expandedModel, setExpandedModel] = useState<string | null>(null)
 
-  // VIP if total deposits > $10k
   const isVip = (user.totalDepositedUsd ?? 0) >= VIP_THRESHOLD_USD
   const creditPrice = isVip ? CREDIT_PRICE_VIP : CREDIT_PRICE_STANDARD
 
@@ -66,7 +116,6 @@ export function PlansScreen() {
   const handleBuyFiat = () => {
     if (usd < 1) return showToast('Минимум $1', false)
     haptic('medium')
-    // TODO: open YooKassa payment
     showToast('Скоро: оплата картой', false)
   }
 
@@ -88,75 +137,88 @@ export function PlansScreen() {
       </div>
 
       {/* Balance */}
-      <div style={{
-        background: `linear-gradient(135deg, rgba(${p.primaryRgb},0.12), rgba(${p.secondaryRgb},0.06))`,
-        border: `1px solid rgba(${p.primaryRgb},0.25)`,
-        borderRadius: 16, padding: 16, marginBottom: 20, textAlign: 'center',
-      }}>
+      <SolidCard style={{ textAlign: 'center', border: `1px solid rgba(${p.primaryRgb},0.4)` }}>
         {isVip && (
           <div style={{
-            display: 'inline-block', marginBottom: 6,
+            display: 'inline-block', marginBottom: 8,
             background: `linear-gradient(135deg, ${p.primary}, ${p.secondary})`,
-            color: '#000', fontSize: 9, fontWeight: 900,
-            padding: '2px 10px', borderRadius: 6, letterSpacing: 1,
+            color: '#000', fontSize: 10, fontWeight: 900,
+            padding: '3px 12px', borderRadius: 8, letterSpacing: 1,
           }}>
-            👑 VIP · $1.12 за кредит
+            👑 VIP · $1.00 за кредит
           </div>
         )}
-        <div style={{ fontSize: 11, color: '#888', marginBottom: 4 }}>Твой баланс</div>
+        <div style={{ fontSize: 11, color: '#668877', marginBottom: 4, fontWeight: 600, letterSpacing: 1 }}>
+          ТВОЙ БАЛАНС
+        </div>
         <div style={{
-          fontSize: 42, fontWeight: 900,
+          fontSize: 56, fontWeight: 900, lineHeight: 1,
           background: `linear-gradient(135deg, ${p.primary}, ${p.secondary})`,
           WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+          filter: `drop-shadow(0 0 20px rgba(${p.primaryRgb},0.4))`,
         }}>
           {user.credits.toLocaleString()}
         </div>
-        <div style={{ fontSize: 12, color: '#888' }}>кредитов</div>
-      </div>
+        <div style={{ fontSize: 13, color: '#668877', marginTop: 4 }}>кредитов</div>
+      </SolidCard>
 
       {/* Top-up block */}
-      <div style={{
-        background: 'rgba(255,255,255,0.10)',
-        border: '1px solid rgba(255,255,255,0.18)',
-        borderRadius: 16, padding: 16, marginBottom: 16,
-      }}>
-        <div style={{ fontSize: 11, color: '#888', fontWeight: 700, letterSpacing: 1, marginBottom: 14 }}>
+      <SolidCard style={{ border: `1px solid rgba(${p.primaryRgb},0.3)` }}>
+        <div style={{ fontSize: 11, color: p.primary, fontWeight: 700, letterSpacing: 1.5, marginBottom: 14 }}>
           ⚡ ПОПОЛНИТЬ БАЛАНС
         </div>
 
         {/* Price per credit */}
         <div style={{
-          fontSize: 12, color: p.primary, marginBottom: 14, fontWeight: 600,
+          display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14,
+          background: `rgba(${p.primaryRgb},0.08)`,
+          border: `1px solid rgba(${p.primaryRgb},0.2)`,
+          borderRadius: 10, padding: '8px 12px',
         }}>
-          1 кредит = ${creditPrice.toFixed(2)}
-          {!isVip && <span style={{ color: '#555', fontWeight: 400 }}> · скидка VIP от $10,000</span>}
+          <span style={{ fontSize: 18 }}>💎</span>
+          <div>
+            <span style={{ fontSize: 14, fontWeight: 800, color: p.primary }}>
+              1 кредит = ${creditPrice.toFixed(2)}
+            </span>
+            {!isVip && (
+              <span style={{ fontSize: 11, color: '#556655', marginLeft: 8 }}>
+                VIP скидка от $10,000
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Quick amounts */}
         <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-          {QUICK_AMOUNTS_USD.map(a => (
-            <button
-              key={a}
-              onClick={() => { setAmountUsd(String(a)); haptic('light') }}
-              style={{
-                flex: 1, padding: '8px 0', borderRadius: 10, border: 'none',
-                background: amountUsd === String(a)
-                  ? `linear-gradient(135deg, ${p.primary}, ${p.secondary})`
-                  : 'rgba(255,255,255,0.14)',
-                color: amountUsd === String(a) ? '#000' : '#aaa',
-                fontWeight: 700, fontSize: 13, cursor: 'pointer',
-              }}
-            >
-              ${a}
-            </button>
-          ))}
+          {QUICK_AMOUNTS_USD.map(a => {
+            const selected = amountUsd === String(a)
+            return (
+              <button
+                key={a}
+                onClick={() => { setAmountUsd(String(a)); haptic('light') }}
+                style={{
+                  flex: 1, padding: '10px 0', borderRadius: 10, border: 'none',
+                  background: selected
+                    ? `linear-gradient(135deg, ${p.primary}, ${p.secondary})`
+                    : 'rgba(255,255,255,0.08)',
+                  color: selected ? '#000' : '#cce8d8',
+                  fontWeight: 800, fontSize: 14, cursor: 'pointer',
+                  boxShadow: selected ? `0 0 16px rgba(${p.primaryRgb},0.5)` : 'none',
+                  transform: selected ? 'scale(1.05)' : 'scale(1)',
+                  transition: 'all 0.15s',
+                }}
+              >
+                ${a}
+              </button>
+            )
+          })}
         </div>
 
         {/* Custom input */}
         <div style={{ position: 'relative', marginBottom: 12 }}>
           <span style={{
             position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
-            color: '#666', fontSize: 16, fontWeight: 700,
+            color: p.primary, fontSize: 18, fontWeight: 800,
           }}>$</span>
           <input
             type="number"
@@ -165,11 +227,11 @@ export function PlansScreen() {
             value={amountUsd}
             onChange={e => setAmountUsd(e.target.value)}
             style={{
-              width: '100%', padding: '12px 14px 12px 28px', borderRadius: 12,
-              border: `1px solid rgba(${p.primaryRgb},0.2)`,
-              background: 'rgba(255,255,255,0.05)', color: '#e0f0e8',
-              fontSize: 16, fontWeight: 700, boxSizing: 'border-box',
-              outline: 'none',
+              width: '100%', padding: '14px 14px 14px 32px', borderRadius: 12,
+              border: `1.5px solid rgba(${p.primaryRgb},${usd > 0 ? '0.5' : '0.2'})`,
+              background: 'rgba(0,255,136,0.04)', color: '#e0f8ec',
+              fontSize: 16, fontWeight: 700, boxSizing: 'border-box', outline: 'none',
+              transition: 'border-color 0.2s',
             }}
           />
         </div>
@@ -177,36 +239,50 @@ export function PlansScreen() {
         {/* Preview */}
         {creditsToReceive > 0 && (
           <div style={{
-            background: `rgba(${p.primaryRgb},0.08)`,
-            border: `1px solid rgba(${p.primaryRgb},0.15)`,
-            borderRadius: 10, padding: '10px 14px', marginBottom: 14,
+            background: `linear-gradient(135deg, rgba(${p.primaryRgb},0.15), rgba(${p.secondaryRgb},0.08))`,
+            border: `1px solid rgba(${p.primaryRgb},0.35)`,
+            borderRadius: 12, padding: '12px 16px', marginBottom: 14,
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            boxShadow: `0 0 20px rgba(${p.primaryRgb},0.15)`,
           }}>
-            <div style={{ fontSize: 12, color: '#888' }}>Получишь кредитов</div>
-            <div style={{ fontSize: 20, fontWeight: 900, color: p.primary }}>
+            <div>
+              <div style={{ fontSize: 11, color: '#668877', fontWeight: 600 }}>Получишь кредитов</div>
+              <div style={{ fontSize: 11, color: '#556655', marginTop: 2 }}>
+                ~{Math.floor(creditsToReceive / 34)} запросов Claude Opus
+              </div>
+            </div>
+            <div style={{
+              fontSize: 28, fontWeight: 900, color: p.primary,
+              filter: `drop-shadow(0 0 10px rgba(${p.primaryRgb},0.6))`,
+            }}>
               {creditsToReceive.toLocaleString()}
             </div>
           </div>
         )}
 
         {/* Payment method toggle */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
-          {(['stars', 'fiat'] as const).map(method => (
-            <button
-              key={method}
-              onClick={() => { setPayMethod(method); haptic('light') }}
-              style={{
-                flex: 1, padding: '10px 0', borderRadius: 10, border: 'none',
-                background: payMethod === method
-                  ? `linear-gradient(135deg, ${p.primary}, ${p.secondary})`
-                  : 'rgba(255,255,255,0.14)',
-                color: payMethod === method ? '#000' : '#aaa',
-                fontWeight: 700, fontSize: 13, cursor: 'pointer',
-              }}
-            >
-              {method === 'stars' ? '⭐ Telegram Stars' : '💳 Картой'}
-            </button>
-          ))}
+        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+          {(['stars', 'fiat'] as const).map(method => {
+            const active = payMethod === method
+            return (
+              <button
+                key={method}
+                onClick={() => { setPayMethod(method); haptic('light') }}
+                style={{
+                  flex: 1, padding: '11px 0', borderRadius: 10, border: 'none',
+                  background: active
+                    ? `linear-gradient(135deg, ${p.primary}, ${p.secondary})`
+                    : 'rgba(255,255,255,0.06)',
+                  color: active ? '#000' : '#889988',
+                  fontWeight: 700, fontSize: 13, cursor: 'pointer',
+                  boxShadow: active ? `0 0 14px rgba(${p.primaryRgb},0.4)` : 'none',
+                  transition: 'all 0.2s',
+                }}
+              >
+                {method === 'stars' ? '⭐ Telegram Stars' : '💳 Картой'}
+              </button>
+            )
+          })}
         </div>
 
         {/* Buy button */}
@@ -214,82 +290,100 @@ export function PlansScreen() {
           onClick={payMethod === 'stars' ? handleBuyStars : handleBuyFiat}
           disabled={buying || !!paymentLoading || usd < 1}
           style={{
-            width: '100%', padding: '14px', borderRadius: 12, border: 'none',
+            width: '100%', padding: '16px', borderRadius: 14, border: 'none',
             background: usd >= 1
               ? `linear-gradient(135deg, ${p.primary}, ${p.secondary})`
-              : 'rgba(255,255,255,0.06)',
-            color: usd >= 1 ? '#000' : '#444',
-            fontWeight: 900, fontSize: 16, cursor: usd >= 1 ? 'pointer' : 'default',
+              : 'rgba(255,255,255,0.05)',
+            color: usd >= 1 ? '#000' : '#334433',
+            fontWeight: 900, fontSize: 17, cursor: usd >= 1 ? 'pointer' : 'default',
             opacity: buying ? 0.7 : 1,
+            boxShadow: usd >= 1 ? `0 4px 24px rgba(${p.primaryRgb},0.5)` : 'none',
+            transition: 'all 0.2s',
+            letterSpacing: 0.5,
           }}
         >
-          {buying ? '⏳ Обрабатываем...' : payMethod === 'stars'
-            ? (creditsToReceive > 0 ? `Оплатить ${starsNeeded} ⭐` : 'Введи сумму')
-            : (creditsToReceive > 0 ? `Оплатить $${usd}` : 'Введи сумму')}
+          {buying
+            ? '⏳ Обрабатываем...'
+            : payMethod === 'stars'
+              ? (creditsToReceive > 0 ? `Оплатить ${starsNeeded.toLocaleString()} ⭐` : 'Введи сумму')
+              : (creditsToReceive > 0 ? `Оплатить $${usd.toFixed(2)}` : 'Введи сумму')}
         </button>
-      </div>
+      </SolidCard>
 
       {/* Premium model costs */}
-      <div style={{
-        background: 'rgba(255,255,255,0.10)',
-        border: '1px solid rgba(255,255,255,0.18)',
-        borderRadius: 14, padding: 14, marginBottom: 16,
-      }}>
-        <div style={{ fontSize: 11, color: '#888', marginBottom: 10, fontWeight: 700, letterSpacing: 1 }}>
-          💎 СТОИМОСТЬ PREMIUM МОДЕЛЕЙ
+      <SolidCard>
+        <div style={{ fontSize: 11, color: p.primary, marginBottom: 14, fontWeight: 700, letterSpacing: 1.5 }}>
+          💎 PREMIUM МОДЕЛИ
         </div>
         {PREMIUM_MODELS.map(m => {
           const canAfford = user.credits >= m.credits
+          const isExpanded = expandedModel === m.id
           return (
-            <div key={m.id} style={{
-              display: 'flex', alignItems: 'center', gap: 10,
-              padding: '8px 0',
-              borderBottom: '1px solid rgba(255,255,255,0.05)',
-            }}>
-              <span style={{ fontSize: 18, width: 28 }}>{m.icon}</span>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: '#e0f0e8' }}>{m.name}</div>
-                <div style={{ fontSize: 10, color: '#5a8a70' }}>{m.company}</div>
+            <div
+              key={m.id}
+              onClick={() => { setExpandedModel(isExpanded ? null : m.id); haptic('light') }}
+              style={{
+                padding: '12px 0',
+                borderBottom: '1px solid rgba(255,255,255,0.06)',
+                cursor: 'pointer',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 20, width: 30 }}>{m.icon}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#e0f8ec' }}>{m.name}</div>
+                  <div style={{ fontSize: 10, color: '#4a7a5a', marginTop: 1 }}>{m.company}</div>
+                </div>
+                <div style={{
+                  fontSize: 12, fontWeight: 800,
+                  color: canAfford ? p.primary : '#446644',
+                  background: canAfford ? `rgba(${p.primaryRgb},0.12)` : 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${canAfford ? `rgba(${p.primaryRgb},0.3)` : 'rgba(255,255,255,0.08)'}`,
+                  padding: '4px 12px', borderRadius: 8,
+                }}>
+                  {m.credits} кр.
+                </div>
               </div>
-              <div style={{
-                fontSize: 12, fontWeight: 800,
-                color: canAfford ? p.primary : '#666',
-                background: canAfford ? `rgba(${p.primaryRgb},0.1)` : 'rgba(255,255,255,0.05)',
-                padding: '3px 10px', borderRadius: 8,
-              }}>
-                {m.credits} кр.
-              </div>
+              {isExpanded && (
+                <div style={{
+                  marginTop: 8, marginLeft: 40,
+                  fontSize: 12, color: '#7aaa8a', lineHeight: 1.5,
+                  background: `rgba(${p.primaryRgb},0.05)`,
+                  border: `1px solid rgba(${p.primaryRgb},0.1)`,
+                  borderRadius: 8, padding: '8px 12px',
+                }}>
+                  {m.desc}
+                </div>
+              )}
             </div>
           )
         })}
-        <div style={{ fontSize: 10, color: '#3a5a4a', marginTop: 8 }}>
+        <div style={{ fontSize: 10, color: '#334433', marginTop: 10, lineHeight: 1.5 }}>
           🆓 Lite модели (GPT-4o mini, Haiku, Gemini Flash, DeepSeek, Llama, Mistral) — 20 запросов/день бесплатно
         </div>
-      </div>
+      </SolidCard>
 
       {/* FAQ */}
-      <div style={{
-        background: 'rgba(255,255,255,0.08)',
-        border: '1px solid rgba(255,255,255,0.15)',
-        borderRadius: 12, padding: 14,
-      }}>
-        <div style={{ fontSize: 11, color: '#888', fontWeight: 700, marginBottom: 10 }}>❓ КАК ЭТО РАБОТАЕТ</div>
+      <SolidCard>
+        <div style={{ fontSize: 11, color: '#668877', fontWeight: 700, marginBottom: 12, letterSpacing: 1 }}>
+          ❓ КАК ЭТО РАБОТАЕТ
+        </div>
         {[
-          ['💳', 'Пополни на любую сумму', 'Минимум $1, максимума нет — покупаешь сколько нужно'],
-          ['♾️', 'Кредиты не сгорают', 'Остаток на балансе хранится бессрочно'],
-          ['🆓', 'Lite модели всегда бесплатно', '20 запросов в день без списания кредитов'],
-          ['⚡', 'Кредиты списываются мгновенно', 'Только при успешном ответе от AI'],
-          ['👑', 'VIP цена от $10,000', 'Суммарный депозит свыше $10,000 — цена $1.12 за кредит навсегда'],
+          ['💳', 'Пополни на любую сумму', 'Минимум $1, максимума нет'],
+          ['♾️', 'Кредиты не сгорают', 'Остаток хранится бессрочно'],
+          ['🆓', 'Lite модели всегда бесплатно', '20 запросов в день без кредитов'],
+          ['⚡', 'Списание только при успехе', 'Ошибка AI — кредиты не тратятся'],
+          ['👑', 'VIP цена от $10,000 депозита', '$1.00 за кредит навсегда'],
         ].map(([icon, title, desc]) => (
           <div key={title} style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
             <span style={{ fontSize: 16, flexShrink: 0 }}>{icon}</span>
             <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: '#c0d8c8' }}>{title}</div>
-              <div style={{ fontSize: 11, color: '#5a8a70', marginTop: 2 }}>{desc}</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#c0e8d0' }}>{title}</div>
+              <div style={{ fontSize: 11, color: '#4a7a5a', marginTop: 1 }}>{desc}</div>
             </div>
           </div>
         ))}
-      </div>
+      </SolidCard>
 
       {/* Toast */}
       {toast && (
@@ -301,6 +395,7 @@ export function PlansScreen() {
           padding: '10px 20px', borderRadius: 12,
           fontSize: 13, fontWeight: 700, zIndex: 1000,
           backdropFilter: 'blur(10px)',
+          whiteSpace: 'nowrap',
         }}>
           {toast.msg}
         </div>
