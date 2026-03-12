@@ -26,11 +26,12 @@ export interface UserState {
   tgId: number
   username: string
   firstName: string
-  plan: 'free' | 'plus' | 'max'
+  plan: string
+  credits: number
+  totalDepositedUsd: number
+  creditCosts: Record<string, number>
   liteToday: number
-  premiumToday: number
   liteLimitDay: number
-  premiumLimitDay: number
   totalRequests: number
   hasPass: boolean
 }
@@ -225,11 +226,12 @@ export const useStore = create<AppState>((set, get) => ({
     tgId: 0,
     username: '',
     firstName: '',
-    plan: 'free',
+    plan: 'credits',
+    credits: 0,
+    totalDepositedUsd: 0,
+    creditCosts: {},
     liteToday: 0,
-    premiumToday: 0,
     liteLimitDay: 20,
-    premiumLimitDay: 0,
     totalRequests: 0,
     hasPass: false,
   },
