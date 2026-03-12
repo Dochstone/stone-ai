@@ -8,11 +8,9 @@ from app.database import get_db
 from app.middleware.auth import get_current_user
 from app.services.limiter import (
     get_or_create_user,
-    get_user_plan,
     get_today_usage,
-    get_active_subscription,
-    get_active_pass,
 )
+from app.services.credits import get_user_credits, CREDIT_COSTS
 
 router = APIRouter(prefix="/api", tags=["user"])
 
@@ -38,14 +36,8 @@ async def get_me(
     """
     tg_id = tg_user["id"]
     user = await get_or_create_user(db, tg_user)
-    plan = await get_user_plan(db, tg_id)
-    sub = await get_active_subscription(db, tg_id)
-    active_pass = await get_active_pass(db, tg_id)
+    credits = await get_user_credits(db, tg_id)
     lite_today = await get_today_usage(db, tg_id, "lite")
-    premium_today = await get_today_usage(db, tg_id, "premium")
-
-    from app.services.limiter import LIMITS
-    limits = LIMITS.get(plan, LIMITS["free"])
 
     return {
         "user": {
@@ -54,28 +46,17 @@ async def get_me(
             "first_name": user.first_name,
             "language": user.language,
         },
-        "plan": plan,
-        "subscription": {
-            "plan": sub.plan,
-            "expires_at": sub.expires_at.isoformat(),
-            "payment_method": sub.payment_method,
-        } if sub else None,
-        "pass": {
-            "type": active_pass.pass_type,
-            "requests_left": active_pass.requests_left,
-            "expires_at": active_pass.expires_at.isoformat() if active_pass.expires_at else None,
-        } if active_pass else None,
+        "plan": "credits",
+        "credits": credits,
+        "credit_costs": CREDIT_COSTS,
         "usage": {
             "lite_today": lite_today,
-            "premium_today": premium_today,
         },
         "limits": {
-            "lite": limits["lite"],
-            "premium": limits["premium"],
+            "lite": 20,
         },
         "stats": {
             "total_requests": user.total_requests,
             "total_tokens": user.total_tokens_used,
-            "days_active": (datetime.utcnow() - user.joined_at).days + 1 if user.joined_at else 1,
         },
     }
