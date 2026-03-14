@@ -36,7 +36,7 @@ export function HomeScreen() {
         }}>
           Stone AI
         </h1>
-        <p style={{ color: '#168877', fontSize: 18, marginTop: 5 }}>
+        <p style={{ color: '#568877', fontSize: 18, marginTop: 5 }}>
           Весь мировой AI · прямо в Telegram
         </p>
       </div>
