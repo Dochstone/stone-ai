@@ -36,7 +36,7 @@ export function HomeScreen() {
         }}>
           Stone AI
         </h1>
-        <p style={{ color: '#668877', fontSize: 13, marginTop: 4 }}>
+        <p style={{ color: '#168877', fontSize: 18, marginTop: 5 }}>
           Весь мировой AI · прямо в Telegram
         </p>
       </div>
@@ -149,10 +149,10 @@ function PromoBanner({ palette, onPlansClick }: { palette: any; onPlansClick: ()
   const features = [
     { icon: '🤖', text: 'Плати сколько хочешь - никаких подписок' },
     { icon: '⚡', text: 'GPT-4.1 · Claude Opus 4 · Grok 3 · Liama' },
-    { icon: '🔍', text: 'Gemini 2.5 Pro · Perplexity · DeepSeek' },
-    { icon: '🆓', text: '6 моделей и 20 запросов бесплатно каждый день' },
+    { icon: '🔍', text: 'Gemini 2.5 Pro · Perplexity · DeepSeek, Sonnet 4.6' },
+    { icon: '🆓', text: '6 бесплатных модели и 20 запросов каждый день' },
     { icon: '🚀', text: 'Без VPN · Без регистраций на сервисах · Без блокировок' },
-    { icon: '💎', text: 'Пополняйся звездами, картой или криптокошельком' },
+    { icon: '💎', text: 'Пополняй баланс звездами, картой или криптокошельком' },
   ]
 
   return (
@@ -178,7 +178,7 @@ function PromoBanner({ palette, onPlansClick }: { palette: any; onPlansClick: ()
       </div>
 
       <div style={{ fontSize: 15, fontWeight: 800, color: '#fff', marginBottom: 12, lineHeight: 1.3 }}>
-        Забудь об ограничениях, vpn, блокировках аккаунтов и способов пополнения! 
+        Забудь о vpn, блокировках аккаунта и десятках регистраций! 
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '7px 10px', marginBottom: 14 }}>
