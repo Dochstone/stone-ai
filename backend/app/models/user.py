@@ -8,7 +8,7 @@ New Stone AI columns:  language, daily_lite_used, daily_premium_used,
 """
 
 from datetime import datetime
-from sqlalchemy import BigInteger, String, DateTime, Integer, Float, Boolean, func, text
+from sqlalchemy import BigInteger, String, DateTime, Integer, Float, Boolean, func, text, numeric
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
