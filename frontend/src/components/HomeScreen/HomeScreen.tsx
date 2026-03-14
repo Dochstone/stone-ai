@@ -147,12 +147,12 @@ export function HomeScreen() {
 function PromoBanner({ palette, onPlansClick }: { palette: any; onPlansClick: () => void }) {
   const p = palette
   const features = [
-    { icon: '🤖', text: '11 топовых AI-моделей' },
-    { icon: '⚡', text: 'GPT-4.1 · Claude Opus 4 · Grok 3' },
+    { icon: '🤖', text: 'Плати сколько хочешь - никаких подписок' },
+    { icon: '⚡', text: 'GPT-4.1 · Claude Opus 4 · Grok 3 · Liama' },
     { icon: '🔍', text: 'Gemini 2.5 Pro · Perplexity · DeepSeek' },
-    { icon: '🆓', text: '6 моделей бесплатно каждый день' },
-    { icon: '🚀', text: 'Без VPN · Без регистраций · Внутри TG' },
-    { icon: '💎', text: 'Пополняй баланс — без лимитов' },
+    { icon: '🆓', text: '6 моделей и 20 запросов бесплатно каждый день' },
+    { icon: '🚀', text: 'Без VPN · Без регистраций на сервисах · Без блокировок' },
+    { icon: '💎', text: 'Пополняйся звездами, картой или криптокошельком' },
   ]
 
   return (
@@ -174,11 +174,11 @@ function PromoBanner({ palette, onPlansClick }: { palette: any; onPlansClick: ()
         fontSize: 11, fontWeight: 700, color: p.primary,
         letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 6,
       }}>
-        ✦ Stone AI — всё в одном
+        ✦ Stone AI — топ 11 AI моделей в одном приложении
       </div>
 
       <div style={{ fontSize: 15, fontWeight: 800, color: '#fff', marginBottom: 12, lineHeight: 1.3 }}>
-        11 моделей · 1 бот · 0 лишних подписок
+        Забудь об ограничениях, vpn, блокировках аккаунтов и способов пополнения! 
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '7px 10px', marginBottom: 14 }}>
