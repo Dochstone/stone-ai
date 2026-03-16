@@ -68,12 +68,23 @@ async def get_ads(
     result = await db.execute(query)
     banners = result.scalars().all()
 
+    # Determine user tier for tier_target filtering
+    from app.models.user import User as UserModel
+    user_result = await db.execute(
+        select(UserModel).where(UserModel.telegram_id == tg_user["id"])
+    )
+    db_user = user_result.scalar_one_or_none()
+    user_has_balance = db_user and float(db_user.balance_usd or 0) > 0
+
     # Filter by schedule and tier_target
     ads = []
     for b in banners:
         if b.start_at and b.start_at > now:
             continue
         if b.end_at and b.end_at < now:
+            continue
+        # Paid users don't see "free"-targeted ads (STRATEGY: "Без рекламы")
+        if b.tier_target == "free" and user_has_balance:
             continue
         ads.append({
             "id": b.id,
@@ -98,6 +109,11 @@ async def track_ad_view(
     db: AsyncSession = Depends(get_db),
 ):
     """Record a banner impression."""
+    # Verify banner exists
+    result = await db.execute(select(AdBanner.id).where(AdBanner.id == banner_id))
+    if not result.scalar_one_or_none():
+        raise HTTPException(status_code=404, detail="Banner not found")
+
     event = AdEvent(
         banner_id=banner_id,
         user_tg_id=tg_user["id"],
@@ -121,6 +137,11 @@ async def track_ad_click(
     db: AsyncSession = Depends(get_db),
 ):
     """Record a banner click."""
+    # Verify banner exists
+    result = await db.execute(select(AdBanner.id).where(AdBanner.id == banner_id))
+    if not result.scalar_one_or_none():
+        raise HTTPException(status_code=404, detail="Banner not found")
+
     event = AdEvent(
         banner_id=banner_id,
         user_tg_id=tg_user["id"],

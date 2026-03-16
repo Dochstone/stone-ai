@@ -28,8 +28,9 @@ export function AdBanner({ placement }: AdBannerProps) {
   const [ad, setAd] = useState<Ad | null>(null)
   const [visible, setVisible] = useState(true)
 
-  // Only show to free users with no balance
-  const shouldShow = user.plan === 'credits' || user.plan === 'per_token' || user.plan === 'free'
+  // Don't show ads to subscribers (STRATEGY: paid = no ads)
+  // Backend also filters by tier_target, this is just a client-side optimization
+  const shouldShow = user.plan !== 'plus' && user.plan !== 'max'
 
   useEffect(() => {
     if (!shouldShow) return
