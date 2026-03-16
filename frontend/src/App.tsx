@@ -23,6 +23,7 @@ const GLOBAL_CSS = `
 @keyframes gradientBar { 0% { background-position: 0% 0; } 100% { background-position: 300% 0; } }
 @keyframes borderGlow { 0%,100% { border-color: rgba(var(--pr),0.12); } 50% { border-color: rgba(var(--pr),0.35); } }
 @keyframes pillGlow { 0%,100% { border-color: rgba(var(--pr),0.3); background: rgba(var(--pr),0.12); } 50% { border-color: rgba(var(--pr),0.55); background: rgba(var(--pr),0.2); } }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 * { box-sizing: border-box; }
 body { margin: 0; padding: 0; background: #050a08; }
 ::-webkit-scrollbar { width: 3px; }
