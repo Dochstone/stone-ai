@@ -25,10 +25,10 @@ async def cmd_start(message: Message):
 
     await message.answer(
         "👋 <b>Добро пожаловать в Stone AI!</b>\n\n"
-        "🤖 Доступ к <b>11 AI-моделям</b> в одном месте:\n"
-        "GPT-4.1, Claude Opus 4, Grok 3, Gemini, DeepSeek и другие.\n\n"
-        "✅ <b>6 моделей бесплатно</b> — 20 запросов в день\n"
-        "⚡ <b>PLUS/MAX</b> — безлимит + Premium модели\n\n"
+        "🤖 Доступ к <b>30+ AI-моделям</b> в одном месте:\n"
+        "GPT-5.1, Claude Opus 4, Grok 3, Gemini 2.5, DeepSeek, Llama 4 и другие.\n\n"
+        "✅ <b>7 моделей бесплатно</b> — 10 запросов в день (+5 за рекламу)\n"
+        "⚡ <b>Premium</b> — оплата за токены\n\n"
         "Нажми кнопку ниже, чтобы начать 👇",
         parse_mode="HTML",
         reply_markup=keyboard,
@@ -43,13 +43,13 @@ async def cmd_help(message: Message):
         "/start — Главное меню\n"
         "/plan — Текущий тариф\n"
         "/help — Эта справка\n\n"
-        "<b>Модели:</b>\n"
+        "<b>Модели (30+):</b>\n"
         "🆓 Lite (бесплатно): GPT-4o mini, Claude Haiku, Gemini Flash, "
-        "DeepSeek R1, Llama 4, Mistral Large\n"
-        "💎 Premium (подписка): GPT-4.1, Claude Opus 4, Grok 3, "
-        "Gemini 2.5 Pro, Perplexity Pro\n\n"
+        "Llama 4, Mistral Large, Gemma 3, Qwen 3\n"
+        "💎 Premium (per-token): GPT-4.1, GPT-5.1, Claude Opus 4, Claude Sonnet 4, "
+        "Grok 3, Gemini 2.5 Pro, DeepSeek R1/V3, Perplexity Pro и другие\n\n"
         "<b>Оплата:</b> ⭐ Stars, 💎 TON, 💲 USDT\n\n"
-        "По вопросам: @art_stone",
+        "По вопросам: https://t.me/StoneAIsupport",
         parse_mode="HTML",
     )
 
@@ -89,9 +89,9 @@ async def cmd_plan(message: Message):
     except Exception:
         text = (
             "📊 <b>Твой тариф: 🆓 FREE</b>\n\n"
-            "• Lite модели: 20 запросов/день\n"
-            "• Premium модели: недоступны\n\n"
-            "Хочешь больше? Открой приложение и выбери подписку ⚡"
+            "• Lite модели: 10 запросов/день (+5 за рекламу)\n"
+            "• Premium модели: оплата за токены\n\n"
+            "Хочешь больше? Пополни баланс в приложении ⚡"
         )
 
     await message.answer(text, parse_mode="HTML")
@@ -109,13 +109,13 @@ async def callback_plans(callback):
 
     await callback.message.answer(
         "💰 <b>Тарифы Stone AI</b>\n\n"
-        "⚡ <b>PLUS</b> — 469⭐/мес (~$7.50)\n"
-        "• 100 Premium запросов/день\n"
-        "• Безлимит Lite\n\n"
-        "👑 <b>MAX</b> — 1499⭐/мес (~$24)\n"
-        "• 500 Premium запросов/день\n"
-        "• API доступ\n\n"
-        "🎫 <b>Пассы:</b> от 6⭐ за 1 запрос",
+        "🆓 <b>FREE</b> — 7 Lite моделей бесплатно\n"
+        "• 10 запросов/день (+5 за рекламу)\n\n"
+        "💎 <b>Per-token</b> — пополни баланс\n"
+        "• 25+ Premium моделей\n"
+        "• Платишь только за использованные токены\n"
+        "• От $0.001 за запрос\n\n"
+        "⭐ Stars, 💎 TON, 💲 USDT",
         parse_mode="HTML",
         reply_markup=keyboard,
     )
