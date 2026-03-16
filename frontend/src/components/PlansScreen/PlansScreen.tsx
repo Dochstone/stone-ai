@@ -90,15 +90,16 @@ export function PlansScreen() {
   const [buying, setBuying] = useState(false)
   const [expandedModel, setExpandedModel] = useState<string | null>(null)
   const [tonPrice, setTonPrice] = useState(0)
+  const [showPayModal, setShowPayModal] = useState(false)
 
-  // Fetch TON price on mount and when switching to TON method
+  // Fetch TON price when modal opens
   useEffect(() => {
-    if (payMethod === 'ton' && tonPrice === 0) {
+    if (showPayModal && tonPrice === 0) {
       apiGet<{ ton_usd: number }>('/api/payment/ton/price')
         .then(data => setTonPrice(data.ton_usd))
-        .catch(() => setTonPrice(3.5)) // fallback
+        .catch(() => setTonPrice(3.5))
     }
-  }, [payMethod])
+  }, [showPayModal])
 
   const isVip = (user.totalDepositedUsd ?? 0) >= VIP_THRESHOLD_USD
   const creditPrice = isVip ? CREDIT_PRICE_VIP : CREDIT_PRICE_STANDARD
@@ -191,11 +192,13 @@ export function PlansScreen() {
     setBuying(false)
   }
 
-  const handleBuy = () => {
-    if (payMethod === 'stars') handleBuyStars()
-    else if (payMethod === 'ton') handleBuyTon()
-    else if (payMethod === 'card') handleBuyCard()
-    else if (payMethod === 'crypto') handleBuyCrypto()
+  const handleBuy = (method: 'stars' | 'ton' | 'card' | 'crypto') => {
+    setPayMethod(method)
+    setShowPayModal(false)
+    if (method === 'stars') handleBuyStars()
+    else if (method === 'ton') handleBuyTon()
+    else if (method === 'card') handleBuyCard()
+    else if (method === 'crypto') handleBuyCrypto()
   }
 
   return (
@@ -339,87 +342,13 @@ export function PlansScreen() {
           </div>
         )}
 
-        {/* Payment method toggle */}
-        <div style={{ display: 'flex', gap: 5, marginBottom: 12 }}>
-          {([
-            { id: 'stars' as const, label: '⭐ Stars' },
-            { id: 'ton' as const, label: '💎 TON' },
-            { id: 'card' as const, label: '💳 Карта' },
-            { id: 'crypto' as const, label: '🪙 Крипто' },
-          ]).map(({ id, label }) => {
-            const active = payMethod === id
-            return (
-              <button
-                key={id}
-                onClick={() => { setPayMethod(id); haptic('light') }}
-                style={{
-                  flex: 1, padding: '11px 0', borderRadius: 10, border: 'none',
-                  background: active
-                    ? `linear-gradient(135deg, ${p.primary}, ${p.secondary})`
-                    : 'rgba(255,255,255,0.06)',
-                  color: active ? '#000' : '#889988',
-                  fontWeight: 700, fontSize: 12, cursor: 'pointer',
-                  boxShadow: active ? `0 0 14px rgba(${p.primaryRgb},0.4)` : 'none',
-                  transition: 'all 0.2s',
-                }}
-              >
-                {label}
-              </button>
-            )
-          })}
-        </div>
-
-        {/* TON wallet connection status */}
-        {payMethod === 'ton' && (
-          <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            background: isWalletConnected ? 'rgba(0,255,136,0.06)' : 'rgba(255,255,255,0.04)',
-            border: `1px solid ${isWalletConnected ? `rgba(${p.primaryRgb},0.3)` : 'rgba(255,255,255,0.1)'}`,
-            borderRadius: 10, padding: '10px 14px', marginBottom: 12,
-          }}>
-            <div>
-              <div style={{ fontSize: 11, color: isWalletConnected ? p.primary : '#889988', fontWeight: 700 }}>
-                {isWalletConnected ? '✅ Кошелёк подключён' : '🔗 Подключи кошелёк'}
-              </div>
-              {isWalletConnected && walletAddress && (
-                <div style={{ fontSize: 10, color: '#556655', marginTop: 2, fontFamily: 'monospace' }}>
-                  {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
-                </div>
-              )}
-            </div>
-            <button
-              onClick={() => { isWalletConnected ? disconnectWallet() : connectWallet(); haptic('light') }}
-              style={{
-                padding: '6px 14px', borderRadius: 8, border: 'none',
-                background: isWalletConnected ? 'rgba(255,80,80,0.1)' : `rgba(${p.primaryRgb},0.15)`,
-                color: isWalletConnected ? '#ff6666' : p.primary,
-                fontSize: 11, fontWeight: 700, cursor: 'pointer',
-              }}
-            >
-              {isWalletConnected ? 'Отключить' : 'Подключить'}
-            </button>
-          </div>
-        )}
-
-        {/* TON verification status */}
-        {payMethod === 'ton' && tonPaymentStatus === 'verifying' && (
-          <div style={{
-            background: `rgba(${p.primaryRgb},0.08)`,
-            border: `1px solid rgba(${p.primaryRgb},0.25)`,
-            borderRadius: 10, padding: '12px 14px', marginBottom: 12,
-            textAlign: 'center',
-          }}>
-            <div style={{ fontSize: 20, marginBottom: 6 }}>⏳</div>
-            <div style={{ fontSize: 12, color: p.primary, fontWeight: 700 }}>Проверяем транзакцию...</div>
-            <div style={{ fontSize: 10, color: '#668877', marginTop: 4 }}>
-              Обычно занимает 15-30 секунд
-            </div>
-          </div>
-        )}
-
-        {/* Buy button */}
+        {/* Single Pay button — opens method picker */}
         <button
-          onClick={handleBuy}
+          onClick={() => {
+            if (usd < 1) return showToast('Введи сумму от $1', false)
+            haptic('medium')
+            setShowPayModal(true)
+          }}
           disabled={buying || !!paymentLoading || tonPaymentLoading || usd < 1}
           style={{
             width: '100%', padding: '16px', borderRadius: 14, border: 'none',
@@ -427,7 +356,7 @@ export function PlansScreen() {
               ? `linear-gradient(135deg, ${p.primary}, ${p.secondary})`
               : 'rgba(255,255,255,0.05)',
             color: usd >= 1 ? '#000' : '#334433',
-            fontWeight: 900, fontSize: 16, cursor: usd >= 1 ? 'pointer' : 'default',
+            fontWeight: 900, fontSize: 17, cursor: usd >= 1 ? 'pointer' : 'default',
             opacity: buying || tonPaymentLoading ? 0.7 : 1,
             boxShadow: usd >= 1 ? `0 4px 24px rgba(${p.primaryRgb},0.5)` : 'none',
             transition: 'all 0.2s',
@@ -435,29 +364,11 @@ export function PlansScreen() {
           }}
         >
           {buying || tonPaymentLoading
-            ? (tonPaymentStatus === 'verifying' ? '⏳ Проверяем...' : '⏳ Обрабатываем...')
-            : payMethod === 'stars'
-              ? (creditsToReceive > 0 ? `Оплатить ${starsNeeded.toLocaleString()} ⭐` : 'Введи сумму')
-              : payMethod === 'ton'
-                ? (creditsToReceive > 0
-                    ? (isWalletConnected
-                        ? `Оплатить ${tonNeeded} TON`
-                        : '🔗 Подключить кошелёк')
-                    : 'Введи сумму')
-                : payMethod === 'card'
-                  ? (creditsToReceive > 0 ? `Оплатить ~${Math.round(usd * 95)}₽ картой` : 'Введи сумму')
-                  : (creditsToReceive > 0 ? `Оплатить $${usd.toFixed(2)} крипто` : 'Введи сумму')}
+            ? (tonPaymentStatus === 'verifying' ? '⏳ Проверяем транзакцию...' : '⏳ Обрабатываем...')
+            : creditsToReceive > 0
+              ? `Оплатить · ${creditsToReceive.toLocaleString()} кредитов`
+              : 'Введи сумму'}
         </button>
-
-        {/* TON conversion info */}
-        {payMethod === 'ton' && tonPrice > 0 && creditsToReceive > 0 && (
-          <div style={{
-            textAlign: 'center', marginTop: 8,
-            fontSize: 10, color: '#556655',
-          }}>
-            1 TON ≈ ${tonPrice.toFixed(2)} · Курс обновляется при создании заказа
-          </div>
-        )}
       </SolidCard>
 
       {/* Premium model costs */}
@@ -535,6 +446,101 @@ export function PlansScreen() {
         ))}
       </SolidCard>
 
+      {/* ═══ Payment Method Modal ═══ */}
+      {showPayModal && (
+        <div
+          onClick={() => setShowPayModal(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 999,
+            background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)',
+            display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              width: '100%', maxWidth: 480,
+              background: 'rgba(10,18,14,0.98)',
+              border: `1px solid rgba(${p.primaryRgb},0.3)`,
+              borderRadius: '24px 24px 0 0',
+              padding: '20px 16px 32px',
+              animation: 'slideUp 0.25s ease-out',
+            }}
+          >
+            {/* Handle bar */}
+            <div style={{
+              width: 40, height: 4, borderRadius: 2,
+              background: 'rgba(255,255,255,0.2)',
+              margin: '0 auto 16px',
+            }} />
+
+            <div style={{
+              fontSize: 15, fontWeight: 800, color: '#e0f8ec',
+              textAlign: 'center', marginBottom: 6,
+            }}>
+              Выбери способ оплаты
+            </div>
+            <div style={{
+              fontSize: 12, color: '#668877', textAlign: 'center', marginBottom: 18,
+            }}>
+              {creditsToReceive.toLocaleString()} кредитов · ${usd.toFixed(2)}
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {/* Stars */}
+              <PayMethodRow
+                icon="⭐" title="Telegram Stars"
+                subtitle={`${starsNeeded.toLocaleString()} Stars`}
+                tag="Быстро"
+                tagColor={p.primary}
+                palette={p}
+                onClick={() => handleBuy('stars')}
+              />
+              {/* TON */}
+              <PayMethodRow
+                icon="💎" title="TON кошелёк"
+                subtitle={tonPrice > 0 ? `≈ ${tonNeeded} TON` : 'Нативный перевод'}
+                tag={isWalletConnected ? 'Подключён' : 'Подключить'}
+                tagColor={isWalletConnected ? p.primary : '#bf5af2'}
+                palette={p}
+                onClick={() => handleBuy('ton')}
+              />
+              {/* Card */}
+              <PayMethodRow
+                icon="💳" title="Карта РФ / СБП"
+                subtitle={`≈ ${Math.round(usd * 95).toLocaleString()}₽`}
+                tag="Рубли"
+                tagColor="#4a90d9"
+                palette={p}
+                onClick={() => handleBuy('card')}
+              />
+              {/* Crypto */}
+              <PayMethodRow
+                icon="🪙" title="Криптовалюта"
+                subtitle="USDT · BTC · ETH · SOL и ещё 10+"
+                tag="Heleket"
+                tagColor="#f5a623"
+                palette={p}
+                onClick={() => handleBuy('crypto')}
+              />
+            </div>
+
+            {/* Cancel */}
+            <button
+              onClick={() => setShowPayModal(false)}
+              style={{
+                width: '100%', marginTop: 12, padding: '12px',
+                borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)',
+                background: 'transparent', color: '#668877',
+                fontSize: 13, fontWeight: 600, cursor: 'pointer',
+              }}
+            >
+              Отмена
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Toast */}
       {toast && (
         <div style={{
@@ -551,5 +557,46 @@ export function PlansScreen() {
         </div>
       )}
     </div>
+  )
+}
+
+/* ═══ Payment Method Row Component ═══ */
+function PayMethodRow({ icon, title, subtitle, tag, tagColor, palette: p, onClick }: {
+  icon: string; title: string; subtitle: string
+  tag: string; tagColor: string; palette: any; onClick: () => void
+}) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 12,
+        width: '100%', padding: '14px 14px',
+        borderRadius: 14, border: `1px solid rgba(${p.primaryRgb},0.15)`,
+        background: 'rgba(255,255,255,0.03)',
+        cursor: 'pointer', textAlign: 'left',
+        transition: 'all 0.15s',
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.background = `rgba(${p.primaryRgb},0.08)`
+        e.currentTarget.style.borderColor = `rgba(${p.primaryRgb},0.35)`
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.background = 'rgba(255,255,255,0.03)'
+        e.currentTarget.style.borderColor = `rgba(${p.primaryRgb},0.15)`
+      }}
+    >
+      <span style={{ fontSize: 26, flexShrink: 0 }}>{icon}</span>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: '#e0f8ec' }}>{title}</div>
+        <div style={{ fontSize: 11, color: '#668877', marginTop: 2 }}>{subtitle}</div>
+      </div>
+      <span style={{
+        fontSize: 10, fontWeight: 700, color: tagColor,
+        background: `${tagColor}18`,
+        padding: '3px 10px', borderRadius: 8, flexShrink: 0,
+      }}>
+        {tag}
+      </span>
+    </button>
   )
 }
