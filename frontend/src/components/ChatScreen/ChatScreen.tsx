@@ -8,6 +8,7 @@ import { useStore } from '../../store/useStore'
 import { useChat } from '../../hooks/useChat'
 import { Tag } from '../ui'
 import { renderMarkdown } from '../../utils/markdown'
+import { AdBanner } from '../AdBanner/AdBanner'
 
 const MODEL_ACCENTS: Record<string, string> = {
   'gpt-4o-mini': '#00ffaa',
@@ -205,6 +206,8 @@ export function ChatScreen() {
         background: 'linear-gradient(to top, #050a08 90%, transparent)',
         zIndex: 50, maxWidth: 480, margin: '0 auto',
       }}>
+        {/* Ad banner above input for free users */}
+        <AdBanner placement="chat_bottom" />
         <div style={{
           display: 'flex', alignItems: 'center', gap: 8,
           background: 'rgba(0,255,136,0.07)',

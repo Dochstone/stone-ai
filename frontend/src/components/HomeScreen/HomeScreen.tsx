@@ -6,6 +6,8 @@ import { useStore } from '../../store/useStore'
 import { useTranslation } from '../../i18n/useTranslation'
 import { useTonPayment } from '../../hooks/useTonPayment'
 import { haptic } from '../../utils/telegram'
+import { AdBanner } from '../AdBanner/AdBanner'
+import { RewardedAdButton } from '../RewardedAdButton/RewardedAdButton'
 
 export function HomeScreen() {
   const { palette, user, models, setModelId, setScreen } = useStore()
@@ -109,6 +111,12 @@ export function HomeScreen() {
           )}
         </div>
       </div>
+
+      {/* Rewarded ad button (when free limit is close) */}
+      <RewardedAdButton />
+
+      {/* Ad banner for free users */}
+      <AdBanner placement="home_banner" />
 
       {/* Wallet connection */}
       <div

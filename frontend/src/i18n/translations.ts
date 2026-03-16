@@ -205,6 +205,13 @@ export const translations = {
   mdesc_gpt51: 'Latest OpenAI',
   mdesc_nano_banana_pro: 'Image generation Pro',
   mdesc_nano_banana: 'Image generation',
+
+  // Rewarded ads
+  rewarded_button: '🎬 +5 free requests (watch ad)',
+  rewarded_loading: 'Loading ad...',
+  rewarded_success: '✅ +5 requests added!',
+  rewarded_already: 'Bonus already claimed today',
+  rewarded_hint: 'Watch a short video to get +5 requests',
   },
 
   // ─── RUSSIAN ───
@@ -391,6 +398,13 @@ export const translations = {
     mdesc_gpt51: 'Новейший OpenAI',
     mdesc_nano_banana_pro: 'Генерация картинок Pro',
     mdesc_nano_banana: 'Генерация картинок',
+
+    // Rewarded ads
+    rewarded_button: '🎬 +5 запросов (смотреть рекламу)',
+    rewarded_loading: 'Загрузка рекламы...',
+    rewarded_success: '✅ +5 запросов добавлено!',
+    rewarded_already: 'Бонус уже получен сегодня',
+    rewarded_hint: 'Посмотрите короткое видео и получите +5 запросов',
   },
 
   // ─── CHINESE SIMPLIFIED ───
@@ -577,5 +591,12 @@ export const translations = {
     mdesc_gpt51: '\u6700\u65B0OpenAI',
     mdesc_nano_banana_pro: '\u56FE\u50CF\u751F\u6210Pro',
     mdesc_nano_banana: '\u56FE\u50CF\u751F\u6210',
+
+    // Rewarded ads
+    rewarded_button: '\uD83C\uDFAC +5\u6B21\u8BF7\u6C42\uFF08\u770B\u5E7F\u544A\uFF09',
+    rewarded_loading: '\u52A0\u8F7D\u5E7F\u544A...',
+    rewarded_success: '\u2705 +5\u6B21\u8BF7\u6C42\u5DF2\u6DFB\u52A0\uFF01',
+    rewarded_already: '\u4ECA\u5929\u5DF2\u9886\u53D6\u5956\u52B1',
+    rewarded_hint: '\u89C2\u770B\u77ED\u89C6\u9891\u83B7\u53D6+5\u6B21\u8BF7\u6C42',
   },
 } as const
