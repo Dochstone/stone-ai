@@ -192,7 +192,7 @@ export function useTonPayment() {
             setLoading(false)
             resolve({
               status: 'failed',
-              error: 'Ошибка проверки. Обратитесь в поддержку @art_stone',
+              error: 'Ошибка проверки. Обратитесь в поддержку https://t.me/StoneAIsupport',
             })
           }
         }
