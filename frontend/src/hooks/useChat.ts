@@ -50,10 +50,13 @@ export function useChat() {
           updateLastAssistant(token)
         },
         onBilling: (billing: BillingInfo) => {
-          // Update balance and last request cost in store
+          // Update balance, last request cost, and session total
+          const currentSession = useStore.getState().user.sessionCostUsd || 0
           setUser({
             balanceUsd: billing.balance_usd,
             lastRequestCost: billing.cost_usd,
+            lastRequestTokens: (billing.tokens_in || 0) + (billing.tokens_out || 0),
+            sessionCostUsd: currentSession + billing.cost_usd,
           })
         },
         onDone: (usage) => {

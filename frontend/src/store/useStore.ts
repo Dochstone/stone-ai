@@ -46,6 +46,8 @@ export interface UserState {
   totalRequests: number
   totalTokens: number
   lastRequestCost: number | null
+  lastRequestTokens: number | null
+  sessionCostUsd: number
   hasPass: boolean
 }
 
@@ -248,6 +250,8 @@ export const useStore = create<AppState>((set, get) => ({
     totalRequests: 0,
     totalTokens: 0,
     lastRequestCost: null,
+    lastRequestTokens: null,
+    sessionCostUsd: 0,
     hasPass: false,
   },
   setUser: (u) => set((s) => ({ user: { ...s.user, ...u } })),

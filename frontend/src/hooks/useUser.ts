@@ -51,6 +51,8 @@ export function useUser() {
           totalRequests: userData.stats.total_requests,
           totalTokens: userData.stats.total_tokens ?? 0,
           lastRequestCost: null,
+          lastRequestTokens: null,
+          sessionCostUsd: 0,
           hasPass: false,
         })
 
@@ -70,6 +72,8 @@ export function useUser() {
           totalRequests: 0,
           totalTokens: 0,
           lastRequestCost: null,
+          lastRequestTokens: null,
+          sessionCostUsd: 0,
           hasPass: false,
         })
         setModels(FALLBACK_MODELS)

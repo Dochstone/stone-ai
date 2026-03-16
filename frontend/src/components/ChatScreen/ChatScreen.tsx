@@ -1,6 +1,8 @@
 /**
- * ChatScreen — Model selector, streaming chat, cost display after each response.
- * Ad banner above input for free users (hidden if balance > 0).
+ * ChatScreen — Model selector, streaming chat, balance in header.
+ * Balance updates from SSE billing chunk. Click balance → stats card.
+ * Ad banner above input only when balance_usd <= 0.
+ * Low balance warning when < $0.50.
  */
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from '../../i18n/useTranslation'
@@ -9,13 +11,17 @@ import { useChat } from '../../hooks/useChat'
 import { Tag } from '../ui'
 import { renderMarkdown } from '../../utils/markdown'
 import { AdBanner } from '../AdBanner/AdBanner'
+import { haptic } from '../../utils/telegram'
+
+const LOW_BALANCE_THRESHOLD = 0.50
 
 export function ChatScreen() {
-  const { models, modelId, setModelId, messages, isStreaming, user, palette } = useStore()
+  const { models, modelId, setModelId, messages, isStreaming, user, palette, setScreen } = useStore()
   const { t } = useTranslation()
   const { sendMessage } = useChat()
   const [input, setInput] = useState('')
   const [showModels, setShowModels] = useState(false)
+  const [showBalanceCard, setShowBalanceCard] = useState(false)
   const endRef = useRef<HTMLDivElement>(null)
   const p = palette
 
@@ -32,12 +38,13 @@ export function ChatScreen() {
     sendMessage(txt)
   }
 
-  // Show ad banner only if user has no balance (STRATEGY: paid = no ads)
   const showAd = user.balanceUsd <= 0
+  const lowBalance = user.balanceUsd > 0 && user.balanceUsd < LOW_BALANCE_THRESHOLD
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-      {/* Chat header with model selector */}
+
+      {/* ═══ Header ═══ */}
       <div style={{
         padding: '10px 16px',
         borderBottom: `1px solid rgba(${p.primaryRgb},0.08)`,
@@ -45,6 +52,7 @@ export function ChatScreen() {
         backdropFilter: 'blur(20px)',
         display: 'flex', alignItems: 'center', gap: 8, zIndex: 50,
       }}>
+        {/* Model icon */}
         <div
           onClick={() => setShowModels(!showModels)}
           style={{
@@ -54,6 +62,8 @@ export function ChatScreen() {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             cursor: 'pointer',
           }}>{currentModel?.icon}</div>
+
+        {/* Model name + company */}
         <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => setShowModels(!showModels)}>
           <div style={{ fontSize: 14, fontWeight: 700, color: '#e0f0e8' }}>
             {currentModel?.name} ▾
@@ -67,21 +77,128 @@ export function ChatScreen() {
             {currentModel?.company}
           </div>
         </div>
-        {/* Balance display in header */}
-        <div style={{
-          fontSize: 11, fontWeight: 700, color: p.primary,
-          background: `rgba(${p.primaryRgb},0.1)`,
-          padding: '4px 8px', borderRadius: 6,
-        }}>
+
+        {/* Balance — clickable, opens stats card */}
+        <div
+          onClick={() => { setShowBalanceCard(!showBalanceCard); haptic('light') }}
+          style={{
+            fontSize: 11, fontWeight: 700,
+            color: lowBalance ? '#f5a623' : p.primary,
+            background: lowBalance ? 'rgba(245,166,35,0.1)' : `rgba(${p.primaryRgb},0.1)`,
+            padding: '4px 8px', borderRadius: 6, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+        >
           ${user.balanceUsd.toFixed(2)}
         </div>
+
         <Tag
           text={currentModel?.tier === 'premium' ? 'PRO' : 'FREE'}
           accent={currentModel?.tier === 'premium' ? '#bf5af2' : p.primary}
         />
       </div>
 
-      {/* Model selector dropdown */}
+      {/* ═══ Balance stats card (popup) ═══ */}
+      {showBalanceCard && (
+        <div style={{
+          position: 'absolute', top: 60, right: 12, zIndex: 200,
+          background: 'rgba(10,18,14,0.98)',
+          border: `1px solid rgba(${p.primaryRgb},0.25)`,
+          borderRadius: 14, padding: 16, width: 260,
+          boxShadow: `0 8px 32px rgba(0,0,0,0.5), 0 0 16px rgba(${p.primaryRgb},0.1)`,
+          animation: 'fadeIn 0.15s ease-out',
+        }}>
+          {/* Balance */}
+          <div style={{ textAlign: 'center', marginBottom: 12 }}>
+            <div style={{ fontSize: 9, color: '#668877', fontWeight: 600, letterSpacing: 1, marginBottom: 4 }}>
+              БАЛАНС
+            </div>
+            <div style={{
+              fontSize: 28, fontWeight: 900,
+              color: lowBalance ? '#f5a623' : p.primary,
+            }}>
+              ${user.balanceUsd.toFixed(2)}
+            </div>
+          </div>
+
+          {/* Last request */}
+          {user.lastRequestCost !== null && user.lastRequestCost > 0 && (
+            <div style={{
+              background: `rgba(${p.primaryRgb},0.06)`,
+              border: `1px solid rgba(${p.primaryRgb},0.12)`,
+              borderRadius: 8, padding: '8px 10px', marginBottom: 8,
+            }}>
+              <div style={{ fontSize: 9, color: '#668877', marginBottom: 3 }}>Последний запрос</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
+                <span style={{ color: '#aab8aa' }}>
+                  {user.lastRequestTokens ? `${user.lastRequestTokens.toLocaleString()} ток.` : '—'}
+                </span>
+                <span style={{ color: '#bf5af2', fontWeight: 700 }}>
+                  -${user.lastRequestCost.toFixed(4)}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Session total */}
+          {user.sessionCostUsd > 0 && (
+            <div style={{
+              display: 'flex', justifyContent: 'space-between',
+              fontSize: 11, padding: '6px 0', marginBottom: 8,
+              borderBottom: '1px solid rgba(255,255,255,0.06)',
+            }}>
+              <span style={{ color: '#668877' }}>За сессию</span>
+              <span style={{ color: '#bf5af2', fontWeight: 700 }}>
+                -${user.sessionCostUsd.toFixed(4)}
+              </span>
+            </div>
+          )}
+
+          {/* Top up button */}
+          <button
+            onClick={() => { setShowBalanceCard(false); setScreen('plans'); haptic('medium') }}
+            style={{
+              width: '100%', padding: '10px', borderRadius: 10, border: 'none',
+              background: `linear-gradient(135deg, ${p.primary}, ${p.secondary})`,
+              color: '#000', fontWeight: 800, fontSize: 12, cursor: 'pointer',
+            }}
+          >
+            Пополнить баланс
+          </button>
+
+          {/* Close zone */}
+          <div
+            onClick={() => setShowBalanceCard(false)}
+            style={{
+              textAlign: 'center', marginTop: 8,
+              fontSize: 10, color: '#5a8a70', cursor: 'pointer',
+            }}
+          >
+            закрыть
+          </div>
+        </div>
+      )}
+
+      {/* ═══ Low balance warning ═══ */}
+      {lowBalance && !isStreaming && messages.length > 0 && (
+        <div
+          onClick={() => { setScreen('plans'); haptic('light') }}
+          style={{
+            padding: '6px 16px',
+            background: 'rgba(245,166,35,0.08)',
+            borderBottom: '1px solid rgba(245,166,35,0.15)',
+            display: 'flex', alignItems: 'center', gap: 6,
+            cursor: 'pointer',
+          }}
+        >
+          <span style={{ fontSize: 12 }}>⚠️</span>
+          <span style={{ fontSize: 11, color: '#f5a623', fontWeight: 600 }}>
+            Баланс ${user.balanceUsd.toFixed(2)} — может не хватить. Пополнить →
+          </span>
+        </div>
+      )}
+
+      {/* ═══ Model selector dropdown ═══ */}
       {showModels && (
         <div style={{
           position: 'absolute', top: 100, left: 12, right: 12, zIndex: 200,
@@ -99,8 +216,7 @@ export function ChatScreen() {
                 onClick={() => { setModelId(md.id); setShowModels(false) }}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 10,
-                  padding: '10px', borderRadius: 10,
-                  cursor: 'pointer',
+                  padding: '10px', borderRadius: 10, cursor: 'pointer',
                   background: modelId === md.id ? `rgba(${p.primaryRgb},0.08)` : 'transparent',
                   border: modelId === md.id ? `1px solid rgba(${p.primaryRgb},0.15)` : '1px solid transparent',
                   marginBottom: 2,
@@ -126,7 +242,7 @@ export function ChatScreen() {
         </div>
       )}
 
-      {/* Messages */}
+      {/* ═══ Messages ═══ */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px 16px 140px' }}>
         {messages.length === 0 && (
           <div style={{ textAlign: 'center', paddingTop: 60, opacity: 0.5 }}>
@@ -140,58 +256,35 @@ export function ChatScreen() {
           </div>
         )}
 
-        {messages.map((msg, i) => {
-          const isAssistant = msg.role === 'assistant'
-          const isLastAssistant = isAssistant && i === messages.length - 1
-
-          return (
-            <div key={i}>
-              <div style={{
-                display: 'flex',
-                justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                marginBottom: 4,
-              }}>
-                <div style={{
-                  maxWidth: '85%', padding: '10px 14px', borderRadius: 14,
-                  background: msg.role === 'user'
-                    ? `linear-gradient(135deg, rgba(${p.primaryRgb},0.12), rgba(${p.secondaryRgb},0.08))`
-                    : 'rgba(8,16,12,0.9)',
-                  border: `1px solid ${msg.role === 'user' ? `rgba(${p.primaryRgb},0.25)` : `rgba(${p.primaryRgb},0.08)`}`,
-                  borderBottomRightRadius: msg.role === 'user' ? 4 : 14,
-                  borderBottomLeftRadius: isAssistant ? 4 : 14,
-                }}>
-                  {isAssistant ? (
-                    <div
-                      className="md-content"
-                      style={{ fontSize: 13, lineHeight: 1.55, color: '#e0f0e8' }}
-                      dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }}
-                    />
-                  ) : (
-                    <div style={{ fontSize: 13, lineHeight: 1.55, color: '#e0f0e8', whiteSpace: 'pre-wrap' }}>
-                      {msg.content}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Cost display after assistant response */}
-              {isAssistant && msg.content && !isStreaming && isLastAssistant && user.lastRequestCost !== null && user.lastRequestCost > 0 && (
-                <div style={{
-                  fontSize: 10, color: '#5a8a70', fontFamily: 'monospace',
-                  marginBottom: 10, paddingLeft: 4,
-                  display: 'flex', alignItems: 'center', gap: 6,
-                }}>
-                  <span>{currentModel?.icon}</span>
-                  <span>{currentModel?.name}</span>
-                  <span>·</span>
-                  <span style={{ color: '#bf5af2' }}>${user.lastRequestCost.toFixed(4)}</span>
-                  <span>·</span>
-                  <span>баланс ${user.balanceUsd.toFixed(2)}</span>
+        {messages.map((msg, i) => (
+          <div key={i} style={{
+            display: 'flex',
+            justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
+            marginBottom: 10,
+          }}>
+            <div style={{
+              maxWidth: '85%', padding: '10px 14px', borderRadius: 14,
+              background: msg.role === 'user'
+                ? `linear-gradient(135deg, rgba(${p.primaryRgb},0.12), rgba(${p.secondaryRgb},0.08))`
+                : 'rgba(8,16,12,0.9)',
+              border: `1px solid ${msg.role === 'user' ? `rgba(${p.primaryRgb},0.25)` : `rgba(${p.primaryRgb},0.08)`}`,
+              borderBottomRightRadius: msg.role === 'user' ? 4 : 14,
+              borderBottomLeftRadius: msg.role === 'assistant' ? 4 : 14,
+            }}>
+              {msg.role === 'assistant' ? (
+                <div
+                  className="md-content"
+                  style={{ fontSize: 13, lineHeight: 1.55, color: '#e0f0e8' }}
+                  dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }}
+                />
+              ) : (
+                <div style={{ fontSize: 13, lineHeight: 1.55, color: '#e0f0e8', whiteSpace: 'pre-wrap' }}>
+                  {msg.content}
                 </div>
               )}
             </div>
-          )
-        })}
+          </div>
+        ))}
 
         {/* Typing indicator */}
         {isStreaming && messages.length > 0 && messages[messages.length - 1]?.content === '' && (
@@ -216,14 +309,13 @@ export function ChatScreen() {
         <div ref={endRef} />
       </div>
 
-      {/* Input bar */}
+      {/* ═══ Input bar ═══ */}
       <div style={{
         position: 'fixed', bottom: 60, left: 0, right: 0,
         padding: '8px 16px 12px',
         background: 'linear-gradient(to top, #050a08 90%, transparent)',
         zIndex: 50, maxWidth: 480, margin: '0 auto',
       }}>
-        {/* Ad banner — thin, above input, only for free users with no balance */}
         {showAd && <AdBanner placement="chat_bottom" />}
 
         <div style={{
