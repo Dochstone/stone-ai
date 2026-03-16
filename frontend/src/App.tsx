@@ -3,6 +3,7 @@
  * Design: v4.5 prototype with premium aesthetic.
  */
 import { useEffect } from 'react'
+import { TonConnectUIProvider } from '@tonconnect/ui-react'
 import { useStore } from './store/useStore'
 import { useUser } from './hooks/useUser'
 import { initTelegramApp } from './utils/telegram'
@@ -88,6 +89,12 @@ export default function App() {
   }
 
   return (
+    <TonConnectUIProvider
+      manifestUrl="https://stone-ai-1.vercel.app/tonconnect-manifest.json"
+      actionsConfiguration={{
+        twaReturnUrl: 'https://t.me/StoneAI_bot'
+      }}
+    >
     <div style={{
       minHeight: '100vh', background: '#050a08', color: '#e0f0e8',
       fontFamily: "-apple-system, 'SF Pro Display', sans-serif",
@@ -117,5 +124,6 @@ export default function App() {
         primary={p.primary}
       />
     </div>
+    </TonConnectUIProvider>
   )
 }
