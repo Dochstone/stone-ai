@@ -4,11 +4,13 @@
 
 import { useStore } from '../../store/useStore'
 import { useTranslation } from '../../i18n/useTranslation'
+import { useTonPayment } from '../../hooks/useTonPayment'
 import { haptic } from '../../utils/telegram'
 
 export function HomeScreen() {
   const { palette, user, models, setModelId, setScreen } = useStore()
   const { t } = useTranslation()
+  const { isWalletConnected, walletAddress, connectWallet, disconnectWallet } = useTonPayment()
   const p = palette
 
   const liteModels = models.filter((m) => m.tier === 'lite')
@@ -105,6 +107,47 @@ export function HomeScreen() {
               Пополнить →
             </span>
           )}
+        </div>
+      </div>
+
+      {/* Wallet connection */}
+      <div
+        onClick={() => { haptic('light'); isWalletConnected ? disconnectWallet() : connectWallet() }}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 12,
+          background: 'rgba(8,16,12,0.95)',
+          border: `1px solid ${isWalletConnected ? `rgba(${p.primaryRgb},0.3)` : 'rgba(255,255,255,0.1)'}`,
+          borderRadius: 14, padding: '12px 16px', marginBottom: 20,
+          cursor: 'pointer', transition: 'all 0.2s',
+        }}
+      >
+        <span style={{ fontSize: 22 }}>{isWalletConnected ? '💎' : '🔗'}</span>
+        <div style={{ flex: 1 }}>
+          <div style={{
+            fontSize: 13, fontWeight: 700,
+            color: isWalletConnected ? '#e0f8ec' : '#889988',
+          }}>
+            {isWalletConnected ? 'TON кошелёк подключён' : 'Подключить TON кошелёк'}
+          </div>
+          {isWalletConnected && walletAddress ? (
+            <div style={{ fontSize: 10, color: '#556655', marginTop: 2, fontFamily: 'monospace' }}>
+              {walletAddress.slice(0, 8)}...{walletAddress.slice(-6)}
+            </div>
+          ) : (
+            <div style={{ fontSize: 10, color: '#556655', marginTop: 2 }}>
+              Tonkeeper · @wallet · и другие
+            </div>
+          )}
+        </div>
+        <div style={{
+          fontSize: 11, fontWeight: 700, padding: '5px 12px',
+          borderRadius: 8,
+          background: isWalletConnected
+            ? `rgba(${p.primaryRgb},0.12)`
+            : `linear-gradient(135deg, ${p.primary}, ${p.secondary})`,
+          color: isWalletConnected ? p.primary : '#000',
+        }}>
+          {isWalletConnected ? 'Отключить' : 'Подключить'}
         </div>
       </div>
 
