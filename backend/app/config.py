@@ -65,6 +65,15 @@ class Settings:
         self.ton_wallet_address = os.getenv("TON_WALLET_ADDRESS", "")
         self.tonapi_key = os.getenv("TONAPI_KEY", "")
 
+        # Lava.ru (Cards RU + SBP)
+        self.lava_secret_key = os.getenv("LAVA_SECRET_KEY", "")
+        self.lava_shop_id = os.getenv("LAVA_SHOP_ID", "")
+        self.lava_webhook_key = os.getenv("LAVA_WEBHOOK_KEY", "")
+
+        # Heleket (Crypto: USDT, BTC, ETH, TON, SOL, etc.)
+        self.heleket_api_key = os.getenv("HELEKET_API_KEY", "")
+        self.heleket_merchant = os.getenv("HELEKET_MERCHANT", "")
+
         # CryptoBot (Phase 3)
         self.cryptobot_api_token = os.getenv("CRYPTOBOT_API_TOKEN", "")
 
