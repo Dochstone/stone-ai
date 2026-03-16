@@ -92,14 +92,25 @@ export function HomeScreen() {
         borderRadius: 16, padding: 16, marginBottom: 16,
       }}>
         {/* Lite usage row */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
           <span style={{ color: '#aab8aa', fontSize: 13 }}>Бесплатных сегодня</span>
-          <span style={{
-            color: liteUsedPct >= 100 ? '#ff6666' : p.primary,
-            fontWeight: 700, fontSize: 14,
-          }}>
-            {user.liteToday}/{user.liteLimitDay === -1 ? '∞' : user.liteLimitDay}
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{
+              color: liteUsedPct >= 100 ? '#ff6666' : p.primary,
+              fontWeight: 700, fontSize: 14,
+            }}>
+              {user.liteToday}/{user.liteLimitDay === -1 ? '∞' : user.liteLimitDay}
+            </span>
+            {user.liteLimitDay <= 10 && (
+              <span style={{
+                fontSize: 9, fontWeight: 700, color: '#f5a623',
+                background: 'rgba(245,166,35,0.12)', padding: '2px 6px',
+                borderRadius: 4, whiteSpace: 'nowrap',
+              }}>
+                +5 за рекламу
+              </span>
+            )}
+          </div>
         </div>
         <div style={{
           height: 5, background: 'rgba(255,255,255,0.08)',
@@ -151,8 +162,46 @@ export function HomeScreen() {
       {/* Rewarded ad button */}
       <RewardedAdButton />
 
-      {/* Ad banner */}
-      <AdBanner placement="home_banner" />
+      {/* ═══ Payment methods strip ═══ */}
+      <div
+        onClick={() => { haptic('light'); setScreen('plans') }}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 10,
+          background: 'rgba(8,16,12,0.95)',
+          border: `1px solid rgba(${p.primaryRgb},0.2)`,
+          borderRadius: 14, padding: '12px 14px', marginBottom: 16,
+          cursor: 'pointer', transition: 'all 0.2s',
+        }}
+      >
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#e0f8ec', marginBottom: 3 }}>
+            Пополнить баланс
+          </div>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {[
+              { icon: '⭐', label: 'Stars' },
+              { icon: '💎', label: 'TON' },
+              { icon: '💳', label: 'Карта/СБП' },
+              { icon: '🪙', label: 'Крипто' },
+            ].map(m => (
+              <span key={m.label} style={{
+                fontSize: 10, color: '#8aaa98',
+                background: 'rgba(255,255,255,0.04)',
+                padding: '2px 7px', borderRadius: 5,
+              }}>
+                {m.icon} {m.label}
+              </span>
+            ))}
+          </div>
+        </div>
+        <span style={{
+          fontSize: 12, fontWeight: 800, color: p.primary,
+          background: `rgba(${p.primaryRgb},0.12)`,
+          padding: '6px 12px', borderRadius: 8, flexShrink: 0,
+        }}>
+          →
+        </span>
+      </div>
 
       {/* ═══ Filter tabs (horizontal scroll) ═══ */}
       <div style={{
@@ -221,6 +270,11 @@ export function HomeScreen() {
           Нет моделей для этого фильтра
         </div>
       )}
+
+      {/* Ad banner at bottom for free users */}
+      <div style={{ marginTop: 16 }}>
+        <AdBanner placement="home_banner" />
+      </div>
     </div>
   )
 }

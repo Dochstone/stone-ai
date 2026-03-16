@@ -120,10 +120,38 @@ def test_rewarded_button_present():
     assert "RewardedAdButton" in src
 
 
-def test_ad_banner_present():
+def test_ad_banner_at_bottom():
+    """Ad banner should be at the bottom of the page, not in the middle."""
     src = _src()
     assert "AdBanner" in src
     assert "home_banner" in src
+    # AdBanner should appear after the model grid
+    grid_pos = src.index("filteredModels.map")
+    banner_pos = src.rindex("AdBanner")
+    assert banner_pos > grid_pos
+
+
+def test_rewarded_hint_in_usage():
+    """+5 за рекламу hint should be in usage card."""
+    src = _src()
+    assert "+5 за рекламу" in src
+
+
+# ─── Payment methods ───
+
+def test_payment_methods_strip():
+    """4 payment methods should be visible on HomeScreen."""
+    src = _src()
+    assert "Stars" in src
+    assert "TON" in src
+    assert "Карта" in src or "СБП" in src
+    assert "Крипто" in src
+
+
+def test_payment_strip_navigates_to_plans():
+    src = _src()
+    # The payment strip should have setScreen('plans')
+    assert "Пополнить баланс" in src
 
 
 # ─── Empty state ───
