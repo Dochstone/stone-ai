@@ -1,10 +1,12 @@
 /**
- * Chat hook — handles sending messages and streaming responses.
+ * Chat hook — handles sending messages, streaming responses,
+ * and billing updates from SSE.
  */
 
 import { useCallback } from 'react'
 import { useStore } from '../store/useStore'
 import { streamChat } from '../api/client'
+import type { BillingInfo } from '../api/client'
 import { haptic, hapticNotification } from '../utils/telegram'
 
 export function useChat() {
@@ -47,6 +49,13 @@ export function useChat() {
         onToken: (token) => {
           updateLastAssistant(token)
         },
+        onBilling: (billing: BillingInfo) => {
+          // Update balance and last request cost in store
+          setUser({
+            balanceUsd: billing.balance_usd,
+            lastRequestCost: billing.cost_usd,
+          })
+        },
         onDone: (usage) => {
           setStreaming(false)
           hapticNotification('success')
@@ -56,7 +65,13 @@ export function useChat() {
           if (model?.tier === 'lite') {
             setUser({ liteToday: user.liteToday + 1, totalRequests: user.totalRequests + 1 })
           } else {
-            setUser({ premiumToday: user.premiumToday + 1, totalRequests: user.totalRequests + 1 })
+            setUser({ totalRequests: user.totalRequests + 1 })
+          }
+
+          // Update total tokens if available
+          if (usage) {
+            const totalNew = (usage.tokens_in || 0) + (usage.tokens_out || 0)
+            setUser({ totalTokens: (user.totalTokens || 0) + totalNew })
           }
         },
         onError: (error) => {

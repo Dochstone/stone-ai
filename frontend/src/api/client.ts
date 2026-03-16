@@ -48,9 +48,19 @@ export interface ChatMessage {
   content: string
 }
 
+export interface BillingInfo {
+  tokens_in: number
+  tokens_out: number
+  cost_usd: number
+  balance_usd: number
+  model_price_per_m: number
+  billing_mode: string
+}
+
 export interface StreamCallbacks {
   onToken: (token: string) => void
   onDone: (usage?: { tokens_in: number; tokens_out: number }) => void
+  onBilling?: (billing: BillingInfo) => void
   onError: (error: string) => void
 }
 
@@ -122,6 +132,10 @@ export async function streamChat(
 
           if (parsed.usage) {
             usage = parsed.usage
+          }
+
+          if (parsed.billing && callbacks.onBilling) {
+            callbacks.onBilling(parsed.billing)
           }
 
           if (parsed.error) {

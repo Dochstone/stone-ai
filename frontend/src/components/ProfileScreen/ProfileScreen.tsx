@@ -170,12 +170,17 @@ export function ProfileScreen() {
 
       <div style={{ height: 10 }} />
 
+      {/* Usage history */}
+      <UsageHistory palette={p} />
+
+      <div style={{ height: 10 }} />
+
       {/* App info */}
       <div style={{
         textAlign: 'center', padding: '12px 0',
         fontFamily: 'monospace', fontSize: 10, color: '#3a6a50',
       }}>
-        Stone AI v1.1 &bull; 11 models &bull; Stars / TON / USDT
+        Stone AI v2.0 &bull; 50 models &bull; Stars / TON / Card / Crypto
       </div>
     </div>
   )
@@ -351,6 +356,122 @@ function ByokCard({ palette }: { palette: any }) {
           <div style={{ fontSize: 10, color: '#3a5a4a', marginTop: 8, lineHeight: 1.4 }}>
             Получи ключ на openrouter.ai → Keys → Create key
           </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Usage History Component ───
+
+interface UsageRecord {
+  model_id: string
+  tier: string
+  tokens_in: number
+  tokens_out: number
+  cost_usd: number
+  created_at: string | null
+}
+
+function UsageHistory({ palette }: { palette: any }) {
+  const p = palette
+  const { models } = useStore()
+  const [history, setHistory] = useState<UsageRecord[]>([])
+  const [loading, setLoading] = useState(false)
+  const [open, setOpen] = useState(false)
+
+  const loadHistory = async () => {
+    if (history.length > 0) return
+    setLoading(true)
+    try {
+      const data = await apiGet<{ history: UsageRecord[] }>('/api/user/usage-history?limit=20')
+      setHistory(data.history)
+    } catch {
+      setHistory([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleToggle = () => {
+    const next = !open
+    setOpen(next)
+    if (next) loadHistory()
+  }
+
+  const getModelName = (id: string) => {
+    const m = models.find(m => m.id === id)
+    return m ? `${m.icon} ${m.name}` : id
+  }
+
+  const formatTime = (iso: string | null) => {
+    if (!iso) return ''
+    const d = new Date(iso)
+    return `${d.getDate().toString().padStart(2, '0')}.${(d.getMonth() + 1).toString().padStart(2, '0')} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
+  }
+
+  return (
+    <div style={{
+      background: 'rgba(255,255,255,0.03)',
+      border: `1px solid rgba(${p.primaryRgb},0.12)`,
+      borderRadius: 16, padding: 16, fontFamily: 'monospace',
+    }}>
+      <div
+        onClick={handleToggle}
+        style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
+      >
+        <span style={{ fontSize: 20 }}>📊</span>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#e0f0e8' }}>История расходов</div>
+          <div style={{ fontSize: 10, color: '#5a8a70', marginTop: 2 }}>Последние 20 запросов</div>
+        </div>
+        <div style={{
+          fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 6,
+          background: 'rgba(255,255,255,0.05)', color: '#5a8a70',
+        }}>
+          {open ? '▲' : '▼'}
+        </div>
+      </div>
+
+      {open && (
+        <div style={{ marginTop: 14 }}>
+          {loading && (
+            <div style={{ textAlign: 'center', padding: '20px 0', color: '#5a8a70', fontSize: 11 }}>
+              Загрузка...
+            </div>
+          )}
+
+          {!loading && history.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '20px 0', color: '#5a8a70', fontSize: 11 }}>
+              Нет запросов
+            </div>
+          )}
+
+          {!loading && history.map((h, i) => (
+            <div key={i} style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '8px 0',
+              borderBottom: i < history.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+            }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{
+                  fontSize: 11, fontWeight: 600, color: '#e0f0e8',
+                  whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                }}>
+                  {getModelName(h.model_id)}
+                </div>
+                <div style={{ fontSize: 9, color: '#5a8a70', marginTop: 2 }}>
+                  {(h.tokens_in + h.tokens_out).toLocaleString()} tok · {formatTime(h.created_at)}
+                </div>
+              </div>
+              <div style={{
+                fontSize: 11, fontWeight: 800, flexShrink: 0,
+                color: h.cost_usd > 0 ? '#bf5af2' : p.primary,
+              }}>
+                {h.cost_usd > 0 ? `-$${h.cost_usd.toFixed(4)}` : 'FREE'}
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
