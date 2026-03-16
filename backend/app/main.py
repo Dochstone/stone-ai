@@ -20,6 +20,7 @@ from app.database import init_db
 
 # Routers
 from app.routers import chat, user, models, payment, byok
+from app.routers import payment_ext
 
 # Bot handlers
 from app.bot import handlers as bot_handlers
@@ -107,6 +108,7 @@ app.include_router(chat.router)
 app.include_router(user.router)
 app.include_router(models.router)
 app.include_router(payment.router)
+app.include_router(payment_ext.router)
 app.include_router(byok.router)
 
 
