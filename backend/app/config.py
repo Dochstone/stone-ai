@@ -77,6 +77,12 @@ class Settings:
         # CryptoBot (Phase 3)
         self.cryptobot_api_token = os.getenv("CRYPTOBOT_API_TOKEN", "")
 
+        # Admin
+        self.admin_tg_ids = os.getenv("ADMIN_TG_IDS", "")  # comma-separated Telegram IDs
+
+        # Ads
+        self.adsgram_block_id = os.getenv("ADSGRAM_BLOCK_ID", "")  # Adsgram rewarded video block ID
+
 
 def get_settings() -> Settings:
     """Get application settings (singleton)."""

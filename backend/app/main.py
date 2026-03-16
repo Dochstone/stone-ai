@@ -19,7 +19,7 @@ from app.config import get_settings
 from app.database import init_db
 
 # Routers
-from app.routers import chat, user, models, payment, byok
+from app.routers import chat, user, models, payment, byok, ads
 from app.routers import payment_ext
 
 # Bot handlers
@@ -109,6 +109,7 @@ app.include_router(user.router)
 app.include_router(models.router)
 app.include_router(payment.router)
 app.include_router(payment_ext.router)
+app.include_router(ads.router)
 app.include_router(byok.router)
 
 
@@ -118,7 +119,7 @@ async def root():
         "name": "Stone AI API",
         "version": "1.0.0",
         "status": "running",
-        "models": 11,
+        "models": 25,
         "docs": "/docs",
     }
 
