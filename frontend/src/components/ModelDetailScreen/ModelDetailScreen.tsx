@@ -8,17 +8,35 @@ import { useTranslation } from '../../i18n/useTranslation'
 import { haptic } from '../../utils/telegram'
 
 const MODEL_DESC_KEY: Record<string, string> = {
+  // Tier 1: Lite
   'gpt-4o-mini': 'mdesc_gpt4o_mini',
   'claude-haiku-4.5': 'mdesc_claude_haiku',
   'gemini-2.0-flash': 'mdesc_gemini_flash',
-  'deepseek-r1': 'mdesc_deepseek',
   'llama-4-maverick': 'mdesc_llama',
   'mistral-large-25': 'mdesc_mistral',
+  'gemma-3-27b': 'mdesc_gemma3',
+  'qwen-3-235b': 'mdesc_qwen3',
+  // Tier 2: Premium mid-range
+  'deepseek-r1': 'mdesc_deepseek',
+  'deepseek-v3': 'mdesc_deepseek_v3',
+  'gpt-4.1-mini': 'mdesc_gpt41_mini',
+  'gemini-2.5-flash': 'mdesc_gemini25_flash',
+  'claude-sonnet-4': 'mdesc_claude_sonnet',
+  'grok-3-mini': 'mdesc_grok3_mini',
+  'phi-4': 'mdesc_phi4',
+  'qwen-qwq': 'mdesc_qwq',
+  'command-r': 'mdesc_command_r',
+  'mistral-small': 'mdesc_mistral_small',
+  // Tier 3: Premium top
   'gpt-4.1': 'mdesc_gpt41',
   'claude-opus-4': 'mdesc_claude_opus',
   'grok-3': 'mdesc_grok',
   'gemini-2.5-pro': 'mdesc_gemini_pro',
   'perplexity-sonar-pro': 'mdesc_perplexity',
+  'gpt-5.1': 'mdesc_gpt51',
+  // Tier 4: Image
+  'nano-banana-pro': 'mdesc_nano_banana_pro',
+  'nano-banana': 'mdesc_nano_banana',
 }
 
 export function ModelDetailScreen() {

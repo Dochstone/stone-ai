@@ -15,6 +15,11 @@ export interface Model {
   tier: 'lite' | 'premium'
   icon: string
   desc: string
+  price_weighted?: number
+  price_input?: number
+  price_output?: number
+  context_length?: string
+  category?: string
 }
 
 export interface ChatMsg {
