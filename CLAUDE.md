@@ -1,80 +1,99 @@
-# CLAUDE.md
+# CLAUDE.md — Stone AI Development Agent
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Сверяйся с `STRATEGY.md`, `TZ_IMPLEMENTATION.md` и `MODELS_50.md` перед работой.
 
-## Projects Overview
+## Контекст
 
-This home directory contains two separate projects:
+Stone AI — платформа доступа к 50+ AI-моделям. Без VPN, прямо в Telegram. Два продукта:
+1. **Telegram Mini App** — основной (React + Vite + Zustand, FastAPI backend)
+2. **Веб-сайт** — [В РАЗРАБОТКЕ] (Next.js + Tailwind, общий backend)
 
-### 1. `bots/mybot/` — Simple Claude-powered Telegram Bot
-A minimal Telegram bot using `python-telegram-bot` + Anthropic Claude API. Single file (`bot.py`), uses `.env` for `ANTHROPIC_API_KEY` and `TELEGRAM_BOT_TOKEN`.
+## Бизнес-модель
 
-### 2. `.openclaw/workspace/tgstonebot/` — TG STONE E-Commerce Bot (Main Project)
-A full-featured Telegram e-commerce bot for selling digital services (bot promotions, chat/channel accounts, audience growth, Telegram Stars, bot development). This is the primary codebase.
+- **Free**: 5 Lite-моделей, 10 req/день + 5 за rewarded video, баннерная реклама
+- **Paid**: 50 моделей, per-token billing (баланс в USD)
+- **Наценка**: гибкая x2.5-6, средняя ~350%, max +30-50% vs ishushka
+- **Цены**: средневзвешенная за 1М токенов (input×0.4 + output×0.6), детали по клику
+- **Списание**: ПОСЛЕ стриминга по реальным токенам
+- **DeepSeek R1**: Premium (платный)
+- **BYOK**: отложен, НЕ упоминать
+- **4 метода оплаты**: Stars, TON Connect, Lava.ru (карты/СБП), Heleket (USDT/BTC/ETH)
 
-## TG STONE — Architecture
+## Архитектура
 
-### Tech Stack
-- **Language:** Python 3.13
-- **Bot Framework:** pyTelegramBotAPI (telebot) — synchronous API
-- **Database:** SQLAlchemy ORM, SQLite (dev) / PostgreSQL (prod)
-- **Admin Dashboard:** Flask web app on port 8080
-- **Payments:** CryptoBot API (USDT) + manual wallet transfers
-- **Deployment:** Docker, Railway/Heroku (Procfile), or local polling
+### Frontend — TG Mini App (frontend/)
+- React + TypeScript + Vite + Zustand
+- Inline CSS (НЕ Tailwind), палитры Matrix/Ocean/Sunset
+- Экраны: Home, Chat, Plans, Profile, FAQ, ModelDetail
+- i18n: RU/EN/ZH
+- Хуки оплаты: `usePayment.ts` (Stars), `useTonPayment.ts` (TON), `useRewardedAd.ts`
+- balanceUsd в store (НЕ credits)
 
-### Module Layout (`tgstonebot/`)
-| File | Purpose |
-|------|---------|
-| `bot.py` | Main bot logic (~3500 lines): all message/callback handlers, order flows, admin commands, backup loop |
-| `bot_fixed.py` | Alternative/backup version of bot.py |
-| `dashboard.py` | Flask admin panel: order management, user balances, promos, partners, broadcasts |
-| `models.py` | SQLAlchemy models: User, Order, CartItem, Transaction, PromoCode, ReferralTransaction, Partner |
-| `crud.py` | Database CRUD operations + service catalog (ServiceCatalog class with all products/pricing) |
-| `keyboards.py` | Telegram InlineKeyboardMarkup builders for all menus |
-| `fsm.py` | Finite state machine for multi-step user flows (UserState enum + UserContext dict) |
-| `payment.py` | CryptoBot API integration: invoice creation, status checks, refunds |
-| `config.py` | All config via env vars. Required: `BOT_TOKEN`, `ADMIN_ID`. Optional: `DATABASE_URL`, `CRYPTO_BOT_TOKEN`, `DASHBOARD_PASSWORD`, etc. |
-| `database.py` | `ManagedSession` context manager for safe DB transactions |
+### Backend (backend/)
+- Python 3.13, FastAPI + SQLAlchemy async + PostgreSQL
+- **Биллинг**: `services/token_billing.py` — per-token, TOKEN_PRICES, calculate_cost(), deduct_balance()
+- **AI**: `services/ai_router.py` — MODEL_MAP 50 моделей (OpenRouter)
+- **Лимиты**: `services/limiter.py` — FREE_DAILY_LIMIT=10, REWARDED_BONUS=5
+- **Оплата роутеры**: 
+  - `routers/payment.py` — Stars + TON + rewarded ads
+  - `routers/payment_ext.py` — Lava (карты/СБП) + Heleket (крипто)
+- **Оплата сервисы**:
+  - `services/ton.py` — TON Connect API
+  - `services/lava.py` — Lava.ru
+  - `services/heleket.py` — Heleket (USDT/BTC/ETH)
+- **Legacy**: `services/credits.py` — УДАЛИТЬ (заменён на token_billing.py)
+- **Модели**: User.balance_usd (Numeric 12,6), Transaction, Usage
+- **Бот**: `bot/payments.py` (Stars обработчик), `bot/handlers.py`
 
-### Key Patterns
-- **State management:** `fsm.py` uses a thread-safe dict with `threading.Lock`. User states tracked via `UserState` enum, context stored in `UserContext` dataclass.
-- **Balance operations:** Atomic updates in `crud.py` using SQLAlchemy's `with_for_update()` to prevent race conditions.
-- **Bot deployment modes:** Polling (local dev, default) vs Webhook (production, set `WEBHOOK_URL`). Auto-handles 409 conflicts with exponential backoff.
-- **Service catalog:** Hardcoded in `crud.py` `ServiceCatalog` class — categories: top placements, chats, channels, inviting, stars, smm, botdev.
-- **All UI text is in Russian.**
+### Website (website/) — [СОЗДАЁТСЯ]
+- Next.js 14 + Tailwind CSS
+- **СВЕТЛЫЙ дизайн** в стиле chatbotai.co (НЕ Matrix-тёмный!)
+- Референс: `StoneAI_Landing_v2.jsx`
 
-## Commands
+## Правила кода
 
-### Run TG STONE Bot (local dev)
+- UI на русском, код на английском
+- Frontend TG: inline CSS, палитры, maxWidth 480px
+- Website: Tailwind, светлый, responsive, SSR/SSG
+- Backend: async, Pydantic, атомарные балансы (with_for_update)
+- Цены: строго по `MODELS_50.md`
+- Оплата: всё в USD, НЕ в кредитах
+
+## Прогресс
+
+- [x] Этап 1: Per-token billing (token_billing.py, balance_usd)
+- [x] Этап 2: Модели (25→50 по MODELS_50.md)
+- [x] Этап 3: Реклама + rewarded ads
+- [x] Тесты: 130 тестов, все зелёные
+- [x] Оплата: Stars + TON + Lava + Heleket
+- [ ] Очистка: убрать legacy credits из payment_ext.py
+- [ ] Этап 4: Frontend PlansScreen (баланс $, per-token)
+- [ ] Этап 5: Frontend HomeScreen (50 моделей, фильтры)
+- [ ] Этап 6: Frontend ChatScreen (стоимость запроса)
+- [ ] Этап 7: Сайт лендинг
+- [ ] Этап 8: Сайт /models + /pricing
+
+## Команды
+
 ```bash
-cd /home/admin/.openclaw/workspace/tgstonebot
-pip install -r requirements.txt
-# Copy .env.example to .env and fill in BOT_TOKEN + ADMIN_ID
-python bot.py          # bot only (polling mode)
-bash start.sh          # bot + dashboard together
+cd frontend && npm run dev
+cd backend && uvicorn app.main:app --reload --port 8000
+cd website && npm run dev
 ```
 
-### Run with Docker
-```bash
-cd /home/admin/.openclaw/workspace/tgstonebot
-docker build -t tgstone .
-docker run --env-file .env -p 8080:8080 tgstone
-```
+## Ключевые файлы
 
-### Run Simple Claude Bot
-```bash
-cd /home/admin/bots/mybot
-pip install python-telegram-bot anthropic python-dotenv
-python bot.py
-```
-
-## OpenClaw Agent Framework
-
-The `.openclaw/workspace/` directory follows an AI agent workspace pattern:
-- `AGENTS.md` — Agent behavior rules, memory system, safety guidelines
-- `SOUL.md` — Agent personality (concise, opinionated, resourceful)
-- `IDENTITY.md` — Agent identity: STONE, Russian-speaking, business partner role
-- `USER.md` — User profile: Стоун, MSK timezone, "vibe coding" style
-- `BOOTSTRAP.md` — First-run initialization flow
-
-**Default language is Russian** — the user (Стоун) communicates in Russian and all bot UI text is in Russian.
+| Файл | Описание |
+|------|----------|
+| STRATEGY.md | Стратегия, финмодель, конкуренты |
+| TZ_IMPLEMENTATION.md | ТЗ на 8 этапов |
+| MODELS_50.md | 50 моделей: slug, цены, множители |
+| StoneAI_Landing_v2.jsx | Референс дизайна сайта |
+| backend/app/services/token_billing.py | Per-token биллинг |
+| backend/app/services/ai_router.py | 50 моделей OpenRouter |
+| backend/app/services/heleket.py | Heleket крипто-оплата |
+| backend/app/services/lava.py | Lava карты/СБП |
+| backend/app/services/ton.py | TON Connect |
+| backend/app/routers/payment.py | Stars + TON + rewarded |
+| backend/app/routers/payment_ext.py | Lava + Heleket |
+| backend/app/routers/chat.py | Chat + billing SSE |
