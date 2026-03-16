@@ -50,13 +50,13 @@ def test_models_endpoint_has_query_params():
 
 def test_filter_by_tier_lite():
     models = [m for m in MODELS_INFO if m["tier"] == "lite"]
-    assert len(models) == 7
+    assert len(models) == 5
     assert all(m["tier"] == "lite" for m in models)
 
 
 def test_filter_by_tier_premium():
     models = [m for m in MODELS_INFO if m["tier"] == "premium"]
-    assert len(models) == 18
+    assert len(models) == 45
     assert all(m["tier"] == "premium" for m in models)
 
 
@@ -65,9 +65,9 @@ def test_filter_by_company_openai():
     ids = {m["id"] for m in models}
     assert "gpt-4o-mini" in ids
     assert "gpt-4.1" in ids
-    assert "gpt-4.1-mini" in ids
     assert "gpt-5.1" in ids
-    assert len(models) == 4
+    assert "o3" in ids
+    assert len(models) == 10  # per MODELS_50.md
 
 
 def test_filter_by_company_anthropic():
@@ -76,28 +76,33 @@ def test_filter_by_company_anthropic():
     assert "claude-haiku-4.5" in ids
     assert "claude-sonnet-4" in ids
     assert "claude-opus-4" in ids
-    assert len(models) == 3
+    assert "claude-opus-4.5" in ids
+    assert len(models) == 6
 
 
 def test_filter_by_category_image():
     models = [m for m in MODELS_INFO if m["category"] == "image"]
+    assert len(models) == 6
     ids = {m["id"] for m in models}
-    assert ids == {"nano-banana-pro", "nano-banana"}
+    assert "nano-banana-pro" in ids
+    assert "flux-schnell" in ids
 
 
-def test_filter_by_category_code():
-    models = [m for m in MODELS_INFO if m["category"] == "code"]
+def test_filter_by_category_reason():
+    models = [m for m in MODELS_INFO if m["category"] == "reason"]
+    assert len(models) == 4
     ids = {m["id"] for m in models}
-    assert "claude-sonnet-4" in ids
-    assert "claude-opus-4" in ids
-    assert "phi-4" in ids
+    assert "o3" in ids
+    assert "o4-mini" in ids
 
 
 def test_filter_by_category_search():
     models = [m for m in MODELS_INFO if m["category"] == "search"]
+    assert len(models) == 3
     ids = {m["id"] for m in models}
-    assert ids == {"perplexity-sonar-pro"}
+    assert "perplexity-sonar-pro" in ids
+    assert "perplexity-sonar" in ids
 
 
 def test_no_filter_returns_all():
-    assert len(MODELS_INFO) == 25
+    assert len(MODELS_INFO) == 50

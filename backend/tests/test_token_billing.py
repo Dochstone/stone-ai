@@ -50,13 +50,13 @@ def test_all_registry_models_have_prices():
 
 def test_calculate_cost_formula():
     """cost = (tokens_in * input_price + tokens_out * output_price) / 1_000_000."""
-    # Simulate calculate_cost for gpt-4o-mini
+    # gpt-4o-mini: input=$0.90, output=$3.60 (per MODELS_50.md)
     m = next(m for m in ACTIVE if m["id"] == "gpt-4o-mini")
     tokens_in, tokens_out = 500, 1500
     expected = (tokens_in * m["price_input"] + tokens_out * m["price_output"]) / 1_000_000
     expected = round(expected, 6)
-    # 500*0.60 + 1500*2.40 = 300 + 3600 = 3900 / 1M = 0.003900
-    assert expected == 0.0039
+    # 500*0.90 + 1500*3.60 = 450 + 5400 = 5850 / 1M = 0.00585
+    assert expected == 0.00585
 
 
 def test_calculate_cost_opus():
@@ -64,16 +64,22 @@ def test_calculate_cost_opus():
     m = next(m for m in ACTIVE if m["id"] == "claude-opus-4")
     tokens_in, tokens_out = 1000, 2000
     cost = round((tokens_in * m["price_input"] + tokens_out * m["price_output"]) / 1_000_000, 6)
-    # 1000*60 + 2000*300 = 60000 + 600000 = 660000 / 1M = 0.66
-    assert cost == 0.66
+    # 1000*37.50 + 2000*187.50 = 37500 + 375000 = 412500 / 1M = 0.4125
+    assert cost == 0.4125
 
 
-def test_new_models_have_prices():
-    """New models from Phase 2 should all be priced."""
-    new_models = {"gemma-3-27b", "qwen-3-235b", "phi-4", "qwen-qwq",
-                  "command-r", "mistral-small", "gpt-5.1", "nano-banana-pro", "nano-banana"}
-    active_ids = {m["id"] for m in ACTIVE}
-    for model_id in new_models:
-        assert model_id in active_ids, f"{model_id} missing from registry"
-        m = next(m for m in ACTIVE if m["id"] == model_id)
-        assert m["price_weighted"] > 0, f"{model_id} has no weighted price"
+def test_50_models_have_prices():
+    """All 50 models should produce TOKEN_PRICES entries."""
+    token_prices = {
+        m["id"]: {"input": m["price_input"], "output": m["price_output"], "weighted": m["price_weighted"]}
+        for m in ACTIVE
+    }
+    assert len(token_prices) == 50
+
+
+def test_per_image_models_zero_token_price():
+    """Per-image models should have 0 token prices (billed per image)."""
+    for m in ACTIVE:
+        if m.get("price_per_image"):
+            assert m["price_input"] == 0
+            assert m["price_output"] == 0

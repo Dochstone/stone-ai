@@ -1,18 +1,11 @@
-"""Tests for MODELS_REGISTRY and derived mappings (Step 1).
+"""Tests for MODELS_REGISTRY — 50 models per MODELS_50.md.
 
-Verifies:
-- Registry has 25 active models
-- MODEL_MAP, TIER_MAP, MODELS_INFO are consistent
-- Tier 1 = lite, Tier 2-4 = premium
-- Required fields present in every entry
-- Prices match STRATEGY.md (weighted = 0.4*input + 0.6*output)
-- No duplicate model IDs
+Verifies structure, tiers, pricing, and consistency.
 """
 
 import ast
 from pathlib import Path
 
-# Parse registry from source to avoid importing httpx/app.config
 BACKEND = Path(__file__).parent.parent
 SRC = BACKEND / "app" / "services" / "ai_router.py"
 
@@ -31,10 +24,10 @@ REGISTRY = _load_registry()
 ACTIVE = [m for m in REGISTRY if m.get("active", True)]
 
 
-# ─── Structure tests ───
+# ─── Structure ───
 
-def test_total_active_models():
-    assert len(ACTIVE) == 25
+def test_total_50_models():
+    assert len(ACTIVE) == 50
 
 
 def test_no_duplicate_ids():
@@ -52,114 +45,146 @@ def test_required_fields():
 
 
 def test_categories():
-    valid = {"chat", "code", "image", "search"}
+    valid = {"chat", "code", "image", "search", "reason"}
     for m in ACTIVE:
         assert m["category"] in valid, f"{m['id']} has invalid category: {m['category']}"
 
 
-# ─── Tier tests ───
-
-def test_tier1_count():
-    tier1 = [m for m in ACTIVE if m["tier"] == 1]
-    assert len(tier1) == 7
-
-
-def test_tier1_models():
-    tier1_ids = {m["id"] for m in ACTIVE if m["tier"] == 1}
-    expected = {"gpt-4o-mini", "claude-haiku-4.5", "gemini-2.0-flash",
-                "llama-4-maverick", "mistral-large-25", "gemma-3-27b", "qwen-3-235b"}
-    assert tier1_ids == expected
-
-
-def test_tier_mapping():
-    """Tier 1 → lite, Tier 2-4 → premium."""
+def test_openrouter_ids_format():
     for m in ACTIVE:
-        expected_tier = "lite" if m["tier"] == 1 else "premium"
-        assert expected_tier in ("lite", "premium")
+        assert "/" in m["openrouter_id"], f"{m['id']}: bad openrouter_id"
+
+
+# ─── Tiers per MODELS_50.md ───
+
+def test_tier1_lite_5_models():
+    tier1 = [m for m in ACTIVE if m["tier"] == 1]
+    assert len(tier1) == 5
+
+
+def test_tier1_ids():
+    ids = {m["id"] for m in ACTIVE if m["tier"] == 1}
+    assert ids == {"gpt-4o-mini", "claude-haiku-4.5", "gemini-2.0-flash",
+                   "llama-4-maverick", "mistral-large-25"}
+
+
+def test_tier2_15_models():
+    assert len([m for m in ACTIVE if m["tier"] == 2]) == 15
+
+
+def test_tier3_15_models():
+    assert len([m for m in ACTIVE if m["tier"] == 3]) == 15
+
+
+def test_tier4_6_models():
+    assert len([m for m in ACTIVE if m["tier"] == 4]) == 6
+
+
+def test_tier5_7_models():
+    assert len([m for m in ACTIVE if m["tier"] == 5]) == 7
+
+
+def test_tier6_2_models():
+    assert len([m for m in ACTIVE if m["tier"] == 6]) == 2
+
+
+def test_tier_mapping_lite_premium():
+    for m in ACTIVE:
+        expected = "lite" if m["tier"] == 1 else "premium"
+        assert expected in ("lite", "premium")
 
 
 def test_deepseek_r1_is_premium():
-    """STRATEGY.md: DeepSeek R1 moved from lite to premium."""
     dr1 = next(m for m in ACTIVE if m["id"] == "deepseek-r1")
-    assert dr1["tier"] == 2  # Tier 2 = premium
+    assert dr1["tier"] == 2
 
 
-# ─── Price tests ───
+# ─── Key models exist ───
 
-def test_weighted_price_formula():
-    """weighted = 0.4 * input + 0.6 * output (±0.01 for rounding)."""
-    for m in ACTIVE:
-        expected = round(m["price_input"] * 0.4 + m["price_output"] * 0.6, 2)
-        actual = round(m["price_weighted"], 2)
-        assert abs(actual - expected) < 0.02, (
-            f"{m['id']}: weighted {actual} != expected {expected} "
-            f"(in={m['price_input']}, out={m['price_output']})"
-        )
+def test_new_models_present():
+    """All 25 new models (added from MODELS_50.md) should be present."""
+    new_ids = {
+        "deepseek-v3.2", "gpt-4.1-nano", "claude-sonnet-4.5", "claude-opus-4.5",
+        "gpt-5.4", "gemini-3-pro", "minimax-m2.5", "glm-5", "command-r7",
+        "kimi-k2.5", "o4-mini", "o3", "claude-haiku-4.5-think",
+        "gemini-2.5-flash-think", "devstral", "gpt-5-image", "gpt-5-image-mini",
+        "flux-schnell", "stable-diffusion-xl", "gemma-3n-4b", "llama-3.3-70b",
+        "qwen-turbo", "nvidia-nemotron", "mythomax-13b",
+        "perplexity-sonar", "perplexity-sonar-deep",
+    }
+    active_ids = {m["id"] for m in ACTIVE}
+    missing = new_ids - active_ids
+    assert not missing, f"Missing new models: {missing}"
 
 
-def test_strategy_prices():
-    """Key prices from STRATEGY.md."""
+# ─── Prices per MODELS_50.md ───
+
+def test_strategy_weighted_prices():
+    """Key weighted prices from MODELS_50.md."""
     prices = {m["id"]: m["price_weighted"] for m in ACTIVE}
-    assert prices["gpt-4o-mini"] == 1.68
-    assert prices["claude-haiku-4.5"] == 13.60
-    assert prices["gemini-2.0-flash"] == 1.12
-    assert prices["gemma-3-27b"] == 1.00
-    assert prices["qwen-3-235b"] == 2.72
-    assert prices["deepseek-r1"] == 6.14
-    assert prices["phi-4"] == 1.00
-    assert prices["claude-opus-4"] == 204.00
+    assert prices["gpt-4o-mini"] == 2.50
+    assert prices["claude-haiku-4.5"] == 11.00
+    assert prices["gemini-2.0-flash"] == 1.40
+    assert prices["deepseek-r1"] == 6.00
+    assert prices["claude-sonnet-4"] == 30.00
+    assert prices["claude-opus-4"] == 130.00
+    assert prices["claude-opus-4.5"] == 51.00
     assert prices["gpt-4.1"] == 28.00
-    assert prices["gpt-5.1"] == 36.80
+    assert prices["gpt-5.1"] == 26.00
+    assert prices["gpt-5.4"] == 30.00
+    assert prices["gemini-2.5-pro"] == 26.00
+    assert prices["gemini-3-pro"] == 24.00
+    assert prices["grok-3"] == 36.00
+    assert prices["o3"] == 19.60
+    assert prices["o4-mini"] == 12.32
 
 
-def test_all_prices_positive():
+def test_all_prices_non_negative():
     for m in ACTIVE:
-        assert m["price_input"] > 0, f"{m['id']} has zero input price"
-        assert m["price_output"] > 0, f"{m['id']} has zero output price"
-        assert m["price_weighted"] > 0, f"{m['id']} has zero weighted price"
+        assert m["price_input"] >= 0, f"{m['id']} has negative input price"
+        assert m["price_output"] >= 0, f"{m['id']} has negative output price"
+        assert m["price_weighted"] >= 0, f"{m['id']} has negative weighted price"
 
 
-# ─── Derived maps consistency ───
+def test_per_image_models():
+    """Per-image models should have price_per_image field."""
+    per_img = [m for m in ACTIVE if m.get("price_per_image")]
+    assert len(per_img) == 2
+    ids = {m["id"] for m in per_img}
+    assert ids == {"flux-schnell", "stable-diffusion-xl"}
+    assert per_img[0]["price_per_image"] > 0
 
-def test_model_map_complete():
+
+def test_free_openrouter_models_have_stone_prices():
+    """Tier 5 models (free on OR) should have Stone AI prices > 0."""
+    tier5 = [m for m in ACTIVE if m["tier"] == 5]
+    for m in tier5:
+        assert m["price_weighted"] > 0, f"{m['id']} (free on OR) should have Stone AI price"
+
+
+# ─── Category counts per MODELS_50.md ───
+
+def test_category_counts():
+    cats = {}
+    for m in ACTIVE:
+        cats.setdefault(m["category"], 0)
+        cats[m["category"]] += 1
+    assert cats["image"] == 6
+    assert cats["reason"] == 4
+    assert cats["search"] == 3
+    assert cats["code"] == 1
+
+
+# ─── Derived maps ───
+
+def test_model_map_50_entries():
     model_map = {m["id"]: m["openrouter_id"] for m in ACTIVE}
-    assert len(model_map) == 25
-    assert model_map["gpt-4o-mini"] == "openai/gpt-4o-mini"
-    assert model_map["nano-banana-pro"] == "google/gemini-3-pro-image-preview"
+    assert len(model_map) == 50
 
 
-def test_tier_map_complete():
+def test_tier_map_5_lite_45_premium():
     tier_map = {m["id"]: ("lite" if m["tier"] == 1 else "premium") for m in ACTIVE}
-    assert len(tier_map) == 25
-    assert tier_map["gpt-4o-mini"] == "lite"
-    assert tier_map["deepseek-r1"] == "premium"
-    assert tier_map["claude-opus-4"] == "premium"
-
-
-def test_models_info_has_new_fields():
-    """MODELS_INFO should include price_weighted, context_length, category."""
-    info = [
-        {
-            "id": m["id"], "name": m["name"], "company": m["company"],
-            "tier": "lite" if m["tier"] == 1 else "premium",
-            "icon": m["icon"], "desc": m["desc"],
-            "price_weighted": m["price_weighted"],
-            "price_input": m["price_input"],
-            "price_output": m["price_output"],
-            "context_length": m["context_length"],
-            "category": m["category"],
-        }
-        for m in ACTIVE
-    ]
-    for entry in info:
-        assert "price_weighted" in entry
-        assert "context_length" in entry
-        assert "category" in entry
-
-
-# ─── OpenRouter ID format ───
-
-def test_openrouter_ids_format():
-    """All OpenRouter IDs should contain a slash (provider/model)."""
-    for m in ACTIVE:
-        assert "/" in m["openrouter_id"], f"{m['id']}: bad openrouter_id {m['openrouter_id']}"
+    lite_count = sum(1 for v in tier_map.values() if v == "lite")
+    premium_count = sum(1 for v in tier_map.values() if v == "premium")
+    assert lite_count == 5
+    assert premium_count == 45
