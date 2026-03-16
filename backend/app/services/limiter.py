@@ -13,7 +13,9 @@ LIMITS = {
     "plus": {"lite": -1, "premium": 100},     # -1 = unlimited
     "max": {"lite": -1, "premium": 500},
 }
-
+# Token limits per request
+MAX_TOKENS_LITE = 4096
+MAX_TOKENS_PREMIUM = 8192
 # Pass limits
 PASS_LIMITS = {
     "day": {"premium": 15, "duration_hours": 24},
