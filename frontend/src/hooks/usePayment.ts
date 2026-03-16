@@ -1,9 +1,9 @@
 /**
- * Payment hook — handles Stars invoice creation and payment flow.
+ * Payment hook — handles Stars invoice creation for USD balance top-up.
  *
- * Flow: Click "Buy" → POST /api/payment/stars/create-invoice → get invoice_url
- *       → WebApp.openInvoice(url) → bot handles pre_checkout + successful_payment
- *       → bot calls /api/payment/stars/confirm → credits added
+ * Flow: Click "Buy" → POST /api/payment/stars/create-invoice { usd_amount }
+ *       → get invoice_url → WebApp.openInvoice(url)
+ *       → bot handles successful_payment → add_balance(usd)
  */
 
 import { useState, useCallback } from 'react'
@@ -17,24 +17,18 @@ interface PaymentResult {
   error?: string
 }
 
-interface TopUpPayload {
-  usd_amount: number
-  credits: number
-  method: 'stars' | 'fiat'
-}
-
 export function usePayment() {
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('idle')
   const [paymentLoading, setPaymentLoading] = useState(false)
 
-  const buyWithStars = useCallback(async (payload: TopUpPayload): Promise<PaymentResult> => {
+  const buyWithStars = useCallback(async (usdAmount: number): Promise<PaymentResult> => {
     setPaymentStatus('loading')
     setPaymentLoading(true)
 
     try {
-      const data = await apiPost<{ invoice_url: string; stars: number; credits: number }>(
+      const data = await apiPost<{ invoice_url: string; stars: number; usd_amount: number }>(
         '/api/payment/stars/create-invoice',
-        payload
+        { usd_amount: usdAmount }
       )
 
       if (!data.invoice_url) throw new Error('Не получен URL инвойса')

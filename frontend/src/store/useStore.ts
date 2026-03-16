@@ -27,17 +27,25 @@ export interface ChatMsg {
   content: string
 }
 
+export interface ModelPrice {
+  input: number
+  output: number
+  weighted: number
+}
+
 export interface UserState {
   tgId: number
   username: string
   firstName: string
   plan: string
-  credits: number
+  balanceUsd: number
   totalDepositedUsd: number
-  creditCosts: Record<string, number>
+  modelPrices: Record<string, ModelPrice>
   liteToday: number
   liteLimitDay: number
   totalRequests: number
+  totalTokens: number
+  lastRequestCost: number | null
   hasPass: boolean
 }
 
@@ -231,13 +239,15 @@ export const useStore = create<AppState>((set, get) => ({
     tgId: 0,
     username: '',
     firstName: '',
-    plan: 'credits',
-    credits: 0,
+    plan: 'per_token',
+    balanceUsd: 0,
     totalDepositedUsd: 0,
-    creditCosts: {},
+    modelPrices: {},
     liteToday: 0,
-    liteLimitDay: 20,
+    liteLimitDay: 10,
     totalRequests: 0,
+    totalTokens: 0,
+    lastRequestCost: null,
     hasPass: false,
   },
   setUser: (u) => set((s) => ({ user: { ...s.user, ...u } })),

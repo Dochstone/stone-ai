@@ -30,37 +30,21 @@ def test_fallback_models_count():
     assert count >= 5, f"Expected at least 5 fallback models, found {count}"
 
 
-def test_fallback_deepseek_r1_premium():
-    """DeepSeek R1 should be tier: 'premium' in fallback."""
+def test_fallback_has_lite_models():
+    """FALLBACK_MODELS should have the 5 lite models."""
     src = (FRONTEND / "hooks" / "useUser.ts").read_text(encoding="utf-8")
-    # Find the deepseek-r1 entry
-    idx = src.index("deepseek-r1")
-    # Find the tier value nearby (within ~100 chars)
-    chunk = src[idx:idx + 100]
-    assert "'premium'" in chunk, f"deepseek-r1 should be premium, found: {chunk}"
-
-
-def test_fallback_new_models_present():
-    """New models should be in FALLBACK_MODELS."""
-    src = (FRONTEND / "hooks" / "useUser.ts").read_text(encoding="utf-8")
-    new_models = [
-        "gemma-3-27b", "qwen-3-235b", "deepseek-v3", "gpt-4.1-mini",
-        "gemini-2.5-flash", "claude-sonnet-4", "grok-3-mini", "phi-4",
-        "qwen-qwq", "command-r", "mistral-small", "gpt-5.1",
-        "nano-banana-pro", "nano-banana",
-    ]
-    for model_id in new_models:
+    for model_id in ["gpt-4o-mini", "claude-haiku-4.5", "gemini-2.0-flash",
+                     "llama-4-maverick", "mistral-large-25"]:
         assert model_id in src, f"{model_id} missing from FALLBACK_MODELS"
 
 
-def test_fallback_no_old_credit_costs():
-    """Fallback error handler should not have creditCosts with model prices."""
+def test_fallback_uses_balance_usd():
+    """Fallback error handler should use balanceUsd, not credits."""
     src = (FRONTEND / "hooks" / "useUser.ts").read_text(encoding="utf-8")
-    # Find the catch/error block fallback
     error_idx = src.index("Failed to init user")
     fallback_chunk = src[error_idx:error_idx + 500]
-    # Should have empty creditCosts
-    assert "creditCosts: {}," in fallback_chunk or "creditCosts: {}" in fallback_chunk
+    assert "balanceUsd:" in fallback_chunk
+    assert "credits:" not in fallback_chunk
 
 
 # ─── Translations ───

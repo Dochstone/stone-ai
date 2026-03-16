@@ -79,7 +79,7 @@ export function HomeScreen() {
           }} />
         </div>
 
-        {/* Credits */}
+        {/* Balance */}
         <div style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           background: `rgba(${p.primaryRgb},0.06)`,
@@ -87,15 +87,15 @@ export function HomeScreen() {
           borderRadius: 10, padding: '10px 14px',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 16 }}>💎</span>
-            <span style={{ color: '#aab8aa', fontSize: 13 }}>Кредиты</span>
+            <span style={{ fontSize: 16 }}>💰</span>
+            <span style={{ color: '#aab8aa', fontSize: 13 }}>Баланс</span>
           </div>
-          {user.credits > 0 ? (
+          {user.balanceUsd > 0 ? (
             <span style={{
               color: p.primary, fontWeight: 800, fontSize: 16,
               filter: `drop-shadow(0 0 6px rgba(${p.primaryRgb},0.5))`,
             }}>
-              {user.credits.toLocaleString()} кр.
+              ${user.balanceUsd.toFixed(2)}
             </span>
           ) : (
             <span
@@ -179,15 +179,8 @@ export function HomeScreen() {
             key={m.id}
             model={m}
             palette={p}
-            creditCost={user.creditCosts?.[m.id] || 0}
-            canAfford={user.credits >= (user.creditCosts?.[m.id] || 0)}
-            onClick={() => {
-              if (user.credits < (user.creditCosts?.[m.id] || 0)) {
-                haptic('light'); setScreen('plans')
-              } else {
-                handleModelClick(m)
-              }
-            }}
+            priceWeighted={m.price_weighted || user.modelPrices[m.id]?.weighted || 0}
+            onClick={() => handleModelClick(m)}
           />
         ))}
       </div>
@@ -258,13 +251,11 @@ function PromoBanner({ palette, onPlansClick }: { palette: any; onPlansClick: ()
 }
 
 function ModelCard({
-  model, palette, locked, creditCost, canAfford, onClick,
+  model, palette, priceWeighted, onClick,
 }: {
-  model: any; palette: any; locked?: boolean
-  creditCost?: number; canAfford?: boolean; onClick: () => void
+  model: any; palette: any; priceWeighted?: number; onClick: () => void
 }) {
   const p = palette
-  const isLocked = locked ?? (creditCost !== undefined && creditCost > 0 && !canAfford)
   const isPremium = model.tier === 'premium'
 
   return (
@@ -272,14 +263,11 @@ function ModelCard({
       onClick={onClick}
       style={{
         background: 'rgba(8,16,12,0.95)',
-        border: `1px solid ${isLocked
-          ? 'rgba(255,255,255,0.1)'
-          : isPremium
-            ? 'rgba(191,90,242,0.3)'
-            : `rgba(${p.primaryRgb},0.25)`}`,
+        border: `1px solid ${isPremium
+          ? 'rgba(191,90,242,0.3)'
+          : `rgba(${p.primaryRgb},0.25)`}`,
         borderRadius: 14, padding: '14px 8px',
         textAlign: 'center', cursor: 'pointer',
-        opacity: isLocked ? 0.55 : 1,
         transition: 'transform 0.15s',
         position: 'relative',
       }}
@@ -302,14 +290,14 @@ function ModelCard({
         {model.name}
       </div>
       <div style={{ fontSize: 9, color: '#4a7a5a' }}>{model.company}</div>
-      {creditCost !== undefined && creditCost > 0 && (
+      {isPremium && priceWeighted !== undefined && priceWeighted > 0 && (
         <div style={{
           fontSize: 9, fontWeight: 800, marginTop: 5,
-          color: canAfford ? '#bf5af2' : '#445544',
-          background: canAfford ? 'rgba(191,90,242,0.1)' : 'rgba(255,255,255,0.04)',
+          color: '#bf5af2',
+          background: 'rgba(191,90,242,0.1)',
           padding: '2px 6px', borderRadius: 5, display: 'inline-block',
         }}>
-          {creditCost} кр.
+          ${priceWeighted.toFixed(1)}/M
         </div>
       )}
     </div>
