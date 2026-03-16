@@ -1,27 +1,67 @@
 /**
- * HomeScreen — welcome, limits display, model grid.
+ * HomeScreen — model grid with filters, usage stats, balance.
+ * Supports 50+ models with horizontal filter tabs.
  */
 
+import { useState, useMemo } from 'react'
 import { useStore } from '../../store/useStore'
 import { useTranslation } from '../../i18n/useTranslation'
-import { useTonPayment } from '../../hooks/useTonPayment'
 import { haptic } from '../../utils/telegram'
 import { AdBanner } from '../AdBanner/AdBanner'
 import { RewardedAdButton } from '../RewardedAdButton/RewardedAdButton'
 
-export function HomeScreen() {
-  const { palette, user, models, setModelId, setScreen } = useStore()
-  const { t } = useTranslation()
-  const { isWalletConnected, walletAddress, connectWallet, disconnectWallet } = useTonPayment()
-  const p = palette
+type FilterId = 'all' | 'free' | 'openai' | 'anthropic' | 'google' | 'meta' | 'xai' | 'image' | 'search' | 'reason' | 'deepseek' | 'alibaba'
 
-  const liteModels = models.filter((m) => m.tier === 'lite')
-  const premiumModels = models.filter((m) => m.tier === 'premium')
+const FILTERS: { id: FilterId; label: string }[] = [
+  { id: 'all', label: 'Все' },
+  { id: 'free', label: '🆓 Бесплатные' },
+  { id: 'openai', label: 'OpenAI' },
+  { id: 'anthropic', label: 'Anthropic' },
+  { id: 'google', label: 'Google' },
+  { id: 'deepseek', label: 'DeepSeek' },
+  { id: 'meta', label: 'Meta' },
+  { id: 'xai', label: 'xAI' },
+  { id: 'alibaba', label: 'Alibaba' },
+  { id: 'image', label: '🎨 Картинки' },
+  { id: 'search', label: '🔍 Поиск' },
+  { id: 'reason', label: '🧠 Reasoning' },
+]
+
+function applyFilter(models: any[], filter: FilterId) {
+  switch (filter) {
+    case 'all': return models
+    case 'free': return models.filter(m => m.tier === 'lite')
+    case 'image': return models.filter(m => m.category === 'image')
+    case 'search': return models.filter(m => m.category === 'search')
+    case 'reason': return models.filter(m => m.category === 'reason')
+    case 'openai': return models.filter(m => m.company === 'OpenAI')
+    case 'anthropic': return models.filter(m => m.company === 'Anthropic')
+    case 'google': return models.filter(m => m.company === 'Google')
+    case 'meta': return models.filter(m => m.company === 'Meta')
+    case 'xai': return models.filter(m => m.company === 'xAI')
+    case 'deepseek': return models.filter(m => m.company === 'DeepSeek')
+    case 'alibaba': return models.filter(m => m.company === 'Alibaba')
+    default: return models
+  }
+}
+
+export function HomeScreen() {
+  const { palette, user, models, setModelId, setScreen, setSelectedModel } = useStore()
+  const { t } = useTranslation()
+  const p = palette
+  const [filter, setFilter] = useState<FilterId>('all')
+
+  const filteredModels = useMemo(() => applyFilter(models, filter), [models, filter])
 
   const handleModelClick = (model: typeof models[0]) => {
     haptic('medium')
-    setModelId(model.id)
-    setScreen('chat')
+    if (model.tier === 'premium') {
+      setSelectedModel(model)
+      setScreen('model_detail')
+    } else {
+      setModelId(model.id)
+      setScreen('chat')
+    }
   }
 
   const liteUsedPct = user.liteLimitDay > 0
@@ -40,21 +80,18 @@ export function HomeScreen() {
         }}>
           Stone AI
         </h1>
-        <p style={{ color: '#568877', fontSize: 18, marginTop: 5 }}>
-          Весь мировой AI · прямо в Telegram
+        <p style={{ color: '#568877', fontSize: 14, marginTop: 5 }}>
+          50+ AI-моделей · прямо в Telegram
         </p>
       </div>
 
-      {/* Promo Banner */}
-      <PromoBanner palette={p} onPlansClick={() => { haptic('light'); setScreen('plans') }} />
-
-      {/* Usage card */}
+      {/* ═══ Usage card ═══ */}
       <div style={{
         background: 'rgba(8,16,12,0.95)',
         border: `1px solid rgba(${p.primaryRgb},0.25)`,
-        borderRadius: 16, padding: 16, marginBottom: 20,
+        borderRadius: 16, padding: 16, marginBottom: 16,
       }}>
-        {/* Lite usage */}
+        {/* Lite usage row */}
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
           <span style={{ color: '#aab8aa', fontSize: 13 }}>Бесплатных сегодня</span>
           <span style={{
@@ -69,8 +106,7 @@ export function HomeScreen() {
           borderRadius: 3, overflow: 'hidden', marginBottom: 14,
         }}>
           <div style={{
-            height: '100%',
-            width: `${liteUsedPct}%`,
+            height: '100%', width: `${liteUsedPct}%`,
             background: liteUsedPct >= 100
               ? 'linear-gradient(90deg, #ff6666, #ff4444)'
               : `linear-gradient(90deg, ${p.primary}, ${p.secondary})`,
@@ -79,7 +115,7 @@ export function HomeScreen() {
           }} />
         </div>
 
-        {/* Balance */}
+        {/* Balance row */}
         <div style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           background: `rgba(${p.primaryRgb},0.06)`,
@@ -112,143 +148,85 @@ export function HomeScreen() {
         </div>
       </div>
 
-      {/* Rewarded ad button (when free limit is close) */}
+      {/* Rewarded ad button */}
       <RewardedAdButton />
 
-      {/* Ad banner for free users */}
+      {/* Ad banner */}
       <AdBanner placement="home_banner" />
 
-      {/* Wallet connection */}
-      <div
-        onClick={() => { haptic('light'); isWalletConnected ? disconnectWallet() : connectWallet() }}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 12,
-          background: 'rgba(8,16,12,0.95)',
-          border: `1px solid ${isWalletConnected ? `rgba(${p.primaryRgb},0.3)` : 'rgba(255,255,255,0.1)'}`,
-          borderRadius: 14, padding: '12px 16px', marginBottom: 20,
-          cursor: 'pointer', transition: 'all 0.2s',
-        }}
-      >
-        <span style={{ fontSize: 22 }}>{isWalletConnected ? '💎' : '🔗'}</span>
-        <div style={{ flex: 1 }}>
-          <div style={{
-            fontSize: 13, fontWeight: 700,
-            color: isWalletConnected ? '#e0f8ec' : '#889988',
-          }}>
-            {isWalletConnected ? 'TON кошелёк подключён' : 'Подключить TON кошелёк'}
-          </div>
-          {isWalletConnected && walletAddress ? (
-            <div style={{ fontSize: 10, color: '#556655', marginTop: 2, fontFamily: 'monospace' }}>
-              {walletAddress.slice(0, 8)}...{walletAddress.slice(-6)}
-            </div>
-          ) : (
-            <div style={{ fontSize: 10, color: '#556655', marginTop: 2 }}>
-              Tonkeeper · @wallet · и другие
-            </div>
-          )}
-        </div>
-        <div style={{
-          fontSize: 11, fontWeight: 700, padding: '5px 12px',
-          borderRadius: 8,
-          background: isWalletConnected
-            ? `rgba(${p.primaryRgb},0.12)`
-            : `linear-gradient(135deg, ${p.primary}, ${p.secondary})`,
-          color: isWalletConnected ? p.primary : '#000',
-        }}>
-          {isWalletConnected ? 'Отключить' : 'Подключить'}
-        </div>
+      {/* ═══ Filter tabs (horizontal scroll) ═══ */}
+      <div style={{
+        display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 8,
+        marginBottom: 14, WebkitOverflowScrolling: 'touch',
+        msOverflowStyle: 'none', scrollbarWidth: 'none',
+      }}>
+        {FILTERS.map(f => {
+          const active = filter === f.id
+          return (
+            <button
+              key={f.id}
+              onClick={() => { setFilter(f.id); haptic('light') }}
+              style={{
+                flexShrink: 0, padding: '7px 14px', borderRadius: 10,
+                border: 'none',
+                background: active
+                  ? `linear-gradient(135deg, ${p.primary}, ${p.secondary})`
+                  : 'rgba(255,255,255,0.06)',
+                color: active ? '#000' : '#8aa898',
+                fontSize: 12, fontWeight: active ? 800 : 600,
+                cursor: 'pointer', transition: 'all 0.15s',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {f.label}
+            </button>
+          )
+        })}
       </div>
 
-      {/* Lite models */}
-      <h3 style={{ color: '#c0e8d0', fontSize: 14, marginBottom: 10, fontWeight: 700, letterSpacing: 0.5 }}>
-        🆓 {t.home_lite_free}
-      </h3>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24 }}>
-        {liteModels.map((m) => (
-          <ModelCard key={m.id} model={m} palette={p} onClick={() => handleModelClick(m)} />
-        ))}
+      {/* ═══ Model count ═══ */}
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        marginBottom: 10,
+      }}>
+        <span style={{ color: '#668877', fontSize: 11, fontWeight: 600 }}>
+          {filteredModels.length} {filteredModels.length === 1 ? 'модель' : filteredModels.length < 5 ? 'модели' : 'моделей'}
+        </span>
+        {filter !== 'all' && (
+          <span
+            onClick={() => setFilter('all')}
+            style={{ color: p.primary, fontSize: 11, fontWeight: 600, cursor: 'pointer' }}
+          >
+            Показать все →
+          </span>
+        )}
       </div>
 
-      {/* Premium models */}
-      <h3 style={{ color: '#c0e8d0', fontSize: 14, marginBottom: 10, fontWeight: 700, letterSpacing: 0.5 }}>
-        💎 {t.home_premium_sub}
-      </h3>
+      {/* ═══ Model grid ═══ */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
-        {premiumModels.map((m) => (
+        {filteredModels.map(m => (
           <ModelCard
             key={m.id}
             model={m}
             palette={p}
-            priceWeighted={m.price_weighted || user.modelPrices[m.id]?.weighted || 0}
+            priceWeighted={m.price_weighted || 0}
             onClick={() => handleModelClick(m)}
           />
         ))}
       </div>
+
+      {/* Empty state */}
+      {filteredModels.length === 0 && (
+        <div style={{ textAlign: 'center', padding: '40px 0', color: '#556655' }}>
+          Нет моделей для этого фильтра
+        </div>
+      )}
     </div>
   )
 }
 
-function PromoBanner({ palette, onPlansClick }: { palette: any; onPlansClick: () => void }) {
-  const p = palette
-  const features = [
-    { icon: '🤖', text: 'Плати сколько хочешь - никаких подписок' },
-    { icon: '⚡', text: 'GPT-4.1 · Claude Opus 4 · Grok 3 · Liama' },
-    { icon: '🔍', text: 'Gemini 2.5 Pro · Perplexity · DeepSeek, Sonnet 4.6' },
-    { icon: '🆓', text: '6 бесплатных модели и 20 запросов каждый день' },
-    { icon: '🚀', text: 'Без VPN · Без регистраций на сервисах · Без блокировок' },
-    { icon: '💎', text: 'Пополняй баланс звездами, картой или криптокошельком' },
-  ]
 
-  return (
-    <div style={{
-      background: 'rgba(8,16,12,0.95)',
-      border: `1px solid rgba(${p.primaryRgb},0.3)`,
-      borderRadius: 16, padding: 16, marginBottom: 20,
-      position: 'relative', overflow: 'hidden',
-    }}>
-      {/* Glow */}
-      <div style={{
-        position: 'absolute', top: -40, right: -40,
-        width: 140, height: 140, borderRadius: '50%',
-        background: `radial-gradient(circle, rgba(${p.primaryRgb},0.12), transparent 70%)`,
-        pointerEvents: 'none',
-      }} />
-
-      <div style={{
-        fontSize: 11, fontWeight: 700, color: p.primary,
-        letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 6,
-      }}>
-        ✦ Stone AI — топ 11 AI моделей в одном приложении
-      </div>
-
-      <div style={{ fontSize: 15, fontWeight: 800, color: '#fff', marginBottom: 12, lineHeight: 1.3 }}>
-        Забудь о vpn, блокировках аккаунта и десятках регистраций! 
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '7px 10px', marginBottom: 14 }}>
-        {features.map((f, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
-            <span style={{ fontSize: 13, flexShrink: 0 }}>{f.icon}</span>
-            <span style={{ fontSize: 11, color: '#99bbaa', lineHeight: 1.4 }}>{f.text}</span>
-          </div>
-        ))}
-      </div>
-
-      <button
-        onClick={onPlansClick}
-        style={{
-          width: '100%', padding: '12px 0', borderRadius: 12, border: 'none',
-          background: `linear-gradient(135deg, ${p.primary}, ${p.secondary})`,
-          color: '#000', fontWeight: 800, fontSize: 14, cursor: 'pointer',
-          boxShadow: `0 4px 20px rgba(${p.primaryRgb},0.4)`,
-          letterSpacing: 0.5,
-        }}
-      >
-        ⚡ Пополнить баланс
-      </button>
-    </div>
-  )
-}
+/* ═══ Model Card ═══ */
 
 function ModelCard({
   model, palette, priceWeighted, onClick,
@@ -258,13 +236,22 @@ function ModelCard({
   const p = palette
   const isPremium = model.tier === 'premium'
 
+  // Category badge color
+  const catColors: Record<string, string> = {
+    image: '#f5a623',
+    search: '#4a90d9',
+    reason: '#bf5af2',
+    code: '#00cc88',
+  }
+  const catColor = catColors[model.category]
+
   return (
     <div
       onClick={onClick}
       style={{
         background: 'rgba(8,16,12,0.95)',
         border: `1px solid ${isPremium
-          ? 'rgba(191,90,242,0.3)'
+          ? 'rgba(191,90,242,0.25)'
           : `rgba(${p.primaryRgb},0.25)`}`,
         borderRadius: 14, padding: '14px 8px',
         textAlign: 'center', cursor: 'pointer',
@@ -272,7 +259,7 @@ function ModelCard({
         position: 'relative',
       }}
     >
-      {/* Badge */}
+      {/* Tier badge */}
       <div style={{
         position: 'absolute', top: 6, right: 6,
         fontSize: 8, fontWeight: 700, padding: '2px 5px', borderRadius: 4,
@@ -282,6 +269,17 @@ function ModelCard({
         {isPremium ? 'PRO' : 'FREE'}
       </div>
 
+      {/* Category badge (for non-chat) */}
+      {catColor && (
+        <div style={{
+          position: 'absolute', top: 6, left: 6,
+          fontSize: 7, fontWeight: 700, padding: '2px 4px', borderRadius: 3,
+          background: `${catColor}20`, color: catColor, textTransform: 'uppercase',
+        }}>
+          {model.category}
+        </div>
+      )}
+
       <div style={{ fontSize: 28, marginBottom: 6 }}>{model.icon}</div>
       <div style={{
         fontSize: 11, fontWeight: 700, color: '#e0f8ec', marginBottom: 2,
@@ -290,16 +288,18 @@ function ModelCard({
         {model.name}
       </div>
       <div style={{ fontSize: 9, color: '#4a7a5a' }}>{model.company}</div>
-      {isPremium && priceWeighted !== undefined && priceWeighted > 0 && (
-        <div style={{
-          fontSize: 9, fontWeight: 800, marginTop: 5,
-          color: '#bf5af2',
-          background: 'rgba(191,90,242,0.1)',
-          padding: '2px 6px', borderRadius: 5, display: 'inline-block',
-        }}>
-          ${priceWeighted.toFixed(1)}/M
-        </div>
-      )}
+
+      {/* Price */}
+      <div style={{
+        fontSize: 9, fontWeight: 800, marginTop: 5,
+        color: isPremium ? '#bf5af2' : '#00cc66',
+        background: isPremium ? 'rgba(191,90,242,0.1)' : `rgba(${p.primaryRgb},0.1)`,
+        padding: '2px 6px', borderRadius: 5, display: 'inline-block',
+      }}>
+        {isPremium
+          ? (priceWeighted && priceWeighted > 0 ? `$${priceWeighted.toFixed(1)}/M` : 'PRO')
+          : 'FREE'}
+      </div>
     </div>
   )
 }
