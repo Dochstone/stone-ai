@@ -78,7 +78,7 @@ async def get_ton_price_usd() -> float:
     return _ton_price_cache["price"] if _ton_price_cache["price"] > 0 else 3.5
 
 
-def create_order(user_tg_id: int, usd_amount: float, credits: int, ton_amount: float) -> dict:
+def create_order(user_tg_id: int, usd_amount: float, ton_amount: float) -> dict:
     """Create a pending TON payment order with unique comment."""
     order_id = uuid.uuid4().hex[:16]
 
@@ -91,7 +91,6 @@ def create_order(user_tg_id: int, usd_amount: float, credits: int, ton_amount: f
         "order_id": order_id,
         "user_tg_id": user_tg_id,
         "usd_amount": usd_amount,
-        "credits": credits,
         "ton_amount": ton_amount,
         "payload_comment": payload_comment,
         "status": "pending",

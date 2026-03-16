@@ -1,23 +1,24 @@
-"""Payment endpoints — Stars + TON Connect + Fiat invoices for credits."""
+"""Payment endpoints — Stars + TON Connect for USD balance top-up."""
 
 import logging
+import math
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, text
 
 from app.database import get_db
 from app.middleware.auth import get_current_user
+from app.models.user import User
 from app.models import Transaction
-from app.services.credits import add_credits, get_user_credits
+from app.services.token_billing import add_balance, get_user_balance, TOKEN_PRICES, get_weighted_price
 from app.services.ton import (
     get_ton_price_usd,
     create_order,
     get_order,
     complete_order,
     verify_transaction,
-    cleanup_expired_orders,
 )
 from app.config import get_settings
 
@@ -25,23 +26,18 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/payment", tags=["payment"])
 
-# Pricing
-CREDIT_PRICE_STANDARD = 1.1    # USD per credit
-CREDIT_PRICE_VIP = 1.0         # USD per credit (total deposited > $10,000)
-VIP_THRESHOLD_USD = 10000.0
-STAR_PRICE_USD = 0.013          # 1 Telegram Star ≈ $0.013
-
-
-def credits_for_usd(usd: float, is_vip: bool) -> int:
-    price = CREDIT_PRICE_VIP if is_vip else CREDIT_PRICE_STANDARD
-    return max(0, int(usd / price))
+# Pricing constants
+STAR_PRICE_USD = 0.013          # 1 Telegram Star ~ $0.013
+MIN_TOP_UP_USD = 1.0            # minimum top-up
 
 
 class TopUpRequest(BaseModel):
-    usd_amount: float       # how much user wants to spend
-    credits: int            # how many credits to receive (pre-calculated by frontend)
-    method: str             # "stars" | "fiat"
+    usd_amount: float       # how much user wants to add to balance
 
+
+# ═══════════════════════════════════════════════════════════
+# Stars Payments (direct USD balance top-up)
+# ═══════════════════════════════════════════════════════════
 
 @router.post("/stars/create-invoice")
 async def create_stars_invoice(
@@ -49,26 +45,11 @@ async def create_stars_invoice(
     tg_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    if req.usd_amount < 1.0:
-        raise HTTPException(status_code=400, detail="Минимальная сумма $1")
-    if req.credits <= 0:
-        raise HTTPException(status_code=400, detail="Некорректное количество кредитов")
+    """Create a Telegram Stars invoice for USD balance top-up."""
+    if req.usd_amount < MIN_TOP_UP_USD:
+        raise HTTPException(status_code=400, detail=f"Минимальная сумма ${MIN_TOP_UP_USD:.0f}")
 
-    # Verify credits match the user's current price tier
-    from sqlalchemy import text
-    result = await db.execute(
-        text("SELECT total_deposited_usd FROM users WHERE tg_id = :tid"),
-        {"tid": tg_user["id"]}
-    )
-    row = result.fetchone()
-    is_vip = (row[0] or 0.0) >= VIP_THRESHOLD_USD if row else False
-    expected_credits = credits_for_usd(req.usd_amount, is_vip)
-
-    # Allow ±1 rounding difference
-    if abs(expected_credits - req.credits) > 1:
-        raise HTTPException(status_code=400, detail="Несоответствие суммы и кредитов")
-
-    stars_amount = max(1, round(req.usd_amount / STAR_PRICE_USD))
+    stars_amount = max(1, math.ceil(req.usd_amount / STAR_PRICE_USD))
 
     from app.main import bot
     if not bot:
@@ -77,15 +58,19 @@ async def create_stars_invoice(
     try:
         from aiogram.types import LabeledPrice
         invoice_url = await bot.create_invoice_link(
-            title="Stone AI — Пополнение кредитов",
-            description=f"{req.credits} кредитов · ${req.usd_amount:.2f}",
-            payload=f"credits:{req.credits}:{tg_user['id']}:{req.usd_amount}",
+            title="Stone AI — Пополнение баланса",
+            description=f"Пополнение баланса: ${req.usd_amount:.2f}",
+            payload=f"topup:{tg_user['id']}:{req.usd_amount}",
             provider_token="",
             currency="XTR",
-            prices=[LabeledPrice(label=f"{req.credits} кредитов", amount=stars_amount)],
+            prices=[LabeledPrice(label=f"${req.usd_amount:.2f}", amount=stars_amount)],
         )
-        logger.info(f"Stars invoice: user={tg_user['id']}, usd={req.usd_amount}, credits={req.credits}, stars={stars_amount}")
-        return {"invoice_url": invoice_url, "stars": stars_amount, "credits": req.credits}
+        logger.info(f"Stars invoice: user={tg_user['id']}, usd={req.usd_amount}, stars={stars_amount}")
+        return {
+            "invoice_url": invoice_url,
+            "stars": stars_amount,
+            "usd_amount": req.usd_amount,
+        }
 
     except Exception as e:
         logger.error(f"Failed to create Stars invoice: {e}")
@@ -94,19 +79,17 @@ async def create_stars_invoice(
 
 @router.post("/stars/confirm")
 async def confirm_stars_payment(
-    credits: int,
     tg_id: int,
     usd_amount: float,
     payment_id: str,
     db: AsyncSession = Depends(get_db),
 ):
-    """Called by bot after successful_payment. Adds credits, updates total_deposited_usd."""
-    new_balance = await add_credits(db, tg_id, credits)
+    """Called by bot after successful_payment. Adds USD to balance."""
+    new_balance = await add_balance(db, tg_id, usd_amount)
 
     # Update total_deposited_usd
-    from sqlalchemy import text
     await db.execute(
-        text("UPDATE users SET total_deposited_usd = COALESCE(total_deposited_usd, 0) + :amt WHERE tg_id = :tid"),
+        text("UPDATE users SET total_deposited_usd = COALESCE(total_deposited_usd, 0) + :amt WHERE telegram_id = :tid"),
         {"amt": usd_amount, "tid": tg_id}
     )
 
@@ -115,16 +98,16 @@ async def confirm_stars_payment(
         amount=round(usd_amount / STAR_PRICE_USD),
         currency="XTR",
         amount_usd=usd_amount,
-        product_type="credits",
-        product_id="credits_topup",
+        product_type="balance_topup",
+        product_id="usd_topup",
         status="completed",
         provider_id=payment_id,
     )
     db.add(tx)
     await db.commit()
 
-    logger.info(f"Credits added: user={tg_id}, credits={credits}, usd={usd_amount}, balance={new_balance}")
-    return {"status": "ok", "credits_added": credits, "new_balance": new_balance}
+    logger.info(f"Balance added: user={tg_id}, usd={usd_amount}, balance=${new_balance:.6f}")
+    return {"status": "ok", "added_usd": usd_amount, "new_balance_usd": new_balance}
 
 
 @router.post("/fiat/create-invoice")
@@ -138,21 +121,63 @@ async def create_fiat_invoice(
 
 @router.get("/pricing")
 async def get_pricing(tg_user: dict = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    """Return credit pricing for current user."""
-    from sqlalchemy import text
-    result = await db.execute(
-        text("SELECT total_deposited_usd FROM users WHERE tg_id = :tid"),
-        {"tid": tg_user["id"]}
-    )
-    row = result.fetchone()
-    total_deposited = row[0] or 0.0 if row else 0.0
-    is_vip = total_deposited >= VIP_THRESHOLD_USD
+    """Return per-token pricing info and user balance."""
+    tg_id = tg_user["id"]
+    balance = await get_user_balance(db, tg_id)
+
+    # Build model prices for frontend
+    model_prices = {}
+    for model_id, prices in TOKEN_PRICES.items():
+        model_prices[model_id] = {
+            "input_per_m": prices["input"],
+            "output_per_m": prices["output"],
+            "weighted_per_m": prices["weighted"],
+        }
 
     return {
-        "credit_price_usd": CREDIT_PRICE_VIP if is_vip else CREDIT_PRICE_STANDARD,
-        "is_vip": is_vip,
-        "total_deposited_usd": total_deposited,
-        "vip_threshold_usd": VIP_THRESHOLD_USD,
+        "balance_usd": balance,
+        "min_top_up_usd": MIN_TOP_UP_USD,
+        "star_price_usd": STAR_PRICE_USD,
+        "model_prices": model_prices,
+        "billing_type": "per_token",
+    }
+
+
+# ═══════════════════════════════════════════════════════════
+# Rewarded Ads
+# ═══════════════════════════════════════════════════════════
+
+@router.post("/rewarded-ad-complete")
+async def rewarded_ad_complete(
+    tg_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Grant +5 free requests after watching a rewarded ad.
+    Max 1 time per day.
+    """
+    tg_id = tg_user["id"]
+    result = await db.execute(
+        select(User).where(User.telegram_id == tg_id).with_for_update()
+    )
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if (user.rewarded_today or 0) >= 5:
+        raise HTTPException(status_code=429, detail="Бонус за рекламу уже получен сегодня")
+
+    user.rewarded_today = 5
+    await db.commit()
+
+    from app.services.limiter import get_today_usage, FREE_DAILY_LIMIT
+    used = await get_today_usage(db, tg_id, "lite")
+
+    logger.info(f"Rewarded ad: user={tg_id}, bonus=5")
+    return {
+        "bonus": 5,
+        "new_limit": FREE_DAILY_LIMIT + 5,
+        "used_today": used,
     }
 
 
@@ -162,12 +187,11 @@ async def get_pricing(tg_user: dict = Depends(get_current_user), db: AsyncSessio
 
 class TonCreateOrderRequest(BaseModel):
     usd_amount: float
-    credits: int
 
 
 class TonVerifyRequest(BaseModel):
     order_id: str
-    boc: str = ""  # optional — we verify via TonAPI polling, not BOC parsing
+    boc: str = ""
 
 
 @router.get("/ton/price")
@@ -183,34 +207,14 @@ async def create_ton_order(
     tg_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """
-    Create a TON payment order.
-
-    Returns wallet address, TON amount, and unique comment for the transaction.
-    Frontend uses these to build a TON Connect sendTransaction call.
-    """
+    """Create a TON payment order for USD balance top-up."""
     settings = get_settings()
 
     if not settings.ton_wallet_address:
         raise HTTPException(status_code=503, detail="TON оплата временно недоступна")
 
-    if req.usd_amount < 1.0:
-        raise HTTPException(status_code=400, detail="Минимальная сумма $1")
-    if req.credits <= 0:
-        raise HTTPException(status_code=400, detail="Некорректное количество кредитов")
-
-    # Verify credits match pricing
-    from sqlalchemy import text
-    result = await db.execute(
-        text("SELECT total_deposited_usd FROM users WHERE tg_id = :tid"),
-        {"tid": tg_user["id"]}
-    )
-    row = result.fetchone()
-    is_vip = (row[0] or 0.0) >= VIP_THRESHOLD_USD if row else False
-    expected_credits = credits_for_usd(req.usd_amount, is_vip)
-
-    if abs(expected_credits - req.credits) > 1:
-        raise HTTPException(status_code=400, detail="Несоответствие суммы и кредитов")
+    if req.usd_amount < MIN_TOP_UP_USD:
+        raise HTTPException(status_code=400, detail=f"Минимальная сумма ${MIN_TOP_UP_USD:.0f}")
 
     # Convert USD to TON
     ton_price = await get_ton_price_usd()
@@ -219,11 +223,9 @@ async def create_ton_order(
 
     ton_amount = round(req.usd_amount / ton_price, 4)
 
-    # Create order with unique comment
     order = create_order(
         user_tg_id=tg_user["id"],
         usd_amount=req.usd_amount,
-        credits=req.credits,
         ton_amount=ton_amount,
     )
 
@@ -238,7 +240,7 @@ async def create_ton_order(
         "ton_amount": ton_amount,
         "nanoton_amount": str(int(ton_amount * 1_000_000_000)),
         "payload_comment": order["payload_comment"],
-        "expires_in": 900,  # 15 minutes
+        "expires_in": 900,
         "ton_usd": ton_price,
     }
 
@@ -249,24 +251,18 @@ async def verify_ton_payment(
     tg_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """
-    Verify a TON payment after user sends the transaction.
-
-    Polls TonAPI to find a matching transaction by comment and amount.
-    On success, credits the user's account.
-    """
+    """Verify a TON payment and add USD to balance."""
     order = get_order(req.order_id)
 
     if not order:
         raise HTTPException(status_code=404, detail="Заказ не найден")
     if order["status"] == "completed":
-        return {"status": "already_completed", "credits": order["credits"]}
+        return {"status": "already_completed"}
     if order["status"] == "expired":
         raise HTTPException(status_code=410, detail="Заказ истёк. Создайте новый.")
     if order["user_tg_id"] != tg_user["id"]:
         raise HTTPException(status_code=403, detail="Заказ принадлежит другому пользователю")
 
-    # Try to find matching transaction via TonAPI
     tx_info = await verify_transaction(
         wallet_address=get_settings().ton_wallet_address,
         expected_comment=order["payload_comment"],
@@ -280,27 +276,23 @@ async def verify_ton_payment(
             "message": "Транзакция ещё не найдена. Подождите 1-2 минуты и попробуйте снова.",
         }
 
-    # Transaction found — credit the user
-    credits_amount = order["credits"]
+    # Transaction found — add USD to balance
     usd_amount = order["usd_amount"]
-
-    new_balance = await add_credits(db, tg_user["id"], credits_amount)
+    new_balance = await add_balance(db, tg_user["id"], usd_amount)
 
     # Update total_deposited_usd
-    from sqlalchemy import text
     await db.execute(
-        text("UPDATE users SET total_deposited_usd = COALESCE(total_deposited_usd, 0) + :amt WHERE tg_id = :tid"),
+        text("UPDATE users SET total_deposited_usd = COALESCE(total_deposited_usd, 0) + :amt WHERE telegram_id = :tid"),
         {"amt": usd_amount, "tid": tg_user["id"]}
     )
 
-    # Record transaction
     tx = Transaction(
         user_tg_id=tg_user["id"],
         amount=tx_info["amount_ton"],
         currency="TON",
         amount_usd=usd_amount,
-        product_type="credits",
-        product_id="credits_topup",
+        product_type="balance_topup",
+        product_id="usd_topup",
         status="completed",
         tx_hash=tx_info["tx_hash"],
         provider_id=f"tonconnect:{req.order_id}",
@@ -308,18 +300,17 @@ async def verify_ton_payment(
     db.add(tx)
     await db.commit()
 
-    # Mark order complete
     complete_order(req.order_id, tx_info["tx_hash"])
 
     logger.info(
-        f"TON payment completed: user={tg_user['id']}, credits={credits_amount}, "
-        f"ton={tx_info['amount_ton']}, tx={tx_info['tx_hash'][:16]}..."
+        f"TON payment: user={tg_user['id']}, usd={usd_amount}, "
+        f"ton={tx_info['amount_ton']}, balance=${new_balance:.6f}"
     )
 
     return {
         "status": "completed",
-        "credits_added": credits_amount,
-        "new_balance": new_balance,
+        "added_usd": usd_amount,
+        "new_balance_usd": new_balance,
         "tx_hash": tx_info["tx_hash"],
         "ton_amount": tx_info["amount_ton"],
     }
@@ -341,6 +332,6 @@ async def get_ton_order_status(
         "order_id": order["order_id"],
         "status": order["status"],
         "ton_amount": order["ton_amount"],
-        "credits": order["credits"],
+        "usd_amount": order["usd_amount"],
         "payload_comment": order["payload_comment"],
     }
