@@ -4,10 +4,12 @@
  * Lite models: free 20/day. Premium: credits per request.
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useStore } from '../../store/useStore'
 import { usePayment } from '../../hooks/usePayment'
+import { useTonPayment } from '../../hooks/useTonPayment'
 import { haptic } from '../../utils/telegram'
+import { apiGet } from '../../api/client'
 
 const STAR_PRICE_USD = 0.013
 const CREDIT_PRICE_STANDARD = 1.1
@@ -78,11 +80,25 @@ function SolidCard({ children, style }: { children: React.ReactNode; style?: Rea
 export function PlansScreen() {
   const { user, palette: p } = useStore()
   const { buyWithStars, paymentLoading, resetPayment } = usePayment()
+  const {
+    isWalletConnected, walletAddress, connectWallet, disconnectWallet,
+    buyWithTon, tonPaymentStatus, tonPaymentLoading, resetTonPayment,
+  } = useTonPayment()
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
   const [amountUsd, setAmountUsd] = useState('')
-  const [payMethod, setPayMethod] = useState<'stars' | 'fiat'>('stars')
+  const [payMethod, setPayMethod] = useState<'stars' | 'ton' | 'card' | 'crypto'>('stars')
   const [buying, setBuying] = useState(false)
   const [expandedModel, setExpandedModel] = useState<string | null>(null)
+  const [tonPrice, setTonPrice] = useState(0)
+
+  // Fetch TON price on mount and when switching to TON method
+  useEffect(() => {
+    if (payMethod === 'ton' && tonPrice === 0) {
+      apiGet<{ ton_usd: number }>('/api/payment/ton/price')
+        .then(data => setTonPrice(data.ton_usd))
+        .catch(() => setTonPrice(3.5)) // fallback
+    }
+  }, [payMethod])
 
   const isVip = (user.totalDepositedUsd ?? 0) >= VIP_THRESHOLD_USD
   const creditPrice = isVip ? CREDIT_PRICE_VIP : CREDIT_PRICE_STANDARD
@@ -90,10 +106,11 @@ export function PlansScreen() {
   const usd = parseFloat(amountUsd) || 0
   const creditsToReceive = usd > 0 ? Math.floor(usd / creditPrice) : 0
   const starsNeeded = usd > 0 ? Math.ceil(usd / STAR_PRICE_USD) : 0
+  const tonNeeded = usd > 0 && tonPrice > 0 ? +(usd / tonPrice).toFixed(2) : 0
 
   const showToast = (msg: string, ok = true) => {
     setToast({ msg, ok })
-    setTimeout(() => setToast(null), 3000)
+    setTimeout(() => setToast(null), 4000)
   }
 
   const handleBuyStars = async () => {
@@ -113,10 +130,72 @@ export function PlansScreen() {
     resetPayment()
   }
 
-  const handleBuyFiat = () => {
+  const handleBuyTon = async () => {
+    if (usd < 1) return showToast('Минимум $1', false)
+    if (!isWalletConnected) {
+      connectWallet()
+      return
+    }
+    haptic('medium')
+    setBuying(true)
+    const result = await buyWithTon(usd, creditsToReceive)
+    if (result.status === 'success') {
+      showToast(`✅ +${result.creditsAdded} кредитов!`, true)
+      setTimeout(() => window.location.reload(), 1500)
+    } else if (result.status === 'cancelled') {
+      showToast('Отменено', false)
+    } else {
+      showToast(result.error || 'Ошибка оплаты TON', false)
+    }
+    setBuying(false)
+    resetTonPayment()
+  }
+
+  const handleBuyCard = async () => {
     if (usd < 1) return showToast('Минимум $1', false)
     haptic('medium')
-    showToast('Скоро: оплата картой', false)
+    setBuying(true)
+    try {
+      const data = await apiPost<{ payment_url: string; order_id: string }>('/api/payment/lava/create-order', {
+        usd_amount: usd, credits: creditsToReceive,
+      })
+      if (data.payment_url) {
+        window.open(data.payment_url, '_blank')
+        showToast('Откроется страница оплаты', true)
+      } else {
+        showToast('Ошибка создания платежа', false)
+      }
+    } catch (e: any) {
+      showToast(e?.detail || 'Оплата картой временно недоступна', false)
+    }
+    setBuying(false)
+  }
+
+  const handleBuyCrypto = async () => {
+    if (usd < 1) return showToast('Минимум $1', false)
+    haptic('medium')
+    setBuying(true)
+    try {
+      const data = await apiPost<{ payment_url: string; order_id: string }>('/api/payment/crypto/create-order', {
+        usd_amount: usd, credits: creditsToReceive,
+      })
+      if (data.payment_url) {
+        window.open(data.payment_url, '_blank')
+        showToast('Откроется страница оплаты', true)
+      } else {
+        showToast('Ошибка создания платежа', false)
+      }
+    } catch (e: any) {
+      showToast(e?.detail || 'Крипто-оплата временно недоступна', false)
+    }
+    setBuying(false)
+  }
+
+  const handleBuy = () => {
+    if (payMethod === 'stars') handleBuyStars()
+    else if (payMethod === 'ton') handleBuyTon()
+    else if (payMethod === 'card') handleBuyCard()
+    else if (payMethod === 'crypto') handleBuyCrypto()
   }
 
   return (
@@ -261,53 +340,124 @@ export function PlansScreen() {
         )}
 
         {/* Payment method toggle */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-          {(['stars', 'fiat'] as const).map(method => {
-            const active = payMethod === method
+        <div style={{ display: 'flex', gap: 5, marginBottom: 12 }}>
+          {([
+            { id: 'stars' as const, label: '⭐ Stars' },
+            { id: 'ton' as const, label: '💎 TON' },
+            { id: 'card' as const, label: '💳 Карта' },
+            { id: 'crypto' as const, label: '🪙 Крипто' },
+          ]).map(({ id, label }) => {
+            const active = payMethod === id
             return (
               <button
-                key={method}
-                onClick={() => { setPayMethod(method); haptic('light') }}
+                key={id}
+                onClick={() => { setPayMethod(id); haptic('light') }}
                 style={{
                   flex: 1, padding: '11px 0', borderRadius: 10, border: 'none',
                   background: active
                     ? `linear-gradient(135deg, ${p.primary}, ${p.secondary})`
                     : 'rgba(255,255,255,0.06)',
                   color: active ? '#000' : '#889988',
-                  fontWeight: 700, fontSize: 13, cursor: 'pointer',
+                  fontWeight: 700, fontSize: 12, cursor: 'pointer',
                   boxShadow: active ? `0 0 14px rgba(${p.primaryRgb},0.4)` : 'none',
                   transition: 'all 0.2s',
                 }}
               >
-                {method === 'stars' ? '⭐ Telegram Stars' : '💳 Картой'}
+                {label}
               </button>
             )
           })}
         </div>
 
+        {/* TON wallet connection status */}
+        {payMethod === 'ton' && (
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            background: isWalletConnected ? 'rgba(0,255,136,0.06)' : 'rgba(255,255,255,0.04)',
+            border: `1px solid ${isWalletConnected ? `rgba(${p.primaryRgb},0.3)` : 'rgba(255,255,255,0.1)'}`,
+            borderRadius: 10, padding: '10px 14px', marginBottom: 12,
+          }}>
+            <div>
+              <div style={{ fontSize: 11, color: isWalletConnected ? p.primary : '#889988', fontWeight: 700 }}>
+                {isWalletConnected ? '✅ Кошелёк подключён' : '🔗 Подключи кошелёк'}
+              </div>
+              {isWalletConnected && walletAddress && (
+                <div style={{ fontSize: 10, color: '#556655', marginTop: 2, fontFamily: 'monospace' }}>
+                  {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+                </div>
+              )}
+            </div>
+            <button
+              onClick={() => { isWalletConnected ? disconnectWallet() : connectWallet(); haptic('light') }}
+              style={{
+                padding: '6px 14px', borderRadius: 8, border: 'none',
+                background: isWalletConnected ? 'rgba(255,80,80,0.1)' : `rgba(${p.primaryRgb},0.15)`,
+                color: isWalletConnected ? '#ff6666' : p.primary,
+                fontSize: 11, fontWeight: 700, cursor: 'pointer',
+              }}
+            >
+              {isWalletConnected ? 'Отключить' : 'Подключить'}
+            </button>
+          </div>
+        )}
+
+        {/* TON verification status */}
+        {payMethod === 'ton' && tonPaymentStatus === 'verifying' && (
+          <div style={{
+            background: `rgba(${p.primaryRgb},0.08)`,
+            border: `1px solid rgba(${p.primaryRgb},0.25)`,
+            borderRadius: 10, padding: '12px 14px', marginBottom: 12,
+            textAlign: 'center',
+          }}>
+            <div style={{ fontSize: 20, marginBottom: 6 }}>⏳</div>
+            <div style={{ fontSize: 12, color: p.primary, fontWeight: 700 }}>Проверяем транзакцию...</div>
+            <div style={{ fontSize: 10, color: '#668877', marginTop: 4 }}>
+              Обычно занимает 15-30 секунд
+            </div>
+          </div>
+        )}
+
         {/* Buy button */}
         <button
-          onClick={payMethod === 'stars' ? handleBuyStars : handleBuyFiat}
-          disabled={buying || !!paymentLoading || usd < 1}
+          onClick={handleBuy}
+          disabled={buying || !!paymentLoading || tonPaymentLoading || usd < 1}
           style={{
             width: '100%', padding: '16px', borderRadius: 14, border: 'none',
             background: usd >= 1
               ? `linear-gradient(135deg, ${p.primary}, ${p.secondary})`
               : 'rgba(255,255,255,0.05)',
             color: usd >= 1 ? '#000' : '#334433',
-            fontWeight: 900, fontSize: 17, cursor: usd >= 1 ? 'pointer' : 'default',
-            opacity: buying ? 0.7 : 1,
+            fontWeight: 900, fontSize: 16, cursor: usd >= 1 ? 'pointer' : 'default',
+            opacity: buying || tonPaymentLoading ? 0.7 : 1,
             boxShadow: usd >= 1 ? `0 4px 24px rgba(${p.primaryRgb},0.5)` : 'none',
             transition: 'all 0.2s',
             letterSpacing: 0.5,
           }}
         >
-          {buying
-            ? '⏳ Обрабатываем...'
+          {buying || tonPaymentLoading
+            ? (tonPaymentStatus === 'verifying' ? '⏳ Проверяем...' : '⏳ Обрабатываем...')
             : payMethod === 'stars'
               ? (creditsToReceive > 0 ? `Оплатить ${starsNeeded.toLocaleString()} ⭐` : 'Введи сумму')
-              : (creditsToReceive > 0 ? `Оплатить $${usd.toFixed(2)}` : 'Введи сумму')}
+              : payMethod === 'ton'
+                ? (creditsToReceive > 0
+                    ? (isWalletConnected
+                        ? `Оплатить ${tonNeeded} TON`
+                        : '🔗 Подключить кошелёк')
+                    : 'Введи сумму')
+                : payMethod === 'card'
+                  ? (creditsToReceive > 0 ? `Оплатить ~${Math.round(usd * 95)}₽ картой` : 'Введи сумму')
+                  : (creditsToReceive > 0 ? `Оплатить $${usd.toFixed(2)} крипто` : 'Введи сумму')}
         </button>
+
+        {/* TON conversion info */}
+        {payMethod === 'ton' && tonPrice > 0 && creditsToReceive > 0 && (
+          <div style={{
+            textAlign: 'center', marginTop: 8,
+            fontSize: 10, color: '#556655',
+          }}>
+            1 TON ≈ ${tonPrice.toFixed(2)} · Курс обновляется при создании заказа
+          </div>
+        )}
       </SolidCard>
 
       {/* Premium model costs */}
