@@ -80,7 +80,7 @@ export default function Nav() {
           <a href="/topup" className="text-text/70 hover:text-text font-medium transition-colors">
             Пополнить
           </a>
-          <a href="/app" className="bg-accent/10 text-accent px-4 py-1.5 rounded-lg font-semibold text-sm hover:bg-accent/15 transition-colors">
+          <a href="/webchat" className="bg-accent/10 text-accent px-4 py-1.5 rounded-lg font-semibold text-sm hover:bg-accent/15 transition-colors">
             Веб-чат
           </a>
         </div>
