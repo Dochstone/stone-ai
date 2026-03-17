@@ -138,17 +138,35 @@ function formatPrice(m: AIModel) {
   return `$${m.pricePerMillion}/1M`;
 }
 
-function ModelSidebar({
+interface ChatSessionItem {
+  id: number;
+  model_id: string;
+  title: string;
+  updated_at: string | null;
+}
+
+function Sidebar({
   selected,
   onSelect,
   open,
   onToggle,
+  sessions,
+  activeSessionId,
+  onLoadSession,
+  onNewChat,
+  onDeleteSession,
 }: {
   selected: string;
   onSelect: (id: string) => void;
   open: boolean;
   onToggle: () => void;
+  sessions: ChatSessionItem[];
+  activeSessionId: number | null;
+  onLoadSession: (id: number) => void;
+  onNewChat: () => void;
+  onDeleteSession: (id: number) => void;
 }) {
+  const [tab, setTab] = useState<"models" | "chats">("models");
   const [filter, setFilter] = useState("");
   const [tierFilter, setTierFilter] = useState<"all" | "free" | "pro">("all");
 
@@ -161,7 +179,6 @@ function ModelSidebar({
 
   return (
     <>
-      {/* Mobile overlay */}
       {open && (
         <div className="fixed inset-0 bg-black/25 z-30 lg:hidden" onClick={onToggle} />
       )}
@@ -171,41 +188,68 @@ function ModelSidebar({
           open ? "translate-x-0" : "-translate-x-full lg:-translate-x-full"
         }`}
       >
-        {/* Header */}
-        <div className="p-3 border-b border-text/5 shrink-0">
-          <div className="flex items-center justify-between mb-2.5">
-            <h2 className="font-bold text-xs text-text/50 uppercase tracking-wide">Модели</h2>
-            <button onClick={onToggle} className="text-text/30 hover:text-text/60 p-1">
+        {/* Tabs + close */}
+        <div className="p-2 border-b border-text/5 shrink-0">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex gap-1 bg-bg rounded-lg p-0.5 flex-1 mr-2">
+              <button
+                onClick={() => setTab("models")}
+                className={`flex-1 py-1.5 rounded-md text-[11px] font-semibold transition-colors ${tab === "models" ? "bg-white text-text shadow-sm" : "text-text/40"}`}
+              >
+                Модели
+              </button>
+              <button
+                onClick={() => setTab("chats")}
+                className={`flex-1 py-1.5 rounded-md text-[11px] font-semibold transition-colors ${tab === "chats" ? "bg-white text-text shadow-sm" : "text-text/40"}`}
+              >
+                Чаты{sessions.length > 0 && <span className="ml-1 text-accent">{sessions.length}</span>}
+              </button>
+            </div>
+            <button onClick={onToggle} className="text-text/30 hover:text-text/60 p-1 shrink-0">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" d="M11 19l-7-7 7-7" />
               </svg>
             </button>
           </div>
-          <input
-            type="text"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            placeholder="Поиск..."
-            className="w-full bg-bg border border-text/10 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-accent"
-          />
-          <div className="flex gap-1 mt-2">
-            {(["all", "free", "pro"] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => setTierFilter(t)}
-                className={`px-2.5 py-1 rounded-md text-[10px] font-semibold transition-colors ${
-                  tierFilter === t ? "bg-accent text-white" : "bg-bg text-text/40"
-                }`}
-              >
-                {t === "all" ? "Все" : t === "free" ? "Free" : "Pro"}
-              </button>
-            ))}
-          </div>
+
+          {tab === "models" && (
+            <>
+              <input
+                type="text"
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                placeholder="Поиск..."
+                className="w-full bg-bg border border-text/10 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-accent"
+              />
+              <div className="flex gap-1 mt-1.5">
+                {(["all", "free", "pro"] as const).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setTierFilter(t)}
+                    className={`px-2.5 py-1 rounded-md text-[10px] font-semibold transition-colors ${
+                      tierFilter === t ? "bg-accent text-white" : "bg-bg text-text/40"
+                    }`}
+                  >
+                    {t === "all" ? "Все" : t === "free" ? "Free" : "Pro"}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+
+          {tab === "chats" && (
+            <button
+              onClick={onNewChat}
+              className="w-full bg-accent text-white py-2 rounded-lg text-xs font-bold hover:bg-accent/90 transition-colors"
+            >
+              + Новый чат
+            </button>
+          )}
         </div>
 
-        {/* Model list */}
+        {/* Content */}
         <div className="flex-1 overflow-y-auto">
-          {filtered.map((m) => (
+          {tab === "models" && filtered.map((m) => (
             <button
               key={m.id}
               onClick={() => { onSelect(m.id); if (window.innerWidth < 1024) onToggle(); }}
@@ -232,6 +276,43 @@ function ModelSidebar({
                 {m.context && <span className="text-[9px] text-text/20">{m.context}</span>}
               </div>
             </button>
+          ))}
+
+          {tab === "chats" && sessions.length === 0 && (
+            <div className="p-6 text-center">
+              <p className="text-text/20 text-2xl mb-2">💬</p>
+              <p className="text-xs text-text/30">Нет сохранённых чатов</p>
+            </div>
+          )}
+
+          {tab === "chats" && sessions.map((s) => (
+            <div
+              key={s.id}
+              className={`px-3 py-2.5 border-b border-text/[0.03] cursor-pointer transition-colors group ${
+                activeSessionId === s.id ? "bg-accent/8 border-l-[3px] border-l-accent" : "hover:bg-bg/50 border-l-[3px] border-l-transparent"
+              }`}
+              onClick={() => { onLoadSession(s.id); if (window.innerWidth < 1024) onToggle(); }}
+            >
+              <div className="flex items-center justify-between">
+                <span className={`font-semibold text-xs truncate flex-1 ${activeSessionId === s.id ? "text-accent" : "text-text"}`}>
+                  {s.title}
+                </span>
+                <button
+                  onClick={(e) => { e.stopPropagation(); onDeleteSession(s.id); }}
+                  className="text-text/15 hover:text-red-400 p-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className="text-[9px] text-text/25">{MODELS.find(m => m.id === s.model_id)?.name || s.model_id}</span>
+                {s.updated_at && (
+                  <span className="text-[9px] text-text/15">{new Date(s.updated_at).toLocaleDateString("ru-RU")}</span>
+                )}
+              </div>
+            </div>
           ))}
         </div>
       </div>
@@ -461,6 +542,8 @@ export default function WebChat() {
   const [pendingFile, setPendingFile] = useState<FileAttachment | null>(null);
   const [uploading, setUploading] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [sessions, setSessions] = useState<ChatSessionItem[]>([]);
+  const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
 
   // Load auth from localStorage
   useEffect(() => {
@@ -489,6 +572,105 @@ export default function WebChat() {
   const toggleSidebar = useCallback(() => {
     setSidebarOpen((prev) => !prev);
   }, []);
+
+  // Load chat sessions
+  const fetchSessions = useCallback(async () => {
+    if (!auth) return;
+    try {
+      const res = await fetch(`${API_URL}/api/chats`, {
+        headers: { Authorization: `Bearer ${auth.token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setSessions(data.sessions || []);
+      }
+    } catch {}
+  }, [auth]);
+
+  useEffect(() => { fetchSessions(); }, [fetchSessions]);
+
+  const loadSession = useCallback(async (sessionId: number) => {
+    if (!auth) return;
+    try {
+      const res = await fetch(`${API_URL}/api/chats/${sessionId}/messages`, {
+        headers: { Authorization: `Bearer ${auth.token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setActiveSessionId(sessionId);
+        setSelectedModel(data.session.model_id);
+        setMessages(data.messages.map((m: any) => ({
+          role: m.role,
+          content: m.content,
+          billing: m.cost_usd > 0 ? {
+            tokens_in: m.tokens_in, tokens_out: m.tokens_out,
+            cost_usd: m.cost_usd, balance_usd: 0, billing_mode: "per_token",
+          } : undefined,
+        })));
+      }
+    } catch {}
+  }, [auth]);
+
+  const newChat = useCallback(() => {
+    setActiveSessionId(null);
+    setMessages([]);
+  }, []);
+
+  const deleteSession = useCallback(async (sessionId: number) => {
+    if (!auth) return;
+    try {
+      await fetch(`${API_URL}/api/chats/${sessionId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${auth.token}` },
+      });
+      setSessions((prev) => prev.filter((s) => s.id !== sessionId));
+      if (activeSessionId === sessionId) newChat();
+    } catch {}
+  }, [auth, activeSessionId, newChat]);
+
+  // Save messages to session after assistant responds
+  const saveToSession = useCallback(async (userContent: string, assistantContent: string, billing: any) => {
+    if (!auth) return;
+    try {
+      let sessionId = activeSessionId;
+
+      // Create session if needed
+      if (!sessionId) {
+        const res = await fetch(`${API_URL}/api/chats`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
+          body: JSON.stringify({ model_id: selectedModel }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          sessionId = data.id;
+          setActiveSessionId(sessionId);
+        }
+      }
+
+      if (!sessionId) return;
+
+      // Save user message
+      await fetch(`${API_URL}/api/chats/${sessionId}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
+        body: JSON.stringify({ session_id: sessionId, role: "user", content: userContent }),
+      });
+
+      // Save assistant message
+      await fetch(`${API_URL}/api/chats/${sessionId}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
+        body: JSON.stringify({
+          session_id: sessionId, role: "assistant", content: assistantContent,
+          tokens_in: billing?.tokens_in || 0, tokens_out: billing?.tokens_out || 0,
+          cost_usd: billing?.cost_usd || 0,
+        }),
+      });
+
+      fetchSessions();
+    } catch {}
+  }, [auth, activeSessionId, selectedModel, fetchSessions]);
 
   const handleFileSelect = useCallback(async (file: File) => {
     if (!auth) return;
@@ -624,12 +806,16 @@ export default function WebChat() {
         ...history,
         { role: "assistant", content: assistantContent, billing },
       ]);
+
+      // Save to persistent history
+      const userText = history[history.length - 1]?.content || "";
+      if (assistantContent) saveToSession(userText, assistantContent, billing);
     } catch (e) {
       setMessages([...history, { role: "assistant", content: "Ошибка соединения" }]);
     } finally {
       setStreaming(false);
     }
-  }, [auth, input, streaming, messages, selectedModel, pendingFile]);
+  }, [auth, input, streaming, messages, selectedModel, pendingFile, saveToSession]);
 
   if (!loaded) return null;
   if (!auth) return <AuthFormComponent onAuth={setAuth} />;
@@ -647,11 +833,16 @@ export default function WebChat() {
         ?
       </button>
 
-      <ModelSidebar
+      <Sidebar
         selected={selectedModel}
         onSelect={setSelectedModel}
         open={sidebarOpen}
         onToggle={toggleSidebar}
+        sessions={sessions}
+        activeSessionId={activeSessionId}
+        onLoadSession={loadSession}
+        onNewChat={newChat}
+        onDeleteSession={deleteSession}
       />
 
       <ChatArea

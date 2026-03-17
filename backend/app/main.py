@@ -19,7 +19,7 @@ from app.config import get_settings
 from app.database import init_db
 
 # Routers
-from app.routers import chat, user, models, payment, byok, ads, admin, auth, referral
+from app.routers import chat, user, models, payment, byok, ads, admin, auth, referral, chats
 from app.routers import payment_ext
 
 # Bot handlers
@@ -116,6 +116,7 @@ app.include_router(byok.router)
 app.include_router(admin.router)
 app.include_router(auth.router)
 app.include_router(referral.router)
+app.include_router(chats.router)
 
 
 @app.get("/")
