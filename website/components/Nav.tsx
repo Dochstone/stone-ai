@@ -29,20 +29,20 @@ export default function Nav() {
         scrolled ? "bg-bg/90 backdrop-blur-md shadow-sm" : "bg-transparent"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-        <a href="/" className="text-xl font-extrabold text-text">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-14 lg:h-16">
+        <a href="/" className="text-xl font-extrabold text-text shrink-0">
           Stone AI
         </a>
 
-        {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-8">
+        {/* Desktop nav — lg and up */}
+        <div className="hidden lg:flex items-center gap-6">
           {/* Tools dropdown */}
           <div
             className="relative"
             onMouseEnter={() => setToolsOpen(true)}
             onMouseLeave={() => setToolsOpen(false)}
           >
-            <button className="text-text/70 hover:text-text font-medium transition-colors flex items-center gap-1">
+            <button className="text-text/70 hover:text-text font-medium text-sm transition-colors flex items-center gap-1">
               Инструменты
               <svg className={`w-3.5 h-3.5 transition-transform ${toolsOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -65,38 +65,32 @@ export default function Nav() {
             )}
           </div>
 
-          <a href="/models" className="text-text/70 hover:text-text font-medium transition-colors">
+          <a href="/models" className="text-text/70 hover:text-text font-medium text-sm transition-colors">
             Модели
           </a>
-          <a href="/pricing" className="text-text/70 hover:text-text font-medium transition-colors">
+          <a href="/pricing" className="text-text/70 hover:text-text font-medium text-sm transition-colors">
             Цены
           </a>
-          <a href="/blog" className="text-text/70 hover:text-text font-medium transition-colors">
+          <a href="/blog" className="text-text/70 hover:text-text font-medium text-sm transition-colors">
             Блог
           </a>
-          <a href="/#faq" className="text-text/70 hover:text-text font-medium transition-colors">
+          <a href="/#faq" className="text-text/70 hover:text-text font-medium text-sm transition-colors">
             FAQ
-          </a>
-          <a href="/topup" className="text-text/70 hover:text-text font-medium transition-colors">
-            Пополнить
-          </a>
-          <a href="/webchat" className="bg-accent/10 text-accent px-4 py-1.5 rounded-lg font-semibold text-sm hover:bg-accent/15 transition-colors">
-            Веб-чат
           </a>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <a
             href="/webchat"
-            className="bg-accent text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors hidden sm:inline-block"
+            className="bg-accent text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors hidden lg:inline-block"
           >
             Начать бесплатно
           </a>
 
-          {/* Mobile burger */}
+          {/* Burger — visible below lg */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden flex flex-col justify-center items-center w-10 h-10 gap-1.5"
+            className="lg:hidden flex flex-col justify-center items-center w-10 h-10 gap-1.5"
             aria-label="Menu"
           >
             <span className={`block w-5 h-0.5 bg-text transition-all ${menuOpen ? "rotate-45 translate-y-1" : ""}`} />
@@ -106,9 +100,9 @@ export default function Nav() {
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile/Tablet menu — below lg */}
       {menuOpen && (
-        <div className="md:hidden bg-bg/95 backdrop-blur-md border-t border-text/5 px-4 pb-4">
+        <div className="lg:hidden bg-bg/95 backdrop-blur-md border-t border-text/5 px-4 pb-4 max-h-[80vh] overflow-y-auto">
           <div className="flex flex-col gap-1 py-3">
             <p className="text-xs text-text/30 font-semibold uppercase tracking-wider px-2 pt-1 pb-2">Инструменты</p>
             {tools.map((t) => (
@@ -126,12 +120,14 @@ export default function Nav() {
             <a href="/blog" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2 px-2">
               Блог
             </a>
-            <a href="/#faq" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2 px-2">
-              FAQ
+            <a href="/topup" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2 px-2">
+              Пополнить
             </a>
+            <div className="border-t border-text/5 my-2" />
             <a
               href="/webchat"
-              className="bg-accent text-white px-5 py-3 rounded-xl font-bold text-sm text-center hover:bg-accent/90 transition-colors sm:hidden mt-2"
+              onClick={() => setMenuOpen(false)}
+              className="bg-accent text-white px-5 py-3 rounded-xl font-bold text-sm text-center hover:bg-accent/90 transition-colors"
             >
               Начать бесплатно
             </a>
@@ -139,7 +135,7 @@ export default function Nav() {
               href={TELEGRAM_BOT_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="border-2 border-text/15 text-text px-5 py-3 rounded-xl font-bold text-sm text-center hover:border-accent hover:text-accent transition-colors sm:hidden mt-2"
+              className="border-2 border-text/15 text-text px-5 py-3 rounded-xl font-bold text-sm text-center hover:border-accent hover:text-accent transition-colors mt-1"
             >
               Telegram-бот
             </a>
