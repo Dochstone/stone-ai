@@ -87,7 +87,7 @@ export function FaqScreen() {
             {t.faq_support_title}
           </div>
         </div>
-        <div onClick={() => window.open('https://t.me/stoneAIC', '_blank')} style={{
+        <div onClick={() => window.open('https://t.me/stoneaisupport', '_blank')} style={{
           display: 'flex', alignItems: 'center', gap: 10,
           padding: '10px 12px', background: 'rgba(0,229,255,0.06)',
           borderRadius: 10, border: '1px solid rgba(0,229,255,0.12)', cursor: 'pointer',
@@ -95,7 +95,7 @@ export function FaqScreen() {
           <span style={{ fontSize: 18 }}>💬</span>
           <div style={{ flex: 1 }}>
             <div style={{ fontFamily: 'sans-serif', fontSize: 13, fontWeight: 600, color: '#e0f0e8' }}>{t.faq_support_tg}</div>
-            <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70' }}>@stoneAIC</div>
+            <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70' }}>@stoneaisupport</div>
           </div>
           <Tag text="→" accent="#00e5ff" />
         </div>
