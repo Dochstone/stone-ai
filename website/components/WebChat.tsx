@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { MODELS, type AIModel } from "@/lib/models";
 import AuthFormComponent, { type AuthState } from "@/components/AuthForm";
+import Onboarding from "@/components/Onboarding";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
 
@@ -459,6 +460,7 @@ export default function WebChat() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [pendingFile, setPendingFile] = useState<FileAttachment | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   // Load auth from localStorage
   useEffect(() => {
@@ -470,6 +472,10 @@ export default function WebChat() {
     // Collapse sidebar on mobile
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
       setSidebarOpen(false);
+    }
+    // Show onboarding if first time
+    if (!localStorage.getItem("onboarding_done")) {
+      setShowOnboarding(true);
     }
   }, []);
 
@@ -630,6 +636,17 @@ export default function WebChat() {
 
   return (
     <div className="h-screen flex bg-bg overflow-hidden">
+      {showOnboarding && <Onboarding onDone={() => setShowOnboarding(false)} />}
+
+      {/* Help button to replay onboarding */}
+      <button
+        onClick={() => setShowOnboarding(true)}
+        className="fixed bottom-20 right-4 z-50 w-8 h-8 bg-white border border-text/10 rounded-full flex items-center justify-center text-text/30 hover:text-accent hover:border-accent/30 transition-colors shadow-sm text-sm font-bold"
+        title="Справка"
+      >
+        ?
+      </button>
+
       <ModelSidebar
         selected={selectedModel}
         onSelect={setSelectedModel}
