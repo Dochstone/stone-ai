@@ -1,7 +1,9 @@
 """Authentication middleware — supports Telegram WebApp and JWT (email/password).
 
-Telegram: Authorization: tma <initData>
-JWT:      Authorization: Bearer <token>  OR  httpOnly cookie "access_token"
+Priority:
+1. X-TG-Init-Data header (Telegram Mini App)
+2. Authorization: tma <initData> (Telegram, legacy compat)
+3. Authorization: Bearer <token> OR httpOnly cookie (JWT, web)
 """
 
 import hashlib
@@ -61,11 +63,14 @@ async def get_current_user(request: Request) -> dict:
     """
     FastAPI dependency: extract and validate user from request.
 
-    Supports two auth methods:
-    1. Telegram WebApp: Authorization: tma <initData>
-    2. JWT (email):     Authorization: Bearer <token> OR cookie "access_token"
+    Auth priority:
+    1. X-TG-Init-Data header → Telegram WebApp
+    2. Authorization: tma <initData> → Telegram WebApp (legacy)
+    3. Authorization: Bearer <token> / cookie → JWT (email/password)
 
-    Returns dict with at least {id, first_name}.
+    Returns dict with at least {id, first_name, auth_provider}.
+    For TG users: id = telegram_id (int).
+    For JWT users: id = telegram_id from DB (for unified lookup).
     """
     settings = get_settings()
 
@@ -76,31 +81,58 @@ async def get_current_user(request: Request) -> dict:
             "first_name": "Art",
             "username": "art_stone",
             "language_code": "ru",
+            "auth_provider": "telegram",
         }
 
-    auth_header = request.headers.get("Authorization", "")
-
-    # --- Telegram WebApp auth ---
-    if auth_header.startswith("tma "):
-        init_data = auth_header[4:]
+    # --- 1. X-TG-Init-Data header (preferred for TG) ---
+    tg_init = request.headers.get("X-TG-Init-Data", "")
+    if tg_init:
         try:
-            return validate_init_data(init_data, settings.bot_token)
+            user = validate_init_data(tg_init, settings.bot_token)
+            user["auth_provider"] = "telegram"
+            return user
         except ValueError as e:
             raise HTTPException(status_code=401, detail=str(e))
 
-    # --- JWT auth (Bearer token or cookie) ---
+    # --- 2. Authorization: tma <initData> (legacy compat) ---
+    auth_header = request.headers.get("Authorization", "")
+    if auth_header.startswith("tma "):
+        init_data = auth_header[4:]
+        try:
+            user = validate_init_data(init_data, settings.bot_token)
+            user["auth_provider"] = "telegram"
+            return user
+        except ValueError as e:
+            raise HTTPException(status_code=401, detail=str(e))
+
+    # --- 3. JWT auth (Bearer token or cookie) ---
     from app.middleware.web_auth import extract_jwt_from_request, decode_jwt
 
     token = extract_jwt_from_request(request)
     if token:
         payload = decode_jwt(token)
+        user_pk = int(payload["sub"])
+
+        # Resolve telegram_id from DB so all downstream code works uniformly
+        from app.database import async_session
+        from sqlalchemy import select
+        from app.models import User
+
+        async with async_session() as db:
+            result = await db.execute(select(User).where(User.id == user_pk))
+            user = result.scalar_one_or_none()
+
+        if not user:
+            raise HTTPException(401, "User not found")
+
         return {
-            "id": int(payload["sub"]),
-            "email": payload.get("email"),
-            "first_name": payload.get("email", "").split("@")[0],
-            "username": None,
-            "language_code": "ru",
-            "auth_provider": "email",
+            "id": user.telegram_id,
+            "db_id": user.id,
+            "email": user.email,
+            "first_name": user.first_name or (user.email or "").split("@")[0],
+            "username": user.username,
+            "language_code": user.language or "ru",
+            "auth_provider": user.auth_provider or "email",
         }
 
     raise HTTPException(status_code=401, detail="Missing authorization (Telegram or JWT)")
