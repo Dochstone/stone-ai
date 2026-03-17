@@ -77,6 +77,9 @@ export default function Nav() {
           <a href="/#faq" className="text-text/70 hover:text-text font-medium text-sm transition-colors">
             FAQ
           </a>
+          <a href="/referral" className="text-text/70 hover:text-text font-medium text-sm transition-colors">
+            Рефералы
+          </a>
           <a href="/docs" className="text-text/70 hover:text-text font-medium text-sm transition-colors">
             API
           </a>
@@ -125,6 +128,9 @@ export default function Nav() {
             </a>
             <a href="/topup" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2 px-2">
               Пополнить
+            </a>
+            <a href="/referral" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2 px-2">
+              Рефералы
             </a>
             <a href="/docs" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2 px-2">
               API Docs

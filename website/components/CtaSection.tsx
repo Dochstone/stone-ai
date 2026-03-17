@@ -19,6 +19,12 @@ export default function CtaSection() {
         <p className="mt-6 text-white/30 text-sm">
           10 бесплатных запросов каждый день. Без регистрации.
         </p>
+        <a
+          href="/referral"
+          className="mt-4 inline-block text-accent text-sm font-semibold hover:underline"
+        >
+          Приглашай друзей — получай 10% от их пополнений &rarr;
+        </a>
       </div>
     </section>
   );
