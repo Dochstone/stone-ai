@@ -774,6 +774,7 @@ export default function WebChat() {
           try {
             const data = JSON.parse(payload);
 
+            // Skip billing chunk — save for display
             if (data.billing) {
               billing = data.billing;
               setAuth((prev) =>
@@ -782,17 +783,32 @@ export default function WebChat() {
               try {
                 const saved = localStorage.getItem("stone_auth");
                 if (saved) {
-                  const parsed = JSON.parse(saved);
-                  parsed.balanceUsd = data.billing.balance_usd;
-                  localStorage.setItem("stone_auth", JSON.stringify(parsed));
+                  const p = JSON.parse(saved);
+                  p.balanceUsd = data.billing.balance_usd;
+                  localStorage.setItem("stone_auth", JSON.stringify(p));
                 }
               } catch {}
               continue;
             }
 
-            const delta = data.choices?.[0]?.delta?.content;
-            if (delta) {
-              assistantContent += delta;
+            // Skip usage chunk
+            if (data.usage) continue;
+
+            // Skip error chunk — show as message
+            if (data.error) {
+              assistantContent = data.error;
+              setMessages([
+                ...history,
+                { role: "assistant", content: assistantContent },
+              ]);
+              continue;
+            }
+
+            // Content chunk — backend sends {"content": "text"}
+            // Also handle OpenRouter raw format {"choices": [{"delta": {"content": "text"}}]}
+            const content = data.content || data.choices?.[0]?.delta?.content;
+            if (content) {
+              assistantContent += content;
               setMessages([
                 ...history,
                 { role: "assistant", content: assistantContent, billing },
