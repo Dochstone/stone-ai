@@ -4,24 +4,28 @@ const reviews = [
     role: "Разработчик",
     text: "Наконец-то нормальный доступ к Claude и GPT без VPN. Пользуюсь каждый день для работы с кодом. Per-token дешевле подписки в разы.",
     stars: 5,
+    gradient: "from-blue-500 to-indigo-600",
   },
   {
     name: "Мария К.",
     role: "Маркетолог",
     text: "Удобно, что все модели в одном месте. Генерирую тексты через GPT-5 и картинки через Flux — всё в Telegram, не нужно 5 подписок.",
     stars: 5,
+    gradient: "from-pink-500 to-rose-600",
   },
   {
     name: "Дмитрий С.",
     role: "Студент",
     text: "Бесплатного плана хватает для учёбы. А когда нужно больше — пополняю на $1 и хватает на неделю. Лучше любой подписки.",
     stars: 5,
+    gradient: "from-teal to-emerald-600",
   },
   {
     name: "Елена В.",
     role: "Предприниматель",
     text: "Perplexity для исследований рынка, Claude для документов, Flux для картинок. Экономлю кучу времени и денег. Оплата через СБП — удобно.",
     stars: 5,
+    gradient: "from-amber-500 to-orange-600",
   },
 ];
 
@@ -46,7 +50,7 @@ export default function Reviews() {
                 &ldquo;{r.text}&rdquo;
               </p>
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-accent/10 flex items-center justify-center text-accent font-bold text-sm">
+                <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${r.gradient} flex items-center justify-center text-white font-bold text-sm shadow-sm`}>
                   {r.name[0]}
                 </div>
                 <div>
