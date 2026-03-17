@@ -41,6 +41,15 @@ html {
               radial-gradient(ellipse 60% 40% at 80% 20%, rgba(14, 154, 131, 0.08) 0%, transparent 60%);
 }
 
+/* Chat mockup glow pulse */
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+.animate-glow {
+  animation: glowPulse 4s ease-in-out infinite;
+}
+
 /* Card hover lift */
 .card-hover {
   @apply transition-all duration-300;
