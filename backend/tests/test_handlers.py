@@ -1,4 +1,4 @@
-"""Tests for bot handlers.py (Step 5).
+"""Tests for bot handlers.py.
 
 Verifies:
 - Updated model counts and descriptions
@@ -17,18 +17,17 @@ def _src():
     return HANDLERS_SRC.read_text(encoding="utf-8")
 
 
-def test_model_count_30_plus():
-    """Should mention 30+ models, not 11."""
+def test_model_count_50_plus():
+    """Should mention 50+ models."""
     src = _src()
-    assert "30+" in src
+    assert "50+" in src or "50 " in src
     assert "11 AI" not in src
 
 
-def test_7_free_models():
-    """Should mention 7 free models, not 6."""
+def test_5_free_models():
+    """Should mention 5 free models."""
     src = _src()
-    assert "7 моделей бесплатно" in src
-    assert "6 моделей бесплатно" not in src
+    assert "5 моделей бесплатно" in src or "5 моделей" in src
 
 
 def test_10_requests_per_day():
@@ -45,16 +44,17 @@ def test_per_token_billing_text():
 
 
 def test_lite_models_list():
-    """Help text should list all 7 Lite models."""
+    """Help text should list Lite models."""
     src = _src()
-    assert "Gemma 3" in src or "Gemma" in src
-    assert "Qwen 3" in src or "Qwen" in src
+    assert "Claude Haiku" in src
+    assert "Gemini Flash" in src
 
 
 def test_premium_models_list():
-    """Help text should mention new premium models."""
+    """Help text should mention premium models."""
     src = _src()
-    assert "GPT-5.1" in src or "Claude Sonnet" in src or "DeepSeek R1/V3" in src
+    assert "GPT-5.1" in src
+    assert "Claude Opus" in src
 
 
 def test_no_old_contacts():
@@ -64,12 +64,21 @@ def test_no_old_contacts():
 
 
 def test_support_link():
-    """Should contain new support link."""
+    """Should contain support link."""
     src = _src()
-    assert "https://t.me/StoneAIsupport" in src
+    assert "stoneAIC" in src
 
 
 def test_exception_fallback_updated():
     """Exception fallback should show 10 req/day, not 20."""
     src = _src()
     assert "20 запросов/день" not in src
+
+
+def test_inline_buttons():
+    """Start message should have all 4 inline buttons."""
+    src = _src()
+    assert "Открыть приложение" in src
+    assert "Модели и цены" in src
+    assert "Пополнить баланс" in src
+    assert "Поддержка @stoneAIC" in src
