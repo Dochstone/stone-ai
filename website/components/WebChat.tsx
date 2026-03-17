@@ -163,12 +163,12 @@ function ModelSidebar({
   selected,
   onSelect,
   open,
-  onClose,
+  onToggle,
 }: {
   selected: string;
   onSelect: (id: string) => void;
   open: boolean;
-  onClose: () => void;
+  onToggle: () => void;
 }) {
   const [filter, setFilter] = useState("");
   const [tierFilter, setTierFilter] = useState<"all" | "free" | "pro">("all");
@@ -181,67 +181,82 @@ function ModelSidebar({
   });
 
   return (
-    <div
-      className={`fixed inset-y-0 left-0 z-40 w-80 bg-white border-r border-text/5 flex flex-col transition-transform lg:relative lg:translate-x-0 ${
-        open ? "translate-x-0" : "-translate-x-full"
-      }`}
-    >
-      {/* Header */}
-      <div className="p-4 border-b border-text/5">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-bold text-sm">Модели</h2>
-          <button onClick={onClose} className="lg:hidden text-text/30 text-xl">&times;</button>
+    <>
+      {/* Mobile overlay */}
+      {open && (
+        <div className="fixed inset-0 bg-black/25 z-30 lg:hidden" onClick={onToggle} />
+      )}
+
+      <div
+        className={`fixed inset-y-0 left-0 z-40 w-[280px] bg-white border-r border-text/5 flex flex-col transition-transform duration-200 lg:relative ${
+          open ? "translate-x-0" : "-translate-x-full lg:-translate-x-full"
+        }`}
+      >
+        {/* Header */}
+        <div className="p-3 border-b border-text/5 shrink-0">
+          <div className="flex items-center justify-between mb-2.5">
+            <h2 className="font-bold text-xs text-text/50 uppercase tracking-wide">Модели</h2>
+            <button onClick={onToggle} className="text-text/30 hover:text-text/60 p-1">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" d="M11 19l-7-7 7-7" />
+              </svg>
+            </button>
+          </div>
+          <input
+            type="text"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            placeholder="Поиск..."
+            className="w-full bg-bg border border-text/10 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-accent"
+          />
+          <div className="flex gap-1 mt-2">
+            {(["all", "free", "pro"] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => setTierFilter(t)}
+                className={`px-2.5 py-1 rounded-md text-[10px] font-semibold transition-colors ${
+                  tierFilter === t ? "bg-accent text-white" : "bg-bg text-text/40"
+                }`}
+              >
+                {t === "all" ? "Все" : t === "free" ? "Free" : "Pro"}
+              </button>
+            ))}
+          </div>
         </div>
-        <input
-          type="text"
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          placeholder="Поиск..."
-          className="w-full bg-bg border border-text/10 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-accent"
-        />
-        <div className="flex gap-1 mt-2">
-          {(["all", "free", "pro"] as const).map((t) => (
+
+        {/* Model list */}
+        <div className="flex-1 overflow-y-auto">
+          {filtered.map((m) => (
             <button
-              key={t}
-              onClick={() => setTierFilter(t)}
-              className={`px-3 py-1 rounded-lg text-[10px] font-semibold transition-colors ${
-                tierFilter === t ? "bg-accent text-white" : "bg-bg text-text/40"
+              key={m.id}
+              onClick={() => { onSelect(m.id); if (window.innerWidth < 1024) onToggle(); }}
+              className={`w-full text-left px-3 py-2.5 border-b border-text/[0.03] transition-colors ${
+                selected === m.id
+                  ? "bg-accent/8 border-l-[3px] border-l-accent"
+                  : "hover:bg-bg/50 border-l-[3px] border-l-transparent"
               }`}
             >
-              {t === "all" ? "Все" : t === "free" ? "Free" : "Pro"}
+              <div className="flex items-center justify-between mb-0.5">
+                <span className={`font-semibold text-xs ${selected === m.id ? "text-accent" : "text-text"}`}>
+                  {m.name}
+                </span>
+                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                  m.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"
+                }`}>
+                  {formatPrice(m)}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded ${companyColors[m.company] ?? "bg-gray-100 text-gray-600"}`}>
+                  {m.company}
+                </span>
+                {m.context && <span className="text-[9px] text-text/20">{m.context}</span>}
+              </div>
             </button>
           ))}
         </div>
       </div>
-
-      {/* Model list */}
-      <div className="flex-1 overflow-y-auto">
-        {filtered.map((m) => (
-          <button
-            key={m.id}
-            onClick={() => { onSelect(m.id); onClose(); }}
-            className={`w-full text-left px-4 py-3 border-b border-text/[0.03] hover:bg-bg/50 transition-colors ${
-              selected === m.id ? "bg-accent/5 border-l-2 border-l-accent" : ""
-            }`}
-          >
-            <div className="flex items-center justify-between mb-0.5">
-              <span className="font-semibold text-xs">{m.name}</span>
-              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
-                m.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"
-              }`}>
-                {formatPrice(m)}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded ${companyColors[m.company] ?? "bg-gray-100 text-gray-600"}`}>
-                {m.company}
-              </span>
-              {m.context && <span className="text-[9px] text-text/25">{m.context}</span>}
-            </div>
-          </button>
-        ))}
-      </div>
-    </div>
+    </>
   );
 }
 
@@ -254,7 +269,8 @@ function ChatArea({
   setInput,
   onSend,
   selectedModel,
-  onOpenSidebar,
+  sidebarOpen,
+  onToggleSidebar,
   balanceUsd,
   onLogout,
   email,
@@ -265,7 +281,8 @@ function ChatArea({
   setInput: (v: string) => void;
   onSend: () => void;
   selectedModel: string;
-  onOpenSidebar: () => void;
+  sidebarOpen: boolean;
+  onToggleSidebar: () => void;
   balanceUsd: number;
   onLogout: () => void;
   email: string;
@@ -285,89 +302,112 @@ function ChatArea({
   };
 
   return (
-    <div className="flex-1 flex flex-col min-w-0">
-      {/* Top bar */}
-      <div className="h-14 border-b border-text/5 bg-white flex items-center justify-between px-4 shrink-0">
+    <div className="flex-1 flex flex-col min-w-0 h-screen">
+      {/* Top nav bar */}
+      <div className="h-12 border-b border-text/5 bg-white flex items-center justify-between px-4 shrink-0">
         <div className="flex items-center gap-3">
-          <button onClick={onOpenSidebar} className="lg:hidden text-text/40">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
+          {/* Sidebar toggle — always visible */}
+          <button onClick={onToggleSidebar} className="text-text/40 hover:text-text/70 transition-colors">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              {sidebarOpen
+                ? <path strokeLinecap="round" d="M11 19l-7-7 7-7" />
+                : <path strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16" />
+              }
+            </svg>
           </button>
-          <div>
-            <span className="font-bold text-sm">{model?.name || selectedModel}</span>
-            <span className="text-[10px] text-text/30 ml-2">{model?.company}</span>
-          </div>
+          <a href="/" className="font-extrabold text-sm text-text/70">Stone AI</a>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-xs font-semibold text-accent">${balanceUsd.toFixed(2)}</span>
-          <div className="text-[10px] text-text/30 hidden sm:block">{email}</div>
+          <a href="/topup" className="text-xs font-semibold text-accent hover:underline">${balanceUsd.toFixed(2)}</a>
+          <span className="text-[10px] text-text/25 hidden sm:block">{email}</span>
           <button onClick={onLogout} className="text-[10px] text-text/30 hover:text-text">Выйти</button>
         </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
-        {messages.length === 0 && (
-          <div className="text-center py-20">
-            <p className="text-2xl font-extrabold text-text/10 mb-2">Stone AI</p>
-            <p className="text-sm text-text/30">Выберите модель и начните диалог</p>
-          </div>
-        )}
-        {messages.map((msg, i) => (
-          <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-            <div className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-              msg.role === "user"
-                ? "bg-accent text-white rounded-br-md"
-                : "bg-white border border-text/5 text-text/80 rounded-bl-md"
-            }`}>
-              <div className="whitespace-pre-wrap">{msg.content}</div>
-              {msg.billing && (
-                <details className="mt-2 text-[10px] opacity-60">
-                  <summary className="cursor-pointer">
-                    {msg.billing.tokens_in + msg.billing.tokens_out} tok · ${msg.billing.cost_usd.toFixed(4)}
-                  </summary>
-                  <div className="mt-1 space-y-0.5">
-                    <div>Input: {msg.billing.tokens_in} tok</div>
-                    <div>Output: {msg.billing.tokens_out} tok</div>
-                    <div>Стоимость: ${msg.billing.cost_usd.toFixed(6)}</div>
-                    <div>Баланс: ${msg.billing.balance_usd.toFixed(4)}</div>
-                    <div>Режим: {msg.billing.billing_mode}</div>
-                  </div>
-                </details>
-              )}
-            </div>
-          </div>
-        ))}
-        {streaming && (
-          <div className="flex justify-start">
-            <div className="bg-white border border-text/5 rounded-2xl rounded-bl-md px-4 py-3">
-              <div className="flex gap-1">
-                <span className="w-2 h-2 bg-accent/40 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                <span className="w-2 h-2 bg-accent/40 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                <span className="w-2 h-2 bg-accent/40 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-              </div>
-            </div>
-          </div>
-        )}
-        <div ref={bottomRef} />
+      {/* Model info bar */}
+      <div className="px-4 py-2.5 bg-bg/50 border-b border-text/[0.03] shrink-0 flex items-center gap-3">
+        <span className="font-bold text-sm">{model?.name || selectedModel}</span>
+        <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded ${companyColors[model?.company ?? ""] ?? "bg-gray-100 text-gray-600"}`}>
+          {model?.company}
+        </span>
+        <span className={`text-[10px] font-bold ${model?.tier === "free" ? "text-teal" : "text-accent"}`}>
+          {model ? formatPrice(model) : ""}
+        </span>
+        {model?.context && <span className="text-[10px] text-text/25">{model.context}</span>}
       </div>
 
-      {/* Input */}
-      <div className="border-t border-text/5 bg-white p-4 shrink-0">
-        <div className="flex gap-2 max-w-4xl mx-auto">
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-4 py-6">
+        {messages.length === 0 ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <div className="text-5xl mb-4 opacity-10">AI</div>
+              <p className="text-lg font-extrabold text-text/10 mb-1">Stone AI</p>
+              <p className="text-sm text-text/25">Выберите модель и начните диалог</p>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4 max-w-3xl mx-auto">
+            {messages.map((msg, i) => (
+              <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                  msg.role === "user"
+                    ? "bg-accent text-white rounded-br-md"
+                    : "bg-white border border-text/5 text-text/80 rounded-bl-md"
+                }`}>
+                  <div className="whitespace-pre-wrap">{msg.content}</div>
+                  {msg.billing && (
+                    <details className="mt-2 text-[10px] opacity-60">
+                      <summary className="cursor-pointer">
+                        {msg.billing.tokens_in + msg.billing.tokens_out} tok · ${msg.billing.cost_usd.toFixed(4)}
+                      </summary>
+                      <div className="mt-1 space-y-0.5">
+                        <div>Input: {msg.billing.tokens_in} tok</div>
+                        <div>Output: {msg.billing.tokens_out} tok</div>
+                        <div>Стоимость: ${msg.billing.cost_usd.toFixed(6)}</div>
+                        <div>Баланс: ${msg.billing.balance_usd.toFixed(4)}</div>
+                        <div>Режим: {msg.billing.billing_mode}</div>
+                      </div>
+                    </details>
+                  )}
+                </div>
+              </div>
+            ))}
+            {streaming && (
+              <div className="flex justify-start">
+                <div className="bg-white border border-text/5 rounded-2xl rounded-bl-md px-4 py-3">
+                  <div className="flex gap-1">
+                    <span className="w-2 h-2 bg-accent/40 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="w-2 h-2 bg-accent/40 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <span className="w-2 h-2 bg-accent/40 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                  </div>
+                </div>
+              </div>
+            )}
+            <div ref={bottomRef} />
+          </div>
+        )}
+      </div>
+
+      {/* Input — pinned bottom, full width */}
+      <div className="border-t border-text/5 bg-white px-4 py-3 shrink-0">
+        <div className="flex gap-2">
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKey}
             placeholder="Написать сообщение..."
             rows={1}
-            className="flex-1 bg-bg border border-text/10 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
+            className="flex-1 bg-bg border border-text/10 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent min-w-0"
           />
           <button
             onClick={onSend}
             disabled={streaming || !input.trim()}
-            className="bg-accent text-white px-5 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors disabled:opacity-40 shrink-0"
+            className="bg-accent text-white w-12 rounded-xl font-bold text-lg hover:bg-accent/90 transition-colors disabled:opacity-40 shrink-0 flex items-center justify-center"
           >
-            &rarr;
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
           </button>
         </div>
       </div>
@@ -384,7 +424,7 @@ export default function WebChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Load auth from localStorage
   useEffect(() => {
@@ -393,6 +433,10 @@ export default function WebChat() {
       if (saved) setAuth(JSON.parse(saved));
     } catch {}
     setLoaded(true);
+    // Collapse sidebar on mobile
+    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      setSidebarOpen(false);
+    }
   }, []);
 
   const logout = useCallback(() => {
@@ -400,6 +444,10 @@ export default function WebChat() {
     localStorage.removeItem("stone_auth");
     setMessages([]);
     fetch(`${API_URL}/api/auth/logout`, { method: "POST", credentials: "include" }).catch(() => {});
+  }, []);
+
+  const toggleSidebar = useCallback(() => {
+    setSidebarOpen((prev) => !prev);
   }, []);
 
   const sendMessage = useCallback(async () => {
@@ -411,7 +459,6 @@ export default function WebChat() {
     setInput("");
     setStreaming(true);
 
-    // Build messages for API (last 20 for context window)
     const apiMessages = history.slice(-20).map((m) => ({
       role: m.role,
       content: m.content,
@@ -445,7 +492,6 @@ export default function WebChat() {
       let assistantContent = "";
       let billing: Message["billing"] | undefined;
 
-      // Add empty assistant message
       setMessages([...history, { role: "assistant", content: "" }]);
 
       while (true) {
@@ -463,13 +509,11 @@ export default function WebChat() {
           try {
             const data = JSON.parse(payload);
 
-            // Billing chunk
             if (data.billing) {
               billing = data.billing;
               setAuth((prev) =>
                 prev ? { ...prev, balanceUsd: data.billing.balance_usd } : prev
               );
-              // Update localStorage
               try {
                 const saved = localStorage.getItem("stone_auth");
                 if (saved) {
@@ -481,7 +525,6 @@ export default function WebChat() {
               continue;
             }
 
-            // Content chunk
             const delta = data.choices?.[0]?.delta?.content;
             if (delta) {
               assistantContent += delta;
@@ -494,7 +537,6 @@ export default function WebChat() {
         }
       }
 
-      // Final message with billing
       setMessages([
         ...history,
         { role: "assistant", content: assistantContent, billing },
@@ -510,17 +552,12 @@ export default function WebChat() {
   if (!auth) return <AuthForm onAuth={setAuth} />;
 
   return (
-    <div className="h-screen flex bg-bg" style={{ paddingTop: 0 }}>
-      {/* Overlay for mobile sidebar */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 bg-black/20 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />
-      )}
-
+    <div className="h-screen flex bg-bg overflow-hidden">
       <ModelSidebar
         selected={selectedModel}
         onSelect={setSelectedModel}
         open={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
+        onToggle={toggleSidebar}
       />
 
       <ChatArea
@@ -530,7 +567,8 @@ export default function WebChat() {
         setInput={setInput}
         onSend={sendMessage}
         selectedModel={selectedModel}
-        onOpenSidebar={() => setSidebarOpen(true)}
+        sidebarOpen={sidebarOpen}
+        onToggleSidebar={toggleSidebar}
         balanceUsd={auth.balanceUsd}
         onLogout={logout}
         email={auth.email}
