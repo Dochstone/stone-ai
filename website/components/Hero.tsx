@@ -68,18 +68,18 @@ function ChatMockup() {
 
 function TrustMarquee() {
   const logos = [
-    { name: "OpenAI", weight: "800", tracking: "-0.02em", size: "text-lg" },
-    { name: "Anthropic", weight: "600", tracking: "0.02em", size: "text-base", italic: true },
-    { name: "Google", weight: "400", tracking: "0", size: "text-lg", colors: true },
-    { name: "Meta", weight: "700", tracking: "0.01em", size: "text-lg" },
-    { name: "Mistral", weight: "800", tracking: "0.05em", size: "text-sm", upper: true },
-    { name: "DeepSeek", weight: "600", tracking: "-0.01em", size: "text-base" },
-    { name: "xAI", weight: "800", tracking: "0.03em", size: "text-lg" },
-    { name: "Perplexity", weight: "500", tracking: "0", size: "text-base" },
-    { name: "NVIDIA", weight: "700", tracking: "0.08em", size: "text-sm", upper: true },
-    { name: "Microsoft", weight: "400", tracking: "0", size: "text-base" },
-    { name: "Stability", weight: "600", tracking: "0.02em", size: "text-base", italic: true },
-    { name: "Cohere", weight: "700", tracking: "0", size: "text-base" },
+    { name: "Яндекс", weight: "700", tracking: "0.01em", size: "text-xl" },
+    { name: "Сбер", weight: "800", tracking: "0.02em", size: "text-xl" },
+    { name: "Тинькофф", weight: "700", tracking: "-0.01em", size: "text-lg" },
+    { name: "VK", weight: "900", tracking: "0.05em", size: "text-xl", upper: true },
+    { name: "Ozon", weight: "800", tracking: "0.03em", size: "text-xl" },
+    { name: "МТС", weight: "900", tracking: "0.06em", size: "text-lg", upper: true },
+    { name: "Wildberries", weight: "600", tracking: "0", size: "text-base", italic: true },
+    { name: "Авито", weight: "700", tracking: "0.01em", size: "text-lg" },
+    { name: "Ростелеком", weight: "500", tracking: "0.02em", size: "text-base" },
+    { name: "HeadHunter", weight: "800", tracking: "-0.01em", size: "text-base" },
+    { name: "Мегафон", weight: "600", tracking: "0.01em", size: "text-lg" },
+    { name: "Lamoda", weight: "400", tracking: "0.08em", size: "text-base", upper: true },
   ];
 
   const all = [...logos, ...logos];
@@ -87,7 +87,7 @@ function TrustMarquee() {
   return (
     <div className="mt-20 overflow-hidden">
       <p className="text-center text-[10px] text-text/25 font-semibold uppercase tracking-[0.2em] mb-6">
-        Модели от ведущих компаний
+        Нам доверяют команды из
       </p>
       <div className="relative">
         <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-bg to-transparent z-10" />
