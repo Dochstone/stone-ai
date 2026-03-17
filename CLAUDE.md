@@ -67,11 +67,11 @@ Stone AI — платформа доступа к 50+ AI-моделям. Без 
 - [x] Тесты: 130 тестов, все зелёные
 - [x] Оплата: Stars + TON + Lava + Heleket
 - [ ] Очистка: убрать legacy credits из payment_ext.py
-- [ ] Этап 4: Frontend PlansScreen (баланс $, per-token)
-- [ ] Этап 5: Frontend HomeScreen (50 моделей, фильтры)
-- [ ] Этап 6: Frontend ChatScreen (стоимость запроса)
-- [ ] Этап 7: Сайт лендинг
-- [ ] Этап 8: Сайт /models + /pricing
+- [x] Этап 4: Frontend PlansScreen (баланс $, per-token)
+- [x] Этап 5: Frontend HomeScreen (50 моделей, фильтры)
+- [x] Этап 6: Frontend ChatScreen (стоимость запроса)
+- [x] Этап 7-8: Сайт лендинг + /models + /pricing
+- [ ] Этап 9: Сайт — 6 страниц инструментов (/chat, /images, /documents, /search, /code, /translate)
 
 ## Команды
 
@@ -86,7 +86,7 @@ cd website && npm run dev
 | Файл | Описание |
 |------|----------|
 | STRATEGY.md | Стратегия, финмодель, конкуренты |
-| TZ_IMPLEMENTATION.md | ТЗ на 8 этапов |
+| TZ_IMPLEMENTATION.md | ТЗ на 9 этапов |
 | MODELS_50.md | 50 моделей: slug, цены, множители |
 | StoneAI_Landing_v2.jsx | Референс дизайна сайта |
 | backend/app/services/token_billing.py | Per-token биллинг |

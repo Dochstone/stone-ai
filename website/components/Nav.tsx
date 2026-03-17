@@ -3,9 +3,19 @@
 import { useEffect, useState } from "react";
 import { TELEGRAM_BOT_URL } from "@/lib/models";
 
+const tools = [
+  { href: "/chat", label: "AI Чат" },
+  { href: "/images", label: "Генерация картинок" },
+  { href: "/documents", label: "Анализ документов" },
+  { href: "/search", label: "AI Поиск" },
+  { href: "/code", label: "Код-ассистент" },
+  { href: "/translate", label: "Переводчик" },
+];
+
 export default function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -26,6 +36,35 @@ export default function Nav() {
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-8">
+          {/* Tools dropdown */}
+          <div
+            className="relative"
+            onMouseEnter={() => setToolsOpen(true)}
+            onMouseLeave={() => setToolsOpen(false)}
+          >
+            <button className="text-text/70 hover:text-text font-medium transition-colors flex items-center gap-1">
+              Инструменты
+              <svg className={`w-3.5 h-3.5 transition-transform ${toolsOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {toolsOpen && (
+              <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2">
+                <div className="bg-white rounded-xl shadow-lg border border-text/5 py-2 min-w-[200px]">
+                  {tools.map((t) => (
+                    <a
+                      key={t.href}
+                      href={t.href}
+                      className="block px-4 py-2.5 text-sm text-text/70 hover:text-text hover:bg-bg transition-colors"
+                    >
+                      {t.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
           <a href="/models" className="text-text/70 hover:text-text font-medium transition-colors">
             Модели
           </a>
@@ -63,21 +102,28 @@ export default function Nav() {
       {/* Mobile menu */}
       {menuOpen && (
         <div className="md:hidden bg-bg/95 backdrop-blur-md border-t border-text/5 px-4 pb-4">
-          <div className="flex flex-col gap-3 py-3">
-            <a href="/models" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2">
+          <div className="flex flex-col gap-1 py-3">
+            <p className="text-xs text-text/30 font-semibold uppercase tracking-wider px-2 pt-1 pb-2">Инструменты</p>
+            {tools.map((t) => (
+              <a key={t.href} href={t.href} onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2 px-2">
+                {t.label}
+              </a>
+            ))}
+            <div className="border-t border-text/5 my-2" />
+            <a href="/models" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2 px-2">
               Модели
             </a>
-            <a href="/pricing" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2">
+            <a href="/pricing" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2 px-2">
               Цены
             </a>
-            <a href="/#faq" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2">
+            <a href="/#faq" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2 px-2">
               FAQ
             </a>
             <a
               href={TELEGRAM_BOT_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-accent text-white px-5 py-3 rounded-xl font-bold text-sm text-center hover:bg-accent/90 transition-colors sm:hidden"
+              className="bg-accent text-white px-5 py-3 rounded-xl font-bold text-sm text-center hover:bg-accent/90 transition-colors sm:hidden mt-2"
             >
               Открыть в Telegram
             </a>
