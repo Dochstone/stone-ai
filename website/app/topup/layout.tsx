@@ -1,3 +1,8 @@
 export default function TopupLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return (
+    <>
+      <style>{`nav, footer, .scroll-to-top { display: none !important; }`}</style>
+      {children}
+    </>
+  );
 }

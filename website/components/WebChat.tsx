@@ -641,7 +641,7 @@ export default function WebChat() {
       {/* Help button to replay onboarding */}
       <button
         onClick={() => setShowOnboarding(true)}
-        className="fixed bottom-20 right-4 z-50 w-8 h-8 bg-white border border-text/10 rounded-full flex items-center justify-center text-text/30 hover:text-accent hover:border-accent/30 transition-colors shadow-sm text-sm font-bold"
+        className="fixed bottom-[72px] right-3 z-50 w-7 h-7 bg-white/80 border border-text/10 rounded-full flex items-center justify-center text-text/20 hover:text-accent hover:border-accent/30 transition-colors shadow-sm text-xs font-bold"
         title="Справка"
       >
         ?
