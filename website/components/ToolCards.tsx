@@ -5,37 +5,49 @@ const tools = [
     icon: "💬",
     title: "AI Чат",
     desc: "Общайтесь с лучшими моделями: GPT-5, Claude, Gemini и другими",
-    gradient: "from-blue-500/10 to-purple-500/10",
+    gradient: "from-blue-500/15 to-indigo-500/5",
+    iconBg: "bg-blue-100",
+    href: "/chat",
   },
   {
     icon: "🎨",
     title: "Генерация картинок",
     desc: "Создавайте изображения через Flux, SDXL и GPT-5 Image",
-    gradient: "from-pink-500/10 to-orange-500/10",
+    gradient: "from-pink-500/15 to-rose-500/5",
+    iconBg: "bg-pink-100",
+    href: "/images",
   },
   {
     icon: "📄",
     title: "Анализ документов",
-    desc: "Загрузите PDF и задайте вопросы по содержимому",
-    gradient: "from-amber-500/10 to-yellow-500/10",
+    desc: "Загрузите PDF или фото — AI ответит на любой вопрос",
+    gradient: "from-amber-500/15 to-orange-500/5",
+    iconBg: "bg-amber-100",
+    href: "/documents",
   },
   {
     icon: "🔍",
     title: "AI Поиск",
     desc: "Поиск в интернете через Perplexity с актуальными данными",
-    gradient: "from-green-500/10 to-teal-500/10",
+    gradient: "from-emerald-500/15 to-teal-500/5",
+    iconBg: "bg-emerald-100",
+    href: "/search",
   },
   {
     icon: "💻",
     title: "Помощь с кодом",
     desc: "Отладка, рефакторинг и генерация кода на любом языке",
-    gradient: "from-slate-500/10 to-blue-500/10",
+    gradient: "from-slate-500/15 to-blue-500/5",
+    iconBg: "bg-slate-100",
+    href: "/code",
   },
   {
     icon: "🧠",
     title: "Reasoning",
     desc: "Сложные задачи с пошаговым рассуждением: o3, DeepSeek R1",
-    gradient: "from-violet-500/10 to-indigo-500/10",
+    gradient: "from-violet-500/15 to-purple-500/5",
+    iconBg: "bg-violet-100",
+    href: "/translate",
   },
 ];
 
@@ -52,16 +64,17 @@ export default function ToolCards() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {tools.map((tool) => (
-            <div
+            <a
               key={tool.title}
-              className={`bg-gradient-to-br ${tool.gradient} rounded-2xl p-6 card-hover border border-white/60`}
+              href={tool.href}
+              className={`bg-gradient-to-br ${tool.gradient} rounded-2xl p-7 card-hover border border-white/50 block group`}
             >
-              <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl mb-4 shadow-sm">
+              <div className={`w-14 h-14 ${tool.iconBg} rounded-2xl flex items-center justify-center text-[28px] mb-5 shadow-sm group-hover:scale-110 transition-transform`}>
                 {tool.icon}
               </div>
               <h3 className="font-bold text-lg mb-2">{tool.title}</h3>
-              <p className="text-text/60 text-sm leading-relaxed">{tool.desc}</p>
-            </div>
+              <p className="text-text/55 text-sm leading-relaxed">{tool.desc}</p>
+            </a>
           ))}
         </div>
       </div>
