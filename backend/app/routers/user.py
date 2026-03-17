@@ -97,3 +97,35 @@ async def get_usage_history(
             for r in rows
         ]
     }
+
+
+@router.get("/user/transactions")
+async def get_transactions(
+    tg_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+    limit: int = Query(default=20, le=100),
+):
+    """Get last N payment transactions for the current user."""
+    from app.models.transaction import Transaction
+
+    result = await db.execute(
+        select(Transaction)
+        .where(Transaction.user_tg_id == tg_user["id"])
+        .order_by(Transaction.created_at.desc())
+        .limit(limit)
+    )
+    rows = result.scalars().all()
+
+    return {
+        "transactions": [
+            {
+                "amount_usd": float(r.amount_usd or 0),
+                "amount": float(r.amount or 0),
+                "currency": r.currency,
+                "status": r.status,
+                "product_type": r.product_type,
+                "created_at": r.created_at.isoformat() if r.created_at else None,
+            }
+            for r in rows
+        ]
+    }
