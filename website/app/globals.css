@@ -45,12 +45,6 @@ body {
   animation: fadeInUp 0.6s ease-out forwards;
 }
 
-/* Hero gradient blob */
-.hero-gradient {
-  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(217, 119, 87, 0.12) 0%, transparent 70%),
-              radial-gradient(ellipse 60% 40% at 80% 20%, rgba(14, 154, 131, 0.08) 0%, transparent 60%);
-}
-
 /* Chat mockup glow pulse */
 @keyframes glowPulse {
   0%, 100% { opacity: 0.6; }
@@ -58,6 +52,32 @@ body {
 }
 .animate-glow {
   animation: glowPulse 4s ease-in-out infinite;
+}
+
+/* Floating model cards */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* SVG gradient mesh — slow pulsing blobs */
+@keyframes pulseSlow {
+  0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.7; }
+  50% { transform: translateX(-50%) scale(1.08); opacity: 1; }
+}
+.animate-pulse-slow {
+  animation: pulseSlow 6s ease-in-out infinite;
+}
+
+@keyframes pulseSlowAlt {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.1); opacity: 0.9; }
+}
+.animate-pulse-slow-alt {
+  animation: pulseSlowAlt 8s ease-in-out infinite;
 }
 
 /* Card hover lift */
