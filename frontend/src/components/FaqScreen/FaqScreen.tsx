@@ -20,6 +20,10 @@ export function FaqScreen() {
     { q: t.faq_q4, a: t.faq_a4 },
     { q: t.faq_q5, a: t.faq_a5 },
     { q: t.faq_q6, a: t.faq_a6 },
+    { q: t.faq_q7, a: t.faq_a7 },
+    { q: t.faq_q8, a: t.faq_a8 },
+    { q: t.faq_q9, a: t.faq_a9 },
+    { q: t.faq_q10, a: t.faq_a10 },
   ]
 
   return (
@@ -83,7 +87,7 @@ export function FaqScreen() {
             {t.faq_support_title}
           </div>
         </div>
-        <div onClick={() => window.open('https://t.me/stonemvp', '_blank')} style={{
+        <div onClick={() => window.open('https://t.me/stoneAIC', '_blank')} style={{
           display: 'flex', alignItems: 'center', gap: 10,
           padding: '10px 12px', background: 'rgba(0,229,255,0.06)',
           borderRadius: 10, border: '1px solid rgba(0,229,255,0.12)', cursor: 'pointer',
@@ -91,7 +95,7 @@ export function FaqScreen() {
           <span style={{ fontSize: 18 }}>💬</span>
           <div style={{ flex: 1 }}>
             <div style={{ fontFamily: 'sans-serif', fontSize: 13, fontWeight: 600, color: '#e0f0e8' }}>{t.faq_support_tg}</div>
-            <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70' }}>@stonemvp</div>
+            <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70' }}>@stoneAIC</div>
           </div>
           <Tag text="→" accent="#00e5ff" />
         </div>
