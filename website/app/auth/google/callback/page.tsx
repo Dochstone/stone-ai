@@ -16,12 +16,13 @@ export default function GoogleCallback() {
       return;
     }
 
-    // Exchange code for id_token via Google, then send to our backend
-    // For simplicity, we send the code to backend which handles the exchange
     fetch(`${API_URL}/api/auth/google`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id_token: code }),
+      body: JSON.stringify({
+        code,
+        redirect_uri: window.location.origin + "/auth/google/callback",
+      }),
     })
       .then((res) => res.json())
       .then((data) => {
@@ -44,10 +45,10 @@ export default function GoogleCallback() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-bg flex items-center justify-center">
+      <div className="min-h-screen bg-bg flex items-center justify-center px-4">
         <div className="text-center">
-          <p className="text-red-500 mb-4">{error}</p>
-          <a href="/webchat" className="text-accent hover:underline">Вернуться</a>
+          <p className="text-red-500 text-sm mb-4">{error}</p>
+          <a href="/webchat" className="text-accent text-sm hover:underline">Вернуться</a>
         </div>
       </div>
     );
@@ -55,7 +56,7 @@ export default function GoogleCallback() {
 
   return (
     <div className="min-h-screen bg-bg flex items-center justify-center">
-      <p className="text-text/50">Авторизация...</p>
+      <p className="text-text/50 text-sm">Авторизация через Google...</p>
     </div>
   );
 }

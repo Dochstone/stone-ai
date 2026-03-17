@@ -43,7 +43,8 @@ class TelegramLinkRequest(BaseModel):
 
 
 class GoogleAuthRequest(BaseModel):
-    id_token: str
+    code: str
+    redirect_uri: str | None = None
 
 
 class YandexAuthRequest(BaseModel):
@@ -182,32 +183,58 @@ async def _get_or_create_oauth_user(
 
 @router.post("/google")
 async def google_auth(body: GoogleAuthRequest, db: AsyncSession = Depends(get_db)):
-    """Authenticate via Google OAuth id_token."""
+    """Authenticate via Google OAuth code → token → user info."""
     settings = get_settings()
-    if not settings.google_client_id:
+    if not settings.google_client_id or not settings.google_client_secret:
         raise HTTPException(503, "Google auth not configured")
 
+    # Exchange code for tokens
     try:
-        from google.oauth2 import id_token as google_id_token
-        from google.auth.transport import requests as google_requests
+        redirect_uri = body.redirect_uri or "https://website-production-907e.up.railway.app/auth/google/callback"
+        async with httpx.AsyncClient() as client:
+            token_resp = await client.post(
+                "https://oauth2.googleapis.com/token",
+                data={
+                    "code": body.code,
+                    "client_id": settings.google_client_id,
+                    "client_secret": settings.google_client_secret,
+                    "redirect_uri": redirect_uri,
+                    "grant_type": "authorization_code",
+                },
+            )
+        if token_resp.status_code != 200:
+            logger.warning(f"Google token exchange failed: {token_resp.text}")
+            raise HTTPException(401, "Google auth failed")
 
-        idinfo = google_id_token.verify_oauth2_token(
-            body.id_token,
-            google_requests.Request(),
-            settings.google_client_id,
-        )
+        tokens = token_resp.json()
+        access_token = tokens.get("access_token")
+        if not access_token:
+            raise HTTPException(401, "No access token from Google")
 
-        email = idinfo.get("email")
+    except httpx.HTTPError as e:
+        logger.error(f"Google token request error: {e}")
+        raise HTTPException(502, "Google auth unavailable")
+
+    # Get user info
+    try:
+        async with httpx.AsyncClient() as client:
+            info_resp = await client.get(
+                "https://www.googleapis.com/oauth2/v2/userinfo",
+                headers={"Authorization": f"Bearer {access_token}"},
+            )
+        if info_resp.status_code != 200:
+            raise HTTPException(401, "Failed to get Google user info")
+
+        google_user = info_resp.json()
+        email = google_user.get("email")
         if not email:
             raise HTTPException(400, "Google account has no email")
-        if not idinfo.get("email_verified"):
-            raise HTTPException(400, "Google email not verified")
 
-        first_name = idinfo.get("given_name") or idinfo.get("name") or email.split("@")[0]
+        first_name = google_user.get("given_name") or google_user.get("name") or email.split("@")[0]
 
-    except ValueError as e:
-        logger.warning(f"Google token verification failed: {e}")
-        raise HTTPException(401, "Invalid Google token")
+    except httpx.HTTPError as e:
+        logger.error(f"Google user info error: {e}")
+        raise HTTPException(502, "Google auth unavailable")
 
     user, token = await _get_or_create_oauth_user(db, email.lower(), first_name, "google")
     logger.info(f"Google auth: user={user.id}, email={email}")

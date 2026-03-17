@@ -82,6 +82,7 @@ class Settings:
 
         # OAuth
         self.google_client_id = os.getenv("GOOGLE_CLIENT_ID", "")
+        self.google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET", "")
         self.yandex_client_id = os.getenv("YANDEX_CLIENT_ID", "")
         self.yandex_client_secret = os.getenv("YANDEX_CLIENT_SECRET", "")
 
