@@ -104,6 +104,11 @@ async def confirm_stars_payment(
         provider_id=payment_id,
     )
     db.add(tx)
+
+    # Referral bonus
+    from app.routers.referral import credit_referrer
+    await credit_referrer(db, tg_id, usd_amount)
+
     await db.commit()
 
     logger.info(f"Balance added: user={tg_id}, usd={usd_amount}, balance=${new_balance:.6f}")

@@ -141,6 +141,10 @@ async def lava_webhook(request: Request, db: AsyncSession = Depends(get_db)):
         text("UPDATE users SET total_deposited_usd = COALESCE(total_deposited_usd, 0) + :amt WHERE telegram_id = :tid"),
         {"amt": usd_amount, "tid": user_tg_id}
     )
+
+    from app.routers.referral import credit_referrer
+    await credit_referrer(db, user_tg_id, usd_amount)
+
     await db.commit()
 
     logger.info(f"Lava payment completed: user={user_tg_id}, usd={usd_amount}, balance=${new_balance:.6f}")
@@ -272,6 +276,10 @@ async def heleket_webhook(request: Request, db: AsyncSession = Depends(get_db)):
         text("UPDATE users SET total_deposited_usd = COALESCE(total_deposited_usd, 0) + :amt WHERE telegram_id = :tid"),
         {"amt": usd_amount, "tid": user_tg_id}
     )
+
+    from app.routers.referral import credit_referrer
+    await credit_referrer(db, user_tg_id, usd_amount)
+
     await db.commit()
 
     logger.info(f"Heleket payment completed: user={user_tg_id}, usd={usd_amount}, balance=${new_balance:.6f}")
