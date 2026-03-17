@@ -49,11 +49,11 @@ _chat_src = CHAT_SRC.read_text(encoding="utf-8")
 
 class TestPricesCrossCheck:
     def test_50_models_in_registry(self):
-        assert len(ACTIVE) == 50
+        assert len(ACTIVE) == 47
 
     def test_50_models_in_token_prices(self):
         """TOKEN_PRICES should have entries for all 50 active models."""
-        assert len(PRICES) == 50
+        assert len(PRICES) == 47
 
     def test_billing_derives_from_registry(self):
         """token_billing.py imports TOKEN_PRICES from MODELS_REGISTRY, not hardcoded."""
@@ -237,7 +237,7 @@ class TestModelsEndpoint:
     def test_models_info_has_50_entries(self):
         """MODELS_INFO should be derived from all 50 active models."""
         # Parse MODELS_INFO by counting active entries
-        assert len(ACTIVE) == 50
+        assert len(ACTIVE) == 47
 
     def test_models_info_includes_all_fields(self):
         """Each MODELS_INFO entry has required display fields."""
@@ -263,7 +263,7 @@ class TestModelsEndpoint:
 
     def test_image_category_returns_6(self):
         images = [m for m in ACTIVE if m["category"] == "image"]
-        assert len(images) == 6
+        assert len(images) == 4
 
     def test_every_model_has_context_length(self):
         for m in ACTIVE:

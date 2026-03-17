@@ -27,7 +27,7 @@ ACTIVE = [m for m in REGISTRY if m.get("active", True)]
 # ─── Structure ───
 
 def test_total_50_models():
-    assert len(ACTIVE) == 50
+    assert len(ACTIVE) == 47
 
 
 def test_no_duplicate_ids():
@@ -69,7 +69,7 @@ def test_tier1_ids():
 
 
 def test_tier2_15_models():
-    assert len([m for m in ACTIVE if m["tier"] == 2]) == 15
+    assert len([m for m in ACTIVE if m["tier"] == 2]) == 14
 
 
 def test_tier3_15_models():
@@ -77,7 +77,7 @@ def test_tier3_15_models():
 
 
 def test_tier4_6_models():
-    assert len([m for m in ACTIVE if m["tier"] == 4]) == 6
+    assert len([m for m in ACTIVE if m["tier"] == 4]) == 4
 
 
 def test_tier5_7_models():
@@ -105,10 +105,10 @@ def test_new_models_present():
     """All 25 new models (added from MODELS_50.md) should be present."""
     new_ids = {
         "deepseek-v3.2", "gpt-4.1-nano", "claude-sonnet-4.5", "claude-opus-4.5",
-        "gpt-5.4", "gemini-3-pro", "minimax-m2.5", "glm-5", "command-r7",
+        "gpt-5.4", "gemini-3-pro", "minimax-m2.5", "command-r7",
         "kimi-k2.5", "o4-mini", "o3", "claude-haiku-4.5-think",
         "gemini-2.5-flash-think", "devstral", "gpt-5-image", "gpt-5-image-mini",
-        "flux-schnell", "stable-diffusion-xl", "gemma-3n-4b", "llama-3.3-70b",
+        "gemma-3n-4b", "llama-3.3-70b",
         "qwen-turbo", "nvidia-nemotron", "mythomax-13b",
         "perplexity-sonar", "perplexity-sonar-deep",
     }
@@ -147,12 +147,9 @@ def test_all_prices_non_negative():
 
 
 def test_per_image_models():
-    """Per-image models should have price_per_image field."""
+    """Per-image models disabled (flux, sdxl not on OpenRouter)."""
     per_img = [m for m in ACTIVE if m.get("price_per_image")]
-    assert len(per_img) == 2
-    ids = {m["id"] for m in per_img}
-    assert ids == {"flux-schnell", "stable-diffusion-xl"}
-    assert per_img[0]["price_per_image"] > 0
+    assert len(per_img) == 0
 
 
 def test_free_openrouter_models_have_stone_prices():
@@ -169,7 +166,7 @@ def test_category_counts():
     for m in ACTIVE:
         cats.setdefault(m["category"], 0)
         cats[m["category"]] += 1
-    assert cats["image"] == 6
+    assert cats["image"] == 4
     assert cats["reason"] == 4
     assert cats["search"] == 3
     assert cats["code"] == 1
@@ -179,7 +176,7 @@ def test_category_counts():
 
 def test_model_map_50_entries():
     model_map = {m["id"]: m["openrouter_id"] for m in ACTIVE}
-    assert len(model_map) == 50
+    assert len(model_map) == 47
 
 
 def test_tier_map_5_lite_45_premium():
@@ -187,4 +184,4 @@ def test_tier_map_5_lite_45_premium():
     lite_count = sum(1 for v in tier_map.values() if v == "lite")
     premium_count = sum(1 for v in tier_map.values() if v == "premium")
     assert lite_count == 5
-    assert premium_count == 45
+    assert premium_count == 42

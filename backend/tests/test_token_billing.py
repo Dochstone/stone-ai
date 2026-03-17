@@ -74,7 +74,7 @@ def test_50_models_have_prices():
         m["id"]: {"input": m["price_input"], "output": m["price_output"], "weighted": m["price_weighted"]}
         for m in ACTIVE
     }
-    assert len(token_prices) == 50
+    assert len(token_prices) == 47
 
 
 def test_per_image_models_zero_token_price():
