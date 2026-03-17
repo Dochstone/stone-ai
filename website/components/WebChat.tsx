@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { MODELS, type AIModel } from "@/lib/models";
+import AuthFormComponent, { type AuthState } from "@/components/AuthForm";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
 
@@ -17,127 +18,6 @@ interface Message {
     balance_usd: number;
     billing_mode: string;
   };
-}
-
-interface AuthState {
-  token: string;
-  email: string;
-  balanceUsd: number;
-}
-
-// ─── Auth Form ───
-
-function AuthForm({ onAuth }: { onAuth: (auth: AuthState) => void }) {
-  const [mode, setMode] = useState<"login" | "register">("login");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    try {
-      const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/register";
-      const res = await fetch(`${API_URL}${endpoint}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.detail || "Ошибка");
-        return;
-      }
-
-      const auth: AuthState = {
-        token: data.token,
-        email: data.user.email,
-        balanceUsd: data.user.balance_usd || 0,
-      };
-      localStorage.setItem("stone_auth", JSON.stringify(auth));
-      onAuth(auth);
-    } catch {
-      setError("Ошибка сети");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-bg flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <a href="/" className="text-2xl font-extrabold text-text">Stone AI</a>
-          <p className="mt-2 text-text/50 text-sm">50+ AI-моделей в одном чате</p>
-        </div>
-
-        <div className="bg-white rounded-2xl border border-text/5 p-8">
-          <div className="flex gap-1 bg-bg rounded-xl p-1 mb-6">
-            <button
-              onClick={() => setMode("login")}
-              className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                mode === "login" ? "bg-white text-text shadow-sm" : "text-text/40"
-              }`}
-            >
-              Вход
-            </button>
-            <button
-              onClick={() => setMode("register")}
-              className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                mode === "register" ? "bg-white text-text shadow-sm" : "text-text/40"
-              }`}
-            >
-              Регистрация
-            </button>
-          </div>
-
-          <form onSubmit={submit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold text-text/50 mb-1.5">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full bg-bg border border-text/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
-                placeholder="you@example.com"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-text/50 mb-1.5">Пароль</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={8}
-                className="w-full bg-bg border border-text/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
-                placeholder={mode === "register" ? "Минимум 8 символов" : ""}
-              />
-            </div>
-
-            {error && <p className="text-red-500 text-xs">{error}</p>}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-accent text-white py-3 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors disabled:opacity-50"
-            >
-              {loading ? "..." : mode === "login" ? "Войти" : "Зарегистрироваться"}
-            </button>
-          </form>
-        </div>
-
-        <p className="text-center mt-6 text-xs text-text/30">
-          Или используйте <a href="https://t.me/StoneAIBot" className="text-accent hover:underline">Telegram-бота</a>
-        </p>
-      </div>
-    </div>
-  );
 }
 
 // ─── Model Sidebar ───
@@ -549,7 +429,7 @@ export default function WebChat() {
   }, [auth, input, streaming, messages, selectedModel]);
 
   if (!loaded) return null;
-  if (!auth) return <AuthForm onAuth={setAuth} />;
+  if (!auth) return <AuthFormComponent onAuth={setAuth} />;
 
   return (
     <div className="h-screen flex bg-bg overflow-hidden">

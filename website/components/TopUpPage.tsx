@@ -1,14 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import AuthFormComponent, { type AuthState } from "@/components/AuthForm";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
-
-interface AuthState {
-  token: string;
-  email: string;
-  balanceUsd: number;
-}
 
 interface TxRecord {
   amount_usd: number;
@@ -18,66 +13,6 @@ interface TxRecord {
 }
 
 const AMOUNTS = [1, 3, 5, 10, 25, 50];
-
-// ─── Auth Gate (reuse from WebChat pattern) ───
-
-function AuthGate({ onAuth }: { onAuth: (a: AuthState) => void }) {
-  const [mode, setMode] = useState<"login" | "register">("login");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_URL}/api/auth/${mode === "login" ? "login" : "register"}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (!res.ok) { setError(data.detail || "Ошибка"); return; }
-      const auth: AuthState = { token: data.token, email: data.user.email, balanceUsd: data.user.balance_usd || 0 };
-      localStorage.setItem("stone_auth", JSON.stringify(auth));
-      onAuth(auth);
-    } catch { setError("Ошибка сети"); } finally { setLoading(false); }
-  };
-
-  return (
-    <div className="min-h-screen bg-bg flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <a href="/" className="text-2xl font-extrabold text-text">Stone AI</a>
-          <p className="mt-2 text-text/50 text-sm">Войдите, чтобы пополнить баланс</p>
-        </div>
-        <div className="bg-white rounded-2xl border border-text/5 p-8">
-          <div className="flex gap-1 bg-bg rounded-xl p-1 mb-6">
-            {(["login", "register"] as const).map((m) => (
-              <button key={m} onClick={() => setMode(m)}
-                className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${mode === m ? "bg-white text-text shadow-sm" : "text-text/40"}`}>
-                {m === "login" ? "Вход" : "Регистрация"}
-              </button>
-            ))}
-          </div>
-          <form onSubmit={submit} className="space-y-4">
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
-              placeholder="Email" className="w-full bg-bg border border-text/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent" />
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8}
-              placeholder="Пароль" className="w-full bg-bg border border-text/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent" />
-            {error && <p className="text-red-500 text-xs">{error}</p>}
-            <button type="submit" disabled={loading}
-              className="w-full bg-accent text-white py-3 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors disabled:opacity-50">
-              {loading ? "..." : mode === "login" ? "Войти" : "Зарегистрироваться"}
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ─── Top Up Page ───
 
@@ -214,7 +149,7 @@ export default function TopUpPage() {
   };
 
   if (!loaded) return null;
-  if (!auth) return <AuthGate onAuth={setAuth} />;
+  if (!auth) return <AuthFormComponent onAuth={setAuth} subtitle="Войдите, чтобы пополнить баланс" />;
 
   return (
     <div className="min-h-screen bg-bg">

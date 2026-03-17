@@ -80,6 +80,11 @@ class Settings:
         # Admin
         self.admin_tg_ids = os.getenv("ADMIN_TG_IDS", "")  # comma-separated Telegram IDs
 
+        # OAuth
+        self.google_client_id = os.getenv("GOOGLE_CLIENT_ID", "")
+        self.yandex_client_id = os.getenv("YANDEX_CLIENT_ID", "")
+        self.yandex_client_secret = os.getenv("YANDEX_CLIENT_SECRET", "")
+
         # Ads
         self.adsgram_block_id = os.getenv("ADSGRAM_BLOCK_ID", "")  # Adsgram rewarded video block ID
 

@@ -1,9 +1,11 @@
-"""Auth API — email/password registration, login, and TG linking."""
+"""Auth API — email/password, Google OAuth, Yandex OAuth, TG linking."""
 
 import re
 import time
+import logging
 from datetime import datetime
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -21,6 +23,8 @@ from app.middleware.web_auth import (
 )
 from app.config import get_settings
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
@@ -36,6 +40,14 @@ class LoginRequest(BaseModel):
 
 class TelegramLinkRequest(BaseModel):
     init_data: str
+
+
+class GoogleAuthRequest(BaseModel):
+    id_token: str
+
+
+class YandexAuthRequest(BaseModel):
+    code: str
 
 
 def _validate_email(email: str) -> str:
@@ -134,6 +146,131 @@ async def logout():
     response = JSONResponse(content={"status": "ok"})
     response.delete_cookie("access_token")
     return response
+
+
+async def _get_or_create_oauth_user(
+    db: AsyncSession, email: str, first_name: str, provider: str,
+) -> tuple:
+    """Find existing user by email or create new one. Returns (user, token)."""
+    result = await db.execute(select(User).where(User.email == email))
+    user = result.scalar_one_or_none()
+
+    if user:
+        # Existing user — update provider if needed
+        if user.auth_provider not in (provider, "both"):
+            user.auth_provider = "both"
+            await db.flush()
+        token = create_jwt(user.id, email)
+        return user, token
+
+    # New user
+    placeholder_tg_id = -int(time.time() * 1000) % (2**53)
+    user = User(
+        telegram_id=placeholder_tg_id,
+        email=email,
+        password_hash=None,
+        auth_provider=provider,
+        first_name=first_name,
+        username=None,
+        joined_at=datetime.utcnow(),
+    )
+    db.add(user)
+    await db.flush()
+    token = create_jwt(user.id, email)
+    return user, token
+
+
+@router.post("/google")
+async def google_auth(body: GoogleAuthRequest, db: AsyncSession = Depends(get_db)):
+    """Authenticate via Google OAuth id_token."""
+    settings = get_settings()
+    if not settings.google_client_id:
+        raise HTTPException(503, "Google auth not configured")
+
+    try:
+        from google.oauth2 import id_token as google_id_token
+        from google.auth.transport import requests as google_requests
+
+        idinfo = google_id_token.verify_oauth2_token(
+            body.id_token,
+            google_requests.Request(),
+            settings.google_client_id,
+        )
+
+        email = idinfo.get("email")
+        if not email:
+            raise HTTPException(400, "Google account has no email")
+        if not idinfo.get("email_verified"):
+            raise HTTPException(400, "Google email not verified")
+
+        first_name = idinfo.get("given_name") or idinfo.get("name") or email.split("@")[0]
+
+    except ValueError as e:
+        logger.warning(f"Google token verification failed: {e}")
+        raise HTTPException(401, "Invalid Google token")
+
+    user, token = await _get_or_create_oauth_user(db, email.lower(), first_name, "google")
+    logger.info(f"Google auth: user={user.id}, email={email}")
+    return _user_response(user, token)
+
+
+@router.post("/yandex")
+async def yandex_auth(body: YandexAuthRequest, db: AsyncSession = Depends(get_db)):
+    """Authenticate via Yandex OAuth code → token → user info."""
+    settings = get_settings()
+    if not settings.yandex_client_id or not settings.yandex_client_secret:
+        raise HTTPException(503, "Yandex auth not configured")
+
+    # Exchange code for token
+    try:
+        async with httpx.AsyncClient() as client:
+            token_resp = await client.post(
+                "https://oauth.yandex.ru/token",
+                data={
+                    "grant_type": "authorization_code",
+                    "code": body.code,
+                    "client_id": settings.yandex_client_id,
+                    "client_secret": settings.yandex_client_secret,
+                },
+                headers={"Content-Type": "application/x-www-form-urlencoded"},
+            )
+        if token_resp.status_code != 200:
+            logger.warning(f"Yandex token exchange failed: {token_resp.text}")
+            raise HTTPException(401, "Yandex auth failed")
+
+        access_token = token_resp.json().get("access_token")
+        if not access_token:
+            raise HTTPException(401, "No access token from Yandex")
+
+    except httpx.HTTPError as e:
+        logger.error(f"Yandex token request error: {e}")
+        raise HTTPException(502, "Yandex auth unavailable")
+
+    # Get user info
+    try:
+        async with httpx.AsyncClient() as client:
+            info_resp = await client.get(
+                "https://login.yandex.ru/info",
+                params={"format": "json"},
+                headers={"Authorization": f"OAuth {access_token}"},
+            )
+        if info_resp.status_code != 200:
+            raise HTTPException(401, "Failed to get Yandex user info")
+
+        yandex_user = info_resp.json()
+        email = yandex_user.get("default_email") or yandex_user.get("emails", [None])[0]
+        if not email:
+            raise HTTPException(400, "Yandex account has no email")
+
+        first_name = yandex_user.get("first_name") or yandex_user.get("display_name") or email.split("@")[0]
+
+    except httpx.HTTPError as e:
+        logger.error(f"Yandex user info error: {e}")
+        raise HTTPException(502, "Yandex auth unavailable")
+
+    user, token = await _get_or_create_oauth_user(db, email.lower(), first_name, "yandex")
+    logger.info(f"Yandex auth: user={user.id}, email={email}")
+    return _user_response(user, token)
 
 
 @router.post("/telegram-link")
