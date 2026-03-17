@@ -71,6 +71,9 @@ export default function Nav() {
           <a href="/pricing" className="text-text/70 hover:text-text font-medium transition-colors">
             Цены
           </a>
+          <a href="/blog" className="text-text/70 hover:text-text font-medium transition-colors">
+            Блог
+          </a>
           <a href="/#faq" className="text-text/70 hover:text-text font-medium transition-colors">
             FAQ
           </a>
@@ -115,6 +118,9 @@ export default function Nav() {
             </a>
             <a href="/pricing" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2 px-2">
               Цены
+            </a>
+            <a href="/blog" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2 px-2">
+              Блог
             </a>
             <a href="/#faq" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2 px-2">
               FAQ

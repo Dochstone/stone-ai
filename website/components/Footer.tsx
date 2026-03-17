@@ -42,6 +42,7 @@ export default function Footer() {
             <ul className="space-y-2 text-sm text-text/50">
               <li><a href="/models" className="hover:text-text transition-colors">Модели</a></li>
               <li><a href="/pricing" className="hover:text-text transition-colors">Цены</a></li>
+              <li><a href="/blog" className="hover:text-text transition-colors">Блог</a></li>
               <li><a href="/#faq" className="hover:text-text transition-colors">FAQ</a></li>
               <li>
                 <a href="https://t.me/StoneAIsupport" target="_blank" rel="noopener noreferrer" className="hover:text-text transition-colors">
