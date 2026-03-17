@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Manrope } from "next/font/google";
 import "./globals.css";
 import Nav from "@/components/Nav";
@@ -13,6 +13,13 @@ const manrope = Manrope({
 
 const SITE_URL = "https://website-production-907e.up.railway.app";
 const OG_IMAGE = `${SITE_URL}/og-image.png`;
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

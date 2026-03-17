@@ -1,9 +1,10 @@
 function ChatMockup() {
   return (
     <div
-      className="relative mx-auto mt-14 max-w-2xl"
+      className="relative mx-auto mt-14 max-w-2xl px-2"
       style={{
         transform: "perspective(1200px) rotateY(-3deg) rotateX(2deg)",
+        transformOrigin: "center center",
       }}
     >
       {/* Glow behind */}

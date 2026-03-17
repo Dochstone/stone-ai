@@ -2,13 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  @apply bg-bg text-text font-sans antialiased;
-}
-
-/* Smooth scrolling */
 html {
   scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-bg text-text font-sans antialiased;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
 }
 
 /* Trust marquee animation */

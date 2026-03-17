@@ -28,7 +28,7 @@ export default function FeaturesTable() {
 
         <div className="max-w-2xl mx-auto overflow-hidden rounded-2xl border border-text/10 bg-white">
           {/* Header */}
-          <div className="grid grid-cols-3 bg-bg text-sm font-semibold">
+          <div className="grid grid-cols-3 bg-bg text-xs sm:text-sm font-semibold">
             <div className="px-5 py-4" />
             <div className="px-5 py-4 text-center">
               <span className="bg-teal-light text-teal px-3 py-1 rounded-full text-xs font-bold">Free</span>
@@ -42,7 +42,7 @@ export default function FeaturesTable() {
           {features.map((f, i) => (
             <div
               key={f.name}
-              className={`grid grid-cols-3 text-sm ${
+              className={`grid grid-cols-3 text-xs sm:text-sm ${
                 i < features.length - 1 ? "border-b border-text/5" : ""
               }`}
             >
