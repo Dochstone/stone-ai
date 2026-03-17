@@ -30,8 +30,8 @@ async def cmd_start(message: Message):
             ),
         ],
         [InlineKeyboardButton(
-            text="Поддержка @stoneAIC",
-            url="https://t.me/stoneAIC",
+            text="Поддержка @stoneaisupport",
+            url="https://t.me/stoneaisupport",
         )],
     ])
 
@@ -61,7 +61,7 @@ async def cmd_help(message: Message):
         "Premium: GPT-5.1, Claude Opus 4, Gemini 2.5 Pro, "
         "Grok 3, DeepSeek R1, Perplexity Pro, Flux и другие\n\n"
         "<b>Оплата:</b> Stars, карты/СБП, USDT/BTC/ETH\n\n"
-        "Поддержка: @stoneAIC",
+        "Поддержка: @stoneaisupport",
         parse_mode="HTML",
     )
 

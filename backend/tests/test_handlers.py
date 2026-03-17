@@ -66,7 +66,7 @@ def test_no_old_contacts():
 def test_support_link():
     """Should contain support link."""
     src = _src()
-    assert "stoneAIC" in src
+    assert "stoneaisupport" in src
 
 
 def test_exception_fallback_updated():
@@ -81,4 +81,4 @@ def test_inline_buttons():
     assert "Открыть приложение" in src
     assert "Модели и цены" in src
     assert "Пополнить баланс" in src
-    assert "Поддержка @stoneAIC" in src
+    assert "Поддержка @stoneaisupport" in src
