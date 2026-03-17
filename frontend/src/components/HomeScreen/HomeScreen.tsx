@@ -10,11 +10,12 @@ import { haptic } from '../../utils/telegram'
 import { AdBanner } from '../AdBanner/AdBanner'
 import { RewardedAdButton } from '../RewardedAdButton/RewardedAdButton'
 
-type FilterId = 'all' | 'free' | 'openai' | 'anthropic' | 'google' | 'meta' | 'xai' | 'image' | 'search' | 'reason' | 'deepseek' | 'alibaba'
+type FilterId = 'all' | 'free' | 'pro' | 'openai' | 'anthropic' | 'google' | 'meta' | 'xai' | 'image' | 'search' | 'reason' | 'deepseek' | 'alibaba'
 
 const FILTERS: { id: FilterId; label: string }[] = [
   { id: 'all', label: 'Все' },
-  { id: 'free', label: '🆓 Бесплатные' },
+  { id: 'free', label: 'Free' },
+  { id: 'pro', label: 'Pro' },
   { id: 'openai', label: 'OpenAI' },
   { id: 'anthropic', label: 'Anthropic' },
   { id: 'google', label: 'Google' },
@@ -22,15 +23,16 @@ const FILTERS: { id: FilterId; label: string }[] = [
   { id: 'meta', label: 'Meta' },
   { id: 'xai', label: 'xAI' },
   { id: 'alibaba', label: 'Alibaba' },
-  { id: 'image', label: '🎨 Картинки' },
-  { id: 'search', label: '🔍 Поиск' },
-  { id: 'reason', label: '🧠 Reasoning' },
+  { id: 'image', label: 'Картинки' },
+  { id: 'search', label: 'Поиск' },
+  { id: 'reason', label: 'Reasoning' },
 ]
 
 function applyFilter(models: any[], filter: FilterId) {
   switch (filter) {
     case 'all': return models
     case 'free': return models.filter(m => m.tier === 'lite')
+    case 'pro': return models.filter(m => m.tier === 'premium')
     case 'image': return models.filter(m => m.category === 'image')
     case 'search': return models.filter(m => m.category === 'search')
     case 'reason': return models.filter(m => m.category === 'reason')
@@ -43,6 +45,48 @@ function applyFilter(models: any[], filter: FilterId) {
     case 'alibaba': return models.filter(m => m.company === 'Alibaba')
     default: return models
   }
+}
+
+// Company icon colors for SVG circles
+const COMPANY_COLORS: Record<string, { bg: string; fg: string }> = {
+  OpenAI: { bg: '#10a37f20', fg: '#10a37f' },
+  Anthropic: { bg: '#d4734420', fg: '#d47344' },
+  Google: { bg: '#4285f420', fg: '#4285f4' },
+  xAI: { bg: '#7c3aed20', fg: '#7c3aed' },
+  DeepSeek: { bg: '#06b6d420', fg: '#06b6d4' },
+  Meta: { bg: '#0284c720', fg: '#0284c7' },
+  Mistral: { bg: '#ea580c20', fg: '#ea580c' },
+  Perplexity: { bg: '#6366f120', fg: '#6366f1' },
+  Alibaba: { bg: '#f9731620', fg: '#f97316' },
+  BFL: { bg: '#f59e0b20', fg: '#f59e0b' },
+  Stability: { bg: '#ec489920', fg: '#ec4899' },
+  MiniMax: { bg: '#e1194620', fg: '#e11946' },
+  Zhipu: { bg: '#8b5cf620', fg: '#8b5cf6' },
+  Moonshot: { bg: '#3b82f620', fg: '#3b82f6' },
+  Cohere: { bg: '#eab30820', fg: '#eab308' },
+  Microsoft: { bg: '#0078d420', fg: '#0078d4' },
+  NVIDIA: { bg: '#76b90020', fg: '#76b900' },
+  Gryphe: { bg: '#ef444420', fg: '#ef4444' },
+}
+
+function CompanyIcon({ company, size = 32 }: { company: string; size?: number }) {
+  const colors = COMPANY_COLORS[company] || { bg: '#ffffff10', fg: '#888' }
+  const letter = company[0]
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: size / 2.5,
+      background: colors.bg,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      flexShrink: 0,
+    }}>
+      <span style={{
+        fontSize: size * 0.42, fontWeight: 800, color: colors.fg,
+        fontFamily: 'system-ui, sans-serif',
+      }}>
+        {letter}
+      </span>
+    </div>
+  )
 }
 
 export function HomeScreen() {
@@ -162,47 +206,6 @@ export function HomeScreen() {
       {/* Rewarded ad button */}
       <RewardedAdButton />
 
-      {/* ═══ Payment methods strip ═══ */}
-      <div
-        onClick={() => { haptic('light'); setScreen('plans') }}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 10,
-          background: 'rgba(8,16,12,0.95)',
-          border: `1px solid rgba(${p.primaryRgb},0.2)`,
-          borderRadius: 14, padding: '12px 14px', marginBottom: 16,
-          cursor: 'pointer', transition: 'all 0.2s',
-        }}
-      >
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#e0f8ec', marginBottom: 3 }}>
-            Пополнить баланс
-          </div>
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {[
-              { icon: '⭐', label: 'Stars' },
-              { icon: '💎', label: 'TON' },
-              { icon: '💳', label: 'Карта/СБП' },
-              { icon: '🪙', label: 'Крипто' },
-            ].map(m => (
-              <span key={m.label} style={{
-                fontSize: 10, color: '#8aaa98',
-                background: 'rgba(255,255,255,0.04)',
-                padding: '2px 7px', borderRadius: 5,
-              }}>
-                {m.icon} {m.label}
-              </span>
-            ))}
-          </div>
-        </div>
-        <span style={{
-          fontSize: 12, fontWeight: 800, color: p.primary,
-          background: `rgba(${p.primaryRgb},0.12)`,
-          padding: '6px 12px', borderRadius: 8, flexShrink: 0,
-        }}>
-          →
-        </span>
-      </div>
-
       {/* ═══ Filter tabs (horizontal scroll) ═══ */}
       <div style={{
         display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 8,
@@ -290,7 +293,6 @@ function ModelCard({
   const p = palette
   const isPremium = model.tier === 'premium'
 
-  // Category badge color
   const catColors: Record<string, string> = {
     image: '#f5a623',
     search: '#4a90d9',
@@ -307,10 +309,12 @@ function ModelCard({
         border: `1px solid ${isPremium
           ? 'rgba(191,90,242,0.25)'
           : `rgba(${p.primaryRgb},0.25)`}`,
-        borderRadius: 14, padding: '14px 8px',
+        borderRadius: 14, padding: '12px 8px 10px',
         textAlign: 'center', cursor: 'pointer',
         transition: 'transform 0.15s',
         position: 'relative',
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        minHeight: 120,
       }}
     >
       {/* Tier badge */}
@@ -334,18 +338,20 @@ function ModelCard({
         </div>
       )}
 
-      <div style={{ fontSize: 28, marginBottom: 6 }}>{model.icon}</div>
+      {/* Company icon */}
+      <CompanyIcon company={model.company} size={36} />
+
       <div style={{
-        fontSize: 11, fontWeight: 700, color: '#e0f8ec', marginBottom: 2,
-        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+        fontSize: 11, fontWeight: 700, color: '#e0f8ec', marginTop: 6,
+        lineHeight: 1.2, wordBreak: 'break-word', maxWidth: '100%',
       }}>
         {model.name}
       </div>
-      <div style={{ fontSize: 9, color: '#4a7a5a' }}>{model.company}</div>
+      <div style={{ fontSize: 9, color: '#4a7a5a', marginTop: 2 }}>{model.company}</div>
 
       {/* Price */}
       <div style={{
-        fontSize: 9, fontWeight: 800, marginTop: 5,
+        fontSize: 9, fontWeight: 800, marginTop: 'auto', paddingTop: 6,
         color: isPremium ? '#bf5af2' : '#00cc66',
         background: isPremium ? 'rgba(191,90,242,0.1)' : `rgba(${p.primaryRgb},0.1)`,
         padding: '2px 6px', borderRadius: 5, display: 'inline-block',

@@ -132,6 +132,38 @@ export function ProfileScreen() {
 
       <div style={{ height: 10 }} />
 
+      {/* Wallet / Payment methods */}
+      <Card accent={p.primary}>
+        <div
+          onClick={() => setScreen('plans')}
+          style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
+        >
+          <span style={{ fontSize: 22 }}>💳</span>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#e0f0e8' }}>Кошелёк</div>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
+              {[
+                { icon: '⭐', label: 'Stars' },
+                { icon: '💎', label: 'TON' },
+                { icon: '💳', label: 'Карта/СБП' },
+                { icon: '🪙', label: 'Крипто' },
+              ].map(m => (
+                <span key={m.label} style={{
+                  fontSize: 10, color: '#8aaa98',
+                  background: 'rgba(255,255,255,0.04)',
+                  padding: '2px 7px', borderRadius: 5,
+                }}>
+                  {m.icon} {m.label}
+                </span>
+              ))}
+            </div>
+          </div>
+          <Tag text="→" accent={p.primary} />
+        </div>
+      </Card>
+
+      <div style={{ height: 10 }} />
+
       {/* Support card */}
       <Card accent="#00e5ff" featured>
         <div style={{ textAlign: 'center', marginBottom: 12 }}>
