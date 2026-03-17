@@ -62,6 +62,7 @@ async def get_me(
             "rewarded_bonus": rewarded_bonus,
             "rewarded_max": REWARDED_BONUS,
         },
+        "total_deposited_usd": round(float(user.total_deposited_usd or 0), 2),
         "stats": {
             "total_requests": user.total_requests or 0,
             "total_tokens": user.total_tokens_used or 0,

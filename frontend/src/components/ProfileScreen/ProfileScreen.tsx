@@ -23,11 +23,13 @@ export function ProfileScreen() {
   const { t } = useTranslation()
   const p = palette
 
+  const safeNum = (n: any) => (typeof n === 'number' && !isNaN(n)) ? n : 0
+
   const stats = [
-    { icon: '📊', value: fmt(user.liteToday + user.premiumToday), label: 'Сегодня', color: p.primary },
-    { icon: '⚡', value: fmt(user.totalRequests), label: 'Всего запросов', color: p.secondary || p.primary },
-    { icon: '💰', value: `$${user.balanceUsd.toFixed(2)}`, label: 'Баланс', color: '#f5a623' },
-    { icon: '📉', value: `$${(user.totalDepositedUsd || 0).toFixed(2)}`, label: 'Потрачено', color: '#bf5af2' },
+    { icon: '📊', value: fmt(safeNum(user.liteToday) + safeNum(user.premiumToday)), label: 'Сегодня', color: p.primary },
+    { icon: '⚡', value: fmt(safeNum(user.totalRequests)), label: 'Всего запросов', color: p.secondary || p.primary },
+    { icon: '💰', value: `$${safeNum(user.balanceUsd).toFixed(2)}`, label: 'Баланс', color: '#f5a623' },
+    { icon: '📉', value: `$${safeNum(user.totalDepositedUsd).toFixed(2)}`, label: 'Внесено', color: '#bf5af2' },
   ]
 
   return (
