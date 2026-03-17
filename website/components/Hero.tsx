@@ -1,3 +1,5 @@
+"use client";
+
 function ChatMockup() {
   return (
     <div
@@ -136,20 +138,37 @@ export default function Hero() {
             Платите только за использованные токены.
           </p>
 
-          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a
-              href="/webchat"
-              className="bg-accent text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
+          {/* Inline registration form — Bybit-style */}
+          <div className="mt-10 max-w-md mx-auto">
+            <form
+              onSubmit={(e) => { e.preventDefault(); window.location.href = '/webchat'; }}
+              className="flex items-center gap-2 bg-white rounded-2xl p-2 shadow-lg shadow-black/[0.06] border border-text/[0.06]"
             >
-              Начать бесплатно
-            </a>
+              <input
+                type="email"
+                placeholder="Email или Telegram"
+                className="flex-1 min-w-0 bg-transparent px-4 py-3 text-sm text-text placeholder:text-text/35 outline-none"
+              />
+              <button
+                type="submit"
+                className="shrink-0 bg-accent text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
+              >
+                Начать бесплатно
+              </button>
+            </form>
+            <p className="text-[11px] text-text/35 mt-3 text-center">
+              Без привязки карты · 10 запросов/день бесплатно
+            </p>
+          </div>
+
+          <div className="mt-4 flex items-center justify-center">
             <a
               href="https://t.me/StoneAIBot"
               target="_blank"
               rel="noopener noreferrer"
-              className="border-2 border-text/15 text-text px-8 py-4 rounded-xl font-bold hover:border-accent hover:text-accent transition-colors"
+              className="text-sm font-semibold text-text/50 hover:text-accent transition-colors"
             >
-              Telegram бот
+              или откройте в Telegram →
             </a>
           </div>
         </div>
@@ -157,21 +176,21 @@ export default function Hero() {
         {/* Chat mockup */}
         <ChatMockup />
 
-        {/* Stats */}
-        <div className="mt-14 flex items-center justify-center gap-8 md:gap-14 text-sm md:text-base text-text/60">
+        {/* Stats — large numbers, Bybit-style */}
+        <div className="mt-14 flex items-center justify-center gap-8 md:gap-16 text-sm md:text-base text-text/50">
           <div className="text-center">
-            <span className="block text-3xl md:text-4xl font-extrabold text-text">50+</span>
-            моделей
+            <span className="block text-[48px] leading-none font-black text-accent">50+</span>
+            <span className="mt-1 block">моделей</span>
           </div>
-          <div className="w-px h-12 bg-text/10" />
+          <div className="w-px h-16 bg-text/10" />
           <div className="text-center">
-            <span className="block text-3xl md:text-4xl font-extrabold text-teal">5</span>
-            бесплатных
+            <span className="block text-[48px] leading-none font-black text-teal">4</span>
+            <span className="mt-1 block">способа оплаты</span>
           </div>
-          <div className="w-px h-12 bg-text/10" />
+          <div className="w-px h-16 bg-text/10" />
           <div className="text-center">
-            <span className="block text-3xl md:text-4xl font-extrabold text-accent">$0.24</span>
-            от /1M токенов
+            <span className="block text-[48px] leading-none font-black text-accent">$0</span>
+            <span className="mt-1 block">для старта</span>
           </div>
         </div>
       </div>

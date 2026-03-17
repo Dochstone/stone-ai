@@ -21,6 +21,15 @@ body {
   animation: marquee 30s linear infinite;
 }
 
+/* Model ticker animation */
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-ticker {
+  animation: ticker 25s linear infinite;
+}
+
 /* Fade in animation */
 @keyframes fadeInUp {
   from {
