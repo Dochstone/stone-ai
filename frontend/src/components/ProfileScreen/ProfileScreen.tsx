@@ -1,14 +1,12 @@
 /**
- * ProfileScreen — User info, stats, palette selector, language, TON wallet, channel link.
- * FAQ moved to separate FaqScreen.
+ * ProfileScreen — User info, 2x2 stats, wallet, palette, language, support.
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from '../../i18n/useTranslation'
-import { LANG_LABELS } from '../../i18n/translations'
 import type { Lang } from '../../i18n/translations'
 import { useStore, PALETTES } from '../../store/useStore'
-import { Card, Tag, Divider, GlowBtn, GlitchTitle, TonIcon } from '../ui'
-import { apiGet, apiPost } from '../../api/client'
+import { Card, Tag, Divider, GlitchTitle } from '../ui'
+import { apiGet } from '../../api/client'
 
 const LANGS = [
   { id: 'ru', flag: '🇷🇺', name: 'RU' },
@@ -16,13 +14,24 @@ const LANGS = [
   { id: 'zh', flag: '🇨🇳', name: 'ZH' },
 ]
 
+function fmt(n: number) {
+  return n.toLocaleString('ru-RU')
+}
+
 export function ProfileScreen() {
   const { user, palette, setPaletteId, models, setScreen, lang, setLang } = useStore()
   const { t } = useTranslation()
-    const p = palette
+  const p = palette
+
+  const stats = [
+    { icon: '📊', value: fmt(user.liteToday + user.premiumToday), label: 'Сегодня', color: p.primary },
+    { icon: '⚡', value: fmt(user.totalRequests), label: 'Всего запросов', color: p.secondary || p.primary },
+    { icon: '💰', value: `$${user.balanceUsd.toFixed(2)}`, label: 'Баланс', color: '#f5a623' },
+    { icon: '📉', value: `$${(user.totalDepositedUsd || 0).toFixed(2)}`, label: 'Потрачено', color: '#bf5af2' },
+  ]
 
   return (
-    <div style={{ padding: '0 18px 90px' }}>
+    <div style={{ padding: '0 16px 90px' }}>
       {/* Header */}
       <div style={{ padding: '16px 0 8px' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
@@ -32,12 +41,12 @@ export function ProfileScreen() {
       </div>
 
       {/* User card */}
-      <Card accent="#00ff88" featured>
+      <Card accent={p.primary} featured>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{
             width: 50, height: 50, borderRadius: 14,
-            background: 'linear-gradient(135deg, rgba(0,255,136,0.15), rgba(0,229,255,0.1))',
-            border: '1px solid rgba(0,255,136,0.25)',
+            background: `linear-gradient(135deg, rgba(${p.primaryRgb},0.15), rgba(${p.primaryRgb},0.05))`,
+            border: `1px solid rgba(${p.primaryRgb},0.25)`,
             display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24,
           }}>👤</div>
           <div style={{ flex: 1 }}>
@@ -48,36 +57,88 @@ export function ProfileScreen() {
               @{user.username || 'anonymous'}
             </div>
           </div>
-          <Tag text={user.plan === 'free' ? 'FREE' : user.plan.toUpperCase()} accent={user.plan === 'free' ? '#5a8a70' : '#aaff00'} />
+          <Tag text={user.plan === 'free' ? 'FREE' : user.plan.toUpperCase()} accent={user.plan === 'free' ? '#5a8a70' : p.primary} />
         </div>
       </Card>
 
-      <div style={{ height: 10 }} />
+      <div style={{ height: 12 }} />
 
-      {/* Stats bar */}
+      {/* ═══ Stats 2x2 grid ═══ */}
       <div style={{
-        display: 'flex', gap: 0,
-        border: '1px solid rgba(0,255,136,0.12)', borderRadius: 12, overflow: 'hidden',
+        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10,
       }}>
-        {[
-          { value: user.totalRequests, label: t.profile_requests_stat },
-          { value: user.liteToday, label: t.profile_lite_today_stat },
-          { value: user.premiumToday, label: t.profile_premium_stat },
-        ].map((s, i) => (
+        {stats.map((s, i) => (
           <div key={i} style={{
-            flex: 1, textAlign: 'center', padding: '12px 8px',
-            borderRight: i < 2 ? '1px solid rgba(0,255,136,0.08)' : 'none',
-            background: 'rgba(0,255,136,0.02)',
+            background: 'rgba(8,16,12,0.95)',
+            border: `1px solid rgba(${p.primaryRgb},0.15)`,
+            borderRadius: 14, padding: '14px 12px',
+            display: 'flex', flexDirection: 'column', alignItems: 'center',
+            justifyContent: 'center', minHeight: 90,
           }}>
-            <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 16, fontWeight: 900, color: '#00ff88' }}>{s.value}</div>
-            <div style={{ fontFamily: 'monospace', fontSize: 9, color: '#5a8a70', marginTop: 3, textTransform: 'uppercase' }}>{s.label}</div>
+            <span style={{ fontSize: 20, marginBottom: 6 }}>{s.icon}</span>
+            <div style={{
+              fontFamily: "'Orbitron',sans-serif", fontSize: 18, fontWeight: 900,
+              color: s.color,
+              filter: `drop-shadow(0 0 6px ${s.color}40)`,
+            }}>
+              {s.value}
+            </div>
+            <div style={{
+              fontFamily: 'monospace', fontSize: 9, color: '#5a8a70',
+              marginTop: 4, textTransform: 'uppercase', textAlign: 'center',
+            }}>
+              {s.label}
+            </div>
           </div>
         ))}
       </div>
 
-      <div style={{ height: 10 }} />
+      <div style={{ height: 12 }} />
+
+      {/* ═══ Wallet / Payment methods ═══ */}
+      <div
+        onClick={() => setScreen('plans')}
+        style={{
+          background: 'rgba(8,16,12,0.95)',
+          border: `1px solid rgba(${p.primaryRgb},0.2)`,
+          borderRadius: 14, padding: '14px 16px',
+          cursor: 'pointer', transition: 'all 0.2s',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: 22 }}>💳</span>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#e0f8ec', marginBottom: 4 }}>
+              Пополнить баланс
+            </div>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {[
+                { icon: '⭐', label: 'Stars' },
+                { icon: '💎', label: 'TON' },
+                { icon: '💳', label: 'Карта/СБП' },
+                { icon: '🪙', label: 'Крипто' },
+              ].map(m => (
+                <span key={m.label} style={{
+                  fontSize: 10, color: '#8aaa98',
+                  background: 'rgba(255,255,255,0.04)',
+                  padding: '2px 7px', borderRadius: 5,
+                }}>
+                  {m.icon} {m.label}
+                </span>
+              ))}
+            </div>
+          </div>
+          <span style={{
+            fontSize: 12, fontWeight: 800, color: p.primary,
+            background: `rgba(${p.primaryRgb},0.12)`,
+            padding: '6px 12px', borderRadius: 8,
+          }}>→</span>
+        </div>
+      </div>
+
+      <div style={{ height: 12 }} />
       <Divider label={t.profile_settings_label} />
-      <div style={{ height: 8 }} />
+      <div style={{ height: 10 }} />
 
       {/* Palette selector */}
       <Card accent={p.primary}>
@@ -113,52 +174,15 @@ export function ProfileScreen() {
           {LANGS.map(l => (
             <button key={l.id} onClick={() => setLang(l.id)} style={{
               flex: 1, padding: '8px 0', borderRadius: 8, cursor: 'pointer',
-              background: lang === l.id ? 'rgba(0,255,136,0.1)' : 'rgba(0,255,136,0.02)',
-              border: `1px solid ${lang === l.id ? 'rgba(0,255,136,0.3)' : 'rgba(0,255,136,0.06)'}`,
-              color: lang === l.id ? '#00ff88' : '#5a8a70',
+              background: lang === l.id ? `rgba(${p.primaryRgb},0.1)` : 'rgba(0,255,136,0.02)',
+              border: `1px solid ${lang === l.id ? `rgba(${p.primaryRgb},0.3)` : 'rgba(0,255,136,0.06)'}`,
+              color: lang === l.id ? p.primary : '#5a8a70',
               fontFamily: 'monospace', fontSize: 12, fontWeight: 700, transition: 'all 0.2s',
             }}>
               <div style={{ fontSize: 18, marginBottom: 2 }}>{l.flag}</div>
               {l.name}
             </button>
           ))}
-        </div>
-      </Card>
-
-      <div style={{ height: 10 }} />
-
-      {/* BYOK — Bring Your Own Key */}
-      <ByokCard palette={palette} />
-
-      <div style={{ height: 10 }} />
-
-      {/* Wallet / Payment methods */}
-      <Card accent={p.primary}>
-        <div
-          onClick={() => setScreen('plans')}
-          style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
-        >
-          <span style={{ fontSize: 22 }}>💳</span>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: '#e0f0e8' }}>Кошелёк</div>
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
-              {[
-                { icon: '⭐', label: 'Stars' },
-                { icon: '💎', label: 'TON' },
-                { icon: '💳', label: 'Карта/СБП' },
-                { icon: '🪙', label: 'Крипто' },
-              ].map(m => (
-                <span key={m.label} style={{
-                  fontSize: 10, color: '#8aaa98',
-                  background: 'rgba(255,255,255,0.04)',
-                  padding: '2px 7px', borderRadius: 5,
-                }}>
-                  {m.icon} {m.label}
-                </span>
-              ))}
-            </div>
-          </div>
-          <Tag text="→" accent={p.primary} />
         </div>
       </Card>
 
@@ -172,7 +196,7 @@ export function ProfileScreen() {
             {t.profile_need_help}?
           </div>
         </div>
-        <div onClick={() => window.open('https://t.me/stonemvp', '_blank')} style={{
+        <div onClick={() => window.open('https://t.me/stoneaisupport', '_blank')} style={{
           display: 'flex', alignItems: 'center', gap: 10,
           padding: '10px 12px', background: 'rgba(0,229,255,0.06)',
           borderRadius: 10, border: '1px solid rgba(0,229,255,0.12)', cursor: 'pointer',
@@ -180,7 +204,7 @@ export function ProfileScreen() {
           <span style={{ fontSize: 18 }}>💬</span>
           <div style={{ flex: 1 }}>
             <div style={{ fontFamily: 'sans-serif', fontSize: 13, fontWeight: 600, color: '#e0f0e8' }}>{t.profile_write_to} Telegram</div>
-            <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70' }}>@stonemvp</div>
+            <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#5a8a70' }}>@stoneaisupport</div>
           </div>
           <Tag text="→" accent="#00e5ff" />
         </div>
@@ -212,187 +236,12 @@ export function ProfileScreen() {
         textAlign: 'center', padding: '12px 0',
         fontFamily: 'monospace', fontSize: 10, color: '#3a6a50',
       }}>
-        Stone AI v2.0 &bull; 50 models &bull; Stars / TON / Card / Crypto
+        Stone AI v2.0 &bull; 47 models &bull; Stars / TON / Card / Crypto
       </div>
     </div>
   )
 }
 
-// ─── BYOK Component ───
-
-function ByokCard({ palette }: { palette: any }) {
-  const p = palette
-  const [status, setStatus] = useState<{ enabled: boolean; key_masked: string | null } | null>(null)
-  const [inputKey, setInputKey] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null)
-  const [open, setOpen] = useState(false)
-
-  useEffect(() => {
-    apiGet('/api/byok/status').then(setStatus).catch(() => {})
-  }, [])
-
-  const handleSave = async () => {
-    if (!inputKey.trim()) return
-    setLoading(true)
-    setMsg(null)
-    try {
-      const res = await apiPost('/api/byok/key', { key: inputKey.trim() })
-      setMsg({ text: res.message, ok: true })
-      setStatus({ enabled: true, key_masked: res.key_masked })
-      setInputKey('')
-    } catch (e: any) {
-      const detail = e.detail?.detail || e.message || 'Ошибка'
-      setMsg({ text: typeof detail === 'string' ? detail : 'Ошибка сохранения', ok: false })
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleDelete = async () => {
-    setLoading(true)
-    setMsg(null)
-    try {
-      const { getInitData } = await import('../../utils/telegram')
-      const initData = getInitData()
-      const API_BASE = (import.meta as any).env?.VITE_API_URL || ''
-      const r = await fetch(`${API_BASE}/api/byok/key`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(initData ? { Authorization: `tma ${initData}` } : {}),
-        },
-      })
-      const res = await r.json()
-      setMsg({ text: res.message || 'Ключ удалён', ok: true })
-      setStatus({ enabled: false, key_masked: null })
-    } catch {
-      setMsg({ text: 'Ошибка удаления', ok: false })
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return (
-    <div style={{
-      background: status?.enabled
-        ? `rgba(${p.primaryRgb},0.07)`
-        : 'rgba(255,255,255,0.03)',
-      border: `1px solid ${status?.enabled ? `rgba(${p.primaryRgb},0.25)` : 'rgba(255,255,255,0.08)'}`,
-      borderRadius: 16,
-      padding: 16,
-      fontFamily: 'monospace',
-    }}>
-      {/* Header */}
-      <div
-        onClick={() => setOpen(o => !o)}
-        style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
-      >
-        <span style={{ fontSize: 22 }}>🔑</span>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#e0f0e8' }}>
-            Свой API ключ
-          </div>
-          <div style={{ fontSize: 10, color: '#5a8a70', marginTop: 2 }}>
-            {status?.enabled
-              ? `✅ Подключён · ${status.key_masked}`
-              : 'Используй свой OpenRouter ключ'}
-          </div>
-        </div>
-        <div style={{
-          fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 6,
-          background: status?.enabled ? `rgba(${p.primaryRgb},0.15)` : 'rgba(255,255,255,0.05)',
-          color: status?.enabled ? p.primary : '#5a8a70',
-        }}>
-          {status?.enabled ? 'BYOK' : open ? '▲' : '▼'}
-        </div>
-      </div>
-
-      {/* Expanded */}
-      {open && (
-        <div style={{ marginTop: 14 }}>
-          <div style={{ fontSize: 10, color: '#5a8a70', marginBottom: 8, lineHeight: 1.5 }}>
-            Подключи ключ с <span style={{ color: p.primary }}>openrouter.ai</span> — запросы пойдут через твою квоту.
-            Лимиты платформы отключатся. Доступны все Premium-модели.
-          </div>
-
-          {status?.enabled ? (
-            <div>
-              <div style={{
-                padding: '8px 12px', borderRadius: 8,
-                background: `rgba(${p.primaryRgb},0.06)`,
-                border: `1px solid rgba(${p.primaryRgb},0.15)`,
-                fontSize: 11, color: p.primary, marginBottom: 10,
-              }}>
-                🔐 {status.key_masked}
-              </div>
-              <button
-                onClick={handleDelete}
-                disabled={loading}
-                style={{
-                  width: '100%', padding: '9px 0', borderRadius: 10,
-                  border: '1px solid rgba(255,80,80,0.3)',
-                  background: 'rgba(255,80,80,0.08)',
-                  color: '#ff5050', fontWeight: 700, fontSize: 12,
-                  cursor: loading ? 'default' : 'pointer', opacity: loading ? 0.6 : 1,
-                }}
-              >
-                {loading ? '...' : '🗑 Удалить ключ'}
-              </button>
-            </div>
-          ) : (
-            <div>
-              <input
-                value={inputKey}
-                onChange={e => setInputKey(e.target.value)}
-                placeholder="sk-or-v1-..."
-                style={{
-                  width: '100%', padding: '10px 12px', borderRadius: 10,
-                  background: 'rgba(0,0,0,0.3)',
-                  border: `1px solid rgba(${p.primaryRgb},0.2)`,
-                  color: '#e0f0e8', fontSize: 12, fontFamily: 'monospace',
-                  outline: 'none', boxSizing: 'border-box', marginBottom: 8,
-                }}
-              />
-              <button
-                onClick={handleSave}
-                disabled={loading || !inputKey.trim()}
-                style={{
-                  width: '100%', padding: '10px 0', borderRadius: 10,
-                  border: 'none',
-                  background: inputKey.trim()
-                    ? `linear-gradient(135deg, ${p.primary}, ${p.secondary})`
-                    : 'rgba(255,255,255,0.05)',
-                  color: inputKey.trim() ? '#000' : '#444',
-                  fontWeight: 800, fontSize: 13,
-                  cursor: loading || !inputKey.trim() ? 'default' : 'pointer',
-                  opacity: loading ? 0.7 : 1,
-                }}
-              >
-                {loading ? '⏳ Проверка...' : '✅ Подключить'}
-              </button>
-            </div>
-          )}
-
-          {msg && (
-            <div style={{
-              marginTop: 8, padding: '8px 12px', borderRadius: 8, fontSize: 11,
-              background: msg.ok ? `rgba(${p.primaryRgb},0.1)` : 'rgba(255,80,80,0.1)',
-              color: msg.ok ? p.primary : '#ff5050',
-              border: `1px solid ${msg.ok ? `rgba(${p.primaryRgb},0.2)` : 'rgba(255,80,80,0.2)'}`,
-            }}>
-              {msg.text}
-            </div>
-          )}
-
-          <div style={{ fontSize: 10, color: '#3a5a4a', marginTop: 8, lineHeight: 1.4 }}>
-            Получи ключ на openrouter.ai → Keys → Create key
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
 
 // ─── Usage History Component ───
 
@@ -433,7 +282,7 @@ function UsageHistory({ palette }: { palette: any }) {
 
   const getModelName = (id: string) => {
     const m = models.find(m => m.id === id)
-    return m ? `${m.icon} ${m.name}` : id
+    return m ? m.name : id
   }
 
   const formatTime = (iso: string | null) => {
