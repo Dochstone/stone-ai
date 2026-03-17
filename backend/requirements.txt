@@ -25,5 +25,8 @@ pyjwt==2.10.1
 bcrypt==5.0.0
 google-auth==2.38.0
 
+# PDF
+pypdf==5.7.0
+
 # Utils
 orjson==3.10.14

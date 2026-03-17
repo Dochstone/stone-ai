@@ -8,9 +8,19 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.
 
 // ─── Types ───
 
+interface FileAttachment {
+  file_id: string;
+  file_name: string;
+  file_type: "image" | "pdf";
+  mime_type: string;
+  size: number;
+  content: string; // base64 data URL for images, text for PDF
+}
+
 interface Message {
   role: "user" | "assistant";
   content: string;
+  file?: FileAttachment;
   billing?: {
     tokens_in: number;
     tokens_out: number;
@@ -154,6 +164,10 @@ function ChatArea({
   balanceUsd,
   onLogout,
   email,
+  pendingFile,
+  onFileSelect,
+  onFileClear,
+  uploading,
 }: {
   messages: Message[];
   streaming: boolean;
@@ -166,8 +180,13 @@ function ChatArea({
   balanceUsd: number;
   onLogout: () => void;
   email: string;
+  pendingFile: FileAttachment | null;
+  onFileSelect: (f: File) => void;
+  onFileClear: () => void;
+  uploading: boolean;
 }) {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const model = MODELS.find((m) => m.id === selectedModel);
 
   useEffect(() => {
@@ -235,6 +254,19 @@ function ChatArea({
                     ? "bg-accent text-white rounded-br-md"
                     : "bg-white border border-text/5 text-text/80 rounded-bl-md"
                 }`}>
+                  {msg.file && (
+                    <div className="mb-2">
+                      {msg.file.file_type === "image" ? (
+                        <img src={msg.file.content} alt={msg.file.file_name} className="max-w-[240px] rounded-lg" />
+                      ) : (
+                        <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs ${msg.role === "user" ? "bg-white/20" : "bg-bg"}`}>
+                          <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                          <span className="truncate">{msg.file.file_name}</span>
+                          <span className="shrink-0 opacity-60">{(msg.file.size / 1024).toFixed(0)}KB</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   <div className="whitespace-pre-wrap">{msg.content}</div>
                   {msg.billing && (
                     <details className="mt-2 text-[10px] opacity-60">
@@ -270,20 +302,52 @@ function ChatArea({
       </div>
 
       {/* Input — pinned bottom, full width */}
-      <div className="border-t border-text/5 bg-white px-4 py-3 shrink-0">
-        <div className="flex gap-2">
+      <div className="border-t border-text/5 bg-white px-3 py-2.5 shrink-0">
+        {/* Pending file preview */}
+        {pendingFile && (
+          <div className="flex items-center gap-2 mb-2 px-2 py-1.5 bg-bg rounded-lg">
+            {pendingFile.file_type === "image" ? (
+              <img src={pendingFile.content} alt="" className="w-10 h-10 rounded object-cover" />
+            ) : (
+              <div className="w-10 h-10 bg-accent/10 rounded flex items-center justify-center">
+                <svg className="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+              </div>
+            )}
+            <span className="text-xs text-text/60 truncate flex-1">{pendingFile.file_name}</span>
+            <button onClick={onFileClear} className="text-text/30 hover:text-text/60 shrink-0 p-1">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
+        )}
+        {uploading && (
+          <div className="text-xs text-accent mb-2 px-2 animate-pulse">Загрузка файла...</div>
+        )}
+        <div className="flex gap-2 items-end">
+          {/* Clip button */}
+          <input ref={fileInputRef} type="file" accept="image/*,.pdf" className="hidden"
+            onChange={(e) => { if (e.target.files?.[0]) onFileSelect(e.target.files[0]); e.target.value = ""; }}
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading || streaming}
+            className="w-10 h-10 rounded-xl bg-bg border border-text/10 flex items-center justify-center text-text/40 hover:text-accent hover:border-accent/30 transition-colors disabled:opacity-30 shrink-0"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+            </svg>
+          </button>
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKey}
-            placeholder="Написать сообщение..."
+            placeholder={pendingFile ? "Добавьте вопрос к файлу..." : "Написать сообщение..."}
             rows={1}
-            className="flex-1 bg-bg border border-text/10 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent min-w-0"
+            className="flex-1 bg-bg border border-text/10 rounded-xl px-4 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent min-w-0"
           />
           <button
             onClick={onSend}
-            disabled={streaming || !input.trim()}
-            className="bg-accent text-white w-12 rounded-xl font-bold text-lg hover:bg-accent/90 transition-colors disabled:opacity-40 shrink-0 flex items-center justify-center"
+            disabled={streaming || (!input.trim() && !pendingFile)}
+            className="bg-accent text-white w-10 h-10 rounded-xl hover:bg-accent/90 transition-colors disabled:opacity-40 shrink-0 flex items-center justify-center"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -305,6 +369,8 @@ export default function WebChat() {
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [pendingFile, setPendingFile] = useState<FileAttachment | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   // Load auth from localStorage
   useEffect(() => {
@@ -330,19 +396,62 @@ export default function WebChat() {
     setSidebarOpen((prev) => !prev);
   }, []);
 
-  const sendMessage = useCallback(async () => {
-    if (!auth || !input.trim() || streaming) return;
+  const handleFileSelect = useCallback(async (file: File) => {
+    if (!auth) return;
+    setUploading(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch(`${API_URL}/api/chat/upload`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${auth.token}` },
+        body: form,
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: "Upload failed" }));
+        alert(err.detail || "Ошибка загрузки");
+        return;
+      }
+      const data: FileAttachment = await res.json();
+      setPendingFile(data);
+    } catch {
+      alert("Ошибка загрузки файла");
+    } finally {
+      setUploading(false);
+    }
+  }, [auth]);
 
-    const userMsg: Message = { role: "user", content: input.trim() };
+  const sendMessage = useCallback(async () => {
+    if (!auth || (!input.trim() && !pendingFile) || streaming) return;
+
+    const currentFile = pendingFile;
+    const userMsg: Message = { role: "user", content: input.trim() || (currentFile ? `[Файл: ${currentFile.file_name}]` : ""), file: currentFile || undefined };
     const history = [...messages, userMsg];
     setMessages(history);
     setInput("");
+    setPendingFile(null);
     setStreaming(true);
 
-    const apiMessages = history.slice(-20).map((m) => ({
-      role: m.role,
-      content: m.content,
-    }));
+    // Build API messages — inject file content for multimodal
+    const apiMessages = history.slice(-20).map((m) => {
+      if (m.file) {
+        if (m.file.file_type === "image") {
+          // OpenRouter multimodal format
+          return {
+            role: m.role,
+            content: [
+              ...(m.content ? [{ type: "text", text: m.content }] : []),
+              { type: "image_url", image_url: { url: m.file.content } },
+            ],
+          };
+        } else {
+          // PDF — inject extracted text as context
+          const fileContext = `[Содержимое файла "${m.file.file_name}"]\n${m.file.content}\n[Конец файла]\n\n${m.content || "Проанализируй этот документ."}`;
+          return { role: m.role, content: fileContext };
+        }
+      }
+      return { role: m.role, content: m.content };
+    });
 
     try {
       const res = await fetch(`${API_URL}/api/chat`, {
@@ -426,7 +535,7 @@ export default function WebChat() {
     } finally {
       setStreaming(false);
     }
-  }, [auth, input, streaming, messages, selectedModel]);
+  }, [auth, input, streaming, messages, selectedModel, pendingFile]);
 
   if (!loaded) return null;
   if (!auth) return <AuthFormComponent onAuth={setAuth} />;
@@ -452,6 +561,10 @@ export default function WebChat() {
         balanceUsd={auth.balanceUsd}
         onLogout={logout}
         email={auth.email}
+        pendingFile={pendingFile}
+        onFileSelect={handleFileSelect}
+        onFileClear={() => setPendingFile(null)}
+        uploading={uploading}
       />
     </div>
   );

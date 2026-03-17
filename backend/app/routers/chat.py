@@ -1,9 +1,13 @@
 """Chat endpoint — streaming AI responses via SSE with per-token billing."""
 
+import base64
 import json
 import logging
+import os
+import tempfile
+import uuid
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -165,3 +169,93 @@ async def chat(
             "X-Accel-Buffering": "no",
         },
     )
+
+
+# ═══════════════════════════════════════════════════════════
+# File Upload — PDF/Image → base64/text for multimodal models
+# ═══════════════════════════════════════════════════════════
+
+ALLOWED_TYPES = {
+    "image/jpeg", "image/png", "image/gif", "image/webp",
+    "application/pdf",
+}
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+
+
+@router.post("/chat/upload")
+async def upload_file(
+    file: UploadFile = File(...),
+    tg_user: dict = Depends(get_current_user),
+):
+    """
+    Upload a file for use in chat. Returns content ready to inject into messages.
+
+    Images → base64 data URL (for vision models via OpenRouter).
+    PDF → extracted text (first ~50K chars).
+
+    Returns:
+        {
+            "file_id": str,
+            "file_name": str,
+            "file_type": "image" | "pdf",
+            "mime_type": str,
+            "size": int,
+            "content": str  — base64 data URL for images, text for PDFs
+        }
+    """
+    if not file.content_type or file.content_type not in ALLOWED_TYPES:
+        raise HTTPException(400, f"Unsupported file type: {file.content_type}. Allowed: images (JPEG, PNG, GIF, WebP) and PDF.")
+
+    data = await file.read()
+    if len(data) > MAX_FILE_SIZE:
+        raise HTTPException(400, f"File too large: {len(data) / 1024 / 1024:.1f}MB. Max: 10MB.")
+
+    file_id = str(uuid.uuid4())[:8]
+    mime = file.content_type
+
+    if mime.startswith("image/"):
+        b64 = base64.b64encode(data).decode("ascii")
+        content = f"data:{mime};base64,{b64}"
+        file_type = "image"
+    elif mime == "application/pdf":
+        text = _extract_pdf_text(data)
+        content = text[:50000]  # cap at ~50K chars
+        file_type = "pdf"
+    else:
+        raise HTTPException(400, "Unsupported file type")
+
+    logger.info(f"File upload: user={tg_user['id']}, type={file_type}, size={len(data)}, name={file.filename}")
+
+    return {
+        "file_id": file_id,
+        "file_name": file.filename or "file",
+        "file_type": file_type,
+        "mime_type": mime,
+        "size": len(data),
+        "content": content,
+    }
+
+
+def _extract_pdf_text(data: bytes) -> str:
+    """Extract text from PDF bytes. Falls back to placeholder if no PDF lib."""
+    try:
+        import io
+        # Try PyPDF2 / pypdf
+        try:
+            from pypdf import PdfReader
+        except ImportError:
+            from PyPDF2 import PdfReader
+
+        reader = PdfReader(io.BytesIO(data))
+        pages = []
+        for page in reader.pages[:200]:  # max 200 pages
+            text = page.extract_text()
+            if text:
+                pages.append(text)
+        return "\n\n".join(pages) if pages else "[PDF: не удалось извлечь текст]"
+
+    except Exception as e:
+        logger.warning(f"PDF text extraction failed: {e}")
+        # Fallback: send as base64 for models that support PDF natively
+        b64 = base64.b64encode(data).decode("ascii")
+        return f"[PDF файл, {len(data) // 1024}KB. Содержимое в base64: {b64[:500]}...]"
