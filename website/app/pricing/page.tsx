@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import PricingCalculator from "@/components/PricingCalculator";
 import PricingComparison from "@/components/PricingComparison";
 import PricingTable from "@/components/PricingTable";
-import { TELEGRAM_BOT_URL } from "@/lib/models";
 
 export const metadata: Metadata = {
   title: "Цены — Stone AI",
@@ -40,12 +39,10 @@ export default function PricingPage() {
             10 запросов бесплатно каждый день. +5 за просмотр рекламы. Без регистрации.
           </p>
           <a
-            href={TELEGRAM_BOT_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/webchat"
             className="inline-block bg-accent text-white px-10 py-4 rounded-xl font-bold text-lg hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
           >
-            Открыть в Telegram
+            Начать бесплатно
           </a>
         </section>
       </div>

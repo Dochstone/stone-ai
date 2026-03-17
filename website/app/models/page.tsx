@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import ModelCatalog from "@/components/ModelCatalog";
-import { TELEGRAM_BOT_URL } from "@/lib/models";
 
 export const metadata: Metadata = {
   title: "Все 50 AI-моделей — Stone AI",
@@ -29,12 +28,10 @@ export default function ModelsPage() {
         {/* CTA */}
         <div className="mt-16 text-center">
           <a
-            href={TELEGRAM_BOT_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/webchat"
             className="inline-block bg-accent text-white px-8 py-4 rounded-xl font-bold hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
           >
-            Попробовать в Telegram
+            Попробовать бесплатно
           </a>
           <p className="mt-3 text-sm text-text/40">10 бесплатных запросов каждый день</p>
         </div>

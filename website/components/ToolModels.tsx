@@ -1,4 +1,4 @@
-import { MODELS, TELEGRAM_BOT_URL, type AIModel } from "@/lib/models";
+import { MODELS, type AIModel } from "@/lib/models";
 
 const companyColors: Record<string, string> = {
   OpenAI: "bg-green-100 text-green-700",
@@ -77,9 +77,7 @@ export default function ToolModels({
 
         <div className="text-center mt-10">
           <a
-            href={TELEGRAM_BOT_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/webchat"
             className="inline-block bg-accent text-white px-8 py-3.5 rounded-xl font-bold hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
           >
             Попробовать в чате

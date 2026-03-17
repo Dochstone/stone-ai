@@ -1,5 +1,3 @@
-import { TELEGRAM_BOT_URL } from "@/lib/models";
-
 export default function Pricing() {
   return (
     <section id="pricing" className="py-20 md:py-28 bg-white">
@@ -40,9 +38,7 @@ export default function Pricing() {
             </ul>
 
             <a
-              href={TELEGRAM_BOT_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/webchat"
               className="block text-center border-2 border-text/15 text-text px-6 py-3 rounded-xl font-bold hover:border-accent hover:text-accent transition-colors"
             >
               Начать бесплатно
@@ -80,9 +76,7 @@ export default function Pricing() {
             </ul>
 
             <a
-              href={TELEGRAM_BOT_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/topup"
               className="block text-center bg-accent text-white px-6 py-3 rounded-xl font-bold hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
             >
               Пополнить баланс

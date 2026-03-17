@@ -5,7 +5,6 @@ import {
   MODELS,
   COMPANIES,
   CATEGORIES,
-  TELEGRAM_BOT_URL,
   type AIModel,
   type ModelCategory,
 } from "@/lib/models";
@@ -194,13 +193,11 @@ export default function ModelCatalog() {
                     </div>
                   </div>
                   <a
-                    href={TELEGRAM_BOT_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href="/webchat"
                     className="block text-center bg-accent text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-accent/90 transition-all"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    Попробовать в Telegram
+                    Попробовать
                   </a>
                 </div>
               )}

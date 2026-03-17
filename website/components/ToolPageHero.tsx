@@ -1,5 +1,3 @@
-import { TELEGRAM_BOT_URL } from "@/lib/models";
-
 interface ToolPageHeroProps {
   badge: string;
   title: string;
@@ -29,12 +27,10 @@ export default function ToolPageHero({ badge, title, highlight, description }: T
 
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
           <a
-            href={TELEGRAM_BOT_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/webchat"
             className="bg-accent text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
           >
-            Попробовать в Telegram
+            Попробовать бесплатно
           </a>
           <a
             href="/models"

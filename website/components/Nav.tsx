@@ -87,12 +87,10 @@ export default function Nav() {
 
         <div className="flex items-center gap-3">
           <a
-            href={TELEGRAM_BOT_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/webchat"
             className="bg-accent text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors hidden sm:inline-block"
           >
-            Открыть в Telegram
+            Начать бесплатно
           </a>
 
           {/* Mobile burger */}
@@ -132,12 +130,18 @@ export default function Nav() {
               FAQ
             </a>
             <a
+              href="/webchat"
+              className="bg-accent text-white px-5 py-3 rounded-xl font-bold text-sm text-center hover:bg-accent/90 transition-colors sm:hidden mt-2"
+            >
+              Начать бесплатно
+            </a>
+            <a
               href={TELEGRAM_BOT_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-accent text-white px-5 py-3 rounded-xl font-bold text-sm text-center hover:bg-accent/90 transition-colors sm:hidden mt-2"
+              className="border-2 border-text/15 text-text px-5 py-3 rounded-xl font-bold text-sm text-center hover:border-accent hover:text-accent transition-colors sm:hidden mt-2"
             >
-              Открыть в Telegram
+              Telegram-бот
             </a>
           </div>
         </div>

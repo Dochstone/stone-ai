@@ -1,5 +1,3 @@
-import { TELEGRAM_BOT_URL } from "@/lib/models";
-
 const steps = [
   {
     num: "01",
@@ -46,9 +44,7 @@ export default function HowItWorks() {
 
         <div className="text-center mt-12">
           <a
-            href={TELEGRAM_BOT_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/webchat"
             className="inline-block bg-accent text-white px-8 py-4 rounded-xl font-bold hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
           >
             Начать бесплатно

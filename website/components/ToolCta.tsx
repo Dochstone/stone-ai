@@ -1,5 +1,3 @@
-import { TELEGRAM_BOT_URL } from "@/lib/models";
-
 interface ToolCtaProps {
   title?: string;
   subtitle?: string;
@@ -15,12 +13,10 @@ export default function ToolCta({
         <h2 className="text-2xl md:text-4xl font-extrabold mb-4">{title}</h2>
         <p className="text-white/50 mb-10 max-w-lg mx-auto">{subtitle}</p>
         <a
-          href={TELEGRAM_BOT_URL}
-          target="_blank"
-          rel="noopener noreferrer"
+          href="/webchat"
           className="inline-block bg-accent text-white px-10 py-4 rounded-xl font-bold text-lg hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
         >
-          Открыть в Telegram
+          Попробовать бесплатно
         </a>
       </div>
     </section>

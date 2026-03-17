@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { POSTS } from "@/lib/blog";
-import { TELEGRAM_BOT_URL } from "@/lib/models";
 
 export const metadata: Metadata = {
   title: "Блог — Stone AI",
@@ -57,12 +56,10 @@ export default function BlogPage() {
 
         <div className="text-center mt-16">
           <a
-            href={TELEGRAM_BOT_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/webchat"
             className="inline-block bg-accent text-white px-8 py-4 rounded-xl font-bold hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
           >
-            Попробовать Stone AI
+            Попробовать бесплатно
           </a>
           <p className="mt-3 text-sm text-text/40">10 бесплатных запросов каждый день</p>
         </div>

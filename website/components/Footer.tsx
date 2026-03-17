@@ -11,12 +11,18 @@ export default function Footer() {
             <p className="text-text/50 text-sm leading-relaxed">
               50 AI-моделей без VPN, прямо в Telegram. Платите только за токены.
             </p>
-            <div className="mt-4">
+            <div className="mt-4 flex flex-col gap-2">
+              <a
+                href="/webchat"
+                className="inline-flex items-center gap-2 text-accent text-sm font-semibold hover:underline"
+              >
+                Веб-чат &rarr;
+              </a>
               <a
                 href={TELEGRAM_BOT_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-accent text-sm font-semibold hover:underline"
+                className="inline-flex items-center gap-2 text-text/50 text-sm font-semibold hover:underline"
               >
                 Telegram-бот &rarr;
               </a>

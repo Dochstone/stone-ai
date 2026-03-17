@@ -1,5 +1,3 @@
-import { TELEGRAM_BOT_URL } from "@/lib/models";
-
 function ChatMockup() {
   return (
     <div
@@ -139,18 +137,18 @@ export default function Hero() {
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
-              href={TELEGRAM_BOT_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/webchat"
               className="bg-accent text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
             >
-              Открыть в Telegram
+              Начать бесплатно
             </a>
             <a
-              href="#models"
+              href="https://t.me/StoneAIBot"
+              target="_blank"
+              rel="noopener noreferrer"
               className="border-2 border-text/15 text-text px-8 py-4 rounded-xl font-bold hover:border-accent hover:text-accent transition-colors"
             >
-              Посмотреть модели
+              Telegram бот
             </a>
           </div>
         </div>

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { POSTS, getPost } from "@/lib/blog";
-import { TELEGRAM_BOT_URL } from "@/lib/models";
 
 interface Props {
   params: { slug: string };
@@ -79,12 +78,10 @@ export default function BlogPostPage({ params }: Props) {
             50+ AI-моделей прямо в Telegram. 10 бесплатных запросов каждый день.
           </p>
           <a
-            href={TELEGRAM_BOT_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/webchat"
             className="inline-block bg-accent text-white px-8 py-3.5 rounded-xl font-bold hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
           >
-            Открыть в Telegram
+            Попробовать бесплатно
           </a>
         </div>
 
