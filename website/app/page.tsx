@@ -2,7 +2,7 @@ import Hero from "@/components/Hero";
 import ToolCards from "@/components/ToolCards";
 import HowItWorks from "@/components/HowItWorks";
 import ModelGrid from "@/components/ModelGrid";
-import Providers from "@/components/Providers";
+
 import FeaturesTable from "@/components/FeaturesTable";
 import Pricing from "@/components/Pricing";
 import Reviews from "@/components/Reviews";
@@ -16,7 +16,6 @@ export default function Home() {
       <ToolCards />
       <HowItWorks />
       <ModelGrid />
-      <Providers />
       <FeaturesTable />
       <Pricing />
       <Reviews />
