@@ -66,12 +66,12 @@ Stone AI — платформа доступа к 50+ AI-моделям. Без 
 - [x] Этап 3: Реклама + rewarded ads
 - [x] Тесты: 130 тестов, все зелёные
 - [x] Оплата: Stars + TON + Lava + Heleket
-- [ ] Очистка: убрать legacy credits из payment_ext.py
+- [x] Очистка: legacy credits убраны
 - [x] Этап 4: Frontend PlansScreen (баланс $, per-token)
 - [x] Этап 5: Frontend HomeScreen (50 моделей, фильтры)
 - [x] Этап 6: Frontend ChatScreen (стоимость запроса)
 - [x] Этап 7-8: Сайт лендинг + /models + /pricing
-- [ ] Этап 9: Сайт — 6 страниц инструментов (/chat, /images, /documents, /search, /code, /translate)
+- [x] Этап 9: Сайт — 6 страниц инструментов (/chat, /images, /documents, /search, /code, /translate)
 
 ## Команды
 

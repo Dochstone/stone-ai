@@ -37,9 +37,11 @@ class User(Base):
     byok_openrouter_key: Mapped[str | None] = mapped_column(String(256), nullable=True)
     byok_enabled: Mapped[bool] = mapped_column(Boolean, server_default=text("false"))
 
-    # ─── Credits (new billing model) ───
-    credits: Mapped[int] = mapped_column(Integer, server_default=text("0"))
+    # ─── Billing ───
+    credits: Mapped[int] = mapped_column(Integer, server_default=text("0"))  # legacy, kept for migration
+    balance_usd: Mapped[float] = mapped_column(Numeric(12, 6), server_default=text("0"))  # per-token balance in USD
     total_deposited_usd: Mapped[float] = mapped_column(Numeric(12, 2), server_default=text("0"))
+    rewarded_today: Mapped[int] = mapped_column(Integer, server_default=text("0"))  # rewarded ad bonus requests today
     daily_lite_used: Mapped[int] = mapped_column(Integer, server_default=text("0"))
     daily_premium_used: Mapped[int] = mapped_column(Integer, server_default=text("0"))
     total_requests: Mapped[int] = mapped_column(Integer, server_default=text("0"))

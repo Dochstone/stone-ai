@@ -46,6 +46,8 @@ async def migrate_users_table():
         ("daily_premium_used", "INTEGER DEFAULT 0"),
         ("total_requests", "INTEGER DEFAULT 0"),
         ("total_tokens_used", "INTEGER DEFAULT 0"),
+        ("balance_usd", "NUMERIC(12,6) DEFAULT 0"),
+        ("rewarded_today", "INTEGER DEFAULT 0"),
     ]
 
     async with engine.begin() as conn:
@@ -59,6 +61,23 @@ async def migrate_users_table():
                 logger.warning(f"Could not add column {col_name}: {e}")
 
 
+async def migrate_credits_to_usd():
+    """One-time migration: convert existing credits to USD balance.
+
+    1 credit ~ $0.011 (credits cost $1.10 per 100).
+    Only runs for users with credits > 0 and balance_usd = 0.
+    """
+    async with engine.begin() as conn:
+        try:
+            await conn.execute(text(
+                "UPDATE users SET balance_usd = credits * 0.011 "
+                "WHERE credits > 0 AND (balance_usd IS NULL OR balance_usd = 0)"
+            ))
+            logger.info("Credits-to-USD migration complete")
+        except Exception as e:
+            logger.warning(f"Credits-to-USD migration skipped: {e}")
+
+
 async def init_db():
     """Create tables that don't exist yet + migrate existing ones."""
     async with engine.begin() as conn:
@@ -67,4 +86,8 @@ async def init_db():
 
     # Add missing columns to users table
     await migrate_users_table()
+
+    # Convert old credits to USD balance (one-time, idempotent)
+    await migrate_credits_to_usd()
+
     logger.info("Database initialization complete")

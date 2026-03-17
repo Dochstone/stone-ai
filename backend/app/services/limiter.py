@@ -1,15 +1,21 @@
-"""Rate limiter — checks user permissions and daily limits."""
+"""Rate limiter — checks user permissions, daily limits, and per-token billing eligibility."""
 
-from datetime import datetime, date, timedelta
+from datetime import datetime, date
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import User, Subscription, Pass, Usage
 from app.services.ai_router import get_model_tier
 
-# Daily request limits per plan
+# Daily request limits
+FREE_DAILY_LIMIT = 10          # base free requests per day
+REWARDED_BONUS = 5             # +5 for watching rewarded ad
+MAX_TOKENS_LITE = 2048         # max output tokens for free requests
+MAX_TOKENS_PAID = 8192         # max output tokens for paid requests
+
+# Subscription plan limits (legacy, kept for PLUS/MAX subscribers)
 LIMITS = {
-    "free": {"lite": 20, "premium": 0},
+    "free": {"lite": FREE_DAILY_LIMIT, "premium": 0},
     "plus": {"lite": -1, "premium": 100},     # -1 = unlimited
     "max": {"lite": -1, "premium": 500},
 }
@@ -105,6 +111,14 @@ async def check_can_request(db: AsyncSession, tg_id: int, model_id: str) -> dict
     """
     Check if user can make a request to the specified model.
 
+    New per-token billing logic:
+    - Lite models: 10 free/day + up to 5 rewarded bonus
+      - If exceeded AND user has balance_usd > 0: allowed (per-token)
+      - Otherwise: denied
+    - Premium models: requires balance_usd > estimated cost
+      - OR active subscription (PLUS/MAX)
+      - OR active pass
+
     Returns:
         {
             "allowed": bool,
@@ -114,72 +128,72 @@ async def check_can_request(db: AsyncSession, tg_id: int, model_id: str) -> dict
             "used_today": int,
             "limit": int,
             "has_pass": bool,
+            "billing": "free" | "per_token" | "subscription" | "pass",
         }
     """
     tier = get_model_tier(model_id)
     plan = await get_user_plan(db, tg_id)
     used_today = await get_today_usage(db, tg_id, tier)
 
-    # Check active pass first (overrides plan limits for premium)
-    active_pass = None
+    # Get user for balance and rewarded bonus
+    result = await db.execute(select(User).where(User.telegram_id == tg_id))
+    user = result.scalar_one_or_none()
+    balance = float(user.balance_usd or 0) if user else 0.0
+    rewarded_bonus = int(user.rewarded_today or 0) if user else 0
+
+    base = {"plan": plan, "tier": tier, "used_today": used_today, "has_pass": False}
+
+    # --- PREMIUM models ---
     if tier == "premium":
+        # Check active pass first
         active_pass = await get_active_pass(db, tg_id)
         if active_pass:
-            return {
-                "allowed": True,
-                "reason": None,
-                "plan": plan,
-                "tier": tier,
-                "used_today": used_today,
-                "limit": active_pass.requests_left,
-                "has_pass": True,
-            }
+            return {**base, "allowed": True, "reason": None,
+                    "limit": active_pass.requests_left, "has_pass": True,
+                    "billing": "pass"}
 
-    # Check plan limits
-    limit = LIMITS.get(plan, LIMITS["free"]).get(tier, 0)
+        # Check subscription limits
+        if plan in ("plus", "max"):
+            limit = LIMITS[plan]["premium"]
+            if limit == -1 or used_today < limit:
+                return {**base, "allowed": True, "reason": None,
+                        "limit": limit, "billing": "subscription"}
+            return {**base, "allowed": False, "limit": limit,
+                    "reason": f"Лимит {limit} premium запросов на сегодня исчерпан",
+                    "billing": "subscription"}
 
-    if limit == -1:
-        return {
-            "allowed": True,
-            "reason": None,
-            "plan": plan,
-            "tier": tier,
-            "used_today": used_today,
-            "limit": -1,
-            "has_pass": False,
-        }
+        # Free plan + premium model → needs balance
+        from app.services.token_billing import estimate_request_cost
+        estimated = estimate_request_cost(model_id)
+        if balance >= estimated:
+            return {**base, "allowed": True, "reason": None,
+                    "limit": -1, "billing": "per_token"}
 
-    if limit == 0:
-        return {
-            "allowed": False,
-            "reason": f"Premium модели доступны по подписке PLUS/MAX или Pass",
-            "plan": plan,
-            "tier": tier,
-            "used_today": used_today,
-            "limit": 0,
-            "has_pass": False,
-        }
+        return {**base, "allowed": False, "limit": 0,
+                "reason": f"Недостаточно средств. Баланс ${balance:.2f}, примерная стоимость ${estimated:.4f}. Пополните баланс.",
+                "billing": "per_token"}
 
-    if used_today >= limit:
-        return {
-            "allowed": False,
-            "reason": f"Лимит {limit} {tier} запросов на сегодня исчерпан",
-            "plan": plan,
-            "tier": tier,
-            "used_today": used_today,
-            "limit": limit,
-            "has_pass": False,
-        }
+    # --- LITE models ---
+    # Subscribers get unlimited lite
+    if plan in ("plus", "max"):
+        return {**base, "allowed": True, "reason": None,
+                "limit": -1, "billing": "subscription"}
 
-    return {
-        "allowed": True,
-        "reason": None,
-        "plan": plan,
-        "tier": tier,
-        "used_today": used_today,
-        "limit": limit,
-        "has_pass": False,
-    }
+    # Free daily limit
+    total_free_limit = FREE_DAILY_LIMIT + rewarded_bonus
+    if used_today < total_free_limit:
+        return {**base, "allowed": True, "reason": None,
+                "limit": total_free_limit, "billing": "free"}
+
+    # Limit exceeded — check balance for per-token
+    if balance > 0:
+        return {**base, "allowed": True, "reason": None,
+                "limit": total_free_limit, "billing": "per_token"}
+
+    return {**base, "allowed": False, "limit": total_free_limit,
+            "reason": f"Лимит {FREE_DAILY_LIMIT} бесплатных запросов исчерпан. "
+                      "Посмотрите рекламу (+5) или пополните баланс.",
+            "billing": "free"}
 
 
 async def record_usage(
@@ -208,12 +222,12 @@ async def record_usage(
     result = await db.execute(select(User).where(User.telegram_id == tg_id))
     user = result.scalar_one_or_none()
     if user:
-        user.total_requests += 1
-        user.total_tokens_used += tokens_in + tokens_out
+        user.total_requests = (user.total_requests or 0) + 1
+        user.total_tokens_used = (user.total_tokens_used or 0) + tokens_in + tokens_out
         if tier == "lite":
-            user.daily_lite_used += 1
+            user.daily_lite_used = (user.daily_lite_used or 0) + 1
         else:
-            user.daily_premium_used += 1
+            user.daily_premium_used = (user.daily_premium_used or 0) + 1
 
     # Decrement pass if used
     active_pass = await get_active_pass(db, tg_id)
