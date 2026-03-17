@@ -37,6 +37,11 @@ class User(Base):
     byok_openrouter_key: Mapped[str | None] = mapped_column(String(256), nullable=True)
     byok_enabled: Mapped[bool] = mapped_column(Boolean, server_default=text("false"))
 
+    # ─── Web auth ───
+    email: Mapped[str | None] = mapped_column(String(256), unique=True, nullable=True)
+    password_hash: Mapped[str | None] = mapped_column(String(256), nullable=True)
+    auth_provider: Mapped[str | None] = mapped_column(String(16), nullable=True, server_default=text("'telegram'"))  # telegram | email
+
     # ─── Billing ───
     credits: Mapped[int] = mapped_column(Integer, server_default=text("0"))  # legacy, kept for migration
     balance_usd: Mapped[float] = mapped_column(Numeric(12, 6), server_default=text("0"))  # per-token balance in USD

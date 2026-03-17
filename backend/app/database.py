@@ -48,6 +48,9 @@ async def migrate_users_table():
         ("total_tokens_used", "INTEGER DEFAULT 0"),
         ("balance_usd", "NUMERIC(12,6) DEFAULT 0"),
         ("rewarded_today", "INTEGER DEFAULT 0"),
+        ("email", "VARCHAR(256) UNIQUE"),
+        ("password_hash", "VARCHAR(256)"),
+        ("auth_provider", "VARCHAR(16) DEFAULT 'telegram'"),
     ]
 
     async with engine.begin() as conn:
