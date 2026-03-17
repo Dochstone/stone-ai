@@ -35,9 +35,6 @@ export default function HowItWorks() {
               </div>
               <h3 className="font-bold text-lg mb-2">{step.title}</h3>
               <p className="text-text/60 text-sm leading-relaxed">{step.desc}</p>
-              {i < steps.length - 1 && (
-                <div className="hidden md:block absolute" />
-              )}
             </div>
           ))}
         </div>

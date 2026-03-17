@@ -145,8 +145,9 @@ export default function Hero() {
               className="flex items-center gap-2 bg-white rounded-2xl p-2 shadow-lg shadow-black/[0.06] border border-text/[0.06]"
             >
               <input
-                type="email"
+                type="text"
                 placeholder="Email или Telegram"
+                aria-label="Email или Telegram"
                 className="flex-1 min-w-0 bg-transparent px-4 py-3 text-sm text-text placeholder:text-text/35 outline-none"
               />
               <button

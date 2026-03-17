@@ -47,7 +47,7 @@ const tools = [
     desc: "Сложные задачи с пошаговым рассуждением: o3, DeepSeek R1",
     gradient: "from-violet-500/15 to-purple-500/5",
     iconBg: "bg-violet-100",
-    href: "/translate",
+    href: "/chat",
   },
 ];
 

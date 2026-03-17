@@ -51,6 +51,7 @@ export default function FAQ() {
             >
               <button
                 onClick={() => setOpenIndex(openIndex === i ? null : i)}
+                aria-expanded={openIndex === i}
                 className="w-full flex items-center justify-between p-5 text-left hover:bg-text/[0.02] transition-colors"
               >
                 <span className="font-semibold text-sm pr-4">{faq.q}</span>
@@ -64,7 +65,7 @@ export default function FAQ() {
               </button>
               <div
                 className={`overflow-hidden transition-all duration-200 ${
-                  openIndex === i ? "max-h-60 pb-5" : "max-h-0"
+                  openIndex === i ? "max-h-96 pb-5" : "max-h-0"
                 }`}
               >
                 <div className="px-5 text-sm text-text/60 leading-relaxed">

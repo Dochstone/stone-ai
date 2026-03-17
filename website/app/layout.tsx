@@ -17,8 +17,8 @@ const OG_IMAGE = `${SITE_URL}/og-image.png`;
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
+  userScalable: true,
 };
 
 export const metadata: Metadata = {
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     template: "%s | Stone AI",
   },
   description:
-    "GPT-5, Claude Opus, Gemini Pro и ещё 47 моделей прямо в Telegram. Платите только за использованные токены. Без VPN, без подписок.",
+    "GPT-5, Claude Opus, Gemini Pro и ещё 46 моделей прямо в Telegram. Платите только за использованные токены. Без VPN, без подписок.",
   keywords: [
     "AI чат",
     "ChatGPT без VPN",
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     siteName: "Stone AI",
     title: "Stone AI — 50 AI-моделей без VPN",
     description:
-      "GPT-5, Claude Opus, Gemini Pro и ещё 47 моделей прямо в Telegram. Платите только за использованные токены.",
+      "GPT-5, Claude Opus, Gemini Pro и ещё 46 моделей прямо в Telegram. Платите только за использованные токены.",
     images: [
       {
         url: OG_IMAGE,
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Stone AI — 50 AI-моделей без VPN",
     description:
-      "GPT-5, Claude Opus, Gemini Pro и ещё 47 моделей прямо в Telegram. Платите только за токены.",
+      "GPT-5, Claude Opus, Gemini Pro и ещё 46 моделей прямо в Telegram. Платите только за токены.",
     images: [OG_IMAGE],
   },
   robots: {

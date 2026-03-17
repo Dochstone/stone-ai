@@ -10,8 +10,8 @@ const features = [
 ];
 
 function Cell({ value }: { value: string }) {
-  if (value === "check") return <span className="text-accent text-lg">&#10003;</span>;
-  if (value === "---") return <span className="text-text/20">&#10005;</span>;
+  if (value === "check") return <span className="text-accent text-lg" aria-label="Доступно">&#10003;</span>;
+  if (value === "---") return <span className="text-text/20" aria-label="Недоступно">&#10005;</span>;
   return <span>{value}</span>;
 }
 
@@ -27,34 +27,35 @@ export default function FeaturesTable() {
         </p>
 
         <div className="max-w-2xl mx-auto overflow-hidden rounded-2xl border border-text/10 bg-white">
-          {/* Header */}
-          <div className="grid grid-cols-3 bg-bg text-xs sm:text-sm font-semibold">
-            <div className="px-5 py-4" />
-            <div className="px-5 py-4 text-center">
-              <span className="bg-teal-light text-teal px-3 py-1 rounded-full text-xs font-bold">Free</span>
-            </div>
-            <div className="px-5 py-4 text-center">
-              <span className="bg-accent/10 text-accent px-3 py-1 rounded-full text-xs font-bold">Per-token</span>
-            </div>
-          </div>
-
-          {/* Rows */}
-          {features.map((f, i) => (
-            <div
-              key={f.name}
-              className={`grid grid-cols-3 text-xs sm:text-sm ${
-                i < features.length - 1 ? "border-b border-text/5" : ""
-              }`}
-            >
-              <div className="px-5 py-3.5 font-medium text-text/70">{f.name}</div>
-              <div className="px-5 py-3.5 text-center text-text/60">
-                <Cell value={f.free} />
-              </div>
-              <div className="px-5 py-3.5 text-center font-medium">
-                <Cell value={f.paid} />
-              </div>
-            </div>
-          ))}
+          <table className="w-full text-xs sm:text-sm">
+            <thead>
+              <tr className="bg-bg">
+                <th className="px-5 py-4 text-left font-semibold" />
+                <th className="px-5 py-4 text-center font-semibold">
+                  <span className="bg-teal-light text-teal px-3 py-1 rounded-full text-xs font-bold">Free</span>
+                </th>
+                <th className="px-5 py-4 text-center font-semibold">
+                  <span className="bg-accent/10 text-accent px-3 py-1 rounded-full text-xs font-bold">Per-token</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {features.map((f, i) => (
+                <tr
+                  key={f.name}
+                  className={i < features.length - 1 ? "border-b border-text/5" : ""}
+                >
+                  <td className="px-5 py-3.5 font-medium text-text/70">{f.name}</td>
+                  <td className="px-5 py-3.5 text-center text-text/60">
+                    <Cell value={f.free} />
+                  </td>
+                  <td className="px-5 py-3.5 text-center font-medium">
+                    <Cell value={f.paid} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </section>
