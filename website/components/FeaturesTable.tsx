@@ -26,36 +26,38 @@ export default function FeaturesTable() {
           Бесплатного хватает для знакомства. Для серьёзной работы — пополните баланс.
         </p>
 
-        <div className="max-w-2xl mx-auto overflow-hidden rounded-2xl border border-text/10 bg-white">
-          <table className="w-full text-xs sm:text-sm">
-            <thead>
-              <tr className="bg-bg">
-                <th className="px-5 py-4 text-left font-semibold" />
-                <th className="px-5 py-4 text-center font-semibold">
-                  <span className="bg-teal-light text-teal px-3 py-1 rounded-full text-xs font-bold">Free</span>
-                </th>
-                <th className="px-5 py-4 text-center font-semibold">
-                  <span className="bg-accent/10 text-accent px-3 py-1 rounded-full text-xs font-bold">Per-token</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {features.map((f, i) => (
-                <tr
-                  key={f.name}
-                  className={i < features.length - 1 ? "border-b border-text/5" : ""}
-                >
-                  <td className="px-5 py-3.5 font-medium text-text/70">{f.name}</td>
-                  <td className="px-5 py-3.5 text-center text-text/60">
-                    <Cell value={f.free} />
-                  </td>
-                  <td className="px-5 py-3.5 text-center font-medium">
-                    <Cell value={f.paid} />
-                  </td>
+        <div className="max-w-2xl mx-auto overflow-x-auto -mx-4 px-4 sm:mx-auto sm:px-0">
+          <div className="min-w-[420px] overflow-hidden rounded-2xl border border-text/10 bg-white">
+            <table className="w-full text-xs sm:text-sm">
+              <thead>
+                <tr className="bg-bg">
+                  <th className="px-3 sm:px-5 py-4 text-left font-semibold" />
+                  <th className="px-3 sm:px-5 py-4 text-center font-semibold">
+                    <span className="bg-teal-light text-teal px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold">Free</span>
+                  </th>
+                  <th className="px-3 sm:px-5 py-4 text-center font-semibold">
+                    <span className="bg-accent/10 text-accent px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold">Per-token</span>
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {features.map((f, i) => (
+                  <tr
+                    key={f.name}
+                    className={i < features.length - 1 ? "border-b border-text/5" : ""}
+                  >
+                    <td className="px-3 sm:px-5 py-3 sm:py-3.5 font-medium text-text/70">{f.name}</td>
+                    <td className="px-3 sm:px-5 py-3 sm:py-3.5 text-center text-text/60">
+                      <Cell value={f.free} />
+                    </td>
+                    <td className="px-3 sm:px-5 py-3 sm:py-3.5 text-center font-medium">
+                      <Cell value={f.paid} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </section>

@@ -29,13 +29,13 @@ export default function Nav() {
         scrolled ? "bg-bg/90 backdrop-blur-md shadow-sm" : "bg-transparent"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-14 lg:h-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-14 md:h-16">
         <a href="/" className="text-xl font-extrabold text-text shrink-0">
           Stone AI
         </a>
 
-        {/* Desktop nav — lg and up */}
-        <div className="hidden lg:flex items-center gap-6">
+        {/* Desktop nav — md and up */}
+        <div className="hidden md:flex items-center gap-4 lg:gap-6">
           {/* Tools dropdown */}
           <div
             className="relative"
@@ -71,16 +71,16 @@ export default function Nav() {
           <a href="/pricing" className="text-text/70 hover:text-text font-medium text-sm transition-colors">
             Цены
           </a>
-          <a href="/blog" className="text-text/70 hover:text-text font-medium text-sm transition-colors">
+          <a href="/blog" className="hidden lg:block text-text/70 hover:text-text font-medium text-sm transition-colors">
             Блог
           </a>
-          <a href="/#faq" className="text-text/70 hover:text-text font-medium text-sm transition-colors">
+          <a href="/#faq" className="hidden lg:block text-text/70 hover:text-text font-medium text-sm transition-colors">
             FAQ
           </a>
           <a href="/referral" className="text-text/70 hover:text-text font-medium text-sm transition-colors">
             Рефералы
           </a>
-          <a href="/docs" className="text-text/70 hover:text-text font-medium text-sm transition-colors">
+          <a href="/docs" className="hidden lg:block text-text/70 hover:text-text font-medium text-sm transition-colors">
             API
           </a>
         </div>
@@ -88,15 +88,15 @@ export default function Nav() {
         <div className="flex items-center gap-2">
           <a
             href="/webchat"
-            className="bg-accent text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors hidden lg:inline-block"
+            className="bg-accent text-white px-4 py-2 min-h-[44px] flex items-center rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors hidden md:inline-flex"
           >
             Начать бесплатно
           </a>
 
-          {/* Burger — visible below lg */}
+          {/* Burger — visible below md (768px) */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="lg:hidden flex flex-col justify-center items-center w-10 h-10 gap-1.5"
+            className="md:hidden flex flex-col justify-center items-center w-11 h-11 gap-1.5"
             aria-label="Menu"
           >
             <span className={`block w-5 h-0.5 bg-text transition-all ${menuOpen ? "rotate-45 translate-y-1" : ""}`} />
@@ -106,40 +106,40 @@ export default function Nav() {
         </div>
       </div>
 
-      {/* Mobile/Tablet menu — below lg */}
+      {/* Mobile menu — below md (768px) */}
       {menuOpen && (
-        <div className="lg:hidden bg-bg/95 backdrop-blur-md border-t border-text/5 px-4 pb-4 max-h-[80vh] overflow-y-auto">
+        <div className="md:hidden bg-bg/95 backdrop-blur-md border-t border-text/5 px-4 pb-4 max-h-[80vh] overflow-y-auto">
           <div className="flex flex-col gap-1 py-3">
             <p className="text-xs text-text/30 font-semibold uppercase tracking-wider px-2 pt-1 pb-2">Инструменты</p>
             {tools.map((t) => (
-              <a key={t.href} href={t.href} onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2 px-2">
+              <a key={t.href} href={t.href} onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
                 {t.label}
               </a>
             ))}
             <div className="border-t border-text/5 my-2" />
-            <a href="/models" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2 px-2">
+            <a href="/models" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
               Модели
             </a>
-            <a href="/pricing" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2 px-2">
+            <a href="/pricing" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
               Цены
             </a>
-            <a href="/blog" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2 px-2">
+            <a href="/blog" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
               Блог
             </a>
-            <a href="/topup" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2 px-2">
+            <a href="/topup" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
               Пополнить
             </a>
-            <a href="/referral" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2 px-2">
+            <a href="/referral" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
               Рефералы
             </a>
-            <a href="/docs" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2 px-2">
+            <a href="/docs" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
               API Docs
             </a>
             <div className="border-t border-text/5 my-2" />
             <a
               href="/webchat"
               onClick={() => setMenuOpen(false)}
-              className="bg-accent text-white px-5 py-3 rounded-xl font-bold text-sm text-center hover:bg-accent/90 transition-colors"
+              className="bg-accent text-white px-5 py-3 min-h-[44px] rounded-xl font-bold text-sm text-center hover:bg-accent/90 transition-colors flex items-center justify-center"
             >
               Начать бесплатно
             </a>
@@ -147,7 +147,7 @@ export default function Nav() {
               href={TELEGRAM_BOT_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="border-2 border-text/15 text-text px-5 py-3 rounded-xl font-bold text-sm text-center hover:border-accent hover:text-accent transition-colors mt-1"
+              className="border-2 border-text/15 text-text px-5 py-3 min-h-[44px] rounded-xl font-bold text-sm text-center hover:border-accent hover:text-accent transition-colors mt-1 flex items-center justify-center"
             >
               Telegram-бот
             </a>

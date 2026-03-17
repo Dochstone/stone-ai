@@ -56,7 +56,7 @@ function ChatMockup() {
       {floatingModels.map((m) => (
         <div
           key={m.name}
-          className="absolute hidden md:flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-xl px-3 py-2 shadow-lg border border-text/[0.06] animate-float z-10"
+          className="absolute hidden lg:flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-xl px-3 py-2 shadow-lg border border-text/[0.06] animate-float z-10"
           style={{
             left: m.x, top: m.y,
             animationDelay: m.delay,
@@ -221,7 +221,7 @@ export default function Hero() {
               />
               <button
                 type="submit"
-                className="shrink-0 bg-accent text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
+                className="shrink-0 bg-accent text-white px-5 sm:px-6 py-3 min-h-[44px] rounded-xl font-bold text-sm hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
               >
                 Начать бесплатно
               </button>
@@ -247,19 +247,19 @@ export default function Hero() {
         <ChatMockup />
 
         {/* Stats */}
-        <div className="mt-14 flex items-center justify-center gap-8 md:gap-16 text-sm md:text-base text-text/50">
+        <div className="mt-14 flex items-center justify-center gap-6 sm:gap-8 md:gap-16 text-xs sm:text-sm md:text-base text-text/50">
           <div className="text-center">
-            <span className="block text-[48px] leading-none font-black text-accent">50+</span>
+            <span className="block text-[32px] sm:text-[40px] md:text-[48px] leading-none font-black text-accent">50+</span>
             <span className="mt-1 block">моделей</span>
           </div>
-          <div className="w-px h-16 bg-text/10" />
+          <div className="w-px h-12 sm:h-16 bg-text/10" />
           <div className="text-center">
-            <span className="block text-[48px] leading-none font-black text-teal">4</span>
+            <span className="block text-[32px] sm:text-[40px] md:text-[48px] leading-none font-black text-teal">4</span>
             <span className="mt-1 block">способа оплаты</span>
           </div>
-          <div className="w-px h-16 bg-text/10" />
+          <div className="w-px h-12 sm:h-16 bg-text/10" />
           <div className="text-center">
-            <span className="block text-[48px] leading-none font-black text-accent">$0</span>
+            <span className="block text-[32px] sm:text-[40px] md:text-[48px] leading-none font-black text-accent">$0</span>
             <span className="mt-1 block">для старта</span>
           </div>
         </div>

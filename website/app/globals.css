@@ -80,6 +80,12 @@ body {
   animation: pulseSlowAlt 8s ease-in-out infinite;
 }
 
+/* Touch-friendly buttons and links */
+a[class*="rounded-xl"],
+button[class*="rounded-xl"] {
+  min-height: 44px;
+}
+
 /* Card hover lift */
 .card-hover {
   @apply transition-all duration-300;

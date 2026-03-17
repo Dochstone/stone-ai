@@ -54,14 +54,14 @@ export default function ModelTicker() {
     <div className="bg-[#1A1916] py-3.5 overflow-hidden border-y border-white/[0.06]">
       <div className="flex animate-ticker items-center">
         {items.map((m, i) => (
-          <span key={i} className="shrink-0 mx-5 flex items-center gap-2 whitespace-nowrap">
+          <span key={i} className="shrink-0 mx-3 sm:mx-5 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap">
             {m.Icon && (
-              <span className="text-white/40">
+              <span className="text-white/40 [&>svg]:w-3.5 [&>svg]:h-3.5 sm:[&>svg]:w-4 sm:[&>svg]:h-4">
                 <m.Icon />
               </span>
             )}
-            <span className="text-white/70 text-sm font-semibold">{m.name}</span>
-            <span className={`text-xs font-bold px-2 py-0.5 rounded-md ${
+            <span className="text-white/70 text-xs sm:text-sm font-semibold">{m.name}</span>
+            <span className={`text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-md ${
               m.price === "FREE"
                 ? "bg-teal/15 text-teal"
                 : "bg-accent/15 text-accent"

@@ -39,7 +39,7 @@ export default function Pricing() {
 
             <a
               href="/webchat"
-              className="block text-center border-2 border-text/15 text-text px-6 py-3 rounded-xl font-bold hover:border-accent hover:text-accent transition-colors"
+              className="block text-center border-2 border-text/15 text-text px-6 py-3 min-h-[44px] rounded-xl font-bold hover:border-accent hover:text-accent transition-colors"
             >
               Начать бесплатно
             </a>
@@ -77,7 +77,7 @@ export default function Pricing() {
 
             <a
               href="/topup"
-              className="block text-center bg-accent text-white px-6 py-3 rounded-xl font-bold hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
+              className="block text-center bg-accent text-white px-6 py-3 min-h-[44px] rounded-xl font-bold hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
             >
               Пополнить баланс
             </a>
@@ -89,11 +89,11 @@ export default function Pricing() {
           <p className="text-xs text-text/40 font-medium uppercase tracking-wide mb-3">
             Способы оплаты
           </p>
-          <div className="flex items-center justify-center gap-6 text-sm text-text/50">
+          <div className="flex items-center justify-center gap-3 sm:gap-6 flex-wrap text-xs sm:text-sm text-text/50">
             <span>Telegram Stars</span>
-            <span className="w-1 h-1 bg-text/20 rounded-full" />
+            <span className="w-1 h-1 bg-text/20 rounded-full hidden sm:block" />
             <span>Карты / СБП</span>
-            <span className="w-1 h-1 bg-text/20 rounded-full" />
+            <span className="w-1 h-1 bg-text/20 rounded-full hidden sm:block" />
             <span>USDT / BTC / ETH</span>
           </div>
         </div>

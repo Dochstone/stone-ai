@@ -12,7 +12,7 @@ export default function CtaSection() {
         </p>
         <a
           href="/webchat"
-          className="inline-block bg-accent text-white px-10 py-4 rounded-xl font-bold text-lg hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
+          className="inline-block bg-accent text-white px-8 sm:px-10 py-4 min-h-[44px] rounded-xl font-bold text-base sm:text-lg hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
         >
           Начать бесплатно
         </a>

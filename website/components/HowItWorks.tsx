@@ -27,8 +27,9 @@ export default function HowItWorks() {
           Три шага — и вы общаетесь с лучшими AI-моделями мира
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-          {steps.map((step, i) => (
+        {/* Desktop: 3 columns */}
+        <div className="hidden md:grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+          {steps.map((step) => (
             <div key={step.num} className="text-center">
               <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent/10 text-accent font-extrabold text-lg mb-5">
                 {step.num}
@@ -39,10 +40,30 @@ export default function HowItWorks() {
           ))}
         </div>
 
+        {/* Mobile: vertical with connector line */}
+        <div className="md:hidden relative max-w-sm mx-auto">
+          {/* Vertical connector */}
+          <div className="absolute left-7 top-14 bottom-14 w-px bg-accent/15" />
+
+          <div className="space-y-8">
+            {steps.map((step) => (
+              <div key={step.num} className="flex items-start gap-5">
+                <div className="relative z-10 shrink-0 w-14 h-14 rounded-2xl bg-accent/10 text-accent font-extrabold text-lg flex items-center justify-center">
+                  {step.num}
+                </div>
+                <div className="pt-2">
+                  <h3 className="font-bold text-base mb-1">{step.title}</h3>
+                  <p className="text-text/60 text-sm leading-relaxed">{step.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         <div className="text-center mt-12">
           <a
             href="/webchat"
-            className="inline-block bg-accent text-white px-8 py-4 rounded-xl font-bold hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
+            className="inline-block bg-accent text-white px-8 py-4 min-h-[44px] rounded-xl font-bold hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
           >
             Начать бесплатно
           </a>
