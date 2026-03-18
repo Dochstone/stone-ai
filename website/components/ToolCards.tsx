@@ -106,19 +106,13 @@ export default function ToolCards() {
               API
             </span>
             <h3 className="font-bold text-lg text-white mb-3">Простой API</h3>
-            <pre className="bg-white/[0.04] rounded-lg p-3 overflow-x-auto border border-white/[0.06] text-[10px] sm:text-[11px] leading-relaxed">
-              <code>
-                <span className="text-emerald-400">curl</span>
-                <span className="text-white/50"> -X POST /api/chat \</span>{"\n"}
-                <span className="text-white/50">  -H </span>
-                <span className="text-amber-300">&quot;Authorization: Bearer $TOKEN&quot;</span>
-                <span className="text-white/50"> \</span>{"\n"}
-                <span className="text-white/50">  -d </span>
-                <span className="text-sky-300">{`'{"model_id":"gpt-4o-mini",`}</span>{"\n"}
-                <span className="text-sky-300">{`    "messages":[{"role":"user",`}</span>{"\n"}
-                <span className="text-sky-300">{`    "content":"Hello!"}]}'`}</span>
-              </code>
-            </pre>
+            <div className="bg-white/[0.04] rounded-xl p-4 overflow-x-auto border border-white/[0.06]">
+              <pre className="text-[11px] sm:text-[12px] leading-[1.7] font-mono" dangerouslySetInnerHTML={{ __html: `<span style="color:#34d399">curl</span><span style="color:rgba(255,255,255,0.5)"> -X </span><span style="color:#fcd34d">POST</span><span style="color:rgba(255,255,255,0.5)"> /api/chat \\
+  -H </span><span style="color:#7dd3fc">"Authorization: Bearer $TKN"</span><span style="color:rgba(255,255,255,0.5)"> \\
+  -d </span><span style="color:#7dd3fc">'{"model_id"</span><span style="color:rgba(255,255,255,0.5)">:</span><span style="color:#fcd34d">"gpt-4o-mini"</span><span style="color:rgba(255,255,255,0.5)">,
+      </span><span style="color:#7dd3fc">"messages"</span><span style="color:rgba(255,255,255,0.5)">:[{</span><span style="color:#7dd3fc">"role"</span><span style="color:rgba(255,255,255,0.5)">:</span><span style="color:#fcd34d">"user"</span><span style="color:rgba(255,255,255,0.5)">,
+      </span><span style="color:#7dd3fc">"content"</span><span style="color:rgba(255,255,255,0.5)">:</span><span style="color:#fcd34d">"Hello!"</span><span style="color:rgba(255,255,255,0.5)">}]}'</span>` }} />
+            </div>
           </a>
 
           {/* Reasoning — small */}
