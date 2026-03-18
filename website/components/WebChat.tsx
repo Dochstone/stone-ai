@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { MODELS, type AIModel } from "@/lib/models";
 import AuthFormComponent, { type AuthState } from "@/components/AuthForm";
-import Onboarding from "@/components/Onboarding";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
 
@@ -12,17 +11,15 @@ const IMAGE_MODEL_IDS = new Set([
   "flux-schnell", "stable-diffusion-xl",
 ]);
 
+// ─── Helpers ───
+
 function extractImageUrl(text: string): string | null {
-  // Check for base64 data URL
   const b64Match = text.match(/(data:image\/[a-z+]+;base64,[A-Za-z0-9+/=]+)/);
   if (b64Match) return b64Match[1];
-  // Check for markdown image
   const mdMatch = text.match(/!\[.*?\]\((https?:\/\/[^\s)]+)\)/);
   if (mdMatch) return mdMatch[1];
-  // Check for raw image URL
   const urlMatch = text.match(/(https?:\/\/[^\s"'<>]+\.(?:png|jpg|jpeg|gif|webp)(?:\?[^\s"'<>]*)?)/i);
   if (urlMatch) return urlMatch[1];
-  // OpenRouter may return URL in JSON-like format
   const jsonUrlMatch = text.match(/"url"\s*:\s*"(https?:\/\/[^"]+)"/);
   if (jsonUrlMatch) return jsonUrlMatch[1];
   return null;
@@ -35,6 +32,128 @@ function downloadImage(url: string, filename: string) {
   a.click();
 }
 
+function formatPrice(m: AIModel) {
+  if (m.tier === "free") return "FREE";
+  if (m.priceUnit) return `$${m.pricePerMillion}${m.priceUnit}`;
+  return `$${m.pricePerMillion}/1M`;
+}
+
+// ─── Markdown Renderer ───
+
+function renderMarkdown(text: string): string {
+  let html = text
+    // Code blocks
+    .replace(/```(\w*)\n([\s\S]*?)```/g, (_match, lang, code) => {
+      const escaped = code.replace(/</g, "&lt;").replace(/>/g, "&gt;").trimEnd();
+      return `<div class="code-block-wrapper"><div class="code-block-header"><span class="code-lang">${lang || "code"}</span><button class="code-copy-btn" onclick="(function(btn){var code=btn.closest('.code-block-wrapper').querySelector('code').textContent;navigator.clipboard.writeText(code);btn.textContent='Скопировано!';setTimeout(function(){btn.textContent='Копировать'},2000)})(this)">Копировать</button></div><pre class="code-block"><code>${escaped}</code></pre></div>`;
+    })
+    // Inline code
+    .replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
+    // Bold
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    // Italic
+    .replace(/\*(.+?)\*/g, "<em>$1</em>")
+    // Strikethrough
+    .replace(/~~(.+?)~~/g, "<del>$1</del>")
+    // Headers
+    .replace(/^### (.+)$/gm, '<h3 class="md-h3">$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2 class="md-h2">$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1 class="md-h1">$1</h1>')
+    // Unordered lists
+    .replace(/^[*-] (.+)$/gm, '<li class="md-li">$1</li>')
+    // Ordered lists
+    .replace(/^\d+\. (.+)$/gm, '<li class="md-li md-oli">$1</li>')
+    // Links
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" class="md-link">$1</a>')
+    // Line breaks (but not inside code blocks)
+    .replace(/\n/g, "<br/>");
+
+  // Clean up consecutive <li> into <ul>
+  html = html.replace(/((?:<li class="md-li">.*?<\/li><br\/>?)+)/g, (match) => {
+    const cleaned = match.replace(/<br\/?>/g, "");
+    return `<ul class="md-ul">${cleaned}</ul>`;
+  });
+
+  return html;
+}
+
+// ─── Types ───
+
+interface FileAttachment {
+  file_id: string;
+  file_name: string;
+  file_type: "image" | "pdf";
+  mime_type: string;
+  size: number;
+  content: string;
+}
+
+interface Message {
+  role: "user" | "assistant";
+  content: string;
+  file?: FileAttachment;
+  billing?: {
+    tokens_in: number;
+    tokens_out: number;
+    cost_usd: number;
+    balance_usd: number;
+    billing_mode: string;
+  };
+}
+
+interface ChatSessionItem {
+  id: number;
+  model_id: string;
+  title: string;
+  updated_at: string | null;
+}
+
+// ─── Company icon for AI avatar ───
+
+const companyIcons: Record<string, string> = {
+  OpenAI: "G",
+  Anthropic: "A",
+  Google: "G",
+  Meta: "M",
+  Mistral: "M",
+  DeepSeek: "D",
+  xAI: "X",
+  Perplexity: "P",
+  Alibaba: "Q",
+  MiniMax: "M",
+  Zhipu: "Z",
+  Cohere: "C",
+  Microsoft: "M",
+  NVIDIA: "N",
+  Gryphe: "G",
+  BFL: "F",
+  Stability: "S",
+  Moonshot: "K",
+};
+
+const companyColors: Record<string, string> = {
+  OpenAI: "#10a37f",
+  Anthropic: "#d97706",
+  Google: "#4285f4",
+  Meta: "#0668E1",
+  Mistral: "#7c3aed",
+  DeepSeek: "#06b6d4",
+  xAI: "#64748b",
+  Perplexity: "#6366f1",
+  Alibaba: "#ff6a00",
+  MiniMax: "#ec4899",
+  Zhipu: "#0ea5e9",
+  Cohere: "#39d353",
+  Microsoft: "#00a4ef",
+  NVIDIA: "#76b900",
+  Gryphe: "#8b5cf6",
+  BFL: "#f59e0b",
+  Stability: "#a855f7",
+  Moonshot: "#06b6d4",
+};
+
+// ─── Message Content ───
+
 function MessageContent({ content, role, selectedModel }: { content: string; role: string; selectedModel: string }) {
   if (role !== "assistant" || !content) {
     return <div className="whitespace-pre-wrap">{content}</div>;
@@ -44,7 +163,6 @@ function MessageContent({ content, role, selectedModel }: { content: string; rol
   const isImageModel = IMAGE_MODEL_IDS.has(selectedModel);
 
   if (imageUrl && isImageModel) {
-    // Strip image URL/markdown from text to show remaining caption
     const caption = content
       .replace(/(data:image\/[a-z+]+;base64,[A-Za-z0-9+/=]+)/, "")
       .replace(/!\[.*?\]\(https?:\/\/[^\s)]+\)/, "")
@@ -54,12 +172,7 @@ function MessageContent({ content, role, selectedModel }: { content: string; rol
 
     return (
       <div>
-        <img
-          src={imageUrl}
-          alt="Generated image"
-          className="max-w-full rounded-xl mb-2"
-          style={{ maxHeight: 400 }}
-        />
+        <img src={imageUrl} alt="Generated image" className="max-w-full rounded-xl mb-2" style={{ maxHeight: 400 }} />
         {caption && <div className="whitespace-pre-wrap text-sm mb-2">{caption}</div>}
         <button
           onClick={() => downloadImage(imageUrl, `stone-ai-${Date.now()}.png`)}
@@ -74,7 +187,6 @@ function MessageContent({ content, role, selectedModel }: { content: string; rol
     );
   }
 
-  // For image models, also check if the whole response looks like a URL
   if (isImageModel && content.match(/^https?:\/\/\S+$/)) {
     return (
       <div>
@@ -92,58 +204,53 @@ function MessageContent({ content, role, selectedModel }: { content: string; rol
     );
   }
 
-  return <div className="whitespace-pre-wrap">{content}</div>;
+  return <div className="md-content" dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }} />;
 }
 
-// ─── Types ───
+// ─── Welcome Screen ───
 
-interface FileAttachment {
-  file_id: string;
-  file_name: string;
-  file_type: "image" | "pdf";
-  mime_type: string;
-  size: number;
-  content: string; // base64 data URL for images, text for PDF
+const SUGGESTION_CARDS = [
+  { icon: "💻", title: "Напиши код на Python", subtitle: "Алгоритмы, скрипты, API" },
+  { icon: "📄", title: "Проанализируй документ", subtitle: "PDF, текст, данные" },
+  { icon: "🎨", title: "Сгенерируй картинку", subtitle: "DALL-E, Flux, SDXL" },
+  { icon: "💡", title: "Объясни простыми словами", subtitle: "Любая тема понятно" },
+];
+
+function WelcomeScreen({ onSuggestion }: { onSuggestion: (text: string) => void }) {
+  return (
+    <div className="flex-1 flex items-center justify-center px-4">
+      <div className="text-center max-w-xl w-full">
+        {/* Logo */}
+        <div className="mb-6">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-accent to-accent/70 flex items-center justify-center shadow-lg shadow-accent/20 mb-4">
+            <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-extrabold text-text mb-2">Чем могу помочь?</h1>
+          <p className="text-sm text-text/40">50+ AI-моделей в одном месте. Выберите модель и начните диалог.</p>
+        </div>
+
+        {/* Suggestion cards */}
+        <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
+          {SUGGESTION_CARDS.map((card) => (
+            <button
+              key={card.title}
+              onClick={() => onSuggestion(card.title)}
+              className="text-left p-4 rounded-2xl border border-text/[0.06] bg-white hover:border-accent/30 hover:shadow-md hover:shadow-accent/5 transition-all duration-200 group"
+            >
+              <span className="text-xl mb-2 block">{card.icon}</span>
+              <span className="text-[13px] font-semibold text-text group-hover:text-accent transition-colors block leading-tight">{card.title}</span>
+              <span className="text-[11px] text-text/30 mt-1 block">{card.subtitle}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
 
-interface Message {
-  role: "user" | "assistant";
-  content: string;
-  file?: FileAttachment;
-  billing?: {
-    tokens_in: number;
-    tokens_out: number;
-    cost_usd: number;
-    balance_usd: number;
-    billing_mode: string;
-  };
-}
-
-// ─── Model Sidebar ───
-
-const companyColors: Record<string, string> = {
-  OpenAI: "bg-green-100 text-green-700",
-  Anthropic: "bg-orange-100 text-orange-700",
-  Google: "bg-blue-100 text-blue-700",
-  Meta: "bg-sky-100 text-sky-700",
-  Mistral: "bg-purple-100 text-purple-700",
-  DeepSeek: "bg-cyan-100 text-cyan-700",
-  xAI: "bg-slate-100 text-slate-700",
-  Perplexity: "bg-indigo-100 text-indigo-700",
-};
-
-function formatPrice(m: AIModel) {
-  if (m.tier === "free") return "FREE";
-  if (m.priceUnit) return `$${m.pricePerMillion}${m.priceUnit}`;
-  return `$${m.pricePerMillion}/1M`;
-}
-
-interface ChatSessionItem {
-  id: number;
-  model_id: string;
-  title: string;
-  updated_at: string | null;
-}
+// ─── Sidebar ───
 
 function Sidebar({
   selected,
@@ -166,366 +273,121 @@ function Sidebar({
   onNewChat: () => void;
   onDeleteSession: (id: number) => void;
 }) {
-  const [tab, setTab] = useState<"models" | "chats">("models");
-  const [filter, setFilter] = useState("");
-  const [tierFilter, setTierFilter] = useState<"all" | "free" | "pro">("all");
-
-  const filtered = MODELS.filter((m) => {
-    if (tierFilter === "free" && m.tier !== "free") return false;
-    if (tierFilter === "pro" && m.tier !== "pro") return false;
-    if (filter && !m.name.toLowerCase().includes(filter.toLowerCase()) && !m.company.toLowerCase().includes(filter.toLowerCase())) return false;
-    return true;
-  });
+  const model = MODELS.find((m) => m.id === selected);
 
   return (
     <>
+      {/* Backdrop for mobile */}
       {open && (
-        <div className="fixed inset-0 bg-black/25 z-30 lg:hidden" onClick={onToggle} />
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden" onClick={onToggle} />
       )}
 
       <div
-        className={`fixed inset-y-0 left-0 z-40 w-[280px] bg-white border-r border-text/5 flex flex-col transition-transform duration-200 lg:relative ${
+        className={`fixed inset-y-0 left-0 z-40 w-[280px] bg-[#F5F4F0] flex flex-col transition-transform duration-200 lg:relative ${
           open ? "translate-x-0" : "-translate-x-full lg:-translate-x-full"
         }`}
       >
-        {/* Tabs + close */}
-        <div className="p-2 border-b border-text/5 shrink-0">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex gap-1 bg-bg rounded-lg p-0.5 flex-1 mr-2">
-              <button
-                onClick={() => setTab("models")}
-                className={`flex-1 py-1.5 rounded-md text-[11px] font-semibold transition-colors ${tab === "models" ? "bg-white text-text shadow-sm" : "text-text/40"}`}
-              >
-                Модели
-              </button>
-              <button
-                onClick={() => setTab("chats")}
-                className={`flex-1 py-1.5 rounded-md text-[11px] font-semibold transition-colors ${tab === "chats" ? "bg-white text-text shadow-sm" : "text-text/40"}`}
-              >
-                Чаты{sessions.length > 0 && <span className="ml-1 text-accent">{sessions.length}</span>}
-              </button>
-            </div>
-            <button onClick={onToggle} className="text-text/30 hover:text-text/60 p-1 shrink-0">
+        {/* Top: New Chat + Collapse */}
+        <div className="p-3 shrink-0">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onNewChat}
+              className="flex-1 flex items-center gap-2 bg-white hover:bg-white/80 border border-text/[0.08] rounded-xl px-3.5 py-2.5 transition-colors shadow-sm"
+            >
+              <svg className="w-4 h-4 text-text/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-[13px] font-semibold text-text/70">Новый чат</span>
+            </button>
+            <button
+              onClick={onToggle}
+              className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/60 text-text/30 hover:text-text/60 transition-colors shrink-0"
+            >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" d="M11 19l-7-7 7-7" />
               </svg>
             </button>
           </div>
+        </div>
 
-          {tab === "models" && (
-            <>
-              <input
-                type="text"
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                placeholder="Поиск..."
-                className="w-full bg-bg border border-text/10 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-accent"
-              />
-              <div className="flex gap-1 mt-1.5">
-                {(["all", "free", "pro"] as const).map((t) => (
+        {/* Chat sessions list */}
+        <div className="flex-1 overflow-y-auto px-2">
+          {sessions.length === 0 ? (
+            <div className="px-3 py-8 text-center">
+              <p className="text-[11px] text-text/20">Нет сохранённых чатов</p>
+            </div>
+          ) : (
+            <div className="space-y-0.5">
+              {sessions.map((s) => (
+                <div
+                  key={s.id}
+                  className={`group flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition-colors ${
+                    activeSessionId === s.id
+                      ? "bg-white shadow-sm"
+                      : "hover:bg-white/50"
+                  }`}
+                  onClick={() => { onLoadSession(s.id); if (window.innerWidth < 1024) onToggle(); }}
+                >
+                  <div className="flex-1 min-w-0">
+                    <span className={`text-[13px] font-medium truncate block ${
+                      activeSessionId === s.id ? "text-text" : "text-text/70"
+                    }`}>
+                      {s.title}
+                    </span>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className="text-[10px] text-text/25">{MODELS.find(m => m.id === s.model_id)?.name || s.model_id}</span>
+                      {s.updated_at && (
+                        <span className="text-[10px] text-text/15">{new Date(s.updated_at).toLocaleDateString("ru-RU")}</span>
+                      )}
+                    </div>
+                  </div>
                   <button
-                    key={t}
-                    onClick={() => setTierFilter(t)}
-                    className={`px-2.5 py-1 rounded-md text-[10px] font-semibold transition-colors ${
-                      tierFilter === t ? "bg-accent text-white" : "bg-bg text-text/40"
-                    }`}
+                    onClick={(e) => { e.stopPropagation(); onDeleteSession(s.id); }}
+                    className="text-text/10 hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
                   >
-                    {t === "all" ? "Все" : t === "free" ? "Free" : "Pro"}
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
                   </button>
-                ))}
-              </div>
-            </>
-          )}
-
-          {tab === "chats" && (
-            <button
-              onClick={onNewChat}
-              className="w-full bg-accent text-white py-2 rounded-lg text-xs font-bold hover:bg-accent/90 transition-colors"
-            >
-              + Новый чат
-            </button>
+                </div>
+              ))}
+            </div>
           )}
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto">
-          {tab === "models" && filtered.map((m) => (
-            <button
-              key={m.id}
-              onClick={() => { onSelect(m.id); if (window.innerWidth < 1024) onToggle(); }}
-              className={`w-full text-left px-3 py-2.5 border-b border-text/[0.03] transition-colors ${
-                selected === m.id
-                  ? "bg-accent/8 border-l-[3px] border-l-accent"
-                  : "hover:bg-bg/50 border-l-[3px] border-l-transparent"
-              }`}
-            >
-              <div className="flex items-center justify-between mb-0.5">
-                <span className={`font-semibold text-xs ${selected === m.id ? "text-accent" : "text-text"}`}>
-                  {m.name}
-                </span>
-                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
-                  m.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"
-                }`}>
-                  {formatPrice(m)}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded ${companyColors[m.company] ?? "bg-gray-100 text-gray-600"}`}>
-                  {m.company}
-                </span>
-                {m.context && <span className="text-[9px] text-text/20">{m.context}</span>}
-              </div>
-            </button>
-          ))}
-
-          {tab === "chats" && sessions.length === 0 && (
-            <div className="p-6 text-center">
-              <p className="text-text/20 text-2xl mb-2">💬</p>
-              <p className="text-xs text-text/30">Нет сохранённых чатов</p>
+        {/* Bottom: Model selector */}
+        <div className="p-3 border-t border-text/[0.06] shrink-0">
+          <label className="text-[10px] font-semibold text-text/30 uppercase tracking-wider mb-1.5 block">Модель</label>
+          <select
+            value={selected}
+            onChange={(e) => onSelect(e.target.value)}
+            className="w-full bg-white border border-text/[0.08] rounded-xl px-3 py-2.5 text-[13px] font-medium text-text appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent/30 transition-colors"
+            style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231A191660' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
+          >
+            <optgroup label="Free">
+              {MODELS.filter(m => m.tier === "free").map(m => (
+                <option key={m.id} value={m.id}>{m.name} — {m.company}</option>
+              ))}
+            </optgroup>
+            <optgroup label="Pro">
+              {MODELS.filter(m => m.tier === "pro").map(m => (
+                <option key={m.id} value={m.id}>{m.name} — {m.company} ({formatPrice(m)})</option>
+              ))}
+            </optgroup>
+          </select>
+          {model && (
+            <div className="flex items-center gap-2 mt-2 px-1">
+              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                model.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"
+              }`}>
+                {formatPrice(model)}
+              </span>
+              {model.context && <span className="text-[10px] text-text/25">{model.context}</span>}
             </div>
           )}
-
-          {tab === "chats" && sessions.map((s) => (
-            <div
-              key={s.id}
-              className={`px-3 py-2.5 border-b border-text/[0.03] cursor-pointer transition-colors group ${
-                activeSessionId === s.id ? "bg-accent/8 border-l-[3px] border-l-accent" : "hover:bg-bg/50 border-l-[3px] border-l-transparent"
-              }`}
-              onClick={() => { onLoadSession(s.id); if (window.innerWidth < 1024) onToggle(); }}
-            >
-              <div className="flex items-center justify-between">
-                <span className={`font-semibold text-xs truncate flex-1 ${activeSessionId === s.id ? "text-accent" : "text-text"}`}>
-                  {s.title}
-                </span>
-                <button
-                  onClick={(e) => { e.stopPropagation(); onDeleteSession(s.id); }}
-                  className="text-text/15 hover:text-red-400 p-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-[9px] text-text/25">{MODELS.find(m => m.id === s.model_id)?.name || s.model_id}</span>
-                {s.updated_at && (
-                  <span className="text-[9px] text-text/15">{new Date(s.updated_at).toLocaleDateString("ru-RU")}</span>
-                )}
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     </>
-  );
-}
-
-// ─── Chat Area ───
-
-function ChatArea({
-  messages,
-  streaming,
-  input,
-  setInput,
-  onSend,
-  selectedModel,
-  sidebarOpen,
-  onToggleSidebar,
-  balanceUsd,
-  onLogout,
-  email,
-  pendingFile,
-  onFileSelect,
-  onFileClear,
-  uploading,
-}: {
-  messages: Message[];
-  streaming: boolean;
-  input: string;
-  setInput: (v: string) => void;
-  onSend: () => void;
-  selectedModel: string;
-  sidebarOpen: boolean;
-  onToggleSidebar: () => void;
-  balanceUsd: number;
-  onLogout: () => void;
-  email: string;
-  pendingFile: FileAttachment | null;
-  onFileSelect: (f: File) => void;
-  onFileClear: () => void;
-  uploading: boolean;
-}) {
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const model = MODELS.find((m) => m.id === selectedModel);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, streaming]);
-
-  const handleKey = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      onSend();
-    }
-  };
-
-  return (
-    <div className="flex-1 flex flex-col min-w-0 h-screen">
-      {/* Top nav bar */}
-      <div className="h-12 border-b border-text/5 bg-white flex items-center justify-between px-4 shrink-0">
-        <div className="flex items-center gap-3">
-          {/* Sidebar toggle — always visible */}
-          <button onClick={onToggleSidebar} className="text-text/40 hover:text-text/70 transition-colors">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              {sidebarOpen
-                ? <path strokeLinecap="round" d="M11 19l-7-7 7-7" />
-                : <path strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16" />
-              }
-            </svg>
-          </button>
-          <a href="/" className="font-extrabold text-sm text-text/70">Stone AI</a>
-        </div>
-        <div className="flex items-center gap-4">
-          <a href="/topup" className="text-xs font-semibold text-accent hover:underline">${balanceUsd.toFixed(2)}</a>
-          <span className="text-[10px] text-text/25 hidden sm:block">{email}</span>
-          <button onClick={onLogout} className="text-[10px] text-text/30 hover:text-text">Выйти</button>
-        </div>
-      </div>
-
-      {/* Model info bar */}
-      <div className="px-4 py-2.5 bg-bg/50 border-b border-text/[0.03] shrink-0 flex items-center gap-3">
-        <span className="font-bold text-sm">{model?.name || selectedModel}</span>
-        <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded ${companyColors[model?.company ?? ""] ?? "bg-gray-100 text-gray-600"}`}>
-          {model?.company}
-        </span>
-        <span className={`text-[10px] font-bold ${model?.tier === "free" ? "text-teal" : "text-accent"}`}>
-          {model ? formatPrice(model) : ""}
-        </span>
-        {model?.context && <span className="text-[10px] text-text/25">{model.context}</span>}
-      </div>
-
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-6">
-        {messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center">
-              <div className="text-5xl mb-4 opacity-10">AI</div>
-              <p className="text-lg font-extrabold text-text/10 mb-1">Stone AI</p>
-              <p className="text-sm text-text/25">Выберите модель и начните диалог</p>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4 max-w-3xl mx-auto">
-            {messages.map((msg, i) => (
-              <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                  msg.role === "user"
-                    ? "bg-accent text-white rounded-br-md"
-                    : "bg-white border border-text/5 text-text/80 rounded-bl-md"
-                }`}>
-                  {msg.file && (
-                    <div className="mb-2">
-                      {msg.file.file_type === "image" ? (
-                        <img src={msg.file.content} alt={msg.file.file_name} className="max-w-[240px] rounded-lg" />
-                      ) : (
-                        <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs ${msg.role === "user" ? "bg-white/20" : "bg-bg"}`}>
-                          <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                          <span className="truncate">{msg.file.file_name}</span>
-                          <span className="shrink-0 opacity-60">{(msg.file.size / 1024).toFixed(0)}KB</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  <MessageContent content={msg.content} role={msg.role} selectedModel={selectedModel} />
-                  {msg.billing && (
-                    <details className="mt-2 text-[10px] opacity-60">
-                      <summary className="cursor-pointer">
-                        {msg.billing.tokens_in + msg.billing.tokens_out} tok · ${msg.billing.cost_usd.toFixed(4)}
-                      </summary>
-                      <div className="mt-1 space-y-0.5">
-                        <div>Input: {msg.billing.tokens_in} tok</div>
-                        <div>Output: {msg.billing.tokens_out} tok</div>
-                        <div>Стоимость: ${msg.billing.cost_usd.toFixed(6)}</div>
-                        <div>Баланс: ${msg.billing.balance_usd.toFixed(4)}</div>
-                        <div>Режим: {msg.billing.billing_mode}</div>
-                      </div>
-                    </details>
-                  )}
-                </div>
-              </div>
-            ))}
-            {streaming && (
-              <div className="flex justify-start">
-                <div className="bg-white border border-text/5 rounded-2xl rounded-bl-md px-4 py-3">
-                  <div className="flex gap-1">
-                    <span className="w-2 h-2 bg-accent/40 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                    <span className="w-2 h-2 bg-accent/40 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                    <span className="w-2 h-2 bg-accent/40 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-                  </div>
-                </div>
-              </div>
-            )}
-            <div ref={bottomRef} />
-          </div>
-        )}
-      </div>
-
-      {/* Input — pinned bottom, full width */}
-      <div className="border-t border-text/5 bg-white px-3 py-2.5 shrink-0">
-        {/* Pending file preview */}
-        {pendingFile && (
-          <div className="flex items-center gap-2 mb-2 px-2 py-1.5 bg-bg rounded-lg">
-            {pendingFile.file_type === "image" ? (
-              <img src={pendingFile.content} alt="" className="w-10 h-10 rounded object-cover" />
-            ) : (
-              <div className="w-10 h-10 bg-accent/10 rounded flex items-center justify-center">
-                <svg className="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-              </div>
-            )}
-            <span className="text-xs text-text/60 truncate flex-1">{pendingFile.file_name}</span>
-            <button onClick={onFileClear} className="text-text/30 hover:text-text/60 shrink-0 p-1">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
-          </div>
-        )}
-        {uploading && (
-          <div className="text-xs text-accent mb-2 px-2 animate-pulse">Загрузка файла...</div>
-        )}
-        <div className="flex gap-2 items-end">
-          {/* Clip button */}
-          <input ref={fileInputRef} type="file" accept="image/*,.pdf" className="hidden"
-            onChange={(e) => { if (e.target.files?.[0]) onFileSelect(e.target.files[0]); e.target.value = ""; }}
-          />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading || streaming}
-            className="w-10 h-10 rounded-xl bg-bg border border-text/10 flex items-center justify-center text-text/40 hover:text-accent hover:border-accent/30 transition-colors disabled:opacity-30 shrink-0"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-            </svg>
-          </button>
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKey}
-            placeholder={pendingFile ? "Добавьте вопрос к файлу..." : "Написать сообщение..."}
-            rows={1}
-            className="flex-1 bg-bg border border-text/10 rounded-xl px-4 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent min-w-0"
-          />
-          <button
-            onClick={onSend}
-            disabled={streaming || (!input.trim() && !pendingFile)}
-            className="bg-accent text-white w-10 h-10 rounded-xl hover:bg-accent/90 transition-colors disabled:opacity-40 shrink-0 flex items-center justify-center"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -541,9 +403,14 @@ export default function WebChat() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [pendingFile, setPendingFile] = useState<FileAttachment | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
   const [sessions, setSessions] = useState<ChatSessionItem[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
+
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const model = useMemo(() => MODELS.find((m) => m.id === selectedModel), [selectedModel]);
 
   // Load auth from localStorage
   useEffect(() => {
@@ -552,13 +419,27 @@ export default function WebChat() {
       if (saved) setAuth(JSON.parse(saved));
     } catch {}
     setLoaded(true);
-    // Collapse sidebar on mobile
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
       setSidebarOpen(false);
     }
-    // Show onboarding if first time
-    if (!localStorage.getItem("onboarding_done")) {
-      setShowOnboarding(true);
+  }, []);
+
+  // Auto-scroll
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, streaming]);
+
+  // Auto-resize textarea
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+    const ta = e.target;
+    ta.style.height = "auto";
+    ta.style.height = Math.min(ta.scrollHeight, 200) + "px";
+  }, []);
+
+  const resetTextarea = useCallback(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
     }
   }, []);
 
@@ -569,11 +450,9 @@ export default function WebChat() {
     fetch(`${API_URL}/api/auth/logout`, { method: "POST", credentials: "include" }).catch(() => {});
   }, []);
 
-  const toggleSidebar = useCallback(() => {
-    setSidebarOpen((prev) => !prev);
-  }, []);
+  const toggleSidebar = useCallback(() => setSidebarOpen((prev) => !prev), []);
 
-  // Load chat sessions
+  // Fetch chat sessions
   const fetchSessions = useCallback(async () => {
     if (!auth) return;
     try {
@@ -628,13 +507,10 @@ export default function WebChat() {
     } catch {}
   }, [auth, activeSessionId, newChat]);
 
-  // Save messages to session after assistant responds
   const saveToSession = useCallback(async (userContent: string, assistantContent: string, billing: any) => {
     if (!auth) return;
     try {
       let sessionId = activeSessionId;
-
-      // Create session if needed
       if (!sessionId) {
         const res = await fetch(`${API_URL}/api/chats`, {
           method: "POST",
@@ -647,17 +523,12 @@ export default function WebChat() {
           setActiveSessionId(sessionId);
         }
       }
-
       if (!sessionId) return;
-
-      // Save user message
       await fetch(`${API_URL}/api/chats/${sessionId}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
         body: JSON.stringify({ session_id: sessionId, role: "user", content: userContent }),
       });
-
-      // Save assistant message
       await fetch(`${API_URL}/api/chats/${sessionId}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
@@ -667,7 +538,6 @@ export default function WebChat() {
           cost_usd: billing?.cost_usd || 0,
         }),
       });
-
       fetchSessions();
     } catch {}
   }, [auth, activeSessionId, selectedModel, fetchSessions]);
@@ -697,6 +567,12 @@ export default function WebChat() {
     }
   }, [auth]);
 
+  const handleSuggestion = useCallback((text: string) => {
+    setInput(text);
+    // Focus textarea and trigger send after setting input
+    setTimeout(() => textareaRef.current?.focus(), 50);
+  }, []);
+
   const sendMessage = useCallback(async () => {
     if (!auth || (!input.trim() && !pendingFile) || streaming) return;
 
@@ -707,12 +583,11 @@ export default function WebChat() {
     setInput("");
     setPendingFile(null);
     setStreaming(true);
+    resetTextarea();
 
-    // Build API messages — inject file content for multimodal
     const apiMessages = history.slice(-20).map((m) => {
       if (m.file) {
         if (m.file.file_type === "image") {
-          // OpenRouter multimodal format
           return {
             role: m.role,
             content: [
@@ -721,7 +596,6 @@ export default function WebChat() {
             ],
           };
         } else {
-          // PDF — inject extracted text as context
           const fileContext = `[Содержимое файла "${m.file.file_name}"]\n${m.file.content}\n[Конец файла]\n\n${m.content || "Проанализируй этот документ."}`;
           return { role: m.role, content: fileContext };
         }
@@ -736,10 +610,7 @@ export default function WebChat() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${auth.token}`,
         },
-        body: JSON.stringify({
-          model_id: selectedModel,
-          messages: apiMessages,
-        }),
+        body: JSON.stringify({ model_id: selectedModel, messages: apiMessages }),
       });
 
       if (!res.ok) {
@@ -774,12 +645,9 @@ export default function WebChat() {
           try {
             const data = JSON.parse(payload);
 
-            // Skip billing chunk — save for display
             if (data.billing) {
               billing = data.billing;
-              setAuth((prev) =>
-                prev ? { ...prev, balanceUsd: data.billing.balance_usd } : prev
-              );
+              setAuth((prev) => prev ? { ...prev, balanceUsd: data.billing.balance_usd } : prev);
               try {
                 const saved = localStorage.getItem("stone_auth");
                 if (saved) {
@@ -791,63 +659,84 @@ export default function WebChat() {
               continue;
             }
 
-            // Skip usage chunk
             if (data.usage) continue;
 
-            // Skip error chunk — show as message
             if (data.error) {
               assistantContent = data.error;
-              setMessages([
-                ...history,
-                { role: "assistant", content: assistantContent },
-              ]);
+              setMessages([...history, { role: "assistant", content: assistantContent }]);
               continue;
             }
 
-            // Content chunk — backend sends {"content": "text"}
-            // Also handle OpenRouter raw format {"choices": [{"delta": {"content": "text"}}]}
             const content = data.content || data.choices?.[0]?.delta?.content;
             if (content) {
               assistantContent += content;
-              setMessages([
-                ...history,
-                { role: "assistant", content: assistantContent, billing },
-              ]);
+              setMessages([...history, { role: "assistant", content: assistantContent, billing }]);
             }
           } catch {}
         }
       }
 
-      setMessages([
-        ...history,
-        { role: "assistant", content: assistantContent, billing },
-      ]);
+      setMessages([...history, { role: "assistant", content: assistantContent, billing }]);
 
-      // Save to persistent history
       const userText = history[history.length - 1]?.content || "";
       if (assistantContent) saveToSession(userText, assistantContent, billing);
-    } catch (e) {
+    } catch {
       setMessages([...history, { role: "assistant", content: "Ошибка соединения" }]);
     } finally {
       setStreaming(false);
     }
-  }, [auth, input, streaming, messages, selectedModel, pendingFile, saveToSession]);
+  }, [auth, input, streaming, messages, selectedModel, pendingFile, saveToSession, resetTextarea]);
+
+  const handleKey = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  }, [sendMessage]);
 
   if (!loaded) return null;
   if (!auth) return <AuthFormComponent onAuth={setAuth} />;
 
+  const aiColor = companyColors[model?.company ?? ""] || "#D97757";
+  const aiLetter = companyIcons[model?.company ?? ""] || "AI";
+
   return (
     <div className="h-screen flex bg-bg overflow-hidden">
-      {showOnboarding && <Onboarding onDone={() => setShowOnboarding(false)} />}
-
-      {/* Help button to replay onboarding */}
-      <button
-        onClick={() => setShowOnboarding(true)}
-        className="fixed bottom-[72px] right-3 z-50 w-7 h-7 bg-white/80 border border-text/10 rounded-full flex items-center justify-center text-text/20 hover:text-accent hover:border-accent/30 transition-colors shadow-sm text-xs font-bold"
-        title="Справка"
-      >
-        ?
-      </button>
+      {/* Inline styles for markdown */}
+      <style>{`
+        .md-content { line-height: 1.7; }
+        .md-content h1, .md-content .md-h1 { font-size: 1.25rem; font-weight: 800; margin: 1rem 0 0.5rem; color: #1A1916; }
+        .md-content h2, .md-content .md-h2 { font-size: 1.1rem; font-weight: 700; margin: 0.75rem 0 0.4rem; color: #1A1916; }
+        .md-content h3, .md-content .md-h3 { font-size: 1rem; font-weight: 600; margin: 0.5rem 0 0.3rem; color: #1A1916; }
+        .md-content strong { font-weight: 700; }
+        .md-content em { font-style: italic; }
+        .md-content del { text-decoration: line-through; opacity: 0.6; }
+        .md-content .md-ul { list-style: disc; padding-left: 1.25rem; margin: 0.5rem 0; }
+        .md-content .md-li { margin: 0.15rem 0; display: list-item; }
+        .md-content .md-oli { list-style: decimal; }
+        .md-content .md-link { color: #D97757; text-decoration: underline; text-underline-offset: 2px; }
+        .md-content .md-link:hover { opacity: 0.8; }
+        .md-content .inline-code {
+          background: rgba(26,25,22,0.06); padding: 0.15em 0.4em; border-radius: 0.375rem;
+          font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.85em; color: #D97757;
+        }
+        .code-block-wrapper { margin: 0.75rem 0; border-radius: 0.75rem; overflow: hidden; border: 1px solid rgba(26,25,22,0.06); }
+        .code-block-header {
+          display: flex; align-items: center; justify-content: space-between;
+          background: #1C1C1E; padding: 0.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .code-lang { font-size: 0.65rem; color: rgba(255,255,255,0.3); font-family: monospace; }
+        .code-copy-btn {
+          font-size: 0.65rem; color: rgba(255,255,255,0.3); background: none; border: none;
+          cursor: pointer; font-family: inherit; padding: 0;
+        }
+        .code-copy-btn:hover { color: rgba(255,255,255,0.6); }
+        .code-block {
+          background: #1C1C1E; padding: 1rem; overflow-x: auto; margin: 0;
+          font-size: 0.8rem; line-height: 1.6;
+        }
+        .code-block code { color: rgba(255,255,255,0.85); font-family: 'SF Mono', 'Fira Code', monospace; white-space: pre; }
+      `}</style>
 
       <Sidebar
         selected={selectedModel}
@@ -861,23 +750,207 @@ export default function WebChat() {
         onDeleteSession={deleteSession}
       />
 
-      <ChatArea
-        messages={messages}
-        streaming={streaming}
-        input={input}
-        setInput={setInput}
-        onSend={sendMessage}
-        selectedModel={selectedModel}
-        sidebarOpen={sidebarOpen}
-        onToggleSidebar={toggleSidebar}
-        balanceUsd={auth.balanceUsd}
-        onLogout={logout}
-        email={auth.email}
-        pendingFile={pendingFile}
-        onFileSelect={handleFileSelect}
-        onFileClear={() => setPendingFile(null)}
-        uploading={uploading}
-      />
+      {/* Main chat area */}
+      <div className="flex-1 flex flex-col min-w-0 h-screen">
+        {/* Top bar */}
+        <div className="h-13 border-b border-text/[0.06] bg-white/80 backdrop-blur-sm flex items-center justify-between px-4 shrink-0">
+          <div className="flex items-center gap-3">
+            {/* Sidebar toggle */}
+            <button onClick={toggleSidebar} className="text-text/30 hover:text-text/60 transition-colors">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                {sidebarOpen
+                  ? <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                  : <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                }
+              </svg>
+            </button>
+
+            {/* Model name + price */}
+            <div className="flex items-center gap-2">
+              <div
+                className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shrink-0"
+                style={{ backgroundColor: aiColor }}
+              >
+                {aiLetter}
+              </div>
+              <span className="font-bold text-sm text-text">{model?.name || selectedModel}</span>
+              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                model?.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"
+              }`}>
+                {model ? formatPrice(model) : ""}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <a href="/topup" className="text-xs font-bold text-accent hover:underline">
+              ${auth.balanceUsd.toFixed(2)}
+            </a>
+            <span className="text-[10px] text-text/20 hidden sm:block">{auth.email}</span>
+            <button onClick={logout} className="text-[10px] text-text/25 hover:text-text/50 transition-colors">Выйти</button>
+          </div>
+        </div>
+
+        {/* Messages area or Welcome screen */}
+        {messages.length === 0 ? (
+          <WelcomeScreen onSuggestion={handleSuggestion} />
+        ) : (
+          <div className="flex-1 overflow-y-auto">
+            <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+              {messages.map((msg, i) => (
+                <div key={i} className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
+                  {/* Avatar */}
+                  <div className="shrink-0 mt-0.5">
+                    {msg.role === "user" ? (
+                      <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
+                        <span className="text-[12px] font-bold text-white">U</span>
+                      </div>
+                    ) : (
+                      <div
+                        className="w-8 h-8 rounded-full flex items-center justify-center"
+                        style={{ backgroundColor: aiColor }}
+                      >
+                        <span className="text-[11px] font-bold text-white">{aiLetter}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Message bubble */}
+                  <div className={`max-w-[75%] min-w-0 ${msg.role === "user" ? "text-right" : ""}`}>
+                    <div className={`inline-block text-left rounded-2xl px-4 py-3 text-[14px] leading-relaxed ${
+                      msg.role === "user"
+                        ? "bg-accent text-white rounded-tr-md"
+                        : "bg-[#F0EFEB] text-text/85 rounded-tl-md"
+                    }`}>
+                      {/* File attachment */}
+                      {msg.file && (
+                        <div className="mb-2">
+                          {msg.file.file_type === "image" ? (
+                            <img src={msg.file.content} alt={msg.file.file_name} className="max-w-[240px] rounded-lg" />
+                          ) : (
+                            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs ${msg.role === "user" ? "bg-white/20" : "bg-white/60"}`}>
+                              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                              <span className="truncate">{msg.file.file_name}</span>
+                              <span className="shrink-0 opacity-60">{(msg.file.size / 1024).toFixed(0)}KB</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      <MessageContent content={msg.content} role={msg.role} selectedModel={selectedModel} />
+
+                      {/* Billing details */}
+                      {msg.billing && (
+                        <details className={`mt-2 text-[10px] ${msg.role === "user" ? "opacity-70" : "opacity-50"}`}>
+                          <summary className="cursor-pointer">
+                            {msg.billing.tokens_in + msg.billing.tokens_out} tok · ${msg.billing.cost_usd.toFixed(4)}
+                          </summary>
+                          <div className="mt-1 space-y-0.5">
+                            <div>Input: {msg.billing.tokens_in} tok</div>
+                            <div>Output: {msg.billing.tokens_out} tok</div>
+                            <div>Стоимость: ${msg.billing.cost_usd.toFixed(6)}</div>
+                            <div>Баланс: ${msg.billing.balance_usd.toFixed(4)}</div>
+                          </div>
+                        </details>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {/* Streaming indicator */}
+              {streaming && (
+                <div className="flex gap-3">
+                  <div className="shrink-0 mt-0.5">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: aiColor }}>
+                      <span className="text-[11px] font-bold text-white">{aiLetter}</span>
+                    </div>
+                  </div>
+                  <div className="bg-[#F0EFEB] rounded-2xl rounded-tl-md px-4 py-3">
+                    <div className="flex gap-1.5">
+                      <span className="w-2 h-2 bg-text/20 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                      <span className="w-2 h-2 bg-text/20 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                      <span className="w-2 h-2 bg-text/20 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div ref={bottomRef} />
+            </div>
+          </div>
+        )}
+
+        {/* Input area — pinned bottom */}
+        <div className="border-t border-text/[0.06] bg-white px-4 py-3 shrink-0">
+          <div className="max-w-3xl mx-auto">
+            {/* Pending file preview */}
+            {pendingFile && (
+              <div className="flex items-center gap-2 mb-2.5 px-3 py-2 bg-bg rounded-xl">
+                {pendingFile.file_type === "image" ? (
+                  <img src={pendingFile.content} alt="" className="w-10 h-10 rounded-lg object-cover" />
+                ) : (
+                  <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
+                    <svg className="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                )}
+                <span className="text-xs text-text/60 truncate flex-1">{pendingFile.file_name}</span>
+                <button onClick={() => setPendingFile(null)} className="text-text/25 hover:text-text/50 shrink-0 p-1">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            )}
+
+            {uploading && (
+              <div className="text-xs text-accent mb-2 px-1 animate-pulse">Загрузка файла...</div>
+            )}
+
+            <div className="flex items-end gap-2 bg-bg border border-text/[0.08] rounded-2xl px-3 py-2 focus-within:border-accent/30 focus-within:ring-2 focus-within:ring-accent/10 transition-all">
+              {/* File attach */}
+              <input ref={fileInputRef} type="file" accept="image/*,.pdf" className="hidden"
+                onChange={(e) => { if (e.target.files?.[0]) handleFileSelect(e.target.files[0]); e.target.value = ""; }}
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading || streaming}
+                className="w-8 h-8 flex items-center justify-center text-text/25 hover:text-accent transition-colors disabled:opacity-30 shrink-0 mb-0.5"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
+                </svg>
+              </button>
+
+              {/* Textarea */}
+              <textarea
+                ref={textareaRef}
+                value={input}
+                onChange={handleInputChange}
+                onKeyDown={handleKey}
+                placeholder={pendingFile ? "Добавьте вопрос к файлу..." : "Написать сообщение..."}
+                rows={1}
+                className="flex-1 bg-transparent text-sm resize-none focus:outline-none min-w-0 py-1.5 max-h-[200px] leading-relaxed placeholder:text-text/25"
+              />
+
+              {/* Send button */}
+              <button
+                onClick={sendMessage}
+                disabled={streaming || (!input.trim() && !pendingFile)}
+                className="w-8 h-8 rounded-xl bg-accent text-white flex items-center justify-center hover:bg-accent/90 transition-colors disabled:opacity-30 shrink-0 mb-0.5"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
