@@ -282,15 +282,17 @@ function Sidebar({
   return (
     <>
       {/* Backdrop — mobile only */}
-      {open && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-30 lg:hidden" onClick={onToggle} />
-      )}
+      <div
+        className={`fixed inset-0 z-30 lg:hidden transition-opacity duration-300 ${
+          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+        style={{ backgroundColor: "rgba(0,0,0,0.35)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)" }}
+        onClick={onToggle}
+      />
 
       {/* Sidebar panel */}
       <div
-        className={`fixed inset-y-0 left-0 z-40 w-[280px] bg-[#F5F4F0] flex flex-col transition-all duration-300 ease-in-out lg:relative lg:shrink-0 ${
-          open ? "translate-x-0 lg:translate-x-0 lg:w-[280px]" : "-translate-x-full lg:translate-x-0 lg:w-0 lg:overflow-hidden"
-        }`}
+        className={`webchat-sidebar fixed inset-y-0 left-0 z-40 bg-[#F5F4F0] flex flex-col lg:relative lg:shrink-0 ${open ? "open" : "closed"}`}
       >
         {/* Top: New Chat + Collapse */}
         <div className="p-3 shrink-0">
@@ -307,9 +309,14 @@ function Sidebar({
             <button
               onClick={onToggle}
               className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/60 text-text/30 hover:text-text/60 transition-colors shrink-0"
+              aria-label="Закрыть sidebar"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              {/* Chevron on desktop, X on mobile */}
+              <svg className="w-4 h-4 hidden lg:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" d="M11 19l-7-7 7-7" />
+              </svg>
+              <svg className="w-4 h-4 lg:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
@@ -820,6 +827,24 @@ export default function WebChat() {
         @supports(padding-bottom: env(safe-area-inset-bottom)) {
           .chat-input-safe { padding-bottom: calc(0.625rem + env(safe-area-inset-bottom)); }
         }
+
+        /* Sidebar: mobile = slide overlay, desktop = width transition */
+        .webchat-sidebar {
+          width: 280px;
+          transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+        .webchat-sidebar.open { transform: translateX(0); }
+        .webchat-sidebar.closed { transform: translateX(-100%); }
+
+        @media (min-width: 1024px) {
+          .webchat-sidebar {
+            position: relative !important;
+            transform: none !important;
+            transition: width 0.3s cubic-bezier(0.4,0,0.2,1);
+          }
+          .webchat-sidebar.open { width: 280px; }
+          .webchat-sidebar.closed { width: 0; overflow: hidden; }
+        }
       `}</style>
 
       <Sidebar
@@ -866,11 +891,11 @@ export default function WebChat() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <a href="/topup" className="text-xs font-bold text-accent hover:underline">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            <a href="/topup" className="text-[11px] sm:text-xs font-bold text-accent hover:underline whitespace-nowrap">
               ${auth.balanceUsd.toFixed(2)}
             </a>
-            <a href="/" className="text-text/25 hover:text-accent transition-colors hidden sm:block" title="На главную">
+            <a href="/" className="text-text/25 hover:text-accent transition-colors hidden md:block" title="На главную">
               <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955a1.126 1.126 0 011.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
               </svg>
@@ -1003,7 +1028,7 @@ export default function WebChat() {
               <div className="text-xs text-accent mb-2 px-1 animate-pulse">Загрузка файла...</div>
             )}
 
-            <div className="flex items-end gap-2 bg-bg border border-text/[0.08] rounded-2xl px-3 py-2 focus-within:border-accent/30 focus-within:ring-2 focus-within:ring-accent/10 transition-all">
+            <div className="flex items-end gap-1.5 sm:gap-2 bg-bg border border-text/[0.08] rounded-2xl px-2 sm:px-3 py-2 focus-within:border-accent/30 focus-within:ring-2 focus-within:ring-accent/10 transition-all min-w-0">
               {/* File attach */}
               <input ref={fileInputRef} type="file" accept="image/*,.pdf" className="hidden"
                 onChange={(e) => { if (e.target.files?.[0]) handleFileSelect(e.target.files[0]); e.target.value = ""; }}
