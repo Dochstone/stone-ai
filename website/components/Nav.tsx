@@ -103,19 +103,28 @@ export default function Nav() {
           </a>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 sm:gap-3">
           {authEmail ? (
-            <a
-              href="/profile"
-              className="hidden md:flex items-center gap-2.5 hover:opacity-80 transition-opacity"
-            >
-              <div
-                className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
-                style={{ backgroundColor: getAvatarColor(authEmail) }}
+            <>
+              <a
+                href="/webchat"
+                className="bg-accent text-white px-4 py-2 min-h-[44px] flex items-center rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors hidden md:inline-flex"
               >
-                <span className="text-[12px] font-bold text-white">{authEmail.slice(0, 2).toUpperCase()}</span>
-              </div>
-            </a>
+                Открыть чат
+              </a>
+              <a
+                href="/profile"
+                className="hidden md:flex items-center gap-2 hover:opacity-80 transition-opacity"
+                title="Личный кабинет"
+              >
+                <div
+                  className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 ring-2 ring-text/[0.06]"
+                  style={{ backgroundColor: getAvatarColor(authEmail) }}
+                >
+                  <span className="text-[12px] font-bold text-white">{authEmail.slice(0, 2).toUpperCase()}</span>
+                </div>
+              </a>
+            </>
           ) : (
             <a
               href="/webchat"
@@ -167,19 +176,28 @@ export default function Nav() {
             <a href="/docs" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
               API Docs
             </a>
-            {authEmail && (
-              <a href="/profile" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
-                Личный кабинет
+            <div className="border-t border-text/5 my-2" />
+            {authEmail ? (
+              <>
+                <a href="/profile" onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3 py-2.5 px-2 min-h-[44px] text-text/70 hover:text-text font-medium">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: getAvatarColor(authEmail) }}>
+                    <span className="text-[11px] font-bold text-white">{authEmail.slice(0, 2).toUpperCase()}</span>
+                  </div>
+                  Личный кабинет
+                </a>
+                <a href="/webchat" onClick={() => setMenuOpen(false)}
+                  className="bg-accent text-white px-5 py-3 min-h-[44px] rounded-xl font-bold text-sm text-center hover:bg-accent/90 transition-colors flex items-center justify-center mt-1">
+                  Открыть чат
+                </a>
+              </>
+            ) : (
+              <a href="/webchat" onClick={() => setMenuOpen(false)}
+                className="bg-accent text-white px-5 py-3 min-h-[44px] rounded-xl font-bold text-sm text-center hover:bg-accent/90 transition-colors flex items-center justify-center">
+                Начать бесплатно
               </a>
             )}
-            <div className="border-t border-text/5 my-2" />
-            <a
-              href={authEmail ? "/webchat" : "/webchat"}
-              onClick={() => setMenuOpen(false)}
-              className="bg-accent text-white px-5 py-3 min-h-[44px] rounded-xl font-bold text-sm text-center hover:bg-accent/90 transition-colors flex items-center justify-center"
-            >
-              {authEmail ? "Открыть чат" : "Начать бесплатно"}
-            </a>
             <a
               href={TELEGRAM_BOT_URL}
               target="_blank"
