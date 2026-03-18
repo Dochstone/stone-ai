@@ -40,7 +40,7 @@ export default function ModelGrid() {
     <section id="models" className="py-20 md:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-4">
-          Популярные модели
+          Технологии OpenAI, Anthropic, Google, xAI — под вашим управлением
         </h2>
         <p className="text-text/60 text-center mb-12 max-w-xl mx-auto">
           От бесплатных до самых мощных. Все доступны прямо в Telegram.

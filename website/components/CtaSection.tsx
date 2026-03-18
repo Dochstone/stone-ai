@@ -3,7 +3,7 @@ export default function CtaSection() {
     <section className="bg-dark text-white py-20 md:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 className="text-3xl md:text-5xl font-extrabold mb-4">
-          Начните прямо сейчас
+          Будущее AI — уже доступно. Начните сейчас.
         </h2>
         <p className="text-white/50 mb-10 max-w-lg mx-auto text-lg">
           50 AI-моделей в одном Telegram-боте.

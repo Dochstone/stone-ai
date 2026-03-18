@@ -194,17 +194,17 @@ export default function Hero() {
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tight">
-            50 AI-моделей
+            Единая платформа для 50 нейросетей.
             <br />
             <span className="bg-gradient-to-r from-accent to-teal bg-clip-text text-transparent">
-              прямо в Telegram
+              Подключись к AI будущего
             </span>
           </h1>
 
           <p className="mt-6 text-lg md:text-xl text-text/60 max-w-2xl mx-auto leading-relaxed">
-            GPT-5, Claude Opus, Gemini Pro, DeepSeek R1 и ещё 46 моделей.
+            Переключайтесь между GPT-5, Claude, Gemini и Grok за одно нажатие.
             <br className="hidden sm:block" />
-            Платите только за использованные токены.
+            Генерируйте картинки, анализируйте документы, ищите в интернете. Начните бесплатно.
           </p>
 
           {/* Inline registration form */}
@@ -223,7 +223,7 @@ export default function Hero() {
                 type="submit"
                 className="shrink-0 bg-accent text-white px-5 sm:px-6 py-3 min-h-[44px] rounded-xl font-bold text-sm hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
               >
-                Начать бесплатно
+                Начать использовать AI
               </button>
             </form>
             <p className="text-[11px] text-text/35 mt-3 text-center">
