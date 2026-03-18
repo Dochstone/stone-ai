@@ -116,6 +116,39 @@ const companyColors: Record<string, string> = {
 
 // ─── Message Content ───
 
+function ImageWithDownload({ url, caption }: { url: string; caption?: string }) {
+  return (
+    <div>
+      <img
+        src={url}
+        alt="Generated image"
+        className="max-w-full rounded-xl mb-2"
+        style={{ maxHeight: 400 }}
+        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+      />
+      {caption && <div className="whitespace-pre-wrap text-sm mb-2">{caption}</div>}
+      <button
+        onClick={() => downloadImage(url, `stone-ai-${Date.now()}.png`)}
+        className="flex items-center gap-1.5 text-[11px] text-accent font-semibold hover:underline mt-1"
+      >
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V3" />
+        </svg>
+        Скачать
+      </button>
+    </div>
+  );
+}
+
+function stripImageFromText(content: string): string {
+  return content
+    .replace(/(data:image\/[a-z+]+;base64,[A-Za-z0-9+/=]+)/, "")
+    .replace(/!\[.*?\]\(https?:\/\/[^\s)]+\)/g, "")
+    .replace(/(https?:\/\/[^\s"'<>]+\.(?:png|jpg|jpeg|gif|webp)(?:\?[^\s"'<>]*)?)/gi, "")
+    .replace(/"url"\s*:\s*"https?:\/\/[^"]+"/g, "")
+    .trim();
+}
+
 function MessageContent({ content, role, selectedModel }: { content: string; role: string; selectedModel: string }) {
   if (role !== "assistant" || !content) {
     return <div className="whitespace-pre-wrap break-words">{content}</div>;
@@ -124,48 +157,29 @@ function MessageContent({ content, role, selectedModel }: { content: string; rol
   const imageUrl = extractImageUrl(content);
   const isImageModel = IMAGE_MODEL_IDS.has(selectedModel);
 
+  // Image model returned an image (base64, URL, markdown image)
   if (imageUrl && isImageModel) {
-    const caption = content
-      .replace(/(data:image\/[a-z+]+;base64,[A-Za-z0-9+/=]+)/, "")
-      .replace(/!\[.*?\]\(https?:\/\/[^\s)]+\)/, "")
-      .replace(/(https?:\/\/[^\s"'<>]+\.(?:png|jpg|jpeg|gif|webp)(?:\?[^\s"'<>]*)?)/, "")
-      .replace(/"url"\s*:\s*"https?:\/\/[^"]+"/g, "")
-      .trim();
-
-    return (
-      <div>
-        <img src={imageUrl} alt="Generated image" className="max-w-full rounded-xl mb-2" style={{ maxHeight: 400 }} />
-        {caption && <div className="whitespace-pre-wrap text-sm mb-2">{caption}</div>}
-        <button
-          onClick={() => downloadImage(imageUrl, `stone-ai-${Date.now()}.png`)}
-          className="flex items-center gap-1.5 text-[11px] text-accent font-semibold hover:underline"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V3" />
-          </svg>
-          Скачать
-        </button>
-      </div>
-    );
+    const caption = stripImageFromText(content);
+    return <ImageWithDownload url={imageUrl} caption={caption || undefined} />;
   }
 
+  // Image model returned a plain URL
   if (isImageModel && content.match(/^https?:\/\/\S+$/)) {
+    return <ImageWithDownload url={content.trim()} />;
+  }
+
+  // Any model returned content with an embedded image (detect universally)
+  if (imageUrl && !isImageModel) {
+    const caption = stripImageFromText(content);
     return (
       <div>
-        <img src={content.trim()} alt="Generated image" className="max-w-full rounded-xl mb-2" style={{ maxHeight: 400 }} />
-        <button
-          onClick={() => downloadImage(content.trim(), `stone-ai-${Date.now()}.png`)}
-          className="flex items-center gap-1.5 text-[11px] text-accent font-semibold hover:underline"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V3" />
-          </svg>
-          Скачать
-        </button>
+        <div className="md-content break-words" dangerouslySetInnerHTML={{ __html: renderMarkdown(caption || content) }} />
+        <ImageWithDownload url={imageUrl} />
       </div>
     );
   }
 
+  // Image model returned text only (no image found) — render as markdown
   return <div className="md-content break-words" dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }} />;
 }
 
