@@ -267,13 +267,15 @@ function Sidebar({
 
   return (
     <>
+      {/* Backdrop — mobile only */}
       {open && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden" onClick={onToggle} />
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-30 lg:hidden" onClick={onToggle} />
       )}
 
+      {/* Sidebar panel */}
       <div
-        className={`fixed inset-y-0 left-0 z-40 w-[280px] bg-[#F5F4F0] flex flex-col transition-transform duration-200 lg:relative ${
-          open ? "translate-x-0" : "-translate-x-full lg:-translate-x-full"
+        className={`fixed inset-y-0 left-0 z-40 w-[280px] bg-[#F5F4F0] flex flex-col transition-all duration-300 ease-in-out lg:relative lg:shrink-0 ${
+          open ? "translate-x-0 lg:translate-x-0 lg:w-[280px]" : "-translate-x-full lg:translate-x-0 lg:w-0 lg:overflow-hidden"
         }`}
       >
         {/* Top: New Chat + Collapse */}
@@ -444,6 +446,18 @@ export default function WebChat() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streaming]);
+
+  // Mobile keyboard: keep input visible
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.visualViewport) return;
+    const vv = window.visualViewport;
+    const onResize = () => {
+      const diff = window.innerHeight - vv.height;
+      document.documentElement.style.setProperty("--kb-height", `${diff}px`);
+    };
+    vv.addEventListener("resize", onResize);
+    return () => vv.removeEventListener("resize", onResize);
+  }, []);
 
   // Auto-resize textarea
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -752,7 +766,7 @@ export default function WebChat() {
   const showStreamingDots = streaming && (!lastMsg || lastMsg.role !== "assistant" || !lastMsg.content);
 
   return (
-    <div className="h-screen flex bg-bg overflow-hidden">
+    <div className="h-dvh flex bg-bg overflow-hidden" style={{ height: "100dvh" }}>
       {/* Inline styles for markdown */}
       <style>{`
         .md-content { line-height: 1.7; }
@@ -771,7 +785,7 @@ export default function WebChat() {
           background: rgba(26,25,22,0.06); padding: 0.15em 0.4em; border-radius: 0.375rem;
           font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.85em; color: #D97757;
         }
-        .code-block-wrapper { margin: 0.75rem 0; border-radius: 0.75rem; overflow: hidden; border: 1px solid rgba(26,25,22,0.06); }
+        .code-block-wrapper { margin: 0.75rem 0; border-radius: 0.75rem; overflow: hidden; border: 1px solid rgba(26,25,22,0.06); max-width: 100%; }
         .code-block-header {
           display: flex; align-items: center; justify-content: space-between;
           background: #1C1C1E; padding: 0.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.06);
@@ -784,9 +798,14 @@ export default function WebChat() {
         .code-copy-btn:hover { color: rgba(255,255,255,0.6); }
         .code-block {
           background: #1C1C1E; padding: 1rem; overflow-x: auto; margin: 0;
-          font-size: 0.8rem; line-height: 1.6;
+          font-size: 0.8rem; line-height: 1.6; -webkit-overflow-scrolling: touch;
         }
         .code-block code { color: rgba(255,255,255,0.85); font-family: 'SF Mono', 'Fira Code', monospace; white-space: pre; }
+        .md-content { overflow-wrap: break-word; word-break: break-word; }
+        .md-content pre { max-width: 100%; }
+        @supports(padding-bottom: env(safe-area-inset-bottom)) {
+          .chat-input-safe { padding-bottom: calc(0.625rem + env(safe-area-inset-bottom)); }
+        }
       `}</style>
 
       <Sidebar
@@ -802,7 +821,7 @@ export default function WebChat() {
       />
 
       {/* Main chat area */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen">
+      <div className="flex-1 flex flex-col min-w-0 h-full">
         {/* Top bar */}
         <div className="h-14 border-b border-text/[0.06] bg-white/80 backdrop-blur-sm flex items-center justify-between px-3 sm:px-4 shrink-0">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -817,15 +836,15 @@ export default function WebChat() {
             </button>
 
             {/* Model name + price */}
-            <div className="flex items-center gap-2 min-w-0">
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 overflow-hidden">
               <div
                 className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shrink-0"
                 style={{ backgroundColor: aiColor }}
               >
                 {aiLetter}
               </div>
-              <span className="font-bold text-sm text-text truncate">{model?.name || selectedModel}</span>
-              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 hidden sm:inline ${
+              <span className="font-bold text-[13px] sm:text-sm text-text truncate max-w-[100px] sm:max-w-[200px]">{model?.name || selectedModel}</span>
+              <span className={`text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
                 model?.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"
               }`}>
                 {model ? formatPrice(model) : ""}
@@ -875,8 +894,8 @@ export default function WebChat() {
                   </div>
 
                   {/* Message bubble */}
-                  <div className={`max-w-[85%] sm:max-w-[75%] min-w-0 ${msg.role === "user" ? "text-right" : ""}`}>
-                    <div className={`inline-block text-left rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-[13px] sm:text-[14px] leading-relaxed ${
+                  <div className={`max-w-[85%] sm:max-w-[75%] min-w-0 overflow-hidden ${msg.role === "user" ? "text-right" : ""}`}>
+                    <div className={`inline-block text-left rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-[13px] sm:text-[14px] leading-relaxed overflow-hidden ${
                       msg.role === "user"
                         ? "bg-accent text-white rounded-tr-md"
                         : "bg-[#F0EFEB] text-text/85 rounded-tl-md"
@@ -944,7 +963,7 @@ export default function WebChat() {
         )}
 
         {/* Input area — pinned bottom */}
-        <div className="border-t border-text/[0.06] bg-white px-3 sm:px-4 py-2.5 sm:py-3 shrink-0">
+        <div className="border-t border-text/[0.06] bg-white px-3 sm:px-4 py-2.5 sm:py-3 shrink-0 chat-input-safe">
           <div className="max-w-3xl mx-auto">
             {pendingFile && (
               <div className="flex items-center gap-2 mb-2.5 px-3 py-2 bg-bg rounded-xl">
