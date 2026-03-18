@@ -3,6 +3,13 @@
 import { useEffect, useState } from "react";
 import { TELEGRAM_BOT_URL } from "@/lib/models";
 
+function getAvatarColor(email: string): string {
+  const colors = ["#D97757", "#0E9A83", "#4285f4", "#7c3aed", "#ec4899", "#f59e0b", "#06b6d4", "#10a37f"];
+  let hash = 0;
+  for (let i = 0; i < email.length; i++) hash = email.charCodeAt(i) + ((hash << 5) - hash);
+  return colors[Math.abs(hash) % colors.length];
+}
+
 const tools = [
   { href: "/chat", label: "AI Чат" },
   { href: "/images", label: "Генерация картинок" },
@@ -16,11 +23,22 @@ export default function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
+  const [authEmail, setAuthEmail] = useState<string | null>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("stone_auth");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.email) setAuthEmail(parsed.email);
+      }
+    } catch {}
   }, []);
 
   return (
@@ -86,12 +104,26 @@ export default function Nav() {
         </div>
 
         <div className="flex items-center gap-2">
-          <a
-            href="/webchat"
-            className="bg-accent text-white px-4 py-2 min-h-[44px] flex items-center rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors hidden md:inline-flex"
-          >
-            Начать бесплатно
-          </a>
+          {authEmail ? (
+            <a
+              href="/profile"
+              className="hidden md:flex items-center gap-2.5 hover:opacity-80 transition-opacity"
+            >
+              <div
+                className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+                style={{ backgroundColor: getAvatarColor(authEmail) }}
+              >
+                <span className="text-[12px] font-bold text-white">{authEmail.slice(0, 2).toUpperCase()}</span>
+              </div>
+            </a>
+          ) : (
+            <a
+              href="/webchat"
+              className="bg-accent text-white px-4 py-2 min-h-[44px] flex items-center rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors hidden md:inline-flex"
+            >
+              Начать бесплатно
+            </a>
+          )}
 
           {/* Burger — visible below md (768px) */}
           <button
@@ -135,13 +167,18 @@ export default function Nav() {
             <a href="/docs" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
               API Docs
             </a>
+            {authEmail && (
+              <a href="/profile" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
+                Личный кабинет
+              </a>
+            )}
             <div className="border-t border-text/5 my-2" />
             <a
-              href="/webchat"
+              href={authEmail ? "/webchat" : "/webchat"}
               onClick={() => setMenuOpen(false)}
               className="bg-accent text-white px-5 py-3 min-h-[44px] rounded-xl font-bold text-sm text-center hover:bg-accent/90 transition-colors flex items-center justify-center"
             >
-              Начать бесплатно
+              {authEmail ? "Открыть чат" : "Начать бесплатно"}
             </a>
             <a
               href={TELEGRAM_BOT_URL}
