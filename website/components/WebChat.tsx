@@ -42,33 +42,22 @@ function formatPrice(m: AIModel) {
 
 function renderMarkdown(text: string): string {
   let html = text
-    // Code blocks
     .replace(/```(\w*)\n([\s\S]*?)```/g, (_match, lang, code) => {
       const escaped = code.replace(/</g, "&lt;").replace(/>/g, "&gt;").trimEnd();
       return `<div class="code-block-wrapper"><div class="code-block-header"><span class="code-lang">${lang || "code"}</span><button class="code-copy-btn" onclick="(function(btn){var code=btn.closest('.code-block-wrapper').querySelector('code').textContent;navigator.clipboard.writeText(code);btn.textContent='Скопировано!';setTimeout(function(){btn.textContent='Копировать'},2000)})(this)">Копировать</button></div><pre class="code-block"><code>${escaped}</code></pre></div>`;
     })
-    // Inline code
     .replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
-    // Bold
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-    // Italic
     .replace(/\*(.+?)\*/g, "<em>$1</em>")
-    // Strikethrough
     .replace(/~~(.+?)~~/g, "<del>$1</del>")
-    // Headers
     .replace(/^### (.+)$/gm, '<h3 class="md-h3">$1</h3>')
     .replace(/^## (.+)$/gm, '<h2 class="md-h2">$1</h2>')
     .replace(/^# (.+)$/gm, '<h1 class="md-h1">$1</h1>')
-    // Unordered lists
     .replace(/^[*-] (.+)$/gm, '<li class="md-li">$1</li>')
-    // Ordered lists
     .replace(/^\d+\. (.+)$/gm, '<li class="md-li md-oli">$1</li>')
-    // Links
-    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" class="md-link">$1</a>')
-    // Line breaks (but not inside code blocks)
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" class="md-link">$1</a>')
     .replace(/\n/g, "<br/>");
 
-  // Clean up consecutive <li> into <ul>
   html = html.replace(/((?:<li class="md-li">.*?<\/li><br\/>?)+)/g, (match) => {
     const cleaned = match.replace(/<br\/?>/g, "");
     return `<ul class="md-ul">${cleaned}</ul>`;
@@ -111,52 +100,25 @@ interface ChatSessionItem {
 // ─── Company icon for AI avatar ───
 
 const companyIcons: Record<string, string> = {
-  OpenAI: "G",
-  Anthropic: "A",
-  Google: "G",
-  Meta: "M",
-  Mistral: "M",
-  DeepSeek: "D",
-  xAI: "X",
-  Perplexity: "P",
-  Alibaba: "Q",
-  MiniMax: "M",
-  Zhipu: "Z",
-  Cohere: "C",
-  Microsoft: "M",
-  NVIDIA: "N",
-  Gryphe: "G",
-  BFL: "F",
-  Stability: "S",
-  Moonshot: "K",
+  OpenAI: "G", Anthropic: "A", Google: "G", Meta: "M", Mistral: "M",
+  DeepSeek: "D", xAI: "X", Perplexity: "P", Alibaba: "Q", MiniMax: "M",
+  Zhipu: "Z", Cohere: "C", Microsoft: "M", NVIDIA: "N", Gryphe: "G",
+  BFL: "F", Stability: "S", Moonshot: "K",
 };
 
 const companyColors: Record<string, string> = {
-  OpenAI: "#10a37f",
-  Anthropic: "#d97706",
-  Google: "#4285f4",
-  Meta: "#0668E1",
-  Mistral: "#7c3aed",
-  DeepSeek: "#06b6d4",
-  xAI: "#64748b",
-  Perplexity: "#6366f1",
-  Alibaba: "#ff6a00",
-  MiniMax: "#ec4899",
-  Zhipu: "#0ea5e9",
-  Cohere: "#39d353",
-  Microsoft: "#00a4ef",
-  NVIDIA: "#76b900",
-  Gryphe: "#8b5cf6",
-  BFL: "#f59e0b",
-  Stability: "#a855f7",
-  Moonshot: "#06b6d4",
+  OpenAI: "#10a37f", Anthropic: "#d97706", Google: "#4285f4", Meta: "#0668E1",
+  Mistral: "#7c3aed", DeepSeek: "#06b6d4", xAI: "#64748b", Perplexity: "#6366f1",
+  Alibaba: "#ff6a00", MiniMax: "#ec4899", Zhipu: "#0ea5e9", Cohere: "#39d353",
+  Microsoft: "#00a4ef", NVIDIA: "#76b900", Gryphe: "#8b5cf6", BFL: "#f59e0b",
+  Stability: "#a855f7", Moonshot: "#06b6d4",
 };
 
 // ─── Message Content ───
 
 function MessageContent({ content, role, selectedModel }: { content: string; role: string; selectedModel: string }) {
   if (role !== "assistant" || !content) {
-    return <div className="whitespace-pre-wrap">{content}</div>;
+    return <div className="whitespace-pre-wrap break-words">{content}</div>;
   }
 
   const imageUrl = extractImageUrl(content);
@@ -204,7 +166,7 @@ function MessageContent({ content, role, selectedModel }: { content: string; rol
     );
   }
 
-  return <div className="md-content" dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }} />;
+  return <div className="md-content break-words" dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }} />;
 }
 
 // ─── Welcome Screen ───
@@ -220,7 +182,6 @@ function WelcomeScreen({ onSuggestion }: { onSuggestion: (text: string) => void 
   return (
     <div className="flex-1 flex items-center justify-center px-4">
       <div className="text-center max-w-xl w-full">
-        {/* Logo */}
         <div className="mb-6">
           <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-accent to-accent/70 flex items-center justify-center shadow-lg shadow-accent/20 mb-4">
             <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -231,8 +192,7 @@ function WelcomeScreen({ onSuggestion }: { onSuggestion: (text: string) => void 
           <p className="text-sm text-text/40">50+ AI-моделей в одном месте. Выберите модель и начните диалог.</p>
         </div>
 
-        {/* Suggestion cards */}
-        <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md mx-auto">
           {SUGGESTION_CARDS.map((card) => (
             <button
               key={card.title}
@@ -247,6 +207,36 @@ function WelcomeScreen({ onSuggestion }: { onSuggestion: (text: string) => void 
         </div>
       </div>
     </div>
+  );
+}
+
+// ─── Scroll to Bottom Button ───
+
+function ScrollToBottom({ containerRef }: { containerRef: React.RefObject<HTMLDivElement | null> }) {
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+      setShow(distFromBottom > 200);
+    };
+    el.addEventListener("scroll", onScroll);
+    return () => el.removeEventListener("scroll", onScroll);
+  }, [containerRef]);
+
+  if (!show) return null;
+
+  return (
+    <button
+      onClick={() => containerRef.current?.scrollTo({ top: containerRef.current.scrollHeight, behavior: "smooth" })}
+      className="absolute bottom-4 left-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-white border border-text/10 shadow-lg flex items-center justify-center text-text/40 hover:text-text/70 transition-colors z-10"
+    >
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+      </svg>
+    </button>
   );
 }
 
@@ -277,7 +267,6 @@ function Sidebar({
 
   return (
     <>
-      {/* Backdrop for mobile */}
       {open && (
         <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden" onClick={onToggle} />
       )}
@@ -291,7 +280,7 @@ function Sidebar({
         <div className="p-3 shrink-0">
           <div className="flex items-center gap-2">
             <button
-              onClick={onNewChat}
+              onClick={() => { onNewChat(); if (window.innerWidth < 1024) onToggle(); }}
               className="flex-1 flex items-center gap-2 bg-white hover:bg-white/80 border border-text/[0.08] rounded-xl px-3.5 py-2.5 transition-colors shadow-sm"
             >
               <svg className="w-4 h-4 text-text/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -314,7 +303,8 @@ function Sidebar({
         <div className="flex-1 overflow-y-auto px-2">
           {sessions.length === 0 ? (
             <div className="px-3 py-8 text-center">
-              <p className="text-[11px] text-text/20">Нет сохранённых чатов</p>
+              <div className="text-3xl mb-2 opacity-20">💬</div>
+              <p className="text-[11px] text-text/20">Здесь появятся ваши чаты</p>
             </div>
           ) : (
             <div className="space-y-0.5">
@@ -355,36 +345,60 @@ function Sidebar({
           )}
         </div>
 
-        {/* Bottom: Model selector */}
-        <div className="p-3 border-t border-text/[0.06] shrink-0">
-          <label className="text-[10px] font-semibold text-text/30 uppercase tracking-wider mb-1.5 block">Модель</label>
-          <select
-            value={selected}
-            onChange={(e) => onSelect(e.target.value)}
-            className="w-full bg-white border border-text/[0.08] rounded-xl px-3 py-2.5 text-[13px] font-medium text-text appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent/30 transition-colors"
-            style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231A191660' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
-          >
-            <optgroup label="Free">
-              {MODELS.filter(m => m.tier === "free").map(m => (
-                <option key={m.id} value={m.id}>{m.name} — {m.company}</option>
-              ))}
-            </optgroup>
-            <optgroup label="Pro">
-              {MODELS.filter(m => m.tier === "pro").map(m => (
-                <option key={m.id} value={m.id}>{m.name} — {m.company} ({formatPrice(m)})</option>
-              ))}
-            </optgroup>
-          </select>
-          {model && (
-            <div className="flex items-center gap-2 mt-2 px-1">
-              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                model.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"
-              }`}>
-                {formatPrice(model)}
-              </span>
-              {model.context && <span className="text-[10px] text-text/25">{model.context}</span>}
-            </div>
-          )}
+        {/* Bottom: Model selector + nav links */}
+        <div className="p-3 border-t border-text/[0.06] shrink-0 space-y-3">
+          <div>
+            <label className="text-[10px] font-semibold text-text/30 uppercase tracking-wider mb-1.5 block">Модель</label>
+            <select
+              value={selected}
+              onChange={(e) => onSelect(e.target.value)}
+              className="w-full bg-white border border-text/[0.08] rounded-xl px-3 py-2.5 text-[13px] font-medium text-text appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent/30 transition-colors"
+              style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231A191660' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
+            >
+              <optgroup label="Free">
+                {MODELS.filter(m => m.tier === "free").map(m => (
+                  <option key={m.id} value={m.id}>{m.name} — {m.company}</option>
+                ))}
+              </optgroup>
+              <optgroup label="Pro">
+                {MODELS.filter(m => m.tier === "pro").map(m => (
+                  <option key={m.id} value={m.id}>{m.name} — {m.company} ({formatPrice(m)})</option>
+                ))}
+              </optgroup>
+            </select>
+            {model && (
+              <div className="flex items-center gap-2 mt-2 px-1">
+                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                  model.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"
+                }`}>
+                  {formatPrice(model)}
+                </span>
+                {model.context && <span className="text-[10px] text-text/25">{model.context}</span>}
+              </div>
+            )}
+          </div>
+
+          {/* Quick nav links */}
+          <div className="flex items-center gap-1 pt-1">
+            <a href="/" className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-text/30 hover:text-accent hover:bg-white/50 transition-colors text-[11px] font-medium">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955a1.126 1.126 0 011.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+              </svg>
+              Главная
+            </a>
+            <a href="/profile" className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-text/30 hover:text-accent hover:bg-white/50 transition-colors text-[11px] font-medium">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+              </svg>
+              Профиль
+            </a>
+            <a href="/topup" className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-text/30 hover:text-accent hover:bg-white/50 transition-colors text-[11px] font-medium">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Баланс
+            </a>
+          </div>
         </div>
       </div>
     </>
@@ -409,6 +423,8 @@ export default function WebChat() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const model = useMemo(() => MODELS.find((m) => m.id === selectedModel), [selectedModel]);
 
@@ -567,10 +583,20 @@ export default function WebChat() {
     }
   }, [auth]);
 
+  // Suggestion cards → auto-send
   const handleSuggestion = useCallback((text: string) => {
     setInput(text);
-    // Focus textarea and trigger send after setting input
-    setTimeout(() => textareaRef.current?.focus(), 50);
+    // Trigger send on next tick after state update
+    setTimeout(() => {
+      const fakeEvent = { preventDefault: () => {} } as React.KeyboardEvent;
+      // We'll just set input and let user see it, then auto-send
+    }, 50);
+  }, []);
+
+  // Stop generation
+  const stopGeneration = useCallback(() => {
+    abortRef.current?.abort();
+    setStreaming(false);
   }, []);
 
   const sendMessage = useCallback(async () => {
@@ -584,6 +610,9 @@ export default function WebChat() {
     setPendingFile(null);
     setStreaming(true);
     resetTextarea();
+
+    const abort = new AbortController();
+    abortRef.current = abort;
 
     const apiMessages = history.slice(-20).map((m) => {
       if (m.file) {
@@ -611,6 +640,7 @@ export default function WebChat() {
           Authorization: `Bearer ${auth.token}`,
         },
         body: JSON.stringify({ model_id: selectedModel, messages: apiMessages }),
+        signal: abort.signal,
       });
 
       if (!res.ok) {
@@ -680,12 +710,31 @@ export default function WebChat() {
 
       const userText = history[history.length - 1]?.content || "";
       if (assistantContent) saveToSession(userText, assistantContent, billing);
-    } catch {
-      setMessages([...history, { role: "assistant", content: "Ошибка соединения" }]);
+    } catch (e: any) {
+      if (e?.name === "AbortError") {
+        // Stopped by user — keep what we have
+      } else {
+        setMessages([...history, { role: "assistant", content: "Ошибка соединения" }]);
+      }
     } finally {
       setStreaming(false);
+      abortRef.current = null;
     }
   }, [auth, input, streaming, messages, selectedModel, pendingFile, saveToSession, resetTextarea]);
+
+  // Auto-send after suggestion card click
+  const pendingSend = useRef(false);
+  const handleSuggestionClick = useCallback((text: string) => {
+    setInput(text);
+    pendingSend.current = true;
+  }, []);
+
+  useEffect(() => {
+    if (pendingSend.current && input.trim()) {
+      pendingSend.current = false;
+      sendMessage();
+    }
+  }, [input, sendMessage]);
 
   const handleKey = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -699,6 +748,8 @@ export default function WebChat() {
 
   const aiColor = companyColors[model?.company ?? ""] || "#D97757";
   const aiLetter = companyIcons[model?.company ?? ""] || "AI";
+  const lastMsg = messages[messages.length - 1];
+  const showStreamingDots = streaming && (!lastMsg || lastMsg.role !== "assistant" || !lastMsg.content);
 
   return (
     <div className="h-screen flex bg-bg overflow-hidden">
@@ -753,32 +804,28 @@ export default function WebChat() {
       {/* Main chat area */}
       <div className="flex-1 flex flex-col min-w-0 h-screen">
         {/* Top bar */}
-        <div className="h-13 border-b border-text/[0.06] bg-white/80 backdrop-blur-sm flex items-center justify-between px-4 shrink-0">
-          <div className="flex items-center gap-3">
+        <div className="h-14 border-b border-text/[0.06] bg-white/80 backdrop-blur-sm flex items-center justify-between px-3 sm:px-4 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             {/* Sidebar toggle */}
-            <button onClick={toggleSidebar} className="text-text/30 hover:text-text/60 transition-colors">
+            <button onClick={toggleSidebar} className="text-text/30 hover:text-text/60 transition-colors shrink-0">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                {sidebarOpen
+                  ? <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  : <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                }
               </svg>
             </button>
 
-            {/* Home link */}
-            <a href="/" className="text-text/50 hover:text-accent transition-colors" title="На главную">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955a1.126 1.126 0 011.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-              </svg>
-            </a>
-
             {/* Model name + price */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0">
               <div
                 className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shrink-0"
                 style={{ backgroundColor: aiColor }}
               >
                 {aiLetter}
               </div>
-              <span className="font-bold text-sm text-text">{model?.name || selectedModel}</span>
-              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+              <span className="font-bold text-sm text-text truncate">{model?.name || selectedModel}</span>
+              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 hidden sm:inline ${
                 model?.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"
               }`}>
                 {model ? formatPrice(model) : ""}
@@ -786,13 +833,18 @@ export default function WebChat() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <a href="/topup" className="text-xs font-bold text-accent hover:underline">
               ${auth.balanceUsd.toFixed(2)}
             </a>
-            <a href="/profile" className="text-text/30 hover:text-accent transition-colors" title="Личный кабинет">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+            <a href="/" className="text-text/25 hover:text-accent transition-colors hidden sm:block" title="На главную">
+              <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955a1.126 1.126 0 011.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+              </svg>
+            </a>
+            <a href="/profile" className="text-text/25 hover:text-accent transition-colors" title="Личный кабинет">
+              <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
               </svg>
             </a>
           </div>
@@ -800,36 +852,35 @@ export default function WebChat() {
 
         {/* Messages area or Welcome screen */}
         {messages.length === 0 ? (
-          <WelcomeScreen onSuggestion={handleSuggestion} />
+          <WelcomeScreen onSuggestion={handleSuggestionClick} />
         ) : (
-          <div className="flex-1 overflow-y-auto">
-            <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+          <div className="flex-1 overflow-y-auto relative" ref={messagesContainerRef}>
+            <div className="max-w-3xl mx-auto px-3 sm:px-4 py-6 space-y-5">
               {messages.map((msg, i) => (
-                <div key={i} className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
+                <div key={i} className={`flex gap-2.5 sm:gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
                   {/* Avatar */}
                   <div className="shrink-0 mt-0.5">
                     {msg.role === "user" ? (
-                      <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
-                        <span className="text-[12px] font-bold text-white">U</span>
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-accent flex items-center justify-center">
+                        <span className="text-[11px] sm:text-[12px] font-bold text-white">U</span>
                       </div>
                     ) : (
                       <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center"
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center"
                         style={{ backgroundColor: aiColor }}
                       >
-                        <span className="text-[11px] font-bold text-white">{aiLetter}</span>
+                        <span className="text-[10px] sm:text-[11px] font-bold text-white">{aiLetter}</span>
                       </div>
                     )}
                   </div>
 
                   {/* Message bubble */}
-                  <div className={`max-w-[75%] min-w-0 ${msg.role === "user" ? "text-right" : ""}`}>
-                    <div className={`inline-block text-left rounded-2xl px-4 py-3 text-[14px] leading-relaxed ${
+                  <div className={`max-w-[85%] sm:max-w-[75%] min-w-0 ${msg.role === "user" ? "text-right" : ""}`}>
+                    <div className={`inline-block text-left rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-[13px] sm:text-[14px] leading-relaxed ${
                       msg.role === "user"
                         ? "bg-accent text-white rounded-tr-md"
                         : "bg-[#F0EFEB] text-text/85 rounded-tl-md"
                     }`}>
-                      {/* File attachment */}
                       {msg.file && (
                         <div className="mb-2">
                           {msg.file.file_type === "image" ? (
@@ -848,7 +899,6 @@ export default function WebChat() {
 
                       <MessageContent content={msg.content} role={msg.role} selectedModel={selectedModel} />
 
-                      {/* Billing details */}
                       {msg.billing && (
                         <details className={`mt-2 text-[10px] ${msg.role === "user" ? "opacity-70" : "opacity-50"}`}>
                           <summary className="cursor-pointer">
@@ -867,12 +917,12 @@ export default function WebChat() {
                 </div>
               ))}
 
-              {/* Streaming indicator */}
-              {streaming && (
-                <div className="flex gap-3">
+              {/* Streaming dots — only when no content yet */}
+              {showStreamingDots && (
+                <div className="flex gap-2.5 sm:gap-3">
                   <div className="shrink-0 mt-0.5">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: aiColor }}>
-                      <span className="text-[11px] font-bold text-white">{aiLetter}</span>
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: aiColor }}>
+                      <span className="text-[10px] sm:text-[11px] font-bold text-white">{aiLetter}</span>
                     </div>
                   </div>
                   <div className="bg-[#F0EFEB] rounded-2xl rounded-tl-md px-4 py-3">
@@ -887,13 +937,15 @@ export default function WebChat() {
 
               <div ref={bottomRef} />
             </div>
+
+            {/* Scroll to bottom */}
+            <ScrollToBottom containerRef={messagesContainerRef} />
           </div>
         )}
 
         {/* Input area — pinned bottom */}
-        <div className="border-t border-text/[0.06] bg-white px-4 py-3 shrink-0">
+        <div className="border-t border-text/[0.06] bg-white px-3 sm:px-4 py-2.5 sm:py-3 shrink-0">
           <div className="max-w-3xl mx-auto">
-            {/* Pending file preview */}
             {pendingFile && (
               <div className="flex items-center gap-2 mb-2.5 px-3 py-2 bg-bg rounded-xl">
                 {pendingFile.file_type === "image" ? (
@@ -939,21 +991,33 @@ export default function WebChat() {
                 value={input}
                 onChange={handleInputChange}
                 onKeyDown={handleKey}
-                placeholder={pendingFile ? "Добавьте вопрос к файлу..." : "Написать сообщение..."}
+                placeholder={pendingFile ? "Добавьте вопрос к файлу..." : "Написать сообщение... (Shift+Enter — новая строка)"}
                 rows={1}
-                className="flex-1 bg-transparent text-sm resize-none focus:outline-none min-w-0 py-1.5 max-h-[200px] leading-relaxed placeholder:text-text/25"
+                className="flex-1 bg-transparent text-sm resize-none focus:outline-none min-w-0 py-1.5 max-h-[200px] leading-relaxed placeholder:text-text/20"
               />
 
-              {/* Send button */}
-              <button
-                onClick={sendMessage}
-                disabled={streaming || (!input.trim() && !pendingFile)}
-                className="w-8 h-8 rounded-xl bg-accent text-white flex items-center justify-center hover:bg-accent/90 transition-colors disabled:opacity-30 shrink-0 mb-0.5"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
-                </svg>
-              </button>
+              {/* Send or Stop button */}
+              {streaming ? (
+                <button
+                  onClick={stopGeneration}
+                  className="w-8 h-8 rounded-xl bg-text/70 text-white flex items-center justify-center hover:bg-text/90 transition-colors shrink-0 mb-0.5"
+                  title="Остановить генерацию"
+                >
+                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                    <rect x="6" y="6" width="12" height="12" rx="2" />
+                  </svg>
+                </button>
+              ) : (
+                <button
+                  onClick={sendMessage}
+                  disabled={!input.trim() && !pendingFile}
+                  className="w-8 h-8 rounded-xl bg-accent text-white flex items-center justify-center hover:bg-accent/90 transition-colors disabled:opacity-30 shrink-0 mb-0.5"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
+                  </svg>
+                </button>
+              )}
             </div>
           </div>
         </div>
