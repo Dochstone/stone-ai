@@ -1,19 +1,7 @@
-import { MODELS } from "@/lib/models";
+"use client";
 
-const FEATURED_IDS = [
-  "gpt-4o-mini",
-  "claude-haiku-4.5",
-  "gemini-2.0-flash",
-  "llama-4-maverick",
-  "gpt-5.1",
-  "claude-opus-4",
-  "gemini-2.5-pro",
-  "grok-3",
-  "deepseek-r1",
-  "perplexity-sonar-pro",
-  "flux-schnell",
-  "o3",
-];
+import { useState } from "react";
+import { MODELS, type ModelCategory } from "@/lib/models";
 
 const companyColors: Record<string, string> = {
   OpenAI: "bg-green-100 text-green-700",
@@ -25,6 +13,15 @@ const companyColors: Record<string, string> = {
   xAI: "bg-slate-100 text-slate-700",
   Perplexity: "bg-indigo-100 text-indigo-700",
   BFL: "bg-amber-100 text-amber-700",
+  Stability: "bg-purple-100 text-purple-700",
+  Alibaba: "bg-orange-100 text-orange-700",
+  Moonshot: "bg-cyan-100 text-cyan-700",
+  MiniMax: "bg-pink-100 text-pink-700",
+  Microsoft: "bg-blue-100 text-blue-700",
+  NVIDIA: "bg-green-100 text-green-700",
+  Cohere: "bg-emerald-100 text-emerald-700",
+  Zhipu: "bg-sky-100 text-sky-700",
+  Gryphe: "bg-violet-100 text-violet-700",
 };
 
 function formatPrice(model: (typeof MODELS)[number]) {
@@ -33,8 +30,19 @@ function formatPrice(model: (typeof MODELS)[number]) {
   return `$${model.pricePerMillion}/1M`;
 }
 
+const TABS: { id: "all" | ModelCategory; label: string }[] = [
+  { id: "all", label: "Все" },
+  { id: "chat", label: "Chat" },
+  { id: "image", label: "Image" },
+  { id: "search", label: "Search" },
+  { id: "reason", label: "Reasoning" },
+  { id: "code", label: "Code" },
+];
+
 export default function ModelGrid() {
-  const featured = FEATURED_IDS.map((id) => MODELS.find((m) => m.id === id)!).filter(Boolean);
+  const [tab, setTab] = useState<"all" | ModelCategory>("all");
+
+  const filtered = tab === "all" ? MODELS.slice(0, 16) : MODELS.filter((m) => m.category === tab);
 
   return (
     <section id="models" className="py-20 md:py-28">
@@ -42,15 +50,33 @@ export default function ModelGrid() {
         <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-4">
           Технологии OpenAI, Anthropic, Google, xAI — под вашим управлением
         </h2>
-        <p className="text-text/60 text-center mb-12 max-w-xl mx-auto">
-          От бесплатных до самых мощных. Все доступны прямо в Telegram.
+        <p className="text-text/60 text-center mb-10 max-w-xl mx-auto">
+          От бесплатных до самых мощных. Все доступны прямо сейчас.
         </p>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {featured.map((model) => (
+        {/* Tabs */}
+        <div className="flex justify-center gap-1.5 mb-10 flex-wrap">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors ${
+                tab === t.id
+                  ? "bg-accent text-white shadow-sm"
+                  : "bg-white text-text/40 hover:text-text/60 border border-text/[0.06]"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Grid with fade */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 transition-opacity duration-300">
+          {filtered.map((model) => (
             <div
               key={model.id}
-              className="bg-white rounded-2xl p-4 card-hover border border-text/5"
+              className="bg-white rounded-2xl p-4 card-hover border border-text/5 animate-fadeIn"
             >
               <div className="flex items-center gap-2 mb-3">
                 <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold ${companyColors[model.company] ?? "bg-gray-100 text-gray-700"}`}>

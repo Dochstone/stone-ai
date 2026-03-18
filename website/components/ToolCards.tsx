@@ -1,141 +1,5 @@
 "use client";
 
-/* ── Inline SVG illustrations ── */
-function ChatSvg() {
-  return (
-    <svg viewBox="0 0 80 80" fill="none" className="w-full h-full">
-      <rect x="8" y="16" width="44" height="32" rx="8" fill="white" fillOpacity="0.2" />
-      <rect x="28" y="32" width="44" height="32" rx="8" fill="white" fillOpacity="0.35" />
-      <circle cx="22" cy="32" r="3" fill="white" fillOpacity="0.5" />
-      <circle cx="30" cy="32" r="3" fill="white" fillOpacity="0.4" />
-      <circle cx="38" cy="32" r="3" fill="white" fillOpacity="0.3" />
-      <rect x="36" y="42" width="24" height="4" rx="2" fill="white" fillOpacity="0.4" />
-      <rect x="36" y="50" width="16" height="4" rx="2" fill="white" fillOpacity="0.25" />
-    </svg>
-  );
-}
-
-function BrushSvg() {
-  return (
-    <svg viewBox="0 0 80 80" fill="none" className="w-full h-full">
-      <rect x="14" y="14" width="52" height="52" rx="12" fill="white" fillOpacity="0.15" />
-      <circle cx="32" cy="36" r="10" fill="white" fillOpacity="0.3" />
-      <circle cx="48" cy="32" r="7" fill="white" fillOpacity="0.2" />
-      <circle cx="40" cy="50" r="8" fill="white" fillOpacity="0.25" />
-      <path d="M20 60 L36 28 L40 32 L24 64Z" fill="white" fillOpacity="0.35" />
-      <rect x="16" y="58" width="14" height="6" rx="3" fill="white" fillOpacity="0.45" />
-    </svg>
-  );
-}
-
-function DocSvg() {
-  return (
-    <svg viewBox="0 0 80 80" fill="none" className="w-full h-full">
-      <rect x="18" y="10" width="36" height="48" rx="6" fill="white" fillOpacity="0.25" />
-      <rect x="26" y="10" width="28" height="48" rx="6" fill="white" fillOpacity="0.15" />
-      <rect x="26" y="22" width="20" height="3" rx="1.5" fill="white" fillOpacity="0.4" />
-      <rect x="26" y="29" width="16" height="3" rx="1.5" fill="white" fillOpacity="0.3" />
-      <rect x="26" y="36" width="20" height="3" rx="1.5" fill="white" fillOpacity="0.35" />
-      <rect x="26" y="43" width="12" height="3" rx="1.5" fill="white" fillOpacity="0.25" />
-      <circle cx="54" cy="52" r="14" fill="white" fillOpacity="0.2" />
-      <path d="M54 45 L54 59 M47 52 L61 52" stroke="white" strokeOpacity="0.5" strokeWidth="2.5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function SearchSvg() {
-  return (
-    <svg viewBox="0 0 80 80" fill="none" className="w-full h-full">
-      <circle cx="34" cy="34" r="18" stroke="white" strokeOpacity="0.35" strokeWidth="3.5" fill="white" fillOpacity="0.08" />
-      <line x1="47" y1="47" x2="64" y2="64" stroke="white" strokeOpacity="0.4" strokeWidth="3.5" strokeLinecap="round" />
-      <circle cx="34" cy="34" r="8" fill="white" fillOpacity="0.15" />
-      <rect x="28" y="26" width="12" height="2.5" rx="1.25" fill="white" fillOpacity="0.3" />
-      <rect x="28" y="32" width="8" height="2.5" rx="1.25" fill="white" fillOpacity="0.2" />
-    </svg>
-  );
-}
-
-function BrainSvg() {
-  return (
-    <svg viewBox="0 0 80 80" fill="none" className="w-full h-full">
-      <ellipse cx="32" cy="36" rx="16" ry="20" fill="white" fillOpacity="0.15" />
-      <ellipse cx="48" cy="36" rx="16" ry="20" fill="white" fillOpacity="0.15" />
-      <path d="M40 18 C36 28 36 44 40 56" stroke="white" strokeOpacity="0.3" strokeWidth="2" />
-      <circle cx="30" cy="30" r="4" fill="white" fillOpacity="0.25" />
-      <circle cx="50" cy="30" r="4" fill="white" fillOpacity="0.25" />
-      <circle cx="36" cy="42" r="3" fill="white" fillOpacity="0.2" />
-      <circle cx="44" cy="42" r="3" fill="white" fillOpacity="0.2" />
-      <path d="M26 32 L34 28 M46 28 L54 32 M32 44 L38 40 M42 40 L48 44" stroke="white" strokeOpacity="0.2" strokeWidth="1.5" />
-    </svg>
-  );
-}
-
-function CodeSvg() {
-  return (
-    <svg viewBox="0 0 80 80" fill="none" className="w-full h-full">
-      <rect x="10" y="14" width="60" height="44" rx="8" fill="white" fillOpacity="0.12" />
-      <rect x="10" y="14" width="60" height="10" rx="8" fill="white" fillOpacity="0.08" />
-      <circle cx="19" cy="19" r="2" fill="white" fillOpacity="0.35" />
-      <circle cx="26" cy="19" r="2" fill="white" fillOpacity="0.25" />
-      <circle cx="33" cy="19" r="2" fill="white" fillOpacity="0.15" />
-      <path d="M26 36 L18 42 L26 48" stroke="white" strokeOpacity="0.45" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M46 36 L54 42 L46 48" stroke="white" strokeOpacity="0.45" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-      <line x1="33" y1="34" x2="39" y2="50" stroke="white" strokeOpacity="0.3" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-const tools = [
-  {
-    Svg: ChatSvg,
-    title: "AI Чат",
-    desc: "Общайтесь с лучшими моделями: GPT-5, Claude, Gemini и другими",
-    badge: "50+ моделей",
-    gradient: "from-blue-600 to-indigo-700",
-    href: "/chat",
-  },
-  {
-    Svg: BrushSvg,
-    title: "Генерация картинок",
-    desc: "Создавайте изображения через Flux, SDXL и GPT-5 Image",
-    badge: "6 генераторов",
-    gradient: "from-pink-500 to-rose-600",
-    href: "/images",
-  },
-  {
-    Svg: DocSvg,
-    title: "Анализ документов",
-    desc: "Загрузите PDF или фото — AI ответит на любой вопрос",
-    badge: "PDF, фото",
-    gradient: "from-amber-500 to-orange-600",
-    href: "/documents",
-  },
-  {
-    Svg: SearchSvg,
-    title: "AI Поиск",
-    desc: "Поиск в интернете через Perplexity с актуальными данными",
-    badge: "Realtime",
-    gradient: "from-emerald-500 to-teal-600",
-    href: "/search",
-  },
-  {
-    Svg: CodeSvg,
-    title: "Помощь с кодом",
-    desc: "Отладка, рефакторинг и генерация кода на любом языке",
-    badge: "Все языки",
-    gradient: "from-slate-600 to-slate-800",
-    href: "/code",
-  },
-  {
-    Svg: BrainSvg,
-    title: "Reasoning",
-    desc: "Сложные задачи с пошаговым рассуждением: o3, DeepSeek R1",
-    badge: "o3 + R1",
-    gradient: "from-violet-600 to-purple-700",
-    href: "/chat",
-  },
-];
-
 export default function ToolCards() {
   return (
     <section className="py-20 md:py-28">
@@ -144,40 +8,128 @@ export default function ToolCards() {
           Полный арсенал AI инструментов для любой задачи
         </h2>
         <p className="text-text/60 text-center mb-12 max-w-lg mx-auto">
-          Все инструменты AI в одном Telegram-боте
+          Все инструменты AI в одном месте
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {tools.map((tool) => (
-            <a
-              key={tool.title}
-              href={tool.href}
-              className={`relative bg-gradient-to-br ${tool.gradient} rounded-2xl p-7 pb-6 block group transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl overflow-hidden`}
-            >
-              {/* SVG illustration — background */}
-              <div className="absolute top-0 right-0 w-28 h-28 opacity-60 group-hover:scale-105 transition-transform duration-500 pointer-events-none">
-                <tool.Svg />
-              </div>
+        {/* Bento Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-auto">
 
-              {/* Badge */}
-              <div className="relative mb-4">
-                <span className="inline-block bg-white/20 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide">
-                  {tool.badge}
-                </span>
+          {/* AI Chat — span 2 cols, large card with chat mockup */}
+          <a href="/chat" className="sm:col-span-2 bg-[#1C1C1E] rounded-2xl p-6 sm:p-8 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[280px]">
+            <div className="relative z-10">
+              <span className="inline-block bg-white/10 text-white/70 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-4">
+                50+ моделей
+              </span>
+              <h3 className="font-bold text-xl text-white mb-2">AI Чат</h3>
+              <p className="text-white/50 text-sm max-w-xs">Общайтесь с GPT-5, Claude, Gemini и другими лучшими моделями</p>
+            </div>
+            {/* Mini chat mockup */}
+            <div className="absolute right-4 sm:right-8 top-6 w-[220px] sm:w-[280px] opacity-80 group-hover:opacity-100 transition-opacity">
+              <div className="bg-white/[0.06] rounded-xl p-3 backdrop-blur-sm border border-white/[0.06]">
+                {/* User message */}
+                <div className="flex justify-end mb-2.5">
+                  <div className="bg-accent/80 rounded-xl rounded-tr-sm px-3 py-2 max-w-[75%]">
+                    <span className="text-white text-[10px]">Напиши код сортировки</span>
+                  </div>
+                </div>
+                {/* AI message */}
+                <div className="flex justify-start mb-2.5">
+                  <div className="bg-white/10 rounded-xl rounded-tl-sm px-3 py-2 max-w-[80%]">
+                    <span className="text-white/70 text-[10px]">Вот реализация быстрой сортировки на Python...</span>
+                  </div>
+                </div>
+                {/* User message */}
+                <div className="flex justify-end">
+                  <div className="bg-accent/80 rounded-xl rounded-tr-sm px-3 py-2 max-w-[70%]">
+                    <span className="text-white text-[10px]">А теперь на Rust</span>
+                  </div>
+                </div>
+                {/* Input */}
+                <div className="mt-2.5 bg-white/[0.05] rounded-lg flex items-center px-2.5 py-1.5 border border-white/[0.06]">
+                  <span className="text-white/20 text-[9px] flex-1">Написать сообщение...</span>
+                  <div className="w-4 h-4 rounded bg-accent/60 flex items-center justify-center">
+                    <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
+                    </svg>
+                  </div>
+                </div>
               </div>
+            </div>
+          </a>
 
-              <h3 className="relative font-bold text-lg text-white mb-2">{tool.title}</h3>
-              <p className="relative text-white/70 text-sm leading-relaxed">{tool.desc}</p>
-
-              {/* Arrow */}
-              <div className="relative mt-4 flex items-center gap-1 text-white/50 group-hover:text-white/80 transition-colors text-xs font-semibold">
-                Подробнее
-                <svg className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
+          {/* Images — colorful card */}
+          <a href="/images" className="bg-gradient-to-br from-pink-500 to-rose-600 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[280px]">
+            <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-4">
+              6 генераторов
+            </span>
+            <h3 className="font-bold text-xl text-white mb-2">Генерация картинок</h3>
+            <p className="text-white/70 text-sm">Flux, SDXL, GPT-5 Image и другие</p>
+            {/* Color placeholder */}
+            <div className="absolute bottom-4 right-4 w-24 h-24 sm:w-32 sm:h-32 opacity-60 group-hover:opacity-80 transition-opacity">
+              <div className="w-full h-full rounded-xl bg-white/15 backdrop-blur-sm border border-white/10 flex items-center justify-center overflow-hidden">
+                <div className="grid grid-cols-2 gap-1 p-2 w-full h-full">
+                  <div className="rounded-md bg-yellow-300/40" />
+                  <div className="rounded-md bg-blue-400/40" />
+                  <div className="rounded-md bg-green-400/40" />
+                  <div className="rounded-md bg-purple-400/40" />
+                </div>
               </div>
-            </a>
-          ))}
+            </div>
+          </a>
+
+          {/* Documents — PDF icon card */}
+          <a href="/documents" className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative">
+            <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-4">
+              PDF, фото
+            </span>
+            <h3 className="font-bold text-lg text-white mb-2">Анализ документов</h3>
+            <p className="text-white/70 text-sm">Загрузите PDF — AI ответит на любой вопрос</p>
+            <div className="absolute bottom-4 right-4 opacity-40 group-hover:opacity-60 transition-opacity">
+              <svg className="w-16 h-16 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+              </svg>
+            </div>
+          </a>
+
+          {/* Search — small */}
+          <a href="/search" className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+            <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">
+              Realtime
+            </span>
+            <h3 className="font-bold text-lg text-white mb-1">AI Поиск</h3>
+            <p className="text-white/70 text-sm">Perplexity с актуальными данными</p>
+          </a>
+
+          {/* API Code Snippet — small, dark */}
+          <a href="/docs" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden sm:col-span-2 lg:col-span-1">
+            <span className="inline-block bg-white/10 text-white/70 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">
+              API
+            </span>
+            <h3 className="font-bold text-lg text-white mb-3">Простой API</h3>
+            <pre className="bg-white/[0.04] rounded-lg p-3 overflow-x-auto border border-white/[0.06] text-[10px] sm:text-[11px] leading-relaxed">
+              <code>
+                <span className="text-emerald-400">curl</span>
+                <span className="text-white/50"> -X POST /api/chat \</span>{"\n"}
+                <span className="text-white/50">  -H </span>
+                <span className="text-amber-300">&quot;Authorization: Bearer $TOKEN&quot;</span>
+                <span className="text-white/50"> \</span>{"\n"}
+                <span className="text-white/50">  -d </span>
+                <span className="text-sky-300">{`'{"model_id":"gpt-4o-mini",`}</span>{"\n"}
+                <span className="text-sky-300">{`    "messages":[{"role":"user",`}</span>{"\n"}
+                <span className="text-sky-300">{`    "content":"Hello!"}]}'`}</span>
+              </code>
+            </pre>
+          </a>
+
+          {/* Reasoning — small */}
+          <a href="/chat" className="bg-gradient-to-br from-violet-600 to-purple-700 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl lg:col-span-1">
+            <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">
+              o3 + R1
+            </span>
+            <h3 className="font-bold text-lg text-white mb-1">Reasoning</h3>
+            <p className="text-white/70 text-sm">Сложные задачи с пошаговым рассуждением</p>
+          </a>
+
         </div>
       </div>
     </section>
