@@ -14,7 +14,7 @@ export default function ToolCards() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-auto">
 
           {/* ── AI Chat — 2 cols, chat mockup ── */}
-          <a href="/chat" className="sm:col-span-2 bg-gradient-to-br from-[#1C1C1E] to-[#2A2520] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[280px]">
+          <a href="/chat" className="sm:col-span-2 bg-gradient-to-br from-[#1C1C1E] via-[#252220] to-[#2E2518] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[280px]">
             <div className="relative z-10">
               <span className="inline-block bg-accent/20 text-accent text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-4">50+ моделей</span>
               <h3 className="font-bold text-xl text-white mb-2">AI Чат</h3>
@@ -34,7 +34,7 @@ export default function ToolCards() {
           </a>
 
           {/* ── Images — rose gradient with mini gallery ── */}
-          <a href="/images" className="bg-gradient-to-br from-pink-600 to-rose-700 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
+          <a href="/images" className="bg-gradient-to-br from-pink-500 via-rose-600 to-fuchsia-700 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
             <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">6 генераторов</span>
             <h3 className="font-bold text-lg text-white mb-2">Генерация картинок</h3>
             <p className="text-white/70 text-[14px] leading-relaxed mb-4">Flux, SDXL, GPT-5 Image. Фотореализм и арт-стили.</p>
@@ -46,7 +46,7 @@ export default function ToolCards() {
           </a>
 
           {/* ── Documents — amber gradient with PDF mockup ── */}
-          <a href="/documents" className="bg-gradient-to-br from-amber-500 to-orange-700 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
+          <a href="/documents" className="bg-gradient-to-br from-amber-500 via-orange-600 to-red-700 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
             <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">PDF, фото</span>
             <h3 className="font-bold text-lg text-white mb-2">Анализ документов</h3>
             <p className="text-white/70 text-[14px] leading-relaxed mb-4">Загрузите PDF или фото — AI ответит на любой вопрос.</p>
@@ -68,7 +68,7 @@ export default function ToolCards() {
           </a>
 
           {/* ── Search — emerald gradient with search mockup ── */}
-          <a href="/search" className="bg-gradient-to-br from-emerald-500 to-teal-700 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
+          <a href="/search" className="bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
             <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">Realtime</span>
             <h3 className="font-bold text-lg text-white mb-2">AI Поиск</h3>
             <p className="text-white/70 text-[14px] leading-relaxed mb-4">Perplexity ищет в интернете. Актуальные данные, не кэш.</p>
@@ -86,7 +86,7 @@ export default function ToolCards() {
           </a>
 
           {/* ── API — dark slate with code snippet ── */}
-          <a href="/docs" className="bg-gradient-to-br from-slate-700 to-slate-900 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden sm:col-span-2 lg:col-span-1 min-h-[180px]">
+          <a href="/docs" className="bg-gradient-to-br from-slate-600 via-slate-700 to-zinc-900 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden sm:col-span-2 lg:col-span-1 min-h-[180px]">
             <span className="inline-block bg-sky-400/20 text-sky-300 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">API</span>
             <h3 className="font-bold text-lg text-white mb-3">Простой API</h3>
             <div className="bg-white/[0.04] rounded-xl p-3 overflow-x-auto border border-white/[0.06]">
@@ -98,7 +98,7 @@ export default function ToolCards() {
           </a>
 
           {/* ── Video — red gradient with video player mockup ── */}
-          <a href="/video" className="bg-gradient-to-br from-red-500 to-rose-800 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
+          <a href="/video" className="bg-gradient-to-br from-red-500 via-rose-600 to-pink-800 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
             <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">5 моделей</span>
             <h3 className="font-bold text-lg text-white mb-2">AI Видео</h3>
             <p className="text-white/70 text-[14px] leading-relaxed mb-4">Kling, Runway, Pika. Видео из текста за 5-10 секунд.</p>
@@ -116,7 +116,7 @@ export default function ToolCards() {
           </a>
 
           {/* ── Audio — indigo gradient with audio player mockup ── */}
-          <a href="/audio" className="bg-gradient-to-br from-indigo-600 to-blue-800 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
+          <a href="/audio" className="bg-gradient-to-br from-indigo-500 via-blue-600 to-violet-800 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
             <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">10+ голосов</span>
             <h3 className="font-bold text-lg text-white mb-2">AI Аудио</h3>
             <p className="text-white/70 text-[14px] leading-relaxed mb-4">Озвучка текста 10+ голосами. Голосовой ввод. Мгновенно.</p>
@@ -140,8 +140,8 @@ export default function ToolCards() {
             </div>
           </a>
 
-          {/* ── Deep Analysis — violet gradient with reasoning mockup ── */}
-          <a href="/chat" className="bg-gradient-to-br from-violet-600 to-purple-800 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
+          {/* ── Deep Analysis — cyan-to-slate gradient with reasoning mockup ── */}
+          <a href="/chat" className="bg-gradient-to-br from-cyan-600 via-blue-700 to-slate-800 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
             <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">o3 + R1</span>
             <h3 className="font-bold text-lg text-white mb-2">Глубокий анализ</h3>
             <p className="text-white/70 text-[14px] leading-relaxed mb-4">Пошаговое рассуждение для сложных задач.</p>
