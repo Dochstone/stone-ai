@@ -240,12 +240,8 @@ export default function Hero() {
       </div>
       <style>{`
         @keyframes heroFade {
-          0%, 25% { opacity: 0.06; }
-          8%, 17% { opacity: 0.12; }
-        }
-        .dark @keyframes heroFade {
-          0%, 25% { opacity: 0.1; }
-          8%, 17% { opacity: 0.18; }
+          0%, 30% { opacity: 0; }
+          5%, 25% { opacity: 0.35; }
         }
       `}</style>
 
