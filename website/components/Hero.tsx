@@ -224,26 +224,6 @@ export default function Hero() {
   return (
     <section className="relative pt-28 pb-10 md:pt-36 md:pb-16 overflow-hidden">
       <GradientMeshBg />
-      {/* AI-generated backgrounds — crossfade carousel */}
-      <div className="absolute inset-0 pointer-events-none">
-        {["/demo/hero-1.jpg", "/demo/hero-2.jpg", "/demo/hero-3.jpg"].map((src, i) => (
-          <div
-            key={src}
-            className="absolute inset-0 bg-cover bg-center"
-            style={{
-              backgroundImage: `url(${src})`,
-              opacity: 0,
-              animation: `heroFade 12s ${i * 4}s infinite`,
-            }}
-          />
-        ))}
-      </div>
-      <style>{`
-        @keyframes heroFade {
-          0%, 30% { opacity: 0; }
-          5%, 25% { opacity: 0.35; }
-        }
-      `}</style>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
