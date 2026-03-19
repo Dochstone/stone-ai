@@ -58,7 +58,7 @@ export default function DemoShowcase() {
           {/* Video — real playable video */}
           <div className="rounded-2xl overflow-hidden border border-text/[0.06] bg-white">
             <video
-              src="/demo/video-neon.mp4"
+              src="/demo/video-cyber-girl.mp4"
               muted
               loop
               playsInline
