@@ -9,86 +9,104 @@ export default function DemoShowcase() {
           Картинки, видео, 3D, аудио — всё в одном чате
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {/* Image demo */}
-          <div className="rounded-2xl overflow-hidden border border-text/[0.06] bg-white group">
-            <div className="aspect-square bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100 flex items-center justify-center relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-pink-300/40 via-purple-300/30 to-blue-400/40" />
-              <div className="relative text-center">
-                <div className="text-5xl mb-2">🎨</div>
-                <p className="text-sm font-semibold text-text/50">Nano Banana Pro</p>
-              </div>
+        {/* Image gallery */}
+        <div className="mb-16">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 rounded-lg bg-pink-500/10 flex items-center justify-center">
+              <span className="text-sm">🎨</span>
             </div>
-            <div className="p-4">
-              <p className="text-xs font-bold text-text mb-1">AI Картинки</p>
-              <p className="text-[11px] text-text/40">Фотореалистичные 4K изображения из текста</p>
-              <a href="/webchat?model=nano-banana-pro" className="text-[11px] text-accent font-semibold mt-2 block hover:underline">Попробовать →</a>
+            <div>
+              <h3 className="font-bold text-text">AI Картинки</h3>
+              <p className="text-xs text-text/40">Nano Banana Pro · GPT-5 Image · Flux</p>
             </div>
           </div>
-
-          {/* Video demo */}
-          <div className="rounded-2xl overflow-hidden border border-text/[0.06] bg-white group">
-            <div className="aspect-square bg-gradient-to-br from-red-100 via-rose-100 to-orange-100 flex items-center justify-center relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-red-300/30 via-rose-300/20 to-orange-300/30" />
-              <div className="relative text-center">
-                <div className="text-5xl mb-2">🎬</div>
-                <p className="text-sm font-semibold text-text/50">Kling v2</p>
-              </div>
-              {/* Fake play button */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-14 h-14 rounded-full bg-white/80 flex items-center justify-center shadow-lg">
-                  <svg className="w-6 h-6 text-accent ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {[
+              { src: "/demo/img-cosmos.jpg", label: "Космос" },
+              { src: "/demo/img-portrait.jpg", label: "Портрет" },
+              { src: "/demo/img-landscape.jpg", label: "Пейзаж" },
+              { src: "/demo/img-abstract.jpg", label: "Абстракция" },
+              { src: "/demo/img-architecture.jpg", label: "Архитектура" },
+              { src: "/demo/img-product.jpg", label: "Продукт" },
+            ].map((img) => (
+              <div key={img.label} className="group relative rounded-xl overflow-hidden aspect-square bg-bg border border-text/[0.06]">
+                <img
+                  src={img.src}
+                  alt={img.label}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                />
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-2.5 pt-8">
+                  <span className="text-[11px] font-semibold text-white">{img.label}</span>
                 </div>
               </div>
+            ))}
+          </div>
+          <div className="text-center mt-4">
+            <a href="/webchat?model=nano-banana-pro" className="text-sm text-accent font-semibold hover:underline">
+              Попробовать генерацию →
+            </a>
+          </div>
+        </div>
+
+        {/* Video + 3D + Audio row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {/* Video */}
+          <div className="rounded-2xl overflow-hidden border border-text/[0.06] bg-white">
+            <div className="aspect-video bg-gradient-to-br from-red-500/10 to-rose-500/5 flex items-center justify-center relative">
+              <div className="w-16 h-16 rounded-full bg-white/90 shadow-lg flex items-center justify-center">
+                <svg className="w-7 h-7 text-red-500 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              </div>
+              <div className="absolute bottom-3 left-3 right-3 flex items-center gap-2">
+                <div className="h-1 flex-1 rounded-full bg-red-400/30" />
+                <span className="text-[10px] text-text/30">0:08</span>
+              </div>
             </div>
             <div className="p-4">
-              <p className="text-xs font-bold text-text mb-1">AI Видео</p>
-              <p className="text-[11px] text-text/40">5-10 секунд видео из текста и фото</p>
-              <a href="/webchat?category=video" className="text-[11px] text-accent font-semibold mt-2 block hover:underline">Попробовать →</a>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-sm">🎬</span>
+                <span className="text-sm font-bold text-text">AI Видео</span>
+              </div>
+              <p className="text-xs text-text/40 mb-2">5-10 секунд видео из текста. Kling, Runway, Pika.</p>
+              <a href="/webchat?category=video" className="text-xs text-accent font-semibold hover:underline">Попробовать →</a>
             </div>
           </div>
 
-          {/* 3D demo */}
-          <div className="rounded-2xl overflow-hidden border border-text/[0.06] bg-white group">
-            <div className="aspect-square bg-gradient-to-br from-cyan-100 via-teal-50 to-emerald-100 flex items-center justify-center relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-cyan-300/30 via-teal-200/20 to-emerald-300/30" />
-              <div className="relative text-center">
-                <div className="text-5xl mb-2">🧊</div>
-                <p className="text-sm font-semibold text-text/50">Tripo v2.5</p>
-              </div>
-              {/* Rotation indicator */}
-              <div className="absolute bottom-3 right-3 text-text/15">
-                <svg className="w-8 h-8 animate-spin" style={{ animationDuration: "8s" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3" />
-                </svg>
+          {/* 3D */}
+          <div className="rounded-2xl overflow-hidden border border-text/[0.06] bg-white">
+            <div className="aspect-video bg-gradient-to-br from-cyan-500/10 to-blue-500/5 flex items-center justify-center relative">
+              <div className="text-5xl animate-spin" style={{ animationDuration: "8s" }}>🧊</div>
+              <div className="absolute bottom-3 right-3 text-[10px] text-text/20 flex items-center gap-1">
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3" /></svg>
+                Вращение
               </div>
             </div>
             <div className="p-4">
-              <p className="text-xs font-bold text-text mb-1">AI 3D модели</p>
-              <p className="text-[11px] text-text/40">GLB модели из текста или фотографии</p>
-              <a href="/webchat?category=3d" className="text-[11px] text-accent font-semibold mt-2 block hover:underline">Попробовать →</a>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-sm">🧊</span>
+                <span className="text-sm font-bold text-text">3D Модели</span>
+              </div>
+              <p className="text-xs text-text/40 mb-2">GLB из текста или фото. Tripo v2.5, TripoSR.</p>
+              <a href="/webchat?category=3d" className="text-xs text-accent font-semibold hover:underline">Попробовать →</a>
             </div>
           </div>
 
-          {/* Audio demo */}
-          <div className="rounded-2xl overflow-hidden border border-text/[0.06] bg-white group">
-            <div className="aspect-square bg-gradient-to-br from-green-100 via-emerald-50 to-teal-100 flex items-center justify-center relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-green-300/30 via-emerald-200/20 to-teal-300/30" />
-              <div className="relative text-center">
-                <div className="text-5xl mb-2">🔊</div>
-                <p className="text-sm font-semibold text-text/50">GPT Audio</p>
-              </div>
-              {/* Sound wave */}
-              <div className="absolute bottom-4 left-4 right-4 flex items-end gap-1 h-8 justify-center">
-                {[3, 5, 8, 6, 9, 4, 7, 5, 3, 6, 8, 4, 7, 5, 3].map((h, i) => (
-                  <div key={i} className="w-1 bg-teal/20 rounded-full" style={{ height: `${h * 3}px` }} />
+          {/* Audio */}
+          <div className="rounded-2xl overflow-hidden border border-text/[0.06] bg-white">
+            <div className="aspect-video bg-gradient-to-br from-indigo-500/10 to-violet-500/5 flex items-center justify-center relative px-6">
+              <div className="flex items-end gap-[3px] h-12 flex-1 justify-center">
+                {[3,5,8,4,7,9,6,4,7,5,8,3,6,9,5,7,4,8,6,3,5,7,4,6,8,5,3,7,4,9,6,5].map((h, i) => (
+                  <div key={i} className="flex-1 rounded-full bg-indigo-400/30" style={{ height: `${h * 4}px` }} />
                 ))}
               </div>
             </div>
             <div className="p-4">
-              <p className="text-xs font-bold text-text mb-1">AI Аудио</p>
-              <p className="text-[11px] text-text/40">Озвучка 10+ голосами, голосовой ввод</p>
-              <a href="/audio" className="text-[11px] text-accent font-semibold mt-2 block hover:underline">Попробовать →</a>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-sm">🔊</span>
+                <span className="text-sm font-bold text-text">AI Аудио</span>
+              </div>
+              <p className="text-xs text-text/40 mb-2">Озвучка 10+ голосами. Голосовой ввод Whisper.</p>
+              <a href="/audio" className="text-xs text-accent font-semibold hover:underline">Попробовать →</a>
             </div>
           </div>
         </div>
