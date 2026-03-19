@@ -129,14 +129,14 @@ export default function ToolCards() {
             </div>
           </a>
 
-          {/* Audio — small */}
-          <a href="/webchat" className="bg-gradient-to-br from-teal-500 to-cyan-600 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative">
+          {/* Audio — small, dark teal */}
+          <a href="/audio" className="bg-gradient-to-br from-teal-600 to-emerald-800 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative">
             <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">
               10+ голосов
             </span>
             <h3 className="font-bold text-lg text-white mb-1">AI Аудио</h3>
-            <p className="text-white/80 text-[14px] leading-relaxed">Озвучка текста, голосовой ввод, TTS + STT</p>
-            <div className="absolute bottom-3 right-3 opacity-30 group-hover:opacity-50 transition-opacity">
+            <p className="text-white text-[14px] leading-relaxed">Озвучка текста 10+ голосами, голосовой ввод Whisper</p>
+            <div className="absolute bottom-3 right-3 opacity-40 group-hover:opacity-60 transition-opacity">
               <svg className="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
               </svg>
