@@ -10,7 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.middleware.web_auth import get_current_user
+from app.middleware.auth import get_current_user
 from app.models.user import User
 from app.services.audio_router import (
     text_to_speech,
@@ -18,7 +18,8 @@ from app.services.audio_router import (
     TTS_VOICES,
     STT_PRICE_PER_MINUTE,
 )
-from app.services.token_billing import calculate_cost, deduct_balance, record_usage
+from app.services.token_billing import calculate_cost, deduct_balance
+from app.services.limiter import record_usage
 
 logger = logging.getLogger(__name__)
 

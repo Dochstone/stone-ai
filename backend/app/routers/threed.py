@@ -10,7 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.middleware.web_auth import get_current_user
+from app.middleware.auth import get_current_user
 from app.models.user import User
 from app.models.threed_task import ThreeDTask
 from app.services.threed_router import (
