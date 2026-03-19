@@ -123,17 +123,33 @@ export default function ToolCards() {
             </div>
           </a>
 
-          {/* Audio */}
-          <a href="/audio" className="bg-gradient-to-br from-teal-600 to-emerald-800 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
-            <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">
+          {/* Audio — dark with audio player mockup */}
+          <a href="/audio" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
+            <span className="inline-block bg-indigo-500/20 text-indigo-300 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">
               10+ голосов
             </span>
             <h3 className="font-bold text-lg text-white mb-2">AI Аудио</h3>
-            <p className="text-white text-[14px] leading-relaxed">Озвучка текста 10+ голосами. Голосовой ввод. Мгновенно.</p>
-            <div className="absolute bottom-4 right-4 opacity-40 group-hover:opacity-60 transition-opacity">
-              <svg className="w-14 h-14 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
-              </svg>
+            <p className="text-white/80 text-[14px] leading-relaxed mb-4">Озвучка текста 10+ голосами. Голосовой ввод. Мгновенно.</p>
+            {/* Mini audio player mockup */}
+            <div className="bg-white/[0.06] rounded-xl p-3 border border-white/[0.06]">
+              {/* Waveform */}
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-7 h-7 rounded-full bg-indigo-500 flex items-center justify-center shrink-0">
+                  <svg className="w-3 h-3 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </div>
+                <div className="flex items-end gap-[3px] h-5 flex-1">
+                  {[3,5,8,4,7,9,6,4,7,5,8,3,6,9,5,7,4,8,6,3,5,7,4,6,8,5,3].map((h, i) => (
+                    <div key={i} className="flex-1 rounded-full bg-indigo-400/40" style={{ height: `${h * 2.2}px` }} />
+                  ))}
+                </div>
+                <span className="text-[10px] text-white/30 shrink-0">0:12</span>
+              </div>
+              {/* Voice selector */}
+              <div className="flex gap-1.5">
+                {["Nova", "Echo", "Alloy"].map((v, i) => (
+                  <span key={v} className={`text-[9px] px-2 py-0.5 rounded-md ${i === 0 ? "bg-indigo-500/30 text-indigo-300" : "bg-white/[0.04] text-white/25"}`}>{v}</span>
+                ))}
+              </div>
             </div>
           </a>
 
