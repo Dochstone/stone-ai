@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
-// All AI-generated images for cycling
+// All AI-generated images
 const allImages = [
   "/demo/img-cosmos.jpg", "/demo/img-portrait.jpg", "/demo/img-landscape.jpg",
   "/demo/img-fantasy.jpg", "/demo/img-robot.jpg", "/demo/img-food.jpg",
@@ -14,37 +14,205 @@ const allImages = [
   "/demo/img-sculpture.jpg", "/demo/img-tunnel.jpg", "/demo/img-tree.jpg",
 ];
 
-function ImageCarousel({ images, interval = 3000, className = "" }: { images: string[]; interval?: number; className?: string }) {
+function ImageCarousel({ images, interval = 3000 }: { images: string[]; interval?: number }) {
   const [idx, setIdx] = useState(0);
   useEffect(() => {
     const t = setInterval(() => setIdx((i) => (i + 1) % images.length), interval);
     return () => clearInterval(t);
   }, [images.length, interval]);
-
   return (
-    <div className={`relative w-full h-full overflow-hidden ${className}`}>
+    <div className="relative w-full h-full overflow-hidden">
       {images.map((src, i) => (
-        <img
-          key={src}
-          src={src}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-[1500ms]"
-          style={{ opacity: i === idx ? 1 : 0 }}
-          loading="lazy"
-        />
+        <img key={src} src={src} alt="" className="absolute inset-0 w-full h-full object-cover transition-opacity duration-[1500ms]" style={{ opacity: i === idx ? 1 : 0 }} loading="lazy" />
       ))}
     </div>
   );
 }
 
-export default function ToolCards() {
-  // Shuffle images for different sections
-  const chatImages = allImages.slice(0, 6);
-  const galleryImages = allImages;
-  const searchImages = ["/demo/img-tokyo.jpg", "/demo/img-aurora.jpg", "/demo/img-luxury.jpg", "/demo/img-underwater.jpg"];
-  const docImages = ["/demo/img-cabin.jpg", "/demo/img-temple.jpg", "/demo/img-sculpture.jpg"];
-  const analysisImages = ["/demo/img-droplet.jpg", "/demo/img-tree.jpg", "/demo/img-owl.jpg", "/demo/img-dragon.jpg"];
+// ── Typing animation hook ──
+function useTyping(texts: string[], charDelay = 40, pauseDelay = 2000) {
+  const [display, setDisplay] = useState("");
+  const [textIdx, setTextIdx] = useState(0);
+  const [charIdx, setCharIdx] = useState(0);
+  const [typing, setTyping] = useState(true);
 
+  useEffect(() => {
+    const text = texts[textIdx];
+    if (typing) {
+      if (charIdx < text.length) {
+        const t = setTimeout(() => { setCharIdx(c => c + 1); setDisplay(text.slice(0, charIdx + 1)); }, charDelay);
+        return () => clearTimeout(t);
+      } else {
+        const t = setTimeout(() => setTyping(false), pauseDelay);
+        return () => clearTimeout(t);
+      }
+    } else {
+      setTextIdx((textIdx + 1) % texts.length);
+      setCharIdx(0);
+      setDisplay("");
+      setTyping(true);
+    }
+  }, [charIdx, typing, textIdx, texts, charDelay, pauseDelay]);
+
+  return display;
+}
+
+// ── Search Demo — shows real-time multi-source search ──
+function SearchDemo() {
+  const queries = ["курс биткоина сегодня", "лучшие AI модели 2026", "погода в Москве завтра", "как работает GPT-5"];
+  const query = useTyping(queries, 60, 3000);
+  const [results, setResults] = useState(0);
+
+  useEffect(() => {
+    if (query.length > 5) setResults(Math.min(3, Math.floor((query.length - 5) / 4)));
+    else setResults(0);
+  }, [query]);
+
+  const resultLines = [
+    { source: "Google", title: "Bitcoin price today: $94,230 (+2.3%)", time: "0.3с" },
+    { source: "News", title: "BTC обновил максимум на фоне решения ФРС", time: "0.8с" },
+    { source: "Scholar", title: "Cryptocurrency Market Analysis Q1 2026", time: "1.2с" },
+  ];
+
+  return (
+    <div className="bg-white/[0.06] rounded-xl p-3 border border-white/[0.06] space-y-2">
+      <div className="flex items-center gap-2 bg-white/[0.04] rounded-lg px-2.5 py-1.5 border border-white/[0.06]">
+        <svg className="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+        <span className="text-[11px] text-white/60 flex-1">{query}<span className="animate-pulse">|</span></span>
+      </div>
+      <div className="flex gap-1">
+        {["Google", "Bing", "News", "Scholar"].map((e, i) => (
+          <span key={e} className={`text-[8px] px-1.5 py-0.5 rounded transition-colors duration-300 ${results > i ? "bg-emerald-500/20 text-emerald-300" : "bg-white/[0.03] text-white/15"}`}>{e}</span>
+        ))}
+      </div>
+      <div className="space-y-1.5">
+        {resultLines.slice(0, results).map((r, i) => (
+          <div key={i} className="flex items-start gap-2 animate-fadeIn">
+            <span className="text-[7px] bg-emerald-500/15 text-emerald-400 px-1 py-0.5 rounded shrink-0 mt-0.5">{r.source}</span>
+            <div className="flex-1 min-w-0">
+              <div className="text-[10px] text-white/60 truncate">{r.title}</div>
+              <div className="text-[8px] text-white/20">{r.time}</div>
+            </div>
+          </div>
+        ))}
+        {results < 3 && query.length > 3 && (
+          <div className="flex gap-1 items-center"><div className="w-2 h-2 rounded-full bg-emerald-400/30 animate-pulse" /><span className="text-[8px] text-white/20">Поиск...</span></div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Document Analysis Demo ──
+function DocAnalysisDemo() {
+  const [step, setStep] = useState(0);
+  useEffect(() => {
+    const steps = [0, 1, 2, 3, 4];
+    let i = 0;
+    const t = setInterval(() => { i = (i + 1) % steps.length; setStep(steps[i]); }, 2000);
+    return () => clearInterval(t);
+  }, []);
+
+  return (
+    <div className="bg-white/[0.06] rounded-xl p-3 border border-white/[0.06]">
+      {/* File upload */}
+      <div className="flex items-center gap-2 mb-2">
+        <div className="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center shrink-0">
+          <span className="text-[8px] font-bold text-amber-400">PDF</span>
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-[10px] text-white/60">contract_2026.pdf</div>
+          <div className="text-[8px] text-white/25">127 стр · 4.2 MB</div>
+        </div>
+        <span className={`text-[8px] px-1.5 py-0.5 rounded transition-all duration-500 ${step >= 1 ? "bg-emerald-400/15 text-emerald-400" : "bg-white/[0.04] text-white/15"}`}>
+          {step >= 1 ? "✓ Готово" : "Загрузка..."}
+        </span>
+      </div>
+      {/* Progress */}
+      <div className="h-1 bg-white/[0.04] rounded-full mb-2 overflow-hidden">
+        <div className="h-full bg-amber-400/40 rounded-full transition-all duration-1000" style={{ width: `${Math.min(step * 30, 100)}%` }} />
+      </div>
+      {/* Analysis results appearing one by one */}
+      <div className="border-t border-white/[0.04] pt-2 space-y-1">
+        <div className="text-[9px] text-white/30 mb-1">AI анализирует документ...</div>
+        {step >= 2 && <div className="text-[10px] text-white/60 animate-fadeIn">📌 Срок: 01.01.2027 — 31.12.2029 (§3.1)</div>}
+        {step >= 3 && <div className="text-[10px] text-red-400/80 animate-fadeIn">⚠️ Штраф 15% за досрочное расторжение (§12.4)</div>}
+        {step >= 4 && <div className="text-[10px] text-amber-400/80 animate-fadeIn">⚠️ Автопролонгация без уведомления (§8.1)</div>}
+      </div>
+    </div>
+  );
+}
+
+// ── Reasoning Demo ──
+function ReasoningDemo() {
+  const [step, setStep] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setStep(s => (s + 1) % 5), 2500);
+    return () => clearInterval(t);
+  }, []);
+
+  const steps = [
+    { n: "1", label: "Разбор", text: "Определяю переменные: x, y, z ∈ ℝ, x²+y²=1" },
+    { n: "2", label: "Подход А", text: "Метод Лагранжа: L = f(x,y) - λ·g(x,y)" },
+    { n: "3", label: "Подход Б", text: "Параметризация: x=cos(t), y=sin(t), t∈[0,2π]" },
+    { n: "4", label: "Решение", text: "max f = √2 при t = π/4, точка (√2/2, √2/2)" },
+  ];
+
+  return (
+    <div className="bg-white/[0.06] rounded-xl p-3 border border-white/[0.06] space-y-2">
+      {steps.map((s, i) => (
+        <div key={i} className={`flex items-start gap-2 transition-opacity duration-500 ${step >= i ? "opacity-100" : "opacity-20"}`}>
+          <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-colors duration-500 ${
+            step > i ? "bg-violet-500/40" : step === i ? "bg-violet-500/20 animate-pulse" : "border border-white/10"
+          }`}>
+            <span className="text-[8px] text-violet-300 font-bold">{s.n}</span>
+          </div>
+          <div className="min-w-0">
+            <div className="text-[8px] text-violet-400/60">{s.label}</div>
+            <div className="text-[10px] text-white/60 font-mono">{step >= i ? s.text : "..."}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── Chat Demo — typing conversation ──
+function ChatDemo() {
+  const [msgIdx, setMsgIdx] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setMsgIdx(i => (i + 1) % 4), 4000);
+    return () => clearInterval(t);
+  }, []);
+
+  const msgs = [
+    { role: "user", text: "Напиши quicksort на Python" },
+    { role: "ai", text: "def quicksort(arr):\n  if len(arr) <= 1: return arr\n  pivot = arr[0]\n  return quicksort([x for x in arr..." },
+    { role: "user", text: "Теперь на Rust с дженериками" },
+    { role: "ai", text: "fn quicksort<T: Ord>(mut arr: Vec<T>)\n  -> Vec<T> {\n  if arr.len() <= 1 { return arr; }\n  let pivot = arr.remove(0)..." },
+  ];
+
+  return (
+    <div className="bg-white/[0.06] rounded-xl p-3 border border-white/[0.06] space-y-2">
+      {msgs.slice(0, msgIdx + 1).map((m, i) => (
+        <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"} animate-fadeIn`}>
+          <div className={`max-w-[85%] rounded-xl px-2.5 py-1.5 ${m.role === "user" ? "bg-accent/60 text-white" : "bg-white/10 text-white/70"}`}>
+            <pre className="text-[9px] whitespace-pre-wrap font-mono leading-relaxed">{m.text}</pre>
+          </div>
+        </div>
+      ))}
+      {msgIdx < 3 && (
+        <div className="flex gap-1 pl-1">
+          <span className="w-1.5 h-1.5 bg-white/20 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+          <span className="w-1.5 h-1.5 bg-white/20 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+          <span className="w-1.5 h-1.5 bg-white/20 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function ToolCards() {
   return (
     <section className="py-20 md:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -57,112 +225,66 @@ export default function ToolCards() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-auto">
 
-          {/* ── AI Chat — 2 cols, cycling images ── */}
-          <a href="/chat" className="sm:col-span-2 bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[320px]">
-            <div className="relative z-10">
-              <span className="inline-block bg-accent/20 text-accent text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-4">50+ моделей</span>
-              <h3 className="font-bold text-xl text-white mb-2">AI Чат</h3>
-              <p className="text-white/70 text-[14px] leading-relaxed max-w-xs">GPT-5, Claude, Gemini — лучшие модели мира в одном чате</p>
+          {/* ── AI Chat — live typing conversation ── */}
+          <a href="/chat" className="sm:col-span-2 bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[300px]">
+            <div className="relative z-10 mb-4">
+              <span className="inline-block bg-accent/20 text-accent text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">50+ моделей</span>
+              <h3 className="font-bold text-xl text-white mb-1">AI Чат</h3>
+              <p className="text-white/50 text-[13px] max-w-[200px]">GPT-5, Claude, Gemini — лучшие модели мира</p>
             </div>
-            <div className="absolute right-0 top-0 bottom-0 w-[55%] opacity-60 group-hover:opacity-90 transition-opacity">
-              <ImageCarousel images={chatImages} interval={3500} />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#1C1C1E] via-[#1C1C1E]/50 to-transparent" />
+            <div className="absolute right-4 sm:right-6 top-4 bottom-4 w-[55%] sm:w-[60%]">
+              <ChatDemo />
             </div>
           </a>
 
           {/* ── Images — full-bleed cycling gallery ── */}
-          <a href="/images" className="bg-[#1C1C1E] rounded-2xl block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[320px]">
+          <a href="/images" className="bg-[#1C1C1E] rounded-2xl block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[300px]">
             <div className="absolute inset-0">
-              <ImageCarousel images={galleryImages} interval={2000} />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#1C1C1E] via-[#1C1C1E]/30 to-transparent" />
+              <ImageCarousel images={allImages} interval={2000} />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#1C1C1E] via-[#1C1C1E]/20 to-transparent" />
             </div>
             <div className="relative z-10 p-6 flex flex-col justify-end h-full">
-              <span className="inline-block bg-pink-500/30 text-pink-300 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3 w-fit">24 картинки</span>
-              <h3 className="font-bold text-xl text-white mb-2">Генерация картинок</h3>
-              <p className="text-white/80 text-[14px]">Фотореализм, арт, фэнтези, продукт — любой стиль за секунды</p>
+              <span className="inline-block bg-pink-500/30 text-pink-300 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3 w-fit">24 стиля</span>
+              <h3 className="font-bold text-xl text-white mb-1">Генерация картинок</h3>
+              <p className="text-white/80 text-[13px]">Фотореализм, арт, фэнтези — любой стиль за секунды</p>
             </div>
           </a>
 
-          {/* ── Search — live multi-engine search mockup ── */}
-          <a href="/search" className="bg-[#1C1C1E] rounded-2xl block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[260px]">
-            <div className="absolute inset-0 opacity-20 group-hover:opacity-35 transition-opacity">
-              <ImageCarousel images={searchImages} interval={5000} />
-            </div>
-            <div className="relative z-10 p-6">
-              <span className="inline-block bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">Realtime</span>
-              <h3 className="font-bold text-lg text-white mb-2">AI Поиск</h3>
-              <p className="text-white/60 text-[13px] mb-4">Perplexity ищет одновременно в нескольких источниках</p>
-              {/* Multi-engine search mockup */}
-              <div className="space-y-2">
-                <div className="bg-white/[0.06] rounded-lg p-2.5 border border-white/[0.06]">
-                  <div className="flex items-center gap-2 mb-2">
-                    <svg className="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
-                    <span className="text-[11px] text-white/50">курс биткоина марта 2026</span>
-                  </div>
-                  <div className="flex gap-1.5 mb-2">
-                    {["Google", "Bing", "News", "Scholar"].map((e, i) => (
-                      <span key={e} className={`text-[8px] px-1.5 py-0.5 rounded ${i === 0 ? "bg-emerald-500/20 text-emerald-300" : "bg-white/[0.04] text-white/20"}`}>{e}</span>
-                    ))}
-                  </div>
-                  <div className="space-y-1">
-                    <div className="h-1.5 w-full rounded bg-emerald-400/20 animate-pulse" />
-                    <div className="h-1.5 w-4/5 rounded bg-emerald-400/15" />
-                    <div className="h-1.5 w-3/5 rounded bg-white/[0.04]" />
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* ── Search — live multi-source search ── */}
+          <a href="/search" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[280px]">
+            <span className="inline-block bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">Realtime</span>
+            <h3 className="font-bold text-lg text-white mb-1">AI Поиск</h3>
+            <p className="text-white/50 text-[13px] mb-4">Ищет одновременно в Google, Bing, News, Scholar</p>
+            <SearchDemo />
           </a>
 
-          {/* ── Documents — PDF analysis mockup ── */}
-          <a href="/documents" className="bg-[#1C1C1E] rounded-2xl block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[260px]">
-            <div className="absolute inset-0 opacity-15 group-hover:opacity-25 transition-opacity">
-              <ImageCarousel images={docImages} interval={6000} />
-            </div>
-            <div className="relative z-10 p-6">
-              <span className="inline-block bg-amber-500/20 text-amber-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">PDF, фото</span>
-              <h3 className="font-bold text-lg text-white mb-2">Анализ документов</h3>
-              <p className="text-white/60 text-[13px] mb-4">AI читает документ и отвечает на вопросы</p>
-              {/* Document analysis mockup */}
-              <div className="bg-white/[0.06] rounded-lg p-2.5 border border-white/[0.06]">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-7 h-7 bg-amber-500/20 rounded flex items-center justify-center">
-                    <span className="text-[9px] font-bold text-amber-400">PDF</span>
-                  </div>
-                  <div>
-                    <div className="text-[10px] text-white/50">contract_2026.pdf</div>
-                    <div className="text-[8px] text-white/25">127 страниц · 4.2 MB</div>
-                  </div>
-                  <div className="ml-auto text-[8px] text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded">Готово</div>
-                </div>
-                <div className="border-t border-white/[0.04] pt-2 mt-1">
-                  <div className="text-[9px] text-white/30 mb-1">Ключевые риски:</div>
-                  <div className="text-[9px] text-white/50">• Штраф за досрочное расторжение §12.4</div>
-                  <div className="text-[9px] text-white/50">• Автопролонгация без уведомления §8.1</div>
-                </div>
-              </div>
-            </div>
+          {/* ── Documents — live PDF analysis ── */}
+          <a href="/documents" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[280px]">
+            <span className="inline-block bg-amber-500/20 text-amber-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">PDF, фото</span>
+            <h3 className="font-bold text-lg text-white mb-1">Анализ документов</h3>
+            <p className="text-white/50 text-[13px] mb-4">AI читает документ и находит ключевые пункты</p>
+            <DocAnalysisDemo />
           </a>
 
-          {/* ── Video — real autoplay video ── */}
+          {/* ── Video — real autoplay ── */}
           <a href="/video" className="bg-[#1C1C1E] rounded-2xl block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[220px]">
             <video src="/demo/video-demo.mp4" poster="/demo/video-poster.jpg" muted loop playsInline autoPlay className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-80 transition-opacity" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#1C1C1E] via-transparent to-transparent" />
             <div className="relative z-10 p-6 flex flex-col justify-end h-full">
-              <span className="inline-block bg-red-500/30 text-red-300 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3 w-fit">5 моделей</span>
+              <span className="inline-block bg-red-500/30 text-red-300 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-2 w-fit">5 моделей</span>
               <h3 className="font-bold text-lg text-white mb-1">AI Видео</h3>
-              <p className="text-white/80 text-[13px]">Kling, Runway, Pika. Видео из текста за 5-10 секунд.</p>
+              <p className="text-white/70 text-[13px]">Kling, Runway, Pika — видео из текста за секунды</p>
             </div>
           </a>
 
           {/* ── Audio — animated waveform ── */}
           <a href="/audio" className="bg-gradient-to-br from-indigo-600 via-blue-700 to-violet-800 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[220px]">
-            <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">10+ голосов</span>
+            <span className="inline-block bg-white/15 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">10+ голосов</span>
             <h3 className="font-bold text-lg text-white mb-2">AI Аудио</h3>
-            <p className="text-white/70 text-[13px] mb-4">Озвучка текста. Голосовой ввод. Мгновенно.</p>
+            <p className="text-white/60 text-[13px] mb-4">Озвучка текста. Голосовой ввод. Мгновенно.</p>
             <div className="flex items-end gap-[2px] h-10">
               {[3,5,8,4,7,9,6,4,7,5,8,3,6,9,5,7,4,8,6,3,5,7,4,6,8,5,3,7,4,9].map((h, i) => (
-                <div key={i} className="flex-1 rounded-full bg-white/25 group-hover:bg-white/50 transition-colors" style={{ height: `${h * 3.5}px`, animation: `waveBar 1.2s ${i * 0.04}s ease-in-out infinite alternate` }} />
+                <div key={i} className="flex-1 rounded-full bg-white/20 group-hover:bg-white/45 transition-colors" style={{ height: `${h * 3.5}px`, animation: `waveBar 1.2s ${i * 0.04}s ease-in-out infinite alternate` }} />
               ))}
             </div>
             <style>{`@keyframes waveBar { from { transform: scaleY(1); } to { transform: scaleY(0.3); } }`}</style>
@@ -173,37 +295,18 @@ export default function ToolCards() {
             <div className="absolute inset-0" dangerouslySetInnerHTML={{ __html: `<model-viewer src="/demo/model-demo.glb" auto-rotate camera-controls touch-action="pan-y" interaction-prompt="none" style="width:100%;height:100%;background:#1C1C1E" shadow-intensity="0.5" exposure="1.5"></model-viewer>` }} />
             <div className="absolute inset-0 bg-gradient-to-t from-[#1C1C1E] via-transparent to-transparent pointer-events-none" />
             <div className="relative z-10 p-6 flex flex-col justify-end h-full pointer-events-none">
-              <span className="inline-block bg-cyan-500/30 text-cyan-300 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3 w-fit">Tripo + TripoSR</span>
+              <span className="inline-block bg-cyan-500/30 text-cyan-300 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-2 w-fit">Tripo + TripoSR</span>
               <h3 className="font-bold text-lg text-white mb-1">3D Модели</h3>
-              <p className="text-white/60 text-[13px]">Вращайте мышью! GLB из текста или фото.</p>
+              <p className="text-white/50 text-[13px]">Вращайте мышью! GLB из текста или фото.</p>
             </div>
           </a>
 
-          {/* ── Deep Analysis + reasoning — combined mockup ── */}
-          <a href="/chat" className="bg-[#1C1C1E] rounded-2xl block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[260px]">
-            <div className="absolute inset-0 opacity-15 group-hover:opacity-25 transition-opacity">
-              <ImageCarousel images={analysisImages} interval={7000} />
-            </div>
-            <div className="relative z-10 p-6">
-              <span className="inline-block bg-violet-500/20 text-violet-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">o3 + R1</span>
-              <h3 className="font-bold text-lg text-white mb-2">Глубокий анализ</h3>
-              <p className="text-white/60 text-[13px] mb-4">AI рассуждает пошагово, показывая ход мыслей</p>
-              {/* Reasoning chain mockup */}
-              <div className="bg-white/[0.06] rounded-lg p-3 border border-white/[0.06] space-y-2.5">
-                <div className="flex items-start gap-2">
-                  <div className="w-5 h-5 rounded-full bg-violet-500/30 flex items-center justify-center shrink-0 mt-0.5"><span className="text-[8px] text-violet-300 font-bold">1</span></div>
-                  <div><div className="text-[9px] text-white/30">Разбор задачи</div><div className="text-[10px] text-white/60">Определяю ключевые переменные и ограничения...</div></div>
-                </div>
-                <div className="flex items-start gap-2">
-                  <div className="w-5 h-5 rounded-full bg-violet-500/30 flex items-center justify-center shrink-0 mt-0.5"><span className="text-[8px] text-violet-300 font-bold">2</span></div>
-                  <div><div className="text-[9px] text-white/30">Гипотезы</div><div className="text-[10px] text-white/60">Рассматриваю 3 подхода: аналитический, численный, графический</div></div>
-                </div>
-                <div className="flex items-start gap-2 opacity-40">
-                  <div className="w-5 h-5 rounded-full border border-white/20 flex items-center justify-center shrink-0 mt-0.5 animate-pulse"><span className="text-[8px] text-white/30 font-bold">3</span></div>
-                  <div><div className="text-[9px] text-white/20">Решение</div><div className="text-[10px] text-white/30">Формулирую финальный ответ...</div></div>
-                </div>
-              </div>
-            </div>
+          {/* ── Deep Analysis — live reasoning chain ── */}
+          <a href="/chat" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[280px]">
+            <span className="inline-block bg-violet-500/20 text-violet-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">o3 + DeepSeek R1</span>
+            <h3 className="font-bold text-lg text-white mb-1">Глубокий анализ</h3>
+            <p className="text-white/50 text-[13px] mb-4">AI рассуждает пошагово, показывая ход мыслей</p>
+            <ReasoningDemo />
           </a>
 
           {/* ── API — code snippet ── */}
