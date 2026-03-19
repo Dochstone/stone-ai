@@ -109,8 +109,12 @@ async def stt_transcribe(
     if not file.content_type or not file.content_type.startswith("audio/"):
         raise HTTPException(400, "Нужен аудиофайл (audio/*)")
 
+    # Check size via Content-Length header first (if available)
+    if file.size and file.size > 25 * 1024 * 1024:
+        raise HTTPException(400, "Файл слишком большой (макс 25MB)")
+
     audio_bytes = await file.read()
-    if len(audio_bytes) > 25 * 1024 * 1024:  # 25MB limit
+    if len(audio_bytes) > 25 * 1024 * 1024:
         raise HTTPException(400, "Файл слишком большой (макс 25MB)")
 
     # Transcribe

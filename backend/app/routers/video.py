@@ -20,7 +20,7 @@ from app.services.video_router import (
     submit_video_generation,
     check_video_status,
 )
-from app.services.token_billing import deduct_balance, add_balance
+from app.services.token_billing import deduct_balance
 
 logger = logging.getLogger(__name__)
 

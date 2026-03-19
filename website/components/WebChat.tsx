@@ -398,8 +398,14 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [videoGenerating, setVideoGenerating] = useState(false);
   const [threedGenerating, setThreedGenerating] = useState(false);
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => { if (pollTimerRef.current) clearTimeout(pollTimerRef.current); };
+  }, []);
 
   const model = useMemo(() => MODELS.find((m) => m.id === selectedModel), [selectedModel]);
   const isVideoModel = VIDEO_MODEL_IDS.has(selectedModel);
@@ -432,6 +438,15 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
     };
     vv.addEventListener("resize", onResize);
     return () => vv.removeEventListener("resize", onResize);
+  }, []);
+
+  // Load model-viewer script for 3D (once)
+  useEffect(() => {
+    if (document.querySelector('script[src*="model-viewer"]')) return;
+    const s = document.createElement("script");
+    s.type = "module";
+    s.src = "https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js";
+    document.head.appendChild(s);
   }, []);
 
   // Auto-resize textarea
@@ -572,15 +587,6 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
     }
   }, [auth]);
 
-  // Suggestion cards → auto-send
-  const handleSuggestion = useCallback((text: string) => {
-    setInput(text);
-    // Trigger send on next tick after state update
-    setTimeout(() => {
-      const fakeEvent = { preventDefault: () => {} } as React.KeyboardEvent;
-      // We'll just set input and let user see it, then auto-send
-    }, 50);
-  }, []);
 
   // 3D generation
   const send3DMessage = useCallback(async () => {
@@ -647,11 +653,11 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
             setThreedGenerating(false);
             return;
           }
-          if (attempts < 60) setTimeout(poll, 3000);
+          if (attempts < 60) pollTimerRef.current = setTimeout(poll, 3000);
           else { setMessages([...history, { role: "assistant", content: "Таймаут генерации." }]); setThreedGenerating(false); }
         } catch { setMessages([...history, { role: "assistant", content: "Ошибка проверки статуса" }]); setThreedGenerating(false); }
       };
-      setTimeout(poll, 3000);
+      pollTimerRef.current = setTimeout(poll, 3000);
 
     } catch {
       setMessages([...history, { role: "assistant", content: "Ошибка соединения" }]);
@@ -725,7 +731,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
           }
           // Still processing
           if (attempts < maxAttempts) {
-            setTimeout(poll, 3000);
+            pollTimerRef.current = setTimeout(poll, 3000);
           } else {
             setMessages([...history, { role: "assistant", content: "Таймаут генерации. Попробуйте снова." }]);
             setVideoGenerating(false);
@@ -735,7 +741,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
           setVideoGenerating(false);
         }
       };
-      setTimeout(poll, 3000);
+      pollTimerRef.current = setTimeout(poll, 3000);
 
     } catch {
       setMessages([...history, { role: "assistant", content: "Ошибка соединения" }]);
@@ -906,8 +912,6 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
 
   return (
     <div className="h-dvh flex bg-bg overflow-hidden" style={{ height: "100dvh" }}>
-      {/* model-viewer for 3D */}
-      <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js" />
       {/* Inline styles for markdown */}
       <style>{`
         .md-content { line-height: 1.7; }
@@ -1327,7 +1331,13 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                       const stopHandler = () => { if (recorder.state === "recording") recorder.stop(); btn.style.color = ""; btn.removeEventListener("click", stopHandler); };
                       setTimeout(() => btn.addEventListener("click", stopHandler), 100);
                     }
-                  } catch { /* mic not available */ }
+                  } catch (err: any) {
+                    if (err?.name === "NotAllowedError") {
+                      alert("Доступ к микрофону запрещён. Разрешите в настройках браузера.");
+                    } else if (err?.name === "NotFoundError") {
+                      alert("Микрофон не найден.");
+                    }
+                  }
                 }}
                 className="flex items-center justify-center text-text/25 hover:text-accent transition-colors shrink-0"
                 style={{ width: 38, height: 38 }}
