@@ -29,14 +29,14 @@ function ImageCarousel({ images, interval = 3000 }: { images: string[]; interval
   );
 }
 
-// ── Video carousel — cycles videos + cyberpunk posters ──
+// ── Video carousel — videos + animated cyberpunk images ──
 function VideoCarousel() {
   const [idx, setIdx] = useState(0);
   const items = [
     { type: "video", src: "/demo/video-neon.mp4" },
-    { type: "img", src: "/demo/video-cyber1.jpg" },
+    { type: "animated-img", src: "/demo/video-cyber1.jpg" },
     { type: "video", src: "/demo/video-city.mp4" },
-    { type: "img", src: "/demo/video-cyber2.jpg" },
+    { type: "animated-img", src: "/demo/video-cyber2.jpg" },
   ];
 
   useEffect(() => {
@@ -46,17 +46,27 @@ function VideoCarousel() {
 
   return (
     <div className="absolute inset-0">
-      {items.map((item, i) => (
-        item.type === "video" ? (
-          <video key={item.src} src={item.src} muted loop playsInline autoPlay
+      <style>{`
+        @keyframes cyberZoom { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
+        @keyframes cyberGlitch { 0%,92%,100% { clip-path: inset(0); } 93% { clip-path: inset(20% 0 60% 0); } 96% { clip-path: inset(50% 0 10% 0); } }
+        @keyframes scanLine { 0% { top: -10%; } 100% { top: 110%; } }
+      `}</style>
+      {items.map((item, i) => {
+        const active = i === idx;
+        if (item.type === "video") {
+          return <video key={item.src} src={item.src} muted loop playsInline autoPlay
             className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
-            style={{ opacity: i === idx ? 0.65 : 0 }} />
-        ) : (
-          <img key={item.src} src={item.src} alt=""
-            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
-            style={{ opacity: i === idx ? 0.65 : 0 }} />
-        )
-      ))}
+            style={{ opacity: active ? 0.65 : 0 }} />;
+        }
+        return (
+          <div key={item.src} className="absolute inset-0 transition-opacity duration-1000" style={{ opacity: active ? 0.65 : 0 }}>
+            <img src={item.src} alt="" className="absolute inset-0 w-full h-full object-cover"
+              style={{ animation: active ? "cyberZoom 5s ease-in-out infinite, cyberGlitch 5s steps(1) infinite" : "none" }} />
+            {/* Scan line overlay */}
+            {active && <div className="absolute left-0 right-0 h-[2px] bg-white/20 pointer-events-none" style={{ animation: "scanLine 2s linear infinite" }} />}
+          </div>
+        );
+      })}
     </div>
   );
 }
