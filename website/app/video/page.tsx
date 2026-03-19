@@ -53,7 +53,7 @@ export default function VideoPage() {
       <section className="py-16 md:py-20">
         <div className="max-w-3xl mx-auto px-4">
           <h3 className="text-xl font-bold text-center mb-6">Пример генерации</h3>
-          <video src="/demo/video-cyber.mp4" controls playsInline muted loop autoPlay className="w-full rounded-2xl shadow-lg" />
+          <video src="/demo/video-neon.mp4" controls playsInline muted loop autoPlay className="w-full rounded-2xl shadow-lg" />
         </div>
       </section>
 

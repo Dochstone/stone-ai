@@ -29,29 +29,33 @@ function ImageCarousel({ images, interval = 3000 }: { images: string[]; interval
   );
 }
 
-// ── Video carousel — cycles through 4 videos ──
-const videoSources = ["/demo/video-cyber.mp4", "/demo/video-wave.mp4", "/demo/video-city.mp4", "/demo/video-nature.mp4"];
-
+// ── Video carousel — cycles videos + cyberpunk posters ──
 function VideoCarousel() {
   const [idx, setIdx] = useState(0);
+  const items = [
+    { type: "video", src: "/demo/video-neon.mp4" },
+    { type: "img", src: "/demo/video-cyber1.jpg" },
+    { type: "video", src: "/demo/video-city.mp4" },
+    { type: "img", src: "/demo/video-cyber2.jpg" },
+  ];
+
   useEffect(() => {
-    const t = setInterval(() => setIdx(i => (i + 1) % videoSources.length), 6000);
+    const t = setInterval(() => setIdx(i => (i + 1) % items.length), 5000);
     return () => clearInterval(t);
-  }, []);
+  }, [items.length]);
 
   return (
     <div className="absolute inset-0">
-      {videoSources.map((src, i) => (
-        <video
-          key={src}
-          src={src}
-          muted
-          loop
-          playsInline
-          autoPlay
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
-          style={{ opacity: i === idx ? 0.6 : 0 }}
-        />
+      {items.map((item, i) => (
+        item.type === "video" ? (
+          <video key={item.src} src={item.src} muted loop playsInline autoPlay
+            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
+            style={{ opacity: i === idx ? 0.65 : 0 }} />
+        ) : (
+          <img key={item.src} src={item.src} alt=""
+            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
+            style={{ opacity: i === idx ? 0.65 : 0 }} />
+        )
       ))}
     </div>
   );
