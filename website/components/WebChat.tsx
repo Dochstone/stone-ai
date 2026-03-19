@@ -206,12 +206,12 @@ function WelcomeScreen({ onSuggestion }: { onSuggestion: (text: string) => void 
           <p className="text-sm text-text/40">50+ AI-моделей в одном месте. Выберите модель и начните диалог.</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md mx-auto">
+        <div className="grid grid-cols-2 max-w-md mx-auto" style={{ gap: 12 }}>
           {SUGGESTION_CARDS.map((card) => (
             <button
               key={card.title}
               onClick={() => onSuggestion(card.title)}
-              className="text-left p-4 rounded-2xl border border-text/[0.06] bg-white hover:border-accent/30 hover:shadow-md hover:shadow-accent/5 transition-all duration-200 group"
+              className="text-left p-4 rounded-2xl border border-text/[0.06] bg-white hover:border-accent/30 hover:shadow-md hover:shadow-accent/5 transition-all duration-200 group h-full"
             >
               <span className="text-xl mb-2 block">{card.icon}</span>
               <span className="text-[13px] font-semibold text-text group-hover:text-accent transition-colors block leading-tight">{card.title}</span>
@@ -257,8 +257,6 @@ function ScrollToBottom({ containerRef }: { containerRef: React.RefObject<HTMLDi
 // ─── Sidebar ───
 
 function Sidebar({
-  selected,
-  onSelect,
   open,
   onToggle,
   sessions,
@@ -267,8 +265,6 @@ function Sidebar({
   onNewChat,
   onDeleteSession,
 }: {
-  selected: string;
-  onSelect: (id: string) => void;
   open: boolean;
   onToggle: () => void;
   sessions: ChatSessionItem[];
@@ -277,7 +273,6 @@ function Sidebar({
   onNewChat: () => void;
   onDeleteSession: (id: number) => void;
 }) {
-  const model = MODELS.find((m) => m.id === selected);
 
   return (
     <>
@@ -299,12 +294,12 @@ function Sidebar({
           <div className="flex items-center gap-2">
             <button
               onClick={() => { onNewChat(); if (window.innerWidth < 1024) onToggle(); }}
-              className="flex-1 flex items-center gap-2 bg-white hover:bg-white/80 border border-text/[0.08] rounded-xl px-3.5 py-2.5 transition-colors shadow-sm"
+              className="flex-1 flex items-center gap-2 bg-accent hover:bg-accent/90 rounded-xl px-3.5 py-2 transition-colors shadow-sm"
             >
-              <svg className="w-4 h-4 text-text/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" d="M12 4v16m8-8H4" />
               </svg>
-              <span className="text-[13px] font-semibold text-text/70">Новый чат</span>
+              <span className="text-[13px] font-semibold text-white">Новый чат</span>
             </button>
             <button
               onClick={onToggle}
@@ -368,41 +363,9 @@ function Sidebar({
           )}
         </div>
 
-        {/* Bottom: Model selector + nav links */}
-        <div className="p-3 border-t border-text/[0.06] shrink-0 space-y-3">
-          <div>
-            <label className="text-[10px] font-semibold text-text/30 uppercase tracking-wider mb-1.5 block">Модель</label>
-            <select
-              value={selected}
-              onChange={(e) => onSelect(e.target.value)}
-              className="w-full bg-white border border-text/[0.08] rounded-xl px-3 py-2.5 text-[13px] font-medium text-text appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent/30 transition-colors"
-              style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231A191660' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
-            >
-              <optgroup label="Free">
-                {MODELS.filter(m => m.tier === "free").map(m => (
-                  <option key={m.id} value={m.id}>{m.name} — {m.company}</option>
-                ))}
-              </optgroup>
-              <optgroup label="Pro">
-                {MODELS.filter(m => m.tier === "pro").map(m => (
-                  <option key={m.id} value={m.id}>{m.name} — {m.company} ({formatPrice(m)})</option>
-                ))}
-              </optgroup>
-            </select>
-            {model && (
-              <div className="flex items-center gap-2 mt-2 px-1">
-                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                  model.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"
-                }`}>
-                  {formatPrice(model)}
-                </span>
-                {model.context && <span className="text-[10px] text-text/25">{model.context}</span>}
-              </div>
-            )}
-          </div>
-
-          {/* Quick nav links */}
-          <div className="flex items-center gap-1 pt-1">
+        {/* Bottom: nav links */}
+        <div className="p-3 border-t border-text/[0.06] shrink-0">
+          <div className="flex items-center gap-1">
             <a href="/" className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-text/30 hover:text-accent hover:bg-white/50 transition-colors text-[11px] font-medium">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955a1.126 1.126 0 011.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
@@ -848,8 +811,6 @@ export default function WebChat() {
       `}</style>
 
       <Sidebar
-        selected={selectedModel}
-        onSelect={setSelectedModel}
         open={sidebarOpen}
         onToggle={toggleSidebar}
         sessions={sessions}
@@ -874,15 +835,31 @@ export default function WebChat() {
               </svg>
             </button>
 
-            {/* Model name + price */}
-            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 overflow-hidden">
+            {/* Model dropdown */}
+            <div className="flex items-center gap-1.5 min-w-0">
               <div
                 className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shrink-0"
                 style={{ backgroundColor: aiColor }}
               >
                 {aiLetter}
               </div>
-              <span className="font-bold text-[13px] sm:text-sm text-text truncate max-w-[100px] sm:max-w-[200px]">{model?.name || selectedModel}</span>
+              <select
+                value={selectedModel}
+                onChange={(e) => setSelectedModel(e.target.value)}
+                className="bg-transparent font-bold text-[13px] sm:text-sm text-text appearance-none cursor-pointer focus:outline-none min-w-0 max-w-[120px] sm:max-w-[200px] truncate pr-4"
+                style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%231A191650' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 0 center" }}
+              >
+                <optgroup label="Free">
+                  {MODELS.filter(m => m.tier === "free").map(m => (
+                    <option key={m.id} value={m.id}>{m.name}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="Pro">
+                  {MODELS.filter(m => m.tier === "pro").map(m => (
+                    <option key={m.id} value={m.id}>{m.name} ({formatPrice(m)})</option>
+                  ))}
+                </optgroup>
+              </select>
               <span className={`text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
                 model?.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"
               }`}>
@@ -1037,7 +1014,7 @@ export default function WebChat() {
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading || streaming}
                 className="flex items-center justify-center text-text/25 hover:text-accent transition-colors disabled:opacity-30 shrink-0"
-                style={{ width: 32, height: 32 }}
+                style={{ width: 38, height: 38 }}
               >
                 <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
@@ -1053,7 +1030,7 @@ export default function WebChat() {
                 placeholder={pendingFile ? "Добавьте вопрос к файлу..." : "Написать сообщение... (Shift+Enter — новая строка)"}
                 rows={1}
                 className="flex-1 bg-transparent resize-none focus:outline-none min-w-0 leading-snug placeholder:text-text/20"
-                style={{ fontSize: 14, padding: "10px 14px", maxHeight: 80, minHeight: 40 }}
+                style={{ fontSize: 14, padding: "10px 16px", maxHeight: 80, minHeight: 42 }}
               />
 
               {/* Send or Stop button */}
@@ -1062,7 +1039,7 @@ export default function WebChat() {
                   onClick={stopGeneration}
                   className="rounded-lg bg-text/70 text-white flex items-center justify-center hover:bg-text/90 transition-colors shrink-0"
                   title="Остановить генерацию"
-                  style={{ width: 32, height: 32 }}
+                  style={{ width: 38, height: 38 }}
                 >
                   <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                     <rect x="6" y="6" width="12" height="12" rx="2" />
@@ -1073,7 +1050,7 @@ export default function WebChat() {
                   onClick={sendMessage}
                   disabled={!input.trim() && !pendingFile}
                   className="rounded-lg bg-accent text-white flex items-center justify-center hover:bg-accent/90 transition-colors disabled:opacity-30 shrink-0"
-                  style={{ width: 32, height: 32 }}
+                  style={{ width: 38, height: 38 }}
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
