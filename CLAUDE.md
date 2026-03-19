@@ -1,22 +1,21 @@
 # CLAUDE.md — Stone AI Development Agent
 
-Сверяйся с `STRATEGY.md`, `TZ_IMPLEMENTATION.md` и `MODELS_50.md` перед работой.
+Сверяйся с `STRATEGY.md`, `ROADMAP_NEXT.md` и `MODELS_50.md` перед работой.
 
 ## Контекст
 
-Stone AI — платформа доступа к 50+ AI-моделям. Без VPN, прямо в Telegram. Два продукта:
+Stone AI — платформа доступа к 50+ AI-моделям. Без VPN. Три продукта:
 1. **Telegram Mini App** — основной (React + Vite + Zustand, FastAPI backend)
-2. **Веб-сайт** — [В РАЗРАБОТКЕ] (Next.js + Tailwind, общий backend)
+2. **Веб-сайт** — production (Next.js 14 + Tailwind, 35 компонентов, 24 страницы)
+3. **Веб-чат** — /webchat (ChatGPT/Claude.ai стиль, sidebar + chat + categories)
 
 ## Бизнес-модель
 
-- **Free**: 5 Lite-моделей, 10 req/день + 5 за rewarded video, баннерная реклама
-- **Paid**: 50 моделей, per-token billing (баланс в USD)
-- **Наценка**: гибкая x2.5-6, средняя ~350%, max +30-50% vs ishushka
-- **Цены**: средневзвешенная за 1М токенов (input×0.4 + output×0.6), детали по клику
-- **Списание**: ПОСЛЕ стриминга по реальным токенам
-- **DeepSeek R1**: Premium (платный)
-- **BYOK**: отложен, НЕ упоминать
+- **Free**: 5 Lite-моделей, 15 запросов/день (10 base + 5 rewarded, показываем как "15 бесплатных")
+- **Paid**: 50+ моделей (чат, картинки, видео, 3D, аудио), per-token billing (баланс в USD)
+- **Видео/3D**: фиксированная цена за генерацию, списание ДО генерации, рефанд при ошибке
+- **Аудио**: TTS per-token (OpenRouter), STT $0.02/мин (Whisper)
+- **Наценка**: гибкая x2.5-6, средняя ~350%
 - **4 метода оплаты**: Stars, TON Connect, Lava.ru (карты/СБП), Heleket (USDT/BTC/ETH)
 
 ## Архитектура
@@ -24,54 +23,47 @@ Stone AI — платформа доступа к 50+ AI-моделям. Без 
 ### Frontend — TG Mini App (frontend/)
 - React + TypeScript + Vite + Zustand
 - Inline CSS (НЕ Tailwind), палитры Matrix/Ocean/Sunset
-- Экраны: Home, Chat, Plans, Profile, FAQ, ModelDetail
 - i18n: RU/EN/ZH
-- Хуки оплаты: `usePayment.ts` (Stars), `useTonPayment.ts` (TON), `useRewardedAd.ts`
-- balanceUsd в store (НЕ credits)
 
-### Backend (backend/)
+### Backend (backend/) — 14 роутеров, 9 сервисов
 - Python 3.13, FastAPI + SQLAlchemy async + PostgreSQL
-- **Биллинг**: `services/token_billing.py` — per-token, TOKEN_PRICES, calculate_cost(), deduct_balance()
-- **AI**: `services/ai_router.py` — MODEL_MAP 50 моделей (OpenRouter)
+- **Биллинг**: `services/token_billing.py` — per-token billing
+- **AI Chat**: `services/ai_router.py` — 50 моделей через OpenRouter
+- **Видео**: `services/video_router.py` + `routers/video.py` — fal.ai (5 моделей)
+- **3D**: `services/threed_router.py` + `routers/threed.py` — fal.ai (Tripo, TripoSR)
+- **Аудио**: `services/audio_router.py` + `routers/audio.py` — TTS (OpenRouter) + STT (Whisper)
 - **Лимиты**: `services/limiter.py` — FREE_DAILY_LIMIT=10, REWARDED_BONUS=5
-- **Оплата роутеры**: 
-  - `routers/payment.py` — Stars + TON + rewarded ads
-  - `routers/payment_ext.py` — Lava (карты/СБП) + Heleket (крипто)
-- **Оплата сервисы**:
-  - `services/ton.py` — TON Connect API
-  - `services/lava.py` — Lava.ru
-  - `services/heleket.py` — Heleket (USDT/BTC/ETH)
-- **Legacy**: `services/credits.py` — УДАЛИТЬ (заменён на token_billing.py)
-- **Модели**: User.balance_usd (Numeric 12,6), Transaction, Usage
-- **Бот**: `bot/payments.py` (Stars обработчик), `bot/handlers.py`
+- **Оплата**: `routers/payment.py` (Stars+TON), `routers/payment_ext.py` (Lava+Heleket)
 
-### Website (website/) — [СОЗДАЁТСЯ]
-- Next.js 14 + Tailwind CSS
-- **СВЕТЛЫЙ дизайн** в стиле chatbotai.co (НЕ Matrix-тёмный!)
-- Референс: `StoneAI_Landing_v2.jsx`
+### Website (website/) — 35 компонентов, 24 страницы
+- Next.js 14 + Tailwind CSS + Dark theme
+- Шрифт: Manrope, цвета: CSS variables (light: #FAF9F5/#1A1916, dark: #0C0C10/#E8E4DD)
+- Accent: #D97757 (обе темы)
+- Страницы: /, /webchat, /profile (6 табов), /models, /pricing, /video, /audio, /3d, /chat, /images, /documents, /search, /code, /translate, /blog, /docs, /referral, /topup
+- WebChat: sidebar чатов + category tabs (Текст/Картинки/Видео/3D) + deep link ?model=X
+- Deploy: Railway (STONEAICHAT project, services: stone-ai + website)
 
 ## Правила кода
 
 - UI на русском, код на английском
-- Frontend TG: inline CSS, палитры, maxWidth 480px
-- Website: Tailwind, светлый, responsive, SSR/SSG
+- "Reasoning" → "Глубокий анализ" везде на сайте
+- "15 бесплатных запросов" (не "10+5", не упоминать rewarded ads)
+- Website: Tailwind, responsive, SSR/SSG, dark theme support
 - Backend: async, Pydantic, атомарные балансы (with_for_update)
-- Цены: строго по `MODELS_50.md`
-- Оплата: всё в USD, НЕ в кредитах
 
 ## Прогресс
 
-- [x] Этап 1: Per-token billing (token_billing.py, balance_usd)
-- [x] Этап 2: Модели (25→50 по MODELS_50.md)
-- [x] Этап 3: Реклама + rewarded ads
-- [x] Тесты: 130 тестов, все зелёные
-- [x] Оплата: Stars + TON + Lava + Heleket
-- [x] Очистка: legacy credits убраны
-- [x] Этап 4: Frontend PlansScreen (баланс $, per-token)
-- [x] Этап 5: Frontend HomeScreen (50 моделей, фильтры)
-- [x] Этап 6: Frontend ChatScreen (стоимость запроса)
-- [x] Этап 7-8: Сайт лендинг + /models + /pricing
-- [x] Этап 9: Сайт — 6 страниц инструментов (/chat, /images, /documents, /search, /code, /translate)
+- [x] Per-token billing, 50 моделей, 4 метода оплаты
+- [x] Webchat: ChatGPT-стиль, sidebar, markdown, code highlight, TTS/STT
+- [x] Видео-генерация (fal.ai): Kling, Runway, Pika, Stable Video, Luma
+- [x] 3D-генерация (fal.ai): Tripo v2.5, TripoSR + model-viewer
+- [x] Аудио: TTS (GPT Audio, 9 голосов), STT (Whisper, микрофон)
+- [x] Профиль /profile: 6 табов (обзор, баланс, история, настройки, рефералы, API)
+- [x] Лендинг: bento grid, product screenshot, trust marquee, demo showcase
+- [x] Страницы /video, /audio, /3d + deep links
+- [x] 57 описаний моделей + /models с раскрывающимися карточками
+- [x] Тёмная тема (CSS variables, toggle в Nav)
+- [x] 330 backend тестов
 
 ## Команды
 
@@ -81,19 +73,35 @@ cd backend && uvicorn app.main:app --reload --port 8000
 cd website && npm run dev
 ```
 
+## Deploy
+
+```bash
+# Website
+cd website && railway link --project STONEAICHAT --service website && railway up --detach
+
+# Backend
+cd backend && railway link --project STONEAICHAT --service stone-ai && railway up --detach
+```
+
+## Env переменные (22 шт)
+
+BOT_TOKEN, WEBAPP_URL, OPENROUTER_API_KEY, DATABASE_URL, SECRET_KEY,
+TON_WALLET_ADDRESS, TONAPI_KEY, LAVA_SECRET_KEY, LAVA_SHOP_ID,
+LAVA_WEBHOOK_KEY, HELEKET_API_KEY, HELEKET_MERCHANT, CRYPTOBOT_API_TOKEN,
+FAL_API_KEY, OPENAI_API_KEY, ADMIN_TG_IDS, GOOGLE_CLIENT_ID,
+GOOGLE_CLIENT_SECRET, YANDEX_CLIENT_ID, YANDEX_CLIENT_SECRET, ADSGRAM_BLOCK_ID
+
 ## Ключевые файлы
 
 | Файл | Описание |
 |------|----------|
-| STRATEGY.md | Стратегия, финмодель, конкуренты |
-| TZ_IMPLEMENTATION.md | ТЗ на 9 этапов |
-| MODELS_50.md | 50 моделей: slug, цены, множители |
-| StoneAI_Landing_v2.jsx | Референс дизайна сайта |
-| backend/app/services/token_billing.py | Per-token биллинг |
+| ROADMAP_NEXT.md | Roadmap с задачами и статусами |
+| website/lib/models.ts | 57 моделей с описаниями и ценами |
+| website/components/WebChat.tsx | Веб-чат (1400+ строк) |
+| website/components/ProfilePage.tsx | Личный кабинет (6 табов) |
 | backend/app/services/ai_router.py | 50 моделей OpenRouter |
-| backend/app/services/heleket.py | Heleket крипто-оплата |
-| backend/app/services/lava.py | Lava карты/СБП |
-| backend/app/services/ton.py | TON Connect |
-| backend/app/routers/payment.py | Stars + TON + rewarded |
-| backend/app/routers/payment_ext.py | Lava + Heleket |
-| backend/app/routers/chat.py | Chat + billing SSE |
+| backend/app/services/video_router.py | Видео через fal.ai |
+| backend/app/services/threed_router.py | 3D через fal.ai |
+| backend/app/services/audio_router.py | TTS + STT |
+| backend/app/services/token_billing.py | Per-token биллинг |
+| backend/app/routers/chat.py | Chat + SSE streaming |
