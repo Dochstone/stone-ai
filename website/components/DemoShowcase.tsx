@@ -22,12 +22,12 @@ export default function DemoShowcase() {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             {[
-              { src: "/demo/img-cosmos.jpg", label: "Космос" },
-              { src: "/demo/img-portrait.jpg", label: "Портрет" },
-              { src: "/demo/img-landscape.jpg", label: "Пейзаж" },
+              { src: "/demo/img-cosmos.jpg", label: "Неоновый город" },
+              { src: "/demo/img-portrait.jpg", label: "Космический портрет" },
+              { src: "/demo/img-landscape.jpg", label: "Горный пейзаж" },
               { src: "/demo/img-abstract.jpg", label: "Абстракция" },
-              { src: "/demo/img-architecture.jpg", label: "Архитектура" },
-              { src: "/demo/img-product.jpg", label: "Продукт" },
+              { src: "/demo/img-architecture.jpg", label: "Архитектура будущего" },
+              { src: "/demo/img-product.jpg", label: "Продуктовое фото" },
             ].map((img) => (
               <div key={img.label} className="group relative rounded-xl overflow-hidden aspect-square bg-bg border border-text/[0.06]">
                 <img
