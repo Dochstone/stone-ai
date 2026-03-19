@@ -29,6 +29,34 @@ function ImageCarousel({ images, interval = 3000 }: { images: string[]; interval
   );
 }
 
+// ── Video carousel — cycles through 4 videos ──
+const videoSources = ["/demo/video-demo.mp4", "/demo/video-wave.mp4", "/demo/video-city.mp4", "/demo/video-nature.mp4"];
+
+function VideoCarousel() {
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setIdx(i => (i + 1) % videoSources.length), 6000);
+    return () => clearInterval(t);
+  }, []);
+
+  return (
+    <div className="absolute inset-0">
+      {videoSources.map((src, i) => (
+        <video
+          key={src}
+          src={src}
+          muted
+          loop
+          playsInline
+          autoPlay
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
+          style={{ opacity: i === idx ? 0.6 : 0 }}
+        />
+      ))}
+    </div>
+  );
+}
+
 // ── Typing animation hook ──
 function useTyping(texts: string[], charDelay = 40, pauseDelay = 2000) {
   const [display, setDisplay] = useState("");
@@ -250,27 +278,27 @@ export default function ToolCards() {
             </div>
           </a>
 
-          {/* ── Search — live multi-source search ── */}
-          <a href="/search" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[280px]">
+          {/* ── Search — live multi-source search, FIXED HEIGHT ── */}
+          <a href="/search" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative" style={{ height: 320 }}>
             <span className="inline-block bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">Realtime</span>
             <h3 className="font-bold text-lg text-white mb-1">AI Поиск</h3>
             <p className="text-white/50 text-[13px] mb-4">Ищет одновременно в Google, Bing, News, Scholar</p>
             <SearchDemo />
           </a>
 
-          {/* ── Documents — live PDF analysis ── */}
-          <a href="/documents" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[280px]">
+          {/* ── Documents — live PDF analysis, FIXED HEIGHT ── */}
+          <a href="/documents" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative" style={{ height: 320 }}>
             <span className="inline-block bg-amber-500/20 text-amber-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">PDF, фото</span>
             <h3 className="font-bold text-lg text-white mb-1">Анализ документов</h3>
             <p className="text-white/50 text-[13px] mb-4">AI читает документ и находит ключевые пункты</p>
             <DocAnalysisDemo />
           </a>
 
-          {/* ── Video — real autoplay ── */}
+          {/* ── Video — cycling real videos ── */}
           <a href="/video" className="bg-[#1C1C1E] rounded-2xl block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[220px]">
-            <video src="/demo/video-demo.mp4" poster="/demo/video-poster.jpg" muted loop playsInline autoPlay className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-80 transition-opacity" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#1C1C1E] via-transparent to-transparent" />
-            <div className="relative z-10 p-6 flex flex-col justify-end h-full">
+            <VideoCarousel />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#1C1C1E] via-[#1C1C1E]/20 to-transparent pointer-events-none" />
+            <div className="relative z-10 p-6 flex flex-col justify-end h-full pointer-events-none">
               <span className="inline-block bg-red-500/30 text-red-300 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-2 w-fit">5 моделей</span>
               <h3 className="font-bold text-lg text-white mb-1">AI Видео</h3>
               <p className="text-white/70 text-[13px]">Kling, Runway, Pika — видео из текста за секунды</p>
@@ -301,8 +329,8 @@ export default function ToolCards() {
             </div>
           </a>
 
-          {/* ── Deep Analysis — live reasoning chain ── */}
-          <a href="/chat" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[280px]">
+          {/* ── Deep Analysis — live reasoning chain, FIXED HEIGHT ── */}
+          <a href="/chat" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative" style={{ height: 320 }}>
             <span className="inline-block bg-violet-500/20 text-violet-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">o3 + DeepSeek R1</span>
             <h3 className="font-bold text-lg text-white mb-1">Глубокий анализ</h3>
             <p className="text-white/50 text-[13px] mb-4">AI рассуждает пошагово, показывая ход мыслей</p>
