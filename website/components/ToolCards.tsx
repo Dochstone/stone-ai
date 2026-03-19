@@ -40,27 +40,35 @@ function VideoCarousel() {
     const t = setInterval(() => {
       setIdx(prev => {
         const next = (prev + 1) % videoSources.length;
-        // Reset next video to start and play it
         const nextVideo = videoRefs.current[next];
         if (nextVideo) {
           nextVideo.currentTime = 0;
           nextVideo.play().catch(() => {});
         }
-        // Pause previous after fade
         setTimeout(() => {
           const prevVideo = videoRefs.current[prev];
           if (prevVideo) prevVideo.pause();
         }, 1200);
         return next;
       });
-    }, 6000);
+    }, 4000);
     return () => clearInterval(t);
   }, []);
 
-  // Start first video on mount
   useEffect(() => {
     const first = videoRefs.current[0];
     if (first) { first.currentTime = 0; first.play().catch(() => {}); }
+  }, []);
+
+  // Prevent playback past 4s (MiniMax loops first frames at end)
+  useEffect(() => {
+    const handlers = videoRefs.current.map((v, i) => {
+      if (!v) return null;
+      const onTime = () => { if (v.currentTime > 3.8) { v.currentTime = 0; } };
+      v.addEventListener("timeupdate", onTime);
+      return () => v.removeEventListener("timeupdate", onTime);
+    });
+    return () => handlers.forEach(h => h?.());
   }, []);
 
   return (
@@ -71,7 +79,6 @@ function VideoCarousel() {
           ref={el => { videoRefs.current[i] = el; }}
           src={src}
           muted
-          loop
           playsInline
           className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
           style={{ opacity: i === idx ? 0.65 : 0 }}
