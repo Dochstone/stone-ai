@@ -1053,7 +1053,7 @@ export default function WebChat() {
                 placeholder={pendingFile ? "Добавьте вопрос к файлу..." : "Написать сообщение... (Shift+Enter — новая строка)"}
                 rows={1}
                 className="flex-1 bg-transparent resize-none focus:outline-none min-w-0 leading-snug placeholder:text-text/20"
-                style={{ fontSize: 14, padding: "6px 8px", maxHeight: 72, minHeight: 28 }}
+                style={{ fontSize: 14, padding: "10px 14px", maxHeight: 80, minHeight: 40 }}
               />
 
               {/* Send or Stop button */}
