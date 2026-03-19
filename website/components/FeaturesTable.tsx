@@ -4,7 +4,7 @@ const features = [
   { name: "GPT-5, Claude Opus", free: "---", paid: "check" },
   { name: "Генерация картинок", free: "---", paid: "check" },
   { name: "AI Поиск (Perplexity)", free: "---", paid: "check" },
-  { name: "Reasoning (o3, R1)", free: "---", paid: "check" },
+  { name: "Глубокий анализ (o3, R1)", free: "---", paid: "check" },
   { name: "Стоимость", free: "Бесплатно", paid: "От $0.24/1M токенов" },
   { name: "Оплата", free: "—", paid: "Stars, карты, СБП, крипто" },
 ];

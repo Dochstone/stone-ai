@@ -1017,7 +1017,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                     { id: "image", label: "Image" },
                     { id: "video", label: "Video" },
                     { id: "3d", label: "3D" },
-                    { id: "reason", label: "Reasoning" },
+                    { id: "reason", label: "Глубокий анализ" },
                     { id: "search", label: "Search" },
                     { id: "code", label: "Code" },
                   ];

@@ -12,7 +12,7 @@ import {
 const categoryLabels: Record<ModelCategory, string> = {
   chat: "Чат",
   image: "Изображения",
-  reason: "Reasoning",
+  reason: "Глубокий анализ",
   search: "Поиск",
   code: "Код",
   video: "Видео",

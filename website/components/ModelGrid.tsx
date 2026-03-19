@@ -35,7 +35,7 @@ const TABS: { id: "all" | ModelCategory; label: string }[] = [
   { id: "chat", label: "Chat" },
   { id: "image", label: "Image" },
   { id: "search", label: "Search" },
-  { id: "reason", label: "Reasoning" },
+  { id: "reason", label: "Глубокий анализ" },
   { id: "code", label: "Code" },
 ];
 
