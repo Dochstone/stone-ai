@@ -76,6 +76,33 @@ export default function ImagesPage() {
         modelIds={modelIds}
         descriptions={modelDescriptions}
       />
+
+      {/* AI-generated gallery */}
+      <section className="py-16 md:py-20 bg-bg">
+        <div className="max-w-5xl mx-auto px-4">
+          <h3 className="text-xl font-bold text-center mb-6">Примеры работ</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { src: "/demo/img-cosmos.jpg", label: "Неоновый город" },
+              { src: "/demo/img-portrait.jpg", label: "Космический портрет" },
+              { src: "/demo/img-landscape.jpg", label: "Горный пейзаж" },
+              { src: "/demo/img-fantasy.jpg", label: "Фэнтези мир" },
+              { src: "/demo/img-robot.jpg", label: "3D персонаж" },
+              { src: "/demo/img-food.jpg", label: "Фуд-фото" },
+              { src: "/demo/img-abstract.jpg", label: "Абстракция" },
+              { src: "/demo/img-architecture.jpg", label: "Архитектура" },
+            ].map((img) => (
+              <div key={img.label} className="relative rounded-xl overflow-hidden aspect-square group">
+                <img src={img.src} alt={img.label} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-2.5 pt-8">
+                  <span className="text-[11px] font-semibold text-white">{img.label}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <ToolExamples
         title="Примеры промптов"
         subtitle="Опишите картинку — AI создаст её за секунды"

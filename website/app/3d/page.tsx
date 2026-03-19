@@ -45,6 +45,16 @@ export default function ThreeDPage() {
         modelIds={modelIds}
         descriptions={modelDescriptions}
       />
+
+      {/* Demo 3D model */}
+      <section className="py-16 md:py-20">
+        <div className="max-w-2xl mx-auto px-4">
+          <h3 className="text-xl font-bold text-center mb-6">Пример 3D модели</h3>
+          <div className="rounded-2xl overflow-hidden border border-text/[0.06] shadow-lg bg-[#f0f0f0]" style={{ height: 400 }} dangerouslySetInnerHTML={{ __html: `<model-viewer src="/demo/model-demo.glb" auto-rotate camera-controls touch-action="pan-y" style="width:100%;height:400px;background:#f0f0f0" shadow-intensity="1" exposure="1.2"></model-viewer>` }} />
+          <p className="text-center text-xs text-text/40 mt-3">Вращайте модель мышью или пальцем</p>
+        </div>
+      </section>
+
       <ToolExamples subtitle="Примеры использования" examples={examples} />
       <ToolFaq items={faqItems} />
       <ToolCta title="Создайте 3D модель" subtitle="Загрузите фото или опишите объект — получите GLB за секунды." ctaHref="/webchat?category=3d" />

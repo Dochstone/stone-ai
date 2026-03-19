@@ -14,7 +14,7 @@ export default function ToolCards() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-auto">
 
           {/* ── AI Chat — 2 cols, chat mockup ── */}
-          <a href="/chat" className="sm:col-span-2 bg-gradient-to-br from-[#1C1C1E] via-[#252220] to-[#2E2518] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[280px]">
+          <a href="/chat" className="sm:col-span-2 bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[280px]" style={{ backgroundImage: "url(/demo/tool-chat.jpg)", backgroundSize: "cover", backgroundPosition: "center", backgroundBlendMode: "soft-light" }}>
             <div className="relative z-10">
               <span className="inline-block bg-accent/20 text-accent text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-4">50+ моделей</span>
               <h3 className="font-bold text-xl text-white mb-2">AI Чат</h3>

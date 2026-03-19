@@ -57,6 +57,21 @@ export default function AudioPage() {
           </div>
         </div>
       </section>
+
+      {/* Demo audio */}
+      <section className="py-16 md:py-20">
+        <div className="max-w-md mx-auto px-4 text-center">
+          <h3 className="text-xl font-bold mb-6">Послушайте пример</h3>
+          <div className="bg-white rounded-2xl border border-text/[0.06] p-6 shadow-lg">
+            <div className="mb-4">
+              <img src="/demo/audio-poster.jpg" alt="Audio waveform" className="w-full rounded-xl mb-4" />
+            </div>
+            <audio controls className="w-full" src="/demo/audio-demo.mp3" />
+            <p className="text-xs text-text/40 mt-3">Голос: Nova · Язык: Русский</p>
+          </div>
+        </div>
+      </section>
+
       <ToolExamples subtitle="Примеры использования" examples={examples} />
       <ToolFaq items={faqItems} />
       <ToolCta title="Попробуйте AI Аудио" subtitle="Озвучка и голосовой ввод — прямо в чате." ctaHref="/webchat" />
