@@ -224,6 +224,8 @@ export default function Hero() {
   return (
     <section className="relative pt-28 pb-10 md:pt-36 md:pb-16 overflow-hidden">
       <GradientMeshBg />
+      {/* AI-generated background */}
+      <div className="absolute inset-0 opacity-[0.04] dark:opacity-[0.08] pointer-events-none" style={{ backgroundImage: "url(/demo/hero-bg.jpg)", backgroundSize: "cover", backgroundPosition: "center" }} />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
