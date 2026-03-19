@@ -2,6 +2,7 @@ import Hero from "@/components/Hero";
 import PromoBanner from "@/components/PromoBanner";
 import ToolCards from "@/components/ToolCards";
 import ProductScreenshot from "@/components/ProductScreenshot";
+import DemoShowcase from "@/components/DemoShowcase";
 import HowItWorks from "@/components/HowItWorks";
 import ModelGrid from "@/components/ModelGrid";
 
@@ -18,6 +19,7 @@ export default function Home() {
       <PromoBanner />
       <ToolCards />
       <ProductScreenshot />
+      <DemoShowcase />
       <HowItWorks />
       <ModelGrid />
       <FeaturesTable />
