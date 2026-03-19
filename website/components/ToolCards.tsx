@@ -30,7 +30,7 @@ function ImageCarousel({ images, interval = 3000 }: { images: string[]; interval
 }
 
 // ── Video carousel — 4 real AI-generated videos ──
-const videoSources = ["/demo/video-cyber-girl.mp4", "/demo/video-neon.mp4", "/demo/video-hacker.mp4", "/demo/video-city.mp4"];
+const videoSources = ["/demo/video-1.mp4", "/demo/video-2.mp4", "/demo/video-3.mp4", "/demo/video-4.mp4"];
 
 function VideoCarousel() {
   const [idx, setIdx] = useState(0);
