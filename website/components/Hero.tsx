@@ -140,8 +140,8 @@ function ChatMockup() {
 function ProviderLogo({ children, color, className = "" }: { children: React.ReactNode; color?: string; className?: string }) {
   return (
     <span
-      className={`shrink-0 mx-6 md:mx-9 inline-flex items-center gap-1.5 opacity-[0.4] hover:opacity-[0.7] transition-opacity duration-300 select-none cursor-default ${className}`}
-      style={{ width: 120, height: 40, color }}
+      className={`shrink-0 mx-6 md:mx-9 inline-flex items-center gap-2 opacity-[0.6] hover:opacity-[0.85] transition-opacity duration-300 select-none cursor-default ${className}`}
+      style={{ height: 44, color }}
     >
       {children}
     </span>
@@ -154,51 +154,51 @@ function TrustMarquee() {
       {/* OpenAI — black bold + circle dot */}
       <ProviderLogo color="#1A1916">
         <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10" fillOpacity="0.15"/><circle cx="12" cy="12" r="4"/></svg>
-        <span className="text-lg font-extrabold tracking-tight">OpenAI</span>
+        <span className="text-2xl font-extrabold tracking-tight">OpenAI</span>
       </ProviderLogo>
       {/* Anthropic — orange + starburst */}
       <ProviderLogo color="#d97706">
         <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.09 6.26L20.18 8l-4.91 3.82L17.36 18 12 14.27 6.64 18l2.09-6.18L3.82 8l6.09.26z"/></svg>
-        <span className="text-lg font-medium">Anthropic</span>
+        <span className="text-2xl font-bold">Anthropic</span>
       </ProviderLogo>
       {/* Google — 4-color letters */}
       <ProviderLogo>
-        <span className="text-lg font-medium tracking-tight">
+        <span className="text-2xl font-bold tracking-tight">
           <span style={{color:"#4285f4"}}>G</span><span style={{color:"#ea4335"}}>o</span><span style={{color:"#fbbc05"}}>o</span><span style={{color:"#4285f4"}}>g</span><span style={{color:"#34a853"}}>l</span><span style={{color:"#ea4335"}}>e</span>
         </span>
       </ProviderLogo>
       {/* xAI — bold italic on dark badge */}
       <ProviderLogo>
-        <span className="bg-[#1A1916] text-white text-sm font-extrabold italic px-3 py-1 rounded-lg">xAI</span>
+        <span className="bg-[#1A1916] text-white text-xl font-extrabold italic px-4 py-1.5 rounded-lg">xAI</span>
       </ProviderLogo>
       {/* DeepSeek — cyan + whale */}
       <ProviderLogo color="#06b6d4">
         <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="12" cy="13" rx="9" ry="7" fillOpacity="0.2"/><path d="M5 12c0-4 3.5-7 7-7s7 3 7 7c0 3-2 5.5-4 6.5C13.5 19.5 12 20 12 20s-1.5-.5-3-1.5C7 17.5 5 15 5 12z" fillOpacity="0.6"/><circle cx="9" cy="11" r="1"/></svg>
-        <span className="text-lg font-normal">DeepSeek</span>
+        <span className="text-2xl font-bold">DeepSeek</span>
       </ProviderLogo>
       {/* Meta — blue + infinity */}
       <ProviderLogo color="#0668E1">
         <svg className="w-5 h-4 shrink-0" viewBox="0 0 24 16" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 8c0-3 2-5 4-5s4 3 4 5-2 5-4 5-4-3-4-5zM12 8c0-3 2-5 4-5s4 3 4 5-2 5-4 5-4-3-4-5z"/></svg>
-        <span className="text-lg font-bold">Meta</span>
+        <span className="text-2xl font-extrabold">Meta</span>
       </ProviderLogo>
       {/* Mistral — orange + wind */}
       <ProviderLogo color="#f97316">
         <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9.59 4.59A2 2 0 1113 8H3m14.59-1.41A2 2 0 1121 12H3m-1 5a2 2 0 114-1H3"/></svg>
-        <span className="text-lg font-normal">Mistral</span>
+        <span className="text-2xl font-bold">Mistral</span>
       </ProviderLogo>
       {/* Stability AI — purple + diamond */}
       <ProviderLogo color="#a855f7">
         <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l8 10-8 10-8-10z" fillOpacity="0.5"/></svg>
-        <span className="text-base font-light">Stability AI</span>
+        <span className="text-2xl font-bold">Stability AI</span>
       </ProviderLogo>
       {/* ElevenLabs — green + sound wave */}
       <ProviderLogo color="#10a37f">
         <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 12h2m2-4h2v8H8m4-10h2v12h-2m4-8h2v4h-2"/></svg>
-        <span className="text-base font-medium">ElevenLabs</span>
+        <span className="text-2xl font-bold">ElevenLabs</span>
       </ProviderLogo>
       {/* Runway — black bold */}
       <ProviderLogo color="#1A1916">
-        <span className="text-lg font-extrabold tracking-tight">Runway</span>
+        <span className="text-2xl font-extrabold tracking-tight">Runway</span>
       </ProviderLogo>
     </>
   );

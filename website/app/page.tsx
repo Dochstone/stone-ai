@@ -1,5 +1,4 @@
 import Hero from "@/components/Hero";
-import ModelTicker from "@/components/ModelTicker";
 import PromoBanner from "@/components/PromoBanner";
 import ToolCards from "@/components/ToolCards";
 import ProductScreenshot from "@/components/ProductScreenshot";
@@ -16,7 +15,6 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <ModelTicker />
       <PromoBanner />
       <ToolCards />
       <ProductScreenshot />
