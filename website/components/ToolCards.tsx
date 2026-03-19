@@ -11,128 +11,116 @@ export default function ToolCards() {
           Все инструменты AI в одном месте
         </p>
 
-        {/* Bento Grid — all cards: min-h-[180px], p-6, consistent text */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-auto">
 
-          {/* AI Chat — span 2 cols */}
+          {/* ── AI Chat — 2 cols, chat mockup ── */}
           <a href="/chat" className="sm:col-span-2 bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[280px]">
             <div className="relative z-10">
-              <span className="inline-block bg-white/10 text-white/70 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-4">
-                50+ моделей
-              </span>
+              <span className="inline-block bg-accent/20 text-accent text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-4">50+ моделей</span>
               <h3 className="font-bold text-xl text-white mb-2">AI Чат</h3>
-              <p className="text-white text-[14px] leading-relaxed max-w-xs">Общайтесь с GPT-5, Claude, Gemini и другими лучшими моделями мира</p>
+              <p className="text-white/80 text-[14px] leading-relaxed max-w-xs">GPT-5, Claude, Gemini и другие лучшие модели мира</p>
             </div>
-            <div className="absolute right-4 sm:right-8 top-6 w-[220px] sm:w-[280px] opacity-80 group-hover:opacity-100 transition-opacity">
-              <div className="bg-white/[0.06] rounded-xl p-3 backdrop-blur-sm border border-white/[0.06]">
-                <div className="flex justify-end mb-2.5">
-                  <div className="bg-accent/80 rounded-xl rounded-tr-sm px-3 py-2 max-w-[75%]">
-                    <span className="text-white text-[10px]">Напиши код сортировки</span>
-                  </div>
-                </div>
-                <div className="flex justify-start mb-2.5">
-                  <div className="bg-white/10 rounded-xl rounded-tl-sm px-3 py-2 max-w-[80%]">
-                    <span className="text-white/70 text-[10px]">Вот реализация быстрой сортировки на Python...</span>
-                  </div>
-                </div>
-                <div className="flex justify-end">
-                  <div className="bg-accent/80 rounded-xl rounded-tr-sm px-3 py-2 max-w-[70%]">
-                    <span className="text-white text-[10px]">А теперь на Rust</span>
-                  </div>
-                </div>
-                <div className="mt-2.5 bg-white/[0.05] rounded-lg flex items-center px-2.5 py-1.5 border border-white/[0.06]">
-                  <span className="text-white/20 text-[9px] flex-1">Написать сообщение...</span>
-                  <div className="w-4 h-4 rounded bg-accent/60 flex items-center justify-center">
-                    <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
-                    </svg>
-                  </div>
+            <div className="absolute right-4 sm:right-8 top-6 w-[220px] sm:w-[280px] opacity-70 group-hover:opacity-100 transition-opacity">
+              <div className="bg-white/[0.06] rounded-xl p-3 border border-white/[0.06]">
+                <div className="flex justify-end mb-2"><div className="bg-accent/80 rounded-xl rounded-tr-sm px-3 py-1.5"><span className="text-white text-[10px]">Напиши код сортировки</span></div></div>
+                <div className="flex justify-start mb-2"><div className="bg-white/10 rounded-xl rounded-tl-sm px-3 py-1.5"><span className="text-white/60 text-[10px]">Вот быстрая сортировка на Python...</span></div></div>
+                <div className="flex justify-end"><div className="bg-accent/80 rounded-xl rounded-tr-sm px-3 py-1.5"><span className="text-white text-[10px]">А теперь на Rust</span></div></div>
+                <div className="mt-2 bg-white/[0.04] rounded-lg flex items-center px-2.5 py-1.5 border border-white/[0.06]">
+                  <span className="text-white/20 text-[9px] flex-1">Сообщение...</span>
+                  <div className="w-4 h-4 rounded bg-accent/60" />
                 </div>
               </div>
             </div>
           </a>
 
-          {/* Images */}
-          <a href="/images" className="bg-gradient-to-br from-pink-500 to-rose-600 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
-            <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">
-              6 генераторов
-            </span>
+          {/* ── Images — dark with mini gallery ── */}
+          <a href="/images" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
+            <span className="inline-block bg-pink-500/20 text-pink-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">6 генераторов</span>
             <h3 className="font-bold text-lg text-white mb-2">Генерация картинок</h3>
-            <p className="text-white text-[14px] leading-relaxed">Flux, SDXL, GPT-5 Image. Фотореализм и арт-стили.</p>
-            <div className="absolute bottom-4 right-4 opacity-40 group-hover:opacity-60 transition-opacity">
-              <svg className="w-14 h-14 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
-              </svg>
+            <p className="text-white/70 text-[14px] leading-relaxed mb-4">Flux, SDXL, GPT-5 Image. Фотореализм и арт-стили.</p>
+            <div className="grid grid-cols-3 gap-1.5">
+              <div className="aspect-square rounded-lg bg-gradient-to-br from-pink-500/30 to-purple-500/30 border border-white/[0.06]" />
+              <div className="aspect-square rounded-lg bg-gradient-to-br from-blue-500/30 to-cyan-400/30 border border-white/[0.06]" />
+              <div className="aspect-square rounded-lg bg-gradient-to-br from-amber-500/30 to-orange-400/30 border border-white/[0.06]" />
             </div>
           </a>
 
-          {/* Documents */}
-          <a href="/documents" className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
-            <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">
-              PDF, фото
-            </span>
+          {/* ── Documents — dark with PDF mockup ── */}
+          <a href="/documents" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
+            <span className="inline-block bg-amber-500/20 text-amber-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">PDF, фото</span>
             <h3 className="font-bold text-lg text-white mb-2">Анализ документов</h3>
-            <p className="text-white text-[14px] leading-relaxed">Загрузите PDF или фото — AI ответит на любой вопрос.</p>
-            <div className="absolute bottom-4 right-4 opacity-40 group-hover:opacity-60 transition-opacity">
-              <svg className="w-14 h-14 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-              </svg>
-            </div>
-          </a>
-
-          {/* Search — with globe+magnifier icon */}
-          <a href="/search" className="bg-gradient-to-br from-emerald-500 to-teal-700 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
-            <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">
-              Realtime
-            </span>
-            <h3 className="font-bold text-lg text-white mb-2">AI Поиск</h3>
-            <p className="text-white text-[14px] leading-relaxed">Perplexity ищет в интернете в реальном времени. Актуальные данные, не кэш.</p>
-            <div className="absolute bottom-4 right-4 opacity-40 group-hover:opacity-60 transition-opacity">
-              <svg className="w-14 h-14 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
-              </svg>
-            </div>
-          </a>
-
-          {/* API Code Snippet */}
-          <a href="/docs" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden sm:col-span-2 lg:col-span-1 min-h-[180px]">
-            <span className="inline-block bg-white/10 text-white/70 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">
-              API
-            </span>
-            <h3 className="font-bold text-lg text-white mb-3">Простой API</h3>
-            <div className="bg-white/[0.04] rounded-xl p-4 overflow-x-auto border border-white/[0.06]">
-              <pre className="text-[11px] sm:text-[12px] leading-[1.7] font-mono" dangerouslySetInnerHTML={{ __html: `<span style="color:#34d399">curl</span><span style="color:rgba(255,255,255,0.5)"> -X </span><span style="color:#fcd34d">POST</span><span style="color:rgba(255,255,255,0.5)"> /api/chat \\
-  -H </span><span style="color:#7dd3fc">"Authorization: Bearer $TKN"</span><span style="color:rgba(255,255,255,0.5)"> \\
-  -d </span><span style="color:#7dd3fc">'{"model_id"</span><span style="color:rgba(255,255,255,0.5)">:</span><span style="color:#fcd34d">"gpt-4o-mini"</span><span style="color:rgba(255,255,255,0.5)">,
-      </span><span style="color:#7dd3fc">"messages"</span><span style="color:rgba(255,255,255,0.5)">:[{</span><span style="color:#7dd3fc">"role"</span><span style="color:rgba(255,255,255,0.5)">:</span><span style="color:#fcd34d">"user"</span><span style="color:rgba(255,255,255,0.5)">,
-      </span><span style="color:#7dd3fc">"content"</span><span style="color:rgba(255,255,255,0.5)">:</span><span style="color:#fcd34d">"Hello!"</span><span style="color:rgba(255,255,255,0.5)">}]}'</span>` }} />
-            </div>
-          </a>
-
-          {/* Video */}
-          <a href="/video" className="bg-gradient-to-br from-red-500 to-rose-700 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
-            <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">
-              5 моделей
-            </span>
-            <h3 className="font-bold text-lg text-white mb-2">AI Видео</h3>
-            <p className="text-white text-[14px] leading-relaxed">Kling, Runway, Pika. Видео из текста и фото за 5-10 секунд.</p>
-            <div className="absolute bottom-4 right-4 opacity-40 group-hover:opacity-60 transition-opacity">
-              <svg className="w-14 h-14 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
-              </svg>
-            </div>
-          </a>
-
-          {/* Audio — dark with audio player mockup */}
-          <a href="/audio" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
-            <span className="inline-block bg-indigo-500/20 text-indigo-300 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">
-              10+ голосов
-            </span>
-            <h3 className="font-bold text-lg text-white mb-2">AI Аудио</h3>
-            <p className="text-white/80 text-[14px] leading-relaxed mb-4">Озвучка текста 10+ голосами. Голосовой ввод. Мгновенно.</p>
-            {/* Mini audio player mockup */}
+            <p className="text-white/70 text-[14px] leading-relaxed mb-4">Загрузите PDF или фото — AI ответит на любой вопрос.</p>
             <div className="bg-white/[0.06] rounded-xl p-3 border border-white/[0.06]">
-              {/* Waveform */}
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center shrink-0">
+                  <svg className="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                </div>
+                <div>
+                  <div className="text-[10px] text-white/50">report_Q4.pdf</div>
+                  <div className="text-[9px] text-white/25">2.4 MB · 48 стр</div>
+                </div>
+              </div>
+              <div className="flex gap-1">
+                {[1,2,3].map(i => <div key={i} className="h-1 flex-1 rounded-full bg-amber-400/20" />)}
+                <div className="h-1 flex-[2] rounded-full bg-white/[0.04]" />
+              </div>
+            </div>
+          </a>
+
+          {/* ── Search — dark with search result mockup ── */}
+          <a href="/search" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
+            <span className="inline-block bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">Realtime</span>
+            <h3 className="font-bold text-lg text-white mb-2">AI Поиск</h3>
+            <p className="text-white/70 text-[14px] leading-relaxed mb-4">Perplexity ищет в интернете. Актуальные данные, не кэш.</p>
+            <div className="bg-white/[0.06] rounded-xl p-3 border border-white/[0.06]">
+              <div className="flex items-center gap-2 mb-2">
+                <svg className="w-4 h-4 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                <span className="text-[10px] text-white/40">курс биткоина сегодня</span>
+              </div>
+              <div className="space-y-1">
+                <div className="h-1.5 w-full rounded bg-emerald-400/15" />
+                <div className="h-1.5 w-4/5 rounded bg-emerald-400/10" />
+                <div className="h-1.5 w-3/5 rounded bg-white/[0.04]" />
+              </div>
+            </div>
+          </a>
+
+          {/* ── API — dark with code snippet ── */}
+          <a href="/docs" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden sm:col-span-2 lg:col-span-1 min-h-[180px]">
+            <span className="inline-block bg-sky-500/20 text-sky-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">API</span>
+            <h3 className="font-bold text-lg text-white mb-3">Простой API</h3>
+            <div className="bg-white/[0.04] rounded-xl p-3 overflow-x-auto border border-white/[0.06]">
+              <pre className="text-[11px] leading-[1.7] font-mono" dangerouslySetInnerHTML={{ __html: `<span style="color:#34d399">curl</span><span style="color:rgba(255,255,255,0.5)"> -X </span><span style="color:#fcd34d">POST</span><span style="color:rgba(255,255,255,0.5)"> /api/chat \\
+  -H </span><span style="color:#7dd3fc">"Bearer $TKN"</span><span style="color:rgba(255,255,255,0.5)"> \\
+  -d </span><span style="color:#7dd3fc">'{"model_id"</span><span style="color:rgba(255,255,255,0.5)">:</span><span style="color:#fcd34d">"gpt-4o-mini"</span><span style="color:rgba(255,255,255,0.5)">,
+      </span><span style="color:#7dd3fc">"messages"</span><span style="color:rgba(255,255,255,0.5)">:[...]}'</span>` }} />
+            </div>
+          </a>
+
+          {/* ── Video — dark with video player mockup ── */}
+          <a href="/video" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
+            <span className="inline-block bg-red-500/20 text-red-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">5 моделей</span>
+            <h3 className="font-bold text-lg text-white mb-2">AI Видео</h3>
+            <p className="text-white/70 text-[14px] leading-relaxed mb-4">Kling, Runway, Pika. Видео из текста за 5-10 секунд.</p>
+            <div className="bg-white/[0.06] rounded-xl overflow-hidden border border-white/[0.06]">
+              <div className="aspect-video bg-gradient-to-br from-red-500/15 to-rose-500/10 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors">
+                  <svg className="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-1.5">
+                <div className="h-1 flex-1 rounded-full bg-red-400/30" />
+                <span className="text-[9px] text-white/25">0:08</span>
+              </div>
+            </div>
+          </a>
+
+          {/* ── Audio — dark with audio player mockup ── */}
+          <a href="/audio" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
+            <span className="inline-block bg-indigo-500/20 text-indigo-300 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">10+ голосов</span>
+            <h3 className="font-bold text-lg text-white mb-2">AI Аудио</h3>
+            <p className="text-white/70 text-[14px] leading-relaxed mb-4">Озвучка текста 10+ голосами. Голосовой ввод. Мгновенно.</p>
+            <div className="bg-white/[0.06] rounded-xl p-3 border border-white/[0.06]">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-7 h-7 rounded-full bg-indigo-500 flex items-center justify-center shrink-0">
                   <svg className="w-3 h-3 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
@@ -144,7 +132,6 @@ export default function ToolCards() {
                 </div>
                 <span className="text-[10px] text-white/30 shrink-0">0:12</span>
               </div>
-              {/* Voice selector */}
               <div className="flex gap-1.5">
                 {["Nova", "Echo", "Alloy"].map((v, i) => (
                   <span key={v} className={`text-[9px] px-2 py-0.5 rounded-md ${i === 0 ? "bg-indigo-500/30 text-indigo-300" : "bg-white/[0.04] text-white/25"}`}>{v}</span>
@@ -153,17 +140,24 @@ export default function ToolCards() {
             </div>
           </a>
 
-          {/* Deep Analysis */}
-          <a href="/chat" className="bg-gradient-to-br from-violet-600 to-purple-800 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
-            <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">
-              o3 + R1
-            </span>
+          {/* ── Deep Analysis — dark with reasoning mockup ── */}
+          <a href="/chat" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
+            <span className="inline-block bg-violet-500/20 text-violet-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">o3 + R1</span>
             <h3 className="font-bold text-lg text-white mb-2">Глубокий анализ</h3>
-            <p className="text-white text-[14px] leading-relaxed">o3 и DeepSeek R1 — пошаговое рассуждение для сложных задач.</p>
-            <div className="absolute bottom-4 right-4 opacity-40 group-hover:opacity-60 transition-opacity">
-              <svg className="w-14 h-14 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
-              </svg>
+            <p className="text-white/70 text-[14px] leading-relaxed mb-4">Пошаговое рассуждение для сложных задач.</p>
+            <div className="bg-white/[0.06] rounded-xl p-3 border border-white/[0.06] space-y-1.5">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded-full border-2 border-violet-400/50 flex items-center justify-center"><div className="w-1.5 h-1.5 rounded-full bg-violet-400" /></div>
+                <span className="text-[10px] text-white/40">Анализирую условие задачи...</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded-full border-2 border-violet-400/50 flex items-center justify-center"><div className="w-1.5 h-1.5 rounded-full bg-violet-400" /></div>
+                <span className="text-[10px] text-white/40">Рассматриваю 3 подхода...</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded-full border-2 border-violet-400/30" />
+                <span className="text-[10px] text-white/25">Формулирую ответ...</span>
+              </div>
             </div>
           </a>
 
