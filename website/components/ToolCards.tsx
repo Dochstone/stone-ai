@@ -30,7 +30,7 @@ function ImageCarousel({ images, interval = 3000 }: { images: string[]; interval
 }
 
 // ── Video carousel — cycles through 4 videos ──
-const videoSources = ["/demo/video-demo.mp4", "/demo/video-wave.mp4", "/demo/video-city.mp4", "/demo/video-nature.mp4"];
+const videoSources = ["/demo/video-cyber.mp4", "/demo/video-wave.mp4", "/demo/video-city.mp4", "/demo/video-nature.mp4"];
 
 function VideoCarousel() {
   const [idx, setIdx] = useState(0);
