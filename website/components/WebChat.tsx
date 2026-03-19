@@ -1002,7 +1002,7 @@ export default function WebChat() {
         )}
 
         {/* Input area — pinned bottom */}
-        <div className="border-t border-text/[0.06] bg-white px-3 sm:px-4 py-2.5 sm:py-3 shrink-0 chat-input-safe">
+        <div className="border-t border-text/[0.06] bg-white px-3 sm:px-4 py-1.5 sm:py-2 shrink-0 chat-input-safe">
           <div className="max-w-3xl mx-auto">
             {pendingFile && (
               <div className="flex items-center gap-2 mb-2.5 px-3 py-2 bg-bg rounded-xl">
@@ -1028,7 +1028,7 @@ export default function WebChat() {
               <div className="text-xs text-accent mb-2 px-1 animate-pulse">Загрузка файла...</div>
             )}
 
-            <div className="flex items-end bg-bg border border-text/[0.08] rounded-2xl focus-within:border-accent/30 focus-within:ring-2 focus-within:ring-accent/10 transition-all min-w-0" style={{ padding: "8px 12px", gap: 8 }}>
+            <div className="flex items-center bg-bg border border-text/[0.08] rounded-xl focus-within:border-accent/30 focus-within:ring-2 focus-within:ring-accent/10 transition-all min-w-0" style={{ padding: "4px 8px", gap: 6 }}>
               {/* File attach */}
               <input ref={fileInputRef} type="file" accept="image/*,.pdf" className="hidden"
                 onChange={(e) => { if (e.target.files?.[0]) handleFileSelect(e.target.files[0]); e.target.value = ""; }}
@@ -1037,9 +1037,9 @@ export default function WebChat() {
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading || streaming}
                 className="flex items-center justify-center text-text/25 hover:text-accent transition-colors disabled:opacity-30 shrink-0"
-                style={{ width: 36, height: 36 }}
+                style={{ width: 32, height: 32 }}
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
                 </svg>
               </button>
@@ -1052,17 +1052,17 @@ export default function WebChat() {
                 onKeyDown={handleKey}
                 placeholder={pendingFile ? "Добавьте вопрос к файлу..." : "Написать сообщение... (Shift+Enter — новая строка)"}
                 rows={1}
-                className="flex-1 bg-transparent resize-none focus:outline-none min-w-0 leading-relaxed placeholder:text-text/20"
-                style={{ fontSize: 14, padding: "10px 14px", maxHeight: 80, minHeight: 40 }}
+                className="flex-1 bg-transparent resize-none focus:outline-none min-w-0 leading-snug placeholder:text-text/20"
+                style={{ fontSize: 14, padding: "6px 8px", maxHeight: 72, minHeight: 28 }}
               />
 
               {/* Send or Stop button */}
               {streaming ? (
                 <button
                   onClick={stopGeneration}
-                  className="rounded-xl bg-text/70 text-white flex items-center justify-center hover:bg-text/90 transition-colors shrink-0"
+                  className="rounded-lg bg-text/70 text-white flex items-center justify-center hover:bg-text/90 transition-colors shrink-0"
                   title="Остановить генерацию"
-                  style={{ width: 36, height: 36 }}
+                  style={{ width: 32, height: 32 }}
                 >
                   <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                     <rect x="6" y="6" width="12" height="12" rx="2" />
@@ -1072,8 +1072,8 @@ export default function WebChat() {
                 <button
                   onClick={sendMessage}
                   disabled={!input.trim() && !pendingFile}
-                  className="rounded-xl bg-accent text-white flex items-center justify-center hover:bg-accent/90 transition-colors disabled:opacity-30 shrink-0"
-                  style={{ width: 36, height: 36 }}
+                  className="rounded-lg bg-accent text-white flex items-center justify-center hover:bg-accent/90 transition-colors disabled:opacity-30 shrink-0"
+                  style={{ width: 32, height: 32 }}
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
