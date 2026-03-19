@@ -245,29 +245,24 @@ export default function Hero() {
             Генерируйте картинки и видео, анализируйте документы, ищите в интернете. Начните бесплатно.
           </p>
 
-          {/* Inline registration form */}
-          <div className="mt-10 max-w-md mx-auto">
-            <form
-              onSubmit={(e) => { e.preventDefault(); window.location.href = '/webchat'; }}
-              className="flex items-center gap-2 bg-white rounded-2xl p-2 shadow-lg shadow-black/[0.06] border border-text/[0.06]"
+          {/* CTA buttons */}
+          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a
+              href="/webchat"
+              className="bg-accent text-white px-8 py-4 min-h-[44px] rounded-xl font-bold text-sm hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
             >
-              <input
-                type="text"
-                placeholder="Email или Telegram"
-                aria-label="Email или Telegram"
-                className="flex-1 min-w-0 bg-transparent px-4 py-3 text-sm text-text placeholder:text-text/35 outline-none"
-              />
-              <button
-                type="submit"
-                className="shrink-0 bg-accent text-white px-5 sm:px-6 py-3 min-h-[44px] rounded-xl font-bold text-sm hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
-              >
-                Начать использовать AI
-              </button>
-            </form>
-            <p className="text-[11px] text-text/35 mt-3 text-center">
-              Без привязки карты · 15 запросов/день бесплатно
-            </p>
+              Открыть чат
+            </a>
+            <a
+              href="/models"
+              className="border-2 border-text/15 text-text px-8 py-4 min-h-[44px] rounded-xl font-bold text-sm hover:border-accent hover:text-accent transition-colors"
+            >
+              Посмотреть модели
+            </a>
           </div>
+          <p className="text-[11px] text-text/35 mt-4 text-center">
+            Бесплатно · Без карты · 15 запросов в день
+          </p>
 
           <div className="mt-4 flex items-center justify-center">
             <a
