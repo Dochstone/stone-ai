@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { TELEGRAM_BOT_URL } from "@/lib/models";
+import ThemeToggle from "@/components/ThemeToggle";
 
 function getAvatarColor(email: string): string {
   const colors = ["#D97757", "#0E9A83", "#4285f4", "#7c3aed", "#ec4899", "#f59e0b", "#06b6d4", "#10a37f"];
@@ -106,6 +107,7 @@ export default function Nav() {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          <ThemeToggle />
           {authEmail ? (
             <>
               <a

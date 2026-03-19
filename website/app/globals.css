@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --color-bg: #FAF9F5;
+  --color-text: #1A1916;
+  --color-teal-light: #E6F7F4;
+}
+
+:root.dark {
+  --color-bg: #0C0C10;
+  --color-text: #E8E4DD;
+  --color-teal-light: #0E9A8320;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -11,6 +23,16 @@ body {
   overflow-x: hidden;
   -webkit-text-size-adjust: 100%;
 }
+
+/* Dark mode overrides for elements that use hardcoded colors */
+.dark .bg-white { background-color: #16161A !important; }
+.dark .bg-bg\/50 { background-color: rgba(12,12,16,0.5) !important; }
+.dark .border-text\/5, .dark .border-text\/\[0\.06\] { border-color: rgba(232,228,221,0.08) !important; }
+.dark .text-text\/60 { color: rgba(232,228,221,0.6) !important; }
+.dark .text-text\/40 { color: rgba(232,228,221,0.4) !important; }
+.dark .text-text\/30 { color: rgba(232,228,221,0.3) !important; }
+.dark .text-text\/25 { color: rgba(232,228,221,0.25) !important; }
+.dark .text-text\/20 { color: rgba(232,228,221,0.2) !important; }
 
 /* Trust marquee animation */
 @keyframes marquee {

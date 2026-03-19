@@ -5,14 +5,15 @@ const config: Config = {
     "./app/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
   ],
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
-        bg: "#FAF9F5",
-        text: "#1A1916",
+        bg: "var(--color-bg)",
+        text: "var(--color-text)",
         accent: "#D97757",
         teal: "#0E9A83",
-        "teal-light": "#E6F7F4",
+        "teal-light": "var(--color-teal-light)",
         dark: "#1A1916",
       },
       fontFamily: {
