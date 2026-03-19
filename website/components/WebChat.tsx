@@ -15,6 +15,8 @@ const VIDEO_MODEL_IDS = new Set([
   "kling-v2", "runway-gen3", "pika-2", "stable-video", "luma-dream",
 ]);
 
+const THREED_MODEL_IDS = new Set(["tripo-v2.5", "triposr"]);
+
 // ─── Helpers ───
 
 function extractImageUrl(text: string): string | null {
@@ -86,6 +88,7 @@ interface Message {
   content: string;
   file?: FileAttachment;
   video?: { url: string; cost_usd?: number };
+  threed?: { url: string; cost_usd?: number };
   billing?: {
     tokens_in: number;
     tokens_out: number;
@@ -394,9 +397,11 @@ export default function WebChat() {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const [videoGenerating, setVideoGenerating] = useState(false);
+  const [threedGenerating, setThreedGenerating] = useState(false);
 
   const model = useMemo(() => MODELS.find((m) => m.id === selectedModel), [selectedModel]);
   const isVideoModel = VIDEO_MODEL_IDS.has(selectedModel);
+  const is3DModel = THREED_MODEL_IDS.has(selectedModel);
 
   // Load auth from localStorage
   useEffect(() => {
@@ -575,6 +580,83 @@ export default function WebChat() {
     }, 50);
   }, []);
 
+  // 3D generation
+  const send3DMessage = useCallback(async () => {
+    if (!auth || (!input.trim() && !pendingFile) || threedGenerating) return;
+
+    const prompt = input.trim() || undefined;
+    const imageUrl = pendingFile?.file_type === "image" ? pendingFile.content : undefined;
+    const userMsg: Message = { role: "user", content: prompt || `[3D из изображения: ${pendingFile?.file_name}]`, file: pendingFile || undefined };
+    const history = [...messages, userMsg];
+    setMessages(history);
+    setInput("");
+    setPendingFile(null);
+    setThreedGenerating(true);
+    resetTextarea();
+
+    try {
+      const res = await fetch(`${API_URL}/api/3d/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
+        body: JSON.stringify({ model_id: selectedModel, prompt, image_url: imageUrl }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: "Ошибка" }));
+        setMessages([...history, { role: "assistant", content: typeof err.detail === "string" ? err.detail : "Ошибка генерации 3D" }]);
+        setThreedGenerating(false);
+        return;
+      }
+
+      const data = await res.json();
+      const taskId = data.task_id;
+
+      // Update balance
+      if (data.balance_usd !== undefined) {
+        setAuth((prev) => prev ? { ...prev, balanceUsd: data.balance_usd } : prev);
+        try { const s = localStorage.getItem("stone_auth"); if (s) { const p = JSON.parse(s); p.balanceUsd = data.balance_usd; localStorage.setItem("stone_auth", JSON.stringify(p)); } } catch {}
+      }
+
+      // Instant result (TripoSR)
+      if (data.status === "completed" && data.model_url) {
+        setMessages([...history, { role: "assistant", content: "3D модель готова!", threed: { url: data.model_url, cost_usd: data.cost_usd } }]);
+        setThreedGenerating(false);
+        return;
+      }
+
+      setMessages([...history, { role: "assistant", content: `Генерация 3D модели... (~${data.estimated_seconds || 60}с)\n${data.model} · $${data.cost_usd?.toFixed(2) || "0.00"}` }]);
+
+      // Poll
+      let attempts = 0;
+      const poll = async () => {
+        attempts++;
+        try {
+          const statusRes = await fetch(`${API_URL}/api/3d/status/${taskId}`, { headers: { Authorization: `Bearer ${auth.token}` } });
+          if (!statusRes.ok) throw new Error("fail");
+          const status = await statusRes.json();
+
+          if (status.status === "completed" && status.model_url) {
+            setMessages([...history, { role: "assistant", content: "3D модель готова!", threed: { url: status.model_url, cost_usd: data.cost_usd } }]);
+            setThreedGenerating(false);
+            return;
+          }
+          if (status.status === "failed") {
+            setMessages([...history, { role: "assistant", content: `Ошибка: ${status.error || "Генерация не удалась"}` }]);
+            setThreedGenerating(false);
+            return;
+          }
+          if (attempts < 60) setTimeout(poll, 3000);
+          else { setMessages([...history, { role: "assistant", content: "Таймаут генерации." }]); setThreedGenerating(false); }
+        } catch { setMessages([...history, { role: "assistant", content: "Ошибка проверки статуса" }]); setThreedGenerating(false); }
+      };
+      setTimeout(poll, 3000);
+
+    } catch {
+      setMessages([...history, { role: "assistant", content: "Ошибка соединения" }]);
+      setThreedGenerating(false);
+    }
+  }, [auth, input, threedGenerating, messages, selectedModel, pendingFile, resetTextarea]);
+
   // Video generation
   const sendVideoMessage = useCallback(async () => {
     if (!auth || !input.trim() || videoGenerating) return;
@@ -666,8 +748,9 @@ export default function WebChat() {
   }, []);
 
   const sendMessage = useCallback(async () => {
-    // Redirect to video generation for video models
+    // Redirect to video/3D generation
     if (isVideoModel) { sendVideoMessage(); return; }
+    if (is3DModel) { send3DMessage(); return; }
     if (!auth || (!input.trim() && !pendingFile) || streaming) return;
 
     const currentFile = pendingFile;
@@ -788,7 +871,7 @@ export default function WebChat() {
       setStreaming(false);
       abortRef.current = null;
     }
-  }, [auth, input, streaming, messages, selectedModel, pendingFile, saveToSession, resetTextarea, isVideoModel, sendVideoMessage]);
+  }, [auth, input, streaming, messages, selectedModel, pendingFile, saveToSession, resetTextarea, isVideoModel, sendVideoMessage, is3DModel, send3DMessage]);
 
   // Auto-send after suggestion card click
   const pendingSend = useRef(false);
@@ -821,6 +904,8 @@ export default function WebChat() {
 
   return (
     <div className="h-dvh flex bg-bg overflow-hidden" style={{ height: "100dvh" }}>
+      {/* model-viewer for 3D */}
+      <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js" />
       {/* Inline styles for markdown */}
       <style>{`
         .md-content { line-height: 1.7; }
@@ -934,6 +1019,11 @@ export default function WebChat() {
                     <option key={m.id} value={m.id}>{m.name} ({formatPrice(m)})</option>
                   ))}
                 </optgroup>
+                <optgroup label="3D">
+                  {MODELS.filter(m => m.category === "3d").map(m => (
+                    <option key={m.id} value={m.id}>{m.name} ({formatPrice(m)})</option>
+                  ))}
+                </optgroup>
               </select>
               <span className={`text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
                 model?.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"
@@ -1035,6 +1125,31 @@ export default function WebChat() {
                         </div>
                       )}
 
+                      {/* 3D viewer */}
+                      {msg.threed && (
+                        <div className="mb-2">
+                          <div className="rounded-xl overflow-hidden border border-text/10 bg-[#f0f0f0]" style={{ width: "100%", height: 280 }}>
+                            {/* @google/model-viewer loaded via script tag */}
+                            <div dangerouslySetInnerHTML={{ __html: `<model-viewer src="${msg.threed.url}" auto-rotate camera-controls touch-action="pan-y" style="width:100%;height:280px;background:#f0f0f0;" shadow-intensity="1"></model-viewer>` }} />
+                          </div>
+                          <div className="flex items-center gap-3 mt-2">
+                            <a
+                              href={msg.threed.url}
+                              download={`stone-ai-3d-${Date.now()}.glb`}
+                              className="flex items-center gap-1.5 text-[11px] text-accent font-semibold hover:underline"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V3" />
+                              </svg>
+                              Скачать GLB
+                            </a>
+                            {msg.threed.cost_usd && (
+                              <span className="text-[10px] text-text/30">${msg.threed.cost_usd.toFixed(2)}</span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
                       <MessageContent content={msg.content} role={msg.role} selectedModel={selectedModel} />
 
                       {msg.billing && (
@@ -1130,7 +1245,7 @@ export default function WebChat() {
                 value={input}
                 onChange={handleInputChange}
                 onKeyDown={handleKey}
-                placeholder={pendingFile ? "Добавьте вопрос к файлу..." : isVideoModel ? `Опишите видео... (~$${formatPrice(model!).replace('/vid','')})` : "Написать сообщение... (Shift+Enter — новая строка)"}
+                placeholder={pendingFile ? "Добавьте вопрос к файлу..." : isVideoModel ? `Опишите видео... (~$${formatPrice(model!).replace('/vid','')})` : is3DModel ? `Опишите 3D-модель или загрузите фото... (~$${formatPrice(model!).replace('/model','')})` : "Написать сообщение... (Shift+Enter — новая строка)"}
                 rows={1}
                 className="flex-1 bg-transparent resize-none focus:outline-none min-w-0 leading-snug placeholder:text-text/20"
                 style={{ fontSize: 14, padding: "10px 16px", maxHeight: 80, minHeight: 42 }}
@@ -1151,7 +1266,7 @@ export default function WebChat() {
               ) : (
                 <button
                   onClick={sendMessage}
-                  disabled={videoGenerating || (!input.trim() && !pendingFile)}
+                  disabled={videoGenerating || threedGenerating || (!input.trim() && !pendingFile)}
                   className="rounded-lg bg-accent text-white flex items-center justify-center hover:bg-accent/90 transition-colors disabled:opacity-30 shrink-0"
                   style={{ width: 38, height: 38 }}
                 >

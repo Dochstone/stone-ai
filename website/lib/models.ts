@@ -1,5 +1,5 @@
 export type ModelTier = "free" | "pro";
-export type ModelCategory = "chat" | "image" | "reason" | "search" | "code" | "video";
+export type ModelCategory = "chat" | "image" | "reason" | "search" | "code" | "video" | "3d";
 
 export interface AIModel {
   id: string;
@@ -83,7 +83,11 @@ export const MODELS: AIModel[] = [
   { id: "pika-2", name: "Pika 2.0", company: "Pika", tier: "pro", category: "video", pricePerMillion: 0.18, priceUnit: "/vid", context: "3-5s" },
   { id: "stable-video", name: "Stable Video", company: "Stability", tier: "pro", category: "video", pricePerMillion: 0.15, priceUnit: "/vid", context: "4s" },
   { id: "luma-dream", name: "Luma Dream", company: "Luma", tier: "pro", category: "video", pricePerMillion: 0.50, priceUnit: "/vid", context: "5s" },
+
+  // TIER 8: 3D GENERATION (2 models)
+  { id: "tripo-v2.5", name: "Tripo v2.5", company: "Tripo3D", tier: "pro", category: "3d", pricePerMillion: 0.60, priceUnit: "/model", context: "25-100s" },
+  { id: "triposr", name: "TripoSR", company: "Stability", tier: "pro", category: "3d", pricePerMillion: 0.21, priceUnit: "/model", context: "<1s" },
 ];
 
 export const COMPANIES = Array.from(new Set(MODELS.map((m) => m.company)));
-export const CATEGORIES: ModelCategory[] = ["chat", "image", "reason", "search", "code", "video"];
+export const CATEGORIES: ModelCategory[] = ["chat", "image", "reason", "search", "code", "video", "3d"];

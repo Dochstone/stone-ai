@@ -16,6 +16,7 @@ const categoryLabels: Record<ModelCategory, string> = {
   search: "Поиск",
   code: "Код",
   video: "Видео",
+  "3d": "3D",
 };
 
 const companyColors: Record<string, string> = {
