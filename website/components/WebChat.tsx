@@ -1165,6 +1165,32 @@ export default function WebChat() {
                           </div>
                         </details>
                       )}
+                      {/* TTS button for assistant messages */}
+                      {msg.role === "assistant" && msg.content && !msg.video && !msg.threed && (
+                        <button
+                          onClick={async () => {
+                            try {
+                              const res = await fetch(`${API_URL}/api/audio/tts`, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth!.token}` },
+                                body: JSON.stringify({ text: msg.content.slice(0, 4096), voice: "alloy" }),
+                              });
+                              if (!res.ok) return;
+                              const data = await res.json();
+                              if (data.audio_b64) {
+                                const audio = new Audio(`data:audio/mpeg;base64,${data.audio_b64}`);
+                                audio.play();
+                              }
+                            } catch {}
+                          }}
+                          className="mt-1.5 text-text/20 hover:text-accent transition-colors"
+                          title="Озвучить"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
+                          </svg>
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1236,6 +1262,52 @@ export default function WebChat() {
               >
                 <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
+                </svg>
+              </button>
+
+              {/* Mic button — STT */}
+              <button
+                onClick={async () => {
+                  try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    const recorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+                    const chunks: Blob[] = [];
+                    recorder.ondataavailable = (e) => chunks.push(e.data);
+                    recorder.onstop = async () => {
+                      stream.getTracks().forEach(t => t.stop());
+                      const blob = new Blob(chunks, { type: "audio/webm" });
+                      const form = new FormData();
+                      form.append("file", blob, "voice.webm");
+                      try {
+                        const res = await fetch(`${API_URL}/api/audio/stt`, {
+                          method: "POST",
+                          headers: { Authorization: `Bearer ${auth!.token}` },
+                          body: form,
+                        });
+                        if (res.ok) {
+                          const data = await res.json();
+                          if (data.text) setInput((prev) => prev + data.text);
+                        }
+                      } catch {}
+                    };
+                    recorder.start();
+                    // Stop after 30 seconds max
+                    setTimeout(() => { if (recorder.state === "recording") recorder.stop(); }, 30000);
+                    // Visual feedback — stop on second click
+                    const btn = document.activeElement as HTMLButtonElement;
+                    if (btn) {
+                      btn.style.color = "#D97757";
+                      const stopHandler = () => { if (recorder.state === "recording") recorder.stop(); btn.style.color = ""; btn.removeEventListener("click", stopHandler); };
+                      setTimeout(() => btn.addEventListener("click", stopHandler), 100);
+                    }
+                  } catch { /* mic not available */ }
+                }}
+                className="flex items-center justify-center text-text/25 hover:text-accent transition-colors shrink-0"
+                style={{ width: 38, height: 38 }}
+                title="Голосовой ввод (нажмите ещё раз чтобы остановить)"
+              >
+                <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
                 </svg>
               </button>
 
