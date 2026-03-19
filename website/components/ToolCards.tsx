@@ -34,17 +34,48 @@ const videoSources = ["/demo/video-1.mp4", "/demo/video-2.mp4", "/demo/video-3.m
 
 function VideoCarousel() {
   const [idx, setIdx] = useState(0);
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+
   useEffect(() => {
-    const t = setInterval(() => setIdx(i => (i + 1) % videoSources.length), 6000);
+    const t = setInterval(() => {
+      setIdx(prev => {
+        const next = (prev + 1) % videoSources.length;
+        // Reset next video to start and play it
+        const nextVideo = videoRefs.current[next];
+        if (nextVideo) {
+          nextVideo.currentTime = 0;
+          nextVideo.play().catch(() => {});
+        }
+        // Pause previous after fade
+        setTimeout(() => {
+          const prevVideo = videoRefs.current[prev];
+          if (prevVideo) prevVideo.pause();
+        }, 1200);
+        return next;
+      });
+    }, 6000);
     return () => clearInterval(t);
+  }, []);
+
+  // Start first video on mount
+  useEffect(() => {
+    const first = videoRefs.current[0];
+    if (first) { first.currentTime = 0; first.play().catch(() => {}); }
   }, []);
 
   return (
     <div className="absolute inset-0">
       {videoSources.map((src, i) => (
-        <video key={src} src={src} muted loop playsInline autoPlay
+        <video
+          key={src}
+          ref={el => { videoRefs.current[i] = el; }}
+          src={src}
+          muted
+          loop
+          playsInline
           className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
-          style={{ opacity: i === idx ? 0.65 : 0 }} />
+          style={{ opacity: i === idx ? 0.65 : 0 }}
+        />
       ))}
     </div>
   );
