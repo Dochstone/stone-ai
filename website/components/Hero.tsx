@@ -204,7 +204,7 @@ export default function Hero() {
           <p className="mt-6 text-lg md:text-xl text-text/60 max-w-2xl mx-auto leading-relaxed">
             Переключайтесь между GPT-5, Claude, Gemini и Grok за одно нажатие.
             <br className="hidden sm:block" />
-            Генерируйте картинки, анализируйте документы, ищите в интернете. Начните бесплатно.
+            Генерируйте картинки и видео, анализируйте документы, ищите в интернете. Начните бесплатно.
           </p>
 
           {/* Inline registration form */}

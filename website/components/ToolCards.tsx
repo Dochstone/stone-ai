@@ -115,6 +115,20 @@ export default function ToolCards() {
             </div>
           </a>
 
+          {/* Video — small */}
+          <a href="/webchat" className="bg-gradient-to-br from-red-500 to-rose-700 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative">
+            <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">
+              5 моделей
+            </span>
+            <h3 className="font-bold text-lg text-white mb-1">AI Видео</h3>
+            <p className="text-white/70 text-sm">Kling, Runway, Pika, Stable Video. Из текста и фото. 5-10с.</p>
+            <div className="absolute bottom-3 right-3 opacity-30 group-hover:opacity-50 transition-opacity">
+              <svg className="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+              </svg>
+            </div>
+          </a>
+
           {/* Reasoning — small */}
           <a href="/chat" className="bg-gradient-to-br from-violet-600 to-purple-700 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl lg:col-span-1">
             <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">
