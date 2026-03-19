@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import WebChat from "@/components/WebChat";
+import WebChatWrapper from "@/components/WebChatWrapper";
 
 export const metadata: Metadata = {
   title: "AI Чат — Stone AI",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function AppPage() {
-  return <WebChat />;
+  return <WebChatWrapper />;
 }

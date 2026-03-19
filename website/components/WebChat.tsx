@@ -378,10 +378,10 @@ function Sidebar({
 
 // ─── Main WebChat ───
 
-export default function WebChat() {
+export default function WebChat({ initialModel, initialCategory }: { initialModel?: string; initialCategory?: string } = {}) {
   const [auth, setAuth] = useState<AuthState | null>(null);
   const [loaded, setLoaded] = useState(false);
-  const [selectedModel, setSelectedModel] = useState("gpt-4o-mini");
+  const [selectedModel, setSelectedModel] = useState(initialModel && MODELS.some(m => m.id === initialModel) ? initialModel : "gpt-4o-mini");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
@@ -390,6 +390,8 @@ export default function WebChat() {
   const [uploading, setUploading] = useState(false);
   const [sessions, setSessions] = useState<ChatSessionItem[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
+  const [modelSearch, setModelSearch] = useState("");
+  const [modelCatFilter, setModelCatFilter] = useState<string>(initialCategory || "all");
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -990,7 +992,7 @@ export default function WebChat() {
               </svg>
             </button>
 
-            {/* Model dropdown */}
+            {/* Model dropdown with filters */}
             <div className="flex items-center gap-1.5 min-w-0">
               <div
                 className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shrink-0"
@@ -1004,26 +1006,35 @@ export default function WebChat() {
                 className="bg-transparent font-bold text-[13px] sm:text-sm text-text appearance-none cursor-pointer focus:outline-none min-w-0 max-w-[120px] sm:max-w-[200px] truncate pr-4"
                 style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%231A191650' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 0 center" }}
               >
-                <optgroup label="Free">
-                  {MODELS.filter(m => m.tier === "free").map(m => (
-                    <option key={m.id} value={m.id}>{m.name}</option>
-                  ))}
-                </optgroup>
-                <optgroup label="Pro">
-                  {MODELS.filter(m => m.tier === "pro" && m.category !== "video").map(m => (
-                    <option key={m.id} value={m.id}>{m.name} ({formatPrice(m)})</option>
-                  ))}
-                </optgroup>
-                <optgroup label="Video">
-                  {MODELS.filter(m => m.category === "video").map(m => (
-                    <option key={m.id} value={m.id}>{m.name} ({formatPrice(m)})</option>
-                  ))}
-                </optgroup>
-                <optgroup label="3D">
-                  {MODELS.filter(m => m.category === "3d").map(m => (
-                    <option key={m.id} value={m.id}>{m.name} ({formatPrice(m)})</option>
-                  ))}
-                </optgroup>
+                {(() => {
+                  const sorted = [...MODELS].sort((a, b) => {
+                    if (a.tier === "free" && b.tier !== "free") return -1;
+                    if (a.tier !== "free" && b.tier === "free") return 1;
+                    return a.pricePerMillion - b.pricePerMillion;
+                  });
+                  const cats = [
+                    { id: "chat", label: "Chat" },
+                    { id: "image", label: "Image" },
+                    { id: "video", label: "Video" },
+                    { id: "3d", label: "3D" },
+                    { id: "reason", label: "Reasoning" },
+                    { id: "search", label: "Search" },
+                    { id: "code", label: "Code" },
+                  ];
+                  return cats.map(cat => {
+                    const models = sorted.filter(m => m.category === cat.id);
+                    if (!models.length) return null;
+                    return (
+                      <optgroup key={cat.id} label={cat.label}>
+                        {models.map(m => (
+                          <option key={m.id} value={m.id}>
+                            {m.tier === "free" ? "★ " : ""}{m.name} — {m.company} ({formatPrice(m)})
+                          </option>
+                        ))}
+                      </optgroup>
+                    );
+                  });
+                })()}
               </select>
               <span className={`text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
                 model?.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"
