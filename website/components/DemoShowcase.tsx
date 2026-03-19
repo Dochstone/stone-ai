@@ -1,3 +1,5 @@
+"use client";
+
 export default function DemoShowcase() {
   return (
     <section className="py-20 md:py-28">
@@ -53,17 +55,17 @@ export default function DemoShowcase() {
 
         {/* Video + 3D + Audio row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {/* Video */}
+          {/* Video — real playable video */}
           <div className="rounded-2xl overflow-hidden border border-text/[0.06] bg-white">
-            <div className="aspect-video bg-cover bg-center flex items-center justify-center relative" style={{ backgroundImage: "url(/demo/video-poster.jpg)" }}>
-              <div className="w-16 h-16 rounded-full bg-white/90 shadow-lg flex items-center justify-center">
-                <svg className="w-7 h-7 text-red-500 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-              </div>
-              <div className="absolute bottom-3 left-3 right-3 flex items-center gap-2">
-                <div className="h-1 flex-1 rounded-full bg-red-400/30" />
-                <span className="text-[10px] text-text/30">0:08</span>
-              </div>
-            </div>
+            <video
+              src="/demo/video-demo.mp4"
+              poster="/demo/video-poster.jpg"
+              muted
+              loop
+              playsInline
+              autoPlay
+              className="w-full aspect-video object-cover"
+            />
             <div className="p-4">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-sm">🎬</span>
@@ -74,15 +76,9 @@ export default function DemoShowcase() {
             </div>
           </div>
 
-          {/* 3D */}
+          {/* 3D — real rotating model */}
           <div className="rounded-2xl overflow-hidden border border-text/[0.06] bg-white">
-            <div className="aspect-video bg-cover bg-center flex items-center justify-center relative" style={{ backgroundImage: "url(/demo/3d-poster.jpg)" }}>
-              <div className="text-4xl drop-shadow-lg">🧊</div>
-              <div className="absolute bottom-3 right-3 text-[10px] text-text/20 flex items-center gap-1">
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3" /></svg>
-                Вращение
-              </div>
-            </div>
+            <div className="aspect-video bg-[#f0f0f0]" dangerouslySetInnerHTML={{ __html: `<model-viewer src="/demo/model-demo.glb" auto-rotate camera-controls touch-action="pan-y" style="width:100%;height:100%;background:#f0f0f0" shadow-intensity="1" exposure="1.2"></model-viewer>` }} />
             <div className="p-4">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-sm">🧊</span>
@@ -93,14 +89,17 @@ export default function DemoShowcase() {
             </div>
           </div>
 
-          {/* Audio */}
+          {/* Audio — real playable audio */}
           <div className="rounded-2xl overflow-hidden border border-text/[0.06] bg-white">
-            <div className="aspect-video bg-cover bg-center flex items-center justify-center relative" style={{ backgroundImage: "url(/demo/audio-poster.jpg)" }}>
-              <div className="flex items-end gap-[3px] h-12 flex-1 justify-center px-6">
-                {[3,5,8,4,7,9,6,4,7,5,8,3,6,9,5,7,4,8,6,3,5,7,4,6,8,5,3,7,4,9,6,5].map((h, i) => (
-                  <div key={i} className="flex-1 rounded-full bg-white/40" style={{ height: `${h * 4}px` }} />
-                ))}
-              </div>
+            <div className="aspect-video bg-cover bg-center flex flex-col items-center justify-center relative" style={{ backgroundImage: "url(/demo/audio-poster.jpg)" }}>
+              <audio id="demo-audio" src="/demo/audio-demo.mp3" preload="metadata" />
+              <button
+                onClick={() => { const a = document.getElementById("demo-audio") as HTMLAudioElement | null; if (a) { a.currentTime = 0; a.play(); } }}
+                className="w-16 h-16 rounded-full bg-white/90 shadow-lg flex items-center justify-center hover:bg-white transition-colors"
+              >
+                <svg className="w-7 h-7 text-indigo-500 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              </button>
+              <span className="text-[11px] text-white/80 mt-2 drop-shadow">Нажмите, чтобы прослушать</span>
             </div>
             <div className="p-4">
               <div className="flex items-center gap-2 mb-1">
