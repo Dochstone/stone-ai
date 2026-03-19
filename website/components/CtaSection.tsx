@@ -2,8 +2,8 @@ export default function CtaSection() {
   return (
     <section className="bg-dark text-white py-20 md:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="text-3xl md:text-5xl font-extrabold mb-4">
-          Будущее AI — уже доступно. Начните сейчас.
+        <h2 className="text-3xl md:text-4xl font-extrabold mb-4">
+          Будущее AI — уже доступно. Начните сейчас
         </h2>
         <p className="text-white/50 mb-10 max-w-lg mx-auto text-lg">
           50 AI-моделей в одном Telegram-боте.
@@ -12,7 +12,7 @@ export default function CtaSection() {
         </p>
         <a
           href="/webchat"
-          className="inline-block bg-accent text-white px-8 sm:px-10 py-4 min-h-[44px] rounded-xl font-bold text-base sm:text-lg hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
+          className="inline-block bg-accent text-white px-8 py-4 min-h-[44px] rounded-xl font-bold text-sm hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
         >
           Начать бесплатно
         </a>

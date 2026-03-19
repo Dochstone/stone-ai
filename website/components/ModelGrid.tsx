@@ -76,7 +76,7 @@ export default function ModelGrid() {
           {filtered.map((model) => (
             <div
               key={model.id}
-              className="bg-white rounded-2xl p-4 card-hover border border-text/5 animate-fadeIn"
+              className="bg-white rounded-2xl p-5 card-hover border border-text/5 animate-fadeIn"
             >
               <div className="flex items-center gap-2 mb-3">
                 <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold ${companyColors[model.company] ?? "bg-gray-100 text-gray-700"}`}>

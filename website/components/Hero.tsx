@@ -137,11 +137,11 @@ function ChatMockup() {
   );
 }
 
-function ProviderLogo({ children, color, className = "" }: { children: React.ReactNode; color?: string; className?: string }) {
+function ProviderLogo({ children, color }: { children: React.ReactNode; color?: string }) {
   return (
     <span
-      className={`shrink-0 mx-6 md:mx-9 inline-flex items-center gap-2 opacity-[0.6] hover:opacity-[0.85] transition-opacity duration-300 select-none cursor-default ${className}`}
-      style={{ height: 44, color }}
+      className="shrink-0 mx-5 md:mx-8 inline-flex items-center gap-2 opacity-[0.6] hover:opacity-[0.85] transition-opacity duration-300 select-none cursor-default"
+      style={{ height: 40, color }}
     >
       {children}
     </span>
@@ -151,54 +151,55 @@ function ProviderLogo({ children, color, className = "" }: { children: React.Rea
 function TrustMarquee() {
   const logos = (
     <>
-      {/* OpenAI — black bold + circle dot */}
+      {/* OpenAI — black circle with white center */}
       <ProviderLogo color="#1A1916">
-        <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10" fillOpacity="0.15"/><circle cx="12" cy="12" r="4"/></svg>
-        <span className="text-2xl font-extrabold tracking-tight">OpenAI</span>
+        <svg className="w-7 h-7 shrink-0" viewBox="0 0 28 28"><circle cx="14" cy="14" r="13" fill="currentColor"/><circle cx="14" cy="14" r="6" fill="#FAF9F5"/></svg>
+        <span style={{ fontSize: 20, fontWeight: 700 }}>OpenAI</span>
       </ProviderLogo>
-      {/* Anthropic — orange + starburst */}
+      {/* Anthropic — orange starburst pinwheel */}
       <ProviderLogo color="#d97706">
-        <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.09 6.26L20.18 8l-4.91 3.82L17.36 18 12 14.27 6.64 18l2.09-6.18L3.82 8l6.09.26z"/></svg>
-        <span className="text-2xl font-bold">Anthropic</span>
+        <svg className="w-7 h-7 shrink-0" viewBox="0 0 28 28" fill="currentColor"><path d="M14 2l1.8 5.4L21.2 6l-3.8 4.2 5.6 1-5 2.8 3.4 4.6L16 16.8 14 22l-2-5.2-5.4 1.8 3.4-4.6-5-2.8 5.6-1L6.8 6l5.4 1.4z"/></svg>
+        <span style={{ fontSize: 20, fontWeight: 700 }}>Anthropic</span>
       </ProviderLogo>
-      {/* Google — 4-color letters */}
+      {/* Google — 4-color G icon + text */}
       <ProviderLogo>
-        <span className="text-2xl font-bold tracking-tight">
-          <span style={{color:"#4285f4"}}>G</span><span style={{color:"#ea4335"}}>o</span><span style={{color:"#fbbc05"}}>o</span><span style={{color:"#4285f4"}}>g</span><span style={{color:"#34a853"}}>l</span><span style={{color:"#ea4335"}}>e</span>
-        </span>
+        <svg className="w-7 h-7 shrink-0" viewBox="0 0 28 28"><path d="M25.2 14.3c0-.8-.1-1.6-.2-2.3H14v4.5h6.3a5.4 5.4 0 01-2.3 3.5v2.9h3.8c2.2-2 3.4-5 3.4-8.6z" fill="#4285f4"/><path d="M14 26c3.1 0 5.8-1 7.7-2.8l-3.8-2.9c-1 .7-2.3 1.1-3.9 1.1-3 0-5.6-2-6.5-4.8H3.6v3C5.5 23.3 9.4 26 14 26z" fill="#34a853"/><path d="M7.5 16.6c-.5-1.4-.5-2.8 0-4.2V9.4H3.6A12 12 0 002 14c0 1.9.5 3.8 1.6 5.4l3.9-2.8z" fill="#fbbc05"/><path d="M14 7.4c1.7 0 3.2.6 4.4 1.7l3.3-3.3C19.8 4 17.1 2.8 14 2.8 9.4 2.8 5.5 5.5 3.6 9.4l3.9 2.8c.9-2.7 3.5-4.8 6.5-4.8z" fill="#ea4335"/></svg>
+        <span style={{ fontSize: 20, fontWeight: 700 }}>Google</span>
       </ProviderLogo>
-      {/* xAI — bold italic on dark badge */}
-      <ProviderLogo>
-        <span className="bg-[#1A1916] text-white text-xl font-extrabold italic px-4 py-1.5 rounded-lg">xAI</span>
-      </ProviderLogo>
-      {/* DeepSeek — cyan + whale */}
-      <ProviderLogo color="#06b6d4">
-        <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="12" cy="13" rx="9" ry="7" fillOpacity="0.2"/><path d="M5 12c0-4 3.5-7 7-7s7 3 7 7c0 3-2 5.5-4 6.5C13.5 19.5 12 20 12 20s-1.5-.5-3-1.5C7 17.5 5 15 5 12z" fillOpacity="0.6"/><circle cx="9" cy="11" r="1"/></svg>
-        <span className="text-2xl font-bold">DeepSeek</span>
-      </ProviderLogo>
-      {/* Meta — blue + infinity */}
-      <ProviderLogo color="#0668E1">
-        <svg className="w-5 h-4 shrink-0" viewBox="0 0 24 16" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 8c0-3 2-5 4-5s4 3 4 5-2 5-4 5-4-3-4-5zM12 8c0-3 2-5 4-5s4 3 4 5-2 5-4 5-4-3-4-5z"/></svg>
-        <span className="text-2xl font-extrabold">Meta</span>
-      </ProviderLogo>
-      {/* Mistral — orange + wind */}
-      <ProviderLogo color="#f97316">
-        <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9.59 4.59A2 2 0 1113 8H3m14.59-1.41A2 2 0 1121 12H3m-1 5a2 2 0 114-1H3"/></svg>
-        <span className="text-2xl font-bold">Mistral</span>
-      </ProviderLogo>
-      {/* Stability AI — purple + diamond */}
-      <ProviderLogo color="#a855f7">
-        <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l8 10-8 10-8-10z" fillOpacity="0.5"/></svg>
-        <span className="text-2xl font-bold">Stability AI</span>
-      </ProviderLogo>
-      {/* ElevenLabs — green + sound wave */}
-      <ProviderLogo color="#10a37f">
-        <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 12h2m2-4h2v8H8m4-10h2v12h-2m4-8h2v4h-2"/></svg>
-        <span className="text-2xl font-bold">ElevenLabs</span>
-      </ProviderLogo>
-      {/* Runway — black bold */}
+      {/* xAI — stylized X */}
       <ProviderLogo color="#1A1916">
-        <span className="text-2xl font-extrabold tracking-tight">Runway</span>
+        <svg className="w-7 h-7 shrink-0" viewBox="0 0 28 28" fill="currentColor"><path d="M5 5l8 9L5 23h2.5l6.5-7.2L20.5 23H24l-8-9L24 5h-2.5L15 12.2 8.5 5H5z" fillOpacity="0.8"/></svg>
+        <span style={{ fontSize: 20, fontWeight: 700, fontStyle: "italic" }}>xAI</span>
+      </ProviderLogo>
+      {/* DeepSeek — blue whale */}
+      <ProviderLogo color="#06b6d4">
+        <svg className="w-7 h-7 shrink-0" viewBox="0 0 28 28" fill="currentColor"><path d="M6 14c0-5 3.6-8 8-8s8 3 8 8c0 4-2.5 6.5-4.5 7.5-1 .5-2 1-3.5 1s-2.5-.5-3.5-1C8.5 20.5 6 18 6 14z" fillOpacity="0.35"/><path d="M8 13c0-3.5 2.7-6 6-6s6 2.5 6 6c0 3-2 5-3.5 5.8-.8.4-1.5.7-2.5.7s-1.7-.3-2.5-.7C9.8 18 8 16 8 13z" fillOpacity="0.5"/><circle cx="11" cy="12" r="1.2"/><path d="M17 15c-1 .8-2 1-3 1s-2-.2-3-1" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
+        <span style={{ fontSize: 20, fontWeight: 700 }}>DeepSeek</span>
+      </ProviderLogo>
+      {/* Meta — blue infinity */}
+      <ProviderLogo color="#0668E1">
+        <svg className="w-7 h-7 shrink-0" viewBox="0 0 28 20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 10c0-3.5 2-5.5 4.5-5.5S14 7.5 14 10s-2 5.5-4.5 5.5S5 13.5 5 10zM14 10c0-3.5 2-5.5 4.5-5.5S23 7.5 23 10s-2 5.5-4.5 5.5S14 13.5 14 10z"/></svg>
+        <span style={{ fontSize: 20, fontWeight: 700 }}>Meta</span>
+      </ProviderLogo>
+      {/* Mistral — orange wind stripes */}
+      <ProviderLogo color="#f97316">
+        <svg className="w-7 h-7 shrink-0" viewBox="0 0 28 28" fill="currentColor"><rect x="4" y="6" width="18" height="3" rx="1.5"/><rect x="4" y="12.5" width="22" height="3" rx="1.5"/><rect x="4" y="19" width="14" height="3" rx="1.5"/></svg>
+        <span style={{ fontSize: 20, fontWeight: 700 }}>Mistral</span>
+      </ProviderLogo>
+      {/* Stability AI — purple diamond */}
+      <ProviderLogo color="#a855f7">
+        <svg className="w-7 h-7 shrink-0" viewBox="0 0 28 28" fill="currentColor"><path d="M14 3l10 11-10 11L4 14z" fillOpacity="0.4"/><path d="M14 7l6 7-6 7-6-7z"/></svg>
+        <span style={{ fontSize: 20, fontWeight: 700 }}>Stability AI</span>
+      </ProviderLogo>
+      {/* ElevenLabs — green sound waves ||| */}
+      <ProviderLogo color="#10a37f">
+        <svg className="w-7 h-7 shrink-0" viewBox="0 0 28 28" fill="currentColor"><rect x="6" y="10" width="3" height="8" rx="1.5"/><rect x="12.5" y="6" width="3" height="16" rx="1.5"/><rect x="19" y="8" width="3" height="12" rx="1.5"/></svg>
+        <span style={{ fontSize: 20, fontWeight: 700 }}>ElevenLabs</span>
+      </ProviderLogo>
+      {/* Runway — black rect with R */}
+      <ProviderLogo color="#1A1916">
+        <svg className="w-7 h-7 shrink-0" viewBox="0 0 28 28"><rect x="2" y="5" width="24" height="18" rx="4" fill="currentColor"/><text x="14" y="18" textAnchor="middle" fill="#FAF9F5" fontSize="13" fontWeight="800" fontFamily="sans-serif">R</text></svg>
+        <span style={{ fontSize: 20, fontWeight: 700 }}>Runway</span>
       </ProviderLogo>
     </>
   );
