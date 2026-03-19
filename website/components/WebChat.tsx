@@ -11,6 +11,10 @@ const IMAGE_MODEL_IDS = new Set([
   "flux-schnell", "stable-diffusion-xl",
 ]);
 
+const VIDEO_MODEL_IDS = new Set([
+  "kling-v2", "runway-gen3", "pika-2", "stable-video", "luma-dream",
+]);
+
 // ─── Helpers ───
 
 function extractImageUrl(text: string): string | null {
@@ -81,6 +85,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   file?: FileAttachment;
+  video?: { url: string; cost_usd?: number };
   billing?: {
     tokens_in: number;
     tokens_out: number;
@@ -388,8 +393,10 @@ export default function WebChat() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const [videoGenerating, setVideoGenerating] = useState(false);
 
   const model = useMemo(() => MODELS.find((m) => m.id === selectedModel), [selectedModel]);
+  const isVideoModel = VIDEO_MODEL_IDS.has(selectedModel);
 
   // Load auth from localStorage
   useEffect(() => {
@@ -568,6 +575,90 @@ export default function WebChat() {
     }, 50);
   }, []);
 
+  // Video generation
+  const sendVideoMessage = useCallback(async () => {
+    if (!auth || !input.trim() || videoGenerating) return;
+
+    const prompt = input.trim();
+    const userMsg: Message = { role: "user", content: prompt };
+    const history = [...messages, userMsg];
+    setMessages(history);
+    setInput("");
+    setVideoGenerating(true);
+    resetTextarea();
+
+    try {
+      // Submit
+      const res = await fetch(`${API_URL}/api/video/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
+        body: JSON.stringify({ model_id: selectedModel, prompt }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: "Ошибка" }));
+        setMessages([...history, { role: "assistant", content: typeof err.detail === "string" ? err.detail : "Ошибка генерации видео" }]);
+        setVideoGenerating(false);
+        return;
+      }
+
+      const data = await res.json();
+      const taskId = data.task_id;
+
+      // Update balance
+      if (data.balance_usd !== undefined) {
+        setAuth((prev) => prev ? { ...prev, balanceUsd: data.balance_usd } : prev);
+        try {
+          const saved = localStorage.getItem("stone_auth");
+          if (saved) { const p = JSON.parse(saved); p.balanceUsd = data.balance_usd; localStorage.setItem("stone_auth", JSON.stringify(p)); }
+        } catch {}
+      }
+
+      // Show processing message
+      setMessages([...history, { role: "assistant", content: `Генерация видео... (~${data.estimated_seconds || 60}с)\n${data.model} · $${data.cost_usd?.toFixed(2) || "0.00"}` }]);
+
+      // Poll for status
+      let attempts = 0;
+      const maxAttempts = 60; // 3s * 60 = 3 minutes max
+      const poll = async () => {
+        attempts++;
+        try {
+          const statusRes = await fetch(`${API_URL}/api/video/status/${taskId}`, {
+            headers: { Authorization: `Bearer ${auth.token}` },
+          });
+          if (!statusRes.ok) throw new Error("Status check failed");
+          const status = await statusRes.json();
+
+          if (status.status === "completed" && status.video_url) {
+            setMessages([...history, { role: "assistant", content: `Видео готово!`, video: { url: status.video_url, cost_usd: data.cost_usd } }]);
+            setVideoGenerating(false);
+            return;
+          }
+          if (status.status === "failed") {
+            setMessages([...history, { role: "assistant", content: `Ошибка: ${status.error || "Генерация не удалась"}` }]);
+            setVideoGenerating(false);
+            return;
+          }
+          // Still processing
+          if (attempts < maxAttempts) {
+            setTimeout(poll, 3000);
+          } else {
+            setMessages([...history, { role: "assistant", content: "Таймаут генерации. Попробуйте снова." }]);
+            setVideoGenerating(false);
+          }
+        } catch {
+          setMessages([...history, { role: "assistant", content: "Ошибка проверки статуса" }]);
+          setVideoGenerating(false);
+        }
+      };
+      setTimeout(poll, 3000);
+
+    } catch {
+      setMessages([...history, { role: "assistant", content: "Ошибка соединения" }]);
+      setVideoGenerating(false);
+    }
+  }, [auth, input, videoGenerating, messages, selectedModel, resetTextarea]);
+
   // Stop generation
   const stopGeneration = useCallback(() => {
     abortRef.current?.abort();
@@ -575,6 +666,8 @@ export default function WebChat() {
   }, []);
 
   const sendMessage = useCallback(async () => {
+    // Redirect to video generation for video models
+    if (isVideoModel) { sendVideoMessage(); return; }
     if (!auth || (!input.trim() && !pendingFile) || streaming) return;
 
     const currentFile = pendingFile;
@@ -695,7 +788,7 @@ export default function WebChat() {
       setStreaming(false);
       abortRef.current = null;
     }
-  }, [auth, input, streaming, messages, selectedModel, pendingFile, saveToSession, resetTextarea]);
+  }, [auth, input, streaming, messages, selectedModel, pendingFile, saveToSession, resetTextarea, isVideoModel, sendVideoMessage]);
 
   // Auto-send after suggestion card click
   const pendingSend = useRef(false);
@@ -832,7 +925,12 @@ export default function WebChat() {
                   ))}
                 </optgroup>
                 <optgroup label="Pro">
-                  {MODELS.filter(m => m.tier === "pro").map(m => (
+                  {MODELS.filter(m => m.tier === "pro" && m.category !== "video").map(m => (
+                    <option key={m.id} value={m.id}>{m.name} ({formatPrice(m)})</option>
+                  ))}
+                </optgroup>
+                <optgroup label="Video">
+                  {MODELS.filter(m => m.category === "video").map(m => (
                     <option key={m.id} value={m.id}>{m.name} ({formatPrice(m)})</option>
                   ))}
                 </optgroup>
@@ -906,6 +1004,34 @@ export default function WebChat() {
                               <span className="shrink-0 opacity-60">{(msg.file.size / 1024).toFixed(0)}KB</span>
                             </div>
                           )}
+                        </div>
+                      )}
+
+                      {/* Video player */}
+                      {msg.video && (
+                        <div className="mb-2">
+                          <video
+                            src={msg.video.url}
+                            controls
+                            playsInline
+                            className="max-w-full rounded-xl"
+                            style={{ maxHeight: 360 }}
+                          />
+                          <div className="flex items-center gap-3 mt-2">
+                            <a
+                              href={msg.video.url}
+                              download={`stone-ai-video-${Date.now()}.mp4`}
+                              className="flex items-center gap-1.5 text-[11px] text-accent font-semibold hover:underline"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V3" />
+                              </svg>
+                              Скачать
+                            </a>
+                            {msg.video.cost_usd && (
+                              <span className="text-[10px] text-text/30">${msg.video.cost_usd.toFixed(2)}</span>
+                            )}
+                          </div>
                         </div>
                       )}
 
@@ -1004,7 +1130,7 @@ export default function WebChat() {
                 value={input}
                 onChange={handleInputChange}
                 onKeyDown={handleKey}
-                placeholder={pendingFile ? "Добавьте вопрос к файлу..." : "Написать сообщение... (Shift+Enter — новая строка)"}
+                placeholder={pendingFile ? "Добавьте вопрос к файлу..." : isVideoModel ? `Опишите видео... (~$${formatPrice(model!).replace('/vid','')})` : "Написать сообщение... (Shift+Enter — новая строка)"}
                 rows={1}
                 className="flex-1 bg-transparent resize-none focus:outline-none min-w-0 leading-snug placeholder:text-text/20"
                 style={{ fontSize: 14, padding: "10px 16px", maxHeight: 80, minHeight: 42 }}
@@ -1025,7 +1151,7 @@ export default function WebChat() {
               ) : (
                 <button
                   onClick={sendMessage}
-                  disabled={!input.trim() && !pendingFile}
+                  disabled={videoGenerating || (!input.trim() && !pendingFile)}
                   className="rounded-lg bg-accent text-white flex items-center justify-center hover:bg-accent/90 transition-colors disabled:opacity-30 shrink-0"
                   style={{ width: 38, height: 38 }}
                 >

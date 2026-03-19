@@ -1,5 +1,5 @@
 export type ModelTier = "free" | "pro";
-export type ModelCategory = "chat" | "image" | "reason" | "search" | "code";
+export type ModelCategory = "chat" | "image" | "reason" | "search" | "code" | "video";
 
 export interface AIModel {
   id: string;
@@ -76,7 +76,14 @@ export const MODELS: AIModel[] = [
   // TIER 6: SPECIAL (2 models)
   { id: "perplexity-sonar", name: "Perplexity Sonar", company: "Perplexity", tier: "pro", category: "search", pricePerMillion: 4.0, context: "127K" },
   { id: "perplexity-sonar-deep", name: "Sonar Deep Research", company: "Perplexity", tier: "pro", category: "search", pricePerMillion: 16.8, context: "127K" },
+
+  // TIER 7: VIDEO GENERATION (5 models)
+  { id: "kling-v2", name: "Kling v2", company: "Kuaishou", tier: "pro", category: "video", pricePerMillion: 0.35, priceUnit: "/vid", context: "5-10s" },
+  { id: "runway-gen3", name: "Runway Gen-3", company: "Runway", tier: "pro", category: "video", pricePerMillion: 0.85, priceUnit: "/vid", context: "5-10s" },
+  { id: "pika-2", name: "Pika 2.0", company: "Pika", tier: "pro", category: "video", pricePerMillion: 0.18, priceUnit: "/vid", context: "3-5s" },
+  { id: "stable-video", name: "Stable Video", company: "Stability", tier: "pro", category: "video", pricePerMillion: 0.15, priceUnit: "/vid", context: "4s" },
+  { id: "luma-dream", name: "Luma Dream", company: "Luma", tier: "pro", category: "video", pricePerMillion: 0.50, priceUnit: "/vid", context: "5s" },
 ];
 
 export const COMPANIES = Array.from(new Set(MODELS.map((m) => m.company)));
-export const CATEGORIES: ModelCategory[] = ["chat", "image", "reason", "search", "code"];
+export const CATEGORIES: ModelCategory[] = ["chat", "image", "reason", "search", "code", "video"];

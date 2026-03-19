@@ -77,6 +77,9 @@ class Settings:
         # CryptoBot (Phase 3)
         self.cryptobot_api_token = os.getenv("CRYPTOBOT_API_TOKEN", "")
 
+        # fal.ai (Video generation)
+        self.fal_api_key = os.getenv("FAL_API_KEY", "")
+
         # Admin
         self.admin_tg_ids = os.getenv("ADMIN_TG_IDS", "")  # comma-separated Telegram IDs
 
