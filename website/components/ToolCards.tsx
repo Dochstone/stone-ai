@@ -14,7 +14,7 @@ export default function ToolCards() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-auto">
 
           {/* ── AI Chat — 2 cols, chat mockup ── */}
-          <a href="/chat" className="sm:col-span-2 bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[280px]">
+          <a href="/chat" className="sm:col-span-2 bg-gradient-to-br from-[#1C1C1E] to-[#2A2520] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[280px]">
             <div className="relative z-10">
               <span className="inline-block bg-accent/20 text-accent text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-4">50+ моделей</span>
               <h3 className="font-bold text-xl text-white mb-2">AI Чат</h3>
@@ -33,61 +33,61 @@ export default function ToolCards() {
             </div>
           </a>
 
-          {/* ── Images — dark with mini gallery ── */}
-          <a href="/images" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
-            <span className="inline-block bg-pink-500/20 text-pink-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">6 генераторов</span>
+          {/* ── Images — rose gradient with mini gallery ── */}
+          <a href="/images" className="bg-gradient-to-br from-pink-600 to-rose-700 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
+            <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">6 генераторов</span>
             <h3 className="font-bold text-lg text-white mb-2">Генерация картинок</h3>
             <p className="text-white/70 text-[14px] leading-relaxed mb-4">Flux, SDXL, GPT-5 Image. Фотореализм и арт-стили.</p>
             <div className="grid grid-cols-3 gap-1.5">
-              <div className="aspect-square rounded-lg bg-gradient-to-br from-pink-500/30 to-purple-500/30 border border-white/[0.06]" />
-              <div className="aspect-square rounded-lg bg-gradient-to-br from-blue-500/30 to-cyan-400/30 border border-white/[0.06]" />
-              <div className="aspect-square rounded-lg bg-gradient-to-br from-amber-500/30 to-orange-400/30 border border-white/[0.06]" />
+              <div className="aspect-square rounded-lg bg-white/15 border border-white/10" />
+              <div className="aspect-square rounded-lg bg-white/10 border border-white/10" />
+              <div className="aspect-square rounded-lg bg-white/20 border border-white/10" />
             </div>
           </a>
 
-          {/* ── Documents — dark with PDF mockup ── */}
-          <a href="/documents" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
-            <span className="inline-block bg-amber-500/20 text-amber-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">PDF, фото</span>
+          {/* ── Documents — amber gradient with PDF mockup ── */}
+          <a href="/documents" className="bg-gradient-to-br from-amber-500 to-orange-700 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
+            <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">PDF, фото</span>
             <h3 className="font-bold text-lg text-white mb-2">Анализ документов</h3>
             <p className="text-white/70 text-[14px] leading-relaxed mb-4">Загрузите PDF или фото — AI ответит на любой вопрос.</p>
-            <div className="bg-white/[0.06] rounded-xl p-3 border border-white/[0.06]">
+            <div className="bg-white/15 rounded-xl p-3 border border-white/10">
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center shrink-0">
-                  <svg className="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
+                  <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
                 </div>
                 <div>
-                  <div className="text-[10px] text-white/50">report_Q4.pdf</div>
-                  <div className="text-[9px] text-white/25">2.4 MB · 48 стр</div>
+                  <div className="text-[10px] text-white/80">report_Q4.pdf</div>
+                  <div className="text-[9px] text-white/50">2.4 MB · 48 стр</div>
                 </div>
               </div>
               <div className="flex gap-1">
-                {[1,2,3].map(i => <div key={i} className="h-1 flex-1 rounded-full bg-amber-400/20" />)}
-                <div className="h-1 flex-[2] rounded-full bg-white/[0.04]" />
+                {[1,2,3].map(i => <div key={i} className="h-1 flex-1 rounded-full bg-white/30" />)}
+                <div className="h-1 flex-[2] rounded-full bg-white/10" />
               </div>
             </div>
           </a>
 
-          {/* ── Search — dark with search result mockup ── */}
-          <a href="/search" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
-            <span className="inline-block bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">Realtime</span>
+          {/* ── Search — emerald gradient with search mockup ── */}
+          <a href="/search" className="bg-gradient-to-br from-emerald-500 to-teal-700 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
+            <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">Realtime</span>
             <h3 className="font-bold text-lg text-white mb-2">AI Поиск</h3>
             <p className="text-white/70 text-[14px] leading-relaxed mb-4">Perplexity ищет в интернете. Актуальные данные, не кэш.</p>
-            <div className="bg-white/[0.06] rounded-xl p-3 border border-white/[0.06]">
+            <div className="bg-white/15 rounded-xl p-3 border border-white/10">
               <div className="flex items-center gap-2 mb-2">
-                <svg className="w-4 h-4 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
-                <span className="text-[10px] text-white/40">курс биткоина сегодня</span>
+                <svg className="w-4 h-4 text-white shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                <span className="text-[10px] text-white/70">курс биткоина сегодня</span>
               </div>
               <div className="space-y-1">
-                <div className="h-1.5 w-full rounded bg-emerald-400/15" />
-                <div className="h-1.5 w-4/5 rounded bg-emerald-400/10" />
-                <div className="h-1.5 w-3/5 rounded bg-white/[0.04]" />
+                <div className="h-1.5 w-full rounded bg-white/25" />
+                <div className="h-1.5 w-4/5 rounded bg-white/15" />
+                <div className="h-1.5 w-3/5 rounded bg-white/10" />
               </div>
             </div>
           </a>
 
-          {/* ── API — dark with code snippet ── */}
-          <a href="/docs" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden sm:col-span-2 lg:col-span-1 min-h-[180px]">
-            <span className="inline-block bg-sky-500/20 text-sky-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">API</span>
+          {/* ── API — dark slate with code snippet ── */}
+          <a href="/docs" className="bg-gradient-to-br from-slate-700 to-slate-900 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden sm:col-span-2 lg:col-span-1 min-h-[180px]">
+            <span className="inline-block bg-sky-400/20 text-sky-300 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">API</span>
             <h3 className="font-bold text-lg text-white mb-3">Простой API</h3>
             <div className="bg-white/[0.04] rounded-xl p-3 overflow-x-auto border border-white/[0.06]">
               <pre className="text-[11px] leading-[1.7] font-mono" dangerouslySetInnerHTML={{ __html: `<span style="color:#34d399">curl</span><span style="color:rgba(255,255,255,0.5)"> -X </span><span style="color:#fcd34d">POST</span><span style="color:rgba(255,255,255,0.5)"> /api/chat \\
@@ -97,66 +97,66 @@ export default function ToolCards() {
             </div>
           </a>
 
-          {/* ── Video — dark with video player mockup ── */}
-          <a href="/video" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
-            <span className="inline-block bg-red-500/20 text-red-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">5 моделей</span>
+          {/* ── Video — red gradient with video player mockup ── */}
+          <a href="/video" className="bg-gradient-to-br from-red-500 to-rose-800 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
+            <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">5 моделей</span>
             <h3 className="font-bold text-lg text-white mb-2">AI Видео</h3>
             <p className="text-white/70 text-[14px] leading-relaxed mb-4">Kling, Runway, Pika. Видео из текста за 5-10 секунд.</p>
-            <div className="bg-white/[0.06] rounded-xl overflow-hidden border border-white/[0.06]">
-              <div className="aspect-video bg-gradient-to-br from-red-500/15 to-rose-500/10 flex items-center justify-center">
+            <div className="bg-white/15 rounded-xl overflow-hidden border border-white/10">
+              <div className="aspect-video bg-white/5 flex items-center justify-center">
                 <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors">
                   <svg className="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                 </div>
               </div>
               <div className="flex items-center gap-2 px-3 py-1.5">
-                <div className="h-1 flex-1 rounded-full bg-red-400/30" />
+                <div className="h-1 flex-1 rounded-full bg-white/30" />
                 <span className="text-[9px] text-white/25">0:08</span>
               </div>
             </div>
           </a>
 
-          {/* ── Audio — dark with audio player mockup ── */}
-          <a href="/audio" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
-            <span className="inline-block bg-indigo-500/20 text-indigo-300 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">10+ голосов</span>
+          {/* ── Audio — indigo gradient with audio player mockup ── */}
+          <a href="/audio" className="bg-gradient-to-br from-indigo-600 to-blue-800 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
+            <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">10+ голосов</span>
             <h3 className="font-bold text-lg text-white mb-2">AI Аудио</h3>
             <p className="text-white/70 text-[14px] leading-relaxed mb-4">Озвучка текста 10+ голосами. Голосовой ввод. Мгновенно.</p>
-            <div className="bg-white/[0.06] rounded-xl p-3 border border-white/[0.06]">
+            <div className="bg-white/15 rounded-xl p-3 border border-white/10">
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-7 h-7 rounded-full bg-indigo-500 flex items-center justify-center shrink-0">
+                <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center shrink-0">
                   <svg className="w-3 h-3 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                 </div>
                 <div className="flex items-end gap-[3px] h-5 flex-1">
                   {[3,5,8,4,7,9,6,4,7,5,8,3,6,9,5,7,4,8,6,3,5,7,4,6,8,5,3].map((h, i) => (
-                    <div key={i} className="flex-1 rounded-full bg-indigo-400/40" style={{ height: `${h * 2.2}px` }} />
+                    <div key={i} className="flex-1 rounded-full bg-white/30" style={{ height: `${h * 2.2}px` }} />
                   ))}
                 </div>
                 <span className="text-[10px] text-white/30 shrink-0">0:12</span>
               </div>
               <div className="flex gap-1.5">
                 {["Nova", "Echo", "Alloy"].map((v, i) => (
-                  <span key={v} className={`text-[9px] px-2 py-0.5 rounded-md ${i === 0 ? "bg-indigo-500/30 text-indigo-300" : "bg-white/[0.04] text-white/25"}`}>{v}</span>
+                  <span key={v} className={`text-[9px] px-2 py-0.5 rounded-md ${i === 0 ? "bg-white/25 text-white" : "bg-white/10 text-white/50"}`}>{v}</span>
                 ))}
               </div>
             </div>
           </a>
 
-          {/* ── Deep Analysis — dark with reasoning mockup ── */}
-          <a href="/chat" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
-            <span className="inline-block bg-violet-500/20 text-violet-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">o3 + R1</span>
+          {/* ── Deep Analysis — violet gradient with reasoning mockup ── */}
+          <a href="/chat" className="bg-gradient-to-br from-violet-600 to-purple-800 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden relative min-h-[180px]">
+            <span className="inline-block bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">o3 + R1</span>
             <h3 className="font-bold text-lg text-white mb-2">Глубокий анализ</h3>
             <p className="text-white/70 text-[14px] leading-relaxed mb-4">Пошаговое рассуждение для сложных задач.</p>
-            <div className="bg-white/[0.06] rounded-xl p-3 border border-white/[0.06] space-y-1.5">
+            <div className="bg-white/15 rounded-xl p-3 border border-white/10 space-y-1.5">
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full border-2 border-violet-400/50 flex items-center justify-center"><div className="w-1.5 h-1.5 rounded-full bg-violet-400" /></div>
-                <span className="text-[10px] text-white/40">Анализирую условие задачи...</span>
+                <div className="w-4 h-4 rounded-full border-2 border-white/50 flex items-center justify-center"><div className="w-1.5 h-1.5 rounded-full bg-white" /></div>
+                <span className="text-[10px] text-white/70">Анализирую условие задачи...</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full border-2 border-violet-400/50 flex items-center justify-center"><div className="w-1.5 h-1.5 rounded-full bg-violet-400" /></div>
-                <span className="text-[10px] text-white/40">Рассматриваю 3 подхода...</span>
+                <div className="w-4 h-4 rounded-full border-2 border-white/50 flex items-center justify-center"><div className="w-1.5 h-1.5 rounded-full bg-white" /></div>
+                <span className="text-[10px] text-white/70">Рассматриваю 3 подхода...</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full border-2 border-violet-400/30" />
-                <span className="text-[10px] text-white/25">Формулирую ответ...</span>
+                <div className="w-4 h-4 rounded-full border-2 border-white/30" />
+                <span className="text-[10px] text-white/40">Формулирую ответ...</span>
               </div>
             </div>
           </a>
