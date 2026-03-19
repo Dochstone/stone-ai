@@ -25,11 +25,7 @@ export default function Pricing() {
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-teal mt-0.5 shrink-0">&#10003;</span>
-                <span>10 запросов в день</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-teal mt-0.5 shrink-0">&#10003;</span>
-                <span>+5 запросов за просмотр рекламы</span>
+                <span>15 запросов в день</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-teal mt-0.5 shrink-0">&#10003;</span>

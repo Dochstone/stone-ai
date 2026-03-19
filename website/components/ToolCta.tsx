@@ -6,7 +6,7 @@ interface ToolCtaProps {
 
 export default function ToolCta({
   title = "Попробуйте прямо сейчас",
-  subtitle = "10 бесплатных запросов каждый день. Без VPN, без регистрации.",
+  subtitle = "15 бесплатных запросов каждый день. Без VPN, без регистрации.",
   ctaHref = "/webchat",
 }: ToolCtaProps) {
   return (

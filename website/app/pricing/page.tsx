@@ -36,7 +36,7 @@ export default function PricingPage() {
             Готовы начать?
           </h2>
           <p className="text-white/50 mb-8 max-w-md mx-auto">
-            10 запросов бесплатно каждый день. +5 за просмотр рекламы. Без регистрации.
+            15 бесплатных запросов каждый день. Без регистрации.
           </p>
           <a
             href="/webchat"

@@ -122,7 +122,7 @@ const jsonLdSoftware = {
     "@type": "Offer",
     price: "0",
     priceCurrency: "USD",
-    description: "10 бесплатных запросов в день. Платные модели от $0.24 за 1M токенов.",
+    description: "15 бесплатных запросов в день. Платные модели от $0.24 за 1M токенов.",
   },
   aggregateRating: {
     "@type": "AggregateRating",

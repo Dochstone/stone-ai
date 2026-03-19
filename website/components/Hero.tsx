@@ -265,7 +265,7 @@ export default function Hero() {
               </button>
             </form>
             <p className="text-[11px] text-text/35 mt-3 text-center">
-              Без привязки карты · 10 запросов/день бесплатно
+              Без привязки карты · 15 запросов/день бесплатно
             </p>
           </div>
 

@@ -17,7 +17,7 @@ export default function CtaSection() {
           Начать бесплатно
         </a>
         <p className="mt-6 text-white/30 text-sm">
-          10 бесплатных запросов каждый день. Без регистрации.
+          15 бесплатных запросов каждый день. Без регистрации.
         </p>
         <a
           href="/referral"

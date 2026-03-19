@@ -33,7 +33,7 @@ export default function ModelsPage() {
           >
             Попробовать бесплатно
           </a>
-          <p className="mt-3 text-sm text-text/40">10 бесплатных запросов каждый день</p>
+          <p className="mt-3 text-sm text-text/40">15 бесплатных запросов каждый день</p>
         </div>
       </div>
     </div>
