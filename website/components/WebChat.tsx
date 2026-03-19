@@ -1007,33 +1007,27 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                 style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%231A191650' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 0 center" }}
               >
                 {(() => {
-                  const sorted = [...MODELS].sort((a, b) => {
+                  const catMap: Record<string, string[]> = {
+                    all: [],
+                    chat: ["chat", "search", "reason", "code"],
+                    image: ["image"],
+                    video: ["video"],
+                    "3d": ["3d"],
+                  };
+                  const allowedCats = catMap[modelCatFilter] || [];
+                  const filtered = modelCatFilter === "all"
+                    ? MODELS
+                    : MODELS.filter(m => allowedCats.includes(m.category));
+                  const sorted = [...filtered].sort((a, b) => {
                     if (a.tier === "free" && b.tier !== "free") return -1;
                     if (a.tier !== "free" && b.tier === "free") return 1;
                     return a.pricePerMillion - b.pricePerMillion;
                   });
-                  const cats = [
-                    { id: "chat", label: "Chat" },
-                    { id: "image", label: "Image" },
-                    { id: "video", label: "Video" },
-                    { id: "3d", label: "3D" },
-                    { id: "reason", label: "Глубокий анализ" },
-                    { id: "search", label: "Search" },
-                    { id: "code", label: "Code" },
-                  ];
-                  return cats.map(cat => {
-                    const models = sorted.filter(m => m.category === cat.id);
-                    if (!models.length) return null;
-                    return (
-                      <optgroup key={cat.id} label={cat.label}>
-                        {models.map(m => (
-                          <option key={m.id} value={m.id}>
-                            {m.tier === "free" ? "★ " : ""}{m.name} — {m.company} ({formatPrice(m)})
-                          </option>
-                        ))}
-                      </optgroup>
-                    );
-                  });
+                  return sorted.map(m => (
+                    <option key={m.id} value={m.id}>
+                      {m.tier === "free" ? "★ " : ""}{m.name} — {m.company} ({formatPrice(m)})
+                    </option>
+                  ));
                 })()}
               </select>
               <span className={`text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
@@ -1059,6 +1053,28 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
               </svg>
             </a>
           </div>
+        </div>
+
+        {/* Category tabs */}
+        <div className="flex items-center gap-1 px-3 sm:px-4 py-1.5 border-b border-text/[0.04] bg-white/50 shrink-0 overflow-x-auto">
+          {[
+            { id: "all", icon: "✨", label: "Все" },
+            { id: "chat", icon: "💬", label: "Текст" },
+            { id: "image", icon: "🖼", label: "Картинки" },
+            { id: "video", icon: "🎬", label: "Видео" },
+            { id: "3d", icon: "🧊", label: "3D" },
+          ].map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setModelCatFilter(t.id)}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors shrink-0 ${
+                modelCatFilter === t.id ? "bg-accent/10 text-accent" : "text-text/30 hover:text-text/50"
+              }`}
+            >
+              <span className="text-xs">{t.icon}</span>
+              <span className="hidden sm:inline">{t.label}</span>
+            </button>
+          ))}
         </div>
 
         {/* Messages area or Welcome screen */}
