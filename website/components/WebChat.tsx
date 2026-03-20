@@ -390,6 +390,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   const [uploading, setUploading] = useState(false);
   const [sessions, setSessions] = useState<ChatSessionItem[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
+  const [recording, setRecording] = useState(false);
   const [modelSearch, setModelSearch] = useState("");
   const [modelCatFilter, setModelCatFilter] = useState<string>(initialCategory || "all");
 
@@ -1282,6 +1283,20 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
               <div className="text-xs text-accent mb-2 px-1 animate-pulse">Загрузка файла...</div>
             )}
 
+            {/* Recording animation */}
+            {recording && (
+              <div className="flex items-center gap-2 mb-2 px-2 py-1.5 bg-red-50 border border-red-200 rounded-xl">
+                <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+                <div className="flex items-end gap-[2px] h-4 flex-1">
+                  {Array.from({ length: 24 }, (_, i) => (
+                    <div key={i} className="flex-1 bg-red-400/40 rounded-full" style={{ height: `${Math.random() * 100}%`, animation: `waveRec 0.5s ${i * 0.02}s ease-in-out infinite alternate` }} />
+                  ))}
+                </div>
+                <span className="text-[11px] text-red-500 font-medium shrink-0">Говорите...</span>
+              </div>
+            )}
+            <style>{`@keyframes waveRec { from { transform: scaleY(0.3); } to { transform: scaleY(1); } }`}</style>
+
             <div className="flex items-center bg-bg border border-text/[0.08] rounded-xl focus-within:border-accent/30 focus-within:ring-2 focus-within:ring-accent/10 transition-all min-w-0" style={{ padding: "4px 8px", gap: 6 }}>
               {/* File attach */}
               <input ref={fileInputRef} type="file" accept="image/*,.pdf" className="hidden"
@@ -1310,71 +1325,94 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                 style={{ fontSize: 14, padding: "10px 16px", maxHeight: 80, minHeight: 42 }}
               />
 
-              {/* Send / Stop / Mic button — context-dependent */}
+              {/* Send / Stop / Mic button */}
               {streaming ? (
+                <button onClick={stopGeneration} className="rounded-lg bg-text/70 text-white flex items-center justify-center hover:bg-text/90 transition-colors shrink-0" title="Остановить" style={{ width: 38, height: 38 }}>
+                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" /></svg>
+                </button>
+              ) : recording ? (
+                /* Recording — pulsing red mic, click to stop */
                 <button
-                  onClick={stopGeneration}
-                  className="rounded-lg bg-text/70 text-white flex items-center justify-center hover:bg-text/90 transition-colors shrink-0"
-                  title="Остановить"
+                  onClick={() => {
+                    const sr = (window as any).__stoneSR;
+                    if (sr) { sr.stop(); }
+                    const rec = (window as any).__stoneRecorder;
+                    if (rec?.state === "recording") rec.stop();
+                    setRecording(false);
+                  }}
+                  className="rounded-lg bg-red-500 text-white flex items-center justify-center shrink-0 animate-pulse"
+                  title="Остановить запись"
                   style={{ width: 38, height: 38 }}
                 >
-                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                    <rect x="6" y="6" width="12" height="12" rx="2" />
+                  <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
                   </svg>
                 </button>
               ) : (input.trim() || pendingFile) ? (
-                <button
-                  onClick={sendMessage}
-                  disabled={videoGenerating || threedGenerating}
-                  className="rounded-lg bg-accent text-white flex items-center justify-center hover:bg-accent/90 transition-colors disabled:opacity-30 shrink-0"
-                  style={{ width: 38, height: 38 }}
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
-                  </svg>
+                <button onClick={sendMessage} disabled={videoGenerating || threedGenerating} className="rounded-lg bg-accent text-white flex items-center justify-center hover:bg-accent/90 transition-colors disabled:opacity-30 shrink-0" style={{ width: 38, height: 38 }}>
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" /></svg>
                 </button>
               ) : (
+                /* Idle — mic button */
                 <button
-                  onClick={async () => {
-                    // Toggle recording
-                    if ((window as any).__stoneRecorder?.state === "recording") {
-                      (window as any).__stoneRecorder.stop();
+                  onClick={() => {
+                    // Try Web Speech API first (realtime transcription)
+                    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+                    if (SpeechRecognition) {
+                      const sr = new SpeechRecognition();
+                      sr.lang = "ru-RU";
+                      sr.continuous = true;
+                      sr.interimResults = true;
+                      let finalText = "";
+                      sr.onresult = (e: any) => {
+                        let interim = "";
+                        for (let i = e.resultIndex; i < e.results.length; i++) {
+                          const t = e.results[i][0].transcript;
+                          if (e.results[i].isFinal) { finalText += t + " "; } else { interim = t; }
+                        }
+                        setInput(finalText + interim);
+                      };
+                      sr.onerror = () => { setRecording(false); };
+                      sr.onend = () => { setRecording(false); };
+                      (window as any).__stoneSR = sr;
+                      sr.start();
+                      setRecording(true);
+                      // Auto-stop after 60s
+                      setTimeout(() => { if (sr) try { sr.stop(); } catch {} }, 60000);
                       return;
                     }
-                    try {
-                      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                      const mime = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm"
-                        : MediaRecorder.isTypeSupported("audio/mp4") ? "audio/mp4" : "";
-                      const recorder = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
-                      (window as any).__stoneRecorder = recorder;
-                      const chunks: Blob[] = [];
-                      recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
-                      recorder.onstop = async () => {
-                        (window as any).__stoneRecorder = null;
-                        stream.getTracks().forEach(t => t.stop());
-                        if (!chunks.length) return;
-                        const blob = new Blob(chunks, { type: mime || "audio/webm" });
-                        const form = new FormData();
-                        form.append("file", blob, "voice.webm");
-                        try {
-                          const res = await fetch(`${API_URL}/api/audio/stt`, {
-                            method: "POST",
-                            headers: { Authorization: `Bearer ${auth!.token}` },
-                            body: form,
-                          });
-                          if (res.ok) {
-                            const data = await res.json();
-                            if (data.text) setInput(prev => prev + data.text);
-                          }
-                        } catch {}
-                      };
-                      recorder.start();
-                      setTimeout(() => { if (recorder.state === "recording") recorder.stop(); }, 30000);
-                    } catch (err: any) {
-                      if (err?.name === "NotAllowedError") alert("Доступ к микрофону запрещён.");
-                      else if (err?.name === "NotFoundError") alert("Микрофон не найден.");
-                      else alert("Ошибка: " + (err?.message || ""));
-                    }
+
+                    // Fallback: MediaRecorder + Whisper API
+                    (async () => {
+                      try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        const mime = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : MediaRecorder.isTypeSupported("audio/mp4") ? "audio/mp4" : "";
+                        const recorder = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+                        (window as any).__stoneRecorder = recorder;
+                        const chunks: Blob[] = [];
+                        recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+                        recorder.onstop = async () => {
+                          (window as any).__stoneRecorder = null;
+                          setRecording(false);
+                          stream.getTracks().forEach(t => t.stop());
+                          if (!chunks.length) return;
+                          const blob = new Blob(chunks, { type: mime || "audio/webm" });
+                          const form = new FormData();
+                          form.append("file", blob, "voice.webm");
+                          try {
+                            const res = await fetch(`${API_URL}/api/audio/stt`, { method: "POST", headers: { Authorization: `Bearer ${auth!.token}` }, body: form });
+                            if (res.ok) { const data = await res.json(); if (data.text) setInput(prev => prev + data.text); }
+                          } catch {}
+                        };
+                        recorder.start();
+                        setRecording(true);
+                        setTimeout(() => { if (recorder.state === "recording") recorder.stop(); }, 30000);
+                      } catch (err: any) {
+                        if (err?.name === "NotAllowedError") alert("Доступ к микрофону запрещён.");
+                        else if (err?.name === "NotFoundError") alert("Микрофон не найден.");
+                        else alert("Ошибка: " + (err?.message || ""));
+                      }
+                    })();
                   }}
                   className="rounded-lg bg-text/10 text-text/40 hover:text-accent hover:bg-accent/10 flex items-center justify-center transition-colors shrink-0"
                   style={{ width: 38, height: 38 }}
