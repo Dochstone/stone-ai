@@ -140,7 +140,7 @@ function ChatMockup() {
 function ProviderLogo({ children, color }: { children: React.ReactNode; color?: string }) {
   return (
     <span
-      className="shrink-0 mx-5 md:mx-8 inline-flex items-center gap-2 opacity-[0.6] hover:opacity-[0.85] transition-opacity duration-300 select-none cursor-default"
+      className="shrink-0 mx-5 md:mx-8 inline-flex items-center gap-2 opacity-100 hover:opacity-100 transition-opacity duration-300 select-none cursor-default"
       style={{ height: 40, color }}
     >
       {children}
