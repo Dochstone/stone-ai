@@ -261,6 +261,146 @@ function ChatDemo() {
   );
 }
 
+// ── Audio Card with real Web Audio API equalizer ──
+const BAR_COUNT = 32;
+const DEMO_TEXT = "Привет! Я Stone AI. Пятьдесят нейросетей в одном месте.";
+
+function AudioCard() {
+  const [playing, setPlaying] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const barsRef = useRef<HTMLDivElement>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const animRef = useRef<number>(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Idle breathing animation
+  const idleBars = Array.from({ length: BAR_COUNT }, (_, i) => {
+    const base = Math.sin(i * 0.4) * 0.3 + 0.5;
+    return base;
+  });
+
+  const drawBars = (data?: Uint8Array) => {
+    const el = barsRef.current;
+    if (!el) return;
+    const bars = el.children;
+    for (let i = 0; i < bars.length; i++) {
+      let h: number;
+      if (data) {
+        const idx = Math.floor((i / BAR_COUNT) * data.length);
+        h = data[idx] / 255;
+      } else {
+        // Idle: gentle sine wave breathing
+        const t = Date.now() / 1000;
+        h = Math.sin(t * 1.5 + i * 0.3) * 0.25 + 0.35;
+      }
+      (bars[i] as HTMLElement).style.height = `${Math.max(h * 100, 8)}%`;
+    }
+  };
+
+  // Idle animation loop
+  useEffect(() => {
+    if (playing) return;
+    let running = true;
+    const tick = () => {
+      if (!running) return;
+      drawBars();
+      animRef.current = requestAnimationFrame(tick);
+    };
+    tick();
+    return () => { running = false; cancelAnimationFrame(animRef.current); };
+  }, [playing]);
+
+  const handlePlay = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (playing) {
+      // Stop
+      audioRef.current?.pause();
+      setPlaying(false);
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Use pre-generated demo audio
+      const audio = new Audio("/demo/audio-demo.mp3");
+      audioRef.current = audio;
+
+      // Set up Web Audio API
+      const ctx = new AudioContext();
+      audioCtxRef.current = ctx;
+      const source = ctx.createMediaElementSource(audio);
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 128;
+      analyserRef.current = analyser;
+      source.connect(analyser);
+      analyser.connect(ctx.destination);
+
+      audio.onended = () => {
+        setPlaying(false);
+        cancelAnimationFrame(animRef.current);
+      };
+
+      await audio.play();
+      setPlaying(true);
+      setLoading(false);
+
+      // Real-time visualization
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      const draw = () => {
+        if (!audioRef.current || audioRef.current.paused) return;
+        analyser.getByteFrequencyData(dataArray);
+        drawBars(dataArray);
+        animRef.current = requestAnimationFrame(draw);
+      };
+      draw();
+    } catch {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div
+      className="bg-gradient-to-br from-indigo-600 via-blue-700 to-violet-800 rounded-2xl p-6 group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[220px] cursor-pointer"
+      onClick={handlePlay}
+    >
+      <span className="inline-block bg-white/15 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">10+ голосов</span>
+      <h3 className="font-bold text-lg text-white mb-2">AI Аудио</h3>
+      <p className="text-white/60 text-[13px] mb-3">Озвучка текста. Голосовой ввод. Мгновенно.</p>
+
+      {/* Play/Stop button */}
+      <div className="flex items-center gap-3 mb-4">
+        <button className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-colors ${playing ? "bg-white/30" : "bg-white/20 hover:bg-white/30"}`}>
+          {loading ? (
+            <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+          ) : playing ? (
+            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+          ) : (
+            <svg className="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          )}
+        </button>
+        <span className="text-[11px] text-white/50">
+          {loading ? "Загрузка..." : playing ? "Воспроизведение" : "Нажмите Play для демо"}
+        </span>
+      </div>
+
+      {/* Equalizer bars */}
+      <div ref={barsRef} className="flex items-end gap-[2px] h-12">
+        {Array.from({ length: BAR_COUNT }, (_, i) => (
+          <div
+            key={i}
+            className={`flex-1 rounded-full transition-colors duration-300 ${playing ? "bg-white/60" : "bg-white/20"}`}
+            style={{ height: "30%", transition: "height 60ms linear, background-color 300ms" }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function ToolCards() {
   return (
     <section className="py-20 md:py-28">
@@ -326,18 +466,8 @@ export default function ToolCards() {
             </div>
           </a>
 
-          {/* ── Audio — animated waveform ── */}
-          <a href="/audio" className="bg-gradient-to-br from-indigo-600 via-blue-700 to-violet-800 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[220px]">
-            <span className="inline-block bg-white/15 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">10+ голосов</span>
-            <h3 className="font-bold text-lg text-white mb-2">AI Аудио</h3>
-            <p className="text-white/60 text-[13px] mb-4">Озвучка текста. Голосовой ввод. Мгновенно.</p>
-            <div className="flex items-end gap-[2px] h-10">
-              {[3,5,8,4,7,9,6,4,7,5,8,3,6,9,5,7,4,8,6,3,5,7,4,6,8,5,3,7,4,9].map((h, i) => (
-                <div key={i} className="flex-1 rounded-full bg-white/20 group-hover:bg-white/45 transition-colors" style={{ height: `${h * 3.5}px`, animation: `waveBar 1.2s ${i * 0.04}s ease-in-out infinite alternate` }} />
-              ))}
-            </div>
-            <style>{`@keyframes waveBar { from { transform: scaleY(1); } to { transform: scaleY(0.3); } }`}</style>
-          </a>
+          {/* ── Audio — interactive equalizer ── */}
+          <AudioCard />
 
           {/* ── 3D — real rotating model ── */}
           <a href="/3d" className="bg-[#1C1C1E] rounded-2xl block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[220px]">
