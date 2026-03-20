@@ -128,9 +128,9 @@ export default function ModelGrid() {
                   {/* Name */}
                   <h3 className="font-bold text-sm mb-1.5">{model.name}</h3>
 
-                  {/* Description (2 lines) */}
-                  {model.description && (
-                    <p className="text-[12px] text-text/50 mb-2.5 line-clamp-2 leading-relaxed">{model.description}</p>
+                  {/* Description — full when closed, no clamp */}
+                  {model.description && !isOpen && (
+                    <p className="text-[12px] text-text/60 mb-2.5 leading-relaxed">{model.description}</p>
                   )}
 
                   {/* Badges */}
@@ -144,39 +144,42 @@ export default function ModelGrid() {
 
                   {/* Context */}
                   {model.context && (
-                    <span className="text-[10px] text-text/30 font-medium">{model.context} контекст</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] text-text/40 font-medium">{model.context} контекст</span>
+                      {!isOpen && <span className="text-[10px] text-accent font-semibold ml-auto">Подробнее →</span>}
+                    </div>
                   )}
                 </div>
 
                 {/* Expanded detail */}
                 {isOpen && (
-                  <div className="border-t border-text/5 px-5 py-4 space-y-3 animate-fadeIn">
+                  <div className="border-t-2 border-accent/20 bg-bg/50 px-5 py-5 space-y-4 animate-fadeIn rounded-b-2xl shadow-inner">
                     {model.description && (
-                      <p className="text-sm text-text/70 leading-relaxed">{model.description}</p>
+                      <p className="text-sm text-text leading-relaxed">{model.description}</p>
                     )}
 
                     {model.strengths && model.strengths.length > 0 && (
                       <div className="flex flex-wrap gap-1.5">
                         {model.strengths.map(s => (
-                          <span key={s} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-bg text-text/50 border border-text/[0.06]">{s}</span>
+                          <span key={s} className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-accent/10 text-accent border border-accent/15">{s}</span>
                         ))}
                       </div>
                     )}
 
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div>
-                        <span className="text-text/30 text-[10px] uppercase">Контекст</span>
-                        <p className="font-medium">{model.context || "—"}</p>
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                      <div className="bg-white rounded-xl p-3 border border-text/[0.06]">
+                        <span className="text-text/40 text-[10px] uppercase font-semibold">Контекст</span>
+                        <p className="font-bold text-text mt-0.5">{model.context || "—"}</p>
                       </div>
-                      <div>
-                        <span className="text-text/30 text-[10px] uppercase">Цена</span>
-                        <p className="font-medium text-accent">{formatPrice(model)}</p>
+                      <div className="bg-white rounded-xl p-3 border border-text/[0.06]">
+                        <span className="text-text/40 text-[10px] uppercase font-semibold">Цена</span>
+                        <p className="font-bold text-accent mt-0.5">{formatPrice(model)}</p>
                       </div>
                     </div>
 
                     <a
                       href={`/webchat?model=${model.id}`}
-                      className="block text-center bg-accent text-white px-4 py-2.5 min-h-[44px] rounded-xl text-sm font-bold hover:bg-accent/90 transition-all focus:outline-none focus:ring-2 focus:ring-accent/30"
+                      className="block text-center bg-accent text-white px-4 py-3 min-h-[48px] rounded-xl text-sm font-bold hover:bg-accent/90 transition-all focus:outline-none focus:ring-2 focus:ring-accent/30 shadow-md shadow-accent/20"
                       onClick={(e) => e.stopPropagation()}
                     >
                       Попробовать {model.name}
