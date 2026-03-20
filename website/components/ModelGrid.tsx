@@ -99,96 +99,100 @@ export default function ModelGrid() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filtered.map((model) => {
-            const isOpen = expanded === model.id;
-            const badges = modelBadges[model.id] || [];
+        <div className="space-y-4">
+          {(() => {
+            const cols = 4;
+            const rows: (typeof filtered)[] = [];
+            for (let i = 0; i < filtered.length; i += cols) rows.push(filtered.slice(i, i + cols));
 
-            return (
-              <div
-                key={model.id}
-                className={`bg-white rounded-2xl border transition-all cursor-pointer card-hover animate-fadeIn ${
-                  isOpen ? "border-accent/30 shadow-lg" : "border-text/5"
-                }`}
-                onClick={() => setExpanded(isOpen ? null : model.id)}
-              >
-                <div className="p-5">
-                  {/* Company + Price */}
-                  <div className="flex items-center justify-between mb-2">
-                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold ${companyColors[model.company] ?? "bg-gray-100 text-gray-700"}`}>
-                      {model.company}
-                    </span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                      model.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"
-                    }`}>
-                      {formatPrice(model)}
-                    </span>
+            return rows.map((row, ri) => {
+              const expandedInRow = row.find(m => m.id === expanded);
+              return (
+                <div key={ri}>
+                  {/* Row of cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {row.map((model) => {
+                      const isOpen = expanded === model.id;
+                      const badges = modelBadges[model.id] || [];
+                      return (
+                        <div
+                          key={model.id}
+                          className={`bg-white rounded-2xl border transition-all cursor-pointer card-hover animate-fadeIn ${
+                            isOpen ? "border-accent ring-2 ring-accent/20 shadow-lg" : "border-text/5"
+                          }`}
+                          onClick={() => setExpanded(isOpen ? null : model.id)}
+                        >
+                          <div className="p-5">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold ${companyColors[model.company] ?? "bg-gray-100 text-gray-700"}`}>{model.company}</span>
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${model.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"}`}>{formatPrice(model)}</span>
+                            </div>
+                            <h3 className="font-bold text-sm mb-1.5">{model.name}</h3>
+                            {model.description && (
+                              <p className="text-[12px] text-text/60 mb-2.5 leading-relaxed line-clamp-2">{model.description}</p>
+                            )}
+                            {badges.length > 0 && (
+                              <div className="flex gap-1 flex-wrap mb-2">
+                                {badges.map(b => (<span key={b.label} className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${b.color}`}>{b.label}</span>))}
+                              </div>
+                            )}
+                            <div className="flex items-center gap-1.5">
+                              {model.context && <span className="text-[10px] text-text/40 font-medium">{model.context}</span>}
+                              <span className="text-[10px] text-accent font-semibold ml-auto">{isOpen ? "Свернуть" : "Подробнее →"}</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
 
-                  {/* Name */}
-                  <h3 className="font-bold text-sm mb-1.5">{model.name}</h3>
-
-                  {/* Description — full when closed, no clamp */}
-                  {model.description && !isOpen && (
-                    <p className="text-[12px] text-text/60 mb-2.5 leading-relaxed">{model.description}</p>
-                  )}
-
-                  {/* Badges */}
-                  {badges.length > 0 && (
-                    <div className="flex gap-1 flex-wrap mb-2">
-                      {badges.map(b => (
-                        <span key={b.label} className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${b.color}`}>{b.label}</span>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Context */}
-                  {model.context && (
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] text-text/40 font-medium">{model.context} контекст</span>
-                      {!isOpen && <span className="text-[10px] text-accent font-semibold ml-auto">Подробнее →</span>}
+                  {/* Expanded panel BELOW the full row */}
+                  {expandedInRow && (
+                    <div className="mt-3 bg-white border-2 border-accent/20 rounded-2xl p-6 shadow-lg animate-fadeIn">
+                      <div className="flex flex-col md:flex-row gap-6">
+                        {/* Left: info */}
+                        <div className="flex-1 space-y-4">
+                          <div className="flex items-center gap-3">
+                            <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${companyColors[expandedInRow.company] ?? "bg-gray-100 text-gray-700"}`}>{expandedInRow.company}</span>
+                            <h3 className="font-extrabold text-lg">{expandedInRow.name}</h3>
+                            <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${expandedInRow.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"}`}>{formatPrice(expandedInRow)}</span>
+                          </div>
+                          <p className="text-sm text-text leading-relaxed">{expandedInRow.description}</p>
+                          {expandedInRow.strengths && (
+                            <div className="flex flex-wrap gap-2">
+                              {expandedInRow.strengths.map(s => (
+                                <span key={s} className="text-[11px] font-semibold px-3 py-1 rounded-lg bg-accent/10 text-accent border border-accent/15">{s}</span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        {/* Right: stats + CTA */}
+                        <div className="w-full md:w-64 shrink-0 space-y-3">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-bg rounded-xl p-3 border border-text/[0.06]">
+                              <span className="text-text/40 text-[10px] uppercase font-semibold">Контекст</span>
+                              <p className="font-bold text-text mt-0.5 text-sm">{expandedInRow.context || "—"}</p>
+                            </div>
+                            <div className="bg-bg rounded-xl p-3 border border-text/[0.06]">
+                              <span className="text-text/40 text-[10px] uppercase font-semibold">Цена</span>
+                              <p className="font-bold text-accent mt-0.5 text-sm">{formatPrice(expandedInRow)}</p>
+                            </div>
+                          </div>
+                          <a
+                            href={`/webchat?model=${expandedInRow.id}`}
+                            className="block text-center bg-accent text-white px-4 py-3 min-h-[48px] rounded-xl text-sm font-bold hover:bg-accent/90 transition-all focus:outline-none focus:ring-2 focus:ring-accent/30 shadow-md shadow-accent/20"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Попробовать {expandedInRow.name}
+                          </a>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
-
-                {/* Expanded detail */}
-                {isOpen && (
-                  <div className="border-t-2 border-accent/20 bg-bg/50 px-5 py-5 space-y-4 animate-fadeIn rounded-b-2xl shadow-inner">
-                    {model.description && (
-                      <p className="text-sm text-text leading-relaxed">{model.description}</p>
-                    )}
-
-                    {model.strengths && model.strengths.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {model.strengths.map(s => (
-                          <span key={s} className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-accent/10 text-accent border border-accent/15">{s}</span>
-                        ))}
-                      </div>
-                    )}
-
-                    <div className="grid grid-cols-2 gap-3 text-xs">
-                      <div className="bg-white rounded-xl p-3 border border-text/[0.06]">
-                        <span className="text-text/40 text-[10px] uppercase font-semibold">Контекст</span>
-                        <p className="font-bold text-text mt-0.5">{model.context || "—"}</p>
-                      </div>
-                      <div className="bg-white rounded-xl p-3 border border-text/[0.06]">
-                        <span className="text-text/40 text-[10px] uppercase font-semibold">Цена</span>
-                        <p className="font-bold text-accent mt-0.5">{formatPrice(model)}</p>
-                      </div>
-                    </div>
-
-                    <a
-                      href={`/webchat?model=${model.id}`}
-                      className="block text-center bg-accent text-white px-4 py-3 min-h-[48px] rounded-xl text-sm font-bold hover:bg-accent/90 transition-all focus:outline-none focus:ring-2 focus:ring-accent/30 shadow-md shadow-accent/20"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      Попробовать {model.name}
-                    </a>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+              );
+            });
+          })()}
         </div>
 
         <div className="text-center mt-10">
