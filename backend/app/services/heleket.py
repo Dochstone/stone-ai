@@ -30,16 +30,20 @@ HELEKET_API_BASE = "https://api.heleket.com/v1"
 def _heleket_sign(api_key: str, data: dict) -> str:
     """Generate MD5 signature for Heleket API.
 
-    Heleket uses: md5(json_body + api_key) — passed in 'sign' header.
+    Heleket uses: md5(base64(json_body) + api_key) — passed in 'sign' header.
     """
-    json_str = json.dumps(data, separators=(",", ":"), ensure_ascii=False)
-    raw = json_str + api_key
+    import base64
+    json_str = json.dumps(data)
+    b64 = base64.b64encode(json_str.encode("utf-8")).decode("utf-8")
+    raw = b64 + api_key
     return hashlib.md5(raw.encode("utf-8")).hexdigest()
 
 
 def verify_webhook_signature(body: bytes, received_sign: str, api_key: str) -> bool:
     """Verify Heleket webhook signature."""
-    raw = body.decode("utf-8") + api_key
+    import base64
+    b64 = base64.b64encode(body).decode("utf-8")
+    raw = b64 + api_key
     expected = hashlib.md5(raw.encode("utf-8")).hexdigest()
     return hmac.compare_digest(expected, received_sign)
 
@@ -87,6 +91,8 @@ async def create_invoice(
     if url_success:
         data["url_success"] = url_success
 
+    # Must use same json string for sign and body
+    body_str = json.dumps(data)
     sign = _heleket_sign(settings.heleket_api_key, data)
 
     headers = {
@@ -99,7 +105,7 @@ async def create_invoice(
         async with httpx.AsyncClient(timeout=15) as client:
             resp = await client.post(
                 f"{HELEKET_API_BASE}/payment",
-                json=data,
+                content=body_str.encode("utf-8"),
                 headers=headers,
             )
 
@@ -139,6 +145,7 @@ async def check_invoice_status(payment_uuid: str) -> dict | None:
         "uuid": payment_uuid,
     }
 
+    body_str = json.dumps(data)
     sign = _heleket_sign(settings.heleket_api_key, data)
 
     headers = {
@@ -151,7 +158,7 @@ async def check_invoice_status(payment_uuid: str) -> dict | None:
         async with httpx.AsyncClient(timeout=10) as client:
             resp = await client.post(
                 f"{HELEKET_API_BASE}/payment/info",
-                json=data,
+                content=body_str.encode("utf-8"),
                 headers=headers,
             )
 
