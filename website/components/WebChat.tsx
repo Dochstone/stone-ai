@@ -1056,22 +1056,6 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
               </svg>
             </a>
-            {/* Theme toggle */}
-            <button
-              onClick={() => {
-                const isDark = document.documentElement.classList.toggle("dark");
-                localStorage.setItem("theme", isDark ? "dark" : "light");
-              }}
-              className="text-text/25 hover:text-accent transition-colors"
-              title="Сменить тему"
-            >
-              <svg className="w-[18px] h-[18px] dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
-              </svg>
-              <svg className="w-[18px] h-[18px] hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
-              </svg>
-            </button>
           </div>
         </div>
 
@@ -1314,63 +1298,6 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                 </svg>
               </button>
 
-              {/* Mic button — STT */}
-              <button
-                onClick={async () => {
-                  // If already recording — stop
-                  if ((window as any).__stoneRecorder?.state === "recording") {
-                    (window as any).__stoneRecorder.stop();
-                    return;
-                  }
-                  try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    // Pick supported mimeType
-                    const mime = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm"
-                      : MediaRecorder.isTypeSupported("audio/mp4") ? "audio/mp4" : "";
-                    const recorder = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
-                    (window as any).__stoneRecorder = recorder;
-                    const chunks: Blob[] = [];
-                    recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
-                    recorder.onstop = async () => {
-                      (window as any).__stoneRecorder = null;
-                      stream.getTracks().forEach(t => t.stop());
-                      if (!chunks.length) return;
-                      const blob = new Blob(chunks, { type: mime || "audio/webm" });
-                      const form = new FormData();
-                      form.append("file", blob, "voice.webm");
-                      try {
-                        const res = await fetch(`${API_URL}/api/audio/stt`, {
-                          method: "POST",
-                          headers: { Authorization: `Bearer ${auth!.token}` },
-                          body: form,
-                        });
-                        if (res.ok) {
-                          const data = await res.json();
-                          if (data.text) setInput((prev) => prev + data.text);
-                        }
-                      } catch {}
-                    };
-                    recorder.start();
-                    setTimeout(() => { if (recorder.state === "recording") recorder.stop(); }, 30000);
-                  } catch (err: any) {
-                    if (err?.name === "NotAllowedError") {
-                      alert("Доступ к микрофону запрещён. Разрешите в настройках браузера.");
-                    } else if (err?.name === "NotFoundError") {
-                      alert("Микрофон не найден.");
-                    } else {
-                      alert("Ошибка записи: " + (err?.message || "неизвестная"));
-                    }
-                  }
-                }}
-                className={`flex items-center justify-center transition-colors shrink-0 ${(typeof window !== "undefined" && (window as any).__stoneRecorder?.state === "recording") ? "text-accent" : "text-text/25 hover:text-accent"}`}
-                style={{ width: 38, height: 38 }}
-                title="Голосовой ввод (нажмите ещё раз чтобы остановить)"
-              >
-                <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
-                </svg>
-              </button>
-
               {/* Textarea */}
               <textarea
                 ref={textareaRef}
@@ -1383,27 +1310,78 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                 style={{ fontSize: 14, padding: "10px 16px", maxHeight: 80, minHeight: 42 }}
               />
 
-              {/* Send or Stop button */}
+              {/* Send / Stop / Mic button — context-dependent */}
               {streaming ? (
                 <button
                   onClick={stopGeneration}
                   className="rounded-lg bg-text/70 text-white flex items-center justify-center hover:bg-text/90 transition-colors shrink-0"
-                  title="Остановить генерацию"
+                  title="Остановить"
                   style={{ width: 38, height: 38 }}
                 >
                   <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                     <rect x="6" y="6" width="12" height="12" rx="2" />
                   </svg>
                 </button>
-              ) : (
+              ) : (input.trim() || pendingFile) ? (
                 <button
                   onClick={sendMessage}
-                  disabled={videoGenerating || threedGenerating || (!input.trim() && !pendingFile)}
+                  disabled={videoGenerating || threedGenerating}
                   className="rounded-lg bg-accent text-white flex items-center justify-center hover:bg-accent/90 transition-colors disabled:opacity-30 shrink-0"
                   style={{ width: 38, height: 38 }}
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
+                  </svg>
+                </button>
+              ) : (
+                <button
+                  onClick={async () => {
+                    // Toggle recording
+                    if ((window as any).__stoneRecorder?.state === "recording") {
+                      (window as any).__stoneRecorder.stop();
+                      return;
+                    }
+                    try {
+                      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                      const mime = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm"
+                        : MediaRecorder.isTypeSupported("audio/mp4") ? "audio/mp4" : "";
+                      const recorder = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+                      (window as any).__stoneRecorder = recorder;
+                      const chunks: Blob[] = [];
+                      recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+                      recorder.onstop = async () => {
+                        (window as any).__stoneRecorder = null;
+                        stream.getTracks().forEach(t => t.stop());
+                        if (!chunks.length) return;
+                        const blob = new Blob(chunks, { type: mime || "audio/webm" });
+                        const form = new FormData();
+                        form.append("file", blob, "voice.webm");
+                        try {
+                          const res = await fetch(`${API_URL}/api/audio/stt`, {
+                            method: "POST",
+                            headers: { Authorization: `Bearer ${auth!.token}` },
+                            body: form,
+                          });
+                          if (res.ok) {
+                            const data = await res.json();
+                            if (data.text) setInput(prev => prev + data.text);
+                          }
+                        } catch {}
+                      };
+                      recorder.start();
+                      setTimeout(() => { if (recorder.state === "recording") recorder.stop(); }, 30000);
+                    } catch (err: any) {
+                      if (err?.name === "NotAllowedError") alert("Доступ к микрофону запрещён.");
+                      else if (err?.name === "NotFoundError") alert("Микрофон не найден.");
+                      else alert("Ошибка: " + (err?.message || ""));
+                    }
+                  }}
+                  className="rounded-lg bg-text/10 text-text/40 hover:text-accent hover:bg-accent/10 flex items-center justify-center transition-colors shrink-0"
+                  style={{ width: 38, height: 38 }}
+                  title="Голосовой ввод"
+                >
+                  <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
                   </svg>
                 </button>
               )}
