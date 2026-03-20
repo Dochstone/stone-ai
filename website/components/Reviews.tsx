@@ -50,8 +50,8 @@ export default function Reviews() {
                 &ldquo;{r.text}&rdquo;
               </p>
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${r.gradient} flex items-center justify-center text-white font-bold text-sm shadow-sm`}>
-                  {r.name[0]}
+                <div className={`w-11 h-11 rounded-full bg-gradient-to-br ${r.gradient} flex items-center justify-center text-white font-bold text-sm shadow-md ring-2 ring-white`}>
+                  {r.name.split(" ").map(w => w[0]).join("")}
                 </div>
                 <div>
                   <p className="font-bold text-sm">{r.name}</p>

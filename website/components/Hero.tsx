@@ -96,15 +96,21 @@ function ChatMockup() {
           {/* Chat area */}
           <div className="p-5 space-y-4 min-h-[220px]">
             {/* User message */}
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-2">
               <div className="bg-accent rounded-2xl rounded-br-md px-4 py-2.5 max-w-[75%]">
                 <p className="text-white text-[13px] leading-relaxed">Сравни React и Vue для стартапа из 3 человек</p>
+              </div>
+              <div className="w-7 h-7 rounded-full bg-accent/60 flex items-center justify-center shrink-0 mt-0.5">
+                <span className="text-[10px] font-bold text-white">U</span>
               </div>
             </div>
 
             {/* AI response */}
-            <div className="flex justify-start">
-              <div className="bg-[#2C2C2E] rounded-2xl rounded-bl-md px-4 py-3 max-w-[85%]">
+            <div className="flex justify-start gap-2">
+              <div className="w-7 h-7 rounded-full bg-teal flex items-center justify-center shrink-0 mt-0.5">
+                <span className="text-[9px] font-bold text-white">AI</span>
+              </div>
+              <div className="bg-[#2C2C2E] rounded-2xl rounded-bl-md px-4 py-3 max-w-[80%]">
                 <p className="text-white/80 text-[13px] leading-relaxed">
                   Для команды из 3 человек рекомендую <span className="text-teal font-semibold">React</span> — больше разработчиков на рынке, богатая экосистема.
                   <span className="text-white/40"> Vue проще в освоении, но при масштабировании React выигрывает за счёт TypeScript-интеграции и Next.js...</span>
