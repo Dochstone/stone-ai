@@ -23,7 +23,7 @@ function ImageCarousel({ images, interval = 3000 }: { images: string[]; interval
   return (
     <div className="relative w-full h-full overflow-hidden">
       {images.map((src, i) => (
-        <img key={src} src={src} alt="" className="absolute inset-0 w-full h-full object-cover transition-opacity duration-[1500ms]" style={{ opacity: i === idx ? 1 : 0 }} loading="lazy" />
+        <img key={src} src={src} alt="AI-сгенерированное изображение" className="absolute inset-0 w-full h-full object-cover transition-opacity duration-[1500ms]" style={{ opacity: i === idx ? 1 : 0 }} loading="lazy" />
       ))}
     </div>
   );

@@ -55,12 +55,14 @@ export default function ModelGrid() {
         </p>
 
         {/* Tabs */}
-        <div className="flex justify-center gap-1.5 mb-10 flex-wrap">
+        <div className="flex justify-center gap-1.5 mb-10 flex-wrap" role="tablist" aria-label="Категории моделей">
           {TABS.map((t) => (
             <button
               key={t.id}
+              role="tab"
+              aria-selected={tab === t.id}
               onClick={() => setTab(t.id)}
-              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors ${
+              className={`px-4 py-2.5 min-h-[44px] rounded-xl text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-accent/30 ${
                 tab === t.id
                   ? "bg-accent text-white shadow-sm"
                   : "bg-white text-text/40 hover:text-text/60 border border-text/[0.06]"

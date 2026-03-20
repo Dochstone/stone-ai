@@ -187,7 +187,7 @@ export default function TopUpPage() {
                 <button
                   key={a}
                   onClick={() => { setAmount(a); setCustomAmount(""); }}
-                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                  className={`px-4 py-2.5 min-h-[44px] rounded-xl text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-accent/30 ${
                     !customAmount && amount === a
                       ? "bg-accent text-white shadow-sm"
                       : "bg-bg text-text/50 hover:bg-text/5"
@@ -250,7 +250,7 @@ export default function TopUpPage() {
             <button
               onClick={createOrder}
               disabled={loading || effectiveAmount < 1}
-              className="w-full bg-accent text-white py-3.5 rounded-xl font-bold hover:bg-accent/90 transition-colors disabled:opacity-40"
+              className="w-full bg-accent text-white py-3.5 min-h-[48px] rounded-xl font-bold hover:bg-accent/90 transition-colors disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:ring-offset-2"
             >
               {loading ? "Создание заказа..." : `Оплатить $${(effectiveAmount || 0).toFixed(2)}`}
             </button>
