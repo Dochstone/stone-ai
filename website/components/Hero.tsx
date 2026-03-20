@@ -201,6 +201,46 @@ function TrustMarquee() {
         <svg className="w-7 h-7 shrink-0" viewBox="0 0 28 28"><rect x="2" y="5" width="24" height="18" rx="4" fill="currentColor"/><text x="14" y="18" textAnchor="middle" fill="#FAF9F5" fontSize="13" fontWeight="800" fontFamily="sans-serif">R</text></svg>
         <span style={{ fontSize: 20, fontWeight: 700 }}>Runway</span>
       </ProviderLogo>
+      {/* NVIDIA — green */}
+      <ProviderLogo color="#76b900">
+        <svg className="w-7 h-7 shrink-0" viewBox="0 0 28 28" fill="currentColor"><path d="M4 8h20v12H4z" fillOpacity="0.15"/><path d="M10 11v6l8-3z"/></svg>
+        <span style={{ fontSize: 20, fontWeight: 700 }}>NVIDIA</span>
+      </ProviderLogo>
+      {/* Cohere — emerald */}
+      <ProviderLogo color="#39d353">
+        <svg className="w-7 h-7 shrink-0" viewBox="0 0 28 28" fill="currentColor"><circle cx="14" cy="14" r="10" fillOpacity="0.3"/><circle cx="14" cy="14" r="5"/></svg>
+        <span style={{ fontSize: 20, fontWeight: 700 }}>Cohere</span>
+      </ProviderLogo>
+      {/* Alibaba/Qwen — orange */}
+      <ProviderLogo color="#ff6a00">
+        <svg className="w-7 h-7 shrink-0" viewBox="0 0 28 28" fill="currentColor"><path d="M14 4C8.5 4 4 8.5 4 14s4.5 10 10 10 10-4.5 10-10S19.5 4 14 4zm0 16c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6z" fillOpacity="0.5"/><circle cx="14" cy="14" r="3"/></svg>
+        <span style={{ fontSize: 20, fontWeight: 700 }}>Qwen</span>
+      </ProviderLogo>
+      {/* Perplexity — indigo */}
+      <ProviderLogo color="#6366f1">
+        <svg className="w-7 h-7 shrink-0" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="14" cy="12" r="7"/><path d="M14 19v5M10 26h8" strokeLinecap="round"/></svg>
+        <span style={{ fontSize: 20, fontWeight: 700 }}>Perplexity</span>
+      </ProviderLogo>
+      {/* Kuaishou/Kling — red */}
+      <ProviderLogo color="#e11d48">
+        <svg className="w-7 h-7 shrink-0" viewBox="0 0 28 28" fill="currentColor"><path d="M8 6l12 8-12 8z" fillOpacity="0.7"/></svg>
+        <span style={{ fontSize: 20, fontWeight: 700 }}>Kling</span>
+      </ProviderLogo>
+      {/* Pika — pink */}
+      <ProviderLogo color="#ec4899">
+        <svg className="w-7 h-7 shrink-0" viewBox="0 0 28 28" fill="currentColor"><path d="M14 4l3 8h8l-6.5 5 2.5 8L14 19l-7 6 2.5-8L3 12h8z"/></svg>
+        <span style={{ fontSize: 20, fontWeight: 700 }}>Pika</span>
+      </ProviderLogo>
+      {/* Luma — indigo */}
+      <ProviderLogo color="#4f46e5">
+        <svg className="w-7 h-7 shrink-0" viewBox="0 0 28 28" fill="currentColor"><circle cx="14" cy="14" r="11" fillOpacity="0.2"/><circle cx="14" cy="14" r="7" fillOpacity="0.4"/><circle cx="14" cy="14" r="3"/></svg>
+        <span style={{ fontSize: 20, fontWeight: 700 }}>Luma</span>
+      </ProviderLogo>
+      {/* Tripo3D — cyan */}
+      <ProviderLogo color="#06b6d4">
+        <svg className="w-7 h-7 shrink-0" viewBox="0 0 28 28" fill="currentColor"><path d="M14 4l10 6v8l-10 6-10-6V10z" fillOpacity="0.3"/><path d="M14 8l6 3.5v5L14 20l-6-3.5v-5z"/></svg>
+        <span style={{ fontSize: 20, fontWeight: 700 }}>Tripo3D</span>
+      </ProviderLogo>
     </>
   );
 
