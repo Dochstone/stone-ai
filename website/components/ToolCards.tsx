@@ -29,61 +29,51 @@ function ImageCarousel({ images, interval = 3000 }: { images: string[]; interval
   );
 }
 
-// ── Video carousel — 4 real AI-generated videos ──
+// ── Video player — single video, crossfade between sources ──
 const videoSources = ["/demo/video-1.mp4", "/demo/video-5.mp4", "/demo/video-2.mp4", "/demo/video-3.mp4", "/demo/video-4.mp4"];
 
 function VideoCarousel() {
-  const [idx, setIdx] = useState(0);
-  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  const [srcIdx, setSrcIdx] = useState(0);
+  const [show, setShow] = useState<"a" | "b">("a");
+  const refA = useRef<HTMLVideoElement>(null);
+  const refB = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
+    // Play initial
+    if (refA.current) { refA.current.src = videoSources[0]; refA.current.play().catch(() => {}); }
+
     const t = setInterval(() => {
-      setIdx(prev => {
+      setSrcIdx(prev => {
         const next = (prev + 1) % videoSources.length;
-        const nextVideo = videoRefs.current[next];
-        if (nextVideo) {
-          nextVideo.currentTime = 0;
-          nextVideo.play().catch(() => {});
-        }
-        setTimeout(() => {
-          const prevVideo = videoRefs.current[prev];
-          if (prevVideo) prevVideo.pause();
-        }, 1200);
+        setShow(s => {
+          const nextShow = s === "a" ? "b" : "a";
+          const target = nextShow === "a" ? refA.current : refB.current;
+          if (target) {
+            target.src = videoSources[next];
+            target.currentTime = 0;
+            target.play().catch(() => {});
+          }
+          // Pause old after crossfade
+          setTimeout(() => {
+            const old = s === "a" ? refA.current : refB.current;
+            if (old) old.pause();
+          }, 1500);
+          return nextShow;
+        });
         return next;
       });
-    }, 4000);
+    }, 5000);
     return () => clearInterval(t);
-  }, []);
-
-  useEffect(() => {
-    const first = videoRefs.current[0];
-    if (first) { first.currentTime = 0; first.play().catch(() => {}); }
-  }, []);
-
-  // Prevent playback past 4s (MiniMax loops first frames at end)
-  useEffect(() => {
-    const handlers = videoRefs.current.map((v, i) => {
-      if (!v) return null;
-      const onTime = () => { if (v.currentTime > 3.2) { v.currentTime = 0; } };
-      v.addEventListener("timeupdate", onTime);
-      return () => v.removeEventListener("timeupdate", onTime);
-    });
-    return () => handlers.forEach(h => h?.());
   }, []);
 
   return (
     <div className="absolute inset-0">
-      {videoSources.map((src, i) => (
-        <video
-          key={src}
-          ref={el => { videoRefs.current[i] = el; }}
-          src={src}
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
-          style={{ opacity: i === idx ? 0.65 : 0 }}
-        />
-      ))}
+      <video ref={refA} muted playsInline
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{ opacity: show === "a" ? 0.65 : 0, transition: "opacity 1.5s ease-in-out" }} />
+      <video ref={refB} muted playsInline
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{ opacity: show === "b" ? 0.65 : 0, transition: "opacity 1.5s ease-in-out" }} />
     </div>
   );
 }
