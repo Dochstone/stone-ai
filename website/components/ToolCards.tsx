@@ -30,7 +30,7 @@ function ImageCarousel({ images, interval = 3000 }: { images: string[]; interval
 }
 
 // ── Video carousel — 4 real AI-generated videos ──
-const videoSources = ["/demo/video-1.mp4", "/demo/video-2.mp4", "/demo/video-3.mp4", "/demo/video-4.mp4"];
+const videoSources = ["/demo/video-1.mp4", "/demo/video-5.mp4", "/demo/video-2.mp4", "/demo/video-3.mp4", "/demo/video-4.mp4"];
 
 function VideoCarousel() {
   const [idx, setIdx] = useState(0);
@@ -64,7 +64,7 @@ function VideoCarousel() {
   useEffect(() => {
     const handlers = videoRefs.current.map((v, i) => {
       if (!v) return null;
-      const onTime = () => { if (v.currentTime > 3.8) { v.currentTime = 0; } };
+      const onTime = () => { if (v.currentTime > 3.2) { v.currentTime = 0; } };
       v.addEventListener("timeupdate", onTime);
       return () => v.removeEventListener("timeupdate", onTime);
     });
