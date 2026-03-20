@@ -378,44 +378,63 @@ function Sidebar({
 
 // ─── Main WebChat ───
 
-// ── Voice Button — free Web Speech API + OpenAI TTS fallback ──
+// ── Voice Button — OpenAI TTS HD (Nova voice) ──
 function VoiceButton({ text, token }: { text: string; token: string }) {
-  const [state, setState] = useState<"idle" | "playing" | "paused">("idle");
-  const utterRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const [state, setState] = useState<"idle" | "loading" | "playing" | "paused">("idle");
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const play = () => {
-    // Stop any existing speech
-    window.speechSynthesis.cancel();
+  const play = async () => {
+    // Stop previous
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
 
-    const utter = new SpeechSynthesisUtterance(text.slice(0, 5000));
-    utter.lang = "ru-RU";
-    utter.rate = 1.0;
-    utter.pitch = 1.0;
-
-    // Pick a Russian voice if available
-    const voices = window.speechSynthesis.getVoices();
-    const ruVoice = voices.find(v => v.lang.startsWith("ru")) || voices.find(v => v.lang.startsWith("en"));
-    if (ruVoice) utter.voice = ruVoice;
-
-    utter.onend = () => setState("idle");
-    utter.onerror = () => setState("idle");
-    utterRef.current = utter;
-
-    window.speechSynthesis.speak(utter);
-    setState("playing");
+    setState("loading");
+    try {
+      const res = await fetch(`${API_URL}/api/audio/tts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ text: text.slice(0, 4096), voice: "nova" }),
+      });
+      if (!res.ok) {
+        // Fallback to browser TTS
+        const utter = new SpeechSynthesisUtterance(text.slice(0, 3000));
+        utter.lang = "ru-RU";
+        utter.rate = 1.0;
+        const voices = window.speechSynthesis.getVoices();
+        const ruVoice = voices.find(v => v.lang.startsWith("ru"));
+        if (ruVoice) utter.voice = ruVoice;
+        utter.onend = () => setState("idle");
+        window.speechSynthesis.speak(utter);
+        setState("playing");
+        return;
+      }
+      const data = await res.json();
+      if (data.audio_b64) {
+        const audio = new Audio(`data:audio/mpeg;base64,${data.audio_b64}`);
+        audioRef.current = audio;
+        audio.onended = () => setState("idle");
+        audio.onerror = () => setState("idle");
+        await audio.play();
+        setState("playing");
+      } else {
+        setState("idle");
+      }
+    } catch {
+      setState("idle");
+    }
   };
 
   const pause = () => {
-    window.speechSynthesis.pause();
+    audioRef.current?.pause();
     setState("paused");
   };
 
   const resume = () => {
-    window.speechSynthesis.resume();
+    audioRef.current?.play();
     setState("playing");
   };
 
   const stop = () => {
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current.currentTime = 0; audioRef.current = null; }
     window.speechSynthesis.cancel();
     setState("idle");
   };
@@ -429,6 +448,12 @@ function VoiceButton({ text, token }: { text: string; token: string }) {
           </svg>
           <span className="text-[10px]">Озвучить</span>
         </button>
+      )}
+      {state === "loading" && (
+        <div className="flex items-center gap-1 text-accent">
+          <div className="w-3.5 h-3.5 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
+          <span className="text-[10px]">Загрузка...</span>
+        </div>
       )}
       {state === "playing" && (
         <>
