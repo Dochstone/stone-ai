@@ -1319,7 +1319,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                 value={input}
                 onChange={handleInputChange}
                 onKeyDown={handleKey}
-                placeholder={pendingFile ? "Добавьте вопрос к файлу..." : isVideoModel ? `Опишите видео... (~$${formatPrice(model!).replace('/vid','')})` : is3DModel ? `Опишите 3D-модель или загрузите фото... (~$${formatPrice(model!).replace('/model','')})` : "Написать сообщение... (Shift+Enter — новая строка)"}
+                placeholder={pendingFile ? "Добавьте вопрос к файлу..." : isVideoModel ? `Опишите видео... (~$${formatPrice(model!).replace('/vid','')})` : is3DModel ? `Опишите 3D-модель или загрузите фото... (~$${formatPrice(model!).replace('/model','')})` : "Написать сообщение..."}
                 rows={1}
                 className="flex-1 bg-transparent resize-none focus:outline-none min-w-0 leading-snug placeholder:text-text/20"
                 style={{ fontSize: 14, padding: "10px 16px", maxHeight: 80, minHeight: 42 }}
