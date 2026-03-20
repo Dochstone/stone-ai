@@ -124,91 +124,90 @@ export default function ModelCatalog() {
         {filtered.length} {filtered.length === 1 ? "модель" : filtered.length < 5 ? "модели" : "моделей"}
       </p>
 
-      {/* Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {filtered.map((model) => {
-          const isExpanded = expanded === model.id;
-          return (
-            <div
-              key={model.id}
-              className={`bg-white rounded-2xl border transition-all cursor-pointer card-hover ${
-                isExpanded ? "border-accent/30 shadow-lg" : "border-text/5"
-              }`}
-              onClick={() => setExpanded(isExpanded ? null : model.id)}
-            >
-              <div className="p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold ${companyColors[model.company] ?? "bg-gray-100 text-gray-700"}`}>
-                    {model.company}
-                  </span>
-                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                    model.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"
-                  }`}>
-                    {model.tier === "free" ? "FREE" : formatPrice(model)}
-                  </span>
+      {/* Grid — rows of 4 with expand below row */}
+      <div className="space-y-4">
+        {(() => {
+          const cols = 4;
+          const rows: typeof filtered[] = [];
+          for (let i = 0; i < filtered.length; i += cols) rows.push(filtered.slice(i, i + cols));
+
+          return rows.map((row, ri) => {
+            const exp = row.find(m => m.id === expanded);
+            return (
+              <div key={ri}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {row.map((model) => {
+                    const isOpen = expanded === model.id;
+                    return (
+                      <div
+                        key={model.id}
+                        className={`bg-white rounded-2xl border transition-all cursor-pointer card-hover ${
+                          isOpen ? "border-accent ring-2 ring-accent/20 shadow-lg" : "border-text/5"
+                        }`}
+                        onClick={() => setExpanded(isOpen ? null : model.id)}
+                      >
+                        <div className="p-5">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold ${companyColors[model.company] ?? "bg-gray-100 text-gray-700"}`}>{model.company}</span>
+                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${model.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"}`}>{model.tier === "free" ? "FREE" : formatPrice(model)}</span>
+                          </div>
+                          <h3 className="font-bold text-sm mb-1.5">{model.name}</h3>
+                          {model.description && <p className="text-[12px] text-text/60 mb-2.5 leading-relaxed line-clamp-2">{model.description}</p>}
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] text-text/40">{categoryLabels[model.category]}</span>
+                            {model.context && <span className="text-[10px] text-text/30">{model.context}</span>}
+                            <span className="text-[10px] text-accent font-semibold ml-auto">{isOpen ? "Свернуть" : "Подробнее →"}</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
 
-                <h3 className="font-bold mb-1.5">{model.name}</h3>
-
-                {model.description && (
-                  <p className="text-xs text-text/50 mb-3 line-clamp-2">{model.description}</p>
-                )}
-
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[10px] text-text/30 font-medium">{categoryLabels[model.category]}</span>
-                  {model.context && <span className="text-[10px] text-text/20">{model.context}</span>}
-                </div>
-              </div>
-
-              {/* Expanded details */}
-              {isExpanded && (
-                <div className="border-t border-text/5 px-5 py-4 space-y-4">
-                  {model.description && (
-                    <p className="text-sm text-text/70 leading-relaxed">{model.description}</p>
-                  )}
-
-                  {/* Strengths */}
-                  {model.strengths && model.strengths.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5">
-                      {model.strengths.map((s) => (
-                        <span key={s} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-bg text-text/50 border border-text/[0.06]">
-                          {s}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div>
-                      <span className="text-text/30 text-[10px] uppercase">Категория</span>
-                      <p className="font-medium text-xs">{categoryLabels[model.category]}</p>
-                    </div>
-                    <div>
-                      <span className="text-text/30 text-[10px] uppercase">Контекст</span>
-                      <p className="font-medium text-xs">{model.context || "—"}</p>
-                    </div>
-                    <div>
-                      <span className="text-text/30 text-[10px] uppercase">Цена</span>
-                      <p className="font-medium text-xs text-accent">{formatPrice(model)}</p>
-                    </div>
-                    <div>
-                      <span className="text-text/30 text-[10px] uppercase">Тариф</span>
-                      <p className="font-medium text-xs">{model.tier === "free" ? "Бесплатный (15/день)" : "Per-token"}</p>
+                {exp && (
+                  <div className="mt-3 bg-white border-2 border-accent/20 rounded-2xl p-6 shadow-lg animate-fadeIn">
+                    <div className="flex flex-col md:flex-row gap-6">
+                      <div className="flex-1 space-y-4">
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${companyColors[exp.company] ?? "bg-gray-100 text-gray-700"}`}>{exp.company}</span>
+                          <h3 className="font-extrabold text-lg">{exp.name}</h3>
+                          <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${exp.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"}`}>{formatPrice(exp)}</span>
+                        </div>
+                        <p className="text-sm text-text leading-relaxed">{exp.description}</p>
+                        {exp.strengths && (
+                          <div className="flex flex-wrap gap-2">
+                            {exp.strengths.map(s => (
+                              <span key={s} className="text-[11px] font-semibold px-3 py-1 rounded-lg bg-accent/10 text-accent border border-accent/15">{s}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <div className="w-full md:w-64 shrink-0 space-y-3">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="bg-bg rounded-xl p-3 border border-text/[0.06]">
+                            <span className="text-text/40 text-[10px] uppercase font-semibold">Контекст</span>
+                            <p className="font-bold text-text mt-0.5 text-sm">{exp.context || "—"}</p>
+                          </div>
+                          <div className="bg-bg rounded-xl p-3 border border-text/[0.06]">
+                            <span className="text-text/40 text-[10px] uppercase font-semibold">Цена</span>
+                            <p className="font-bold text-accent mt-0.5 text-sm">{formatPrice(exp)}</p>
+                          </div>
+                        </div>
+                        <a
+                          href={`/webchat?model=${exp.id}`}
+                          className="block text-center bg-accent text-white px-4 py-3 min-h-[48px] rounded-xl text-sm font-bold hover:bg-accent/90 transition-all shadow-md shadow-accent/20"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          Попробовать {exp.name}
+                        </a>
+                      </div>
                     </div>
                   </div>
-
-                  <a
-                    href={`/webchat?model=${model.id}`}
-                    className="block text-center bg-accent text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-accent/90 transition-all"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    Попробовать {model.name}
-                  </a>
-                </div>
-              )}
-            </div>
-          );
-        })}
+                )}
+              </div>
+            );
+          });
+        })()}
       </div>
     </>
   );
