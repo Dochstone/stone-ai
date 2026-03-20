@@ -1046,7 +1046,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
             <a href="/topup" className="text-[11px] sm:text-xs font-bold text-accent hover:underline whitespace-nowrap">
               ${auth.balanceUsd.toFixed(2)}
             </a>
-            <a href="/" className="text-text/25 hover:text-accent transition-colors hidden md:block" title="На главную">
+            <a href="/" className="text-text/25 hover:text-accent transition-colors" title="На главную">
               <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955a1.126 1.126 0 011.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
               </svg>
@@ -1299,14 +1299,25 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
               {/* Mic button — STT */}
               <button
                 onClick={async () => {
+                  // If already recording — stop
+                  if ((window as any).__stoneRecorder?.state === "recording") {
+                    (window as any).__stoneRecorder.stop();
+                    return;
+                  }
                   try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    const recorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+                    // Pick supported mimeType
+                    const mime = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm"
+                      : MediaRecorder.isTypeSupported("audio/mp4") ? "audio/mp4" : "";
+                    const recorder = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+                    (window as any).__stoneRecorder = recorder;
                     const chunks: Blob[] = [];
-                    recorder.ondataavailable = (e) => chunks.push(e.data);
+                    recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
                     recorder.onstop = async () => {
+                      (window as any).__stoneRecorder = null;
                       stream.getTracks().forEach(t => t.stop());
-                      const blob = new Blob(chunks, { type: "audio/webm" });
+                      if (!chunks.length) return;
+                      const blob = new Blob(chunks, { type: mime || "audio/webm" });
                       const form = new FormData();
                       form.append("file", blob, "voice.webm");
                       try {
@@ -1322,24 +1333,18 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                       } catch {}
                     };
                     recorder.start();
-                    // Stop after 30 seconds max
                     setTimeout(() => { if (recorder.state === "recording") recorder.stop(); }, 30000);
-                    // Visual feedback — stop on second click
-                    const btn = document.activeElement as HTMLButtonElement;
-                    if (btn) {
-                      btn.style.color = "#D97757";
-                      const stopHandler = () => { if (recorder.state === "recording") recorder.stop(); btn.style.color = ""; btn.removeEventListener("click", stopHandler); };
-                      setTimeout(() => btn.addEventListener("click", stopHandler), 100);
-                    }
                   } catch (err: any) {
                     if (err?.name === "NotAllowedError") {
                       alert("Доступ к микрофону запрещён. Разрешите в настройках браузера.");
                     } else if (err?.name === "NotFoundError") {
                       alert("Микрофон не найден.");
+                    } else {
+                      alert("Ошибка записи: " + (err?.message || "неизвестная"));
                     }
                   }
                 }}
-                className="flex items-center justify-center text-text/25 hover:text-accent transition-colors shrink-0"
+                className={`flex items-center justify-center transition-colors shrink-0 ${(typeof window !== "undefined" && (window as any).__stoneRecorder?.state === "recording") ? "text-accent" : "text-text/25 hover:text-accent"}`}
                 style={{ width: 38, height: 38 }}
                 title="Голосовой ввод (нажмите ещё раз чтобы остановить)"
               >

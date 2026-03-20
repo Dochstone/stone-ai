@@ -36,9 +36,11 @@ body {
 .dark .text-text\/25 { color: rgba(232,228,221,0.4) !important; }
 .dark .text-text\/20 { color: rgba(232,228,221,0.35) !important; }
 
-/* Respect reduced motion preference */
+/* Respect reduced motion preference (keep marquee/ticker running) */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *:not(.animate-marquee):not(.animate-ticker),
+  *:not(.animate-marquee):not(.animate-ticker)::before,
+  *:not(.animate-marquee):not(.animate-ticker)::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

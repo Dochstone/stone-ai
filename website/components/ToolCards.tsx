@@ -23,7 +23,8 @@ function ImageCarousel({ images, interval = 3000 }: { images: string[]; interval
   return (
     <div className="relative w-full h-full overflow-hidden">
       {images.map((src, i) => (
-        <img key={src} src={src} alt="AI-сгенерированное изображение" className="absolute inset-0 w-full h-full object-cover transition-opacity duration-[1500ms]" style={{ opacity: i === idx ? 1 : 0 }} loading="lazy" />
+        <img key={src} src={src} alt="AI-сгенерированное изображение" className="absolute inset-0 w-full h-full object-cover"
+          style={{ opacity: i === idx ? 1 : 0, transition: "opacity 1s ease-in-out" }} loading="lazy" />
       ))}
     </div>
   );
@@ -33,47 +34,59 @@ function ImageCarousel({ images, interval = 3000 }: { images: string[]; interval
 const videoSources = ["/demo/video-1.mp4", "/demo/video-5.mp4", "/demo/video-2.mp4", "/demo/video-3.mp4", "/demo/video-4.mp4"];
 
 function VideoCarousel() {
-  const [srcIdx, setSrcIdx] = useState(0);
-  const [show, setShow] = useState<"a" | "b">("a");
+  const [active, setActive] = useState(0);
   const refA = useRef<HTMLVideoElement>(null);
   const refB = useRef<HTMLVideoElement>(null);
+  const idxRef = useRef(0);
+  const slotRef = useRef<"a" | "b">("a");
 
   useEffect(() => {
-    // Play initial
-    if (refA.current) { refA.current.src = videoSources[0]; refA.current.play().catch(() => {}); }
+    const a = refA.current, b = refB.current;
+    if (!a || !b) return;
+
+    // Init: slot A plays first video
+    a.src = videoSources[0];
+    a.load();
+    a.play().catch(() => {});
+
+    // Preload slot B with second video
+    b.src = videoSources[1];
+    b.load();
 
     const t = setInterval(() => {
-      setSrcIdx(prev => {
-        const next = (prev + 1) % videoSources.length;
-        setShow(s => {
-          const nextShow = s === "a" ? "b" : "a";
-          const target = nextShow === "a" ? refA.current : refB.current;
-          if (target) {
-            target.src = videoSources[next];
-            target.currentTime = 0;
-            target.play().catch(() => {});
-          }
-          // Pause old after crossfade
-          setTimeout(() => {
-            const old = s === "a" ? refA.current : refB.current;
-            if (old) old.pause();
-          }, 1500);
-          return nextShow;
-        });
-        return next;
-      });
+      idxRef.current = (idxRef.current + 1) % videoSources.length;
+      const nextSlot = slotRef.current === "a" ? "b" : "a";
+      const nextEl = nextSlot === "a" ? a : b;
+      const oldEl = slotRef.current === "a" ? a : b;
+
+      // Start next (already preloaded)
+      nextEl.currentTime = 0;
+      nextEl.play().catch(() => {});
+      slotRef.current = nextSlot;
+      setActive(prev => prev + 1); // trigger re-render
+
+      // After crossfade, pause old and preload next-next
+      setTimeout(() => {
+        oldEl.pause();
+        const preloadIdx = (idxRef.current + 1) % videoSources.length;
+        oldEl.src = videoSources[preloadIdx];
+        oldEl.load();
+      }, 1500);
     }, 5000);
+
     return () => clearInterval(t);
   }, []);
 
+  const showA = slotRef.current === "a";
+
   return (
     <div className="absolute inset-0">
-      <video ref={refA} muted playsInline
+      <video ref={refA} muted playsInline preload="auto"
         className="absolute inset-0 w-full h-full object-cover"
-        style={{ opacity: show === "a" ? 0.65 : 0, transition: "opacity 1.5s ease-in-out" }} />
-      <video ref={refB} muted playsInline
+        style={{ opacity: showA ? 0.65 : 0, transition: "opacity 1.2s ease-in-out" }} />
+      <video ref={refB} muted playsInline preload="auto"
         className="absolute inset-0 w-full h-full object-cover"
-        style={{ opacity: show === "b" ? 0.65 : 0, transition: "opacity 1.5s ease-in-out" }} />
+        style={{ opacity: showA ? 0 : 0.65, transition: "opacity 1.2s ease-in-out" }} />
     </div>
   );
 }
