@@ -195,10 +195,8 @@ function MessageContent({ content, role, selectedModel }: { content: string; rol
 
 const SUGGESTION_CARDS = [
   { icon: "💻", title: "Напиши код на Python", subtitle: "Алгоритмы, скрипты, API", modelId: "devstral" },
-  { icon: "📄", title: "Проанализируй документ", subtitle: "PDF, текст, данные", modelId: "claude-haiku-4.5" },
   { icon: "🎨", title: "Сгенерируй картинку", subtitle: "Nano Banana Pro, GPT-5 Image", modelId: "nano-banana-pro" },
   { icon: "🎬", title: "Сгенерируй видео", subtitle: "Kling v2, Runway, Pika", modelId: "kling-v2" },
-  { icon: "💡", title: "Объясни простыми словами", subtitle: "Любая тема понятно", modelId: "gpt-4o-mini" },
   { icon: "🔍", title: "Найди в интернете", subtitle: "Perplexity Sonar, актуальные данные", modelId: "perplexity-sonar" },
 ];
 
@@ -216,7 +214,7 @@ function WelcomeScreen({ onSuggestion }: { onSuggestion: (text: string, modelId:
           <p className="text-sm text-text/40">50+ AI-моделей в одном месте. Выберите модель и начните диалог.</p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 max-w-lg mx-auto" style={{ gap: 12 }}>
+        <div className="grid grid-cols-2 max-w-md mx-auto" style={{ gap: 12 }}>
           {SUGGESTION_CARDS.map((card) => (
             <button
               key={card.title}
