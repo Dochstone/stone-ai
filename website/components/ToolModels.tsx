@@ -40,7 +40,7 @@ export default function ToolModels({
   const models = modelIds.map((id) => MODELS.find((m) => m.id === id)!).filter(Boolean);
 
   return (
-    <section className="py-20 md:py-28 bg-white">
+    <section className="py-20 md:py-28 bg-bg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-2xl md:text-3xl font-extrabold text-center mb-3">
           {title}

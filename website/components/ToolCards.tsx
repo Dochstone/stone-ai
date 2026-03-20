@@ -415,7 +415,7 @@ export default function ToolCards() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-auto">
 
           {/* ── AI Chat — live typing conversation ── */}
-          <a href="/chat" className="sm:col-span-2 bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[300px]">
+          <a href="/chat" className="sm:col-span-2 bg-[var(--color-card-dark)] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[300px]">
             <div className="relative z-10 mb-4">
               <span className="inline-block bg-accent/20 text-accent text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">50+ моделей</span>
               <h3 className="font-bold text-xl text-white mb-1">AI Чат</h3>
@@ -427,10 +427,10 @@ export default function ToolCards() {
           </a>
 
           {/* ── Images — full-bleed cycling gallery ── */}
-          <a href="/images" className="bg-[#1C1C1E] rounded-2xl block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[300px]">
+          <a href="/images" className="bg-[var(--color-card-dark)] rounded-2xl block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[300px]">
             <div className="absolute inset-0">
               <ImageCarousel images={allImages} interval={2000} />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#1C1C1E] via-[#1C1C1E]/20 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-card-dark)] via-[var(--color-card-dark)]/20 to-transparent" />
             </div>
             <div className="relative z-10 p-6 flex flex-col justify-end h-full">
               <span className="inline-block bg-pink-500/30 text-pink-300 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3 w-fit">24 стиля</span>
@@ -440,7 +440,7 @@ export default function ToolCards() {
           </a>
 
           {/* ── Search — live multi-source search, FIXED HEIGHT ── */}
-          <a href="/search" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative" style={{ height: 320 }}>
+          <a href="/search" className="bg-[var(--color-card-dark)] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative" style={{ height: 320 }}>
             <span className="inline-block bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">Realtime</span>
             <h3 className="font-bold text-lg text-white mb-1">AI Поиск</h3>
             <p className="text-white/50 text-[13px] mb-4">Ищет одновременно в Google, Bing, News, Scholar</p>
@@ -448,7 +448,7 @@ export default function ToolCards() {
           </a>
 
           {/* ── Documents — live PDF analysis, FIXED HEIGHT ── */}
-          <a href="/documents" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative" style={{ height: 320 }}>
+          <a href="/documents" className="bg-[var(--color-card-dark)] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative" style={{ height: 320 }}>
             <span className="inline-block bg-amber-500/20 text-amber-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">PDF, фото</span>
             <h3 className="font-bold text-lg text-white mb-1">Анализ документов</h3>
             <p className="text-white/50 text-[13px] mb-4">AI читает документ и находит ключевые пункты</p>
@@ -456,9 +456,9 @@ export default function ToolCards() {
           </a>
 
           {/* ── Video — cycling real videos ── */}
-          <a href="/video" className="bg-[#1C1C1E] rounded-2xl block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[220px]">
+          <a href="/video" className="bg-[var(--color-card-dark)] rounded-2xl block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[220px]">
             <VideoCarousel />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#1C1C1E] via-[#1C1C1E]/20 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-card-dark)] via-[var(--color-card-dark)]/20 to-transparent pointer-events-none" />
             <div className="relative z-10 p-6 flex flex-col justify-end h-full pointer-events-none">
               <span className="inline-block bg-red-500/30 text-red-300 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-2 w-fit">5 моделей</span>
               <h3 className="font-bold text-lg text-white mb-1">AI Видео</h3>
@@ -470,9 +470,9 @@ export default function ToolCards() {
           <AudioCard />
 
           {/* ── 3D — real rotating model ── */}
-          <a href="/3d" className="bg-[#1C1C1E] rounded-2xl block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[220px]">
+          <a href="/3d" className="bg-[var(--color-card-dark)] rounded-2xl block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[220px]">
             <div className="absolute inset-0" dangerouslySetInnerHTML={{ __html: `<model-viewer src="/demo/model-demo.glb" auto-rotate camera-controls touch-action="pan-y" interaction-prompt="none" style="width:100%;height:100%;background:#1C1C1E" shadow-intensity="0.5" exposure="1.5"></model-viewer>` }} />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#1C1C1E] via-transparent to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-card-dark)] via-transparent to-transparent pointer-events-none" />
             <div className="relative z-10 p-6 flex flex-col justify-end h-full pointer-events-none">
               <span className="inline-block bg-cyan-500/30 text-cyan-300 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-2 w-fit">Tripo + TripoSR</span>
               <h3 className="font-bold text-lg text-white mb-1">3D Модели</h3>
@@ -481,7 +481,7 @@ export default function ToolCards() {
           </a>
 
           {/* ── Deep Analysis — live reasoning chain, FIXED HEIGHT ── */}
-          <a href="/chat" className="bg-[#1C1C1E] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative" style={{ height: 320 }}>
+          <a href="/chat" className="bg-[var(--color-card-dark)] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative" style={{ height: 320 }}>
             <span className="inline-block bg-violet-500/20 text-violet-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">o3 + DeepSeek R1</span>
             <h3 className="font-bold text-lg text-white mb-1">Глубокий анализ</h3>
             <p className="text-white/50 text-[13px] mb-4">AI рассуждает пошагово, показывая ход мыслей</p>

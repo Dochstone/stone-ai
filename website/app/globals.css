@@ -6,12 +6,14 @@
   --color-bg: #FAF9F5;
   --color-text: #1A1916;
   --color-teal-light: #E6F7F4;
+  --color-card-dark: #1C1C1E;
 }
 
 :root.dark {
   --color-bg: #0C0C10;
   --color-text: #E8E4DD;
   --color-teal-light: #0E9A8320;
+  --color-card-dark: #1E1E22;
 }
 
 html {

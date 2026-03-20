@@ -55,11 +55,21 @@ export default function ModelGrid() {
         </p>
 
         {/* Tabs */}
-        <div className="flex justify-center gap-1.5 mb-10 flex-wrap" role="tablist" aria-label="Категории моделей">
+        <div
+          className="flex justify-center gap-1.5 mb-10 flex-wrap"
+          role="tablist"
+          aria-label="Категории моделей"
+          onKeyDown={(e) => {
+            const idx = TABS.findIndex(t => t.id === tab);
+            if (e.key === "ArrowRight") { e.preventDefault(); setTab(TABS[(idx + 1) % TABS.length].id); }
+            if (e.key === "ArrowLeft") { e.preventDefault(); setTab(TABS[(idx - 1 + TABS.length) % TABS.length].id); }
+          }}
+        >
           {TABS.map((t) => (
             <button
               key={t.id}
               role="tab"
+              tabIndex={tab === t.id ? 0 : -1}
               aria-selected={tab === t.id}
               onClick={() => setTab(t.id)}
               className={`px-4 py-2.5 min-h-[44px] rounded-xl text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-accent/30 ${
