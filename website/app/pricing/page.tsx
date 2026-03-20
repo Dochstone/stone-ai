@@ -9,9 +9,24 @@ export const metadata: Metadata = {
     "Прозрачные цены на 50 AI-моделей. Платите только за использованные токены. От $0.24 за 1M. Калькулятор стоимости.",
 };
 
+import Breadcrumbs from "@/components/Breadcrumbs";
+
+const pricingJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: "Stone AI",
+  description: "50+ AI-моделей. Оплата за токены.",
+  offers: [
+    { "@type": "Offer", name: "Free", price: "0", priceCurrency: "USD", description: "15 запросов в день, 5 моделей" },
+    { "@type": "Offer", name: "Per-token", price: "0.24", priceCurrency: "USD", description: "От $0.24 за 1M токенов, 50+ моделей" },
+  ],
+};
+
 export default function PricingPage() {
   return (
-    <div className="pt-28 pb-20 min-h-screen">
+    <div className="pb-20 min-h-screen">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingJsonLd) }} />
+      <Breadcrumbs items={[{ label: "Цены" }]} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <div className="inline-block bg-accent/10 text-accent px-4 py-1.5 rounded-full text-sm font-semibold mb-4">

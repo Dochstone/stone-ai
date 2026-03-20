@@ -150,6 +150,23 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
               />
             </div>
 
+            {mode === "register" && password.length > 0 && (
+              <div className="flex items-center gap-2">
+                <div className="flex-1 flex gap-1">
+                  {[1,2,3,4].map(i => (
+                    <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${
+                      password.length >= i * 3
+                        ? password.length >= 12 ? "bg-emerald-400" : password.length >= 8 ? "bg-amber-400" : "bg-red-400"
+                        : "bg-text/10"
+                    }`} />
+                  ))}
+                </div>
+                <span className="text-[10px] text-text/40">
+                  {password.length < 8 ? "Слабый" : password.length < 12 ? "Средний" : "Сильный"}
+                </span>
+              </div>
+            )}
+
             {error && (
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl px-4 py-2.5" role="alert">
                 <p className="text-red-600 dark:text-red-400 text-xs font-medium">{error}</p>

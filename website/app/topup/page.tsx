@@ -6,6 +6,13 @@ export const metadata: Metadata = {
   description: "Пополните баланс Stone AI: карты, СБП, USDT, BTC, ETH. От $1. Без VPN.",
 };
 
+import Breadcrumbs from "@/components/Breadcrumbs";
+
 export default function Page() {
-  return <TopUpPage />;
+  return (
+    <>
+      <Breadcrumbs items={[{ label: "Пополнение" }]} />
+      <TopUpPage />
+    </>
+  );
 }

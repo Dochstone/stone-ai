@@ -7,9 +7,12 @@ export const metadata: Metadata = {
     "Каталог из 50 AI-моделей: GPT-5, Claude Opus, Gemini Pro, DeepSeek, Flux и другие. Цены от $0.24 за 1M токенов. Без VPN, прямо в Telegram.",
 };
 
+import Breadcrumbs from "@/components/Breadcrumbs";
+
 export default function ModelsPage() {
   return (
-    <div className="pt-28 pb-20 min-h-screen">
+    <div className="pb-20 min-h-screen">
+      <Breadcrumbs items={[{ label: "Модели" }]} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <div className="inline-block bg-accent/10 text-accent px-4 py-1.5 rounded-full text-sm font-semibold mb-4">

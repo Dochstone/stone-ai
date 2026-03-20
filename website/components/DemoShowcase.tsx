@@ -1,5 +1,20 @@
 "use client";
 
+import { useRef, useState, useEffect } from "react";
+
+function LazyLoad({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } }, { rootMargin: "200px" });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  return <div ref={ref} className={className}>{visible ? children : <div className="w-full h-full bg-bg/50 animate-pulse rounded-xl" />}</div>;
+}
+
 export default function DemoShowcase() {
   return (
     <section className="py-20 md:py-28">
@@ -55,16 +70,11 @@ export default function DemoShowcase() {
 
         {/* Video + 3D + Audio row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {/* Video — real playable video */}
+          {/* Video — lazy loaded */}
           <div className="rounded-2xl overflow-hidden border border-text/[0.06] bg-white">
-            <video
-              src="/demo/video-1.mp4"
-              muted
-              loop
-              playsInline
-              autoPlay
-              className="w-full aspect-video object-cover"
-            />
+            <LazyLoad className="w-full aspect-video">
+              <video src="/demo/video-1.mp4" muted loop playsInline autoPlay className="w-full h-full object-cover" />
+            </LazyLoad>
             <div className="p-4">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-sm">🎬</span>
@@ -75,9 +85,11 @@ export default function DemoShowcase() {
             </div>
           </div>
 
-          {/* 3D — real rotating model */}
+          {/* 3D — lazy loaded */}
           <div className="rounded-2xl overflow-hidden border border-text/[0.06] bg-white">
-            <div className="aspect-video bg-[#f0f0f0] dark:bg-[#1C1C1E]" dangerouslySetInnerHTML={{ __html: `<model-viewer src="/demo/model-demo.glb" auto-rotate camera-controls touch-action="pan-y" style="width:100%;height:100%;background:#f0f0f0" shadow-intensity="1" exposure="1.2"></model-viewer>` }} />
+            <LazyLoad className="aspect-video bg-[#f0f0f0] dark:bg-[#1C1C1E]">
+              <div className="w-full h-full" dangerouslySetInnerHTML={{ __html: `<model-viewer src="/demo/model-demo.glb" auto-rotate camera-controls touch-action="pan-y" style="width:100%;height:100%;background:inherit" shadow-intensity="1" exposure="1.2"></model-viewer>` }} />
+            </LazyLoad>
             <div className="p-4">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-sm">🧊</span>
