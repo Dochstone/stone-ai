@@ -194,13 +194,15 @@ function MessageContent({ content, role, selectedModel }: { content: string; rol
 // ─── Welcome Screen ───
 
 const SUGGESTION_CARDS = [
-  { icon: "💻", title: "Напиши код на Python", subtitle: "Алгоритмы, скрипты, API" },
-  { icon: "📄", title: "Проанализируй документ", subtitle: "PDF, текст, данные" },
-  { icon: "🎨", title: "Сгенерируй картинку", subtitle: "DALL-E, Flux, SDXL" },
-  { icon: "💡", title: "Объясни простыми словами", subtitle: "Любая тема понятно" },
+  { icon: "💻", title: "Напиши код на Python", subtitle: "Алгоритмы, скрипты, API", modelId: "devstral" },
+  { icon: "📄", title: "Проанализируй документ", subtitle: "PDF, текст, данные", modelId: "claude-haiku-4.5" },
+  { icon: "🎨", title: "Сгенерируй картинку", subtitle: "Nano Banana Pro, GPT-5 Image", modelId: "nano-banana-pro" },
+  { icon: "🎬", title: "Сгенерируй видео", subtitle: "Kling v2, Runway, Pika", modelId: "kling-v2" },
+  { icon: "💡", title: "Объясни простыми словами", subtitle: "Любая тема понятно", modelId: "gpt-4o-mini" },
+  { icon: "🔍", title: "Найди в интернете", subtitle: "Perplexity Sonar, актуальные данные", modelId: "perplexity-sonar" },
 ];
 
-function WelcomeScreen({ onSuggestion }: { onSuggestion: (text: string) => void }) {
+function WelcomeScreen({ onSuggestion }: { onSuggestion: (text: string, modelId: string) => void }) {
   return (
     <div className="flex-1 flex items-center justify-center px-4">
       <div className="text-center max-w-xl w-full">
@@ -214,11 +216,11 @@ function WelcomeScreen({ onSuggestion }: { onSuggestion: (text: string) => void 
           <p className="text-sm text-text/40">50+ AI-моделей в одном месте. Выберите модель и начните диалог.</p>
         </div>
 
-        <div className="grid grid-cols-2 max-w-md mx-auto" style={{ gap: 12 }}>
+        <div className="grid grid-cols-2 sm:grid-cols-3 max-w-lg mx-auto" style={{ gap: 12 }}>
           {SUGGESTION_CARDS.map((card) => (
             <button
               key={card.title}
-              onClick={() => onSuggestion(card.title)}
+              onClick={() => onSuggestion(card.title, card.modelId)}
               className="text-left p-4 rounded-2xl border border-text/[0.06] bg-white hover:border-accent/30 hover:shadow-md hover:shadow-accent/5 transition-all duration-200 group h-full"
             >
               <span className="text-xl mb-2 block">{card.icon}</span>
@@ -946,9 +948,10 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
     }
   }, [auth, input, streaming, messages, selectedModel, pendingFile, saveToSession, resetTextarea, isVideoModel, sendVideoMessage, is3DModel, send3DMessage]);
 
-  // Auto-send after suggestion card click
+  // Auto-send after suggestion card click — switches model first
   const pendingSend = useRef(false);
-  const handleSuggestionClick = useCallback((text: string) => {
+  const handleSuggestionClick = useCallback((text: string, modelId: string) => {
+    setSelectedModel(modelId);
     setInput(text);
     pendingSend.current = true;
   }, []);
