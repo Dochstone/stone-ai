@@ -252,8 +252,9 @@ function TrustMarquee() {
       <div className="relative">
         <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-bg to-transparent z-10" />
         <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-bg to-transparent z-10" />
-        <div className="flex animate-marquee items-center">
-          {logos}{logos}
+        <div className="flex items-center w-max animate-marquee">
+          <div className="flex items-center shrink-0">{logos}</div>
+          <div className="flex items-center shrink-0">{logos}</div>
         </div>
       </div>
     </div>
