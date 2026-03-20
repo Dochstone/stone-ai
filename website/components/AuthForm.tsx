@@ -122,32 +122,46 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
           </div>
 
           <form onSubmit={submit} className="space-y-3">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full bg-bg border border-text/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
-              placeholder="Email"
-            />
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={8}
-              className="w-full bg-bg border border-text/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
-              placeholder={mode === "register" ? "Пароль (мин. 8 символов)" : "Пароль"}
-            />
+            <div>
+              <label htmlFor="auth-email" className="sr-only">Email</label>
+              <input
+                id="auth-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+                className="w-full bg-bg border border-text/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"
+                placeholder="Email"
+              />
+            </div>
+            <div>
+              <label htmlFor="auth-password" className="sr-only">Пароль</label>
+              <input
+                id="auth-password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={8}
+                autoComplete={mode === "register" ? "new-password" : "current-password"}
+                className="w-full bg-bg border border-text/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"
+                placeholder={mode === "register" ? "Пароль (мин. 8 символов)" : "Пароль"}
+              />
+            </div>
 
-            {error && <p className="text-red-500 text-xs">{error}</p>}
+            {error && (
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl px-4 py-2.5" role="alert">
+                <p className="text-red-600 dark:text-red-400 text-xs font-medium">{error}</p>
+              </div>
+            )}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-accent text-white py-3 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors disabled:opacity-50"
+              className="w-full bg-accent text-white py-3 min-h-[44px] rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:ring-offset-2"
             >
-              {loading ? "..." : mode === "login" ? "Войти" : "Зарегистрироваться"}
+              {loading ? "Загрузка..." : mode === "login" ? "Войти" : "Зарегистрироваться"}
             </button>
           </form>
         </div>

@@ -66,7 +66,7 @@ export default function Nav() {
             onMouseEnter={() => setToolsOpen(true)}
             onMouseLeave={() => setToolsOpen(false)}
           >
-            <button className="text-text/70 hover:text-text font-medium text-sm transition-colors flex items-center gap-1">
+            <button className="text-text/70 hover:text-text font-medium text-sm transition-colors flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-accent/30 rounded-lg px-1 -mx-1" aria-haspopup="menu" aria-expanded={toolsOpen}>
               Инструменты
               <svg className={`w-3.5 h-3.5 transition-transform ${toolsOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -142,7 +142,7 @@ export default function Nav() {
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="md:hidden flex flex-col justify-center items-center w-11 h-11 gap-1.5"
-            aria-label="Menu"
+            aria-label="Меню" aria-expanded={menuOpen}
           >
             <span className={`block w-5 h-0.5 bg-text transition-all ${menuOpen ? "rotate-45 translate-y-1" : ""}`} />
             <span className={`block w-5 h-0.5 bg-text transition-all ${menuOpen ? "opacity-0" : ""}`} />

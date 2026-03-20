@@ -249,13 +249,13 @@ export default function Hero() {
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
             <a
               href="/webchat"
-              className="bg-accent text-white px-8 py-4 min-h-[44px] rounded-xl font-bold text-sm hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
+              className="bg-accent text-white px-8 py-4 min-h-[44px] rounded-xl font-bold text-sm hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:ring-offset-2"
             >
               Открыть чат
             </a>
             <a
               href="/models"
-              className="border-2 border-text/15 text-text px-8 py-4 min-h-[44px] rounded-xl font-bold text-sm hover:border-accent hover:text-accent transition-colors"
+              className="border-2 border-text/15 text-text px-8 py-4 min-h-[44px] rounded-xl font-bold text-sm hover:border-accent hover:text-accent transition-colors focus:outline-none focus:ring-2 focus:ring-accent/30 focus:ring-offset-2"
             >
               Посмотреть модели
             </a>

@@ -77,7 +77,7 @@ export default function DemoShowcase() {
 
           {/* 3D — real rotating model */}
           <div className="rounded-2xl overflow-hidden border border-text/[0.06] bg-white">
-            <div className="aspect-video bg-[#f0f0f0]" dangerouslySetInnerHTML={{ __html: `<model-viewer src="/demo/model-demo.glb" auto-rotate camera-controls touch-action="pan-y" style="width:100%;height:100%;background:#f0f0f0" shadow-intensity="1" exposure="1.2"></model-viewer>` }} />
+            <div className="aspect-video bg-[#f0f0f0] dark:bg-[#1C1C1E]" dangerouslySetInnerHTML={{ __html: `<model-viewer src="/demo/model-demo.glb" auto-rotate camera-controls touch-action="pan-y" style="width:100%;height:100%;background:#f0f0f0" shadow-intensity="1" exposure="1.2"></model-viewer>` }} />
             <div className="p-4">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-sm">🧊</span>

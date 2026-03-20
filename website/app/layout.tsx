@@ -17,8 +17,6 @@ const OG_IMAGE = `${SITE_URL}/og-image.png`;
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 export const metadata: Metadata = {
@@ -201,8 +199,9 @@ export default function RootLayout({
             </div>
           </noscript>
         )}
+        <a href="#main-content" className="skip-link">Перейти к содержанию</a>
         <Nav />
-        <main>{children}</main>
+        <main id="main-content">{children}</main>
         <Footer />
         <ScrollToTop />
       </body>
