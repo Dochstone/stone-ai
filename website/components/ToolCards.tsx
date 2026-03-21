@@ -435,7 +435,7 @@ export default function ToolCards() {
               <h3 className="font-bold text-lg sm:text-xl text-white mb-1">AI Чат</h3>
               <p className="text-white/50 text-[12px] sm:text-[13px] max-w-[140px] sm:max-w-[200px]">GPT-5, Claude, Gemini — лучшие модели мира</p>
             </div>
-            <div className="absolute right-3 sm:right-6 top-14 sm:top-4 bottom-4 w-[50%] sm:w-[60%]">
+            <div className="absolute right-3 sm:right-6 top-4 bottom-4 w-[50%] sm:w-[60%]">
               <ChatDemo />
             </div>
           </a>
