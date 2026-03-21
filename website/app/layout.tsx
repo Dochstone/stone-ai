@@ -154,11 +154,6 @@ const jsonLdSoftware = {
     offerCount: "50",
     description: "15 бесплатных запросов в день. 50+ платных моделей от $0.24 за 1M токенов.",
   },
-  aggregateRating: {
-    "@type": "AggregateRating",
-    ratingValue: "4.8",
-    ratingCount: "150",
-  },
 };
 
 const YM_ID = process.env.NEXT_PUBLIC_YM_ID;
