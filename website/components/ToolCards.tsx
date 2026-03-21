@@ -382,8 +382,8 @@ function AudioCard() {
       onClick={handlePlay}
     >
       <span className="inline-block bg-white/15 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">10+ голосов</span>
-      <h3 className="font-bold text-lg text-white mb-2">AI Аудио</h3>
-      <p className="text-white/60 text-[13px] mb-3">Озвучка текста. Голосовой ввод. Мгновенно.</p>
+      <h3 className="font-bold text-lg text-white mb-2">ИИ Аудио</h3>
+      <p className="text-white/60 text-[13px] mb-3">Нейросеть озвучивает текст 10+ голосами. Голосовой ввод через Whisper</p>
 
       {/* Play/Stop button */}
       <div className="flex items-center gap-3 mb-4">
@@ -431,9 +431,9 @@ export default function ToolCards() {
           {/* ── AI Chat — live typing conversation ── */}
           <a href="/chat" className="sm:col-span-2 bg-[var(--color-card-dark)] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[260px] sm:min-h-[300px]">
             <div className="relative z-10 mb-4">
-              <span className="inline-block bg-accent/20 text-accent text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">50+ моделей</span>
-              <h3 className="font-bold text-lg sm:text-xl text-white mb-1">AI Чат</h3>
-              <p className="text-white/50 text-[12px] sm:text-[13px] max-w-[140px] sm:max-w-[200px]">GPT-5, Claude, Gemini — лучшие модели мира</p>
+              <span className="inline-block bg-accent/20 text-accent text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">50+ нейросетей</span>
+              <h3 className="font-bold text-lg sm:text-xl text-white mb-1">ИИ Чат-бот</h3>
+              <p className="text-white/50 text-[12px] sm:text-[13px] max-w-[140px] sm:max-w-[200px]">GPT-5, Claude, Gemini и Grok — переключайтесь между нейросетями за секунду</p>
             </div>
             <div className="absolute right-3 sm:right-6 top-4 bottom-4 w-[50%] sm:w-[60%]">
               <ChatDemo />
@@ -449,15 +449,15 @@ export default function ToolCards() {
             <div className="relative z-10 p-6 flex flex-col justify-end h-full">
               <span className="inline-block bg-pink-500/30 text-pink-300 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3 w-fit">24 стиля</span>
               <h3 className="font-bold text-xl text-white mb-1">Генерация картинок</h3>
-              <p className="text-white/80 text-[13px]">Фотореализм, арт, фэнтези — любой стиль за секунды</p>
+              <p className="text-white/80 text-[13px]">Фотореализм, арт, фэнтези — от $0.012 за картинку. 6 нейросетей на выбор</p>
             </div>
           </a>
 
           {/* ── Search — live multi-source search, FIXED HEIGHT ── */}
           <a href="/search" className="bg-[var(--color-card-dark)] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative" style={{ height: 320 }}>
             <span className="inline-block bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">Realtime</span>
-            <h3 className="font-bold text-lg text-white mb-1">AI Поиск</h3>
-            <p className="text-white/50 text-[13px] mb-4">Ищет одновременно в Google, Bing, News, Scholar</p>
+            <h3 className="font-bold text-lg text-white mb-1">ИИ Поиск</h3>
+            <p className="text-white/50 text-[13px] mb-4">Perplexity ищет в Google, Bing, News и даёт ответ со ссылками</p>
             <SearchDemo />
           </a>
 
@@ -465,7 +465,7 @@ export default function ToolCards() {
           <a href="/documents" className="bg-[var(--color-card-dark)] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative" style={{ height: 320 }}>
             <span className="inline-block bg-amber-500/20 text-amber-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">PDF, фото</span>
             <h3 className="font-bold text-lg text-white mb-1">Анализ документов</h3>
-            <p className="text-white/50 text-[13px] mb-4">AI читает документ и находит ключевые пункты</p>
+            <p className="text-white/50 text-[13px] mb-4">Загрузите PDF или фото — нейросеть найдёт ключевые пункты и ответит на вопросы</p>
             <DocAnalysisDemo />
           </a>
 
@@ -475,8 +475,8 @@ export default function ToolCards() {
             <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-card-dark)] via-[var(--color-card-dark)]/20 to-transparent pointer-events-none" />
             <div className="relative z-10 p-6 flex flex-col justify-end h-full pointer-events-none">
               <span className="inline-block bg-red-500/30 text-red-300 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-2 w-fit">5 моделей</span>
-              <h3 className="font-bold text-lg text-white mb-1">AI Видео</h3>
-              <p className="text-white/70 text-[13px]">Kling, Runway, Pika — видео из текста за секунды</p>
+              <h3 className="font-bold text-lg text-white mb-1">ИИ Видео</h3>
+              <p className="text-white/70 text-[13px]">Kling, Runway, Pika — нейросеть создаёт видео из текста или фото. От $0.15</p>
             </div>
           </a>
 
@@ -490,7 +490,7 @@ export default function ToolCards() {
             <div className="relative z-10 p-6 flex flex-col justify-end h-full pointer-events-none">
               <span className="inline-block bg-cyan-500/30 text-cyan-300 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-2 w-fit">Tripo + TripoSR</span>
               <h3 className="font-bold text-lg text-white mb-1">3D Модели</h3>
-              <p className="text-white/50 text-[13px]">Вращайте мышью! GLB из текста или фото.</p>
+              <p className="text-white/50 text-[13px]">Нейросеть создаёт 3D из текста или фото. GLB для игр и печати. Вращайте!</p>
             </div>
           </a>
 
@@ -498,14 +498,15 @@ export default function ToolCards() {
           <a href="/chat" className="bg-[var(--color-card-dark)] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative" style={{ height: 320 }}>
             <span className="inline-block bg-violet-500/20 text-violet-400 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">o3 + DeepSeek R1</span>
             <h3 className="font-bold text-lg text-white mb-1">Глубокий анализ</h3>
-            <p className="text-white/50 text-[13px] mb-4">AI рассуждает пошагово, показывая ход мыслей</p>
+            <p className="text-white/50 text-[13px] mb-4">Reasoning-нейросети думают пошагово: математика, логика, сложные задачи</p>
             <ReasoningDemo />
           </a>
 
           {/* ── API — code snippet ── */}
           <a href="/docs" className="bg-gradient-to-br from-slate-600 via-slate-700 to-zinc-900 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden min-h-[180px]">
             <span className="inline-block bg-sky-400/20 text-sky-300 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">API</span>
-            <h3 className="font-bold text-lg text-white mb-3">Простой API</h3>
+            <h3 className="font-bold text-lg text-white mb-1">Простой API</h3>
+            <p className="text-white/50 text-[13px] mb-3">REST API для 50+ нейросетей. SSE-стриминг, JWT-авторизация</p>
             <div className="bg-white/[0.04] rounded-xl p-3 overflow-x-auto border border-white/[0.06]">
               <pre className="text-[11px] leading-[1.7] font-mono" dangerouslySetInnerHTML={{ __html: `<span style="color:#34d399">curl</span><span style="color:rgba(255,255,255,0.5)"> -X </span><span style="color:#fcd34d">POST</span><span style="color:rgba(255,255,255,0.5)"> /api/chat \\
   -H </span><span style="color:#7dd3fc">"Bearer $TKN"</span><span style="color:rgba(255,255,255,0.5)"> \\
