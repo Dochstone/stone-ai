@@ -4,6 +4,7 @@ import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
+import WebVitals from "@/components/WebVitals";
 
 const manrope = Manrope({
   subsets: ["latin", "cyrillic"],
@@ -11,7 +12,7 @@ const manrope = Manrope({
   variable: "--font-manrope",
 });
 
-const SITE_URL = "https://website-production-907e.up.railway.app";
+import { SITE_URL } from "@/lib/constants";
 const OG_IMAGE = `${SITE_URL}/og-image.png`;
 
 export const viewport: Viewport = {
@@ -22,23 +23,26 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Stone AI — 50 AI-моделей без VPN",
+    default: "50+ AI-моделей и нейросетей без VPN — чат с GPT-5, Claude, Gemini | Stone AI",
     template: "%s | Stone AI",
   },
   description:
-    "GPT-5, Claude Opus, Gemini Pro и ещё 46 моделей прямо в Telegram. Платите только за использованные токены. Без VPN, без подписок.",
+    "GPT-5, Claude Opus, Gemini Pro и ещё 47 нейросетей в одном чате. Бот в Telegram без VPN. Оплата за токены — от $0.004 за запрос. Попробуйте бесплатно — 15 запросов в день.",
   keywords: [
     "AI чат",
     "ChatGPT без VPN",
+    "ChatGPT альтернатива",
     "Claude без VPN",
-    "AI модели Telegram",
+    "нейросеть онлайн",
+    "нейросеть бесплатно",
+    "AI бот Telegram",
+    "GPT на русском",
     "GPT-5",
     "Claude Opus",
     "Gemini Pro",
-    "нейросеть Telegram",
-    "AI бот",
+    "искусственный интеллект",
+    "ИИ чат",
     "генерация картинок AI",
-    "per-token оплата",
     "Stone AI",
   ],
   authors: [{ name: "Stone AI" }],
@@ -48,9 +52,9 @@ export const metadata: Metadata = {
     locale: "ru_RU",
     url: SITE_URL,
     siteName: "Stone AI",
-    title: "Stone AI — 50 AI-моделей без VPN",
+    title: "50+ AI-моделей и нейросетей без VPN — Stone AI",
     description:
-      "GPT-5, Claude Opus, Gemini Pro и ещё 46 моделей прямо в Telegram. Платите только за использованные токены.",
+      "GPT-5, Claude Opus, Gemini Pro и ещё 47 нейросетей в одном чате. Бот в Telegram без VPN. Оплата за токены — от $0.004 за запрос. 15 бесплатных запросов в день.",
     images: [
       {
         url: OG_IMAGE,
@@ -62,9 +66,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Stone AI — 50 AI-моделей без VPN",
+    title: "50+ AI-моделей и нейросетей без VPN — Stone AI",
     description:
-      "GPT-5, Claude Opus, Gemini Pro и ещё 46 моделей прямо в Telegram. Платите только за токены.",
+      "GPT-5, Claude Opus, Gemini Pro и ещё 47 нейросетей в одном чате. Бот в Telegram без VPN. Оплата за токены — от $0.004 за запрос. 15 бесплатных запросов в день.",
     images: [OG_IMAGE],
   },
   robots: {
@@ -76,16 +80,34 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: SITE_URL,
+    canonical: "/",
+  },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+  },
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/icon-192x192.png",
+  },
+  other: {
+    "theme-color": "#C4623D",
   },
 };
 
 const jsonLdOrganization = {
   "@context": "https://schema.org",
   "@type": "Organization",
+  "@id": `${SITE_URL}/#organization`,
   name: "Stone AI",
   url: SITE_URL,
-  logo: `${SITE_URL}/og-image.png`,
+  logo: {
+    "@type": "ImageObject",
+    url: `${SITE_URL}/og-image.png`,
+    width: 1200,
+    height: 630,
+  },
   description:
     "Платформа доступа к 50+ AI-моделям через Telegram. GPT-5, Claude Opus, Gemini Pro и другие. Без VPN, без подписок.",
   sameAs: ["https://t.me/StoneAIBot", "https://t.me/StoneAIsupport"],
@@ -93,19 +115,23 @@ const jsonLdOrganization = {
     "@type": "ContactPoint",
     contactType: "customer support",
     url: "https://t.me/StoneAIsupport",
+    availableLanguage: "Russian",
   },
 };
 
 const jsonLdWebSite = {
   "@context": "https://schema.org",
   "@type": "WebSite",
+  "@id": `${SITE_URL}/#website`,
   name: "Stone AI",
   url: SITE_URL,
+  inLanguage: "ru",
+  publisher: { "@id": `${SITE_URL}/#organization` },
   description:
-    "50 AI-моделей без VPN, прямо в Telegram. Платите только за использованные токены.",
+    "50+ AI-моделей и нейросетей без VPN, прямо в Telegram. Платите только за использованные токены.",
   potentialAction: {
     "@type": "SearchAction",
-    target: `${SITE_URL}/models?q={search_term_string}`,
+    target: { "@type": "EntryPoint", urlTemplate: `${SITE_URL}/models?q={search_term_string}` },
     "query-input": "required name=search_term_string",
   },
 };
@@ -113,14 +139,20 @@ const jsonLdWebSite = {
 const jsonLdSoftware = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
+  "@id": `${SITE_URL}/#app`,
   name: "Stone AI",
-  operatingSystem: "Telegram",
-  applicationCategory: "UtilitiesApplication",
+  operatingSystem: "Android, iOS, Web",
+  applicationCategory: "BusinessApplication",
+  url: "https://t.me/StoneAIBot",
+  downloadUrl: "https://t.me/StoneAIBot",
+  author: { "@id": `${SITE_URL}/#organization` },
   offers: {
-    "@type": "Offer",
-    price: "0",
+    "@type": "AggregateOffer",
+    lowPrice: "0",
+    highPrice: "130",
     priceCurrency: "USD",
-    description: "15 бесплатных запросов в день. Платные модели от $0.24 за 1M токенов.",
+    offerCount: "50",
+    description: "15 бесплатных запросов в день. 50+ платных моделей от $0.24 за 1M токенов.",
   },
   aggregateRating: {
     "@type": "AggregateRating",
@@ -141,8 +173,7 @@ export default function RootLayout({
     <html lang="ru" className={manrope.variable} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})()` }} />
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js" async />
+        {/* icons, manifest, apple-web-app, theme-color — via Metadata API export above */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -200,6 +231,8 @@ export default function RootLayout({
           </noscript>
         )}
         <a href="#main-content" className="skip-link">Перейти к содержанию</a>
+        <WebVitals />
+        {YM_ID && <script dangerouslySetInnerHTML={{ __html: `window.__ymId=${YM_ID};` }} />}
         <Nav />
         <main id="main-content">{children}</main>
         <Footer />

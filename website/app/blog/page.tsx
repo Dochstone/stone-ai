@@ -1,11 +1,22 @@
 import type { Metadata } from "next";
 import { POSTS } from "@/lib/blog";
 
+export const revalidate = 3600;
+
 export const metadata: Metadata = {
   title: "Блог",
   description:
     "Статьи про AI-модели, сравнения, гайды и советы. Как выбрать модель, сэкономить на AI и оплатить из России.",
+  alternates: { canonical: "/blog" },
 };
+
+const blogFaqItems = [
+  { q: "Как часто выходят новые статьи?", a: "Мы публикуем 2-3 статьи в месяц: сравнения моделей, гайды по использованию и обзоры новых функций Stone AI." },
+  { q: "Могу ли я предложить тему для статьи?", a: "Да! Напишите нам в Telegram @StoneAIsupport — мы рассмотрим вашу идею и напишем статью, если тема будет полезна другим пользователям." },
+  { q: "Статьи подходят для начинающих?", a: "Все статьи написаны простым языком без технического жаргона. Мы объясняем каждый термин и даём практические примеры." },
+];
+
+const blogFaqJsonLd = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: blogFaqItems.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) };
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("ru-RU", {
@@ -18,6 +29,7 @@ function formatDate(iso: string) {
 export default function BlogPage() {
   return (
     <div className="pt-28 pb-20 min-h-screen">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogFaqJsonLd) }} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-14">
           <div className="inline-block bg-accent/10 text-accent px-4 py-1.5 rounded-full text-sm font-semibold mb-4">

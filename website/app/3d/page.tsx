@@ -4,6 +4,8 @@ import ToolModels from "@/components/ToolModels";
 import ToolExamples from "@/components/ToolExamples";
 import ToolFaq from "@/components/ToolFaq";
 import ToolCta from "@/components/ToolCta";
+import ModelViewerScript from "@/components/ModelViewerScript";
+import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "3D Генерация — из текста и фото в 3D модель",
@@ -30,9 +32,15 @@ const faqItems = [
   { q: "Можно ли посмотреть 3D модель в браузере?", a: "Да! После генерации модель отображается прямо в чате с возможностью вращения, зума и скачивания GLB файла." },
 ];
 
+const faqJsonLd = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqItems.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) };
+const bcJsonLd = { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Главная", item: `${SITE_URL}/` }, { "@type": "ListItem", position: 2, name: "3D Генерация" }] };
+
 export default function ThreeDPage() {
   return (
     <>
+      <ModelViewerScript />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Stone AI — 3D Генерация", applicationCategory: "DesignApplication", description: "Генерация 3D моделей из текста и фото. Tripo v2.5, TripoSR. GLB формат.", offers: { "@type": "Offer", price: "0.21", priceCurrency: "USD" } }) }} />
       <ToolPageHero
         badge="Text/Image → 3D"

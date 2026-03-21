@@ -1,0 +1,26 @@
+{
+  "name": "Stone AI — 50 AI-моделей без VPN",
+  "short_name": "Stone AI",
+  "description": "GPT-5, Claude Opus, Gemini Pro и ещё 46 моделей. Без VPN, без подписок. Оплата за токены.",
+  "start_url": "/webchat",
+  "display": "standalone",
+  "background_color": "#FAF9F5",
+  "theme_color": "#C4623D",
+  "orientation": "portrait-primary",
+  "categories": ["productivity", "utilities"],
+  "lang": "ru",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import ToolPageHero from "@/components/ToolPageHero";
 import ToolExamples from "@/components/ToolExamples";
 import ToolFaq from "@/components/ToolFaq";
 import ToolCta from "@/components/ToolCta";
+import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "AI Аудио — озвучка текста и голосовой ввод",
@@ -22,9 +24,14 @@ const faqItems = [
   { q: "Максимальная длина текста для озвучки?", a: "До 4096 символов за один запрос (~2 минуты аудио). Для длинных текстов разбивайте на части." },
 ];
 
+const faqJsonLd = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqItems.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) };
+const bcJsonLd = { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Главная", item: `${SITE_URL}/` }, { "@type": "ListItem", position: 2, name: "Аудио" }] };
+
 export default function AudioPage() {
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Stone AI — AI Аудио", applicationCategory: "MultimediaApplication", description: "Озвучка текста 10+ голосами, голосовой ввод через Whisper AI.", offers: { "@type": "Offer", price: "0", priceCurrency: "USD", description: "15 бесплатных запросов в день" } }) }} />
       <ToolPageHero
         badge="10+ голосов"
@@ -65,7 +72,7 @@ export default function AudioPage() {
           <h3 className="text-xl font-bold mb-6">Послушайте пример</h3>
           <div className="bg-white rounded-2xl border border-text/[0.06] p-6 shadow-lg">
             <div className="mb-4">
-              <img src="/demo/audio-poster.jpg" alt="Audio waveform" className="w-full rounded-xl mb-4" />
+              <Image src="/demo/audio-poster.jpg" alt="Audio waveform" width={400} height={225} className="w-full rounded-xl mb-4" />
             </div>
             <audio controls className="w-full" src="/demo/audio-demo.mp3" />
             <p className="text-xs text-text/40 mt-3">Голос: Nova · Язык: Русский</p>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 
 // All AI-generated images
 const allImages = [
@@ -23,8 +24,8 @@ function ImageCarousel({ images, interval = 3000 }: { images: string[]; interval
   return (
     <div className="relative w-full h-full overflow-hidden">
       {images.map((src, i) => (
-        <img key={src} src={src} alt="AI-сгенерированное изображение" className="absolute inset-0 w-full h-full object-cover"
-          style={{ opacity: i === idx ? 1 : 0, transition: "opacity 1s ease-in-out" }} loading="lazy" />
+        <Image key={src} src={src} alt="AI-сгенерированное изображение" fill sizes="(max-width: 640px) 100vw, 33vw"
+          className="object-cover" style={{ opacity: i === idx ? 1 : 0, transition: "opacity 1s ease-in-out" }} />
       ))}
     </div>
   );

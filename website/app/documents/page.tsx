@@ -4,6 +4,7 @@ import ToolModels from "@/components/ToolModels";
 import ToolExamples from "@/components/ToolExamples";
 import ToolFaq from "@/components/ToolFaq";
 import ToolCta from "@/components/ToolCta";
+import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Анализ документов AI — PDF, фото, контракты",
@@ -61,9 +62,14 @@ const faqItems = [
   },
 ];
 
+const faqJsonLd = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqItems.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) };
+const bcJsonLd = { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Главная", item: `${SITE_URL}/` }, { "@type": "ListItem", position: 2, name: "Документы" }] };
+
 export default function DocumentsPage() {
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
       <ToolPageHero
         badge="Контекст до 1M токенов"
         title="Анализ документов"

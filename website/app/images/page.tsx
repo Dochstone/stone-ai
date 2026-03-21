@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import ToolPageHero from "@/components/ToolPageHero";
 import ToolModels from "@/components/ToolModels";
 import ToolExamples from "@/components/ToolExamples";
 import ToolFaq from "@/components/ToolFaq";
 import ToolCta from "@/components/ToolCta";
+import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Генерация картинок AI — Flux, GPT-5 Image, SDXL",
@@ -61,9 +63,14 @@ const faqItems = [
   },
 ];
 
+const faqJsonLd = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqItems.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) };
+const bcJsonLd = { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Главная", item: `${SITE_URL}/` }, { "@type": "ListItem", position: 2, name: "Картинки" }] };
+
 export default function ImagesPage() {
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
       <ToolPageHero
         badge="6 моделей генерации"
         title="Создавайте изображения"
@@ -93,7 +100,7 @@ export default function ImagesPage() {
               { src: "/demo/img-architecture.jpg", label: "Архитектура" },
             ].map((img) => (
               <div key={img.label} className="relative rounded-xl overflow-hidden aspect-square group">
-                <img src={img.src} alt={img.label} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                <Image src={img.src} alt={img.label} fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-2.5 pt-8">
                   <span className="text-[11px] font-semibold text-white">{img.label}</span>
                 </div>

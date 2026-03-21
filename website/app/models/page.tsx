@@ -8,11 +8,12 @@ export const metadata: Metadata = {
 };
 
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { SITE_URL } from "@/lib/constants";
 
 export default function ModelsPage() {
   return (
     <div className="pb-20 min-h-screen">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "ItemList", name: "AI модели Stone AI", description: "Каталог 50+ AI-моделей: чат, картинки, видео, 3D, аудио, поиск", numberOfItems: 57, itemListElement: [{ "@type": "ListItem", position: 1, name: "GPT-5.4", url: "https://website-production-907e.up.railway.app/webchat?model=gpt-5.4" }, { "@type": "ListItem", position: 2, name: "Claude Opus 4", url: "https://website-production-907e.up.railway.app/webchat?model=claude-opus-4" }, { "@type": "ListItem", position: 3, name: "Gemini 2.5 Pro", url: "https://website-production-907e.up.railway.app/webchat?model=gemini-2.5-pro" }] }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "ItemList", name: "AI модели Stone AI", description: "Каталог 50+ AI-моделей: чат, картинки, видео, 3D, аудио, поиск", numberOfItems: 57, itemListElement: [{ "@type": "ListItem", position: 1, name: "GPT-5.4", url: `${SITE_URL}/webchat?model=gpt-5.4` }, { "@type": "ListItem", position: 2, name: "Claude Opus 4", url: `${SITE_URL}/webchat?model=claude-opus-4` }, { "@type": "ListItem", position: 3, name: "Gemini 2.5 Pro", url: `${SITE_URL}/webchat?model=gemini-2.5-pro` }] }) }} />
       <Breadcrumbs items={[{ label: "Модели" }]} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">

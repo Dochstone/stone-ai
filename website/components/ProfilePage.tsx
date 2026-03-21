@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { MODELS } from "@/lib/models";
+import { SITE_URL } from "@/lib/constants";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
 
@@ -76,7 +77,7 @@ function getInitials(email: string, name?: string | null): string {
 }
 
 function getAvatarColor(email: string): string {
-  const colors = ["#D97757", "#0E9A83", "#4285f4", "#7c3aed", "#ec4899", "#f59e0b", "#06b6d4", "#10a37f"];
+  const colors = ["#C4623D", "#0E9A83", "#4285f4", "#7c3aed", "#ec4899", "#f59e0b", "#06b6d4", "#10a37f"];
   let hash = 0;
   for (let i = 0; i < email.length; i++) hash = email.charCodeAt(i) + ((hash << 5) - hash);
   return colors[Math.abs(hash) % colors.length];
@@ -611,7 +612,7 @@ function ReferralsTab({ stats, loading }: { stats: ReferralStats | null; loading
     return <div className="text-center py-12 text-text/25 text-sm">Загрузка...</div>;
   }
 
-  const refLink = `https://website-production-907e.up.railway.app/webchat?ref=${stats.referral_code}`;
+  const refLink = `${SITE_URL}/webchat?ref=${stats.referral_code}`;
 
   const copyLink = () => {
     navigator.clipboard.writeText(refLink);

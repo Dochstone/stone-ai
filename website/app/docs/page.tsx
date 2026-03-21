@@ -8,6 +8,19 @@ export const metadata: Metadata = {
 
 const BASE_URL = "https://stone-ai-production.up.railway.app";
 
+const howToJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  name: "Как начать использовать Stone AI API",
+  description: "Пошаговая инструкция по подключению к API Stone AI: регистрация, получение токена и отправка первого запроса к AI-модели.",
+  step: [
+    { "@type": "HowToStep", position: 1, name: "Регистрация", text: "Отправьте POST-запрос на /api/auth/register с email и паролем. В ответе получите JWT-токен для авторизации." },
+    { "@type": "HowToStep", position: 2, name: "Получите JWT токен", text: "Сохраните поле token из ответа. Используйте его в заголовке Authorization: Bearer <token> для всех последующих запросов." },
+    { "@type": "HowToStep", position: 3, name: "Выберите модель", text: "Отправьте GET-запрос на /api/models чтобы получить список доступных AI-моделей с ценами и характеристиками." },
+    { "@type": "HowToStep", position: 4, name: "Отправьте сообщение", text: "Отправьте POST-запрос на /api/chat с model_id и массивом messages. Ответ придёт через SSE (Server-Sent Events) в реальном времени." },
+  ],
+};
+
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
     <section id={id} className="scroll-mt-24 mb-14">
@@ -60,6 +73,7 @@ const NAV_ITEMS = [
 export default function DocsPage() {
   return (
     <div className="pt-24 pb-20 min-h-screen">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToJsonLd) }} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex gap-10">
           {/* Sidebar nav */}

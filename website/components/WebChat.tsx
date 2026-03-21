@@ -971,7 +971,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   if (!loaded) return null;
   if (!auth) return <AuthFormComponent onAuth={setAuth} />;
 
-  const aiColor = companyColors[model?.company ?? ""] || "#D97757";
+  const aiColor = companyColors[model?.company ?? ""] || "#C4623D";
   const aiLetter = companyIcons[model?.company ?? ""] || "AI";
   const lastMsg = messages[messages.length - 1];
   const showStreamingDots = streaming && (!lastMsg || lastMsg.role !== "assistant" || !lastMsg.content);
@@ -990,11 +990,11 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
         .md-content .md-ul { list-style: disc; padding-left: 1.25rem; margin: 0.5rem 0; }
         .md-content .md-li { margin: 0.15rem 0; display: list-item; }
         .md-content .md-oli { list-style: decimal; }
-        .md-content .md-link { color: #D97757; text-decoration: underline; text-underline-offset: 2px; }
+        .md-content .md-link { color: #C4623D; text-decoration: underline; text-underline-offset: 2px; }
         .md-content .md-link:hover { opacity: 0.8; }
         .md-content .inline-code {
           background: rgba(26,25,22,0.06); padding: 0.15em 0.4em; border-radius: 0.375rem;
-          font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.85em; color: #D97757;
+          font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.85em; color: #C4623D;
         }
         .code-block-wrapper { margin: 0.75rem 0; border-radius: 0.75rem; overflow: hidden; border: 1px solid rgba(26,25,22,0.06); max-width: 100%; }
         .code-block-header {

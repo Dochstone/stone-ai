@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { POSTS, getPost } from "@/lib/blog";
+import { breadcrumbJsonLd } from "@/components/Breadcrumbs";
+
+import { SITE_URL } from "@/lib/constants";
+
+export const revalidate = 3600;
 
 interface Props {
   params: { slug: string };
@@ -17,11 +22,13 @@ export function generateMetadata({ params }: Props): Metadata {
   return {
     title: post.title,
     description: post.description,
+    alternates: { canonical: `/blog/${params.slug}` },
     openGraph: {
       title: post.title,
       description: post.description,
       type: "article",
       publishedTime: post.date,
+      modifiedTime: post.dateModified,
     },
   };
 }
@@ -38,8 +45,24 @@ export default function BlogPostPage({ params }: Props) {
   const post = getPost(params.slug);
   if (!post) return notFound();
 
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.description,
+    datePublished: post.date,
+    dateModified: post.dateModified,
+    author: { "@type": "Organization", name: "Stone AI" },
+    publisher: { "@type": "Organization", name: "Stone AI", logo: { "@type": "ImageObject", url: `${SITE_URL}/og-image.png` } },
+    mainEntityOfPage: `${SITE_URL}/blog/${post.slug}`,
+  };
+
+  const bcItems = [{ label: "Блог", href: "/blog" }, { label: post.title }];
+
   return (
     <div className="pt-28 pb-20 min-h-screen">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(bcItems)) }} />
       <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-1.5 text-sm text-text/40 mb-6">
@@ -62,7 +85,7 @@ export default function BlogPostPage({ params }: Props) {
             {post.title}
           </h1>
           <div className="flex items-center gap-3 text-sm text-text/40">
-            <span>{formatDate(post.date)}</span>
+            <time dateTime={post.date}>{formatDate(post.date)}</time>
             <span className="w-1 h-1 bg-text/15 rounded-full" />
             <span>{post.readTime}</span>
           </div>
@@ -70,14 +93,12 @@ export default function BlogPostPage({ params }: Props) {
 
         {/* Content */}
         <div className="space-y-6">
-          {post.content.map((paragraph, i) => (
-            <p
-              key={i}
-              className="text-text/70 text-[15px] leading-[1.8]"
-            >
-              {paragraph}
-            </p>
-          ))}
+          {post.content.map((block, i) => {
+            if (typeof block === "object" && "h2" in block) {
+              return <h2 key={i} className="text-xl md:text-2xl font-extrabold mt-10 mb-2">{block.h2}</h2>;
+            }
+            return <p key={i} className="text-text/70 text-[15px] leading-[1.8]">{String(block)}</p>;
+          })}
         </div>
 
         {/* CTA */}

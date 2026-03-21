@@ -11,7 +11,7 @@ const config: Config = {
       colors: {
         bg: "var(--color-bg)",
         text: "var(--color-text)",
-        accent: "#D97757",
+        accent: "#C4623D",
         teal: "#0E9A83",
         "teal-light": "var(--color-teal-light)",
         dark: "#1A1916",

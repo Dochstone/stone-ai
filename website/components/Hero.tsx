@@ -3,7 +3,7 @@
 /* ── Floating model cards around the mockup ── */
 const floatingModels = [
   { name: "GPT-5.1", color: "#10a37f", x: "-12%", y: "10%", delay: "0s" },
-  { name: "Claude Opus", color: "#D97757", x: "85%", y: "5%", delay: "1.2s" },
+  { name: "Claude Opus", color: "#C4623D", x: "85%", y: "5%", delay: "1.2s" },
   { name: "Gemini Pro", color: "#4285f4", x: "90%", y: "55%", delay: "0.6s" },
   { name: "Grok 3", color: "#1d9bf0", x: "-8%", y: "60%", delay: "1.8s" },
   { name: "DeepSeek R1", color: "#6366f1", x: "40%", y: "-8%", delay: "2.4s" },
@@ -244,10 +244,10 @@ export default function Hero() {
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tight">
-            Единая платформа для 50 нейросетей.
+            50+ AI-моделей и нейросетей
             <br />
             <span className="bg-gradient-to-r from-accent to-teal bg-clip-text text-transparent">
-              Подключись к AI будущего
+              в одном чате без VPN
             </span>
           </h1>
 

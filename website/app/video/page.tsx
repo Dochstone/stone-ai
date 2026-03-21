@@ -4,6 +4,7 @@ import ToolModels from "@/components/ToolModels";
 import ToolExamples from "@/components/ToolExamples";
 import ToolFaq from "@/components/ToolFaq";
 import ToolCta from "@/components/ToolCta";
+import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "AI Генерация видео — Kling, Runway, Pika",
@@ -33,9 +34,14 @@ const faqItems = [
   { q: "Почему списание до генерации?", a: "Видео-генерация требует больших вычислительных ресурсов. Баланс списывается перед началом. Если генерация не удалась — деньги возвращаются автоматически." },
 ];
 
+const faqJsonLd = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqItems.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) };
+const bcJsonLd = { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Главная", item: `${SITE_URL}/` }, { "@type": "ListItem", position: 2, name: "Видео" }] };
+
 export default function VideoPage() {
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Stone AI — AI Видео", applicationCategory: "MultimediaApplication", description: "Генерация видео из текста и фото. Kling v2, Runway Gen-3, Pika 2.0.", offers: { "@type": "Offer", price: "0.15", priceCurrency: "USD" } }) }} />
       <ToolPageHero
         badge="5 видео-моделей"

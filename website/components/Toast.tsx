@@ -29,7 +29,7 @@ let nextId = 0;
 const typeStyles: Record<ToastType, string> = {
   success: "bg-[#0E9A83] text-white",
   error: "bg-red-600 text-white",
-  info: "bg-[#D97757] text-white",
+  info: "bg-[#C4623D] text-white",
 };
 
 export function ToastProvider({ children }: { children: ReactNode }) {
