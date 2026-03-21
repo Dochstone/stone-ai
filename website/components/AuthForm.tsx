@@ -151,6 +151,7 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
                 </div>
                 <h3 className="font-bold text-lg">Проверьте почту</h3>
                 <p className="text-text/50 text-sm mt-1">{message}</p>
+                <p className="text-text/30 text-xs mt-2">Не нашли? Проверьте папку «Спам»</p>
               </div>
               <input type="text" value={code} onChange={(e) => setCode(e.target.value)}
                 placeholder="Введите 6-значный код" required maxLength={6}
@@ -198,6 +199,7 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
               <div className="text-center mb-4">
                 <h3 className="font-bold text-lg">Новый пароль</h3>
                 <p className="text-text/50 text-sm mt-1">{message}</p>
+                <p className="text-text/30 text-xs mt-2">Не нашли письмо? Проверьте папку «Спам»</p>
               </div>
               <input type="text" value={code} onChange={(e) => setCode(e.target.value)}
                 placeholder="Код из письма" required maxLength={6}
