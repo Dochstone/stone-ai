@@ -107,7 +107,7 @@ export default function ReferralPage() {
         </div>
 
         {/* Stats cards */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           <div className="bg-white rounded-2xl border border-text/5 p-5 text-center">
             <p className="text-2xl font-extrabold text-text">{stats?.referral_count ?? 0}</p>
             <p className="text-xs text-text/40 mt-1">Приглашённых</p>

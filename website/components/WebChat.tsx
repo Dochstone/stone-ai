@@ -1254,13 +1254,13 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                       {msg.billing && (
                         <details className={`mt-2 text-[10px] ${msg.role === "user" ? "opacity-70" : "opacity-50"}`}>
                           <summary className="cursor-pointer">
-                            {msg.billing.tokens_in + msg.billing.tokens_out} tok · ${msg.billing.cost_usd.toFixed(4)}
+                            {msg.billing.tokens_in + msg.billing.tokens_out} tok · ${msg.billing.cost_usd.toFixed(2)}
                           </summary>
                           <div className="mt-1 space-y-0.5">
                             <div>Input: {msg.billing.tokens_in} tok</div>
                             <div>Output: {msg.billing.tokens_out} tok</div>
-                            <div>Стоимость: ${msg.billing.cost_usd.toFixed(6)}</div>
-                            <div>Баланс: ${msg.billing.balance_usd.toFixed(4)}</div>
+                            <div>Стоимость: ${msg.billing.cost_usd.toFixed(2)}</div>
+                            <div>Баланс: ${msg.billing.balance_usd.toFixed(2)}</div>
                           </div>
                         </details>
                       )}

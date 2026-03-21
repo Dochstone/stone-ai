@@ -16,7 +16,7 @@ export default function PricingCalculator() {
     cost = (model.pricePerMillion * requests).toFixed(2);
   } else {
     const tokens = requests * AVG_TOKENS_PER_REQUEST;
-    cost = ((tokens / 1_000_000) * model.pricePerMillion).toFixed(4);
+    cost = ((tokens / 1_000_000) * model.pricePerMillion).toFixed(2);
   }
 
   return (

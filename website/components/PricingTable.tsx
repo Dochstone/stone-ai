@@ -23,8 +23,7 @@ function calcCost(model: (typeof MODELS)[number], reqs: number) {
 }
 
 function formatCost(c: number) {
-  if (c < 0.01) return `$${c.toFixed(4)}`;
-  if (c < 1) return `$${c.toFixed(2)}`;
+  if (c < 0.01) return `<$0.01`;
   return `$${c.toFixed(2)}`;
 }
 

@@ -335,10 +335,10 @@ function HistoryTab({ usage }: { usage: UsageItem[] }) {
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <StatCard label="Запросов" value={filtered.length.toLocaleString()} />
         <StatCard label="Токенов" value={totalTokens.toLocaleString()} />
-        <StatCard label="Потрачено" value={`$${totalCost.toFixed(4)}`} accent />
+        <StatCard label="Потрачено" value={`$${totalCost.toFixed(2)}`} accent />
       </div>
 
       {/* Table */}
@@ -347,11 +347,11 @@ function HistoryTab({ usage }: { usage: UsageItem[] }) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-text/[0.06] text-left">
-                <th className="px-5 py-3 text-[10px] font-semibold text-text/30 uppercase">Дата</th>
-                <th className="px-5 py-3 text-[10px] font-semibold text-text/30 uppercase">Модель</th>
-                <th className="px-5 py-3 text-[10px] font-semibold text-text/30 uppercase text-right">Input</th>
-                <th className="px-5 py-3 text-[10px] font-semibold text-text/30 uppercase text-right">Output</th>
-                <th className="px-5 py-3 text-[10px] font-semibold text-text/30 uppercase text-right">Стоимость</th>
+                <th className="px-3 sm:px-5 py-3 text-[10px] font-semibold text-text/30 uppercase">Дата</th>
+                <th className="px-3 sm:px-5 py-3 text-[10px] font-semibold text-text/30 uppercase">Модель</th>
+                <th className="px-3 sm:px-5 py-3 text-[10px] font-semibold text-text/30 uppercase text-right hidden sm:table-cell">Input</th>
+                <th className="px-3 sm:px-5 py-3 text-[10px] font-semibold text-text/30 uppercase text-right hidden sm:table-cell">Output</th>
+                <th className="px-3 sm:px-5 py-3 text-[10px] font-semibold text-text/30 uppercase text-right">Стоимость</th>
               </tr>
             </thead>
             <tbody>
@@ -362,11 +362,11 @@ function HistoryTab({ usage }: { usage: UsageItem[] }) {
                 const model = MODELS.find((m) => m.id === u.model_id);
                 return (
                   <tr key={i} className="border-b border-text/[0.03] hover:bg-bg/50 transition-colors">
-                    <td className="px-5 py-3 text-text/60 text-xs">{formatDateTime(u.created_at)}</td>
-                    <td className="px-5 py-3 text-xs font-medium text-text">{model?.name || u.model_id}</td>
-                    <td className="px-5 py-3 text-xs text-text/40 text-right">{u.tokens_in.toLocaleString()}</td>
-                    <td className="px-5 py-3 text-xs text-text/40 text-right">{u.tokens_out.toLocaleString()}</td>
-                    <td className="px-5 py-3 text-xs font-bold text-accent text-right">${u.cost_usd.toFixed(4)}</td>
+                    <td className="px-3 sm:px-5 py-3 text-text/60 text-xs">{formatDateTime(u.created_at)}</td>
+                    <td className="px-3 sm:px-5 py-3 text-xs font-medium text-text truncate max-w-[120px] sm:max-w-none">{model?.name || u.model_id}</td>
+                    <td className="px-3 sm:px-5 py-3 text-xs text-text/40 text-right hidden sm:table-cell">{u.tokens_in.toLocaleString()}</td>
+                    <td className="px-3 sm:px-5 py-3 text-xs text-text/40 text-right hidden sm:table-cell">{u.tokens_out.toLocaleString()}</td>
+                    <td className="px-3 sm:px-5 py-3 text-xs font-bold text-accent text-right">${u.cost_usd.toFixed(2)}</td>
                   </tr>
                 );
               })}
@@ -646,7 +646,7 @@ function ReferralsTab({ stats, loading }: { stats: ReferralStats | null; loading
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <StatCard label="Приглашено" value={stats.referral_count.toString()} />
         <StatCard label="Заработано" value={`$${stats.referral_balance.toFixed(2)}`} accent />
         <StatCard label="Процент" value={`${stats.referral_percent}%`} />
