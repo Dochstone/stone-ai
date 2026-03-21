@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
@@ -33,6 +33,27 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
+
+  useEffect(() => {
+    if (resendTimer <= 0) return;
+    const t = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendTimer]);
+
+  const resendCode = useCallback(async () => {
+    if (resendTimer > 0) return;
+    setError("");
+    try {
+      if (screen === "verify") {
+        await api("/api/auth/register", { email, password });
+      } else if (screen === "reset") {
+        await api("/api/auth/forgot-password", { email });
+      }
+      setResendTimer(60);
+      setMessage("Новый код отправлен на " + email);
+    } catch (err: any) { setError(err.message); }
+  }, [screen, email, password, resendTimer]);
 
   const api = async (endpoint: string, body: object) => {
     const res = await fetch(`${API_URL}${endpoint}`, {
@@ -60,6 +81,7 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
     try {
       await api("/api/auth/register", { email, password });
       setMessage("Код отправлен на " + email);
+      setResendTimer(60);
       setScreen("verify");
     } catch (err: any) { setError(err.message); } finally { setLoading(false); }
   };
@@ -79,6 +101,7 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
     try {
       await api("/api/auth/forgot-password", { email });
       setMessage("Код отправлен на " + email);
+      setResendTimer(60);
       setScreen("reset");
     } catch (err: any) { setError(err.message); } finally { setLoading(false); }
   };
@@ -136,10 +159,16 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
               <button type="submit" disabled={loading} className={btnClass}>
                 {loading ? "Проверяю..." : "Подтвердить"}
               </button>
-              <button type="button" onClick={() => { setScreen("register"); setError(""); setCode(""); }}
-                className="w-full text-text/40 text-xs hover:text-accent transition-colors py-1">
-                Назад
-              </button>
+              <div className="flex items-center justify-between">
+                <button type="button" onClick={() => { setScreen("register"); setError(""); setCode(""); }}
+                  className="text-text/40 text-xs hover:text-accent transition-colors py-1">
+                  Назад
+                </button>
+                <button type="button" onClick={resendCode} disabled={resendTimer > 0}
+                  className="text-xs hover:text-accent transition-colors py-1 disabled:text-text/20 text-text/40">
+                  {resendTimer > 0 ? `Повторить через ${resendTimer}с` : "Отправить код повторно"}
+                </button>
+              </div>
             </form>
           )}
 
@@ -179,10 +208,16 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
               <button type="submit" disabled={loading} className={btnClass}>
                 {loading ? "Сохраняю..." : "Сменить пароль"}
               </button>
-              <button type="button" onClick={() => { setScreen("forgot"); setError(""); setCode(""); }}
-                className="w-full text-text/40 text-xs hover:text-accent transition-colors py-1">
+              <div className="flex items-center justify-between">
+                <button type="button" onClick={() => { setScreen("forgot"); setError(""); setCode(""); }}
+                  className="text-text/40 text-xs hover:text-accent transition-colors py-1">
                 Назад
-              </button>
+                </button>
+                <button type="button" onClick={resendCode} disabled={resendTimer > 0}
+                  className="text-xs hover:text-accent transition-colors py-1 disabled:text-text/20 text-text/40">
+                  {resendTimer > 0 ? `Повторить через ${resendTimer}с` : "Отправить код повторно"}
+                </button>
+              </div>
             </form>
           )}
 
