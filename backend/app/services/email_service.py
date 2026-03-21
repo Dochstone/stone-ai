@@ -1,18 +1,16 @@
-"""Email service — send verification codes and password resets via SMTP."""
+"""Email service — send via email proxy on VPS (noreply@stoneai.ru)."""
 
 import os
 import random
-import smtplib
 import logging
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import threading
+
+import httpx
 
 logger = logging.getLogger(__name__)
 
-SMTP_HOST = os.getenv("SMTP_HOST", "smtp.beget.com")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "465"))
-SMTP_EMAIL = os.getenv("SMTP_EMAIL", "noreply@stoneai.ru")
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
+EMAIL_PROXY_URL = os.getenv("EMAIL_PROXY_URL", "http://45.11.93.113:5050/send")
+EMAIL_PROXY_KEY = os.getenv("EMAIL_PROXY_KEY", "stoneai-email-secret-2026")
 
 
 def generate_code() -> str:
@@ -20,22 +18,19 @@ def generate_code() -> str:
 
 
 def _send_email(to_email: str, subject: str, html_body: str):
-    if not SMTP_PASSWORD:
-        logger.error("SMTP_PASSWORD not set, cannot send email")
-        return False
-
-    msg = MIMEMultipart("alternative")
-    msg["From"] = f"Stone AI <{SMTP_EMAIL}>"
-    msg["To"] = to_email
-    msg["Subject"] = subject
-    msg.attach(MIMEText(html_body, "html", "utf-8"))
-
     try:
-        with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=5) as server:
-            server.login(SMTP_EMAIL, SMTP_PASSWORD)
-            server.send_message(msg)
-        logger.info(f"Email sent to {to_email}: {subject}")
-        return True
+        r = httpx.post(
+            EMAIL_PROXY_URL,
+            json={"to": to_email, "subject": subject, "html": html_body},
+            headers={"X-API-Key": EMAIL_PROXY_KEY, "Content-Type": "application/json"},
+            timeout=10,
+        )
+        if r.status_code == 200:
+            logger.info(f"Email sent to {to_email}: {subject}")
+            return True
+        else:
+            logger.error(f"Email proxy error {r.status_code}: {r.text}")
+            return False
     except Exception as e:
         logger.error(f"Failed to send email to {to_email}: {e}")
         return False
@@ -43,7 +38,6 @@ def _send_email(to_email: str, subject: str, html_body: str):
 
 def send_email_background(to_email: str, subject: str, html_body: str):
     """Send email in a background thread to avoid blocking the request."""
-    import threading
     t = threading.Thread(target=_send_email, args=(to_email, subject, html_body), daemon=True)
     t.start()
 
