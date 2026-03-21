@@ -37,7 +37,7 @@ export default function PricingPage() {
           </h1>
           <p className="text-text/60 max-w-xl mx-auto">
             Платите только за использованные токены. Пополняйте баланс любым удобным способом —
-            Stars, карты, СБП или криптовалюта.
+            Stars, криптовалюта или TON.
           </p>
         </div>
 

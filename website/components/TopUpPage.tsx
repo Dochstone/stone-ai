@@ -21,7 +21,7 @@ export default function TopUpPage() {
   const [loaded, setLoaded] = useState(false);
   const [amount, setAmount] = useState(5);
   const [customAmount, setCustomAmount] = useState("");
-  const [method, setMethod] = useState<"lava" | "crypto">("lava");
+  const [method, setMethod] = useState<"lava" | "crypto">("crypto");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [history, setHistory] = useState<TxRecord[]>([]);
@@ -212,17 +212,7 @@ export default function TopUpPage() {
           {/* Method */}
           <div className="mb-6">
             <label className="block text-xs font-semibold text-text/50 mb-2">Способ оплаты</label>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => setMethod("lava")}
-                className={`p-4 rounded-xl border-2 text-left transition-all ${
-                  method === "lava" ? "border-accent bg-accent/5" : "border-text/10 hover:border-text/20"
-                }`}
-              >
-                <div className="font-bold text-sm mb-1">Карта / СБП</div>
-                <div className="text-[10px] text-text/40">Visa, MasterCard, МИР, СБП</div>
-                <div className="text-[10px] text-text/30 mt-1">Через Lava.ru</div>
-              </button>
+            <div className="grid grid-cols-1 gap-3">
               <button
                 onClick={() => setMethod("crypto")}
                 className={`p-4 rounded-xl border-2 text-left transition-all ${

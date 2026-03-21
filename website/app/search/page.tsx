@@ -52,7 +52,7 @@ const faqItems = [
   },
   {
     q: "Зачем Perplexity через Stone AI, если есть perplexity.ai?",
-    a: "Stone AI даёт доступ к Perplexity без VPN, через привычный Telegram. Оплата в рублях через СБП, Stars или крипту. Плюс все остальные 47 моделей в одном месте.",
+    a: "Stone AI даёт доступ к Perplexity без VPN, через привычный Telegram. Оплата через Stars, крипту или TON. Плюс все остальные 47 моделей в одном месте.",
   },
 ];
 

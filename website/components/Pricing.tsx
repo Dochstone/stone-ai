@@ -67,7 +67,7 @@ export default function Pricing() {
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-accent mt-0.5 shrink-0">&#10003;</span>
-                <span>Stars, карты, СБП, криптовалюта</span>
+                <span>Stars, криптовалюта, TON</span>
               </li>
             </ul>
 
@@ -88,7 +88,7 @@ export default function Pricing() {
           <div className="flex items-center justify-center gap-3 sm:gap-6 flex-wrap text-xs sm:text-sm text-text/50">
             <span>Telegram Stars</span>
             <span className="w-1 h-1 bg-text/20 rounded-full hidden sm:block" />
-            <span>Карты / СБП</span>
+            <span>Криптовалюта</span>
             <span className="w-1 h-1 bg-text/20 rounded-full hidden sm:block" />
             <span>USDT / BTC / ETH</span>
           </div>

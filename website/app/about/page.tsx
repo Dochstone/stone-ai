@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 const stats = [
   { value: "50+", label: "AI-моделей", desc: "от 15 мировых компаний" },
   { value: "15", label: "провайдеров", desc: "OpenAI, Anthropic, Google, Meta..." },
-  { value: "4", label: "способа оплаты", desc: "Stars, карты, СБП, крипто" },
+  { value: "3", label: "способа оплаты", desc: "Stars, крипто, TON" },
   { value: "2025", label: "год основания", desc: "работаем стабильно" },
 ];
 
@@ -39,7 +39,7 @@ const values = [
 
 const timeline = [
   { year: "2025", event: "Запуск Stone AI как Telegram-бота с 10 AI-моделями" },
-  { year: "2025", event: "Добавлены генерация картинок, per-token биллинг, 4 способа оплаты" },
+  { year: "2025", event: "Добавлены генерация картинок, per-token биллинг, 3 способа оплаты" },
   { year: "2026", event: "Расширение до 50+ моделей. Видео, 3D, аудио. Веб-чат и сайт stoneai.ru" },
   { year: "2026", event: "Запуск API для разработчиков, реферальная программа" },
 ];

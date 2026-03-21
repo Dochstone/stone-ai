@@ -221,7 +221,7 @@ function BalanceTab({ profile, transactions }: { profile: UserProfile; transacti
     const c = t.currency?.toLowerCase() || "";
     if (c === "stars" || t.product_type === "stars") return "Stars";
     if (c === "ton") return "TON";
-    if (c === "rub") return "Lava";
+    if (c === "rub") return "Рубли";
     if (["usdt", "btc", "eth"].includes(c)) return "Heleket";
     return t.product_type || "—";
   };

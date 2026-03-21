@@ -6,7 +6,7 @@ const features = [
   { name: "AI Поиск (Perplexity)", free: "---", paid: "check" },
   { name: "Глубокий анализ (o3, R1)", free: "---", paid: "check" },
   { name: "Стоимость", free: "Бесплатно", paid: "От $0.24/1M токенов" },
-  { name: "Оплата", free: "—", paid: "Stars, карты, СБП, крипто" },
+  { name: "Оплата", free: "—", paid: "Stars, крипто, TON" },
 ];
 
 function Cell({ value }: { value: string }) {

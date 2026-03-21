@@ -37,7 +37,7 @@ const rows = [
   },
   {
     feature: "Оплата из России",
-    stone: "Stars, СБП, карты, крипто",
+    stone: "Stars, крипто, TON",
     chatgpt: "Зарубежная карта",
     competitors: "Stars, карты",
   },
