@@ -96,6 +96,8 @@ app.add_middleware(
         "https://stone-ai-1.vercel.app",
         "https://stone-ai.vercel.app",
         "https://website-production-907e.up.railway.app",
+        "https://stoneai.ru",
+        "https://www.stoneai.ru",
         "http://localhost:5173",
         "http://localhost:3000",
         "http://localhost:3001",
