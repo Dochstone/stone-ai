@@ -82,7 +82,7 @@ export default function PrivacyPage() {
             <p className="mb-2">4.2. Используемые платёжные провайдеры:</p>
             <ul className="list-disc pl-5 space-y-1 mb-2">
               <li>Telegram Stars — встроенная платёжная система Telegram, обработка производится платформой Telegram;</li>
-              <li>Lava.ru — обработка платежей банковскими картами и через Систему быстрых платежей (СБП) для карт российских банков;</li>
+              <li>Heleket — обработка платежей в криптовалюте (USDT, BTC, ETH);</li>
               <li>Heleket — обработка платежей в криптовалюте (USDT, BTC, ETH);</li>
               <li>TON Connect — оплата криптовалютой TON через кошелёк Пользователя.</li>
             </ul>
@@ -117,8 +117,7 @@ export default function PrivacyPage() {
             <ul className="list-disc pl-5 space-y-1 mb-2">
               <li>OpenRouter — маршрутизация запросов к AI-моделям различных провайдеров;</li>
               <li>OpenAI, Anthropic, Google, DeepSeek — провайдеры AI-моделей, обрабатывающие тексты запросов;</li>
-              <li>Lava.ru — обработка платежей банковскими картами и через СБП;</li>
-              <li>Heleket — обработка платежей в криптовалюте;</li>
+              <li>Heleket — обработка платежей в криптовалюте (USDT, BTC, ETH);</li>
               <li>TON Connect — подключение криптовалютного кошелька TON.</li>
             </ul>
             <p>

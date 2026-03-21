@@ -21,13 +21,13 @@ export default function TopUpPage() {
   const [loaded, setLoaded] = useState(false);
   const [amount, setAmount] = useState(5);
   const [customAmount, setCustomAmount] = useState("");
-  const [method, setMethod] = useState<"lava" | "crypto">("crypto");
+  const [method, setMethod] = useState<"crypto">("crypto");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [history, setHistory] = useState<TxRecord[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [pollOrderId, setPollOrderId] = useState<string | null>(null);
-  const [pollMethod, setPollMethod] = useState<"lava" | "crypto">("lava");
+  const [pollMethod, setPollMethod] = useState<"crypto">("crypto");
 
   useEffect(() => {
     try {
@@ -77,9 +77,7 @@ export default function TopUpPage() {
   // Poll for payment completion
   useEffect(() => {
     if (!pollOrderId || !auth) return;
-    const endpoint = pollMethod === "lava"
-      ? `/api/payment/lava/check/${pollOrderId}`
-      : `/api/payment/crypto/check/${pollOrderId}`;
+    const endpoint = `/api/payment/crypto/check/${pollOrderId}`;
 
     const interval = setInterval(async () => {
       try {
@@ -106,9 +104,7 @@ export default function TopUpPage() {
     setLoading(true);
     setError("");
 
-    const endpoint = method === "lava"
-      ? "/api/payment/lava/create-order"
-      : "/api/payment/crypto/create-order";
+    const endpoint = "/api/payment/crypto/create-order";
 
     try {
       const res = await fetch(`${API_URL}${endpoint}`, {

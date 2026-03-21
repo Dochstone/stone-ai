@@ -71,7 +71,7 @@ export default function TermsPage() {
             <p className="mb-2">3.4. Доступные способы пополнения баланса:</p>
             <ul className="list-disc pl-5 space-y-1 mb-2">
               <li>Telegram Stars — встроенная валюта Telegram;</li>
-              <li>Банковские карты и СБП — через платёжного провайдера Lava.ru;</li>
+              <li>Криптовалюта (USDT, BTC, ETH) — через платёжного провайдера Heleket;</li>
               <li>Криптовалюта (USDT, BTC, ETH) — через платёжного провайдера Heleket;</li>
               <li>TON Connect — оплата в криптовалюте TON.</li>
             </ul>
