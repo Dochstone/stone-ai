@@ -91,6 +91,9 @@ export const metadata: Metadata = {
     icon: "/favicon.ico",
     apple: "/icon-192x192.png",
   },
+  verification: {
+    google: "PpzANTmpi-gEDEFk0SFPtyDzyTJ93D640gChtmgw10o",
+  },
   other: {
     "theme-color": "#C4623D",
   },
