@@ -429,13 +429,13 @@ export default function ToolCards() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-auto">
 
           {/* ── AI Chat — live typing conversation ── */}
-          <a href="/chat" className="sm:col-span-2 bg-[var(--color-card-dark)] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[300px]">
+          <a href="/chat" className="sm:col-span-2 bg-[var(--color-card-dark)] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[260px] sm:min-h-[300px]">
             <div className="relative z-10 mb-4">
               <span className="inline-block bg-accent/20 text-accent text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">50+ моделей</span>
-              <h3 className="font-bold text-xl text-white mb-1">AI Чат</h3>
-              <p className="text-white/50 text-[13px] max-w-[200px]">GPT-5, Claude, Gemini — лучшие модели мира</p>
+              <h3 className="font-bold text-lg sm:text-xl text-white mb-1">AI Чат</h3>
+              <p className="text-white/50 text-[12px] sm:text-[13px] max-w-[140px] sm:max-w-[200px]">GPT-5, Claude, Gemini — лучшие модели мира</p>
             </div>
-            <div className="absolute right-4 sm:right-6 top-4 bottom-4 w-[55%] sm:w-[60%]">
+            <div className="absolute right-3 sm:right-6 top-14 sm:top-4 bottom-4 w-[50%] sm:w-[60%]">
               <ChatDemo />
             </div>
           </a>
