@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import ProfilePage from "@/components/ProfilePage";
 
 export const metadata: Metadata = {
-  title: "Личный кабинет — Stone AI",
+  title: "Личный кабинет",
   description: "Управляйте профилем, балансом и настройками Stone AI.",
 };
 

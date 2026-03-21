@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { POSTS } from "@/lib/blog";
 
 export const metadata: Metadata = {
-  title: "Блог — Stone AI",
+  title: "Блог",
   description:
     "Статьи про AI-модели, сравнения, гайды и советы. Как выбрать модель, сэкономить на AI и оплатить из России.",
 };

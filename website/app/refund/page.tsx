@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Возврат средств — Stone AI",
+  title: "Возврат средств",
 };
 
 export default function RefundPage() {

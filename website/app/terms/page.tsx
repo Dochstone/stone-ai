@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Оферта — Stone AI",
+  title: "Оферта",
 };
 
 export default function TermsPage() {

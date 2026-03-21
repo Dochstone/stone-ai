@@ -6,11 +6,11 @@ import ToolFaq from "@/components/ToolFaq";
 import ToolCta from "@/components/ToolCta";
 
 export const metadata: Metadata = {
-  title: "AI Чат — 50 моделей в одном боте | Stone AI",
+  title: "AI Чат — 50 моделей в одном боте",
   description:
     "Общайтесь с GPT-5, Claude Opus, Gemini Pro, DeepSeek R1 и ещё 46 AI-моделями прямо в Telegram. Без VPN, без подписок. Оплата за токены.",
   openGraph: {
-    title: "AI Чат — 50 моделей в одном боте | Stone AI",
+    title: "AI Чат — 50 моделей в одном боте",
     description: "GPT-5, Claude Opus, Gemini Pro и другие AI-модели прямо в Telegram. Без VPN.",
   },
 };

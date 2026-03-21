@@ -6,11 +6,11 @@ import ToolFaq from "@/components/ToolFaq";
 import ToolCta from "@/components/ToolCta";
 
 export const metadata: Metadata = {
-  title: "AI Поиск — Perplexity в Telegram без VPN | Stone AI",
+  title: "AI Поиск — Perplexity в Telegram без VPN",
   description:
     "Поиск в интернете с AI: актуальные данные, источники, глубокие исследования. Perplexity Sonar, Pro и Deep Research. Без VPN, в Telegram.",
   openGraph: {
-    title: "AI Поиск — Perplexity в Telegram без VPN | Stone AI",
+    title: "AI Поиск — Perplexity в Telegram без VPN",
     description: "Perplexity в Telegram без VPN. Real-time данные, ссылки на источники, глубокие исследования.",
   },
 };

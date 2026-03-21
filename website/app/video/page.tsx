@@ -6,7 +6,7 @@ import ToolFaq from "@/components/ToolFaq";
 import ToolCta from "@/components/ToolCta";
 
 export const metadata: Metadata = {
-  title: "AI Генерация видео — Kling, Runway, Pika | Stone AI",
+  title: "AI Генерация видео — Kling, Runway, Pika",
   description: "Генерируйте видео из текста и фото. Kling v2, Runway Gen-3, Pika 2.0, Stable Video, Luma Dream Machine. От $0.15 за видео.",
 };
 
@@ -36,6 +36,7 @@ const faqItems = [
 export default function VideoPage() {
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Stone AI — AI Видео", applicationCategory: "MultimediaApplication", description: "Генерация видео из текста и фото. Kling v2, Runway Gen-3, Pika 2.0.", offers: { "@type": "Offer", price: "0.15", priceCurrency: "USD" } }) }} />
       <ToolPageHero
         badge="5 видео-моделей"
         title="AI Генерация видео"

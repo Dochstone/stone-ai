@@ -6,11 +6,11 @@ import ToolFaq from "@/components/ToolFaq";
 import ToolCta from "@/components/ToolCta";
 
 export const metadata: Metadata = {
-  title: "AI Переводчик — 100+ языков с пониманием контекста | Stone AI",
+  title: "AI Переводчик — 100+ языков с пониманием контекста",
   description:
     "Точный AI-перевод на 100+ языков. Понимает контекст, сохраняет тон и стиль. GPT, Claude, Gemini — в Telegram без VPN.",
   openGraph: {
-    title: "AI Переводчик — 100+ языков | Stone AI",
+    title: "AI Переводчик — 100+ языков",
     description: "AI-перевод с пониманием контекста. 100+ языков, сохранение тона. В Telegram без VPN.",
   },
 };

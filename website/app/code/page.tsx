@@ -6,11 +6,11 @@ import ToolFaq from "@/components/ToolFaq";
 import ToolCta from "@/components/ToolCta";
 
 export const metadata: Metadata = {
-  title: "AI Код-ассистент — Claude, GPT, DeepSeek для разработки | Stone AI",
+  title: "AI Код-ассистент — Claude, GPT, DeepSeek для разработки",
   description:
     "AI-помощник для программистов: отладка, рефакторинг, генерация кода. Claude Opus, GPT-4.1, Devstral, DeepSeek R1. Без VPN, в Telegram.",
   openGraph: {
-    title: "AI Код-ассистент — Claude, GPT, DeepSeek | Stone AI",
+    title: "AI Код-ассистент — Claude, GPT, DeepSeek",
     description: "AI-помощник для разработчиков: Claude Opus, GPT-4.1, Devstral, o3. В Telegram без VPN.",
   },
 };

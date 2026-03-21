@@ -6,11 +6,11 @@ import ToolFaq from "@/components/ToolFaq";
 import ToolCta from "@/components/ToolCta";
 
 export const metadata: Metadata = {
-  title: "Анализ документов AI — PDF, фото, контракты | Stone AI",
+  title: "Анализ документов AI — PDF, фото, контракты",
   description:
     "Загрузите PDF, фото документа или текст — AI ответит на любой вопрос. Claude Opus (200K), Gemini Pro (1M контекст). Без VPN, в Telegram.",
   openGraph: {
-    title: "Анализ документов AI — PDF, фото, контракты | Stone AI",
+    title: "Анализ документов AI — PDF, фото, контракты",
     description: "Загрузите документ — AI проанализирует и ответит на вопросы. До 1M токенов контекста.",
   },
 };

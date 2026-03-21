@@ -5,7 +5,7 @@ import ToolFaq from "@/components/ToolFaq";
 import ToolCta from "@/components/ToolCta";
 
 export const metadata: Metadata = {
-  title: "AI Аудио — озвучка текста и голосовой ввод | Stone AI",
+  title: "AI Аудио — озвучка текста и голосовой ввод",
   description: "Озвучка текста 10+ голосами (GPT Audio), голосовой ввод через Whisper. TTS и STT в одном чате. От $0.01 за предложение.",
 };
 
@@ -25,6 +25,7 @@ const faqItems = [
 export default function AudioPage() {
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Stone AI — AI Аудио", applicationCategory: "MultimediaApplication", description: "Озвучка текста 10+ голосами, голосовой ввод через Whisper AI.", offers: { "@type": "Offer", price: "0", priceCurrency: "USD", description: "15 бесплатных запросов в день" } }) }} />
       <ToolPageHero
         badge="10+ голосов"
         title="AI Аудио — озвучка"

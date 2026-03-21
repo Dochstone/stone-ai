@@ -4,7 +4,7 @@ import PricingComparison from "@/components/PricingComparison";
 import PricingTable from "@/components/PricingTable";
 
 export const metadata: Metadata = {
-  title: "Цены — Stone AI",
+  title: "Цены",
   description:
     "Прозрачные цены на 50 AI-моделей. Платите только за использованные токены. От $0.24 за 1M. Калькулятор стоимости.",
 };

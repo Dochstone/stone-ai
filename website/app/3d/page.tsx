@@ -6,7 +6,7 @@ import ToolFaq from "@/components/ToolFaq";
 import ToolCta from "@/components/ToolCta";
 
 export const metadata: Metadata = {
-  title: "3D Генерация — из текста и фото в 3D модель | Stone AI",
+  title: "3D Генерация — из текста и фото в 3D модель",
   description: "Генерируйте 3D модели из текста и фотографий. Tripo v2.5, TripoSR. GLB формат для игр, печати, визуализации. От $0.21 за модель.",
 };
 
@@ -33,6 +33,7 @@ const faqItems = [
 export default function ThreeDPage() {
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Stone AI — 3D Генерация", applicationCategory: "DesignApplication", description: "Генерация 3D моделей из текста и фото. Tripo v2.5, TripoSR. GLB формат.", offers: { "@type": "Offer", price: "0.21", priceCurrency: "USD" } }) }} />
       <ToolPageHero
         badge="Text/Image → 3D"
         title="3D модели из текста"

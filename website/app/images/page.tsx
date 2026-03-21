@@ -6,11 +6,11 @@ import ToolFaq from "@/components/ToolFaq";
 import ToolCta from "@/components/ToolCta";
 
 export const metadata: Metadata = {
-  title: "Генерация картинок AI — Flux, GPT-5 Image, SDXL | Stone AI",
+  title: "Генерация картинок AI — Flux, GPT-5 Image, SDXL",
   description:
     "Создавайте изображения с помощью AI прямо в Telegram. Nano Banana Pro, GPT-5 Image, Flux Schnell, SDXL. От $0.012 за картинку. Без VPN.",
   openGraph: {
-    title: "Генерация картинок AI — Flux, GPT-5 Image, SDXL | Stone AI",
+    title: "Генерация картинок AI — Flux, GPT-5 Image, SDXL",
     description: "Создавайте AI-изображения в Telegram. 6 моделей, от $0.012 за картинку.",
   },
 };
