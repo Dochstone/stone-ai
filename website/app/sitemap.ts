@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { POSTS } from "@/lib/blog";
+import { MODELS } from "@/lib/models";
 
 import { SITE_URL } from "@/lib/constants";
 
@@ -36,5 +37,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...blogPages];
+  const modelPages: MetadataRoute.Sitemap = MODELS.map((model) => ({
+    url: `${SITE_URL}/models/${model.id}`,
+    lastModified: now,
+    changeFrequency: "monthly",
+    priority: 0.6,
+  }));
+
+  return [...staticPages, ...blogPages, ...modelPages];
 }
