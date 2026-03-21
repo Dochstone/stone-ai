@@ -22,10 +22,16 @@ from app.middleware.web_auth import (
     JWT_EXPIRE_DAYS,
 )
 from app.config import get_settings
+from app.services.email_service import generate_code, send_verification_code, send_reset_code
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
+
+# In-memory code store: {email: {"code": "123456", "ts": timestamp, "password": "hashed", ...}}
+_pending_codes: dict[str, dict] = {}
+_reset_codes: dict[str, dict] = {}
+CODE_TTL = 600  # 10 minutes
 
 
 class RegisterRequest(BaseModel):
@@ -49,6 +55,21 @@ class GoogleAuthRequest(BaseModel):
 
 class YandexAuthRequest(BaseModel):
     code: str
+
+
+class VerifyEmailRequest(BaseModel):
+    email: str
+    code: str
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+
+class ResetPasswordRequest(BaseModel):
+    email: str
+    code: str
+    new_password: str
 
 
 def _validate_email(email: str) -> str:
@@ -96,21 +117,54 @@ def _user_response(user: User, token: str) -> JSONResponse:
 
 @router.post("/register")
 async def register(body: RegisterRequest, db: AsyncSession = Depends(get_db)):
-    """Register a new user with email and password."""
+    """Step 1: Send verification code to email."""
     email = _validate_email(body.email)
     _validate_password(body.password)
 
     existing = await db.execute(select(User).where(User.email == email))
     if existing.scalar_one_or_none():
-        raise HTTPException(409, "Email already registered")
+        raise HTTPException(409, "Email уже зарегистрирован")
 
-    # Negative placeholder telegram_id for web-only users
+    code = generate_code()
+    _pending_codes[email] = {
+        "code": code,
+        "ts": time.time(),
+        "password_hash": hash_password(body.password),
+    }
+
+    if not send_verification_code(email, code):
+        raise HTTPException(502, "Не удалось отправить код. Попробуйте позже.")
+
+    return {"status": "code_sent", "message": "Код отправлен на почту"}
+
+
+@router.post("/verify-email")
+async def verify_email(body: VerifyEmailRequest, db: AsyncSession = Depends(get_db)):
+    """Step 2: Verify code and create account."""
+    email = _validate_email(body.email)
+
+    pending = _pending_codes.get(email)
+    if not pending:
+        raise HTTPException(400, "Сначала запросите код регистрации")
+
+    if time.time() - pending["ts"] > CODE_TTL:
+        _pending_codes.pop(email, None)
+        raise HTTPException(400, "Код истёк. Запросите новый.")
+
+    if pending["code"] != body.code.strip():
+        raise HTTPException(400, "Неверный код")
+
+    # Check again that email isn't taken
+    existing = await db.execute(select(User).where(User.email == email))
+    if existing.scalar_one_or_none():
+        _pending_codes.pop(email, None)
+        raise HTTPException(409, "Email уже зарегистрирован")
+
     placeholder_tg_id = -int(time.time() * 1000) % (2**53)
-
     user = User(
         telegram_id=placeholder_tg_id,
         email=email,
-        password_hash=hash_password(body.password),
+        password_hash=pending["password_hash"],
         auth_provider="email",
         first_name=email.split("@")[0],
         username=None,
@@ -119,6 +173,55 @@ async def register(body: RegisterRequest, db: AsyncSession = Depends(get_db)):
     db.add(user)
     await db.flush()
 
+    _pending_codes.pop(email, None)
+    token = create_jwt(user.id, email)
+    return _user_response(user, token)
+
+
+@router.post("/forgot-password")
+async def forgot_password(body: ForgotPasswordRequest, db: AsyncSession = Depends(get_db)):
+    """Send password reset code to email."""
+    email = _validate_email(body.email)
+
+    result = await db.execute(select(User).where(User.email == email))
+    user = result.scalar_one_or_none()
+    if not user:
+        # Don't reveal if email exists
+        return {"status": "ok", "message": "Если аккаунт существует, код отправлен на почту"}
+
+    code = generate_code()
+    _reset_codes[email] = {"code": code, "ts": time.time()}
+
+    send_reset_code(email, code)
+    return {"status": "ok", "message": "Если аккаунт существует, код отправлен на почту"}
+
+
+@router.post("/reset-password")
+async def reset_password(body: ResetPasswordRequest, db: AsyncSession = Depends(get_db)):
+    """Verify reset code and set new password."""
+    email = _validate_email(body.email)
+    _validate_password(body.new_password)
+
+    pending = _reset_codes.get(email)
+    if not pending:
+        raise HTTPException(400, "Сначала запросите код сброса")
+
+    if time.time() - pending["ts"] > CODE_TTL:
+        _reset_codes.pop(email, None)
+        raise HTTPException(400, "Код истёк. Запросите новый.")
+
+    if pending["code"] != body.code.strip():
+        raise HTTPException(400, "Неверный код")
+
+    result = await db.execute(select(User).where(User.email == email))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(404, "Пользователь не найден")
+
+    user.password_hash = hash_password(body.new_password)
+    await db.flush()
+
+    _reset_codes.pop(email, None)
     token = create_jwt(user.id, email)
     return _user_response(user, token)
 
