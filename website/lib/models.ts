@@ -14,7 +14,7 @@ export interface AIModel {
   strengths?: string[];
 }
 
-export const TELEGRAM_BOT_URL = "https://t.me/StoneAIBot";
+export const TELEGRAM_BOT_URL = "https://t.me/drifttt55bot";
 
 export const MODELS: AIModel[] = [
   // TIER 1: FREE (5 models)

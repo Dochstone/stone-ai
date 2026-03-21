@@ -110,7 +110,7 @@ const jsonLdOrganization = {
   },
   description:
     "Платформа доступа к 50+ AI-моделям через Telegram. GPT-5, Claude Opus, Gemini Pro и другие. Без VPN, без подписок.",
-  sameAs: ["https://t.me/StoneAIBot", "https://t.me/StoneAIsupport"],
+  sameAs: ["https://t.me/drifttt55bot", "https://t.me/StoneAIsupport"],
   contactPoint: {
     "@type": "ContactPoint",
     contactType: "customer support",
@@ -143,8 +143,8 @@ const jsonLdSoftware = {
   name: "Stone AI",
   operatingSystem: "Android, iOS, Web",
   applicationCategory: "BusinessApplication",
-  url: "https://t.me/StoneAIBot",
-  downloadUrl: "https://t.me/StoneAIBot",
+  url: "https://t.me/drifttt55bot",
+  downloadUrl: "https://t.me/drifttt55bot",
   author: { "@id": `${SITE_URL}/#organization` },
   offers: {
     "@type": "AggregateOffer",

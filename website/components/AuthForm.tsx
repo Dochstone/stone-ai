@@ -276,7 +276,7 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
         </div>
 
         <p className="text-center mt-6 text-xs text-text/30">
-          Или используйте <a href="https://t.me/StoneAIBot" className="text-accent hover:underline">Telegram-бота</a>
+          Или используйте <a href="https://t.me/drifttt55bot" className="text-accent hover:underline">Telegram-бота</a>
         </p>
       </div>
     </div>

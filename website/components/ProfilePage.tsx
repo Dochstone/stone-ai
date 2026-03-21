@@ -437,7 +437,7 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
   };
 
   const linkTelegram = () => {
-    window.open("https://t.me/StoneAIBot?start=link_" + profile.id, "_blank");
+    window.open("https://t.me/drifttt55bot?start=link_" + profile.id, "_blank");
   };
 
   const linkGoogle = () => {

@@ -159,7 +159,7 @@ export default function AboutPage() {
               Написать в поддержку
             </a>
             <a
-              href="https://t.me/StoneAIBot"
+              href="https://t.me/drifttt55bot"
               target="_blank"
               rel="noopener noreferrer"
               className="border-2 border-text/15 text-text px-8 py-3.5 rounded-xl font-bold hover:border-accent hover:text-accent transition-colors"

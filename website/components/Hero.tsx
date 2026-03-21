@@ -278,7 +278,7 @@ export default function Hero() {
 
           <div className="mt-4 flex items-center justify-center">
             <a
-              href="https://t.me/StoneAIBot"
+              href="https://t.me/drifttt55bot"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm font-semibold text-text/50 hover:text-accent transition-colors"
