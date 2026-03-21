@@ -132,9 +132,7 @@ async def register(body: RegisterRequest, db: AsyncSession = Depends(get_db)):
         "password_hash": hash_password(body.password),
     }
 
-    if not send_verification_code(email, code):
-        raise HTTPException(502, "Не удалось отправить код. Попробуйте позже.")
-
+    send_verification_code(email, code)
     return {"status": "code_sent", "message": "Код отправлен на почту"}
 
 

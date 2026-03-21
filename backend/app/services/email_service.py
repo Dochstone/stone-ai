@@ -31,7 +31,7 @@ def _send_email(to_email: str, subject: str, html_body: str):
     msg.attach(MIMEText(html_body, "html", "utf-8"))
 
     try:
-        with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=10) as server:
+        with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=5) as server:
             server.login(SMTP_EMAIL, SMTP_PASSWORD)
             server.send_message(msg)
         logger.info(f"Email sent to {to_email}: {subject}")
@@ -41,7 +41,14 @@ def _send_email(to_email: str, subject: str, html_body: str):
         return False
 
 
-def send_verification_code(to_email: str, code: str) -> bool:
+def send_email_background(to_email: str, subject: str, html_body: str):
+    """Send email in a background thread to avoid blocking the request."""
+    import threading
+    t = threading.Thread(target=_send_email, args=(to_email, subject, html_body), daemon=True)
+    t.start()
+
+
+def send_verification_code(to_email: str, code: str):
     html = f"""
     <div style="font-family:sans-serif;max-width:400px;margin:0 auto;padding:20px">
         <h2 style="color:#C4623D;margin-bottom:8px">Stone AI</h2>
@@ -52,10 +59,10 @@ def send_verification_code(to_email: str, code: str) -> bool:
         <p style="color:#888;font-size:13px">Код действителен 10 минут. Если вы не запрашивали регистрацию — проигнорируйте это письмо.</p>
     </div>
     """
-    return _send_email(to_email, f"Код подтверждения: {code}", html)
+    send_email_background(to_email, f"Код подтверждения: {code}", html)
 
 
-def send_reset_code(to_email: str, code: str) -> bool:
+def send_reset_code(to_email: str, code: str):
     html = f"""
     <div style="font-family:sans-serif;max-width:400px;margin:0 auto;padding:20px">
         <h2 style="color:#C4623D;margin-bottom:8px">Stone AI</h2>
@@ -66,4 +73,4 @@ def send_reset_code(to_email: str, code: str) -> bool:
         <p style="color:#888;font-size:13px">Код действителен 10 минут. Если вы не запрашивали сброс пароля — проигнорируйте это письмо.</p>
     </div>
     """
-    return _send_email(to_email, f"Сброс пароля: {code}", html)
+    send_email_background(to_email, f"Сброс пароля: {code}", html)
