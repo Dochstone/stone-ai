@@ -7,9 +7,9 @@ import ToolCta from "@/components/ToolCta";
 import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "AI Чат — 50 моделей в одном боте",
+  title: "ИИ чат-бот — 50 нейросетей в одном боте без VPN",
   description:
-    "Общайтесь с GPT-5, Claude Opus, Gemini Pro, DeepSeek R1 и ещё 46 AI-моделями прямо в Telegram. Без VPN, без подписок. Оплата за токены.",
+    "Чат с нейросетями GPT-5, Claude Opus, Gemini Pro, DeepSeek R1 прямо в Telegram. ИИ бот без VPN, без подписок. Оплата за токены.",
   openGraph: {
     title: "AI Чат — 50 моделей в одном боте",
     description: "GPT-5, Claude Opus, Gemini Pro и другие AI-модели прямо в Telegram. Без VPN.",
@@ -77,10 +77,10 @@ export default function ChatPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
       <ToolPageHero
-        badge="50+ AI-моделей"
-        title="AI Чат с лучшими"
-        highlight="моделями мира"
-        description="GPT-5, Claude Opus, Gemini Pro, DeepSeek R1 и ещё 46 моделей. Сравнивайте ответы, выбирайте лучшую для каждой задачи."
+        badge="50+ нейросетей в одном чате"
+        title="ИИ чат-бот с лучшими"
+        highlight="нейросетями мира"
+        description="Чат-бот с GPT-5, Claude Opus, Gemini Pro, DeepSeek R1 и ещё 46 нейросетями. Сравнивайте ответы ИИ, выбирайте лучшую модель для каждой задачи."
       />
       <ToolModels
         title="Модели для чата"

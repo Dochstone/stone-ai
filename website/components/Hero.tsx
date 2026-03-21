@@ -252,9 +252,9 @@ export default function Hero() {
           </h1>
 
           <p className="mt-6 text-lg md:text-xl text-text/60 max-w-2xl mx-auto leading-relaxed">
-            Переключайтесь между GPT-5, Claude, Gemini и Grok за одно нажатие.
+            ИИ чат-бот с нейросетями GPT-5, Claude, Gemini и Grok — переключайтесь за одно нажатие.
             <br className="hidden sm:block" />
-            Генерируйте картинки и видео, анализируйте документы, ищите в интернете. Начните бесплатно.
+            Генерация картинок и видео, анализ документов, поиск в интернете. Попробуйте бесплатно.
           </p>
 
           {/* CTA buttons */}

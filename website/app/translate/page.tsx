@@ -7,9 +7,9 @@ import ToolCta from "@/components/ToolCta";
 import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "AI Переводчик — 100+ языков с пониманием контекста",
+  title: "ИИ переводчик нейросетью — 100+ языков онлайн",
   description:
-    "Точный AI-перевод на 100+ языков. Понимает контекст, сохраняет тон и стиль. GPT, Claude, Gemini — в Telegram без VPN.",
+    "Перевод нейросетью на 100+ языков. ИИ понимает контекст, сохраняет тон. Чат-бот с GPT, Claude, Gemini — в Telegram без VPN.",
   openGraph: {
     title: "AI Переводчик — 100+ языков",
     description: "AI-перевод с пониманием контекста. 100+ языков, сохранение тона. В Telegram без VPN.",
@@ -74,10 +74,10 @@ export default function TranslatePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
       <ToolPageHero
-        badge="100+ языков"
-        title="AI-переводчик"
+        badge="Нейросеть-переводчик"
+        title="ИИ-переводчик"
         highlight="с пониманием контекста"
-        description="Не просто перевод — адаптация. AI понимает контекст, сохраняет тон и стиль. 100+ языков, от бесплатных до премиум-моделей."
+        description="Нейросеть переводит с пониманием контекста, сохраняет тон и стиль. ИИ чат-бот для перевода на 100+ языков."
       />
       <ToolModels
         title="Модели для перевода"

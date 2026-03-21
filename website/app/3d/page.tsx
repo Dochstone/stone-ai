@@ -8,8 +8,8 @@ import ModelViewerScript from "@/components/ModelViewerScript";
 import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "3D Генерация — из текста и фото в 3D модель",
-  description: "Генерируйте 3D модели из текста и фотографий. Tripo v2.5, TripoSR. GLB формат для игр, печати, визуализации. От $0.21 за модель.",
+  title: "3D генерация нейросетью — ИИ из текста в 3D модель",
+  description: "Нейросеть для 3D генерации из текста и фото. ИИ-модели Tripo v2.5, TripoSR. GLB для игр, печати. От $0.21. Без VPN.",
 };
 
 const modelIds = ["tripo-v2.5", "triposr"];
@@ -43,10 +43,10 @@ export default function ThreeDPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Stone AI — 3D Генерация", applicationCategory: "DesignApplication", description: "Генерация 3D моделей из текста и фото. Tripo v2.5, TripoSR. GLB формат.", offers: { "@type": "Offer", price: "0.21", priceCurrency: "USD" } }) }} />
       <ToolPageHero
-        badge="Text/Image → 3D"
-        title="3D модели из текста"
-        highlight="и фотографий"
-        description="Tripo v2.5 и TripoSR генерируют 3D модели в формате GLB. Для игр, 3D печати, визуализации продуктов."
+        badge="Нейросеть для 3D"
+        title="3D модели нейросетью"
+        highlight="из текста и фото"
+        description="ИИ-генератор 3D моделей: нейросети Tripo v2.5 и TripoSR. GLB формат для игр, 3D печати, визуализации."
       />
       <ToolModels
         title="3D модели"

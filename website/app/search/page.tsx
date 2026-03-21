@@ -7,9 +7,9 @@ import ToolCta from "@/components/ToolCta";
 import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "AI Поиск — Perplexity в Telegram без VPN",
+  title: "ИИ поиск нейросетью — Perplexity в Telegram без VPN",
   description:
-    "Поиск в интернете с AI: актуальные данные, источники, глубокие исследования. Perplexity Sonar, Pro и Deep Research. Без VPN, в Telegram.",
+    "Поиск в интернете нейросетью: актуальные данные, источники. ИИ чат-бот Perplexity Sonar и Deep Research. Без VPN, в Telegram.",
   openGraph: {
     title: "AI Поиск — Perplexity в Telegram без VPN",
     description: "Perplexity в Telegram без VPN. Real-time данные, ссылки на источники, глубокие исследования.",
@@ -65,10 +65,10 @@ export default function SearchPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
       <ToolPageHero
-        badge="Real-time данные"
-        title="AI Поиск в интернете"
-        highlight="с актуальными данными"
-        description="Perplexity Sonar, Pro и Deep Research прямо в Telegram. Актуальные данные, ссылки на источники, автоматические исследования."
+        badge="ИИ-поиск в реальном времени"
+        title="Поиск в интернете"
+        highlight="нейросетью с источниками"
+        description="ИИ-бот ищет в интернете через Perplexity. Нейросеть даёт актуальные данные со ссылками на источники. Чат в Telegram без VPN."
       />
       <ToolModels
         title="Модели для поиска"

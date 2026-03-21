@@ -7,8 +7,8 @@ import ToolCta from "@/components/ToolCta";
 import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "AI Генерация видео — Kling, Runway, Pika",
-  description: "Генерируйте видео из текста и фото. Kling v2, Runway Gen-3, Pika 2.0, Stable Video, Luma Dream Machine. От $0.15 за видео.",
+  title: "Генерация видео нейросетью — ИИ из текста в видео",
+  description: "Нейросеть для генерации видео из текста и фото. ИИ-модели Kling v2, Runway Gen-3, Pika 2.0. От $0.15 за видео. Без VPN.",
 };
 
 const modelIds = ["kling-v2", "runway-gen3", "pika-2", "stable-video", "luma-dream"];
@@ -44,10 +44,10 @@ export default function VideoPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Stone AI — AI Видео", applicationCategory: "MultimediaApplication", description: "Генерация видео из текста и фото. Kling v2, Runway Gen-3, Pika 2.0.", offers: { "@type": "Offer", price: "0.15", priceCurrency: "USD" } }) }} />
       <ToolPageHero
-        badge="5 видео-моделей"
-        title="AI Генерация видео"
+        badge="5 нейросетей для видео"
+        title="Генерация видео нейросетью"
         highlight="из текста и фото"
-        description="Kling v2, Runway Gen-3, Pika 2.0, Stable Video, Luma Dream Machine. Создавайте видео за секунды. От $0.15 за клип."
+        description="ИИ-генератор видео: Kling v2, Runway Gen-3, Pika 2.0, Stable Video, Luma. Нейросеть создаёт видео за секунды. От $0.15 за клип."
       />
       <ToolModels
         title="Видео-модели"

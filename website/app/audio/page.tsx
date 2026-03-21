@@ -7,8 +7,8 @@ import ToolCta from "@/components/ToolCta";
 import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "AI Аудио — озвучка текста и голосовой ввод",
-  description: "Озвучка текста 10+ голосами (GPT Audio), голосовой ввод через Whisper. TTS и STT в одном чате. От $0.01 за предложение.",
+  title: "Озвучка текста нейросетью — ИИ голосовой бот",
+  description: "Нейросеть для озвучки текста 10+ голосами. ИИ чат-бот с голосовым вводом Whisper. TTS и STT без VPN. От $0.01.",
 };
 
 const examples = [
@@ -34,10 +34,10 @@ export default function AudioPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Stone AI — AI Аудио", applicationCategory: "MultimediaApplication", description: "Озвучка текста 10+ голосами, голосовой ввод через Whisper AI.", offers: { "@type": "Offer", price: "0", priceCurrency: "USD", description: "15 бесплатных запросов в день" } }) }} />
       <ToolPageHero
-        badge="10+ голосов"
-        title="AI Аудио — озвучка"
+        badge="Нейросеть для озвучки"
+        title="ИИ Аудио — озвучка"
         highlight="и голосовой ввод"
-        description="Озвучка текста 10+ голосами через GPT Audio. Голосовой ввод через Whisper AI. Мгновенно, на любом языке."
+        description="Нейросеть озвучивает текст 10+ голосами. ИИ чат-бот с голосовым вводом через Whisper. Мгновенно, на любом языке."
       />
       <section className="py-20 md:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

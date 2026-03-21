@@ -8,9 +8,9 @@ import ToolCta from "@/components/ToolCta";
 import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Генерация картинок AI — Flux, GPT-5 Image, SDXL",
+  title: "Генерация картинок нейросетью — ИИ бесплатно онлайн",
   description:
-    "Создавайте изображения с помощью AI прямо в Telegram. Nano Banana Pro, GPT-5 Image, Flux Schnell, SDXL. От $0.012 за картинку. Без VPN.",
+    "Генерация картинок нейросетью в Telegram. ИИ-генератор: Flux, GPT-5 Image, SDXL. От $0.012 за картинку. Без VPN.",
   openGraph: {
     title: "Генерация картинок AI — Flux, GPT-5 Image, SDXL",
     description: "Создавайте AI-изображения в Telegram. 6 моделей, от $0.012 за картинку.",
@@ -72,10 +72,10 @@ export default function ImagesPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
       <ToolPageHero
-        badge="6 моделей генерации"
-        title="Создавайте изображения"
-        highlight="с помощью AI"
-        description="Flux, GPT-5 Image, Nano Banana Pro и другие модели. Фотореализм, иллюстрации, логотипы, мемы — от $0.012 за картинку."
+        badge="6 нейросетей для картинок"
+        title="Генерация картинок"
+        highlight="нейросетью бесплатно"
+        description="Нейросети Flux, GPT-5 Image, Nano Banana Pro. Фотореализм, иллюстрации, логотипы, мемы — ИИ генератор от $0.012 за картинку."
       />
       <ToolModels
         title="Модели для генерации картинок"

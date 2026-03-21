@@ -7,9 +7,9 @@ import ToolCta from "@/components/ToolCta";
 import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "AI Код-ассистент — Claude, GPT, DeepSeek для разработки",
+  title: "Нейросеть для кода — ИИ-ассистент для программистов",
   description:
-    "AI-помощник для программистов: отладка, рефакторинг, генерация кода. Claude Opus, GPT-4.1, Devstral, DeepSeek R1. Без VPN, в Telegram.",
+    "ИИ чат-бот для программистов: отладка, рефакторинг, генерация кода. Нейросети Claude Opus, GPT-4.1, Devstral. Без VPN, в Telegram.",
   openGraph: {
     title: "AI Код-ассистент — Claude, GPT, DeepSeek",
     description: "AI-помощник для разработчиков: Claude Opus, GPT-4.1, Devstral, o3. В Telegram без VPN.",
@@ -78,10 +78,10 @@ export default function CodePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
       <ToolPageHero
-        badge="Для разработчиков"
-        title="AI-ассистент"
+        badge="Нейросеть для кода"
+        title="ИИ-ассистент"
         highlight="для программистов"
-        description="Дебаг, рефакторинг, генерация кода, code review, SQL, DevOps. Claude Opus, GPT-4.1, Devstral и другие — прямо в Telegram."
+        description="Нейросеть для дебага, рефакторинга, генерации кода, code review. Чат-бот с Claude Opus, GPT-4.1, Devstral — прямо в Telegram."
       />
       <ToolModels
         title="Модели для разработки"

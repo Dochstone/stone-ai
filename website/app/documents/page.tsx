@@ -7,9 +7,9 @@ import ToolCta from "@/components/ToolCta";
 import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Анализ документов AI — PDF, фото, контракты",
+  title: "Анализ документов нейросетью — ИИ для PDF и фото",
   description:
-    "Загрузите PDF, фото документа или текст — AI ответит на любой вопрос. Claude Opus (200K), Gemini Pro (1M контекст). Без VPN, в Telegram.",
+    "Загрузите PDF или фото — нейросеть ответит на любой вопрос. ИИ чат-бот с Claude Opus, Gemini Pro. Без VPN, в Telegram.",
   openGraph: {
     title: "Анализ документов AI — PDF, фото, контракты",
     description: "Загрузите документ — AI проанализирует и ответит на вопросы. До 1M токенов контекста.",
@@ -71,10 +71,10 @@ export default function DocumentsPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
       <ToolPageHero
-        badge="Контекст до 1M токенов"
+        badge="Нейросеть для документов"
         title="Анализ документов"
-        highlight="с помощью AI"
-        description="Загрузите PDF, фото или текст — AI ответит на любой вопрос. Контракты, отчёты, научные статьи, счета."
+        highlight="нейросетью онлайн"
+        description="Загрузите PDF, фото или текст — ИИ ответит на любой вопрос. Чат-бот анализирует контракты, отчёты, научные статьи."
       />
       <ToolModels
         title="Модели для анализа документов"
