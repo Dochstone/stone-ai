@@ -69,6 +69,17 @@ class User(Base):
 
     # ─── Subscription tier ───
     subscription_tier: Mapped[str | None] = mapped_column(String(20), server_default=text("'free'"))  # free/mini/opti/plus
+    credits_balance: Mapped[int] = mapped_column(Integer, server_default=text("0"))
+    credits_reset_date = mapped_column(DateTime, nullable=True)
+    subscription_started = mapped_column(DateTime, nullable=True)
+
+    # ─── Monthly usage counters (reset with subscription) ───
+    monthly_fast_used: Mapped[int] = mapped_column(Integer, server_default=text("0"))
+    monthly_premium_used: Mapped[int] = mapped_column(Integer, server_default=text("0"))
+    monthly_images_used: Mapped[int] = mapped_column(Integer, server_default=text("0"))
+    monthly_videos_used: Mapped[int] = mapped_column(Integer, server_default=text("0"))
+    monthly_3d_used: Mapped[int] = mapped_column(Integer, server_default=text("0"))
+    monthly_audio_used: Mapped[int] = mapped_column(Integer, server_default=text("0"))
 
     def __repr__(self):
         return f"<User telegram_id={self.telegram_id} username={self.username}>"

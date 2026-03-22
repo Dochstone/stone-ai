@@ -66,6 +66,15 @@ async def migrate_users_table():
         ("fingerprint", "VARCHAR(64)"),
         # Subscription tier
         ("subscription_tier", "VARCHAR(20) DEFAULT 'free'"),
+        ("credits_balance", "INTEGER DEFAULT 0"),
+        ("credits_reset_date", "TIMESTAMP"),
+        ("subscription_started", "TIMESTAMP"),
+        ("monthly_fast_used", "INTEGER DEFAULT 0"),
+        ("monthly_premium_used", "INTEGER DEFAULT 0"),
+        ("monthly_images_used", "INTEGER DEFAULT 0"),
+        ("monthly_videos_used", "INTEGER DEFAULT 0"),
+        ("monthly_3d_used", "INTEGER DEFAULT 0"),
+        ("monthly_audio_used", "INTEGER DEFAULT 0"),
     ]
 
     async with engine.begin() as conn:

@@ -1,6 +1,8 @@
-"""User endpoint — profile, limits, balance info, usage history."""
+"""User endpoint — profile, limits, balance info, usage history, subscriptions."""
 
+from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, Query, Request, HTTPException
+from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -20,6 +22,10 @@ from app.services.subscription import PLANS, CREDIT_COSTS, get_accessible_models
 from app.services.token_billing import get_user_balance, TOKEN_PRICES
 
 router = APIRouter(prefix="/api", tags=["user"])
+
+
+class SubscribeRequest(BaseModel):
+    tier: str  # mini, opti, plus
 
 
 @router.get("/user/me")
@@ -175,3 +181,77 @@ async def list_plans():
             "features": plan["features"],
         })
     return {"plans": result}
+
+
+@router.post("/subscribe")
+async def subscribe(req: SubscribeRequest, request: Request, db: AsyncSession = Depends(get_db)):
+    """Activate a subscription plan. Deducts from USD balance at current exchange rate."""
+    if req.tier not in PLANS or req.tier == "free":
+        raise HTTPException(400, "Недопустимый тариф")
+
+    plan = PLANS[req.tier]
+    price_rub = plan["price_rub"]
+    usd_rate = 95.0  # ~95 RUB/USD
+    price_usd = round(price_rub / usd_rate, 2)
+
+    # Auth — JWT or TG
+    token = extract_jwt_from_request(request)
+    if token:
+        payload = decode_jwt(token)
+        user_id = int(payload["sub"])
+        result = await db.execute(select(User).where(User.id == user_id))
+        user = result.scalar_one_or_none()
+    else:
+        try:
+            tg_user = await get_current_user(request)
+            result = await db.execute(select(User).where(User.telegram_id == tg_user["id"]))
+            user = result.scalar_one_or_none()
+        except Exception:
+            raise HTTPException(401, "Не авторизован")
+
+    if not user:
+        raise HTTPException(404, "Пользователь не найден")
+
+    balance = float(user.balance_usd or 0)
+    if balance < price_usd:
+        raise HTTPException(
+            402,
+            {
+                "error": "insufficient_balance",
+                "message": f"Недостаточно средств. Нужно ${price_usd:.2f}, баланс ${balance:.2f}. Пополните баланс.",
+                "required": price_usd,
+                "balance": balance,
+                "topup_url": "/topup",
+            },
+        )
+
+    # Deduct balance
+    user.balance_usd = round(balance - price_usd, 6)
+
+    # Activate subscription
+    now = datetime.utcnow()
+    user.subscription_tier = req.tier
+    user.credits_balance = plan["credits"]
+    user.subscription_started = now
+    user.credits_reset_date = now + timedelta(days=30)
+
+    # Reset monthly counters
+    user.monthly_fast_used = 0
+    user.monthly_premium_used = 0
+    user.monthly_images_used = 0
+    user.monthly_videos_used = 0
+    user.monthly_3d_used = 0
+    user.monthly_audio_used = 0
+
+    await db.flush()
+
+    return {
+        "status": "ok",
+        "tier": req.tier,
+        "plan_name": plan["name"],
+        "price_rub": price_rub,
+        "price_usd": price_usd,
+        "credits": plan["credits"],
+        "expires": user.credits_reset_date.isoformat(),
+        "new_balance_usd": float(user.balance_usd),
+    }
