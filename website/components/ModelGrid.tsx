@@ -141,14 +141,44 @@ export default function ModelGrid() {
                               <span className="text-[10px] text-accent font-semibold ml-auto">{isOpen ? "Свернуть" : "Подробнее →"}</span>
                             </div>
                           </div>
+                          {/* Mobile inline expand */}
+                          {isOpen && (
+                            <div className="sm:hidden border-t border-accent/10 p-5 space-y-3 animate-fadeIn">
+                              <p className="text-sm text-text leading-relaxed">{model.description}</p>
+                              {model.strengths && (
+                                <div className="flex flex-wrap gap-1.5">
+                                  {model.strengths.map(s => (
+                                    <span key={s} className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-accent/10 text-accent border border-accent/15">{s}</span>
+                                  ))}
+                                </div>
+                              )}
+                              <div className="grid grid-cols-2 gap-2">
+                                <div className="bg-bg rounded-xl p-3">
+                                  <span className="text-text/40 text-[10px] uppercase font-semibold">Контекст</span>
+                                  <p className="font-bold text-sm mt-0.5">{model.context || "—"}</p>
+                                </div>
+                                <div className="bg-bg rounded-xl p-3">
+                                  <span className="text-text/40 text-[10px] uppercase font-semibold">Цена</span>
+                                  <p className="font-bold text-accent text-sm mt-0.5">{formatPrice(model)}</p>
+                                </div>
+                              </div>
+                              <a
+                                href={`/webchat?model=${model.id}`}
+                                className="block text-center bg-accent text-white px-4 py-3 min-h-[44px] rounded-xl text-sm font-bold hover:bg-accent/90 transition-all"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                Попробовать {model.name}
+                              </a>
+                            </div>
+                          )}
                         </div>
                       );
                     })}
                   </div>
 
-                  {/* Expanded panel BELOW the full row */}
+                  {/* Expanded panel BELOW the full row — desktop only */}
                   {expandedInRow && (
-                    <div className="mt-3 bg-white border-2 border-accent/20 rounded-2xl p-6 shadow-lg animate-fadeIn">
+                    <div className="mt-3 bg-white border-2 border-accent/20 rounded-2xl p-6 shadow-lg animate-fadeIn hidden sm:block">
                       <div className="flex flex-col md:flex-row gap-6">
                         {/* Left: info */}
                         <div className="flex-1 space-y-4">
