@@ -3,7 +3,7 @@
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, Query, Request, HTTPException
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
@@ -20,12 +20,16 @@ from app.services.limiter import (
 )
 from app.services.subscription import PLANS, CREDIT_COSTS, get_accessible_models
 from app.services.token_billing import get_user_balance, TOKEN_PRICES
+from app.services.promo import apply_promo
 
 router = APIRouter(prefix="/api", tags=["user"])
 
 
 class SubscribeRequest(BaseModel):
-    tier: str  # mini, opti, plus
+    tier: str  # mini, max, max-pro
+
+class PromoRequest(BaseModel):
+    code: str
 
 
 @router.get("/user/me")
@@ -255,4 +259,74 @@ async def subscribe(req: SubscribeRequest, request: Request, db: AsyncSession = 
         "credits": plan["credits"],
         "expires": user.credits_reset_date.isoformat(),
         "new_balance_usd": float(user.balance_usd),
+    }
+
+
+@router.post("/promo")
+async def apply_promo_code(req: PromoRequest, request: Request, db: AsyncSession = Depends(get_db)):
+    """Apply a promo code to get bonus balance or credits."""
+    token = extract_jwt_from_request(request)
+    if token:
+        payload = decode_jwt(token)
+        user_id = int(payload["sub"])
+        result = await db.execute(select(User).where(User.id == user_id))
+        user = result.scalar_one_or_none()
+    else:
+        try:
+            tg_user = await get_current_user(request)
+            result = await db.execute(select(User).where(User.telegram_id == tg_user["id"]))
+            user = result.scalar_one_or_none()
+        except Exception:
+            raise HTTPException(401, "Не авторизован")
+
+    if not user:
+        raise HTTPException(404, "Пользователь не найден")
+
+    promo_result = await apply_promo(db, user, req.code)
+    if not promo_result["ok"]:
+        raise HTTPException(400, promo_result["error"])
+
+    return promo_result
+
+
+@router.get("/referral")
+async def get_referral_info(request: Request, db: AsyncSession = Depends(get_db)):
+    """Get referral link and stats."""
+    token = extract_jwt_from_request(request)
+    if token:
+        payload = decode_jwt(token)
+        user_id = int(payload["sub"])
+        result = await db.execute(select(User).where(User.id == user_id))
+        user = result.scalar_one_or_none()
+    else:
+        try:
+            tg_user = await get_current_user(request)
+            result = await db.execute(select(User).where(User.telegram_id == tg_user["id"]))
+            user = result.scalar_one_or_none()
+        except Exception:
+            raise HTTPException(401, "Не авторизован")
+
+    if not user:
+        raise HTTPException(404, "Пользователь не найден")
+
+    # Generate referral code if not exists
+    if not user.referral_code:
+        import hashlib
+        user.referral_code = hashlib.md5(str(user.id).encode()).hexdigest()[:8]
+        await db.flush()
+
+    # Count referrals
+    ref_count = await db.scalar(
+        select(func.count()).select_from(User).where(User.referrer_id == user.telegram_id)
+    ) or 0
+
+    from app.services.subscription import PLANS
+    from app.services.limiter import _hours_until_reset
+
+    return {
+        "referral_code": user.referral_code,
+        "referral_link": f"https://stoneai.ru/webchat?ref={user.referral_code}",
+        "referral_count": ref_count,
+        "referral_balance": round(float(user.referral_balance or 0), 2),
+        "referral_percent": 10,  # 10% from each referral top-up
     }

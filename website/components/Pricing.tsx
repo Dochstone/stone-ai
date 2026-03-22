@@ -67,9 +67,10 @@ const plans = [
     name: "Max Pro",
     price: "1 990₽",
     period: "/мес",
-    desc: "Для профессионалов",
-    badge: null,
+    desc: "Максимум возможностей",
+    badge: "Легенда",
     accent: false,
+    premium: true,
     features: [
       "Все 65+ моделей + API доступ",
       "10 000 запросов/мес к быстрым",
@@ -77,9 +78,10 @@ const plans = [
       "300 картинок, 50 видео/мес",
       "30 3D, 100 озвучек",
       "Приоритетная скорость",
+      "Ранний доступ к новым моделям",
     ],
     locked: [],
-    cta: "Выбрать Max Pro",
+    cta: "Стать Max Pro",
     href: "/topup",
   },
 ];
@@ -122,35 +124,41 @@ export default function Pricing() {
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
-          {plans.map((plan) => (
+          {plans.map((plan: any) => (
             <div
               key={plan.id}
               className={`rounded-2xl p-6 relative flex flex-col ${
-                plan.accent
+                plan.premium
+                  ? "bg-gradient-to-br from-[#1C1C1E] to-[#2C2C2E] text-white border-2 border-amber-500/30 shadow-xl shadow-amber-500/10"
+                  : plan.accent
                   ? "bg-bg border-2 border-accent shadow-lg shadow-accent/5"
                   : "bg-bg border border-text/5"
               }`}
             >
               {plan.badge && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-white px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">
-                  {plan.badge}
+                <span className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
+                  plan.premium
+                    ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white"
+                    : "bg-accent text-white"
+                }`}>
+                  {plan.premium ? "⭐ " : ""}{plan.badge}
                 </span>
               )}
 
               <div className="mb-4">
-                <h3 className="text-lg font-extrabold">{plan.name}</h3>
+                <h3 className={`text-lg font-extrabold ${plan.premium ? "text-white" : ""}`}>{plan.name}</h3>
                 <div className="mt-1">
-                  <span className="text-2xl font-extrabold">{plan.price}</span>
-                  {plan.period && <span className="text-text/40 text-sm">{plan.period}</span>}
+                  <span className={`text-2xl font-extrabold ${plan.premium ? "text-amber-400" : ""}`}>{plan.price}</span>
+                  {plan.period && <span className={`text-sm ${plan.premium ? "text-white/40" : "text-text/40"}`}>{plan.period}</span>}
                 </div>
-                <p className="text-text/50 text-xs mt-1">{plan.desc}</p>
+                <p className={`text-xs mt-1 ${plan.premium ? "text-white/50" : "text-text/50"}`}>{plan.desc}</p>
               </div>
 
               <ul className="space-y-2 text-sm mb-4 flex-1">
                 {plan.features.map((f) => (
                   <li key={f} className="flex items-start gap-2">
-                    <span className={`mt-0.5 shrink-0 text-xs ${plan.accent ? "text-accent" : "text-teal"}`}>&#10003;</span>
-                    <span className="text-text/70 text-xs">{f}</span>
+                    <span className={`mt-0.5 shrink-0 text-xs ${plan.premium ? "text-amber-400" : plan.accent ? "text-accent" : "text-teal"}`}>&#10003;</span>
+                    <span className={`text-xs ${plan.premium ? "text-white/70" : "text-text/70"}`}>{f}</span>
                   </li>
                 ))}
                 {plan.locked.map((f) => (
@@ -173,7 +181,9 @@ export default function Pricing() {
                   onClick={() => subscribe(plan.id)}
                   disabled={loading === plan.id}
                   className={`w-full text-center px-4 py-2.5 min-h-[44px] rounded-xl font-bold text-sm transition-all disabled:opacity-50 ${
-                    plan.accent
+                    plan.premium
+                      ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 shadow-md shadow-amber-500/20"
+                      : plan.accent
                       ? "bg-accent text-white hover:bg-accent/90 shadow-md shadow-accent/20"
                       : "border-2 border-text/15 text-text hover:border-accent hover:text-accent"
                   }`}
