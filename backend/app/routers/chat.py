@@ -1,5 +1,6 @@
 """Chat endpoint — streaming AI responses via SSE with per-token billing."""
 
+import asyncio
 import base64
 import json
 import logging
@@ -71,18 +72,28 @@ async def chat(
     if not using_byok:
         check = await check_can_request(db, tg_id, req.model_id)
         if not check["allowed"]:
-            status = 402 if check["tier"] == "premium" else 429
+            is_locked = check.get("error") == "model_locked"
+            status = 403 if is_locked else 429
             raise HTTPException(
                 status_code=status,
                 detail={
-                    "error": check["reason"],
+                    "error": check.get("error", check["reason"]),
+                    "message": check["reason"],
                     "plan": check["plan"],
                     "tier": check["tier"],
+                    "required_tier": check.get("required_tier"),
                     "used_today": check["used_today"],
                     "limit": check["limit"],
                     "need_balance": check["billing"] == "per_token",
+                    "upgrade_url": "/pricing",
                 },
             )
+
+        # Artificial delay for free-plan users before streaming starts
+        delay = check.get("delay", 0)
+        if delay > 0:
+            await asyncio.sleep(delay)
+
         plan = check["plan"]
         billing_mode = check["billing"]
     else:

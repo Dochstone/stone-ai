@@ -119,6 +119,32 @@ def get_model_tier(model_id: str) -> str:
     return TIER_MAP.get(model_id, "premium")
 
 
+# ─── Category mapping for Free-plan limiter ───
+# "fast"    — tier 1 (lite) + tier 2 (mid-range) + tier 5 (free on OpenRouter)
+# "premium" — tier 3 (premium) + tier 6 (perplexity search)
+# "image"   — tier 4 (image generation)
+# Video models are handled separately.
+
+
+def get_model_category(model_id: str) -> str:
+    """Return 'fast', 'premium', 'image', or 'unknown'.
+
+    Tier mapping:
+      - fast    = tier 1 (lite) + tier 2 (mid-range) + tier 5 (free on OpenRouter)
+      - premium = tier 3 (premium) + tier 6 (perplexity search)
+      - image   = tier 4 (image generation)
+    Video models are handled separately.
+    """
+    model = next((m for m in MODELS_REGISTRY if m["id"] == model_id), None)
+    if not model:
+        return "unknown"
+    if model.get("category") == "image":
+        return "image"
+    if model["tier"] in (1, 2, 5):
+        return "fast"
+    return "premium"  # tier 3, 6
+
+
 async def stream_chat_response(
     model_id: str,
     messages: list[dict],

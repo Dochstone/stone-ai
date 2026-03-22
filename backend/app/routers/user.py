@@ -1,15 +1,18 @@
 """User endpoint — profile, limits, balance info, usage history."""
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.middleware.auth import get_current_user
+from app.middleware.web_auth import extract_jwt_from_request, decode_jwt
+from app.models import User
 from app.models.usage import Usage
 from app.services.limiter import (
     get_or_create_user,
     get_today_usage,
+    get_free_limits,
     FREE_DAILY_LIMIT,
     REWARDED_BONUS,
 )
@@ -130,3 +133,28 @@ async def get_transactions(
             for r in rows
         ]
     }
+
+
+@router.get("/user/limits")
+async def user_limits(request: Request, db: AsyncSession = Depends(get_db)):
+    """Get current usage limits for the authenticated user."""
+    # Try JWT first (web), then TG auth
+    token = extract_jwt_from_request(request)
+    if token:
+        payload = decode_jwt(token)
+        user_id = int(payload["sub"])
+        result = await db.execute(select(User).where(User.id == user_id))
+        user = result.scalar_one_or_none()
+    else:
+        # Try TG auth
+        try:
+            tg_user = await get_current_user(request)
+            result = await db.execute(select(User).where(User.telegram_id == tg_user["id"]))
+            user = result.scalar_one_or_none()
+        except Exception:
+            raise HTTPException(status_code=401, detail="Not authenticated")
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return await get_free_limits(db, user)

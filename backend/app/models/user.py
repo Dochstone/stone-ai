@@ -8,7 +8,7 @@ New Stone AI columns:  language, daily_lite_used, daily_premium_used,
 """
 
 from datetime import datetime
-from sqlalchemy import BigInteger, String, DateTime, Integer, Float, Boolean, func, text, Numeric
+from sqlalchemy import BigInteger, String, DateTime, Date, Integer, Float, Boolean, func, text, Numeric
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
@@ -51,6 +51,24 @@ class User(Base):
     daily_premium_used: Mapped[int] = mapped_column(Integer, server_default=text("0"))
     total_requests: Mapped[int] = mapped_column(Integer, server_default=text("0"))
     total_tokens_used: Mapped[int] = mapped_column(Integer, server_default=text("0"))
+
+    # ─── Free Plan: streaks & granular usage tracking ───
+    login_streak: Mapped[int] = mapped_column(Integer, server_default=text("0"))
+    last_login_date = mapped_column(Date, nullable=True)
+    streak_bonus_fast: Mapped[int] = mapped_column(Integer, server_default=text("0"))
+    streak_bonus_images: Mapped[int] = mapped_column(Integer, server_default=text("0"))
+    streak_bonus_video: Mapped[int] = mapped_column(Integer, server_default=text("0"))
+    daily_fast_used: Mapped[int] = mapped_column(Integer, server_default=text("0"))
+    daily_premium_used_new: Mapped[int] = mapped_column(Integer, server_default=text("0"))
+    daily_image_used: Mapped[int] = mapped_column(Integer, server_default=text("0"))
+    weekly_video_used: Mapped[int] = mapped_column(Integer, server_default=text("0"))
+
+    # ─── Anti-abuse ───
+    last_ip: Mapped[str | None] = mapped_column(String(45), nullable=True)
+    fingerprint: Mapped[str | None] = mapped_column(String(64), nullable=True)
+
+    # ─── Subscription tier ───
+    subscription_tier: Mapped[str | None] = mapped_column(String(20), server_default=text("'free'"))  # free/mini/opti/plus
 
     def __repr__(self):
         return f"<User telegram_id={self.telegram_id} username={self.username}>"

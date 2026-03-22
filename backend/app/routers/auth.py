@@ -23,6 +23,7 @@ from app.middleware.web_auth import (
 )
 from app.config import get_settings
 from app.services.email_service import generate_code, send_verification_code, send_reset_code
+from app.services.streak import update_login_streak
 
 logger = logging.getLogger(__name__)
 
@@ -72,10 +73,24 @@ class ResetPasswordRequest(BaseModel):
     new_password: str
 
 
+BLOCKED_EMAIL_DOMAINS = {
+    "tempmail.com", "guerrillamail.com", "yopmail.com", "mailinator.com",
+    "throwaway.email", "temp-mail.org", "tempail.com", "guerrillamail.org",
+    "fakeinbox.com", "sharklasers.com", "guerrillamail.net", "grr.la",
+    "guerrillamail.de", "tmail.com", "tmpmail.net", "tmpmail.org",
+    "binkmail.com", "safetymail.info", "trashmail.com", "trashmail.me",
+    "mohmal.com", "dispostable.com", "mailnesia.com", "maildrop.cc",
+    "temp-mail.io", "emailondeck.com", "getnada.com", "burnermail.io",
+}
+
+
 def _validate_email(email: str) -> str:
     email = email.strip().lower()
     if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", email):
         raise HTTPException(400, "Invalid email format")
+    domain = email.split("@")[1].lower()
+    if domain in BLOCKED_EMAIL_DOMAINS:
+        raise HTTPException(400, "Используйте реальный email адрес")
     return email
 
 
@@ -116,7 +131,7 @@ def _user_response(user: User, token: str) -> JSONResponse:
 
 
 @router.post("/register")
-async def register(body: RegisterRequest, db: AsyncSession = Depends(get_db)):
+async def register(body: RegisterRequest, request: Request, db: AsyncSession = Depends(get_db)):
     """Step 1: Send verification code to email."""
     email = _validate_email(body.email)
     _validate_password(body.password)
@@ -137,7 +152,7 @@ async def register(body: RegisterRequest, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/verify-email")
-async def verify_email(body: VerifyEmailRequest, db: AsyncSession = Depends(get_db)):
+async def verify_email(body: VerifyEmailRequest, request: Request, db: AsyncSession = Depends(get_db)):
     """Step 2: Verify code and create account."""
     email = _validate_email(body.email)
 
@@ -170,6 +185,9 @@ async def verify_email(body: VerifyEmailRequest, db: AsyncSession = Depends(get_
     )
     db.add(user)
     await db.flush()
+
+    user.last_ip = request.client.host if request.client else None
+    await update_login_streak(db, user)
 
     _pending_codes.pop(email, None)
     token = create_jwt(user.id, email)
@@ -225,7 +243,7 @@ async def reset_password(body: ResetPasswordRequest, db: AsyncSession = Depends(
 
 
 @router.post("/login")
-async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)):
+async def login(body: LoginRequest, request: Request, db: AsyncSession = Depends(get_db)):
     """Login with email and password, returns JWT."""
     email = _validate_email(body.email)
 
@@ -237,6 +255,9 @@ async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)):
 
     if not verify_password(body.password, user.password_hash):
         raise HTTPException(401, "Invalid email or password")
+
+    user.last_ip = request.client.host if request.client else None
+    await update_login_streak(db, user)
 
     token = create_jwt(user.id, email)
     return _user_response(user, token)
@@ -283,7 +304,7 @@ async def _get_or_create_oauth_user(
 
 
 @router.post("/google")
-async def google_auth(body: GoogleAuthRequest, db: AsyncSession = Depends(get_db)):
+async def google_auth(body: GoogleAuthRequest, request: Request, db: AsyncSession = Depends(get_db)):
     """Authenticate via Google OAuth code → token → user info."""
     settings = get_settings()
     if not settings.google_client_id or not settings.google_client_secret:
@@ -338,12 +359,14 @@ async def google_auth(body: GoogleAuthRequest, db: AsyncSession = Depends(get_db
         raise HTTPException(502, "Google auth unavailable")
 
     user, token = await _get_or_create_oauth_user(db, email.lower(), first_name, "google")
+    user.last_ip = request.client.host if request.client else None
+    await update_login_streak(db, user)
     logger.info(f"Google auth: user={user.id}, email={email}")
     return _user_response(user, token)
 
 
 @router.post("/yandex")
-async def yandex_auth(body: YandexAuthRequest, db: AsyncSession = Depends(get_db)):
+async def yandex_auth(body: YandexAuthRequest, request: Request, db: AsyncSession = Depends(get_db)):
     """Authenticate via Yandex OAuth code → token → user info."""
     settings = get_settings()
     if not settings.yandex_client_id or not settings.yandex_client_secret:
@@ -397,6 +420,8 @@ async def yandex_auth(body: YandexAuthRequest, db: AsyncSession = Depends(get_db
         raise HTTPException(502, "Yandex auth unavailable")
 
     user, token = await _get_or_create_oauth_user(db, email.lower(), first_name, "yandex")
+    user.last_ip = request.client.host if request.client else None
+    await update_login_streak(db, user)
     logger.info(f"Yandex auth: user={user.id}, email={email}")
     return _user_response(user, token)
 

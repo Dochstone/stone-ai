@@ -51,6 +51,21 @@ async def migrate_users_table():
         ("email", "VARCHAR(256) UNIQUE"),
         ("password_hash", "VARCHAR(256)"),
         ("auth_provider", "VARCHAR(16) DEFAULT 'telegram'"),
+        # Free Plan: streaks & granular usage tracking
+        ("login_streak", "INTEGER DEFAULT 0"),
+        ("last_login_date", "DATE"),
+        ("streak_bonus_fast", "INTEGER DEFAULT 0"),
+        ("streak_bonus_images", "INTEGER DEFAULT 0"),
+        ("streak_bonus_video", "INTEGER DEFAULT 0"),
+        ("daily_fast_used", "INTEGER DEFAULT 0"),
+        ("daily_premium_used_new", "INTEGER DEFAULT 0"),
+        ("daily_image_used", "INTEGER DEFAULT 0"),
+        ("weekly_video_used", "INTEGER DEFAULT 0"),
+        # Anti-abuse
+        ("last_ip", "VARCHAR(45)"),
+        ("fingerprint", "VARCHAR(64)"),
+        # Subscription tier
+        ("subscription_tier", "VARCHAR(20) DEFAULT 'free'"),
     ]
 
     async with engine.begin() as conn:
