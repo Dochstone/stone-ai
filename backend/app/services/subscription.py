@@ -17,9 +17,9 @@ PLANS = {
         },
         "period": "day",  # limits reset daily
         "features": {
-            "history": False,
+            "history": True,
             "voice": False,
-            "delay": 5,  # seconds
+            "delay": 0,
             "api": False,
         },
     },

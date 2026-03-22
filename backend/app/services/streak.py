@@ -3,10 +3,9 @@
 from datetime import datetime, timezone
 
 STREAK_BONUSES = {
-    2: {"fast": 2, "images": 0},
-    7: {"fast": 5, "images": 1},
-    30: {"fast": 5, "images": 1},
-    # 30-day streak also grants 1 one-time premium request (handled separately)
+    2: {"fast": 2, "images": 0, "premium": 0},
+    7: {"fast": 5, "images": 1, "premium": 0},
+    30: {"fast": 5, "images": 1, "premium": 5},  # 5 one-time premium requests as bonus
 }
 
 

@@ -24,7 +24,7 @@ FREE_LIMITS = {
     "3d": 0,             # no 3D on free
 }
 
-FREE_RESPONSE_DELAY = 5  # fixed 5 second delay for free users
+FREE_RESPONSE_DELAY = 0  # no artificial delay for free users
 
 # Streak milestones: days -> what unlocks (for get_free_limits display)
 STREAK_MILESTONES = [3, 7, 14, 30, 60]
