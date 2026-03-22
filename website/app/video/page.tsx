@@ -8,7 +8,7 @@ import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Генерация видео нейросетью — ИИ из текста в видео",
-  description: "Нейросеть для генерации видео из текста и фото. ИИ-модели Kling v2, Runway Gen-3, Pika 2.0. От $0.15 за видео. Без VPN.",
+  description: "Нейросеть для генерации видео из текста и фото. ИИ-модели Kling v2, Runway Gen-3, Pika 2.0. От $0.15 за видео.",
 };
 
 const modelIds = ["kling-v3", "sora-2", "veo-3", "runway-gen3", "minimax", "pixverse-v5", "kling-v2", "luma-dream", "pika-2", "wan-2", "hunyuan", "ltx-video", "stable-video"];

@@ -9,7 +9,7 @@ import { SITE_URL } from "@/lib/constants";
 export const metadata: Metadata = {
   title: "Анализ документов нейросетью — ИИ для PDF и фото",
   description:
-    "Загрузите PDF или фото — нейросеть ответит на любой вопрос. ИИ чат-бот с Claude Opus, Gemini Pro. Без VPN, в Telegram.",
+    "Загрузите PDF или фото — нейросеть ответит на любой вопрос. ИИ чат-бот с Claude Opus, Gemini Pro. В Telegram.",
   openGraph: {
     title: "Анализ документов AI — PDF, фото, контракты",
     description: "Загрузите документ — AI проанализирует и ответит на вопросы. До 1M токенов контекста.",

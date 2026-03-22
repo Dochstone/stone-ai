@@ -23,16 +23,15 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "50+ AI-моделей и нейросетей без VPN — чат с GPT-5, Claude, Gemini | Stone AI",
+    default: "65+ нейросетей в одном окне — текст, картинки, видео | Stone AI",
     template: "%s | Stone AI",
   },
   description:
-    "GPT-5, Claude Opus, Gemini Pro и ещё 47 нейросетей в одном чате. Бот в Telegram без VPN. Оплата за токены — от $0.004 за запрос. Попробуйте бесплатно — 15 запросов в день.",
+    "GPT-5, Claude, Gemini и ещё 62 нейросети. Текст, картинки, видео, аудио, 3D и код. Оплата в рублях. 15 бесплатных запросов в день.",
   keywords: [
     "AI чат",
-    "ChatGPT без VPN",
     "ChatGPT альтернатива",
-    "Claude без VPN",
+    "Claude онлайн",
     "нейросеть онлайн",
     "нейросеть бесплатно",
     "AI бот Telegram",
@@ -52,23 +51,23 @@ export const metadata: Metadata = {
     locale: "ru_RU",
     url: SITE_URL,
     siteName: "Stone AI",
-    title: "50+ AI-моделей и нейросетей без VPN — Stone AI",
+    title: "65+ нейросетей в одном окне — Stone AI",
     description:
-      "GPT-5, Claude Opus, Gemini Pro и ещё 47 нейросетей в одном чате. Бот в Telegram без VPN. Оплата за токены — от $0.004 за запрос. 15 бесплатных запросов в день.",
+      "GPT-5, Claude, Gemini и ещё 62 нейросети. Текст, картинки, видео, аудио, 3D и код. Оплата в рублях. 15 бесплатных запросов в день.",
     images: [
       {
         url: OG_IMAGE,
         width: 1200,
         height: 630,
-        alt: "Stone AI — 50 AI-моделей без VPN, прямо в Telegram",
+        alt: "Stone AI — 65+ нейросетей в одном окне",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "50+ AI-моделей и нейросетей без VPN — Stone AI",
+    title: "65+ нейросетей в одном окне — Stone AI",
     description:
-      "GPT-5, Claude Opus, Gemini Pro и ещё 47 нейросетей в одном чате. Бот в Telegram без VPN. Оплата за токены — от $0.004 за запрос. 15 бесплатных запросов в день.",
+      "GPT-5, Claude, Gemini и ещё 62 нейросети. Текст, картинки, видео, аудио, 3D и код. Оплата в рублях. 15 бесплатных запросов в день.",
     images: [OG_IMAGE],
   },
   robots: {
@@ -112,7 +111,7 @@ const jsonLdOrganization = {
     height: 630,
   },
   description:
-    "Платформа доступа к 50+ AI-моделям через Telegram. GPT-5, Claude Opus, Gemini Pro и другие. Без VPN, без подписок.",
+    "Платформа доступа к 65+ нейросетям через Telegram. GPT-5, Claude Opus, Gemini Pro и другие. Одна подписка вместо пяти.",
   sameAs: ["https://t.me/drifttt55bot", "https://t.me/StoneAIsupport"],
   contactPoint: {
     "@type": "ContactPoint",
@@ -131,7 +130,7 @@ const jsonLdWebSite = {
   inLanguage: "ru",
   publisher: { "@id": `${SITE_URL}/#organization` },
   description:
-    "50+ AI-моделей и нейросетей без VPN, прямо в Telegram. Платите только за использованные токены.",
+    "65+ нейросетей в одном окне. Текст, картинки, видео и код. Платите только за использованные токены.",
   potentialAction: {
     "@type": "SearchAction",
     target: { "@type": "EntryPoint", urlTemplate: `${SITE_URL}/models?q={search_term_string}` },
@@ -155,7 +154,7 @@ const jsonLdSoftware = {
     highPrice: "130",
     priceCurrency: "USD",
     offerCount: "50",
-    description: "15 бесплатных запросов в день. 50+ платных моделей от $0.24 за 1M токенов.",
+    description: "15 бесплатных запросов в день. 65+ платных моделей от $0.24 за 1M токенов.",
   },
 };
 

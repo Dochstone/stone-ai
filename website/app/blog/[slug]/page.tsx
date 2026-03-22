@@ -105,7 +105,7 @@ export default function BlogPostPage({ params }: Props) {
         <div className="mt-14 bg-white rounded-2xl border border-text/5 p-8 text-center">
           <h3 className="font-bold text-lg mb-2">Попробуйте Stone AI</h3>
           <p className="text-text/50 text-sm mb-6">
-            50+ AI-моделей прямо в Telegram. 15 бесплатных запросов каждый день.
+            65+ нейросетей в одном окне. 15 бесплатных запросов каждый день.
           </p>
           <a
             href="/webchat"

@@ -13,7 +13,7 @@ const rows = [
   },
   {
     feature: "Кол-во моделей",
-    stone: "50+",
+    stone: "65+",
     chatgpt: "Только OpenAI",
     competitors: "~30",
   },
@@ -24,10 +24,10 @@ const rows = [
     competitors: "3 запроса/день",
   },
   {
-    feature: "VPN для России",
-    stone: "Не нужен",
-    chatgpt: "Нужен",
-    competitors: "Не нужен",
+    feature: "Удобство доступа",
+    stone: "Telegram + веб-чат",
+    chatgpt: "Только сайт",
+    competitors: "Telegram",
   },
   {
     feature: "Генерация картинок",
@@ -36,9 +36,9 @@ const rows = [
     competitors: "Flux",
   },
   {
-    feature: "Оплата из России",
+    feature: "Оплата в рублях",
     stone: "Stars, крипто, TON",
-    chatgpt: "Зарубежная карта",
+    chatgpt: "Только валюта",
     competitors: "Stars, карты",
   },
   {

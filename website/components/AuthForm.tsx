@@ -135,7 +135,7 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <a href="/" className="text-2xl font-extrabold text-text">Stone AI</a>
-          <p className="mt-2 text-text/50 text-sm">{subtitle || "50+ AI-моделей в одном чате"}</p>
+          <p className="mt-2 text-text/50 text-sm">{subtitle || "65+ нейросетей в одном окне"}</p>
         </div>
 
         <div className="bg-white rounded-2xl border border-text/5 p-8">

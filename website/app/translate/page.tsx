@@ -9,10 +9,10 @@ import { SITE_URL } from "@/lib/constants";
 export const metadata: Metadata = {
   title: "ИИ переводчик нейросетью — 100+ языков онлайн",
   description:
-    "Перевод нейросетью на 100+ языков. ИИ понимает контекст, сохраняет тон. Чат-бот с GPT, Claude, Gemini — в Telegram без VPN.",
+    "Перевод нейросетью на 100+ языков. ИИ понимает контекст, сохраняет тон. Чат-бот с GPT, Claude, Gemini — в Telegram.",
   openGraph: {
     title: "AI Переводчик — 100+ языков",
-    description: "AI-перевод с пониманием контекста. 100+ языков, сохранение тона. В Telegram без VPN.",
+    description: "AI-перевод с пониманием контекста. 100+ языков, сохранение тона. В Telegram.",
   },
 };
 

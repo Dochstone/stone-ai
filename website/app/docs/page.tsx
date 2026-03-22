@@ -97,7 +97,7 @@ export default function DocsPage() {
                 API v1
               </div>
               <h1 className="text-3xl font-extrabold mb-3">API Документация</h1>
-              <P>REST API для доступа к 50+ AI-моделям. SSE-стриминг, per-token биллинг, JWT авторизация.</P>
+              <P>REST API для доступа к 65+ нейросетям. SSE-стриминг, per-token биллинг, JWT авторизация.</P>
             </div>
 
             {/* Getting Started */}

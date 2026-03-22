@@ -54,7 +54,7 @@ export default function Nav() {
         <a href="/" className="flex items-center gap-2 shrink-0">
           <span className="text-xl font-extrabold text-text">Stone AI</span>
           <span className="hidden sm:inline-flex items-center bg-accent/8 text-accent text-[9px] font-bold px-2 py-0.5 rounded-full border border-accent/15">
-            50+ моделей
+            65+ моделей
           </span>
         </a>
 

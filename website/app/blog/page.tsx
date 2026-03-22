@@ -6,7 +6,7 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: "Блог",
   description:
-    "Статьи про AI-модели, сравнения, гайды и советы. Как выбрать модель, сэкономить на AI и оплатить из России.",
+    "Статьи про AI-модели, сравнения, гайды и советы. Как выбрать модель, сэкономить на AI и оплатить в рублях.",
   alternates: { canonical: "/blog" },
 };
 
@@ -39,7 +39,7 @@ export default function BlogPage() {
             Статьи и гайды
           </h1>
           <p className="text-text/60 max-w-lg mx-auto">
-            Как выбрать AI-модель, сэкономить на токенах и оплатить из России без VPN.
+            Как выбрать AI-модель, сэкономить на токенах и оплатить в рублях.
           </p>
         </div>
 

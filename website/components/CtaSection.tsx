@@ -6,9 +6,9 @@ export default function CtaSection() {
           Будущее AI — уже доступно. Начните сейчас
         </h2>
         <p className="text-white/50 mb-10 max-w-lg mx-auto text-lg">
-          50 AI-моделей в одном Telegram-боте.
+          65+ нейросетей в одном окне.
           <br />
-          Без VPN, без подписок, без ограничений.
+          Текст, картинки, видео, аудио, 3D и код.
         </p>
         <a
           href="/webchat"

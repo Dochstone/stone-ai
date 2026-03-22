@@ -197,7 +197,7 @@ export default function ModelGrid() {
 
         <div className="text-center mt-10">
           <a href="/models" className="inline-flex items-center gap-2 text-accent font-bold hover:underline text-lg">
-            Все 50 моделей <span aria-hidden="true">&rarr;</span>
+            Все 65+ моделей <span aria-hidden="true">&rarr;</span>
           </a>
         </div>
       </div>

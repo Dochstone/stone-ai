@@ -7,12 +7,12 @@ import ToolCta from "@/components/ToolCta";
 import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "ИИ поиск нейросетью — Perplexity в Telegram без VPN",
+  title: "ИИ поиск нейросетью — Perplexity в Telegram",
   description:
-    "Поиск в интернете нейросетью: актуальные данные, источники. ИИ чат-бот Perplexity Sonar и Deep Research. Без VPN, в Telegram.",
+    "Поиск в интернете нейросетью: актуальные данные, источники. ИИ чат-бот Perplexity Sonar и Deep Research. В Telegram.",
   openGraph: {
-    title: "AI Поиск — Perplexity в Telegram без VPN",
-    description: "Perplexity в Telegram без VPN. Real-time данные, ссылки на источники, глубокие исследования.",
+    title: "AI Поиск — Perplexity в Telegram",
+    description: "Perplexity в Telegram. Real-time данные, ссылки на источники, глубокие исследования.",
   },
 };
 
@@ -52,7 +52,7 @@ const faqItems = [
   },
   {
     q: "Зачем Perplexity через Stone AI, если есть perplexity.ai?",
-    a: "Stone AI даёт доступ к Perplexity без VPN, через привычный Telegram. Оплата через Stars, крипту или TON. Плюс все остальные 47 моделей в одном месте.",
+    a: "Stone AI даёт удобный доступ к Perplexity через привычный Telegram. Оплата в рублях через Stars, крипту или TON. Плюс все остальные 62 нейросети в одном месте.",
   },
 ];
 
@@ -68,7 +68,7 @@ export default function SearchPage() {
         badge="ИИ-поиск в реальном времени"
         title="Поиск в интернете"
         highlight="нейросетью с источниками"
-        description="ИИ-бот ищет в интернете через Perplexity. Нейросеть даёт актуальные данные со ссылками на источники. Чат в Telegram без VPN."
+        description="ИИ-бот ищет в интернете через Perplexity. Нейросеть даёт актуальные данные со ссылками на источники. Чат в Telegram."
       />
       <ToolModels
         title="Модели для поиска"

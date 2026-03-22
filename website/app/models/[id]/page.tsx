@@ -23,10 +23,10 @@ export function generateMetadata({ params }: Props): Metadata {
   const cat = categoryLabels[model.category] || model.category;
   return {
     title: `${model.name} — нейросеть ${cat} | Stone AI`,
-    description: `${model.name} от ${model.company} в Stone AI. ${model.description || ""} Контекст ${model.context}. ${model.tier === "free" ? "Бесплатно, 15 запросов/день." : `От $${model.pricePerMillion}/1M токенов.`} Без VPN.`,
+    description: `${model.name} от ${model.company} в Stone AI. ${model.description || ""} Контекст ${model.context}. ${model.tier === "free" ? "Бесплатно, 15 запросов/день." : `От $${model.pricePerMillion}/1M токенов.`}`,
     alternates: { canonical: `/models/${params.id}` },
     openGraph: {
-      title: `${model.name} — ${cat} нейросеть без VPN`,
+      title: `${model.name} — ${cat} нейросеть в Stone AI`,
       description: `${model.description || model.name + " от " + model.company}. Доступна в Telegram и веб-чате Stone AI.`,
     },
   };

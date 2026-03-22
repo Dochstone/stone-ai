@@ -9,7 +9,7 @@ import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "3D генерация нейросетью — ИИ из текста в 3D модель",
-  description: "Нейросеть для 3D генерации из текста и фото. ИИ-модели Tripo v2.5, TripoSR. GLB для игр, печати. От $0.21. Без VPN.",
+  description: "Нейросеть для 3D генерации из текста и фото. ИИ-модели Tripo v2.5, TripoSR. GLB для игр, печати. От $0.21.",
 };
 
 const modelIds = ["tripo-v2.5", "triposr"];

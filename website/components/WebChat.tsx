@@ -211,7 +211,7 @@ function WelcomeScreen({ onSuggestion }: { onSuggestion: (text: string, modelId:
             </svg>
           </div>
           <h1 className="text-2xl font-extrabold text-text mb-2">Чем могу помочь?</h1>
-          <p className="text-sm text-text/40">50+ AI-моделей в одном месте. Выберите модель и начните диалог.</p>
+          <p className="text-sm text-text/40">65+ нейросетей в одном окне. Выберите модель и начните диалог.</p>
         </div>
 
         <div className="grid grid-cols-2 max-w-md mx-auto" style={{ gap: 12 }}>

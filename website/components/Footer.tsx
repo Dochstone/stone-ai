@@ -9,7 +9,7 @@ export default function Footer() {
           <div className="col-span-2 md:col-span-1">
             <h3 className="text-lg font-extrabold mb-3">Stone AI</h3>
             <p className="text-text/50 text-sm leading-relaxed">
-              50 AI-моделей без VPN, прямо в Telegram. Платите только за токены.
+              65+ нейросетей в одном окне. Платите только за токены.
             </p>
             <div className="mt-4 flex flex-col gap-2">
               <a

@@ -7,12 +7,12 @@ import ToolCta from "@/components/ToolCta";
 import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "ИИ чат-бот — 50 нейросетей в одном боте без VPN",
+  title: "ИИ чат-бот — 65 нейросетей в одном окне",
   description:
-    "Чат с нейросетями GPT-5, Claude Opus, Gemini Pro, DeepSeek R1 прямо в Telegram. ИИ бот без VPN, без подписок. Оплата за токены.",
+    "Чат с нейросетями GPT-5, Claude Opus, Gemini Pro, DeepSeek R1 прямо в Telegram. Оплата в рублях. 15 бесплатных запросов в день.",
   openGraph: {
-    title: "AI Чат — 50 моделей в одном боте",
-    description: "GPT-5, Claude Opus, Gemini Pro и другие AI-модели прямо в Telegram. Без VPN.",
+    title: "AI Чат — 65 моделей в одном окне",
+    description: "GPT-5, Claude Opus, Gemini Pro и другие AI-модели прямо в Telegram.",
   },
 };
 
@@ -77,10 +77,10 @@ export default function ChatPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
       <ToolPageHero
-        badge="50+ нейросетей в одном чате"
+        badge="65+ нейросетей в одном окне"
         title="ИИ чат-бот с лучшими"
         highlight="нейросетями мира"
-        description="Чат-бот с GPT-5, Claude Opus, Gemini Pro, DeepSeek R1 и ещё 46 нейросетями. Сравнивайте ответы ИИ, выбирайте лучшую модель для каждой задачи."
+        description="Чат-бот с GPT-5, Claude Opus, Gemini Pro, DeepSeek R1 и ещё 62 нейросетями. Сравнивайте ответы ИИ, выбирайте лучшую модель для каждой задачи."
       />
       <ToolModels
         title="Модели для чата"
@@ -93,7 +93,7 @@ export default function ChatPage() {
         examples={examples}
       />
       <ToolFaq items={faqItems} />
-      <ToolCta title="Начните общаться с AI" subtitle="5 моделей бесплатно, 15 запросов в день. Без VPN и регистрации." />
+      <ToolCta title="Начните общаться с AI" subtitle="5 моделей бесплатно, 15 запросов в день. Бесплатный старт." />
     </>
   );
 }

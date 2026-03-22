@@ -9,10 +9,10 @@ import { SITE_URL } from "@/lib/constants";
 export const metadata: Metadata = {
   title: "Нейросеть для кода — ИИ-ассистент для программистов",
   description:
-    "ИИ чат-бот для программистов: отладка, рефакторинг, генерация кода. Нейросети Claude Opus, GPT-4.1, Devstral. Без VPN, в Telegram.",
+    "ИИ чат-бот для программистов: отладка, рефакторинг, генерация кода. Нейросети Claude Opus, GPT-4.1, Devstral. В Telegram.",
   openGraph: {
     title: "AI Код-ассистент — Claude, GPT, DeepSeek",
-    description: "AI-помощник для разработчиков: Claude Opus, GPT-4.1, Devstral, o3. В Telegram без VPN.",
+    description: "AI-помощник для разработчиков: Claude Opus, GPT-4.1, Devstral, o3. В Telegram.",
   },
 };
 

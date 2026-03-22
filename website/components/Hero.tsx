@@ -235,14 +235,14 @@ export default function Hero() {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <div className="inline-block bg-accent/10 text-accent px-4 py-1.5 rounded-full text-sm font-semibold mb-6">
-            Без VPN, без подписок
+            Одна подписка вместо пяти
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tight">
-            50+ AI-моделей и нейросетей
+            65+ нейросетей в одном окне
             <br />
             <span className="bg-gradient-to-r from-accent to-teal bg-clip-text text-transparent">
-              в одном чате без VPN
+              Текст, картинки, видео и код
             </span>
           </h1>
 
@@ -289,7 +289,7 @@ export default function Hero() {
         {/* Stats */}
         <div className="mt-14 flex items-center justify-center gap-6 sm:gap-8 md:gap-16 text-xs sm:text-sm md:text-base text-text/50">
           <div className="text-center">
-            <span className="block text-[32px] sm:text-[40px] md:text-[48px] leading-none font-black text-accent">50+</span>
+            <span className="block text-[32px] sm:text-[40px] md:text-[48px] leading-none font-black text-accent">65+</span>
             <span className="mt-1 block">моделей</span>
           </div>
           <div className="w-px h-12 sm:h-16 bg-text/10" />

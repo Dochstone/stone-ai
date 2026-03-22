@@ -431,7 +431,7 @@ export default function ToolCards() {
           {/* ── AI Chat — live typing conversation ── */}
           <a href="/chat" className="sm:col-span-2 bg-[var(--color-card-dark)] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[260px] sm:min-h-[300px]">
             <div className="relative z-10 mb-4">
-              <span className="inline-block bg-accent/20 text-accent text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">50+ нейросетей</span>
+              <span className="inline-block bg-accent/20 text-accent text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">65+ нейросетей</span>
               <h3 className="font-bold text-lg sm:text-xl text-white mb-1">ИИ Чат-бот</h3>
               <p className="text-white/50 text-[12px] sm:text-[13px] max-w-[140px] sm:max-w-[200px]">GPT-5, Claude, Gemini и Grok — переключайтесь между нейросетями за секунду</p>
             </div>
@@ -506,7 +506,7 @@ export default function ToolCards() {
           <a href="/docs" className="bg-gradient-to-br from-slate-600 via-slate-700 to-zinc-900 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden min-h-[180px]">
             <span className="inline-block bg-sky-400/20 text-sky-300 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">API</span>
             <h3 className="font-bold text-lg text-white mb-1">Простой API</h3>
-            <p className="text-white/50 text-[13px] mb-3">REST API для 50+ нейросетей. SSE-стриминг, JWT-авторизация</p>
+            <p className="text-white/50 text-[13px] mb-3">REST API для 65+ нейросетей. SSE-стриминг, JWT-авторизация</p>
             <div className="bg-white/[0.04] rounded-xl p-3 overflow-x-auto border border-white/[0.06]">
               <pre className="text-[11px] leading-[1.7] font-mono" dangerouslySetInnerHTML={{ __html: `<span style="color:#34d399">curl</span><span style="color:rgba(255,255,255,0.5)"> -X </span><span style="color:#fcd34d">POST</span><span style="color:rgba(255,255,255,0.5)"> /api/chat \\
   -H </span><span style="color:#7dd3fc">"Bearer $TKN"</span><span style="color:rgba(255,255,255,0.5)"> \\

@@ -6,7 +6,7 @@ import PricingTable from "@/components/PricingTable";
 export const metadata: Metadata = {
   title: "Цены",
   description:
-    "Прозрачные цены на 50 AI-моделей. Платите только за использованные токены. От $0.24 за 1M. Калькулятор стоимости.",
+    "Прозрачные цены на 65+ нейросетей. Платите только за использованные токены. От $0.24 за 1M. Калькулятор стоимости.",
 };
 
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -15,10 +15,10 @@ const pricingJsonLd = {
   "@context": "https://schema.org",
   "@type": "Product",
   name: "Stone AI",
-  description: "50+ AI-моделей. Оплата за токены.",
+  description: "65+ нейросетей. Оплата за токены.",
   offers: [
     { "@type": "Offer", name: "Free", price: "0", priceCurrency: "USD", description: "15 запросов в день, 5 моделей" },
-    { "@type": "Offer", name: "Per-token", price: "0.24", priceCurrency: "USD", description: "От $0.24 за 1M токенов, 50+ моделей" },
+    { "@type": "Offer", name: "Per-token", price: "0.24", priceCurrency: "USD", description: "От $0.24 за 1M токенов, 65+ моделей" },
   ],
 };
 

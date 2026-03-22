@@ -50,12 +50,12 @@ export default function Pricing() {
               Per-token
             </span>
             <h3 className="text-2xl font-extrabold mt-4 mb-1">Оплата за токены</h3>
-            <p className="text-text/50 text-sm mb-6">Полный доступ ко всем 50+ моделям</p>
+            <p className="text-text/50 text-sm mb-6">Полный доступ ко всем 65+ моделям</p>
 
             <ul className="space-y-3 text-sm mb-8">
               <li className="flex items-start gap-3">
                 <span className="text-accent mt-0.5 shrink-0">&#10003;</span>
-                <span>Все 50 моделей включая GPT-5, Claude Opus</span>
+                <span>Все 65+ моделей включая GPT-5, Claude Opus</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-accent mt-0.5 shrink-0">&#10003;</span>
