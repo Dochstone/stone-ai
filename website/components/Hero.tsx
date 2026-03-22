@@ -235,21 +235,21 @@ export default function Hero() {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <div className="inline-block bg-accent/10 text-accent px-4 py-1.5 rounded-full text-sm font-semibold mb-6">
-            Одна подписка вместо пяти
+            Попробуйте бесплатно
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tight">
-            65+ нейросетей в одном окне
+            Одна подписка вместо десяти
             <br />
             <span className="bg-gradient-to-r from-accent to-teal bg-clip-text text-transparent">
-              Текст, картинки, видео и код
+              Все нейросети уже здесь
             </span>
           </h1>
 
           <p className="mt-6 text-lg md:text-xl text-text/60 max-w-2xl mx-auto leading-relaxed">
-            ИИ чат-бот с нейросетями GPT-5, Claude, Gemini и Grok — переключайтесь за одно нажатие.
+            GPT-5, Claude, Gemini, Midjourney, Sora и ещё 60 нейросетей.
             <br className="hidden sm:block" />
-            Генерация картинок и видео, анализ документов, поиск в интернете. Попробуйте бесплатно.
+            Пишите тексты, генерируйте картинки и видео, анализируйте документы — в одном окне.
           </p>
 
           {/* CTA buttons */}
