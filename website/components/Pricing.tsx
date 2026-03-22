@@ -1,3 +1,9 @@
+"use client";
+
+import { useState } from "react";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
+
 const plans = [
   {
     id: "free",
@@ -82,6 +88,32 @@ const plans = [
 ];
 
 export default function Pricing() {
+  const [loading, setLoading] = useState<string | null>(null);
+  const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
+
+  const subscribe = async (tier: string) => {
+    const saved = localStorage.getItem("stone_auth");
+    if (!saved) { window.location.href = "/webchat"; return; }
+    const auth = JSON.parse(saved);
+    setLoading(tier);
+    setResult(null);
+    try {
+      const res = await fetch(`${API_URL}/api/subscribe`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
+        body: JSON.stringify({ tier }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setResult({ ok: true, message: `Тариф ${data.plan_name} активирован! Действует 30 дней.` });
+      } else {
+        const detail = typeof data.detail === "object" ? data.detail : { message: data.detail };
+        setResult({ ok: false, message: detail.message || "Ошибка" });
+      }
+    } catch { setResult({ ok: false, message: "Ошибка сети" }); }
+    setLoading(null);
+  };
+
   return (
     <section id="pricing" className="py-20 md:py-28 bg-bg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -132,19 +164,43 @@ export default function Pricing() {
                 ))}
               </ul>
 
-              <a
-                href={plan.href}
-                className={`block text-center px-4 py-2.5 min-h-[44px] rounded-xl font-bold text-sm transition-all ${
-                  plan.accent
-                    ? "bg-accent text-white hover:bg-accent/90 shadow-md shadow-accent/20"
-                    : "border-2 border-text/15 text-text hover:border-accent hover:text-accent"
-                }`}
-              >
-                {plan.cta}
-              </a>
+              {plan.id === "free" ? (
+                <a
+                  href="/webchat"
+                  className="block text-center px-4 py-2.5 min-h-[44px] rounded-xl font-bold text-sm border-2 border-text/15 text-text hover:border-accent hover:text-accent transition-all"
+                >
+                  Начать бесплатно
+                </a>
+              ) : (
+                <button
+                  onClick={() => subscribe(plan.id)}
+                  disabled={loading === plan.id}
+                  className={`w-full text-center px-4 py-2.5 min-h-[44px] rounded-xl font-bold text-sm transition-all disabled:opacity-50 ${
+                    plan.accent
+                      ? "bg-accent text-white hover:bg-accent/90 shadow-md shadow-accent/20"
+                      : "border-2 border-text/15 text-text hover:border-accent hover:text-accent"
+                  }`}
+                >
+                  {loading === plan.id ? "Активация..." : plan.cta}
+                </button>
+              )}
             </div>
           ))}
         </div>
+
+        {/* Result message */}
+        {result && (
+          <div className={`mt-6 max-w-md mx-auto rounded-xl px-5 py-3 text-center text-sm font-medium ${
+            result.ok ? "bg-teal/10 text-teal" : "bg-red-50 text-red-600"
+          }`}>
+            {result.message}
+            {!result.ok && (
+              <a href="/topup" className="block mt-2 text-accent font-bold hover:underline">
+                Пополнить баланс →
+              </a>
+            )}
+          </div>
+        )}
 
         {/* Payment methods */}
         <div className="mt-12 text-center">
