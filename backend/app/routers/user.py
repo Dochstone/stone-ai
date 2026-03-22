@@ -242,6 +242,7 @@ async def subscribe(req: SubscribeRequest, request: Request, db: AsyncSession = 
     user.monthly_videos_used = 0
     user.monthly_3d_used = 0
     user.monthly_audio_used = 0
+    user.opus_requests_used = 0
 
     await db.flush()
 

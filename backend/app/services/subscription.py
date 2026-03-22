@@ -10,12 +10,13 @@ PLANS = {
         "limits": {
             "text_fast": 15,        # per day
             "text_premium": 0,      # locked
+            "opus_limit": 0,        # locked
             "images": 2,            # per day (Nano Banana only)
             "videos": 0,            # locked
             "models_3d": 0,         # locked
             "audio": 0,             # locked
         },
-        "period": "day",  # limits reset daily
+        "period": "day",
         "features": {
             "history": True,
             "voice": False,
@@ -25,15 +26,16 @@ PLANS = {
     },
     "mini": {
         "name": "Мини",
-        "price_rub": 390,
+        "price_rub": 339,
         "credits": 1000,
         "limits": {
-            "text_fast": 500,       # per month
-            "text_premium": 20,     # per month
-            "images": 15,           # per month (all image models)
-            "videos": 0,            # locked
-            "models_3d": 0,         # locked
-            "audio": 0,             # locked
+            "text_fast": 500,
+            "text_premium": 20,
+            "opus_limit": 5,        # max 5 Claude Opus 4 requests/month
+            "images": 15,
+            "videos": 3,            # budget video only (LTX, Wan, Hunyuan)
+            "models_3d": 0,
+            "audio": 0,
         },
         "period": "month",
         "features": {
@@ -45,11 +47,12 @@ PLANS = {
     },
     "opti": {
         "name": "Опти",
-        "price_rub": 890,
-        "credits": 3500,
+        "price_rub": 790,
+        "credits": 3000,
         "limits": {
             "text_fast": 2000,
             "text_premium": 100,
+            "opus_limit": 20,       # max 20 Opus/month
             "images": 50,
             "videos": 10,
             "models_3d": 5,
@@ -63,13 +66,14 @@ PLANS = {
             "api": False,
         },
     },
-    "plus": {
-        "name": "Плюс",
-        "price_rub": 1990,
-        "credits": 15000,
+    "pro": {
+        "name": "Про",
+        "price_rub": 1950,
+        "credits": 10000,
         "limits": {
             "text_fast": 10000,
             "text_premium": 500,
+            "opus_limit": 80,       # max 80 Opus/month
             "images": 300,
             "videos": 50,
             "models_3d": 30,
@@ -142,21 +146,28 @@ FREE_MODELS = {
     "llama-4-maverick", "mistral-small", "qwen-turbo", "nano-banana",
 }
 
+# Budget video models available on Mini
+BUDGET_VIDEO_MODELS = {"ltx-video", "wan-2", "hunyuan"}
+
 MINI_MODELS = FREE_MODELS | {
     "claude-haiku-4.5", "claude-sonnet-4", "gpt-4.1-mini", "gpt-5.1",
     "gemini-2.5-flash", "grok-3-mini", "deepseek-r1", "deepseek-v3.2",
     # All image models
     "nano-banana-pro", "gpt-5-image-mini", "gpt-5-image",
-}
+    # Budget video models
+} | BUDGET_VIDEO_MODELS
 
-# opti and plus have access to ALL models
-FULL_ACCESS_TIERS = {"opti", "plus"}
+# Opus model IDs (for sub-limit checking)
+OPUS_MODEL_IDS = {"claude-opus-4", "claude-opus-4.5"}
+
+# opti and pro have access to ALL models
+FULL_ACCESS_TIERS = {"opti", "pro"}
 
 
-def get_accessible_models(tier: str) -> set:
-    """Return set of model IDs accessible on this tier."""
+def get_accessible_models(tier: str) -> set | None:
+    """Return set of model IDs accessible on this tier. None = all models."""
     if tier in FULL_ACCESS_TIERS:
-        return None  # None = all models
+        return None
     if tier == "mini":
         return MINI_MODELS
     return FREE_MODELS
@@ -164,7 +175,7 @@ def get_accessible_models(tier: str) -> set:
 
 def get_credit_cost(model_id: str) -> int:
     """Return credit cost for a single request to this model."""
-    return CREDIT_COSTS.get(model_id, 5)  # default 5 cr for unknown
+    return CREDIT_COSTS.get(model_id, 5)
 
 
 def get_required_tier(model_id: str) -> str:
@@ -174,6 +185,11 @@ def get_required_tier(model_id: str) -> str:
     if model_id in MINI_MODELS:
         return "mini"
     return "opti"
+
+
+def is_opus_model(model_id: str) -> bool:
+    """Check if model is Claude Opus (has sub-limit)."""
+    return model_id in OPUS_MODEL_IDS
 
 
 def get_plan(tier: str) -> dict:

@@ -75,6 +75,7 @@ async def migrate_users_table():
         ("monthly_videos_used", "INTEGER DEFAULT 0"),
         ("monthly_3d_used", "INTEGER DEFAULT 0"),
         ("monthly_audio_used", "INTEGER DEFAULT 0"),
+        ("opus_requests_used", "INTEGER DEFAULT 0"),
     ]
 
     async with engine.begin() as conn:
