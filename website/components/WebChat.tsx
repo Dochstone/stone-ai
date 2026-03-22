@@ -17,6 +17,25 @@ const VIDEO_MODEL_IDS = new Set([
 
 const THREED_MODEL_IDS = new Set(["tripo-v2.5", "triposr"]);
 
+// Model access tiers for lock icons
+const FREE_MODEL_IDS = new Set([
+  "gpt-4o-mini", "gemini-2.0-flash", "deepseek-v3",
+  "llama-4-maverick", "mistral-small", "qwen-turbo", "nano-banana",
+]);
+const MINI_MODEL_IDS = new Set([
+  ...FREE_MODEL_IDS,
+  "claude-haiku-4.5", "claude-sonnet-4", "gpt-4.1-mini", "gpt-5.1",
+  "gemini-2.5-flash", "grok-3-mini", "deepseek-r1", "deepseek-v3.2",
+  "nano-banana-pro", "gpt-5-image-mini", "gpt-5-image",
+]);
+
+function getModelLockInfo(modelId: string, balance: number): { locked: boolean; tier: string; price: string } | null {
+  if (balance > 0) return null; // balance = no locks
+  if (FREE_MODEL_IDS.has(modelId)) return null;
+  if (MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: "Мини", price: "390₽/мес" };
+  return { locked: true, tier: "Опти", price: "890₽/мес" };
+}
+
 // ─── Helpers ───
 
 function extractImageUrl(text: string): string | null {
@@ -446,6 +465,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   const [auth, setAuth] = useState<AuthState | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [selectedModel, setSelectedModel] = useState(initialModel && MODELS.some(m => m.id === initialModel) ? initialModel : "gpt-4o-mini");
+  const [lockModal, setLockModal] = useState<{ model: string; tier: string; price: string } | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
@@ -1072,7 +1092,15 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
               </div>
               <select
                 value={selectedModel}
-                onChange={(e) => setSelectedModel(e.target.value)}
+                onChange={(e) => {
+                  const lock = getModelLockInfo(e.target.value, auth?.balanceUsd || 0);
+                  if (lock) {
+                    const m = MODELS.find(x => x.id === e.target.value);
+                    setLockModal({ model: m?.name || e.target.value, tier: lock.tier, price: lock.price });
+                    return;
+                  }
+                  setSelectedModel(e.target.value);
+                }}
                 className="bg-transparent font-bold text-[13px] sm:text-sm text-text appearance-none cursor-pointer focus:outline-none min-w-0 max-w-[120px] sm:max-w-[200px] truncate pr-4"
                 style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%231A191650' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 0 center" }}
               >
@@ -1088,16 +1116,24 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                   const filtered = modelCatFilter === "all"
                     ? MODELS
                     : MODELS.filter(m => allowedCats.includes(m.category));
+                  const bal = auth?.balanceUsd || 0;
                   const sorted = [...filtered].sort((a, b) => {
+                    const aLocked = getModelLockInfo(a.id, bal) !== null;
+                    const bLocked = getModelLockInfo(b.id, bal) !== null;
+                    if (!aLocked && bLocked) return -1;
+                    if (aLocked && !bLocked) return 1;
                     if (a.tier === "free" && b.tier !== "free") return -1;
                     if (a.tier !== "free" && b.tier === "free") return 1;
                     return a.pricePerMillion - b.pricePerMillion;
                   });
-                  return sorted.map(m => (
-                    <option key={m.id} value={m.id}>
-                      {m.tier === "free" ? "★ " : ""}{m.name} — {m.company} ({formatPrice(m)})
-                    </option>
-                  ));
+                  return sorted.map(m => {
+                    const lock = getModelLockInfo(m.id, bal);
+                    return (
+                      <option key={m.id} value={m.id}>
+                        {lock ? "🔒 " : m.tier === "free" ? "★ " : ""}{m.name} — {m.company} ({formatPrice(m)})
+                      </option>
+                    );
+                  });
                 })()}
               </select>
               <span className={`text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
@@ -1469,6 +1505,33 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
           </div>
         </div>
       </div>
+
+      {/* Lock Modal */}
+      {lockModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-4" onClick={() => setLockModal(null)}>
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="text-center">
+              <div className="w-14 h-14 bg-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">🔒</span>
+              </div>
+              <h3 className="font-extrabold text-lg mb-2">{lockModal.model}</h3>
+              <p className="text-text/50 text-sm mb-6">
+                Доступен на тарифе <span className="font-bold text-accent">{lockModal.tier}</span> ({lockModal.price})
+              </p>
+              <div className="flex gap-3">
+                <button onClick={() => setLockModal(null)}
+                  className="flex-1 border-2 border-text/15 text-text py-2.5 rounded-xl font-bold text-sm hover:border-text/30 transition-colors">
+                  Закрыть
+                </button>
+                <a href="/pricing"
+                  className="flex-1 bg-accent text-white py-2.5 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors text-center">
+                  Смотреть тарифы
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
