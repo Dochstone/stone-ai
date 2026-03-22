@@ -16,6 +16,7 @@ from app.services.limiter import (
     FREE_DAILY_LIMIT,
     REWARDED_BONUS,
 )
+from app.services.subscription import PLANS, CREDIT_COSTS, get_accessible_models
 from app.services.token_billing import get_user_balance, TOKEN_PRICES
 
 router = APIRouter(prefix="/api", tags=["user"])
@@ -158,3 +159,19 @@ async def user_limits(request: Request, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
 
     return await get_free_limits(db, user)
+
+
+@router.get("/plans")
+async def list_plans():
+    """Return available subscription plans for /pricing page."""
+    result = []
+    for tier, plan in PLANS.items():
+        result.append({
+            "id": tier,
+            "name": plan["name"],
+            "price_rub": plan["price_rub"],
+            "limits": plan["limits"],
+            "period": plan["period"],
+            "features": plan["features"],
+        })
+    return {"plans": result}

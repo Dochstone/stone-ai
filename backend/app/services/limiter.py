@@ -12,14 +12,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import User, Subscription, Pass, Usage
 from app.services.ai_router import get_model_tier, get_model_category, MODELS_REGISTRY
+from app.services.subscription import FREE_MODELS, get_accessible_models, get_credit_cost, get_required_tier, get_plan, PLANS, CREDIT_COSTS
 
 # ─── Free plan constants ───
-
-# Models available on Free plan (7 models)
-FREE_MODELS = {
-    "gpt-4o-mini", "gemini-2.0-flash", "deepseek-v3",
-    "llama-4-maverick", "mistral-small", "qwen-turbo", "nano-banana",
-}
 
 FREE_LIMITS = {
     "text": 15,          # 15 text requests/day
@@ -285,24 +280,14 @@ async def check_can_request(db: AsyncSession, tg_id: int, model_id: str) -> dict
 
     # ── Free plan logic (subscription_tier == "free" AND balance <= 0) ──
 
-    # Check if model is allowed on free plan
-    model_info = next((m for m in MODELS_REGISTRY if m["id"] == model_id), None)
-    model_name = model_info["name"] if model_info else model_id
-
-    if model_id not in FREE_MODELS:
-        # Model locked — determine which tier unlocks it
-        if category == "image":
-            msg = _UPGRADE_MESSAGES["model_locked"].format(model_name=model_name)
-            required = "mini"
-        elif model_info and model_info.get("category") in ("video",):
-            msg = _UPGRADE_MESSAGES["video_locked"]
-            required = "opti"
-        elif model_info and model_info.get("category") in ("3d",):
-            msg = _UPGRADE_MESSAGES["3d_locked"]
-            required = "opti"
-        else:
-            msg = _UPGRADE_MESSAGES["model_locked"].format(model_name=model_name)
-            required = "mini"
+    # Check model access for current tier
+    accessible = get_accessible_models(sub_tier)
+    if accessible is not None and model_id not in accessible:
+        required = get_required_tier(model_id)
+        plan_info = get_plan(required)
+        model_info = next((m for m in MODELS_REGISTRY if m["id"] == model_id), None)
+        model_name = model_info["name"] if model_info else model_id
+        msg = f"{model_name} доступен на тарифе {plan_info['name']} ({plan_info['price_rub']}₽/мес)"
 
         return {
             **base,
