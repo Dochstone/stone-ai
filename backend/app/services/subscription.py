@@ -25,15 +25,15 @@ PLANS = {
         },
     },
     "mini": {
-        "name": "Мини",
-        "price_rub": 339,
+        "name": "Mini",
+        "price_rub": 390,
         "credits": 1000,
         "limits": {
             "text_fast": 500,
             "text_premium": 20,
-            "opus_limit": 5,        # max 5 Claude Opus 4 requests/month
+            "opus_limit": 5,
             "images": 15,
-            "videos": 3,            # budget video only (LTX, Wan, Hunyuan)
+            "videos": 3,
             "models_3d": 0,
             "audio": 0,
         },
@@ -45,14 +45,14 @@ PLANS = {
             "api": False,
         },
     },
-    "opti": {
-        "name": "Опти",
-        "price_rub": 790,
+    "max": {
+        "name": "Max",
+        "price_rub": 890,
         "credits": 3000,
         "limits": {
             "text_fast": 2000,
             "text_premium": 100,
-            "opus_limit": 20,       # max 20 Opus/month
+            "opus_limit": 20,
             "images": 50,
             "videos": 10,
             "models_3d": 5,
@@ -66,14 +66,14 @@ PLANS = {
             "api": False,
         },
     },
-    "pro": {
-        "name": "Про",
-        "price_rub": 1950,
+    "max-pro": {
+        "name": "Max Pro",
+        "price_rub": 1990,
         "credits": 10000,
         "limits": {
             "text_fast": 10000,
             "text_premium": 500,
-            "opus_limit": 80,       # max 80 Opus/month
+            "opus_limit": 80,
             "images": 300,
             "videos": 50,
             "models_3d": 30,
@@ -160,8 +160,8 @@ MINI_MODELS = FREE_MODELS | {
 # Opus model IDs (for sub-limit checking)
 OPUS_MODEL_IDS = {"claude-opus-4", "claude-opus-4.5"}
 
-# opti and pro have access to ALL models
-FULL_ACCESS_TIERS = {"opti", "pro"}
+# max and max-pro have access to ALL models
+FULL_ACCESS_TIERS = {"max", "max-pro"}
 
 
 def get_accessible_models(tier: str) -> set | None:
@@ -184,7 +184,7 @@ def get_required_tier(model_id: str) -> str:
         return "free"
     if model_id in MINI_MODELS:
         return "mini"
-    return "opti"
+    return "max"
 
 
 def is_opus_model(model_id: str) -> bool:
