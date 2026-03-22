@@ -23,7 +23,8 @@ const FREE_MODEL_IDS = new Set([
   "llama-4-maverick", "mistral-small", "qwen-turbo", "nano-banana",
 ]);
 const MINI_MODEL_IDS = new Set([
-  ...FREE_MODEL_IDS,
+  "gpt-4o-mini", "gemini-2.0-flash", "deepseek-v3",
+  "llama-4-maverick", "mistral-small", "qwen-turbo", "nano-banana",
   "claude-haiku-4.5", "claude-sonnet-4", "gpt-4.1-mini", "gpt-5.1",
   "gemini-2.5-flash", "grok-3-mini", "deepseek-r1", "deepseek-v3.2",
   "nano-banana-pro", "gpt-5-image-mini", "gpt-5-image",
