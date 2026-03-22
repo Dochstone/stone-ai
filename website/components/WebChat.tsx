@@ -467,6 +467,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   const [loaded, setLoaded] = useState(false);
   const [selectedModel, setSelectedModel] = useState(initialModel && MODELS.some(m => m.id === initialModel) ? initialModel : "gpt-4o-mini");
   const [lockModal, setLockModal] = useState<{ model: string; tier: string; price: string } | null>(null);
+  const [limits, setLimits] = useState<{ text?: { used: number; limit: number }; image?: { used: number; limit: number }; streak?: { days: number } } | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
@@ -508,6 +509,15 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
       setSidebarOpen(false);
     }
   }, []);
+
+  // Fetch usage limits
+  useEffect(() => {
+    if (!auth?.token) return;
+    fetch(`${API_URL}/api/user/limits`, { headers: { Authorization: `Bearer ${auth.token}` } })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) setLimits(data); })
+      .catch(() => {});
+  }, [auth?.token, messages.length]); // refetch after each message
 
   // Auto-scroll
   useEffect(() => {
@@ -1146,6 +1156,22 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            {limits && limits.text && limits.text.limit > 0 && (
+              <div className="hidden sm:flex items-center gap-1.5 text-[10px] text-text/40" title={`${limits.text.used}/${limits.text.limit} запросов`}>
+                <div className="w-16 h-1.5 bg-text/10 rounded-full overflow-hidden">
+                  <div className="h-full rounded-full transition-all" style={{
+                    width: `${Math.min(100, (limits.text.used / limits.text.limit) * 100)}%`,
+                    backgroundColor: limits.text.used >= limits.text.limit * 0.8 ? "#ef4444" : "#C4623D",
+                  }} />
+                </div>
+                <span>{limits.text.limit - limits.text.used}</span>
+              </div>
+            )}
+            {limits?.streak && limits.streak.days >= 2 && (
+              <span className="hidden sm:inline text-[10px] text-amber-500" title={`${limits.streak.days} дней подряд`}>
+                🔥{limits.streak.days}
+              </span>
+            )}
             <a href="/topup" className="text-[11px] sm:text-xs font-bold text-accent hover:underline whitespace-nowrap">
               ${auth.balanceUsd.toFixed(2)}
             </a>
