@@ -1406,14 +1406,13 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                       sr.lang = "ru-RU";
                       sr.continuous = true;
                       sr.interimResults = true;
-                      let finalText = "";
                       sr.onresult = (e: any) => {
-                        let interim = "";
-                        for (let i = e.resultIndex; i < e.results.length; i++) {
-                          const t = e.results[i][0].transcript;
-                          if (e.results[i].isFinal) { finalText += t + " "; } else { interim = t; }
+                        let full = "";
+                        for (let i = 0; i < e.results.length; i++) {
+                          full += e.results[i][0].transcript;
+                          if (e.results[i].isFinal) full += " ";
                         }
-                        setInput(finalText + interim);
+                        setInput(full.trim());
                       };
                       sr.onerror = () => { setRecording(false); };
                       sr.onend = () => { setRecording(false); };
