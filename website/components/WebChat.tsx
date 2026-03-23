@@ -33,8 +33,8 @@ const MINI_MODEL_IDS = new Set([
 function getModelLockInfo(modelId: string, balance: number): { locked: boolean; tier: string; price: string } | null {
   if (balance > 0) return null; // balance = no locks
   if (FREE_MODEL_IDS.has(modelId)) return null;
-  if (MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: "Мини", price: "390₽/мес" };
-  return { locked: true, tier: "Опти", price: "890₽/мес" };
+  if (MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: "Mini", price: "390₽/мес" };
+  return { locked: true, tier: "Max", price: "890₽/мес" };
 }
 
 // ─── Helpers ───
@@ -1243,7 +1243,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
               <span className={`text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
                 model?.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"
               }`}>
-                {model ? formatPrice(model) : ""}
+                {model?.company || ""}
               </span>
             </div>
           </div>
@@ -1319,7 +1319,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                         <span className="text-[10px] text-text/30">{m.company}</span>
                       </div>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${lock ? "bg-text/5 text-text/30" : m.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"}`}>
-                        {lock ? lock.tier : formatPrice(m)}
+                        {lock ? lock.tier : m.tier === "free" ? "Free" : m.company}
                       </span>
                     </button>
                   );
@@ -1619,7 +1619,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                 value={input}
                 onChange={handleInputChange}
                 onKeyDown={handleKey}
-                placeholder={pendingFile ? "Добавьте вопрос к файлу..." : isVideoModel ? `Опишите видео... (~$${formatPrice(model!).replace('/vid','')})` : is3DModel ? `Опишите 3D-модель или загрузите фото... (~$${formatPrice(model!).replace('/model','')})` : "Написать сообщение..."}
+                placeholder={pendingFile ? "Добавьте вопрос к файлу..." : isVideoModel ? "Опишите видео..." : is3DModel ? "Опишите 3D-модель или загрузите фото..." : "Написать сообщение..."}
                 rows={1}
                 className="flex-1 bg-transparent resize-none focus:outline-none min-w-0 leading-snug placeholder:text-text/20"
                 style={{ fontSize: 14, padding: "10px 16px", maxHeight: 80, minHeight: 42 }}
