@@ -1452,8 +1452,6 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
 
                       <MessageContent content={msg.content} role={msg.role} selectedModel={selectedModel} />
 
-                      {/* Billing details hidden — subscription model */}
-                      )}
                       {/* Action buttons for AI messages */}
                       {msg.role === "assistant" && msg.content && (
                         <div className="flex items-center gap-1 mt-2">
