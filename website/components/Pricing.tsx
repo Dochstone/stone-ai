@@ -158,13 +158,13 @@ export default function Pricing() {
               </div>
 
               <ul className="space-y-2 text-sm mb-4 flex-1">
-                {plan.features.map((f) => (
+                {plan.features.map((f: string) => (
                   <li key={f} className="flex items-start gap-2">
                     <span className={`mt-0.5 shrink-0 text-xs ${plan.premium ? "text-amber-400" : plan.accent ? "text-accent" : "text-teal"}`}>&#10003;</span>
                     <span className={`text-xs ${plan.premium ? "text-white/70" : "text-text/70"}`}>{f}</span>
                   </li>
                 ))}
-                {plan.locked.map((f) => (
+                {plan.locked.map((f: string) => (
                   <li key={f} className="flex items-start gap-2">
                     <span className="mt-0.5 shrink-0 text-xs text-text/20">&#128274;</span>
                     <span className="text-text/30 text-xs line-through">{f}</span>
