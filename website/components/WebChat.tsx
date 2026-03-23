@@ -211,42 +211,156 @@ function MessageContent({ content, role, selectedModel }: { content: string; rol
   return <div className="md-content break-words" dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }} />;
 }
 
-// ─── Welcome Screen ───
+// ─── Prompt Templates ───
 
-const SUGGESTION_CARDS = [
-  { icon: "💻", title: "Напиши код на Python", subtitle: "Алгоритмы, скрипты, API", modelId: "devstral" },
-  { icon: "🎨", title: "Сгенерируй картинку", subtitle: "Nano Banana Pro, GPT-5 Image", modelId: "nano-banana-pro" },
-  { icon: "🎬", title: "Сгенерируй видео", subtitle: "Kling v2, Runway, Pika", modelId: "kling-v2" },
-  { icon: "🔍", title: "Найди в интернете", subtitle: "Perplexity Sonar, актуальные данные", modelId: "perplexity-sonar" },
+const PROMPT_CATEGORIES = [
+  { id: "popular", label: "Популярное", icon: "⭐" },
+  { id: "marketing", label: "Маркетинг", icon: "📢" },
+  { id: "code", label: "Код", icon: "💻" },
+  { id: "text", label: "Тексты", icon: "✍️" },
+  { id: "images", label: "Картинки", icon: "🎨" },
+  { id: "analysis", label: "Анализ", icon: "📊" },
+  { id: "translate", label: "Перевод", icon: "🌍" },
 ];
 
+const PROMPT_TEMPLATES: Record<string, { text: string; model: string }[]> = {
+  popular: [
+    { text: "Напиши пост для Telegram-канала на тему: ", model: "gpt-4o-mini" },
+    { text: "Сгенерируй фотореалистичную картинку: ", model: "nano-banana-pro" },
+    { text: "Объясни простыми словами что такое ", model: "gpt-4o-mini" },
+    { text: "Найди актуальную информацию про ", model: "perplexity-sonar" },
+    { text: "Напиши функцию на Python которая ", model: "devstral" },
+    { text: "Переведи на английский сохранив тон: ", model: "gpt-4o-mini" },
+  ],
+  marketing: [
+    { text: "Напиши 5 вариантов заголовка для рекламы продукта: ", model: "gpt-4o-mini" },
+    { text: "Составь контент-план на неделю для Telegram-канала про ", model: "gpt-4o-mini" },
+    { text: "Напиши email-рассылку для клиентов. Тема: ", model: "gpt-4o-mini" },
+    { text: "Напиши описание товара для маркетплейса. Товар: ", model: "gpt-4o-mini" },
+    { text: "Придумай 10 идей для Reels/Shorts на тему ", model: "gpt-4o-mini" },
+    { text: "Проанализируй целевую аудиторию для продукта: ", model: "gpt-4o-mini" },
+    { text: "Напиши скрипт продаж для холодного звонка. Продукт: ", model: "gpt-4o-mini" },
+    { text: "Составь УТП (уникальное торговое предложение) для ", model: "gpt-4o-mini" },
+  ],
+  code: [
+    { text: "Напиши функцию на Python: ", model: "devstral" },
+    { text: "Сделай code review этого кода и найди баги:\n\n", model: "devstral" },
+    { text: "Перепиши этот код с async/await:\n\n", model: "devstral" },
+    { text: "Напиши SQL-запрос: ", model: "gpt-4o-mini" },
+    { text: "Напиши unit-тесты для этой функции:\n\n", model: "devstral" },
+    { text: "Напиши REST API на FastAPI: ", model: "devstral" },
+    { text: "Объясни этот алгоритм строка за строкой:\n\n", model: "gpt-4o-mini" },
+    { text: "Напиши Dockerfile для Node.js приложения с multi-stage build", model: "devstral" },
+  ],
+  text: [
+    { text: "Напиши статью на тему: ", model: "gpt-4o-mini" },
+    { text: "Перепиши текст в более формальном стиле:\n\n", model: "gpt-4o-mini" },
+    { text: "Сократи текст до 3 предложений сохранив смысл:\n\n", model: "gpt-4o-mini" },
+    { text: "Напиши сценарий для YouTube-видео на 5 минут. Тема: ", model: "gpt-4o-mini" },
+    { text: "Исправь грамматические ошибки в тексте:\n\n", model: "gpt-4o-mini" },
+    { text: "Напиши резюме/CV для специалиста: ", model: "gpt-4o-mini" },
+    { text: "Составь список плюсов и минусов: ", model: "gpt-4o-mini" },
+    { text: "Напиши поздравление с днём рождения для ", model: "gpt-4o-mini" },
+  ],
+  images: [
+    { text: "Фотореалистичный портрет: ", model: "nano-banana-pro" },
+    { text: "Минималистичный логотип для компании: ", model: "nano-banana-pro" },
+    { text: "Flat illustration для мобильного приложения: ", model: "nano-banana" },
+    { text: "Обложка для Telegram-канала: ", model: "nano-banana-pro" },
+    { text: "Мем в стиле: ", model: "nano-banana" },
+    { text: "Концепт-арт: ", model: "nano-banana-pro" },
+  ],
+  analysis: [
+    { text: "Проанализируй этот документ и выдели ключевые пункты:\n\n", model: "gpt-4o-mini" },
+    { text: "Сравни плюсы и минусы: ", model: "gpt-4o-mini" },
+    { text: "Составь SWOT-анализ для компании: ", model: "gpt-4o-mini" },
+    { text: "Найди актуальные данные и проведи исследование рынка: ", model: "perplexity-sonar" },
+    { text: "Проверь этот контракт на скрытые риски:\n\n", model: "gpt-4o-mini" },
+    { text: "Посчитай unit-экономику для бизнеса: ", model: "gpt-4o-mini" },
+  ],
+  translate: [
+    { text: "Переведи на английский, сохрани деловой тон:\n\n", model: "gpt-4o-mini" },
+    { text: "Переведи на русский:\n\n", model: "gpt-4o-mini" },
+    { text: "Переведи маркетинговый текст на английский. Адаптируй метафоры:\n\n", model: "gpt-4o-mini" },
+    { text: "Переведи техническую документацию. Термины оставь на английском:\n\n", model: "gpt-4o-mini" },
+    { text: "Переведи с китайского на русский:\n\n", model: "gpt-4o-mini" },
+    { text: "Переведи субтитры с японского на русский:\n\n", model: "gpt-4o-mini" },
+  ],
+};
+
+// ─── Welcome Screen ───
+
 function WelcomeScreen({ onSuggestion }: { onSuggestion: (text: string, modelId: string) => void }) {
+  const [promptCat, setPromptCat] = useState("popular");
+
   return (
-    <div className="flex-1 flex items-center justify-center px-4">
-      <div className="text-center max-w-xl w-full">
+    <div className="flex-1 flex items-center justify-center px-4 overflow-y-auto">
+      <div className="text-center max-w-2xl w-full py-8">
         <div className="mb-6">
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-accent to-accent/70 flex items-center justify-center shadow-lg shadow-accent/20 mb-4">
-            <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <div className="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-accent to-accent/70 flex items-center justify-center shadow-lg shadow-accent/20 mb-3">
+            <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
             </svg>
           </div>
-          <h1 className="text-2xl font-extrabold text-text mb-2">Чем могу помочь?</h1>
-          <p className="text-sm text-text/40">65+ нейросетей в одном окне. Выберите модель и начните диалог.</p>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-text mb-1">Чем могу помочь?</h1>
+          <p className="text-xs sm:text-sm text-text/40">Выберите шаблон или напишите свой запрос</p>
         </div>
 
-        <div className="grid grid-cols-2 max-w-md mx-auto" style={{ gap: 12 }}>
-          {SUGGESTION_CARDS.map((card) => (
+        {/* Category tabs */}
+        <div className="flex gap-1 overflow-x-auto pb-2 mb-4 justify-center flex-wrap">
+          {PROMPT_CATEGORIES.map((cat) => (
             <button
-              key={card.title}
-              onClick={() => onSuggestion(card.title, card.modelId)}
-              className="text-left p-4 rounded-2xl border border-text/[0.06] bg-white hover:border-accent/30 hover:shadow-md hover:shadow-accent/5 transition-all duration-200 group h-full"
+              key={cat.id}
+              onClick={() => setPromptCat(cat.id)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+                promptCat === cat.id ? "bg-accent text-white" : "bg-white text-text/40 border border-text/[0.06] hover:text-text/60"
+              }`}
             >
-              <span className="text-xl mb-2 block">{card.icon}</span>
-              <span className="text-[13px] font-semibold text-text group-hover:text-accent transition-colors block leading-tight">{card.title}</span>
-              <span className="text-[11px] text-text/30 mt-1 block">{card.subtitle}</span>
+              {cat.icon} {cat.label}
             </button>
           ))}
         </div>
+
+        {/* Prompt cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-lg mx-auto text-left">
+          {(PROMPT_TEMPLATES[promptCat] || []).map((tmpl, i) => (
+            <button
+              key={i}
+              onClick={() => onSuggestion(tmpl.text, tmpl.model)}
+              className="p-3 rounded-xl border border-text/[0.06] bg-white hover:border-accent/30 hover:shadow-sm transition-all group"
+            >
+              <span className="text-[12px] sm:text-[13px] text-text/70 group-hover:text-accent transition-colors leading-snug line-clamp-2">{tmpl.text}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Templates Picker (reusable in welcome + inline) ───
+
+function TemplatesPicker({ onSelect }: { onSelect: (text: string, modelId: string) => void }) {
+  const [cat, setCat] = useState("popular");
+  return (
+    <div>
+      <div className="flex gap-1 overflow-x-auto pb-2 mb-2">
+        {PROMPT_CATEGORIES.map((c) => (
+          <button key={c.id} onClick={() => setCat(c.id)}
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors ${
+              cat === c.id ? "bg-accent text-white" : "bg-bg text-text/40 hover:text-text/60"
+            }`}>
+            {c.icon} {c.label}
+          </button>
+        ))}
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+        {(PROMPT_TEMPLATES[cat] || []).map((tmpl, i) => (
+          <button key={i} onClick={() => onSelect(tmpl.text, tmpl.model)}
+            className="p-2.5 rounded-lg border border-text/[0.06] bg-bg hover:border-accent/30 transition-all text-left">
+            <span className="text-[11px] sm:text-[12px] text-text/60 hover:text-accent leading-snug line-clamp-2">{tmpl.text}</span>
+          </button>
+        ))}
       </div>
     </div>
   );
@@ -483,6 +597,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   const [lockModal, setLockModal] = useState<{ model: string; tier: string; price: string } | null>(null);
   const [modelPickerOpen, setModelPickerOpen] = useState(false);
   const [modelSearch, setModelSearch] = useState("");
+  const [showTemplates, setShowTemplates] = useState(false);
   const [limits, setLimits] = useState<{ text?: { used: number; limit: number }; image?: { used: number; limit: number }; streak?: { days: number } } | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -1419,6 +1534,26 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
           </div>
         )}
 
+        {/* Templates panel */}
+        {showTemplates && (
+          <div className="border-t border-text/[0.06] bg-white px-3 sm:px-4 py-3 shrink-0 max-h-[40vh] overflow-y-auto">
+            <div className="max-w-3xl mx-auto">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold text-text/50">Шаблоны промптов</span>
+                <button onClick={() => setShowTemplates(false)} className="text-text/30 hover:text-text/60 transition-colors">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+              <TemplatesPicker onSelect={(text: string, modelId: string) => {
+                setInput(text);
+                const lock = getModelLockInfo(modelId, auth?.balanceUsd || 0);
+                if (!lock) setSelectedModel(modelId);
+                setShowTemplates(false);
+              }} />
+            </div>
+          </div>
+        )}
+
         {/* Input area — pinned bottom */}
         <div className="border-t border-text/[0.06] bg-white px-3 sm:px-4 py-1.5 sm:py-2 shrink-0 chat-input-safe">
           <div className="max-w-3xl mx-auto">
@@ -1461,6 +1596,18 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
             <style>{`@keyframes waveRec { from { transform: scaleY(0.3); } to { transform: scaleY(1); } }`}</style>
 
             <div className="flex items-center bg-bg border border-text/[0.08] rounded-xl focus-within:border-accent/30 focus-within:ring-2 focus-within:ring-accent/10 transition-all min-w-0" style={{ padding: "4px 8px", gap: 6 }}>
+              {/* Templates button */}
+              <button
+                onClick={() => setShowTemplates(!showTemplates)}
+                className="flex items-center justify-center text-text/25 hover:text-accent transition-colors shrink-0"
+                style={{ width: 38, height: 38 }}
+                title="Шаблоны промптов"
+              >
+                <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z" />
+                </svg>
+              </button>
+
               {/* File attach */}
               <input ref={fileInputRef} type="file" accept="image/*,.pdf" className="hidden"
                 onChange={(e) => { if (e.target.files?.[0]) handleFileSelect(e.target.files[0]); e.target.value = ""; }}
