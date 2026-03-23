@@ -301,6 +301,7 @@ function Sidebar({
   onNewChat: () => void;
   onDeleteSession: (id: number) => void;
 }) {
+  const [sidebarSearch, setSidebarSearch] = useState("");
 
   return (
     <>
@@ -345,6 +346,19 @@ function Sidebar({
           </div>
         </div>
 
+        {/* Search */}
+        {sessions.length > 3 && (
+          <div className="px-3 pb-2 shrink-0">
+            <input
+              type="text"
+              placeholder="Поиск чатов..."
+              value={sidebarSearch}
+              onChange={(e) => setSidebarSearch(e.target.value)}
+              className="w-full bg-white/60 border border-text/10 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-accent/30"
+            />
+          </div>
+        )}
+
         {/* Chat sessions list */}
         <div className="flex-1 overflow-y-auto px-2">
           {sessions.length === 0 ? (
@@ -354,7 +368,7 @@ function Sidebar({
             </div>
           ) : (
             <div className="space-y-0.5">
-              {sessions.map((s) => (
+              {sessions.filter(s => !sidebarSearch || s.title?.toLowerCase().includes(sidebarSearch.toLowerCase())).map((s) => (
                 <div
                   key={s.id}
                   className={`group flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition-colors ${
@@ -467,6 +481,8 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   const [loaded, setLoaded] = useState(false);
   const [selectedModel, setSelectedModel] = useState(initialModel && MODELS.some(m => m.id === initialModel) ? initialModel : "gpt-4o-mini");
   const [lockModal, setLockModal] = useState<{ model: string; tier: string; price: string } | null>(null);
+  const [modelPickerOpen, setModelPickerOpen] = useState(false);
+  const [modelSearch, setModelSearch] = useState("");
   const [limits, setLimits] = useState<{ text?: { used: number; limit: number }; image?: { used: number; limit: number }; streak?: { days: number } } | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -477,7 +493,6 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   const [sessions, setSessions] = useState<ChatSessionItem[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
   const [recording, setRecording] = useState(false);
-  const [modelSearch, setModelSearch] = useState("");
   const [modelCatFilter, setModelCatFilter] = useState<string>(initialCategory || "all");
 
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -1101,52 +1116,15 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
               >
                 {aiLetter}
               </div>
-              <select
-                value={selectedModel}
-                onChange={(e) => {
-                  const lock = getModelLockInfo(e.target.value, auth?.balanceUsd || 0);
-                  if (lock) {
-                    const m = MODELS.find(x => x.id === e.target.value);
-                    setLockModal({ model: m?.name || e.target.value, tier: lock.tier, price: lock.price });
-                    return;
-                  }
-                  setSelectedModel(e.target.value);
-                }}
-                className="bg-transparent font-bold text-[13px] sm:text-sm text-text appearance-none cursor-pointer focus:outline-none min-w-0 max-w-[120px] sm:max-w-[200px] truncate pr-4"
-                style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%231A191650' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 0 center" }}
+              <button
+                onClick={() => setModelPickerOpen(!modelPickerOpen)}
+                className="flex items-center gap-1 bg-transparent font-bold text-[13px] sm:text-sm text-text cursor-pointer focus:outline-none min-w-0 max-w-[140px] sm:max-w-[220px] truncate"
               >
-                {(() => {
-                  const catMap: Record<string, string[]> = {
-                    all: [],
-                    chat: ["chat", "search", "reason", "code"],
-                    image: ["image"],
-                    video: ["video"],
-                    "3d": ["3d"],
-                  };
-                  const allowedCats = catMap[modelCatFilter] || [];
-                  const filtered = modelCatFilter === "all"
-                    ? MODELS
-                    : MODELS.filter(m => allowedCats.includes(m.category));
-                  const bal = auth?.balanceUsd || 0;
-                  const sorted = [...filtered].sort((a, b) => {
-                    const aLocked = getModelLockInfo(a.id, bal) !== null;
-                    const bLocked = getModelLockInfo(b.id, bal) !== null;
-                    if (!aLocked && bLocked) return -1;
-                    if (aLocked && !bLocked) return 1;
-                    if (a.tier === "free" && b.tier !== "free") return -1;
-                    if (a.tier !== "free" && b.tier === "free") return 1;
-                    return a.pricePerMillion - b.pricePerMillion;
-                  });
-                  return sorted.map(m => {
-                    const lock = getModelLockInfo(m.id, bal);
-                    return (
-                      <option key={m.id} value={m.id}>
-                        {lock ? "🔒 " : m.tier === "free" ? "★ " : ""}{m.name} — {m.company} ({formatPrice(m)})
-                      </option>
-                    );
-                  });
-                })()}
-              </select>
+                {model?.name || "Модель"}
+                <svg className="w-3 h-3 text-text/30 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" d="M6 9l6 6 6-6" />
+                </svg>
+              </button>
               <span className={`text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
                 model?.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"
               }`}>
@@ -1187,6 +1165,48 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
             </a>
           </div>
         </div>
+
+        {/* Model Picker Panel */}
+        {modelPickerOpen && (
+          <div className="absolute top-14 left-0 right-0 z-30 bg-white border-b border-text/10 shadow-lg max-h-[60vh] flex flex-col">
+            <div className="p-3 border-b border-text/5 shrink-0">
+              <input type="text" value={modelSearch} onChange={(e) => setModelSearch(e.target.value)}
+                placeholder="Поиск модели..." autoFocus
+                className="w-full bg-bg border border-text/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent/30" />
+            </div>
+            <div className="overflow-y-auto flex-1 p-2">
+              {(() => {
+                const catMap: Record<string, string[]> = { all: [], chat: ["chat", "search", "reason", "code"], image: ["image"], video: ["video"], "3d": ["3d"] };
+                const cats = catMap[modelCatFilter] || [];
+                let list = modelCatFilter === "all" ? MODELS : MODELS.filter(m => cats.includes(m.category));
+                if (modelSearch) list = list.filter(m => m.name.toLowerCase().includes(modelSearch.toLowerCase()) || m.company.toLowerCase().includes(modelSearch.toLowerCase()));
+                const bal = auth?.balanceUsd || 0;
+                return [...list].sort((a, b) => {
+                  const aL = getModelLockInfo(a.id, bal) !== null, bL = getModelLockInfo(b.id, bal) !== null;
+                  if (!aL && bL) return -1; if (aL && !bL) return 1;
+                  return a.pricePerMillion - b.pricePerMillion;
+                }).map(m => {
+                  const lock = getModelLockInfo(m.id, bal);
+                  return (
+                    <button key={m.id} onClick={() => {
+                      if (lock) { setLockModal({ model: m.name, tier: lock.tier, price: lock.price }); setModelPickerOpen(false); return; }
+                      setSelectedModel(m.id); setModelPickerOpen(false); setModelSearch("");
+                    }} className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left transition-colors ${selectedModel === m.id ? "bg-accent/5 border border-accent/20" : "hover:bg-bg"} ${lock ? "opacity-50" : ""}`}>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm font-semibold">{lock ? "🔒 " : ""}{m.name}</span>
+                        <span className="text-[10px] text-text/30 ml-1.5">{m.company}</span>
+                      </div>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${lock ? "bg-text/5 text-text/30" : m.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"}`}>
+                        {lock ? lock.tier : formatPrice(m)}
+                      </span>
+                    </button>
+                  );
+                });
+              })()}
+            </div>
+          </div>
+        )}
+        {modelPickerOpen && <div className="fixed inset-0 z-20" onClick={() => { setModelPickerOpen(false); setModelSearch(""); }} />}
 
         {/* Category tabs */}
         <div className="flex items-center gap-1 px-3 sm:px-4 py-1.5 border-b border-text/[0.04] bg-white/50 shrink-0 overflow-x-auto">
@@ -1327,9 +1347,46 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                           </div>
                         </details>
                       )}
-                      {/* Voice assistant — play/pause/stop */}
-                      {msg.role === "assistant" && msg.content && !msg.video && !msg.threed && (
-                        <VoiceButton text={msg.content} token={auth!.token} />
+                      {/* Action buttons for AI messages */}
+                      {msg.role === "assistant" && msg.content && (
+                        <div className="flex items-center gap-1 mt-2">
+                          {/* Copy */}
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(msg.content);
+                              const btn = document.getElementById(`copy-${i}`);
+                              if (btn) { btn.textContent = "✓"; setTimeout(() => { btn.textContent = "Копировать"; }, 1500); }
+                            }}
+                            id={`copy-${i}`}
+                            className="text-[10px] text-text/30 hover:text-accent px-2 py-1 rounded-lg hover:bg-accent/5 transition-colors"
+                          >
+                            Копировать
+                          </button>
+                          {/* Regenerate — only on last AI message */}
+                          {i === messages.length - 1 && !streaming && (
+                            <button
+                              onClick={() => {
+                                // Find last user message and resend
+                                const lastUserMsg = [...messages].reverse().find(m => m.role === "user");
+                                if (lastUserMsg) {
+                                  setMessages(prev => prev.slice(0, -1)); // remove last AI response
+                                  setInput(lastUserMsg.content);
+                                  setTimeout(() => {
+                                    const btn = document.querySelector("[data-send-btn]") as HTMLButtonElement;
+                                    if (btn) btn.click();
+                                  }, 100);
+                                }
+                              }}
+                              className="text-[10px] text-text/30 hover:text-accent px-2 py-1 rounded-lg hover:bg-accent/5 transition-colors"
+                            >
+                              Повторить
+                            </button>
+                          )}
+                          {/* Voice */}
+                          {!msg.video && !msg.threed && (
+                            <VoiceButton text={msg.content} token={auth!.token} />
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
