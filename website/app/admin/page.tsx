@@ -53,12 +53,14 @@ export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [authed, setAuthed] = useState(false);
-  const [tab, setTab] = useState<"stats" | "users" | "transactions">("stats");
+  const [tab, setTab] = useState<"stats" | "users" | "transactions" | "promos" | "referrals">("stats");
 
   const [stats, setStats] = useState<Stats | null>(null);
   const [users, setUsers] = useState<UserRow[]>([]);
   const [usersTotal, setUsersTotal] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [promos, setPromos] = useState<any[]>([]);
+  const [referrals, setReferrals] = useState<{ referrers: any[]; total_referred_users: number }>({ referrers: [], total_referred_users: 0 });
   const [loading, setLoading] = useState(false);
 
   // Check saved token
@@ -107,6 +109,10 @@ export default function AdminPage() {
       fetchData("stats").then((d) => { if (d) setStats(d); setLoading(false); });
     } else if (tab === "users") {
       fetchData("users?limit=100").then((d) => { if (d) { setUsers(d.users); setUsersTotal(d.total); } setLoading(false); });
+    } else if (tab === "promos") {
+      fetchData("promos").then((d) => { if (d) setPromos(d.promos); setLoading(false); });
+    } else if (tab === "referrals") {
+      fetchData("referrals").then((d) => { if (d) setReferrals(d); setLoading(false); });
     } else {
       fetchData("transactions?limit=50").then((d) => { if (d) setTransactions(d.transactions); setLoading(false); });
     }
@@ -158,11 +164,17 @@ export default function AdminPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 bg-bg rounded-xl p-1 mb-8 max-w-md">
-          {(["stats", "users", "transactions"] as const).map((t) => (
-            <button key={t} onClick={() => setTab(t)}
-              className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${tab === t ? "bg-white text-text shadow-sm" : "text-text/40"}`}>
-              {t === "stats" ? "Статистика" : t === "users" ? "Пользователи" : "Платежи"}
+        <div className="flex gap-1 bg-bg rounded-xl p-1 mb-8 max-w-2xl overflow-x-auto">
+          {([
+            { id: "stats", label: "Статистика" },
+            { id: "users", label: "Пользователи" },
+            { id: "transactions", label: "Платежи" },
+            { id: "promos", label: "Промокоды" },
+            { id: "referrals", label: "Рефералы" },
+          ] as const).map((t) => (
+            <button key={t.id} onClick={() => setTab(t.id)}
+              className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors whitespace-nowrap ${tab === t.id ? "bg-white text-text shadow-sm" : "text-text/40"}`}>
+              {t.label}
             </button>
           ))}
         </div>
@@ -291,6 +303,83 @@ export default function AdminPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {/* Promos Tab */}
+        {tab === "promos" && (
+          <div className="space-y-4">
+            {promos.map((p: any) => (
+              <div key={p.code} className="bg-white rounded-2xl border border-text/5 p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono font-bold text-lg text-accent">{p.code}</span>
+                    <span className="bg-bg px-2 py-0.5 rounded text-xs text-text/50">{p.type}</span>
+                    {p.tier !== "—" && <span className="bg-accent/10 text-accent px-2 py-0.5 rounded text-xs font-bold">{p.tier}</span>}
+                  </div>
+                  <div className="text-right">
+                    <span className="text-2xl font-extrabold">{p.used}</span>
+                    <span className="text-text/30 text-sm">/{p.max_uses}</span>
+                  </div>
+                </div>
+                <p className="text-text/60 text-sm mb-2">{p.desc}</p>
+                <div className="flex items-center gap-4 text-xs text-text/40">
+                  {p.days > 0 && <span>{p.days} дней бесплатно</span>}
+                  {p.credits > 0 && <span>+{p.credits} кредитов</span>}
+                  <span>Использовано: {p.used} раз</span>
+                </div>
+                {/* Progress bar */}
+                <div className="mt-3 h-1.5 bg-bg rounded-full overflow-hidden">
+                  <div className="h-full bg-accent rounded-full transition-all" style={{ width: `${Math.min(100, (p.used / p.max_uses) * 100)}%` }} />
+                </div>
+              </div>
+            ))}
+            {promos.length === 0 && <p className="text-text/30 text-sm text-center py-8">Нет промокодов</p>}
+          </div>
+        )}
+
+        {/* Referrals Tab */}
+        {tab === "referrals" && (
+          <div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              <StatCard label="Всего приглашённых" value={referrals.total_referred_users.toString()} />
+              <StatCard label="Рефереров с приглашёнными" value={referrals.referrers.length.toString()} />
+            </div>
+
+            <div className="bg-white rounded-2xl border border-text/5 overflow-hidden">
+              <div className="p-4 border-b border-text/5">
+                <span className="font-bold text-sm">Рефереры</span>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-bg text-text/50 text-xs">
+                      <th className="text-left py-2.5 px-4">Пользователь</th>
+                      <th className="text-left py-2.5 px-4">Код</th>
+                      <th className="text-right py-2.5 px-4">Приглашённых</th>
+                      <th className="text-right py-2.5 px-4">Заработано</th>
+                      <th className="text-left py-2.5 px-4">Тариф</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {referrals.referrers.map((r: any) => (
+                      <tr key={r.id} className="border-t border-text/5 hover:bg-bg/50">
+                        <td className="py-2.5 px-4">{r.first_name || r.email || r.username || "—"}</td>
+                        <td className="py-2.5 px-4 font-mono text-accent text-xs">{r.referral_code}</td>
+                        <td className="py-2.5 px-4 text-right font-bold">{r.referral_count}</td>
+                        <td className="py-2.5 px-4 text-right font-mono text-teal">${r.referral_balance}</td>
+                        <td className="py-2.5 px-4">
+                          <span className="bg-bg px-2 py-0.5 rounded text-xs">{r.subscription_tier}</span>
+                        </td>
+                      </tr>
+                    ))}
+                    {referrals.referrers.length === 0 && (
+                      <tr><td colSpan={5} className="py-8 text-center text-text/30 text-sm">Нет рефералов</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}

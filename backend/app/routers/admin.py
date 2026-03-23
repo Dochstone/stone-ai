@@ -327,3 +327,66 @@ async def web_admin_transactions(
             for t in txns
         ],
     }
+
+
+@router.get("/web/promos")
+async def web_admin_promos(
+    _admin: dict = Depends(require_web_admin),
+):
+    """Promo code usage stats."""
+    from app.services.promo import PROMO_CODES, _promo_usage, _promo_total_uses
+
+    promos = []
+    for code, config in PROMO_CODES.items():
+        promos.append({
+            "code": code,
+            "type": config["type"],
+            "desc": config["desc"],
+            "tier": config.get("tier", "—"),
+            "days": config.get("days", 0),
+            "credits": config.get("credits", 0),
+            "used": _promo_total_uses.get(code, 0),
+            "max_uses": config["max_uses"],
+            "user_ids": list(_promo_usage.get(code, set())),
+        })
+    return {"promos": promos}
+
+
+@router.get("/web/referrals")
+async def web_admin_referrals(
+    _admin: dict = Depends(require_web_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Referral stats — users with referrals and earnings."""
+    # Users who have referral_code and at least 1 referral
+    result = await db.execute(
+        select(User).where(User.referral_code.isnot(None)).order_by(User.referral_balance.desc())
+    )
+    referrers = result.scalars().all()
+
+    data = []
+    for u in referrers:
+        ref_count = await db.scalar(
+            select(func.count()).select_from(User).where(User.referrer_id == u.telegram_id)
+        ) or 0
+        if ref_count > 0 or float(u.referral_balance or 0) > 0:
+            data.append({
+                "id": u.id,
+                "email": u.email,
+                "username": u.username,
+                "first_name": u.first_name,
+                "referral_code": u.referral_code,
+                "referral_count": ref_count,
+                "referral_balance": round(float(u.referral_balance or 0), 2),
+                "subscription_tier": u.subscription_tier or "free",
+            })
+
+    # Also count total referral registrations
+    total_referred = await db.scalar(
+        select(func.count()).select_from(User).where(User.referrer_id.isnot(None))
+    ) or 0
+
+    return {
+        "referrers": data,
+        "total_referred_users": total_referred,
+    }
