@@ -174,7 +174,7 @@ export default function Nav() {
             <a href="/blog" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
               Блог
             </a>
-            <a href="/topup" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
+            <a href="/pricing" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
               Пополнить
             </a>
             <a href="/docs" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">

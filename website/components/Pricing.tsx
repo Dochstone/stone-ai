@@ -239,46 +239,16 @@ export default function Pricing() {
               )}
             </div>
 
-            {/* Payment options */}
-            <div className="space-y-2 mb-6">
-              <p className="text-xs font-semibold text-text/50 mb-2">Способ оплаты</p>
-              <a href={`/topup?amount=${Math.ceil(modal.priceNum / 95)}&plan=${modal.id}`}
-                className="flex items-center gap-3 p-3 bg-bg rounded-xl border border-text/10 hover:border-accent transition-colors">
-                <span className="text-lg">⭐</span>
-                <div className="flex-1">
-                  <span className="text-sm font-bold">Telegram Stars</span>
-                  <span className="text-text/40 text-xs block">Мгновенно через Telegram</span>
-                </div>
-                <span className="text-xs text-text/40">{modal.price}</span>
-              </a>
-              <a href={`/topup?amount=${Math.ceil(modal.priceNum / 95)}&plan=${modal.id}`}
-                className="flex items-center gap-3 p-3 bg-bg rounded-xl border border-text/10 hover:border-accent transition-colors">
-                <span className="text-lg">💎</span>
-                <div className="flex-1">
-                  <span className="text-sm font-bold">Криптовалюта</span>
-                  <span className="text-text/40 text-xs block">USDT, BTC, ETH через Heleket</span>
-                </div>
-                <span className="text-xs text-text/40">~${Math.ceil(modal.priceNum / 95)}</span>
-              </a>
-              <a href={`/topup?amount=${Math.ceil(modal.priceNum / 95)}&plan=${modal.id}`}
-                className="flex items-center gap-3 p-3 bg-bg rounded-xl border border-text/10 hover:border-accent transition-colors">
-                <span className="text-lg">💠</span>
-                <div className="flex-1">
-                  <span className="text-sm font-bold">TON Connect</span>
-                  <span className="text-text/40 text-xs block">Через Tonkeeper</span>
-                </div>
-                <span className="text-xs text-text/40">~${Math.ceil(modal.priceNum / 95)}</span>
-              </a>
-            </div>
-
-            {/* Direct activation (if balance sufficient) */}
+            {/* Subscribe button */}
             <button
               onClick={() => subscribe(modal.id)}
               disabled={loading}
-              className="w-full bg-accent text-white py-3 min-h-[44px] rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors disabled:opacity-50 mb-3"
+              className="w-full bg-accent text-white py-3.5 min-h-[48px] rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors disabled:opacity-50 mb-3 shadow-md shadow-accent/20"
             >
-              {loading ? "Активация..." : `Активировать с баланса (~$${Math.ceil(modal.priceNum / 95)})`}
+              {loading ? "Активация..." : `Подписаться — ${modal.price}${modal.period}`}
             </button>
+
+            <p className="text-text/30 text-[10px] text-center mb-1">Оплата через Telegram Stars, криптовалюту или TON</p>
 
             {result && (
               <p className={`text-center text-xs font-medium ${result.ok ? "text-teal" : "text-red-500"}`}>

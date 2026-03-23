@@ -1172,7 +1172,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                 🔥{limits.streak.days}
               </span>
             )}
-            <a href="/topup" className="text-[11px] sm:text-xs font-bold text-accent hover:underline whitespace-nowrap">
+            <a href="/pricing" className="text-[11px] sm:text-xs font-bold text-accent hover:underline whitespace-nowrap">
               ${auth.balanceUsd.toFixed(2)}
             </a>
             <a href="/" className="text-text/25 hover:text-accent transition-colors" title="На главную">
