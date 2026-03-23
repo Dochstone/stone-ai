@@ -352,6 +352,54 @@ async def web_admin_promos(
     return {"promos": promos}
 
 
+@router.post("/web/promos")
+async def web_admin_create_promo(
+    request: Request,
+    _admin: dict = Depends(require_web_admin),
+):
+    """Create or update a promo code."""
+    from app.services.promo import PROMO_CODES, _promo_usage, _promo_total_uses
+
+    body = await request.json()
+    code = body.get("code", "").strip().upper()
+    if not code:
+        raise HTTPException(400, "Код обязателен")
+
+    PROMO_CODES[code] = {
+        "type": body.get("type", "days"),
+        "tier": body.get("tier", "mini"),
+        "days": int(body.get("days", 7)),
+        "credits": int(body.get("credits", 0)),
+        "max_uses": int(body.get("max_uses", 1000)),
+        "one_per_user": body.get("one_per_user", True),
+        "desc": body.get("desc", ""),
+    }
+    if code not in _promo_usage:
+        _promo_usage[code] = set()
+    if code not in _promo_total_uses:
+        _promo_total_uses[code] = 0
+
+    return {"status": "ok", "code": code}
+
+
+@router.delete("/web/promos/{code}")
+async def web_admin_delete_promo(
+    code: str,
+    _admin: dict = Depends(require_web_admin),
+):
+    """Delete a promo code."""
+    from app.services.promo import PROMO_CODES, _promo_usage, _promo_total_uses
+
+    code = code.upper()
+    if code not in PROMO_CODES:
+        raise HTTPException(404, "Промокод не найден")
+
+    del PROMO_CODES[code]
+    _promo_usage.pop(code, None)
+    _promo_total_uses.pop(code, None)
+    return {"status": "ok", "deleted": code}
+
+
 @router.get("/web/referrals")
 async def web_admin_referrals(
     _admin: dict = Depends(require_web_admin),

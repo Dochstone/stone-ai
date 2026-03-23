@@ -310,6 +310,50 @@ export default function AdminPage() {
         {/* Promos Tab */}
         {tab === "promos" && (
           <div className="space-y-4">
+            {/* Create promo form */}
+            <div className="bg-white rounded-2xl border border-text/5 p-5">
+              <h3 className="font-bold text-sm mb-3">Создать промокод</h3>
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                const form = e.target as HTMLFormElement;
+                const fd = new FormData(form);
+                const auth = localStorage.getItem("admin_token");
+                if (!auth) return;
+                const res = await fetch(`${API_URL}/api/admin/web/promos`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth}` },
+                  body: JSON.stringify({
+                    code: fd.get("code"), type: fd.get("type"), tier: fd.get("tier"),
+                    days: fd.get("days"), credits: fd.get("credits"),
+                    max_uses: fd.get("max_uses"), desc: fd.get("desc"),
+                  }),
+                });
+                if (res.ok) {
+                  form.reset();
+                  fetchData("promos").then((d: any) => { if (d) setPromos(d.promos); });
+                }
+              }} className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <input name="code" placeholder="КОД" required className="bg-bg border border-text/10 rounded-lg px-3 py-2 text-xs font-mono uppercase" />
+                <select name="type" className="bg-bg border border-text/10 rounded-lg px-3 py-2 text-xs">
+                  <option value="days">Бесплатные дни</option>
+                  <option value="credits">Кредиты</option>
+                </select>
+                <select name="tier" className="bg-bg border border-text/10 rounded-lg px-3 py-2 text-xs">
+                  <option value="mini">Mini</option>
+                  <option value="max">Max</option>
+                  <option value="max-pro">Max Pro</option>
+                </select>
+                <input name="days" type="number" defaultValue={7} placeholder="Дней" className="bg-bg border border-text/10 rounded-lg px-3 py-2 text-xs" />
+                <input name="credits" type="number" defaultValue={0} placeholder="Кредитов" className="bg-bg border border-text/10 rounded-lg px-3 py-2 text-xs" />
+                <input name="max_uses" type="number" defaultValue={1000} placeholder="Макс. исп." className="bg-bg border border-text/10 rounded-lg px-3 py-2 text-xs" />
+                <input name="desc" placeholder="Описание" className="bg-bg border border-text/10 rounded-lg px-3 py-2 text-xs col-span-2 sm:col-span-1" />
+                <button type="submit" className="bg-accent text-white rounded-lg px-3 py-2 text-xs font-bold hover:bg-accent/90">
+                  Создать
+                </button>
+              </form>
+            </div>
+
+            {/* Promo list */}
             {promos.map((p: any) => (
               <div key={p.code} className="bg-white rounded-2xl border border-text/5 p-5">
                 <div className="flex items-center justify-between mb-3">
@@ -318,9 +362,29 @@ export default function AdminPage() {
                     <span className="bg-bg px-2 py-0.5 rounded text-xs text-text/50">{p.type}</span>
                     {p.tier !== "—" && <span className="bg-accent/10 text-accent px-2 py-0.5 rounded text-xs font-bold">{p.tier}</span>}
                   </div>
-                  <div className="text-right">
-                    <span className="text-2xl font-extrabold">{p.used}</span>
-                    <span className="text-text/30 text-sm">/{p.max_uses}</span>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <span className="text-2xl font-extrabold">{p.used}</span>
+                      <span className="text-text/30 text-sm">/{p.max_uses}</span>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        if (!confirm(`Удалить промокод ${p.code}?`)) return;
+                        const auth = localStorage.getItem("admin_token");
+                        if (!auth) return;
+                        await fetch(`${API_URL}/api/admin/web/promos/${p.code}`, {
+                          method: "DELETE",
+                          headers: { Authorization: `Bearer ${auth}` },
+                        });
+                        fetchData("promos").then((d: any) => { if (d) setPromos(d.promos); });
+                      }}
+                      className="text-red-400 hover:text-red-600 transition-colors"
+                      title="Удалить"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
                 <p className="text-text/60 text-sm mb-2">{p.desc}</p>
@@ -329,7 +393,6 @@ export default function AdminPage() {
                   {p.credits > 0 && <span>+{p.credits} кредитов</span>}
                   <span>Использовано: {p.used} раз</span>
                 </div>
-                {/* Progress bar */}
                 <div className="mt-3 h-1.5 bg-bg rounded-full overflow-hidden">
                   <div className="h-full bg-accent rounded-full transition-all" style={{ width: `${Math.min(100, (p.used / p.max_uses) * 100)}%` }} />
                 </div>
