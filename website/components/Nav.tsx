@@ -52,7 +52,10 @@ export default function Nav() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-14 md:h-16">
         <a href="/" className="flex items-center gap-2 shrink-0">
-          <span className="text-xl font-extrabold text-text">Stone AI</span>
+          <div>
+            <span className="text-xl font-extrabold text-text block leading-tight">Stone AI</span>
+            <span className="hidden md:block text-[9px] text-text/25 tracking-[0.15em] uppercase leading-none">Smart Technology Omniscient Neural Engine</span>
+          </div>
           <span className="hidden sm:inline-flex items-center bg-accent/8 text-accent text-[9px] font-bold px-2 py-0.5 rounded-full border border-accent/15">
             65+ моделей
           </span>

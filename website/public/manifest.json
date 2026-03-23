@@ -1,7 +1,7 @@
 {
   "name": "Stone AI — 65+ нейросетей в одном окне",
   "short_name": "Stone AI",
-  "description": "GPT-5, Claude Opus, Gemini Pro и ещё 62 нейросети. Текст, картинки, видео, аудио, 3D и код. Оплата в рублях.",
+  "description": "STONE — Smart Technology Omniscient Neural Engine. 65+ нейросетей в одном окне. Текст, картинки, видео и код.",
   "start_url": "/webchat",
   "display": "standalone",
   "background_color": "#FAF9F5",

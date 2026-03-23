@@ -7,7 +7,8 @@ export default function Footer() {
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <h3 className="text-lg font-extrabold mb-3">Stone AI</h3>
+            <h3 className="text-lg font-extrabold mb-1">Stone AI</h3>
+            <p className="text-[9px] text-text/25 tracking-[0.12em] uppercase mb-2">Smart Technology Omniscient Neural Engine</p>
             <p className="text-text/50 text-sm leading-relaxed">
               65+ нейросетей в одном окне. Подписка от 390₽/мес.
             </p>

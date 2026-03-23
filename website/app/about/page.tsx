@@ -72,8 +72,8 @@ export default function AboutPage() {
             </span>
           </h1>
           <p className="text-text/60 text-lg max-w-2xl mx-auto leading-relaxed">
-            Stone AI — российская платформа, которая объединяет 65+ нейросетей от ведущих мировых компаний
-            в одном удобном интерфейсе. Одна подписка вместо пяти, с оплатой в рублях.
+            STONE AI — Smart Technology Omniscient Neural Engine — умный нейронный движок, который объединяет
+            65+ нейросетей от ведущих мировых компаний в одном окне. Одна подписка вместо пяти, с оплатой в рублях.
           </p>
         </div>
 

@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     template: "%s | Stone AI",
   },
   description:
-    "GPT-5, Claude, Gemini и ещё 62 нейросети. Текст, картинки, видео, аудио, 3D и код. Оплата в рублях. 15 бесплатных запросов в день.",
+    "GPT-5, Claude, Gemini и ещё 62 нейросети. Текст, картинки, видео, аудио, 3D и код. Оплата в рублях. STONE — Smart Technology Omniscient Neural Engine.",
   keywords: [
     "AI чат",
     "ChatGPT альтернатива",
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     siteName: "Stone AI",
     title: "65+ нейросетей в одном окне — Stone AI",
     description:
-      "GPT-5, Claude, Gemini и ещё 62 нейросети. Текст, картинки, видео, аудио, 3D и код. Оплата в рублях. 15 бесплатных запросов в день.",
+      "STONE — Smart Technology Omniscient Neural Engine. 65+ нейросетей в одном окне. Текст, картинки, видео и код. Оплата в рублях.",
     images: [
       {
         url: OG_IMAGE,
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "65+ нейросетей в одном окне — Stone AI",
     description:
-      "GPT-5, Claude, Gemini и ещё 62 нейросети. Текст, картинки, видео, аудио, 3D и код. Оплата в рублях. 15 бесплатных запросов в день.",
+      "STONE — Smart Technology Omniscient Neural Engine. 65+ нейросетей в одном окне. Текст, картинки, видео и код. Оплата в рублях.",
     images: [OG_IMAGE],
   },
   robots: {
