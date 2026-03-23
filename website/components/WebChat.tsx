@@ -177,38 +177,77 @@ function stripImageFromText(content: string): string {
     .trim();
 }
 
+function ThinkingBlock({ content }: { content: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="mb-2">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-1.5 text-[11px] text-text/30 hover:text-text/50 transition-colors py-1"
+      >
+        <svg className={`w-3 h-3 transition-transform ${open ? "rotate-90" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+        <span className="font-semibold">Ход мыслей</span>
+        <span className="text-text/15">({content.length} симв.)</span>
+      </button>
+      {open && (
+        <div className="mt-1 pl-3 border-l-2 border-text/10 text-[12px] text-text/40 leading-relaxed max-h-[300px] overflow-y-auto">
+          <div className="whitespace-pre-wrap">{content}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function MessageContent({ content, role, selectedModel }: { content: string; role: string; selectedModel: string }) {
   if (role !== "assistant" || !content) {
     return <div className="whitespace-pre-wrap break-words">{content}</div>;
   }
 
-  const imageUrl = extractImageUrl(content);
+  // Extract <think>...</think> block
+  const thinkMatch = content.match(/<think>([\s\S]*?)<\/think>/);
+  const thinkContent = thinkMatch ? thinkMatch[1].trim() : null;
+  const displayContent = thinkMatch ? content.replace(/<think>[\s\S]*?<\/think>/, "").trim() : content;
+  // Detect still-thinking (open <think> without close)
+  const isStillThinking = !thinkMatch && content.includes("<think>") && !content.includes("</think>");
+  const partialThink = isStillThinking ? content.replace("<think>", "").trim() : null;
+
+  const imageUrl = extractImageUrl(displayContent);
   const isImageModel = IMAGE_MODEL_IDS.has(selectedModel);
 
-  // Image model returned an image (base64, URL, markdown image)
-  if (imageUrl && isImageModel) {
-    const caption = stripImageFromText(content);
-    return <ImageWithDownload url={imageUrl} caption={caption || undefined} />;
-  }
+  return (
+    <div>
+      {/* Still thinking indicator */}
+      {isStillThinking && (
+        <div className="flex items-center gap-2 mb-2 text-[11px] text-text/30">
+          <div className="flex gap-1">
+            <span className="w-1.5 h-1.5 bg-accent/40 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+            <span className="w-1.5 h-1.5 bg-accent/40 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+            <span className="w-1.5 h-1.5 bg-accent/40 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+          </div>
+          <span className="font-semibold">Размышляет...</span>
+        </div>
+      )}
 
-  // Image model returned a plain URL
-  if (isImageModel && content.match(/^https?:\/\/\S+$/)) {
-    return <ImageWithDownload url={content.trim()} />;
-  }
+      {/* Completed thinking block */}
+      {thinkContent && <ThinkingBlock content={thinkContent} />}
 
-  // Any model returned content with an embedded image (detect universally)
-  if (imageUrl && !isImageModel) {
-    const caption = stripImageFromText(content);
-    return (
-      <div>
-        <div className="md-content break-words" dangerouslySetInnerHTML={{ __html: renderMarkdown(caption || content) }} />
-        <ImageWithDownload url={imageUrl} />
-      </div>
-    );
-  }
-
-  // Image model returned text only (no image found) — render as markdown
-  return <div className="md-content break-words" dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }} />;
+      {/* Main content */}
+      {imageUrl && isImageModel ? (
+        <ImageWithDownload url={imageUrl} caption={stripImageFromText(displayContent) || undefined} />
+      ) : isImageModel && displayContent.match(/^https?:\/\/\S+$/) ? (
+        <ImageWithDownload url={displayContent.trim()} />
+      ) : imageUrl && !isImageModel ? (
+        <>
+          <div className="md-content break-words" dangerouslySetInnerHTML={{ __html: renderMarkdown(stripImageFromText(displayContent) || displayContent) }} />
+          <ImageWithDownload url={imageUrl} />
+        </>
+      ) : displayContent ? (
+        <div className="md-content break-words" dangerouslySetInnerHTML={{ __html: renderMarkdown(displayContent) }} />
+      ) : null}
+    </div>
+  );
 }
 
 // ─── Prompt Templates ───
@@ -313,7 +352,7 @@ function WelcomeScreen({ onSuggestion }: { onSuggestion: (text: string, modelId:
               key={cat.id}
               onClick={() => setPromptCat(cat.id)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
-                promptCat === cat.id ? "bg-accent text-white" : "bg-white text-text/40 border border-text/[0.06] hover:text-text/60"
+                promptCat === cat.id ? "bg-accent text-white" : "bg-bg text-text/40 border border-text/[0.06] hover:text-text/60"
               }`}
             >
               {cat.icon} {cat.label}
@@ -387,7 +426,7 @@ function ScrollToBottom({ containerRef }: { containerRef: React.RefObject<HTMLDi
   return (
     <button
       onClick={() => containerRef.current?.scrollTo({ top: containerRef.current.scrollHeight, behavior: "smooth" })}
-      className="absolute bottom-4 left-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-white border border-text/10 shadow-lg flex items-center justify-center text-text/40 hover:text-text/70 transition-colors z-10"
+      className="absolute bottom-4 left-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-bg border border-text/10 shadow-lg flex items-center justify-center text-text/40 hover:text-text/70 transition-colors z-10"
     >
       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
@@ -406,6 +445,7 @@ function Sidebar({
   onLoadSession,
   onNewChat,
   onDeleteSession,
+  onRenameSession,
 }: {
   open: boolean;
   onToggle: () => void;
@@ -414,8 +454,11 @@ function Sidebar({
   onLoadSession: (id: number) => void;
   onNewChat: () => void;
   onDeleteSession: (id: number) => void;
+  onRenameSession: (id: number, title: string) => void;
 }) {
   const [sidebarSearch, setSidebarSearch] = useState("");
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editTitle, setEditTitle] = useState("");
 
   return (
     <>
@@ -430,7 +473,7 @@ function Sidebar({
 
       {/* Sidebar panel */}
       <div
-        className={`webchat-sidebar fixed inset-y-0 left-0 z-40 bg-[#F5F4F0] flex flex-col lg:relative lg:shrink-0 ${open ? "open" : "closed"}`}
+        className={`webchat-sidebar fixed inset-y-0 left-0 z-40 bg-bg flex flex-col lg:relative lg:shrink-0 ${open ? "open" : "closed"}`}
       >
         {/* Top: New Chat + Collapse */}
         <div className="p-3 shrink-0">
@@ -446,7 +489,7 @@ function Sidebar({
             </button>
             <button
               onClick={onToggle}
-              className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/60 text-text/30 hover:text-text/60 transition-colors shrink-0"
+              className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-text/[0.06] text-text/30 hover:text-text/60 transition-colors shrink-0"
               aria-label="Закрыть sidebar"
             >
               {/* Chevron on desktop, X on mobile */}
@@ -468,7 +511,7 @@ function Sidebar({
               placeholder="Поиск чатов..."
               value={sidebarSearch}
               onChange={(e) => setSidebarSearch(e.target.value)}
-              className="w-full bg-white/60 border border-text/10 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-accent/30"
+              className="w-full bg-bg border border-text/10 rounded-lg px-3 py-1.5 text-xs text-text focus:outline-none focus:ring-1 focus:ring-accent/30"
             />
           </div>
         )}
@@ -487,17 +530,33 @@ function Sidebar({
                   key={s.id}
                   className={`group flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition-colors ${
                     activeSessionId === s.id
-                      ? "bg-white shadow-sm"
-                      : "hover:bg-white/50"
+                      ? "bg-accent/10 shadow-sm"
+                      : "hover:bg-text/[0.04]"
                   }`}
-                  onClick={() => { onLoadSession(s.id); if (window.innerWidth < 1024) onToggle(); }}
+                  onClick={() => { if (editingId !== s.id) { onLoadSession(s.id); if (window.innerWidth < 1024) onToggle(); } }}
+                  onDoubleClick={(e) => { e.stopPropagation(); setEditingId(s.id); setEditTitle(s.title || ""); }}
                 >
                   <div className="flex-1 min-w-0">
-                    <span className={`text-[13px] font-medium truncate block ${
-                      activeSessionId === s.id ? "text-text" : "text-text/70"
-                    }`}>
-                      {s.title}
-                    </span>
+                    {editingId === s.id ? (
+                      <input
+                        autoFocus
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        onBlur={() => { if (editTitle.trim() && editTitle !== s.title) onRenameSession(s.id, editTitle.trim()); setEditingId(null); }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") { if (editTitle.trim() && editTitle !== s.title) onRenameSession(s.id, editTitle.trim()); setEditingId(null); }
+                          if (e.key === "Escape") setEditingId(null);
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="w-full text-[13px] font-medium text-text bg-bg border-2 border-accent/30 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-accent/30"
+                      />
+                    ) : (
+                      <span className={`text-[13px] font-medium truncate block ${
+                        activeSessionId === s.id ? "text-text" : "text-text/70"
+                      }`}>
+                        {s.title}
+                      </span>
+                    )}
                     <div className="flex items-center gap-1.5 mt-0.5">
                       <span className="text-[10px] text-text/25">{MODELS.find(m => m.id === s.model_id)?.name || s.model_id}</span>
                       {s.updated_at && (
@@ -609,6 +668,17 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
   const [recording, setRecording] = useState(false);
   const [modelCatFilter, setModelCatFilter] = useState<string>(initialCategory || "all");
+
+  // Comparison mode
+  const [compareMode, setCompareMode] = useState(false);
+  const [compareModels, setCompareModels] = useState<string[]>([]);
+  const [compareStreaming, setCompareStreaming] = useState<Record<string, boolean>>({});
+  const [compareResponses, setCompareResponses] = useState<Record<string, { content: string; billing?: Message["billing"]; error?: string }>>({});
+  const [comparePrompt, setComparePrompt] = useState("");
+  const [compareActiveTab, setCompareActiveTab] = useState(0);
+  const compareAbortRefs = useRef<Record<string, AbortController>>({});
+  const [dragging, setDragging] = useState(false);
+  const dragCounterRef = useRef(0);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -741,6 +811,17 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
     setMessages([]);
   }, []);
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "n") { e.preventDefault(); newChat(); }
+      if ((e.ctrlKey || e.metaKey) && e.key === "/") { e.preventDefault(); textareaRef.current?.focus(); }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "S") { e.preventDefault(); toggleSidebar(); }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [newChat, toggleSidebar]);
+
   const deleteSession = useCallback(async (sessionId: number) => {
     if (!auth) return;
     try {
@@ -752,6 +833,18 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
       if (activeSessionId === sessionId) newChat();
     } catch {}
   }, [auth, activeSessionId, newChat]);
+
+  const renameSession = useCallback(async (sessionId: number, title: string) => {
+    if (!auth) return;
+    try {
+      await fetch(`${API_URL}/api/chats/${sessionId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
+        body: JSON.stringify({ title }),
+      });
+      setSessions(prev => prev.map(s => s.id === sessionId ? { ...s, title } : s));
+    } catch {}
+  }, [auth]);
 
   const saveToSession = useCallback(async (userContent: string, assistantContent: string, billing: any) => {
     if (!auth) return;
@@ -981,7 +1074,116 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
     setStreaming(false);
   }, []);
 
+  // ─── Compare mode: send one prompt to multiple models ───
+  const sendCompareMessage = useCallback(async () => {
+    if (!auth || !input.trim() || compareModels.length < 2) return;
+    if (Object.values(compareStreaming).some(v => v)) return;
+
+    const userContent = input.trim();
+    setInput("");
+    resetTextarea();
+    setComparePrompt(userContent);
+    setCompareResponses({});
+
+    const newStreaming: Record<string, boolean> = {};
+    compareModels.forEach(id => { newStreaming[id] = true; });
+    setCompareStreaming(newStreaming);
+
+    const apiMessages = [{ role: "user" as const, content: userContent }];
+
+    const aborts: Record<string, AbortController> = {};
+    compareModels.forEach(id => { aborts[id] = new AbortController(); });
+    compareAbortRefs.current = aborts;
+
+    const promises = compareModels.map(async (modelId) => {
+      try {
+        const res = await fetch(`${API_URL}/api/chat`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
+          body: JSON.stringify({ model_id: modelId, messages: apiMessages }),
+          signal: aborts[modelId].signal,
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ detail: "Ошибка" }));
+          const errMsg = typeof err.detail === "string" ? err.detail : err.detail?.message || "Ошибка";
+          setCompareResponses(prev => ({ ...prev, [modelId]: { content: "", error: errMsg } }));
+          setCompareStreaming(prev => ({ ...prev, [modelId]: false }));
+          return;
+        }
+
+        const reader = res.body?.getReader();
+        if (!reader) return;
+
+        const decoder = new TextDecoder();
+        let content = "";
+        let billing: Message["billing"] | undefined;
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const text = decoder.decode(value, { stream: true });
+          const lines = text.split("\n");
+
+          for (const line of lines) {
+            if (!line.startsWith("data: ")) continue;
+            const payload = line.slice(6).trim();
+            if (payload === "[DONE]") continue;
+
+            try {
+              const data = JSON.parse(payload);
+              if (data.billing) { billing = data.billing; continue; }
+              if (data.usage) continue;
+              if (data.error) {
+                setCompareResponses(prev => ({ ...prev, [modelId]: { content: "", error: data.error } }));
+                continue;
+              }
+              const c = data.content || data.choices?.[0]?.delta?.content;
+              if (c) {
+                content += c;
+                setCompareResponses(prev => ({ ...prev, [modelId]: { content, billing } }));
+              }
+            } catch {}
+          }
+        }
+
+        setCompareResponses(prev => ({ ...prev, [modelId]: { content, billing } }));
+      } catch (e: any) {
+        if (e?.name !== "AbortError") {
+          setCompareResponses(prev => ({ ...prev, [modelId]: { content: "", error: "Ошибка соединения" } }));
+        }
+      } finally {
+        setCompareStreaming(prev => ({ ...prev, [modelId]: false }));
+      }
+    });
+
+    await Promise.allSettled(promises);
+    compareAbortRefs.current = {};
+  }, [auth, input, compareModels, compareStreaming, resetTextarea]);
+
+  const stopCompare = useCallback(() => {
+    Object.values(compareAbortRefs.current).forEach(c => c.abort());
+    setCompareStreaming({});
+  }, []);
+
+  const exitCompareWithModel = useCallback((modelId: string) => {
+    const resp = compareResponses[modelId];
+    if (resp && comparePrompt) {
+      setMessages([
+        { role: "user", content: comparePrompt },
+        { role: "assistant", content: resp.content, billing: resp.billing },
+      ]);
+    }
+    setSelectedModel(modelId);
+    setCompareMode(false);
+    setCompareModels([]);
+    setCompareResponses({});
+    setComparePrompt("");
+  }, [compareResponses, comparePrompt]);
+
   const sendMessage = useCallback(async () => {
+    // Redirect to comparison mode
+    if (compareMode && compareModels.length >= 2) { sendCompareMessage(); return; }
     // Redirect to video/3D generation
     if (isVideoModel) { sendVideoMessage(); return; }
     if (is3DModel) { send3DMessage(); return; }
@@ -1105,7 +1307,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
       setStreaming(false);
       abortRef.current = null;
     }
-  }, [auth, input, streaming, messages, selectedModel, pendingFile, saveToSession, resetTextarea, isVideoModel, sendVideoMessage, is3DModel, send3DMessage]);
+  }, [auth, input, streaming, messages, selectedModel, pendingFile, saveToSession, resetTextarea, isVideoModel, sendVideoMessage, is3DModel, send3DMessage, compareMode, compareModels, sendCompareMessage]);
 
   // Auto-send after suggestion card click — switches model first
   const pendingSend = useRef(false);
@@ -1138,13 +1340,41 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   const showStreamingDots = streaming && (!lastMsg || lastMsg.role !== "assistant" || !lastMsg.content);
 
   return (
-    <div className="h-dvh flex bg-bg overflow-hidden" style={{ height: "100dvh" }}>
+    <div
+      className="h-dvh flex bg-bg overflow-hidden relative"
+      style={{ height: "100dvh" }}
+      onDragEnter={(e) => { e.preventDefault(); dragCounterRef.current++; setDragging(true); }}
+      onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; }}
+      onDragLeave={(e) => { e.preventDefault(); dragCounterRef.current--; if (dragCounterRef.current === 0) setDragging(false); }}
+      onDrop={(e) => {
+        e.preventDefault();
+        dragCounterRef.current = 0;
+        setDragging(false);
+        const file = e.dataTransfer.files?.[0];
+        if (file) handleFileSelect(file);
+      }}
+    >
+      {/* Drag & drop overlay */}
+      {dragging && (
+        <div className="absolute inset-0 z-[60] bg-accent/5 backdrop-blur-sm flex items-center justify-center pointer-events-none">
+          <div className="border-2 border-dashed border-accent rounded-2xl px-8 py-6 bg-bg/95 shadow-lg">
+            <div className="text-center">
+              <svg className="w-10 h-10 text-accent mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+              </svg>
+              <p className="text-accent font-bold text-sm">Перетащите файл сюда</p>
+              <p className="text-text/30 text-xs mt-1">Изображения и PDF до 10MB</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Inline styles for markdown */}
       <style>{`
         .md-content { line-height: 1.7; }
-        .md-content h1, .md-content .md-h1 { font-size: 1.25rem; font-weight: 800; margin: 1rem 0 0.5rem; color: #1A1916; }
-        .md-content h2, .md-content .md-h2 { font-size: 1.1rem; font-weight: 700; margin: 0.75rem 0 0.4rem; color: #1A1916; }
-        .md-content h3, .md-content .md-h3 { font-size: 1rem; font-weight: 600; margin: 0.5rem 0 0.3rem; color: #1A1916; }
+        .md-content h1, .md-content .md-h1 { font-size: 1.25rem; font-weight: 800; margin: 1rem 0 0.5rem; color: var(--text); }
+        .md-content h2, .md-content .md-h2 { font-size: 1.1rem; font-weight: 700; margin: 0.75rem 0 0.4rem; color: var(--text); }
+        .md-content h3, .md-content .md-h3 { font-size: 1rem; font-weight: 600; margin: 0.5rem 0 0.3rem; color: var(--text); }
         .md-content strong { font-weight: 700; }
         .md-content em { font-style: italic; }
         .md-content del { text-decoration: line-through; opacity: 0.6; }
@@ -1154,8 +1384,8 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
         .md-content .md-link { color: #C4623D; text-decoration: underline; text-underline-offset: 2px; }
         .md-content .md-link:hover { opacity: 0.8; }
         .md-content .inline-code {
-          background: rgba(26,25,22,0.06); padding: 0.15em 0.4em; border-radius: 0.375rem;
-          font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.85em; color: #C4623D;
+          background: rgba(128,128,128,0.1); padding: 0.15em 0.4em; border-radius: 0.375rem;
+          font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.85em; color: var(--accent);
         }
         .code-block-wrapper { margin: 0.75rem 0; border-radius: 0.75rem; overflow: hidden; border: 1px solid rgba(26,25,22,0.06); max-width: 100%; }
         .code-block-header {
@@ -1175,6 +1405,15 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
         .code-block code { color: rgba(255,255,255,0.85); font-family: 'SF Mono', 'Fira Code', monospace; white-space: pre; }
         .md-content { overflow-wrap: break-word; word-break: break-word; }
         .md-content pre { max-width: 100%; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        .streaming-cursor::after {
+          content: '▊';
+          display: inline;
+          color: #C4623D;
+          animation: blink 0.8s step-end infinite;
+          margin-left: 1px;
+          font-size: 0.85em;
+        }
         @supports(padding-bottom: env(safe-area-inset-bottom)) {
           .chat-input-safe { padding-bottom: calc(0.625rem + env(safe-area-inset-bottom)); }
         }
@@ -1206,12 +1445,13 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
         onLoadSession={loadSession}
         onNewChat={newChat}
         onDeleteSession={deleteSession}
+        onRenameSession={renameSession}
       />
 
       {/* Main chat area */}
       <div className="flex-1 flex flex-col min-w-0 h-full relative">
         {/* Top bar */}
-        <div className="h-14 border-b border-text/[0.06] bg-white/80 backdrop-blur-sm flex items-center justify-between px-3 sm:px-4 shrink-0">
+        <div className="h-14 border-b border-text/[0.06] bg-bg/80 backdrop-blur-sm flex items-center justify-between px-3 sm:px-4 shrink-0">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             {/* Sidebar toggle */}
             <button onClick={toggleSidebar} className="text-text/30 hover:text-text/60 transition-colors shrink-0">
@@ -1249,6 +1489,31 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            {/* Compare toggle — only for text models */}
+            {!IMAGE_MODEL_IDS.has(selectedModel) && !VIDEO_MODEL_IDS.has(selectedModel) && !THREED_MODEL_IDS.has(selectedModel) && (
+              <button
+                onClick={() => {
+                  if (compareMode) {
+                    setCompareMode(false);
+                    setCompareModels([]);
+                    setCompareResponses({});
+                    setComparePrompt("");
+                  } else {
+                    setCompareMode(true);
+                    setCompareModels([selectedModel]);
+                  }
+                }}
+                className={`hidden sm:flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold transition-colors ${
+                  compareMode ? "bg-accent text-white" : "text-text/30 hover:text-text/50 hover:bg-text/5"
+                }`}
+                title="Сравнить модели"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+                </svg>
+                Сравнить
+              </button>
+            )}
             {limits && limits.text && limits.text.limit > 0 && (
               <div className="hidden sm:flex items-center gap-1.5 text-[10px] text-text/40" title={`${limits.text.used}/${limits.text.limit} запросов`}>
                 <div className="w-16 h-1.5 bg-text/10 rounded-full overflow-hidden">
@@ -1312,8 +1577,31 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                   return (
                     <button key={m.id} onClick={() => {
                       if (lock) { setLockModal({ model: m.name, tier: lock.tier, price: lock.price }); setModelPickerOpen(false); return; }
+                      if (compareMode) {
+                        // Multi-select in compare mode
+                        if (compareModels.includes(m.id)) {
+                          setCompareModels(prev => prev.filter(x => x !== m.id));
+                        } else if (compareModels.length < 3) {
+                          setCompareModels(prev => [...prev, m.id]);
+                        }
+                        // Don't close picker in compare mode
+                        return;
+                      }
                       setSelectedModel(m.id); setModelPickerOpen(false); setModelSearch("");
-                    }} className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left transition-colors ${selectedModel === m.id ? "bg-accent/5 border border-accent/20" : "hover:bg-bg"} ${lock ? "opacity-50" : ""}`}>
+                    }} className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left transition-colors ${
+                      compareMode
+                        ? compareModels.includes(m.id) ? "bg-accent/10 border border-accent/30" : "hover:bg-bg"
+                        : selectedModel === m.id ? "bg-accent/5 border border-accent/20" : "hover:bg-bg"
+                    } ${lock ? "opacity-50" : ""}`}>
+                      {compareMode && (
+                        <div className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${
+                          compareModels.includes(m.id) ? "bg-accent border-accent" : "border-text/20"
+                        }`}>
+                          {compareModels.includes(m.id) && (
+                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                          )}
+                        </div>
+                      )}
                       <div className="flex-1 min-w-0">
                         <span className="text-sm font-semibold truncate block">{lock ? "🔒 " : ""}{m.name}</span>
                         <span className="text-[10px] text-text/30">{m.company}</span>
@@ -1330,8 +1618,54 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
         )}
         {modelPickerOpen && <div className="fixed inset-0 z-[44]" onClick={() => { setModelPickerOpen(false); setModelSearch(""); }} />}
 
+        {/* Compare mode: selected model chips */}
+        {compareMode && (
+          <div className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 border-b border-accent/10 bg-accent/[0.03] shrink-0 overflow-x-auto">
+            <span className="text-[10px] text-text/30 font-semibold shrink-0">Сравнение:</span>
+            {compareModels.map(mId => {
+              const m = MODELS.find(x => x.id === mId);
+              return (
+                <span key={mId} className="flex items-center gap-1 bg-accent/10 text-accent text-[11px] font-semibold px-2 py-0.5 rounded-full shrink-0">
+                  {m?.name || mId}
+                  <button onClick={() => {
+                    if (compareModels.length > 1) setCompareModels(prev => prev.filter(x => x !== mId));
+                  }} className="hover:text-red-500 transition-colors">
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </span>
+              );
+            })}
+            {compareModels.length < 3 && (
+              <button
+                onClick={() => setModelPickerOpen(true)}
+                className="flex items-center gap-0.5 text-[11px] text-accent font-semibold px-2 py-0.5 rounded-full border border-dashed border-accent/30 hover:bg-accent/5 transition-colors shrink-0"
+              >
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M12 4v16m8-8H4" /></svg>
+                Добавить
+              </button>
+            )}
+          </div>
+        )}
+
         {/* Category tabs */}
-        <div className="flex items-center gap-1 px-3 sm:px-4 py-1.5 border-b border-text/[0.04] bg-white/50 shrink-0 overflow-x-auto">
+        <div className="flex items-center gap-1 px-3 sm:px-4 py-1.5 border-b border-text/[0.04] bg-bg/50 shrink-0 overflow-x-auto">
+          {/* Mobile compare toggle */}
+          <button
+            onClick={() => {
+              if (compareMode) {
+                setCompareMode(false); setCompareModels([]); setCompareResponses({}); setComparePrompt("");
+              } else {
+                setCompareMode(true); setCompareModels([selectedModel]);
+              }
+            }}
+            className={`sm:hidden flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold transition-colors shrink-0 ${
+              compareMode ? "bg-accent text-white" : "text-text/30"
+            }`}
+          >
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7" />
+            </svg>
+          </button>
           {[
             { id: "all", icon: "✨", label: "Все" },
             { id: "chat", icon: "💬", label: "Текст" },
@@ -1352,8 +1686,138 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
           ))}
         </div>
 
-        {/* Messages area or Welcome screen */}
-        {messages.length === 0 ? (
+        {/* Messages area or Welcome screen or Compare view */}
+        {compareMode && (comparePrompt || Object.keys(compareResponses).length > 0) ? (
+          /* ─── Comparison View ─── */
+          <div className="flex-1 overflow-y-auto" ref={messagesContainerRef}>
+            <div className="max-w-5xl mx-auto px-3 sm:px-4 py-6">
+              {/* User prompt */}
+              <div className="flex gap-2.5 flex-row-reverse mb-4">
+                <div className="shrink-0 mt-0.5">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-accent ring-2 ring-accent/20 flex items-center justify-center">
+                    <span className="text-[11px] sm:text-[12px] font-bold text-white">U</span>
+                  </div>
+                </div>
+                <div className="max-w-[85%] sm:max-w-[75%]">
+                  <div className="inline-block text-left rounded-2xl rounded-tr-md px-3.5 sm:px-4 py-2.5 sm:py-3 text-[13px] sm:text-[14px] leading-relaxed bg-accent text-white">
+                    {comparePrompt}
+                  </div>
+                </div>
+              </div>
+
+              {/* Desktop: side-by-side columns */}
+              <div className="hidden md:grid gap-3" style={{ gridTemplateColumns: `repeat(${compareModels.length}, 1fr)` }}>
+                {compareModels.map(modelId => {
+                  const m = MODELS.find(x => x.id === modelId);
+                  const resp = compareResponses[modelId];
+                  const isStreaming = compareStreaming[modelId];
+                  const color = companyColors[m?.company ?? ""] || "#C4623D";
+                  return (
+                    <div key={modelId} className="border border-text/[0.06] rounded-2xl bg-bg overflow-hidden flex flex-col">
+                      {/* Header */}
+                      <div className="flex items-center gap-2 px-3 py-2.5 border-b border-text/[0.06]">
+                        <div className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shrink-0" style={{ backgroundColor: color }}>
+                          {companyIcons[m?.company ?? ""] || "AI"}
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-[12px] font-bold truncate block">{m?.name || modelId}</span>
+                          <span className="text-[10px] text-text/30">{m?.company}</span>
+                        </div>
+                        {isStreaming && (
+                          <div className="flex gap-1 ml-auto">
+                            <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                            <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                            <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                          </div>
+                        )}
+                      </div>
+                      {/* Response */}
+                      <div className="flex-1 px-3 py-3 text-[13px] leading-relaxed text-text/85 overflow-hidden">
+                        {resp?.error ? (
+                          <span className="text-red-500 text-xs">{resp.error}</span>
+                        ) : resp?.content ? (
+                          <div className="md-content break-words" dangerouslySetInnerHTML={{ __html: renderMarkdown(resp.content) }} />
+                        ) : isStreaming ? (
+                          <span className="text-text/20 text-xs">Генерация...</span>
+                        ) : null}
+                      </div>
+                      {/* Footer */}
+                      {resp?.content && !isStreaming && (
+                        <div className="flex items-center gap-2 px-3 py-2 border-t border-text/[0.06]">
+                          <button
+                            onClick={() => navigator.clipboard.writeText(resp.content)}
+                            className="text-[10px] text-text/30 hover:text-accent px-2 py-1 rounded-lg hover:bg-accent/5 transition-colors"
+                          >
+                            Копировать
+                          </button>
+                          <button
+                            onClick={() => exitCompareWithModel(modelId)}
+                            className="text-[10px] text-accent font-semibold px-2 py-1 rounded-lg hover:bg-accent/5 transition-colors ml-auto"
+                          >
+                            Продолжить
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Mobile: tabs */}
+              <div className="md:hidden">
+                <div className="flex border-b border-text/10 mb-3">
+                  {compareModels.map((modelId, idx) => {
+                    const m = MODELS.find(x => x.id === modelId);
+                    const isStreaming = compareStreaming[modelId];
+                    return (
+                      <button
+                        key={modelId}
+                        onClick={() => setCompareActiveTab(idx)}
+                        className={`flex-1 py-2 text-[11px] font-semibold text-center truncate transition-colors ${
+                          compareActiveTab === idx ? "text-accent border-b-2 border-accent" : "text-text/30"
+                        }`}
+                      >
+                        {m?.name || modelId}
+                        {isStreaming && <span className="ml-1 animate-pulse">...</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+                {(() => {
+                  const modelId = compareModels[compareActiveTab] || compareModels[0];
+                  const resp = compareResponses[modelId];
+                  const isStreaming = compareStreaming[modelId];
+                  return (
+                    <div className="border border-text/[0.06] rounded-2xl bg-bg p-3">
+                      {resp?.error ? (
+                        <span className="text-red-500 text-xs">{resp.error}</span>
+                      ) : resp?.content ? (
+                        <>
+                          <div className="md-content break-words text-[13px] leading-relaxed text-text/85" dangerouslySetInnerHTML={{ __html: renderMarkdown(resp.content) }} />
+                          <div className="flex items-center gap-2 mt-3 pt-2 border-t border-text/[0.06]">
+                            <button onClick={() => navigator.clipboard.writeText(resp.content)} className="text-[10px] text-text/30 hover:text-accent px-2 py-1 rounded-lg hover:bg-accent/5 transition-colors">
+                              Копировать
+                            </button>
+                            <button onClick={() => exitCompareWithModel(modelId)} className="text-[10px] text-accent font-semibold px-2 py-1 rounded-lg hover:bg-accent/5 transition-colors ml-auto">
+                              Продолжить
+                            </button>
+                          </div>
+                        </>
+                      ) : isStreaming ? (
+                        <div className="flex gap-1.5 py-4 justify-center">
+                          <span className="w-2 h-2 bg-text/20 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                          <span className="w-2 h-2 bg-text/20 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                          <span className="w-2 h-2 bg-text/20 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+            <div ref={bottomRef} />
+          </div>
+        ) : messages.length === 0 ? (
           <WelcomeScreen onSuggestion={handleSuggestionClick} />
         ) : (
           <div className="flex-1 overflow-y-auto relative" ref={messagesContainerRef}>
@@ -1383,14 +1847,14 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                     <div className={`inline-block text-left rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-[13px] sm:text-[14px] leading-relaxed overflow-hidden ${
                       msg.role === "user"
                         ? "bg-accent text-white rounded-tr-md"
-                        : "bg-[#F0EFEB] text-text/85 rounded-tl-md"
+                        : "bg-text/[0.06] text-text/85 rounded-tl-md"
                     }`}>
                       {msg.file && (
                         <div className="mb-2">
                           {msg.file.file_type === "image" ? (
                             <img src={msg.file.content} alt={msg.file.file_name} className="max-w-[240px] rounded-lg" />
                           ) : (
-                            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs ${msg.role === "user" ? "bg-white/20" : "bg-white/60"}`}>
+                            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs ${msg.role === "user" ? "bg-white/20" : "bg-text/[0.04]"}`}>
                               <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                               </svg>
@@ -1430,7 +1894,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                       {/* 3D viewer */}
                       {msg.threed && (
                         <div className="mb-2">
-                          <div className="rounded-xl overflow-hidden border border-text/10 bg-[#f0f0f0]" style={{ width: "100%", height: 280 }}>
+                          <div className="rounded-xl overflow-hidden border border-text/10 bg-text/[0.04]" style={{ width: "100%", height: 280 }}>
                             {/* @google/model-viewer loaded via script tag */}
                             <div dangerouslySetInnerHTML={{ __html: `<model-viewer src="${msg.threed.url}" auto-rotate camera-controls touch-action="pan-y" style="width:100%;height:280px;background:#f0f0f0;" shadow-intensity="1"></model-viewer>` }} />
                           </div>
@@ -1450,7 +1914,9 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                         </div>
                       )}
 
-                      <MessageContent content={msg.content} role={msg.role} selectedModel={selectedModel} />
+                      <div className={streaming && i === messages.length - 1 && msg.role === "assistant" && msg.content ? "streaming-cursor" : ""}>
+                        <MessageContent content={msg.content} role={msg.role} selectedModel={selectedModel} />
+                      </div>
 
                       {/* Action buttons for AI messages */}
                       {msg.role === "assistant" && msg.content && (
@@ -1506,7 +1972,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                       <span className="text-[10px] sm:text-[11px] font-bold text-white">{aiLetter}</span>
                     </div>
                   </div>
-                  <div className="bg-[#F0EFEB] rounded-2xl rounded-tl-md px-4 py-3">
+                  <div className="bg-text/[0.06] rounded-2xl rounded-tl-md px-4 py-3">
                     <div className="flex gap-1.5">
                       <span className="w-2 h-2 bg-text/20 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
                       <span className="w-2 h-2 bg-text/20 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
@@ -1545,7 +2011,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
         )}
 
         {/* Input area — pinned bottom */}
-        <div className="border-t border-text/[0.06] bg-white px-3 sm:px-4 py-1.5 sm:py-2 shrink-0 chat-input-safe">
+        <div className="border-t border-text/[0.06] bg-bg px-3 sm:px-4 py-1.5 sm:py-2 shrink-0 chat-input-safe">
           <div className="max-w-3xl mx-auto">
             {pendingFile && (
               <div className="flex items-center gap-2 mb-2.5 px-3 py-2 bg-bg rounded-xl">
@@ -1619,14 +2085,18 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                 value={input}
                 onChange={handleInputChange}
                 onKeyDown={handleKey}
-                placeholder={pendingFile ? "Добавьте вопрос к файлу..." : isVideoModel ? "Опишите видео..." : is3DModel ? "Опишите 3D-модель или загрузите фото..." : "Написать сообщение..."}
+                placeholder={pendingFile ? "Добавьте вопрос к файлу..." : compareMode ? `Сравнить ${compareModels.length} модели...` : isVideoModel ? "Опишите видео..." : is3DModel ? "Опишите 3D-модель или загрузите фото..." : "Написать сообщение..."}
                 rows={1}
                 className="flex-1 bg-transparent resize-none focus:outline-none min-w-0 leading-snug placeholder:text-text/20"
                 style={{ fontSize: 14, padding: "10px 16px", maxHeight: 80, minHeight: 42 }}
               />
 
               {/* Send / Stop / Mic button */}
-              {streaming ? (
+              {Object.values(compareStreaming).some(v => v) ? (
+                <button onClick={stopCompare} className="rounded-lg bg-text/70 text-white flex items-center justify-center hover:bg-text/90 transition-colors shrink-0" title="Остановить" style={{ width: 38, height: 38 }}>
+                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" /></svg>
+                </button>
+              ) : streaming ? (
                 <button onClick={stopGeneration} className="rounded-lg bg-text/70 text-white flex items-center justify-center hover:bg-text/90 transition-colors shrink-0" title="Остановить" style={{ width: 38, height: 38 }}>
                   <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" /></svg>
                 </button>
@@ -1730,7 +2200,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
       {/* Lock Modal */}
       {lockModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-4" onClick={() => setLockModal(null)}>
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-bg rounded-2xl p-6 max-w-sm w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="text-center">
               <div className="w-14 h-14 bg-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">🔒</span>

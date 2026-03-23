@@ -80,7 +80,7 @@ export default function Nav() {
             </button>
             {toolsOpen && (
               <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2">
-                <div className="bg-white rounded-xl shadow-lg border border-text/5 py-2 min-w-[200px]">
+                <div className="bg-bg rounded-xl shadow-lg border border-text/5 py-2 min-w-[200px]">
                   {tools.map((t) => (
                     <a
                       key={t.href}

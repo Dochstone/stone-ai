@@ -168,6 +168,34 @@ async def save_message(
     return {"id": msg.id, "session_title": session.title}
 
 
+class RenameSessionRequest(BaseModel):
+    title: str
+
+
+@router.patch("/{session_id}")
+async def rename_session(
+    session_id: int,
+    body: RenameSessionRequest,
+    tg_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Rename a chat session."""
+    result = await db.execute(
+        select(ChatSession).where(
+            ChatSession.id == session_id,
+            ChatSession.user_tg_id == tg_user["id"],
+        )
+    )
+    session = result.scalar_one_or_none()
+    if not session:
+        raise HTTPException(404, "Chat not found")
+
+    session.title = body.title[:100].strip()
+    await db.flush()
+
+    return {"status": "ok", "title": session.title}
+
+
 @router.delete("/{session_id}")
 async def delete_session(
     session_id: int,
