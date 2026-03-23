@@ -145,7 +145,7 @@ export default function TopUpPage() {
   };
 
   if (!loaded) return null;
-  if (!auth) return <AuthFormComponent onAuth={setAuth} subtitle="Войдите, чтобы пополнить баланс" />;
+  if (!auth) return <AuthFormComponent onAuth={setAuth} subtitle="Войдите, чтобы выбрать тариф или пополнить баланс" />;
 
   return (
     <div className="min-h-screen bg-bg">
@@ -173,7 +173,7 @@ export default function TopUpPage() {
 
         {/* Top-up form */}
         <div className="bg-white rounded-2xl border border-text/5 p-8 mb-10">
-          <h2 className="font-bold text-lg mb-6">Пополнить баланс</h2>
+          <h2 className="font-bold text-lg mb-6">Пополнить баланс / Выбрать тариф</h2>
 
           {/* Amount */}
           <div className="mb-6">

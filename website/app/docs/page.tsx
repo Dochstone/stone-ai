@@ -97,7 +97,7 @@ export default function DocsPage() {
                 API v1
               </div>
               <h1 className="text-3xl font-extrabold mb-3">API Документация</h1>
-              <P>REST API для доступа к 65+ нейросетям. SSE-стриминг, per-token биллинг, JWT авторизация.</P>
+              <P>REST API для доступа к 65+ нейросетям. SSE-стриминг, подписка, JWT авторизация.</P>
             </div>
 
             {/* Getting Started */}
@@ -177,7 +177,7 @@ with httpx.stream("POST", url,
               <CodeBlock lang="json" code={`data: {"choices": [{"delta": {"content": "Привет"}}]}
 data: {"choices": [{"delta": {"content": "! AI — это..."}}]}
 data: {"usage": {"tokens_in": 15, "tokens_out": 82}}
-data: {"billing": {"tokens_in": 15, "tokens_out": 82, "cost_usd": 0.0003, "balance_usd": 9.99, "billing_mode": "per_token"}}
+data: {"billing": {"tokens_in": 15, "tokens_out": 82, "plan": "max", "requests_left": 1842}}
 data: [DONE]`} />
             </Section>
 
@@ -236,8 +236,8 @@ curl "${BASE_URL}/api/models?category=image"   # по категории`} />
 
             {/* Billing */}
             <Section id="billing" title="Биллинг">
-              <P>Stone AI использует per-token биллинг. Стоимость зависит от модели и количества токенов.</P>
-              <P>Формула: <code className="bg-bg px-1.5 py-0.5 rounded text-xs font-mono">cost = (tokens_in × price_input + tokens_out × price_output) / 1,000,000</code></P>
+              <P>Stone AI использует систему подписок: Free (0₽), Mini (390₽/мес), Max (890₽/мес), Max Pro (1990₽/мес). Лимиты запросов зависят от тарифа.</P>
+              <P>API доступен на тарифе Max Pro. Лимиты запросов определяются подпиской.</P>
               <Table
                 headers={["Модель", "Input $/1M", "Output $/1M", "Средневзвешенная"]}
                 rows={[
@@ -249,8 +249,8 @@ curl "${BASE_URL}/api/models?category=image"   # по категории`} />
                   ["flux-schnell", "—", "—", "$0.012/img"],
                 ]}
               />
-              <P>5 моделей бесплатно (15 запросов/день). Остальные — per-token с баланса в USD.</P>
-              <P>Списание происходит ПОСЛЕ получения ответа, по реально использованным токенам.</P>
+              <P>7 моделей бесплатно (15 запросов/день). Остальные — по подписке Mini/Max/Max Pro.</P>
+              <P>Каждый запрос засчитывается из лимита подписки после получения ответа.</P>
             </Section>
 
             {/* Limits */}
@@ -258,8 +258,10 @@ curl "${BASE_URL}/api/models?category=image"   # по категории`} />
               <Table
                 headers={["Тариф", "Lite модели", "Premium модели"]}
                 rows={[
-                  ["Free", "15/день", "По балансу (per-token)"],
-                  ["Per-token", "Безлимит (с баланса)", "Безлимит (с баланса)"],
+                  ["Free", "15/день", "—"],
+                  ["Mini (390₽/мес)", "500/мес", "20/мес"],
+                  ["Max (890₽/мес)", "2 000/мес", "100/мес"],
+                  ["Max Pro (1990₽/мес)", "10 000/мес", "500/мес"],
                 ]}
               />
               <Table
@@ -268,7 +270,7 @@ curl "${BASE_URL}/api/models?category=image"   # по категории`} />
                   ["MAX_TOKENS_LITE", "4096 (макс. output для бесплатных)"],
                   ["MAX_TOKENS_PAID", "8192 (макс. output для платных)"],
                   ["Max file upload", "10MB"],
-                  ["Rate limit", "Нет жёсткого rate limit, лимитируется балансом"],
+                  ["Rate limit", "Лимитируется тарифом подписки"],
                 ]}
               />
             </Section>
@@ -279,8 +281,8 @@ curl "${BASE_URL}/api/models?category=image"   # по категории`} />
                 headers={["Код", "Описание", "Решение"]}
                 rows={[
                   ["401", "Unauthorized — невалидный или отсутствующий токен", "Проверьте Authorization header"],
-                  ["402", "Payment Required — недостаточно средств для premium модели", "Пополните баланс на /topup"],
-                  ["429", "Too Many Requests — лимит бесплатных запросов исчерпан", "Подождите до завтра или пополните баланс"],
+                  ["402", "Payment Required — недостаточно прав для premium модели", "Выберите подходящий тариф на /pricing"],
+                  ["429", "Too Many Requests — лимит запросов исчерпан", "Подождите до завтра или выберите более высокий тариф"],
                   ["400", "Bad Request — неверные параметры", "Проверьте model_id и messages"],
                   ["503", "Service Unavailable — сервис оплаты временно недоступен", "Попробуйте позже"],
                 ]}
@@ -288,12 +290,12 @@ curl "${BASE_URL}/api/models?category=image"   # по категории`} />
               <P>Ошибки возвращаются в формате:</P>
               <CodeBlock lang="json" code={`{
   "detail": {
-    "error": "Недостаточно средств. Баланс $0.01, примерная стоимость $0.26",
+    "error": "Лимит запросов исчерпан. Выберите более высокий тариф.",
     "plan": "free",
     "tier": "premium",
-    "used_today": 0,
-    "limit": 0,
-    "need_balance": true
+    "used_today": 15,
+    "limit": 15,
+    "upgrade_url": "/pricing"
   }
 }`} />
             </Section>

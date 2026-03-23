@@ -4,7 +4,7 @@ import ModelCatalog from "@/components/ModelCatalog";
 export const metadata: Metadata = {
   title: "Все 65+ нейросетей",
   description:
-    "Каталог из 65+ нейросетей: GPT-5, Claude Opus, Gemini Pro, DeepSeek, Flux и другие. Цены от $0.24 за 1M токенов. Прямо в Telegram.",
+    "Каталог из 65+ нейросетей: GPT-5, Claude Opus, Gemini Pro, DeepSeek, Flux и другие. Бесплатный старт. Подписка от 390₽/мес.",
 };
 
 import Breadcrumbs from "@/components/Breadcrumbs";

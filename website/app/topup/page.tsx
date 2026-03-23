@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import TopUpPage from "@/components/TopUpPage";
 
 export const metadata: Metadata = {
-  title: "Пополнить баланс",
-  description: "Пополните баланс Stone AI: Stars, USDT, BTC, ETH, TON. От $1. Оплата в рублях.",
+  title: "Пополнение и тарифы",
+  description: "Выберите тариф Stone AI или пополните баланс: Stars, USDT, BTC, ETH, TON. Подписка от 390₽/мес.",
 };
 
 import Breadcrumbs from "@/components/Breadcrumbs";

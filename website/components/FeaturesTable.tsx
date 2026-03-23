@@ -1,11 +1,11 @@
 const features = [
   { name: "AI модели", free: "5 моделей", paid: "65+ моделей" },
-  { name: "Запросы в день", free: "10 + 5 за рекламу", paid: "Безлимитно" },
+  { name: "Запросы в день", free: "15", paid: "До 10 000/мес" },
   { name: "GPT-5, Claude Opus", free: "---", paid: "check" },
   { name: "Генерация картинок", free: "---", paid: "check" },
   { name: "AI Поиск (Perplexity)", free: "---", paid: "check" },
   { name: "Глубокий анализ (o3, R1)", free: "---", paid: "check" },
-  { name: "Стоимость", free: "Бесплатно", paid: "От $0.24/1M токенов" },
+  { name: "Стоимость", free: "Бесплатно", paid: "От 390₽/мес" },
   { name: "Оплата", free: "—", paid: "Stars, крипто, TON" },
 ];
 
@@ -20,10 +20,10 @@ export default function FeaturesTable() {
     <section className="py-20 md:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-4">
-          Free vs Per-token
+          Free vs Подписка
         </h2>
         <p className="text-text/60 text-center mb-12 max-w-lg mx-auto">
-          Бесплатного хватает для знакомства. Для серьёзной работы — пополните баланс.
+          Бесплатного хватает для знакомства. Для серьёзной работы — выберите тариф.
         </p>
 
         <div className="max-w-2xl mx-auto overflow-x-auto -mx-4 px-4 sm:mx-auto sm:px-0">
@@ -36,7 +36,7 @@ export default function FeaturesTable() {
                     <span className="bg-teal-light text-teal px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold">Free</span>
                   </th>
                   <th className="px-3 sm:px-5 py-4 text-center font-semibold">
-                    <span className="bg-accent/10 text-accent px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold">Per-token</span>
+                    <span className="bg-accent/10 text-accent px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold">Подписка</span>
                   </th>
                 </tr>
               </thead>

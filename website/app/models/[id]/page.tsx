@@ -23,7 +23,7 @@ export function generateMetadata({ params }: Props): Metadata {
   const cat = categoryLabels[model.category] || model.category;
   return {
     title: `${model.name} — нейросеть ${cat} | Stone AI`,
-    description: `${model.name} от ${model.company} в Stone AI. ${model.description || ""} Контекст ${model.context}. ${model.tier === "free" ? "Бесплатно, 15 запросов/день." : `От $${model.pricePerMillion}/1M токенов.`}`,
+    description: `${model.name} от ${model.company} в Stone AI. ${model.description || ""} Контекст ${model.context}. ${model.tier === "free" ? "Бесплатно, 15 запросов/день." : "Доступна по подписке от 390₽/мес."}`,
     alternates: { canonical: `/models/${params.id}` },
     openGraph: {
       title: `${model.name} — ${cat} нейросеть в Stone AI`,
@@ -50,7 +50,7 @@ export default function ModelPage({ params }: Props) {
       "@type": "Offer",
       price: model.tier === "free" ? "0" : String(model.pricePerMillion),
       priceCurrency: "USD",
-      description: model.tier === "free" ? "15 бесплатных запросов в день" : `$${model.pricePerMillion} за 1M токенов`,
+      description: model.tier === "free" ? "15 бесплатных запросов в день" : "Доступна по подписке от 390₽/мес",
     },
     author: { "@type": "Organization", name: model.company },
   };
@@ -92,10 +92,10 @@ export default function ModelPage({ params }: Props) {
           <div className="bg-white rounded-2xl border border-text/5 p-5">
             <div className="text-text/40 text-xs font-medium mb-1">Цена</div>
             <div className="text-xl font-extrabold">
-              {model.tier === "free" ? "Бесплатно" : model.priceUnit ? `$${model.pricePerMillion}/${model.priceUnit}` : `$${model.pricePerMillion}/1M`}
+              {model.tier === "free" ? "Бесплатно" : "от 390₽/мес"}
             </div>
             <div className="text-text/30 text-xs mt-1">
-              {model.tier === "free" ? "15 запросов в день" : "токенов"}
+              {model.tier === "free" ? "15 запросов в день" : "по подписке"}
             </div>
           </div>
           <div className="bg-white rounded-2xl border border-text/5 p-5">
@@ -131,7 +131,7 @@ export default function ModelPage({ params }: Props) {
           <p className="text-text/50 text-sm mb-6">
             {model.tier === "free"
               ? "Бесплатно, 15 запросов в день. Без регистрации."
-              : `От $${model.pricePerMillion} за 1M токенов. Пополните баланс от $1.`}
+              : "Доступна по подписке от 390₽/мес. Попробуйте бесплатно."}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <a
@@ -164,7 +164,7 @@ export default function ModelPage({ params }: Props) {
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-bold text-sm">{m.name}</span>
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${m.tier === "free" ? "bg-teal/10 text-teal" : "bg-accent/10 text-accent"}`}>
-                      {m.tier === "free" ? "Free" : m.priceUnit ? `$${m.pricePerMillion}/${m.priceUnit}` : `$${m.pricePerMillion}/1M`}
+                      {m.tier === "free" ? "Free" : "Подписка"}
                     </span>
                   </div>
                   <div className="text-text/40 text-xs">{m.company} · {m.context}</div>

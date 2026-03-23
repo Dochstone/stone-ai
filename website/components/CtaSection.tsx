@@ -23,7 +23,7 @@ export default function CtaSection() {
           href="/referral"
           className="mt-4 inline-block text-accent text-sm font-semibold hover:underline"
         >
-          Приглашай друзей — получай 10% от их пополнений &rarr;
+          Приглашай друзей — получай бонусы от их подписок &rarr;
         </a>
       </div>
     </section>

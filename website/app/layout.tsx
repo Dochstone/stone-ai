@@ -130,7 +130,7 @@ const jsonLdWebSite = {
   inLanguage: "ru",
   publisher: { "@id": `${SITE_URL}/#organization` },
   description:
-    "65+ нейросетей в одном окне. Текст, картинки, видео и код. Платите только за использованные токены.",
+    "65+ нейросетей в одном окне. Текст, картинки, видео и код. Бесплатный старт. Подписка от 390₽/мес.",
   potentialAction: {
     "@type": "SearchAction",
     target: { "@type": "EntryPoint", urlTemplate: `${SITE_URL}/models?q={search_term_string}` },
@@ -154,7 +154,7 @@ const jsonLdSoftware = {
     highPrice: "130",
     priceCurrency: "USD",
     offerCount: "50",
-    description: "15 бесплатных запросов в день. 65+ платных моделей от $0.24 за 1M токенов.",
+    description: "Бесплатный старт — 15 запросов в день. Подписка от 390₽/мес. Free / Mini / Max / Max Pro.",
   },
 };
 

@@ -205,8 +205,8 @@ export default function Pricing() {
           }`}>
             {result.message}
             {!result.ok && (
-              <a href="/topup" className="block mt-2 text-accent font-bold hover:underline">
-                Пополнить баланс →
+              <a href="/pricing" className="block mt-2 text-accent font-bold hover:underline">
+                Выбрать тариф →
               </a>
             )}
           </div>

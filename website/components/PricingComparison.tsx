@@ -1,15 +1,15 @@
 const rows = [
   {
     feature: "Доступ к GPT-5",
-    stone: "Per-token, от $0.04/запрос",
+    stone: "От 390₽/мес (Mini)",
     chatgpt: "$20/мес (Plus)",
-    competitors: "Per-token, ~на 30% дороже",
+    competitors: "Подписка, ~на 30% дороже",
   },
   {
     feature: "Claude Opus 4",
-    stone: "Per-token, от $0.20/запрос",
+    stone: "От 890₽/мес (Max)",
     chatgpt: "---",
-    competitors: "Per-token",
+    competitors: "Подписка",
   },
   {
     feature: "Кол-во моделей",
