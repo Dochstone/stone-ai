@@ -1265,8 +1265,11 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                 🔥{limits.streak.days}
               </span>
             )}
-            <a href="/pricing" className="text-[11px] sm:text-xs font-bold text-accent hover:underline whitespace-nowrap">
-              ${auth.balanceUsd.toFixed(2)}
+            <a href="/pricing" className="text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap hover:opacity-80 transition-opacity" style={{
+              background: limits?.plan === "max-pro" ? "linear-gradient(135deg, #f59e0b, #ea580c)" : limits?.plan === "max" ? "#C4623D" : limits?.plan === "mini" ? "#0E9A83" : "#e5e5e5",
+              color: limits?.plan && limits.plan !== "free" ? "#fff" : "#888",
+            }}>
+              {limits?.plan === "max-pro" ? "Max Pro" : limits?.plan === "max" ? "Max" : limits?.plan === "mini" ? "Mini" : "Free"}
             </a>
             <a href="/" className="text-text/25 hover:text-accent transition-colors" title="На главную">
               <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -1415,9 +1418,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                               </svg>
                               Скачать
                             </a>
-                            {msg.video.cost_usd && (
-                              <span className="text-[10px] text-text/30">${msg.video.cost_usd.toFixed(2)}</span>
-                            )}
+                            {/* cost hidden — subscription model */}
                           </div>
                         </div>
                       )}
@@ -1440,27 +1441,14 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                               </svg>
                               Скачать GLB
                             </a>
-                            {msg.threed.cost_usd && (
-                              <span className="text-[10px] text-text/30">${msg.threed.cost_usd.toFixed(2)}</span>
-                            )}
+                            {/* cost hidden — subscription model */}
                           </div>
                         </div>
                       )}
 
                       <MessageContent content={msg.content} role={msg.role} selectedModel={selectedModel} />
 
-                      {msg.billing && (
-                        <details className={`mt-2 text-[10px] ${msg.role === "user" ? "opacity-70" : "opacity-50"}`}>
-                          <summary className="cursor-pointer">
-                            {msg.billing.tokens_in + msg.billing.tokens_out} tok · ${msg.billing.cost_usd.toFixed(2)}
-                          </summary>
-                          <div className="mt-1 space-y-0.5">
-                            <div>Input: {msg.billing.tokens_in} tok</div>
-                            <div>Output: {msg.billing.tokens_out} tok</div>
-                            <div>Стоимость: ${msg.billing.cost_usd.toFixed(2)}</div>
-                            <div>Баланс: ${msg.billing.balance_usd.toFixed(2)}</div>
-                          </div>
-                        </details>
+                      {/* Billing details hidden — subscription model */}
                       )}
                       {/* Action buttons for AI messages */}
                       {msg.role === "assistant" && msg.content && (
