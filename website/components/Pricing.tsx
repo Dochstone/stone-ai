@@ -59,10 +59,11 @@ export default function Pricing() {
       const data = await res.json();
       if (res.ok) {
         setPromoResult({ ok: true, message: data.message });
-        // Update balance in localStorage
-        const saved = JSON.parse(localStorage.getItem("stone_auth") || "{}");
-        saved.balanceUsd = data.new_balance;
-        localStorage.setItem("stone_auth", JSON.stringify(saved));
+        if (data.tier && data.tier !== "free") {
+          // Promo activated a plan — close modal, show success
+          setModal(null);
+          setResult({ ok: true, message: data.message });
+        }
       } else {
         setPromoResult({ ok: false, message: typeof data.detail === "string" ? data.detail : "Ошибка" });
       }
@@ -220,7 +221,7 @@ export default function Pricing() {
                   type="text"
                   value={promo}
                   onChange={(e) => setPromo(e.target.value.toUpperCase())}
-                  placeholder="STONE50"
+                  placeholder="STONE7"
                   className="flex-1 bg-bg border border-text/10 rounded-xl px-4 py-2.5 text-sm font-mono uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-accent/30"
                 />
                 <button
