@@ -23,7 +23,7 @@ from app.services.limiter import (
     check_can_request,
     record_usage,
     MAX_TOKENS_LITE,
-    MAX_TOKENS_PAID,
+    MAX_TOKENS_PREMIUM,
 )
 from app.services.token_billing import calculate_cost, deduct_balance, get_weighted_price
 
@@ -105,7 +105,7 @@ async def chat(
         system_prompt = req.system_prompt
 
     # Dynamic max_tokens based on billing mode
-    max_tokens = MAX_TOKENS_LITE if billing_mode == "free" else MAX_TOKENS_PAID
+    max_tokens = MAX_TOKENS_LITE if billing_mode == "free" else MAX_TOKENS_PREMIUM
 
     # Stream response
     async def generate():
