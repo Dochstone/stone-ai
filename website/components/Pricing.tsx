@@ -117,7 +117,7 @@ export default function Pricing() {
           Бесплатный старт. Апгрейд когда нужно больше.
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto">
           {plans.map((plan) => (
             <div
               key={plan.id}
@@ -156,7 +156,7 @@ export default function Pricing() {
                 {plan.locked.map((f: string) => (
                   <li key={f} className="flex items-start gap-2">
                     <span className="mt-0.5 shrink-0 text-xs text-text/20">&#128274;</span>
-                    <span className="text-text/30 text-xs line-through">{f}</span>
+                    <span className="text-text/40 text-xs line-through">{f}</span>
                   </li>
                 ))}
               </ul>

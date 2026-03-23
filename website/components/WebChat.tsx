@@ -294,8 +294,8 @@ function WelcomeScreen({ onSuggestion }: { onSuggestion: (text: string, modelId:
   const [promptCat, setPromptCat] = useState("popular");
 
   return (
-    <div className="flex-1 flex items-center justify-center px-4 overflow-y-auto">
-      <div className="text-center max-w-2xl w-full py-8">
+    <div className="flex-1 flex items-start justify-center px-4 overflow-y-auto">
+      <div className="text-center max-w-2xl w-full py-6 sm:py-8">
         <div className="mb-6">
           <div className="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-accent to-accent/70 flex items-center justify-center shadow-lg shadow-accent/20 mb-3">
             <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -307,7 +307,7 @@ function WelcomeScreen({ onSuggestion }: { onSuggestion: (text: string, modelId:
         </div>
 
         {/* Category tabs */}
-        <div className="flex gap-1 overflow-x-auto pb-2 mb-4 justify-center flex-wrap">
+        <div className="flex gap-1 pb-2 mb-4 justify-center flex-wrap">
           {PROMPT_CATEGORIES.map((cat) => (
             <button
               key={cat.id}
@@ -327,7 +327,7 @@ function WelcomeScreen({ onSuggestion }: { onSuggestion: (text: string, modelId:
             <button
               key={i}
               onClick={() => onSuggestion(tmpl.text, tmpl.model)}
-              className="p-3 rounded-xl border border-text/[0.06] bg-white hover:border-accent/30 hover:shadow-sm transition-all group"
+              className="p-3 rounded-xl border border-text/[0.06] bg-bg hover:border-accent/30 hover:shadow-sm transition-all group"
             >
               <span className="text-[12px] sm:text-[13px] text-text/70 group-hover:text-accent transition-colors leading-snug line-clamp-2">{tmpl.text}</span>
             </button>
@@ -1209,7 +1209,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
       />
 
       {/* Main chat area */}
-      <div className="flex-1 flex flex-col min-w-0 h-full">
+      <div className="flex-1 flex flex-col min-w-0 h-full relative">
         {/* Top bar */}
         <div className="h-14 border-b border-text/[0.06] bg-white/80 backdrop-blur-sm flex items-center justify-between px-3 sm:px-4 shrink-0">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -1283,7 +1283,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
 
         {/* Model Picker Panel */}
         {modelPickerOpen && (
-          <div className="absolute top-14 left-0 right-0 z-30 bg-white border-b border-text/10 shadow-lg max-h-[60vh] flex flex-col">
+          <div className="absolute top-14 left-0 right-0 z-[45] bg-bg border-b border-text/10 shadow-lg max-h-[50vh] sm:max-h-[60vh] flex flex-col">
             <div className="p-3 border-b border-text/5 shrink-0">
               <input type="text" value={modelSearch} onChange={(e) => setModelSearch(e.target.value)}
                 placeholder="Поиск модели..." autoFocus
@@ -1308,8 +1308,8 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                       setSelectedModel(m.id); setModelPickerOpen(false); setModelSearch("");
                     }} className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left transition-colors ${selectedModel === m.id ? "bg-accent/5 border border-accent/20" : "hover:bg-bg"} ${lock ? "opacity-50" : ""}`}>
                       <div className="flex-1 min-w-0">
-                        <span className="text-sm font-semibold">{lock ? "🔒 " : ""}{m.name}</span>
-                        <span className="text-[10px] text-text/30 ml-1.5">{m.company}</span>
+                        <span className="text-sm font-semibold truncate block">{lock ? "🔒 " : ""}{m.name}</span>
+                        <span className="text-[10px] text-text/30">{m.company}</span>
                       </div>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${lock ? "bg-text/5 text-text/30" : m.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"}`}>
                         {lock ? lock.tier : formatPrice(m)}
@@ -1321,7 +1321,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
             </div>
           </div>
         )}
-        {modelPickerOpen && <div className="fixed inset-0 z-20" onClick={() => { setModelPickerOpen(false); setModelSearch(""); }} />}
+        {modelPickerOpen && <div className="fixed inset-0 z-[44]" onClick={() => { setModelPickerOpen(false); setModelSearch(""); }} />}
 
         {/* Category tabs */}
         <div className="flex items-center gap-1 px-3 sm:px-4 py-1.5 border-b border-text/[0.04] bg-white/50 shrink-0 overflow-x-auto">
@@ -1536,7 +1536,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
 
         {/* Templates panel */}
         {showTemplates && (
-          <div className="border-t border-text/[0.06] bg-white px-3 sm:px-4 py-3 shrink-0 max-h-[40vh] overflow-y-auto">
+          <div className="border-t border-text/[0.06] bg-bg px-3 sm:px-4 py-3 shrink-0 max-h-[30vh] sm:max-h-[40vh] overflow-y-auto">
             <div className="max-w-3xl mx-auto">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-text/50">Шаблоны промптов</span>
@@ -1659,7 +1659,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                   </svg>
                 </button>
               ) : (input.trim() || pendingFile) ? (
-                <button onClick={sendMessage} disabled={videoGenerating || threedGenerating} className="rounded-lg bg-accent text-white flex items-center justify-center hover:bg-accent/90 transition-colors disabled:opacity-30 shrink-0" style={{ width: 38, height: 38 }}>
+                <button data-send-btn onClick={sendMessage} disabled={videoGenerating || threedGenerating} className="rounded-lg bg-accent text-white flex items-center justify-center hover:bg-accent/90 transition-colors disabled:opacity-30 shrink-0" style={{ width: 38, height: 38 }}>
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" /></svg>
                 </button>
               ) : (
