@@ -32,21 +32,53 @@ class PromoRequest(BaseModel):
     code: str
 
 
+async def _get_user_from_request(request: Request, db: AsyncSession) -> User:
+    """Get user from JWT or TG auth."""
+    token = extract_jwt_from_request(request)
+    if token:
+        payload = decode_jwt(token)
+        user_id = int(payload["sub"])
+        result = await db.execute(select(User).where(User.id == user_id))
+        user = result.scalar_one_or_none()
+        if user:
+            return user
+    try:
+        tg_user = await get_current_user(request)
+        result = await db.execute(select(User).where(User.telegram_id == tg_user["id"]))
+        user = result.scalar_one_or_none()
+        if user:
+            return user
+    except Exception:
+        pass
+    raise HTTPException(401, "Not authenticated")
+
+
 @router.get("/user/me")
 async def get_me(
-    tg_user: dict = Depends(get_current_user),
+    request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    """
-    Get current user profile with limits, balance, and pricing info.
+    """Get current user profile — supports JWT (web) and TG auth."""
+    token = extract_jwt_from_request(request)
+    if token:
+        payload = decode_jwt(token)
+        user_id = int(payload["sub"])
+        result = await db.execute(select(User).where(User.id == user_id))
+        user = result.scalar_one_or_none()
+        if not user:
+            raise HTTPException(404, "User not found")
+        tg_id = user.telegram_id
+    else:
+        try:
+            tg_user = await get_current_user(request)
+            tg_id = tg_user["id"]
+            user = await get_or_create_user(db, tg_user)
+        except Exception:
+            raise HTTPException(401, "Not authenticated")
 
-    Returns per-token billing data instead of credit-based system.
-    """
-    tg_id = tg_user["id"]
-    user = await get_or_create_user(db, tg_user)
     balance = await get_user_balance(db, tg_id)
     lite_today = await get_today_usage(db, tg_id, "lite")
-    rewarded_bonus = int(user.rewarded_today or 0)
+    rewarded_bonus = int(user.rewarded_today or 0) if hasattr(user, 'rewarded_today') else 0
 
     # Build model prices map for frontend
     model_prices = {}
@@ -59,12 +91,18 @@ async def get_me(
 
     return {
         "user": {
+            "id": user.id,
             "tg_id": user.telegram_id,
+            "email": user.email,
             "username": user.username,
             "first_name": user.first_name,
             "language": user.language,
+            "auth_provider": user.auth_provider or "email",
+            "created_at": user.joined_at.isoformat() if user.joined_at else None,
+            "balance_usd": balance,
+            "plan": user.subscription_tier or "free",
         },
-        "plan": "per_token",
+        "plan": user.subscription_tier or "free",
         "balance_usd": balance,
         "model_prices": model_prices,
         "usage": {
@@ -86,14 +124,15 @@ async def get_me(
 
 @router.get("/user/usage-history")
 async def get_usage_history(
-    tg_user: dict = Depends(get_current_user),
+    request: Request,
     db: AsyncSession = Depends(get_db),
     limit: int = Query(default=20, le=100),
 ):
     """Get last N usage records for the current user."""
+    user = await _get_user_from_request(request, db)
     result = await db.execute(
         select(Usage)
-        .where(Usage.user_tg_id == tg_user["id"])
+        .where(Usage.user_tg_id == user.telegram_id)
         .order_by(Usage.created_at.desc())
         .limit(limit)
     )
@@ -116,16 +155,17 @@ async def get_usage_history(
 
 @router.get("/user/transactions")
 async def get_transactions(
-    tg_user: dict = Depends(get_current_user),
+    request: Request,
     db: AsyncSession = Depends(get_db),
     limit: int = Query(default=20, le=100),
 ):
     """Get last N payment transactions for the current user."""
     from app.models.transaction import Transaction
+    user = await _get_user_from_request(request, db)
 
     result = await db.execute(
         select(Transaction)
-        .where(Transaction.user_tg_id == tg_user["id"])
+        .where(Transaction.user_tg_id == user.telegram_id)
         .order_by(Transaction.created_at.desc())
         .limit(limit)
     )
