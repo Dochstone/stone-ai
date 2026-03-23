@@ -1265,12 +1265,16 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                 🔥{limits.streak.days}
               </span>
             )}
-            <a href="/pricing" className="text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap hover:opacity-80 transition-opacity" style={{
-              background: limits?.plan === "max-pro" ? "linear-gradient(135deg, #f59e0b, #ea580c)" : limits?.plan === "max" ? "#C4623D" : limits?.plan === "mini" ? "#0E9A83" : "#e5e5e5",
-              color: limits?.plan && limits.plan !== "free" ? "#fff" : "#888",
-            }}>
-              {limits?.plan === "max-pro" ? "Max Pro" : limits?.plan === "max" ? "Max" : limits?.plan === "mini" ? "Mini" : "Free"}
-            </a>
+            {(() => {
+              const p = limits?.plan || "free";
+              const bg = p === "max-pro" ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white" : p === "max" ? "bg-accent text-white" : p === "mini" ? "bg-teal text-white" : "bg-text/10 text-text/40";
+              const label = p === "max-pro" ? "Max Pro" : p === "max" ? "Max" : p === "mini" ? "Mini" : "Free";
+              return (
+                <a href="/pricing" className={`text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap hover:opacity-80 transition-opacity ${bg}`}>
+                  {label}
+                </a>
+              );
+            })()}
             <a href="/" className="text-text/25 hover:text-accent transition-colors" title="На главную">
               <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955a1.126 1.126 0 011.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
