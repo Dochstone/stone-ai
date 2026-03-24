@@ -99,10 +99,8 @@ async def chat(
     else:
         plan = "byok"
 
-    # System prompt only for subscribers or BYOK users
-    system_prompt = None
-    if req.system_prompt and (using_byok or plan in ("plus", "max")):
-        system_prompt = req.system_prompt
+    # System prompt — allowed for all users
+    system_prompt = req.system_prompt if req.system_prompt else None
 
     # Dynamic max_tokens based on billing mode
     max_tokens = MAX_TOKENS_LITE if billing_mode == "free" else MAX_TOKENS_PREMIUM

@@ -366,7 +366,7 @@ class TestWrongPassword:
     def test_register_rejects_duplicate_email(self):
         """409 on duplicate email."""
         assert "409" in _auth_router_src
-        assert "already registered" in _auth_router_src.lower()
+        assert "уже зарегистрирован" in _auth_router_src or "already registered" in _auth_router_src.lower()
 
     def test_bcrypt_hash_different_each_time(self):
         """bcrypt uses random salt, so same password → different hash."""

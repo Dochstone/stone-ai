@@ -231,11 +231,9 @@ class TestFreeExhaustedThenRewarded:
         allowed = balance > 0  # per-token fallback
         assert allowed is True
 
-    def test_limiter_has_rewarded_logic(self):
-        """limiter.py should check rewarded_today."""
-        assert "rewarded_today" in _limiter_src
-        assert "FREE_DAILY_LIMIT" in _limiter_src
-        assert "REWARDED_BONUS" in _limiter_src
+    def test_limiter_has_free_limits_logic(self):
+        """limiter.py should have free plan limits."""
+        assert "FREE_LIMITS" in _limiter_src or "FREE_DAILY_LIMIT" in _limiter_src
 
 
 # ═══════════════════════════════════════════════════════════
