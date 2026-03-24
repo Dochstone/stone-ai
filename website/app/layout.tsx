@@ -18,6 +18,8 @@ const OG_IMAGE = `${SITE_URL}/og-image.png`;
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export const metadata: Metadata = {

@@ -2088,7 +2088,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                 placeholder={pendingFile ? "Добавьте вопрос к файлу..." : compareMode ? `Сравнить ${compareModels.length} модели...` : isVideoModel ? "Опишите видео..." : is3DModel ? "Опишите 3D-модель или загрузите фото..." : "Написать сообщение..."}
                 rows={1}
                 className="flex-1 bg-transparent resize-none focus:outline-none min-w-0 leading-snug placeholder:text-text/20"
-                style={{ fontSize: 14, padding: "10px 16px", maxHeight: 80, minHeight: 42 }}
+                style={{ fontSize: 16, padding: "10px 16px", maxHeight: 80, minHeight: 42 }}
               />
 
               {/* Send / Stop / Mic button */}
