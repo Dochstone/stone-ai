@@ -8,15 +8,46 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.
 
 // ─── Mode config ───
 
-type Mode = "photo" | "video" | "3d";
+type Mode = "chat" | "photo" | "video" | "3d" | "health";
 
 const MODES: { id: Mode; label: string; icon: string; color: string; bg: string }[] = [
+  { id: "chat", label: "Чат", icon: "💬", color: "text-accent", bg: "bg-accent" },
   { id: "photo", label: "Фото", icon: "🎨", color: "text-pink-500", bg: "bg-pink-500" },
   { id: "video", label: "Видео", icon: "🎬", color: "text-red-500", bg: "bg-red-500" },
   { id: "3d", label: "3D", icon: "🧊", color: "text-cyan-500", bg: "bg-cyan-500" },
+  { id: "health", label: "Врач", icon: "🏥", color: "text-emerald-500", bg: "bg-emerald-500" },
 ];
 
+const HEALTH_SYSTEM_PROMPT = `Ты — AI-ассистент по общим вопросам здоровья. Ты НЕ врач и НЕ ставишь диагнозы.
+
+Твоя роль:
+1. Анализировать загруженные фото (кожа, глаза, высыпания и т.д.) и описывать что ты видишь
+2. Предлагать ВОЗМОЖНЫЕ причины симптомов (не диагноз)
+3. Рекомендовать к какому специалисту обратиться
+4. Давать общие советы по уходу и профилактике
+
+ОБЯЗАТЕЛЬНО в каждом ответе:
+- Начинай с наблюдений (что видно на фото или описано)
+- Укажи возможные причины (2-3 варианта)
+- Порекомендуй специалиста
+- Заверши: "Для точного диагноза обратитесь к врачу."
+
+Отвечай на русском. Будь внимателен и заботлив.`;
+
 const MODE_MODELS: Record<Mode, { id: string; name: string }[]> = {
+  chat: [
+    { id: "gpt-4o-mini", name: "GPT-4o mini" },
+    { id: "gemini-2.0-flash", name: "Gemini Flash" },
+    { id: "claude-haiku-4.5", name: "Claude Haiku" },
+    { id: "deepseek-r1", name: "DeepSeek R1" },
+    { id: "gpt-5.1", name: "GPT-5.1" },
+    { id: "claude-sonnet-4", name: "Claude Sonnet" },
+    { id: "gemini-2.5-pro", name: "Gemini Pro" },
+  ],
+  health: [
+    { id: "gpt-4o-mini", name: "GPT-4o mini (Vision)" },
+    { id: "gemini-2.0-flash", name: "Gemini Flash (Vision)" },
+  ],
   photo: [
     { id: "nano-banana-pro", name: "Nano Banana Pro" },
     { id: "nano-banana", name: "Nano Banana" },
@@ -39,12 +70,28 @@ const MODE_MODELS: Record<Mode, { id: string; name: string }[]> = {
 };
 
 const MODE_PLACEHOLDERS: Record<Mode, string> = {
+  chat: "Написать сообщение...",
   photo: "Опишите изображение... (напр: фотореалистичный портрет девушки в закатном свете)",
   video: "Опишите видео... (напр: камера пролетает над горным озером на рассвете)",
-  "3d": "Опишите 3D-модель или загрузите фото... (напр: низкополигональный замок)",
+  "3d": "Опишите 3D-модель или загрузите фото...",
+  health: "Опишите симптомы или загрузите фото...",
 };
 
 const MODE_TIPS: Record<Mode, string[]> = {
+  chat: [
+    "Напиши пост для Telegram-канала на тему AI-трендов",
+    "Сравни плюсы и минусы React vs Vue для стартапа",
+    "Объясни квантовые вычисления простыми словами",
+    "Составь контент-план на неделю для Instagram",
+    "Напиши функцию на Python для сортировки данных",
+    "Проанализируй этот текст и найди ошибки",
+  ],
+  health: [
+    "Покраснение и раздражение глаза, что это может быть?",
+    "Высыпания на коже рук, появились 3 дня назад",
+    "Проблемы с ногтями — изменился цвет и форма",
+    "Что делать при частых головных болях?",
+  ],
   photo: [
     "Фотореалистичный портрет девушки с рыжими волосами в осеннем парке",
     "Минималистичный логотип кофейни, flat design, белый фон",
@@ -91,8 +138,8 @@ interface Message {
 export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {}) {
   const [auth, setAuth] = useState<AuthState | null>(null);
   const [loaded, setLoaded] = useState(false);
-  const [mode, setMode] = useState<Mode>(initialMode || "photo");
-  const [selectedModel, setSelectedModel] = useState(MODE_MODELS[initialMode || "photo"][0].id);
+  const [mode, setMode] = useState<Mode>(initialMode || "chat");
+  const [selectedModel, setSelectedModel] = useState(MODE_MODELS[initialMode || "chat"][0].id);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [generating, setGenerating] = useState(false);
@@ -310,11 +357,93 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
     }
   }, [auth, input, generating, messages, selectedModel, pendingImage]);
 
+  // ─── Chat / Health (SSE streaming) ───
+  const generateChat = useCallback(async (isHealth = false) => {
+    if (!auth || (!input.trim() && !pendingImage) || generating) return;
+    const text = input.trim();
+    const userMsg: Message = {
+      role: "user",
+      content: text || (pendingImage ? "Проанализируй это фото" : ""),
+      image: pendingImage || undefined,
+    };
+    const history = [...messages, userMsg];
+    setMessages(history);
+    setInput("");
+    setPendingImage(null);
+    setPendingFileName("");
+    setGenerating(true);
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
+
+    // Build API messages (last 20)
+    const apiMessages = history.slice(-20).map((m) => {
+      if (m.image) {
+        return {
+          role: m.role,
+          content: [
+            ...(m.content ? [{ type: "text", text: m.content }] : []),
+            { type: "image_url", image_url: { url: m.image } },
+          ],
+        };
+      }
+      return { role: m.role, content: m.content };
+    });
+
+    try {
+      const body: any = { model_id: selectedModel, messages: apiMessages };
+      if (isHealth) body.system_prompt = HEALTH_SYSTEM_PROMPT;
+
+      const res = await fetch(`${API_URL}/api/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: "Ошибка" }));
+        const errMsg = typeof err.detail === "string" ? err.detail : err.detail?.message || "Ошибка";
+        setMessages([...history, { role: "assistant", content: errMsg }]);
+        setGenerating(false);
+        return;
+      }
+
+      const reader = res.body?.getReader();
+      if (!reader) { setGenerating(false); return; }
+      const decoder = new TextDecoder();
+      let content = "";
+      setMessages([...history, { role: "assistant", content: "" }]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        for (const line of decoder.decode(value, { stream: true }).split("\n")) {
+          if (!line.startsWith("data: ")) continue;
+          const payload = line.slice(6).trim();
+          if (payload === "[DONE]") continue;
+          try {
+            const data = JSON.parse(payload);
+            if (data.billing || data.usage) continue;
+            if (data.error) { content = data.error; break; }
+            const c = data.content || data.choices?.[0]?.delta?.content;
+            if (c) { content += c; setMessages([...history, { role: "assistant", content }]); }
+          } catch {}
+        }
+      }
+
+      setMessages([...history, { role: "assistant", content }]);
+    } catch {
+      setMessages([...history, { role: "assistant", content: "Ошибка соединения" }]);
+    } finally {
+      setGenerating(false);
+    }
+  }, [auth, input, generating, messages, selectedModel, pendingImage]);
+
   const send = useCallback(() => {
-    if (mode === "photo") generateImage();
+    if (mode === "chat") generateChat(false);
+    else if (mode === "health") generateChat(true);
+    else if (mode === "photo") generateImage();
     else if (mode === "video") generateVideo();
     else generate3D();
-  }, [mode, generateImage, generateVideo, generate3D]);
+  }, [mode, generateChat, generateImage, generateVideo, generate3D]);
 
   const modeConfig = MODES.find(m => m.id === mode)!;
 
@@ -415,24 +544,43 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
                 <span className="text-4xl">{modeConfig.icon}</span>
               </div>
               <h2 className="text-xl sm:text-2xl font-extrabold text-text mb-2">
-                {mode === "photo" ? "Генерация изображений" : mode === "video" ? "Генерация видео" : "Генерация 3D моделей"}
+                {mode === "chat" ? "AI Чат" : mode === "health" ? "AI Консультант" : mode === "photo" ? "Генерация изображений" : mode === "video" ? "Генерация видео" : "Генерация 3D моделей"}
               </h2>
               <p className="text-sm text-text/40 max-w-md mx-auto">
-                {mode === "photo" ? "Опишите изображение — AI создаст его за секунды" : mode === "video" ? "Опишите сцену — AI создаст видео из текста" : "Опишите объект или загрузите фото — AI создаст 3D модель"}
+                {mode === "chat" ? "Задайте вопрос — AI ответит мгновенно. Выберите модель под задачу"
+                  : mode === "health" ? "Загрузите фото или опишите симптомы — AI даст общую информацию и подскажет к какому врачу обратиться"
+                  : mode === "photo" ? "Опишите изображение — AI создаст его за секунды"
+                  : mode === "video" ? "Опишите сцену — AI создаст видео из текста"
+                  : "Опишите объект или загрузите фото — AI создаст 3D модель"}
               </p>
             </div>
 
-            {/* 3D mode: upload area */}
-            {mode === "3d" && (
+            {/* Upload area for 3D and Health */}
+            {(mode === "3d" || mode === "health") && (
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-cyan-300 rounded-2xl p-6 text-center cursor-pointer hover:border-cyan-500 hover:bg-cyan-50/30 transition-all mb-6"
+                className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all mb-6 ${
+                  mode === "health" ? "border-emerald-300 hover:border-emerald-500 hover:bg-emerald-50/30" : "border-cyan-300 hover:border-cyan-500 hover:bg-cyan-50/30"
+                }`}
               >
-                <svg className="w-10 h-10 text-cyan-400 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                <svg className={`w-10 h-10 mx-auto mb-2 ${mode === "health" ? "text-emerald-400" : "text-cyan-400"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
                 </svg>
-                <p className="text-cyan-600 font-bold text-sm">Загрузите фото для 3D-конвертации</p>
-                <p className="text-text/30 text-xs mt-1">или опишите объект текстом</p>
+                <p className={`font-bold text-sm ${mode === "health" ? "text-emerald-600" : "text-cyan-600"}`}>
+                  {mode === "health" ? "Загрузите фото для анализа" : "Загрузите фото для 3D-конвертации"}
+                </p>
+                <p className="text-text/30 text-xs mt-1">или опишите текстом</p>
+              </div>
+            )}
+
+            {/* Health disclaimer */}
+            {mode === "health" && (
+              <div className="flex items-start gap-2 mb-6 px-4 py-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200/50 dark:border-amber-800/30">
+                <span className="text-amber-500 shrink-0 mt-0.5">&#9888;</span>
+                <p className="text-[11px] text-amber-700 dark:text-amber-400 leading-relaxed">
+                  AI даёт <strong>общую информацию</strong>, не медицинский диагноз. Не заменяет консультацию врача.
+                </p>
               </div>
             )}
 
@@ -512,7 +660,9 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
 
                     {/* Text content */}
                     {msg.content && !msg.imageResult && !msg.videoUrl && !msg.threedUrl && (
-                      <div className="whitespace-pre-wrap break-words">{msg.content}</div>
+                      msg.role === "assistant" && (mode === "chat" || mode === "health")
+                        ? <div className="break-words" dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }} />
+                        : <div className="whitespace-pre-wrap break-words">{msg.content}</div>
                     )}
                     {msg.content && (msg.imageResult || msg.videoUrl || msg.threedUrl) && (
                       <div className="text-[12px] text-text/50 mt-1">{msg.content}</div>
@@ -536,7 +686,7 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
                       <span className="w-2 h-2 bg-text/20 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
                     </div>
                     <span className="text-[11px] text-text/30">
-                      {mode === "photo" ? "Рисую..." : mode === "video" ? "Генерирую видео..." : "Создаю 3D модель..."}
+                      {mode === "chat" ? "Думаю..." : mode === "health" ? "Анализирую..." : mode === "photo" ? "Рисую..." : mode === "video" ? "Генерирую видео..." : "Создаю 3D модель..."}
                     </span>
                   </div>
                 </div>
@@ -565,9 +715,9 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
             onChange={(e) => { if (e.target.files?.[0]) handleFileSelect(e.target.files[0]); e.target.value = ""; }} />
 
           <div className="flex items-center gap-2 bg-bg border border-text/[0.08] rounded-xl focus-within:border-accent/30 focus-within:ring-2 focus-within:ring-accent/10 transition-all px-2 py-1">
-            {mode === "3d" && (
+            {(mode === "3d" || mode === "health" || mode === "chat") && (
               <button onClick={() => fileInputRef.current?.click()} disabled={generating}
-                className="flex items-center justify-center w-10 h-10 text-text/25 hover:text-cyan-500 transition-colors disabled:opacity-30 shrink-0">
+                className="flex items-center justify-center w-10 h-10 text-text/25 hover:text-accent transition-colors disabled:opacity-30 shrink-0">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
                 </svg>
