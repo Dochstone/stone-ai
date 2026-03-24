@@ -1481,9 +1481,9 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                 </svg>
               </button>
               <span className={`text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
-                model?.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"
+                FREE_MODEL_IDS.has(selectedModel) ? "bg-teal-light text-teal" : MINI_MODEL_IDS.has(selectedModel) ? "bg-blue-100 text-blue-700" : "bg-accent/10 text-accent"
               }`}>
-                {model?.company || ""}
+                {model?.context || ""}
               </span>
             </div>
           </div>
@@ -1604,10 +1604,10 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                       )}
                       <div className="flex-1 min-w-0">
                         <span className="text-sm font-semibold truncate block">{lock ? "🔒 " : ""}{m.name}</span>
-                        <span className="text-[10px] text-text/30">{m.company}</span>
+                        <span className="text-[10px] text-text/30">{m.company} · {m.context}</span>
                       </div>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${lock ? "bg-text/5 text-text/30" : m.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"}`}>
-                        {lock ? lock.tier : m.tier === "free" ? "Free" : m.company}
+                        {lock ? lock.tier : m.tier === "free" ? "Free" : FREE_MODEL_IDS.has(m.id) ? "Free" : MINI_MODEL_IDS.has(m.id) ? "Mini" : "Max"}
                       </span>
                     </button>
                   );
