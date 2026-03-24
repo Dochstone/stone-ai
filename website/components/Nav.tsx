@@ -13,8 +13,7 @@ function getAvatarColor(email: string): string {
 
 const tools = [
   { href: "/chat", label: "AI Чат" },
-  { href: "/images", label: "Генерация картинок" },
-  { href: "/video", label: "AI Видео" },
+  { href: "/studio", label: "AI Студия" },
   { href: "/audio", label: "AI Аудио" },
   { href: "/3d", label: "3D Генерация" },
   { href: "/documents", label: "Анализ документов" },
