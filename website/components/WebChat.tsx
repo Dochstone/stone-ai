@@ -1606,8 +1606,13 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                         <span className="text-sm font-semibold truncate block">{lock ? "🔒 " : ""}{m.name}</span>
                         <span className="text-[10px] text-text/30">{m.company} · {m.context}</span>
                       </div>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${lock ? "bg-text/5 text-text/30" : m.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"}`}>
-                        {lock ? lock.tier : m.tier === "free" ? "Free" : FREE_MODEL_IDS.has(m.id) ? "Free" : MINI_MODEL_IDS.has(m.id) ? "Mini" : "Max"}
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
+                        lock ? "bg-text/5 text-text/30"
+                        : FREE_MODEL_IDS.has(m.id) ? "bg-teal-light text-teal"
+                        : MINI_MODEL_IDS.has(m.id) ? "bg-blue-100 text-blue-600"
+                        : "bg-accent/10 text-accent"
+                      }`}>
+                        {lock ? lock.tier : FREE_MODEL_IDS.has(m.id) ? "Free" : MINI_MODEL_IDS.has(m.id) ? "Mini" : "Max"}
                       </span>
                     </button>
                   );
