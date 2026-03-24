@@ -47,11 +47,11 @@ export default function Nav() {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all ${
-        scrolled ? "bg-bg/90 backdrop-blur-md shadow-sm" : "bg-transparent"
+        menuOpen ? "bg-bg shadow-sm" : scrolled ? "bg-bg/90 backdrop-blur-md shadow-sm" : "bg-transparent"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-14 md:h-16">
-        <a href="/" className="flex items-center gap-2 shrink-0">
+        <a href="/" className="flex items-center gap-2 shrink-0 min-w-0">
           <div>
             <span className="text-xl font-extrabold text-text block leading-tight">Stone AI</span>
             <span className="hidden md:block text-[9px] text-text/25 tracking-[0.15em] uppercase leading-none">Smart Technology Omniscient Neural Engine</span>
@@ -112,7 +112,7 @@ export default function Nav() {
           </a>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <ThemeToggle />
           {authEmail ? (
             <>
@@ -147,42 +147,57 @@ export default function Nav() {
           {/* Burger — visible below md (768px) */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden flex flex-col justify-center items-center w-11 h-11 gap-1.5"
-            aria-label="Меню" aria-expanded={menuOpen}
+            className="md:hidden flex flex-col justify-center items-center w-11 h-11 shrink-0 gap-1.5"
+            aria-label={menuOpen ? "Закрыть меню" : "Открыть меню"} aria-expanded={menuOpen}
           >
-            <span className={`block w-5 h-0.5 bg-text transition-all ${menuOpen ? "rotate-45 translate-y-1" : ""}`} />
-            <span className={`block w-5 h-0.5 bg-text transition-all ${menuOpen ? "opacity-0" : ""}`} />
-            <span className={`block w-5 h-0.5 bg-text transition-all ${menuOpen ? "-rotate-45 -translate-y-1" : ""}`} />
+            <span className={`block w-5 h-0.5 bg-text transition-all origin-center ${menuOpen ? "rotate-45 translate-y-[4px]" : ""}`} />
+            <span className={`block w-5 h-0.5 bg-text transition-all ${menuOpen ? "opacity-0 scale-0" : ""}`} />
+            <span className={`block w-5 h-0.5 bg-text transition-all origin-center ${menuOpen ? "-rotate-45 -translate-y-[4px]" : ""}`} />
           </button>
         </div>
       </div>
 
       {/* Mobile menu — below md (768px) */}
       {menuOpen && (
-        <div className="md:hidden bg-bg/95 backdrop-blur-md border-t border-text/5 px-4 pb-4 max-h-[80vh] overflow-y-auto">
+        <div className="md:hidden bg-bg border-t border-text/5 px-4 pb-4 max-h-[80vh] overflow-y-auto">
           <div className="flex flex-col gap-1 py-3">
-            <p className="text-xs text-text/30 font-semibold uppercase tracking-wider px-2 pt-1 pb-2">Инструменты</p>
-            {tools.map((t) => (
+            {/* Основные инструменты */}
+            <p className="text-xs text-text/30 font-semibold uppercase tracking-wider px-2 pt-1 pb-1">Инструменты</p>
+            {tools.slice(0, 3).map((t) => (
               <a key={t.href} href={t.href} onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
                 {t.label}
               </a>
             ))}
+            {/* Свёрнутые инструменты */}
+            <button
+              onClick={() => setToolsOpen(!toolsOpen)}
+              className="text-text/40 hover:text-text/60 font-medium text-sm py-2 px-2 min-h-[44px] flex items-center gap-1 transition-colors"
+            >
+              Ещё инструменты
+              <svg className={`w-3.5 h-3.5 transition-transform ${toolsOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {toolsOpen && tools.slice(3).map((t) => (
+              <a key={t.href} href={t.href} onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 pl-4 min-h-[44px] flex items-center">
+                {t.label}
+              </a>
+            ))}
+
             <div className="border-t border-text/5 my-2" />
             <a href="/models" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
               Модели
             </a>
             <a href="/pricing" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
-              Цены
+              Тарифы
             </a>
             <a href="/blog" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
               Блог
             </a>
-            <a href="/pricing" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
-              Тарифы
-            </a>
             <a href="/docs" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
               API Docs
             </a>
+
             <div className="border-t border-text/5 my-2" />
             {authEmail ? (
               <>
