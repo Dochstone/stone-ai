@@ -1511,7 +1511,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
         {/* Category tabs */}
         <div className="flex px-3 sm:px-4 border-b border-text/[0.04] bg-bg/50 shrink-0">
           {[
-            { id: "all", icon: "💬", label: "Чат" },
+            { id: "all", icon: "💬", label: "Все" },
             { id: "free", icon: "✨", label: "Free" },
             { id: "image", icon: "🎨", label: "Фото" },
             { id: "video", icon: "🎬", label: "Видео" },
