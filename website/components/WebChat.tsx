@@ -1741,6 +1741,45 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
           ))}
         </div>
 
+        {/* Quick model chips */}
+        {modelCatFilter !== "all" && (
+          <div className="border-b border-text/[0.04] bg-bg/50 shrink-0">
+            <div className="max-w-3xl mx-auto px-3 sm:px-4 py-1.5 flex items-center gap-1.5 overflow-x-auto">
+              {(modelCatFilter === "image" ? [
+                { id: "nano-banana-pro", name: "Nano Banana Pro" },
+                { id: "nano-banana", name: "Nano Banana" },
+                { id: "gpt-5-image", name: "GPT-5 Image" },
+                { id: "gpt-5-image-mini", name: "GPT-5 Image mini" },
+                { id: "flux-schnell", name: "Flux Schnell" },
+              ] : modelCatFilter === "video" ? [
+                { id: "kling-v2", name: "Kling v2" },
+                { id: "runway-gen3", name: "Runway Gen3" },
+                { id: "pika-2", name: "Pika 2" },
+                { id: "stable-video", name: "Stable Video" },
+                { id: "luma-dream", name: "Luma Dream" },
+              ] : modelCatFilter === "3d" ? [
+                { id: "tripo-v2.5", name: "Tripo v2.5" },
+                { id: "triposr", name: "TripoSR" },
+              ] : modelCatFilter === "health" ? [
+                { id: "gpt-4o-mini", name: "GPT-4o mini" },
+                { id: "gemini-2.0-flash", name: "Gemini Flash" },
+              ] : []).map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => setSelectedModel(m.id)}
+                  className={`px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-semibold whitespace-nowrap transition-colors shrink-0 ${
+                    selectedModel === m.id
+                      ? "bg-accent text-white"
+                      : "bg-text/[0.04] text-text/35 hover:text-text/60"
+                  }`}
+                >
+                  {m.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Health disclaimer */}
         {modelCatFilter === "health" && (
           <div className="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200/50 dark:border-amber-800/30 shrink-0">
