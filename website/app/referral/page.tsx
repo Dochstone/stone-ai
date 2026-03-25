@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <ReferralPage />;
+  return (<><h1 className="sr-only">Реферальная программа Stone AI</h1><ReferralPage /></>);
 }

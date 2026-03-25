@@ -14,5 +14,10 @@ export const metadata: Metadata = {
 };
 
 export default function HealthPage() {
-  return <HealthChat />;
+  return (
+    <>
+      <h1 className="sr-only">AI Консультант по здоровью — анализ фото симптомов</h1>
+      <HealthChat />
+    </>
+  );
 }

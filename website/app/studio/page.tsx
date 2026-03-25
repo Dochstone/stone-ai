@@ -14,5 +14,10 @@ export const metadata: Metadata = {
 };
 
 export default function StudioPage() {
-  return <CreativeChat />;
+  return (
+    <>
+      <h1 className="sr-only">AI Студия — генерация картинок, видео и 3D моделей</h1>
+      <CreativeChat />
+    </>
+  );
 }

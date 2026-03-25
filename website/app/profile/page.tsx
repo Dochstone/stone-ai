@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <ProfilePage />;
+  return (<><h1 className="sr-only">Личный кабинет Stone AI</h1><ProfilePage /></>);
 }
