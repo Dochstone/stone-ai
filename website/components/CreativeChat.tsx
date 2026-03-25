@@ -39,10 +39,16 @@ const MODE_MODELS: Record<Mode, { id: string; name: string }[]> = {
     { id: "gpt-4o-mini", name: "GPT-4o mini" },
     { id: "gemini-2.0-flash", name: "Gemini Flash" },
     { id: "claude-haiku-4.5", name: "Claude Haiku" },
+    { id: "llama-4-maverick", name: "Llama 4" },
     { id: "deepseek-r1", name: "DeepSeek R1" },
+    { id: "deepseek-v3", name: "DeepSeek V3" },
     { id: "gpt-5.1", name: "GPT-5.1" },
+    { id: "gpt-5.4", name: "GPT-5.4" },
     { id: "claude-sonnet-4", name: "Claude Sonnet" },
+    { id: "claude-opus-4", name: "Claude Opus" },
     { id: "gemini-2.5-pro", name: "Gemini Pro" },
+    { id: "grok-3", name: "Grok 3" },
+    { id: "perplexity-sonar", name: "Perplexity" },
   ],
   health: [
     { id: "gpt-4o-mini", name: "GPT-4o mini (Vision)" },
@@ -514,24 +520,24 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
             </a>
             <h1 className="text-sm font-bold text-text">AI Студия</h1>
           </div>
-          <a href="/studio" className="text-[11px] text-accent font-semibold hover:underline">Текстовый чат</a>
+          <button onClick={() => { setMessages([]); }} className="text-[11px] text-accent font-semibold hover:underline">Новый чат</button>
         </div>
       </header>
 
       {/* Mode switcher */}
       <div className="border-b border-text/[0.06] bg-bg">
-        <div className="max-w-3xl mx-auto px-4 flex">
+        <div className="max-w-3xl mx-auto px-2 sm:px-4 flex overflow-x-auto">
           {MODES.map((m) => (
             <button
               key={m.id}
               onClick={() => switchMode(m.id)}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold transition-all border-b-2 ${
+              className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 py-3 text-xs sm:text-sm font-semibold transition-all border-b-2 whitespace-nowrap min-w-0 ${
                 mode === m.id
                   ? `${m.color} border-current`
                   : "text-text/30 border-transparent hover:text-text/50"
               }`}
             >
-              <span className="text-base">{m.icon}</span>
+              <span className="text-sm sm:text-base">{m.icon}</span>
               {m.label}
             </button>
           ))}
@@ -563,7 +569,7 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
         {messages.length === 0 ? (
           <div className="max-w-2xl mx-auto px-4 py-8">
             <div className="text-center mb-8">
-              <div className={`w-20 h-20 mx-auto rounded-3xl ${modeConfig.bg} flex items-center justify-center shadow-xl mb-4`} style={{ boxShadow: `0 10px 25px -5px ${mode === "photo" ? "rgba(236,72,153,0.2)" : mode === "video" ? "rgba(239,68,68,0.2)" : "rgba(6,182,212,0.2)"}` }}>
+              <div className={`w-20 h-20 mx-auto rounded-3xl ${modeConfig.bg} flex items-center justify-center shadow-xl mb-4`} style={{ boxShadow: `0 10px 25px -5px ${mode === "chat" ? "rgba(217,119,87,0.2)" : mode === "health" ? "rgba(16,185,129,0.2)" : mode === "photo" ? "rgba(236,72,153,0.2)" : mode === "video" ? "rgba(239,68,68,0.2)" : "rgba(6,182,212,0.2)"}` }}>
                 <span className="text-4xl">{modeConfig.icon}</span>
               </div>
               <h2 className="text-xl sm:text-2xl font-extrabold text-text mb-2">
@@ -613,10 +619,9 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
                 <button
                   key={i}
                   onClick={() => { setInput(tip); }}
-                  className="p-3 rounded-xl border border-text/[0.06] bg-bg hover:border-current hover:shadow-sm transition-all text-left group"
-                  style={{ borderColor: undefined }}
+                  className="p-3 rounded-xl border border-text/[0.06] bg-bg hover:border-accent/30 hover:shadow-sm transition-all text-left group"
                 >
-                  <span className={`text-[12px] sm:text-[13px] text-text/60 group-hover:${modeConfig.color} transition-colors leading-snug line-clamp-2`}>{tip}</span>
+                  <span className="text-[12px] sm:text-[13px] text-text/60 group-hover:text-accent transition-colors leading-snug line-clamp-2">{tip}</span>
                 </button>
               ))}
             </div>
@@ -691,6 +696,15 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
                       <div className="text-[12px] text-text/50 mt-1">{msg.content}</div>
                     )}
                   </div>
+                  {/* Copy button */}
+                  {msg.role === "assistant" && msg.content && !generating && (
+                    <button
+                      onClick={() => navigator.clipboard.writeText(msg.content)}
+                      className="text-[10px] text-text/30 hover:text-accent mt-1 px-2 py-1 rounded-lg hover:bg-accent/5 transition-colors"
+                    >
+                      Копировать
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
