@@ -329,49 +329,92 @@ const PROMPT_TEMPLATES: Record<string, { text: string; model: string }[]> = {
 
 // ─── Welcome Screen ───
 
-function WelcomeScreen({ onSuggestion }: { onSuggestion: (text: string, modelId: string) => void }) {
+const WELCOME_CONFIG: Record<string, { icon: string; bg: string; title: string; subtitle: string }> = {
+  all: { icon: "💬", bg: "bg-accent", title: "Чем могу помочь?", subtitle: "Выберите шаблон или напишите свой запрос" },
+  image: { icon: "🎨", bg: "bg-pink-500", title: "Генерация изображений", subtitle: "Опишите картинку — AI создаст её за секунды" },
+  video: { icon: "🎬", bg: "bg-red-500", title: "Генерация видео", subtitle: "Опишите сцену — AI создаст видео из текста" },
+  "3d": { icon: "🧊", bg: "bg-cyan-500", title: "Генерация 3D", subtitle: "Опишите объект или загрузите фото" },
+  health: { icon: "🏥", bg: "bg-emerald-500", title: "AI Консультант", subtitle: "Загрузите фото или опишите симптомы" },
+};
+
+function WelcomeScreen({ onSuggestion, activeTab }: { onSuggestion: (text: string, modelId: string) => void; activeTab: string }) {
   const [promptCat, setPromptCat] = useState("popular");
+  const cfg = WELCOME_CONFIG[activeTab] || WELCOME_CONFIG.all;
+  const isChat = activeTab === "all" || activeTab === "chat";
 
   return (
     <div className="flex-1 flex items-start justify-center px-4 overflow-y-auto">
       <div className="text-center max-w-2xl w-full py-6 sm:py-8">
         <div className="mb-6">
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-accent to-accent/70 flex items-center justify-center shadow-lg shadow-accent/20 mb-3">
-            <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
-            </svg>
+          <div className={`w-14 h-14 mx-auto rounded-2xl ${cfg.bg} flex items-center justify-center shadow-lg mb-3`}>
+            <span className="text-3xl">{cfg.icon}</span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-text mb-1">Чем могу помочь?</h1>
-          <p className="text-xs sm:text-sm text-text/40">Выберите шаблон или напишите свой запрос</p>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-text mb-1">{cfg.title}</h1>
+          <p className="text-xs sm:text-sm text-text/40">{cfg.subtitle}</p>
         </div>
 
-        {/* Category tabs */}
-        <div className="flex gap-1 pb-2 mb-4 justify-center flex-wrap">
-          {PROMPT_CATEGORIES.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setPromptCat(cat.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
-                promptCat === cat.id ? "bg-accent text-white" : "bg-bg text-text/40 border border-text/[0.06] hover:text-text/60"
-              }`}
-            >
-              {cat.icon} {cat.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Prompt cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-lg mx-auto text-left">
-          {(PROMPT_TEMPLATES[promptCat] || []).map((tmpl, i) => (
-            <button
-              key={i}
-              onClick={() => onSuggestion(tmpl.text, tmpl.model)}
-              className="p-3 rounded-xl border border-text/[0.06] bg-bg hover:border-accent/30 hover:shadow-sm transition-all group"
-            >
-              <span className="text-[12px] sm:text-[13px] text-text/70 group-hover:text-accent transition-colors leading-snug line-clamp-2">{tmpl.text}</span>
-            </button>
-          ))}
-        </div>
+        {isChat ? (
+          <>
+            {/* Category tabs */}
+            <div className="flex gap-1 pb-2 mb-4 justify-center flex-wrap">
+              {PROMPT_CATEGORIES.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setPromptCat(cat.id)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+                    promptCat === cat.id ? "bg-accent text-white" : "bg-bg text-text/40 border border-text/[0.06] hover:text-text/60"
+                  }`}
+                >
+                  {cat.icon} {cat.label}
+                </button>
+              ))}
+            </div>
+            {/* Prompt cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-lg mx-auto text-left">
+              {(PROMPT_TEMPLATES[promptCat] || []).map((tmpl, i) => (
+                <button
+                  key={i}
+                  onClick={() => onSuggestion(tmpl.text, tmpl.model)}
+                  className="p-3 rounded-xl border border-text/[0.06] bg-bg hover:border-accent/30 hover:shadow-sm transition-all group"
+                >
+                  <span className="text-[12px] sm:text-[13px] text-text/70 group-hover:text-accent transition-colors leading-snug line-clamp-2">{tmpl.text}</span>
+                </button>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="grid grid-cols-2 gap-2 max-w-lg mx-auto text-left">
+            {(activeTab === "image" ? [
+              { text: "Фотореалистичный портрет девушки в осеннем парке", model: "nano-banana-pro" },
+              { text: "Минималистичный логотип кофейни, flat design", model: "nano-banana-pro" },
+              { text: "Космическая станция на орбите Юпитера", model: "nano-banana-pro" },
+              { text: "Милый кот в костюме астронавта", model: "nano-banana" },
+            ] : activeTab === "video" ? [
+              { text: "Камера пролетает над зелёным лесом на рассвете", model: "kling-v2" },
+              { text: "Девушка идёт по пляжу, закат, кинематографично", model: "kling-v2" },
+              { text: "Таймлапс ночного города, огни, 4K", model: "runway-gen3" },
+              { text: "Золотая рыбка в коралловом рифе", model: "pika-2" },
+            ] : activeTab === "3d" ? [
+              { text: "Средневековый замок, low-poly стиль", model: "tripo-v2.5" },
+              { text: "Спортивная машина, фотореалистичная", model: "tripo-v2.5" },
+              { text: "Стилизованное дерево для игры", model: "triposr" },
+              { text: "Фигурка робота для 3D-печати", model: "tripo-v2.5" },
+            ] : /* health */ [
+              { text: "Покраснение и раздражение глаза", model: "gpt-4o-mini" },
+              { text: "Высыпания на коже рук, 3 дня назад", model: "gpt-4o-mini" },
+              { text: "Изменился цвет и форма ногтей", model: "gpt-4o-mini" },
+              { text: "Частые головные боли, что делать?", model: "gpt-4o-mini" },
+            ]).map((tmpl, i) => (
+              <button
+                key={i}
+                onClick={() => onSuggestion(tmpl.text, tmpl.model)}
+                className="p-3 rounded-xl border border-text/[0.06] bg-bg hover:border-accent/30 hover:shadow-sm transition-all group"
+              >
+                <span className="text-[12px] sm:text-[13px] text-text/70 group-hover:text-accent transition-colors leading-snug line-clamp-2">{tmpl.text}</span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1840,7 +1883,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
             <div ref={bottomRef} />
           </div>
         ) : messages.length === 0 ? (
-          <WelcomeScreen onSuggestion={handleSuggestionClick} />
+          <WelcomeScreen onSuggestion={handleSuggestionClick} activeTab={modelCatFilter} />
         ) : (
           <div className="flex-1 overflow-y-auto relative" ref={messagesContainerRef}>
             <div className="max-w-3xl mx-auto px-3 sm:px-4 py-6 space-y-5">
