@@ -175,7 +175,7 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
   const [pendingImage, setPendingImage] = useState<string | null>(null);
   const [pendingFileName, setPendingFileName] = useState("");
   const [dragging, setDragging] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(typeof window !== "undefined" && window.innerWidth >= 1024);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sessions, setSessions] = useState<{ id: number; model_id: string; title: string; updated_at: string | null }[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
 
@@ -188,6 +188,7 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
   useEffect(() => {
     try { const s = localStorage.getItem("stone_auth"); if (s) setAuth(JSON.parse(s)); } catch {}
     setLoaded(true);
+    if (window.innerWidth >= 1024) setSidebarOpen(true);
   }, []);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, generating]);
@@ -589,7 +590,7 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
 
       {/* Sidebar */}
       {sidebarOpen && <div className="fixed inset-0 z-30 lg:hidden bg-black/30" onClick={() => setSidebarOpen(false)} />}
-      <div className={`fixed inset-y-0 left-0 z-40 w-[260px] bg-bg border-r border-text/[0.06] flex flex-col transition-transform duration-200 lg:relative lg:shrink-0 ${sidebarOpen ? "translate-x-0 lg:w-[260px]" : "-translate-x-full lg:-translate-x-0 lg:w-0 lg:border-0 lg:overflow-hidden"}`}>
+      <div className={`fixed inset-y-0 left-0 z-40 w-[260px] bg-bg border-r border-text/[0.06] flex flex-col transition-all duration-200 lg:relative lg:shrink-0 ${sidebarOpen ? "translate-x-0 lg:w-[260px]" : "-translate-x-full lg:translate-x-0 lg:w-0 lg:border-0 lg:overflow-hidden"}`}>
         <div className="p-3 flex items-center gap-2 shrink-0">
           <button onClick={newChat} className="flex-1 flex items-center gap-2 bg-accent hover:bg-accent/90 rounded-xl px-3.5 py-2 transition-colors">
             <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M12 4v16m8-8H4" /></svg>
@@ -633,12 +634,12 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
       <header className="border-b border-text/[0.06] bg-bg shrink-0">
         <div className="px-3 sm:px-4 h-12 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
-            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="w-9 h-9 flex items-center justify-center shrink-0 rounded-lg text-text/30 hover:text-text/60 hover:bg-text/[0.04] transition-colors">
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="w-10 h-10 flex items-center justify-center shrink-0 rounded-lg text-text/30 hover:text-text/60 hover:bg-text/[0.04] transition-colors">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
               </svg>
             </button>
-            <a href="/" className="text-sm font-bold text-text hover:text-accent transition-colors truncate">Stone AI</a>
+            <a href="/" className="text-[13px] font-extrabold text-text hover:text-accent transition-colors">Stone AI</a>
           </div>
           <div className="flex items-center gap-1 shrink-0">
             <button onClick={newChat} className="h-9 px-3 rounded-lg text-[11px] text-accent font-semibold hover:bg-accent/5 transition-colors">Новый</button>
@@ -659,14 +660,14 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
             <button
               key={m.id}
               onClick={() => switchMode(m.id)}
-              className={`flex items-center justify-center gap-1 px-2 sm:px-3 py-2 text-[11px] sm:text-xs font-semibold transition-all border-b-2 whitespace-nowrap ${
+              className={`flex-1 flex items-center justify-center gap-1 px-1 sm:px-3 py-2.5 text-[10px] sm:text-xs font-semibold transition-all border-b-2 whitespace-nowrap ${
                 mode === m.id
                   ? `${m.color} border-current`
                   : "text-text/25 border-transparent hover:text-text/40"
               }`}
             >
-              <span className="text-xs sm:text-sm">{m.icon}</span>
-              <span className="hidden xs:inline sm:inline">{m.label}</span>
+              <span className="text-xs">{m.icon}</span>
+              <span>{m.label}</span>
             </button>
           ))}
         </div>
