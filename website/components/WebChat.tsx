@@ -12,7 +12,7 @@ const IMAGE_MODEL_IDS = new Set([
 ]);
 
 const VIDEO_MODEL_IDS = new Set([
-  "kling-v2", "runway-gen3", "pika-2", "stable-video", "luma-dream",
+  "kling-v3", "sora-2", "veo-3", "kling-v2", "runway-gen3", "pika-2", "minimax", "pixverse-v5", "luma-dream", "stable-video", "wan-2", "hunyuan", "ltx-video",
 ]);
 
 const THREED_MODEL_IDS = new Set(["tripo-v2.5", "triposr"]);
@@ -391,10 +391,10 @@ function WelcomeScreen({ onSuggestion, activeTab }: { onSuggestion: (text: strin
               { text: "Космическая станция на орбите Юпитера", model: "nano-banana-pro" },
               { text: "Милый кот в костюме астронавта", model: "nano-banana" },
             ] : activeTab === "video" ? [
-              { text: "Камера пролетает над зелёным лесом на рассвете", model: "kling-v2" },
-              { text: "Девушка идёт по пляжу, закат, кинематографично", model: "kling-v2" },
-              { text: "Таймлапс ночного города, огни, 4K", model: "runway-gen3" },
-              { text: "Золотая рыбка в коралловом рифе", model: "pika-2" },
+              { text: "Камера пролетает над зелёным лесом на рассвете", model: "kling-v3" },
+              { text: "Девушка идёт по пляжу, закат, кинематографично", model: "sora-2" },
+              { text: "Таймлапс ночного города, огни, 4K", model: "veo-3" },
+              { text: "Золотая рыбка в коралловом рифе", model: "kling-v3" },
             ] : activeTab === "3d" ? [
               { text: "Средневековый замок, low-poly стиль", model: "tripo-v2.5" },
               { text: "Спортивная машина, фотореалистичная", model: "tripo-v2.5" },
@@ -1572,11 +1572,13 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                 { id: "gpt-5-image-mini", name: "GPT-5 Image mini" },
                 { id: "flux-schnell", name: "Flux Schnell" },
               ] : modelCatFilter === "video" ? [
-                { id: "kling-v2", name: "Kling v2" },
+                { id: "kling-v3", name: "Kling 3.0 Pro" },
+                { id: "sora-2", name: "Sora 2" },
+                { id: "veo-3", name: "Veo 3.1" },
                 { id: "runway-gen3", name: "Runway Gen3" },
+                { id: "kling-v2", name: "Kling v2" },
                 { id: "pika-2", name: "Pika 2" },
-                { id: "stable-video", name: "Stable Video" },
-                { id: "luma-dream", name: "Luma Dream" },
+                { id: "minimax", name: "MiniMax" },
               ] : modelCatFilter === "3d" ? [
                 { id: "tripo-v2.5", name: "Tripo v2.5" },
                 { id: "triposr", name: "TripoSR" },
