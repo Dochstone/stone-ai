@@ -715,6 +715,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
 
   const [dragging, setDragging] = useState(false);
   const dragCounterRef = useRef(0);
+  const [upsellModal, setUpsellModal] = useState<{ type: "limit" | "locked"; model?: string; tier?: string } | null>(null);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -1163,7 +1164,19 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({ detail: "Ошибка сервера" }));
-        const errMsg = typeof err.detail === "string" ? err.detail : err.detail?.error || "Ошибка";
+        const detail = err.detail;
+        // Upsell trigger on limit/lock
+        if (res.status === 429 || (res.status === 403 && detail?.error === "model_locked")) {
+          setMessages(prev => prev.slice(0, -1)); // remove the user message we just added
+          if (detail?.error === "model_locked") {
+            setUpsellModal({ type: "locked", model: model?.name, tier: detail?.required_tier || "mini" });
+          } else {
+            setUpsellModal({ type: "limit" });
+          }
+          setStreaming(false);
+          return;
+        }
+        const errMsg = typeof detail === "string" ? detail : detail?.error || detail?.message || "Ошибка";
         setMessages([...history, { role: "assistant", content: errMsg }]);
         setStreaming(false);
         return;
@@ -1995,6 +2008,68 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                   Смотреть тарифы
                 </a>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Upsell Modal — triggers on 429 (limit) or 403 (model_locked) */}
+      {upsellModal && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center" onClick={() => setUpsellModal(null)}>
+          <div className="bg-bg rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="bg-gradient-to-br from-accent to-accent/80 px-6 pt-8 pb-6 text-white text-center">
+              <div className="w-16 h-16 mx-auto mb-4 bg-white/20 rounded-2xl flex items-center justify-center">
+                <span className="text-3xl">{upsellModal.type === "limit" ? "⚡" : "🔓"}</span>
+              </div>
+              <h3 className="text-xl font-extrabold mb-1">
+                {upsellModal.type === "limit" ? "Запросы на сегодня закончились" : `${upsellModal.model} заблокирована`}
+              </h3>
+              <p className="text-white/70 text-sm">
+                {upsellModal.type === "limit"
+                  ? "Вы использовали 15 бесплатных запросов"
+                  : `Доступна на тарифе ${upsellModal.tier === "max" ? "Max" : "Mini"}`}
+              </p>
+            </div>
+
+            {/* Benefits */}
+            <div className="px-6 py-5">
+              <p className="text-[11px] text-text/40 font-semibold uppercase tracking-wider mb-3">Что вы получите</p>
+              <div className="space-y-2.5">
+                {[
+                  { icon: "🧠", text: "GPT-5.4, Claude Opus, Gemini Pro — топовые модели" },
+                  { icon: "🎨", text: "Генерация картинок — Flux, Stable Diffusion, GPT-5 Image" },
+                  { icon: "🎬", text: "Генерация видео — Kling, Runway, Pika" },
+                  { icon: "⚡", text: "Без задержек — мгновенные ответы" },
+                ].map((b, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <span className="text-lg shrink-0">{b.icon}</span>
+                    <span className="text-[13px] text-text/70 leading-snug">{b.text}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Pricing */}
+              <div className="grid grid-cols-2 gap-2 mt-5">
+                <a href="/pricing" className="block p-3 rounded-xl border-2 border-accent/20 hover:border-accent transition-colors text-center">
+                  <p className="text-[10px] text-text/40 font-semibold">MINI</p>
+                  <p className="text-lg font-extrabold text-text">390<span className="text-sm font-bold text-text/40">₽</span></p>
+                  <p className="text-[10px] text-text/30">в месяц</p>
+                </a>
+                <a href="/pricing" className="block p-3 rounded-xl border-2 border-accent bg-accent/5 hover:bg-accent/10 transition-colors text-center relative">
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-accent text-white text-[8px] font-bold px-2 py-0.5 rounded-full">ХИТ</div>
+                  <p className="text-[10px] text-text/40 font-semibold">MAX</p>
+                  <p className="text-lg font-extrabold text-text">890<span className="text-sm font-bold text-text/40">₽</span></p>
+                  <p className="text-[10px] text-text/30">в месяц</p>
+                </a>
+              </div>
+
+              <a href="/pricing" className="block w-full mt-4 bg-accent text-white py-3.5 rounded-xl font-bold text-center text-sm hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20">
+                Выбрать тариф
+              </a>
+              <button onClick={() => setUpsellModal(null)} className="block w-full mt-2 text-text/30 text-xs text-center py-2 hover:text-text/50 transition-colors">
+                Продолжить бесплатно завтра
+              </button>
             </div>
           </div>
         </div>
