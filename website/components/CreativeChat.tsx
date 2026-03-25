@@ -590,7 +590,7 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
 
       {/* Sidebar */}
       {sidebarOpen && <div className="fixed inset-0 z-30 lg:hidden bg-black/30" onClick={() => setSidebarOpen(false)} />}
-      <div className={`fixed inset-y-0 left-0 z-40 w-[260px] bg-bg border-r border-text/[0.06] flex flex-col transition-all duration-200 lg:relative lg:shrink-0 ${sidebarOpen ? "translate-x-0 lg:w-[260px]" : "-translate-x-full lg:translate-x-0 lg:w-0 lg:border-0 lg:overflow-hidden"}`}>
+      <div className={`fixed inset-y-0 left-0 z-40 w-[260px] bg-bg border-r border-text/[0.06] flex flex-col lg:relative lg:shrink-0 transition-transform duration-200 ${sidebarOpen ? "translate-x-0 lg:w-[260px]" : "-translate-x-full invisible lg:visible lg:translate-x-0 lg:w-0 lg:border-0 lg:overflow-hidden"}`}>
         <div className="p-3 flex items-center gap-2 shrink-0">
           <button onClick={newChat} className="flex-1 flex items-center gap-2 bg-accent hover:bg-accent/90 rounded-xl px-3.5 py-2 transition-colors">
             <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M12 4v16m8-8H4" /></svg>
