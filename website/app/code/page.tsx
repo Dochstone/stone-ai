@@ -77,7 +77,7 @@ export default function CodePage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
-      <ToolPageHero
+      <ToolPageHero breadcrumb="Код-ассистент"
         badge="Нейросеть для кода"
         title="ИИ-ассистент"
         highlight="для программистов"

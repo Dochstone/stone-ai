@@ -6,28 +6,28 @@ const reviews = [
     role: "Разработчик",
     text: "Наконец-то все нейросети в одном месте. Пользуюсь каждый день для работы с кодом. Подписка за 890₽ — дешевле ChatGPT Plus в разы.",
     stars: 5,
-    avatar: "/demo/avatar-alexey.jpg",
+    avatar: "/demo/avatar-alexey.webp",
   },
   {
     name: "Мария К.",
     role: "Маркетолог",
     text: "Удобно, что все модели в одном месте. Генерирую тексты через GPT-5 и картинки через Flux — всё в Telegram, не нужно 5 подписок.",
     stars: 5,
-    avatar: "/demo/avatar-maria.jpg",
+    avatar: "/demo/avatar-maria.webp",
   },
   {
     name: "Дмитрий С.",
     role: "Студент",
     text: "Бесплатного плана хватает для учёбы. А когда нужно больше — пополняю на $1 и хватает на неделю. Лучше любой подписки.",
     stars: 5,
-    avatar: "/demo/avatar-dmitry.jpg",
+    avatar: "/demo/avatar-dmitry.webp",
   },
   {
     name: "Елена В.",
     role: "Предприниматель",
     text: "Perplexity для исследований рынка, Claude для документов, Flux для картинок. Экономлю кучу времени и денег. Оплата через Stars — удобно.",
     stars: 5,
-    avatar: "/demo/avatar-elena.jpg",
+    avatar: "/demo/avatar-elena.webp",
   },
 ];
 

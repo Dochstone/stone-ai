@@ -33,7 +33,7 @@ export default function AudioPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Stone AI — AI Аудио", applicationCategory: "MultimediaApplication", description: "Озвучка текста 10+ голосами, голосовой ввод через Whisper AI.", offers: { "@type": "Offer", price: "0", priceCurrency: "USD", description: "15 бесплатных запросов в день" } }) }} />
-      <ToolPageHero
+      <ToolPageHero breadcrumb="AI Аудио"
         badge="Нейросеть для озвучки"
         title="ИИ Аудио — озвучка"
         highlight="и голосовой ввод"
@@ -72,7 +72,7 @@ export default function AudioPage() {
           <h3 className="text-xl font-bold mb-6">Послушайте пример</h3>
           <div className="bg-white rounded-2xl border border-text/[0.06] p-6 shadow-lg">
             <div className="mb-4">
-              <Image src="/demo/audio-poster.jpg" alt="Audio waveform" width={400} height={225} className="w-full rounded-xl mb-4" />
+              <Image src="/demo/audio-poster.webp" alt="Audio waveform" width={400} height={225} className="w-full rounded-xl mb-4" />
             </div>
             <audio controls className="w-full" src="/demo/audio-demo.mp3" />
             <p className="text-xs text-text/40 mt-3">Голос: Nova · Язык: Русский</p>

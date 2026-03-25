@@ -51,7 +51,7 @@ export default function VideoPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Stone AI — AI Видео", applicationCategory: "MultimediaApplication", description: "Генерация видео из текста и фото. Kling v2, Runway Gen-3, Pika 2.0.", offers: { "@type": "Offer", price: "0.15", priceCurrency: "USD" } }) }} />
-      <ToolPageHero
+      <ToolPageHero breadcrumb="AI Видео"
         badge="5 нейросетей для видео"
         title="Генерация видео нейросетью"
         highlight="из текста и фото"

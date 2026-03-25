@@ -40,14 +40,14 @@ export default function DemoShowcase() {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { src: "/demo/img-cosmos.jpg", label: "Неоновый город" },
-              { src: "/demo/img-portrait.jpg", label: "Космический портрет" },
-              { src: "/demo/img-landscape.jpg", label: "Горный пейзаж" },
-              { src: "/demo/img-fantasy.jpg", label: "Фэнтези мир" },
-              { src: "/demo/img-robot.jpg", label: "3D персонаж" },
-              { src: "/demo/img-food.jpg", label: "Фуд-фото" },
-              { src: "/demo/img-abstract.jpg", label: "Абстракция" },
-              { src: "/demo/img-architecture.jpg", label: "Архитектура" },
+              { src: "/demo/img-cosmos.webp", label: "Неоновый город" },
+              { src: "/demo/img-portrait.webp", label: "Космический портрет" },
+              { src: "/demo/img-landscape.webp", label: "Горный пейзаж" },
+              { src: "/demo/img-fantasy.webp", label: "Фэнтези мир" },
+              { src: "/demo/img-robot.webp", label: "3D персонаж" },
+              { src: "/demo/img-food.webp", label: "Фуд-фото" },
+              { src: "/demo/img-abstract.webp", label: "Абстракция" },
+              { src: "/demo/img-architecture.webp", label: "Архитектура" },
             ].map((img) => (
               <div key={img.label} className="group relative rounded-xl overflow-hidden aspect-square bg-bg border border-text/[0.06]">
                 <Image

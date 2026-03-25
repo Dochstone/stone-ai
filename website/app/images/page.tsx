@@ -71,7 +71,7 @@ export default function ImagesPage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
-      <ToolPageHero
+      <ToolPageHero breadcrumb="Генерация картинок"
         badge="6 нейросетей для картинок"
         title="Генерация картинок"
         highlight="нейросетью бесплатно"
@@ -90,14 +90,14 @@ export default function ImagesPage() {
           <h3 className="text-xl font-bold text-center mb-6">Примеры работ</h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { src: "/demo/img-cosmos.jpg", label: "Неоновый город" },
-              { src: "/demo/img-portrait.jpg", label: "Космический портрет" },
-              { src: "/demo/img-landscape.jpg", label: "Горный пейзаж" },
-              { src: "/demo/img-fantasy.jpg", label: "Фэнтези мир" },
-              { src: "/demo/img-robot.jpg", label: "3D персонаж" },
-              { src: "/demo/img-food.jpg", label: "Фуд-фото" },
-              { src: "/demo/img-abstract.jpg", label: "Абстракция" },
-              { src: "/demo/img-architecture.jpg", label: "Архитектура" },
+              { src: "/demo/img-cosmos.webp", label: "Неоновый город" },
+              { src: "/demo/img-portrait.webp", label: "Космический портрет" },
+              { src: "/demo/img-landscape.webp", label: "Горный пейзаж" },
+              { src: "/demo/img-fantasy.webp", label: "Фэнтези мир" },
+              { src: "/demo/img-robot.webp", label: "3D персонаж" },
+              { src: "/demo/img-food.webp", label: "Фуд-фото" },
+              { src: "/demo/img-abstract.webp", label: "Абстракция" },
+              { src: "/demo/img-architecture.webp", label: "Архитектура" },
             ].map((img) => (
               <div key={img.label} className="relative rounded-xl overflow-hidden aspect-square group">
                 <Image src={img.src} alt={img.label} fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />

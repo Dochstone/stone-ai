@@ -73,7 +73,7 @@ export default function TranslatePage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
-      <ToolPageHero
+      <ToolPageHero breadcrumb="AI Перевод"
         badge="Нейросеть-переводчик"
         title="ИИ-переводчик"
         highlight="с пониманием контекста"

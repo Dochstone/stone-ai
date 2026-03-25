@@ -76,7 +76,7 @@ export default function ChatPage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
-      <ToolPageHero
+      <ToolPageHero breadcrumb="AI Чат"
         badge="65+ нейросетей в одном окне"
         title="ИИ чат-бот с лучшими"
         highlight="нейросетями мира"

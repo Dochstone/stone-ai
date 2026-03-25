@@ -42,7 +42,7 @@ export default function ThreeDPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Stone AI — 3D Генерация", applicationCategory: "DesignApplication", description: "Генерация 3D моделей из текста и фото. Tripo v2.5, TripoSR. GLB формат.", offers: { "@type": "Offer", price: "0.21", priceCurrency: "USD" } }) }} />
-      <ToolPageHero
+      <ToolPageHero breadcrumb="3D Генерация"
         badge="Нейросеть для 3D"
         title="3D модели нейросетью"
         highlight="из текста и фото"

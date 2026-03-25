@@ -64,7 +64,7 @@ export default function SearchPage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
-      <ToolPageHero
+      <ToolPageHero breadcrumb="AI Поиск"
         badge="ИИ-поиск в реальном времени"
         title="Поиск в интернете"
         highlight="нейросетью с источниками"

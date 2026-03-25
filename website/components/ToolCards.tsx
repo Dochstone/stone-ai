@@ -5,14 +5,14 @@ import Image from "next/image";
 
 // All AI-generated images
 const allImages = [
-  "/demo/img-cosmos.jpg", "/demo/img-portrait.jpg", "/demo/img-landscape.jpg",
-  "/demo/img-fantasy.jpg", "/demo/img-robot.jpg", "/demo/img-food.jpg",
-  "/demo/img-abstract.jpg", "/demo/img-architecture.jpg", "/demo/img-product.jpg",
-  "/demo/img-samurai.jpg", "/demo/img-underwater.jpg", "/demo/img-owl.jpg",
-  "/demo/img-aurora.jpg", "/demo/img-cyberpunk.jpg", "/demo/img-temple.jpg",
-  "/demo/img-droplet.jpg", "/demo/img-cabin.jpg", "/demo/img-dragon.jpg",
-  "/demo/img-luxury.jpg", "/demo/img-astronaut.jpg", "/demo/img-tokyo.jpg",
-  "/demo/img-sculpture.jpg", "/demo/img-tunnel.jpg", "/demo/img-tree.jpg",
+  "/demo/img-cosmos.webp", "/demo/img-portrait.webp", "/demo/img-landscape.webp",
+  "/demo/img-fantasy.webp", "/demo/img-robot.webp", "/demo/img-food.webp",
+  "/demo/img-abstract.webp", "/demo/img-architecture.webp", "/demo/img-product.webp",
+  "/demo/img-samurai.webp", "/demo/img-underwater.webp", "/demo/img-owl.webp",
+  "/demo/img-aurora.webp", "/demo/img-cyberpunk.webp", "/demo/img-temple.webp",
+  "/demo/img-droplet.webp", "/demo/img-cabin.webp", "/demo/img-dragon.webp",
+  "/demo/img-luxury.webp", "/demo/img-astronaut.webp", "/demo/img-tokyo.webp",
+  "/demo/img-sculpture.webp", "/demo/img-tunnel.webp", "/demo/img-tree.webp",
 ];
 
 function ImageCarousel({ images, interval = 3000 }: { images: string[]; interval?: number }) {

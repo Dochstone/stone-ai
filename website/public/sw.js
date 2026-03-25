@@ -1,6 +1,7 @@
-const CACHE_NAME = 'stone-ai-v1';
+const CACHE_NAME = 'stone-ai-v2';
 const STATIC_ASSETS = [
   '/',
+  '/offline.html',
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png',
@@ -25,21 +26,27 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
-
-  // Skip API calls and external requests
   if (url.pathname.startsWith('/api') || url.origin !== self.location.origin) return;
 
+  // Navigation requests — network first, fallback to offline page
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match('/offline.html'))
+    );
+    return;
+  }
+
+  // Static assets — cache first, then network
   event.respondWith(
     caches.match(event.request).then((cached) => {
-      const fetchPromise = fetch(event.request).then((response) => {
-        if (response.ok && url.pathname.match(/\.(js|css|woff2|png|jpg|svg)$/)) {
+      if (cached) return cached;
+      return fetch(event.request).then((response) => {
+        if (response.ok && url.pathname.match(/\.(js|css|woff2|png|jpg|webp|svg)$/)) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         }
         return response;
-      }).catch(() => cached);
-
-      return cached || fetchPromise;
+      });
     })
   );
 });

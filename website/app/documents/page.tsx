@@ -70,7 +70,7 @@ export default function DocumentsPage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
-      <ToolPageHero
+      <ToolPageHero breadcrumb="Анализ документов"
         badge="Нейросеть для документов"
         title="Анализ документов"
         highlight="нейросетью онлайн"
