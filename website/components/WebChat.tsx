@@ -712,14 +712,6 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   const [recording, setRecording] = useState(false);
   const [modelCatFilter, setModelCatFilter] = useState<string>(initialCategory || "all");
 
-  // Comparison mode
-  const [compareMode, setCompareMode] = useState(false);
-  const [compareModels, setCompareModels] = useState<string[]>([]);
-  const [compareStreaming, setCompareStreaming] = useState<Record<string, boolean>>({});
-  const [compareResponses, setCompareResponses] = useState<Record<string, { content: string; billing?: Message["billing"]; error?: string }>>({});
-  const [comparePrompt, setComparePrompt] = useState("");
-  const [compareActiveTab, setCompareActiveTab] = useState(0);
-  const compareAbortRefs = useRef<Record<string, AbortController>>({});
   const [dragging, setDragging] = useState(false);
   const dragCounterRef = useRef(0);
 
@@ -1117,116 +1109,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
     setStreaming(false);
   }, []);
 
-  // ─── Compare mode: send one prompt to multiple models ───
-  const sendCompareMessage = useCallback(async () => {
-    if (!auth || !input.trim() || compareModels.length < 2) return;
-    if (Object.values(compareStreaming).some(v => v)) return;
-
-    const userContent = input.trim();
-    setInput("");
-    resetTextarea();
-    setComparePrompt(userContent);
-    setCompareResponses({});
-
-    const newStreaming: Record<string, boolean> = {};
-    compareModels.forEach(id => { newStreaming[id] = true; });
-    setCompareStreaming(newStreaming);
-
-    const apiMessages = [{ role: "user" as const, content: userContent }];
-
-    const aborts: Record<string, AbortController> = {};
-    compareModels.forEach(id => { aborts[id] = new AbortController(); });
-    compareAbortRefs.current = aborts;
-
-    const promises = compareModels.map(async (modelId) => {
-      try {
-        const res = await fetch(`${API_URL}/api/chat`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
-          body: JSON.stringify({ model_id: modelId, messages: apiMessages }),
-          signal: aborts[modelId].signal,
-        });
-
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({ detail: "Ошибка" }));
-          const errMsg = typeof err.detail === "string" ? err.detail : err.detail?.message || "Ошибка";
-          setCompareResponses(prev => ({ ...prev, [modelId]: { content: "", error: errMsg } }));
-          setCompareStreaming(prev => ({ ...prev, [modelId]: false }));
-          return;
-        }
-
-        const reader = res.body?.getReader();
-        if (!reader) return;
-
-        const decoder = new TextDecoder();
-        let content = "";
-        let billing: Message["billing"] | undefined;
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const text = decoder.decode(value, { stream: true });
-          const lines = text.split("\n");
-
-          for (const line of lines) {
-            if (!line.startsWith("data: ")) continue;
-            const payload = line.slice(6).trim();
-            if (payload === "[DONE]") continue;
-
-            try {
-              const data = JSON.parse(payload);
-              if (data.billing) { billing = data.billing; continue; }
-              if (data.usage) continue;
-              if (data.error) {
-                setCompareResponses(prev => ({ ...prev, [modelId]: { content: "", error: data.error } }));
-                continue;
-              }
-              const c = data.content || data.choices?.[0]?.delta?.content;
-              if (c) {
-                content += c;
-                setCompareResponses(prev => ({ ...prev, [modelId]: { content, billing } }));
-              }
-            } catch {}
-          }
-        }
-
-        setCompareResponses(prev => ({ ...prev, [modelId]: { content, billing } }));
-      } catch (e: any) {
-        if (e?.name !== "AbortError") {
-          setCompareResponses(prev => ({ ...prev, [modelId]: { content: "", error: "Ошибка соединения" } }));
-        }
-      } finally {
-        setCompareStreaming(prev => ({ ...prev, [modelId]: false }));
-      }
-    });
-
-    await Promise.allSettled(promises);
-    compareAbortRefs.current = {};
-  }, [auth, input, compareModels, compareStreaming, resetTextarea]);
-
-  const stopCompare = useCallback(() => {
-    Object.values(compareAbortRefs.current).forEach(c => c.abort());
-    setCompareStreaming({});
-  }, []);
-
-  const exitCompareWithModel = useCallback((modelId: string) => {
-    const resp = compareResponses[modelId];
-    if (resp && comparePrompt) {
-      setMessages([
-        { role: "user", content: comparePrompt },
-        { role: "assistant", content: resp.content, billing: resp.billing },
-      ]);
-    }
-    setSelectedModel(modelId);
-    setCompareMode(false);
-    setCompareModels([]);
-    setCompareResponses({});
-    setComparePrompt("");
-  }, [compareResponses, comparePrompt]);
-
   const sendMessage = useCallback(async () => {
-    // Redirect to comparison mode
-    if (compareMode && compareModels.length >= 2) { sendCompareMessage(); return; }
     // Redirect to video/3D generation
     if (isVideoModel) { sendVideoMessage(); return; }
     if (is3DModel) { send3DMessage(); return; }
@@ -1354,7 +1237,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
       setStreaming(false);
       abortRef.current = null;
     }
-  }, [auth, input, streaming, messages, selectedModel, pendingFile, saveToSession, resetTextarea, isVideoModel, sendVideoMessage, is3DModel, send3DMessage, compareMode, compareModels, sendCompareMessage]);
+  }, [auth, input, streaming, messages, selectedModel, pendingFile, saveToSession, resetTextarea, isVideoModel, sendVideoMessage, is3DModel, send3DMessage, modelCatFilter]);
 
   // Auto-send after suggestion card click — switches model first
   const pendingSend = useRef(false);
@@ -1536,31 +1419,6 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-            {/* Compare toggle — only for text models */}
-            {!IMAGE_MODEL_IDS.has(selectedModel) && !VIDEO_MODEL_IDS.has(selectedModel) && !THREED_MODEL_IDS.has(selectedModel) && (
-              <button
-                onClick={() => {
-                  if (compareMode) {
-                    setCompareMode(false);
-                    setCompareModels([]);
-                    setCompareResponses({});
-                    setComparePrompt("");
-                  } else {
-                    setCompareMode(true);
-                    setCompareModels([selectedModel]);
-                  }
-                }}
-                className={`hidden sm:flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold transition-colors ${
-                  compareMode ? "bg-accent text-white" : "text-text/30 hover:text-text/50 hover:bg-text/5"
-                }`}
-                title="Сравнить модели"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
-                </svg>
-                Сравнить
-              </button>
-            )}
             {limits && limits.text && limits.text.limit > 0 && (
               <div className="hidden sm:flex items-center gap-1.5 text-[10px] text-text/40" title={`${limits.text.used}/${limits.text.limit} запросов`}>
                 <div className="w-16 h-1.5 bg-text/10 rounded-full overflow-hidden">
@@ -1624,31 +1482,10 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                   return (
                     <button key={m.id} onClick={() => {
                       if (lock) { setLockModal({ model: m.name, tier: lock.tier, price: lock.price }); setModelPickerOpen(false); return; }
-                      if (compareMode) {
-                        // Multi-select in compare mode
-                        if (compareModels.includes(m.id)) {
-                          setCompareModels(prev => prev.filter(x => x !== m.id));
-                        } else if (compareModels.length < 3) {
-                          setCompareModels(prev => [...prev, m.id]);
-                        }
-                        // Don't close picker in compare mode
-                        return;
-                      }
                       setSelectedModel(m.id); setModelPickerOpen(false); setModelSearch("");
                     }} className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left transition-colors ${
-                      compareMode
-                        ? compareModels.includes(m.id) ? "bg-accent/10 border border-accent/30" : "hover:bg-bg"
-                        : selectedModel === m.id ? "bg-accent/5 border border-accent/20" : "hover:bg-bg"
+                      selectedModel === m.id ? "bg-accent/5 border border-accent/20" : "hover:bg-bg"
                     } ${lock ? "opacity-50" : ""}`}>
-                      {compareMode && (
-                        <div className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${
-                          compareModels.includes(m.id) ? "bg-accent border-accent" : "border-text/20"
-                        }`}>
-                          {compareModels.includes(m.id) && (
-                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                          )}
-                        </div>
-                      )}
                       <div className="flex-1 min-w-0">
                         <span className="text-sm font-semibold truncate block">{lock ? "🔒 " : ""}{m.name}</span>
                         <span className="text-[10px] text-text/30">{m.company} · {m.context}</span>
@@ -1670,54 +1507,8 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
         )}
         {modelPickerOpen && <div className="fixed inset-0 z-[44]" onClick={() => { setModelPickerOpen(false); setModelSearch(""); }} />}
 
-        {/* Compare mode: selected model chips */}
-        {compareMode && (
-          <div className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 border-b border-accent/10 bg-accent/[0.03] shrink-0 overflow-x-auto">
-            <span className="text-[10px] text-text/30 font-semibold shrink-0">Сравнение:</span>
-            {compareModels.map(mId => {
-              const m = MODELS.find(x => x.id === mId);
-              return (
-                <span key={mId} className="flex items-center gap-1 bg-accent/10 text-accent text-[11px] font-semibold px-2 py-0.5 rounded-full shrink-0">
-                  {m?.name || mId}
-                  <button onClick={() => {
-                    if (compareModels.length > 1) setCompareModels(prev => prev.filter(x => x !== mId));
-                  }} className="hover:text-red-500 transition-colors">
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                  </button>
-                </span>
-              );
-            })}
-            {compareModels.length < 3 && (
-              <button
-                onClick={() => setModelPickerOpen(true)}
-                className="flex items-center gap-0.5 text-[11px] text-accent font-semibold px-2 py-0.5 rounded-full border border-dashed border-accent/30 hover:bg-accent/5 transition-colors shrink-0"
-              >
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M12 4v16m8-8H4" /></svg>
-                Добавить
-              </button>
-            )}
-          </div>
-        )}
-
         {/* Category tabs */}
-        <div className="flex items-center gap-1 px-3 sm:px-4 py-1.5 border-b border-text/[0.04] bg-bg/50 shrink-0 overflow-x-auto">
-          {/* Mobile compare toggle */}
-          <button
-            onClick={() => {
-              if (compareMode) {
-                setCompareMode(false); setCompareModels([]); setCompareResponses({}); setComparePrompt("");
-              } else {
-                setCompareMode(true); setCompareModels([selectedModel]);
-              }
-            }}
-            className={`sm:hidden flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold transition-colors shrink-0 ${
-              compareMode ? "bg-accent text-white" : "text-text/30"
-            }`}
-          >
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7" />
-            </svg>
-          </button>
+        <div className="flex px-3 sm:px-4 border-b border-text/[0.04] bg-bg/50 shrink-0">
           {[
             { id: "all", icon: "💬", label: "Чат" },
             { id: "image", icon: "🎨", label: "Фото" },
@@ -1790,138 +1581,8 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
           </div>
         )}
 
-        {/* Messages area or Welcome screen or Compare view */}
-        {compareMode && (comparePrompt || Object.keys(compareResponses).length > 0) ? (
-          /* ─── Comparison View ─── */
-          <div className="flex-1 overflow-y-auto" ref={messagesContainerRef}>
-            <div className="max-w-5xl mx-auto px-3 sm:px-4 py-6">
-              {/* User prompt */}
-              <div className="flex gap-2.5 flex-row-reverse mb-4">
-                <div className="shrink-0 mt-0.5">
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-accent ring-2 ring-accent/20 flex items-center justify-center">
-                    <span className="text-[11px] sm:text-[12px] font-bold text-white">U</span>
-                  </div>
-                </div>
-                <div className="max-w-[85%] sm:max-w-[75%]">
-                  <div className="inline-block text-left rounded-2xl rounded-tr-md px-3.5 sm:px-4 py-2.5 sm:py-3 text-[13px] sm:text-[14px] leading-relaxed bg-accent text-white">
-                    {comparePrompt}
-                  </div>
-                </div>
-              </div>
-
-              {/* Desktop: side-by-side columns */}
-              <div className="hidden md:grid gap-3" style={{ gridTemplateColumns: `repeat(${compareModels.length}, 1fr)` }}>
-                {compareModels.map(modelId => {
-                  const m = MODELS.find(x => x.id === modelId);
-                  const resp = compareResponses[modelId];
-                  const isStreaming = compareStreaming[modelId];
-                  const color = companyColors[m?.company ?? ""] || "#C4623D";
-                  return (
-                    <div key={modelId} className="border border-text/[0.06] rounded-2xl bg-bg overflow-hidden flex flex-col">
-                      {/* Header */}
-                      <div className="flex items-center gap-2 px-3 py-2.5 border-b border-text/[0.06]">
-                        <div className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shrink-0" style={{ backgroundColor: color }}>
-                          {companyIcons[m?.company ?? ""] || "AI"}
-                        </div>
-                        <div className="min-w-0">
-                          <span className="text-[12px] font-bold truncate block">{m?.name || modelId}</span>
-                          <span className="text-[10px] text-text/30">{m?.company}</span>
-                        </div>
-                        {isStreaming && (
-                          <div className="flex gap-1 ml-auto">
-                            <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                            <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                            <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-                          </div>
-                        )}
-                      </div>
-                      {/* Response */}
-                      <div className="flex-1 px-3 py-3 text-[13px] leading-relaxed text-text/85 overflow-hidden">
-                        {resp?.error ? (
-                          <span className="text-red-500 text-xs">{resp.error}</span>
-                        ) : resp?.content ? (
-                          <div className="md-content break-words" dangerouslySetInnerHTML={{ __html: renderMarkdown(resp.content) }} />
-                        ) : isStreaming ? (
-                          <span className="text-text/20 text-xs">Генерация...</span>
-                        ) : null}
-                      </div>
-                      {/* Footer */}
-                      {resp?.content && !isStreaming && (
-                        <div className="flex items-center gap-2 px-3 py-2 border-t border-text/[0.06]">
-                          <button
-                            onClick={() => navigator.clipboard.writeText(resp.content)}
-                            className="text-[10px] text-text/30 hover:text-accent px-2 py-1 rounded-lg hover:bg-accent/5 transition-colors"
-                          >
-                            Копировать
-                          </button>
-                          <button
-                            onClick={() => exitCompareWithModel(modelId)}
-                            className="text-[10px] text-accent font-semibold px-2 py-1 rounded-lg hover:bg-accent/5 transition-colors ml-auto"
-                          >
-                            Продолжить
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Mobile: tabs */}
-              <div className="md:hidden">
-                <div className="flex border-b border-text/10 mb-3">
-                  {compareModels.map((modelId, idx) => {
-                    const m = MODELS.find(x => x.id === modelId);
-                    const isStreaming = compareStreaming[modelId];
-                    return (
-                      <button
-                        key={modelId}
-                        onClick={() => setCompareActiveTab(idx)}
-                        className={`flex-1 py-2 text-[11px] font-semibold text-center truncate transition-colors ${
-                          compareActiveTab === idx ? "text-accent border-b-2 border-accent" : "text-text/30"
-                        }`}
-                      >
-                        {m?.name || modelId}
-                        {isStreaming && <span className="ml-1 animate-pulse">...</span>}
-                      </button>
-                    );
-                  })}
-                </div>
-                {(() => {
-                  const modelId = compareModels[compareActiveTab] || compareModels[0];
-                  const resp = compareResponses[modelId];
-                  const isStreaming = compareStreaming[modelId];
-                  return (
-                    <div className="border border-text/[0.06] rounded-2xl bg-bg p-3">
-                      {resp?.error ? (
-                        <span className="text-red-500 text-xs">{resp.error}</span>
-                      ) : resp?.content ? (
-                        <>
-                          <div className="md-content break-words text-[13px] leading-relaxed text-text/85" dangerouslySetInnerHTML={{ __html: renderMarkdown(resp.content) }} />
-                          <div className="flex items-center gap-2 mt-3 pt-2 border-t border-text/[0.06]">
-                            <button onClick={() => navigator.clipboard.writeText(resp.content)} className="text-[10px] text-text/30 hover:text-accent px-2 py-1 rounded-lg hover:bg-accent/5 transition-colors">
-                              Копировать
-                            </button>
-                            <button onClick={() => exitCompareWithModel(modelId)} className="text-[10px] text-accent font-semibold px-2 py-1 rounded-lg hover:bg-accent/5 transition-colors ml-auto">
-                              Продолжить
-                            </button>
-                          </div>
-                        </>
-                      ) : isStreaming ? (
-                        <div className="flex gap-1.5 py-4 justify-center">
-                          <span className="w-2 h-2 bg-text/20 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                          <span className="w-2 h-2 bg-text/20 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                          <span className="w-2 h-2 bg-text/20 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-                        </div>
-                      ) : null}
-                    </div>
-                  );
-                })()}
-              </div>
-            </div>
-            <div ref={bottomRef} />
-          </div>
-        ) : messages.length === 0 ? (
+        {/* Messages area or Welcome screen */}
+        {messages.length === 0 ? (
           <WelcomeScreen onSuggestion={handleSuggestionClick} activeTab={modelCatFilter} />
         ) : (
           <div className="flex-1 overflow-y-auto relative" ref={messagesContainerRef}>
@@ -2189,18 +1850,14 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                 value={input}
                 onChange={handleInputChange}
                 onKeyDown={handleKey}
-                placeholder={pendingFile ? "Добавьте вопрос к файлу..." : compareMode ? `Сравнить ${compareModels.length} модели...` : isVideoModel ? "Опишите видео..." : is3DModel ? "Опишите 3D-модель или загрузите фото..." : "Написать сообщение..."}
+                placeholder={pendingFile ? "Добавьте вопрос к файлу..." : modelCatFilter === "health" ? "Опишите симптомы или загрузите фото..." : isVideoModel ? "Опишите видео..." : is3DModel ? "Опишите 3D-модель или загрузите фото..." : "Написать сообщение..."}
                 rows={1}
                 className="flex-1 bg-transparent resize-none focus:outline-none min-w-0 leading-snug placeholder:text-text/20"
                 style={{ fontSize: 16, padding: "10px 16px", maxHeight: 80, minHeight: 42 }}
               />
 
               {/* Send / Stop / Mic button */}
-              {Object.values(compareStreaming).some(v => v) ? (
-                <button onClick={stopCompare} className="rounded-lg bg-text/70 text-white flex items-center justify-center hover:bg-text/90 transition-colors shrink-0" title="Остановить" style={{ width: 38, height: 38 }}>
-                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" /></svg>
-                </button>
-              ) : streaming ? (
+              {streaming ? (
                 <button onClick={stopGeneration} className="rounded-lg bg-text/70 text-white flex items-center justify-center hover:bg-text/90 transition-colors shrink-0" title="Остановить" style={{ width: 38, height: 38 }}>
                   <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" /></svg>
                 </button>
