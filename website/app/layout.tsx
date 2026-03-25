@@ -18,8 +18,7 @@ const OG_IMAGE = `${SITE_URL}/og-image.png`;
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
 };
 
 export const metadata: Metadata = {
@@ -191,6 +190,9 @@ export default function RootLayout({
             __html: JSON.stringify(jsonLdSoftware),
           }}
         />
+
+        {/* Service Worker registration */}
+        <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js')})}` }} />
 
         {/* Google Analytics */}
         {GA_ID && (
