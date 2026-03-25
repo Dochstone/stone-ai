@@ -175,7 +175,7 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
   const [pendingImage, setPendingImage] = useState<string | null>(null);
   const [pendingFileName, setPendingFileName] = useState("");
   const [dragging, setDragging] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(typeof window !== "undefined" && window.innerWidth >= 1024);
   const [sessions, setSessions] = useState<{ id: number; model_id: string; title: string; updated_at: string | null }[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
 
@@ -188,7 +188,6 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
   useEffect(() => {
     try { const s = localStorage.getItem("stone_auth"); if (s) setAuth(JSON.parse(s)); } catch {}
     setLoaded(true);
-    if (typeof window !== "undefined" && window.innerWidth < 768) setSidebarOpen(false);
   }, []);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, generating]);
@@ -589,8 +588,8 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
       )}
 
       {/* Sidebar */}
-      {sidebarOpen && <div className="fixed inset-0 z-30 md:hidden bg-black/30 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />}
-      <div className={`fixed inset-y-0 left-0 z-40 w-[280px] bg-bg border-r border-text/[0.06] flex flex-col transition-transform duration-300 md:relative md:translate-x-0 md:shrink-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:w-0 md:overflow-hidden"}`}>
+      {sidebarOpen && <div className="fixed inset-0 z-30 lg:hidden bg-black/30" onClick={() => setSidebarOpen(false)} />}
+      <div className={`fixed inset-y-0 left-0 z-40 w-[260px] bg-bg border-r border-text/[0.06] flex flex-col transition-transform duration-200 lg:relative lg:shrink-0 ${sidebarOpen ? "translate-x-0 lg:w-[260px]" : "-translate-x-full lg:-translate-x-0 lg:w-0 lg:border-0 lg:overflow-hidden"}`}>
         <div className="p-3 flex items-center gap-2 shrink-0">
           <button onClick={newChat} className="flex-1 flex items-center gap-2 bg-accent hover:bg-accent/90 rounded-xl px-3.5 py-2 transition-colors">
             <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M12 4v16m8-8H4" /></svg>
@@ -632,21 +631,18 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
       <div className="flex-1 flex flex-col min-w-0">
       {/* Header */}
       <header className="border-b border-text/[0.06] bg-bg shrink-0">
-        <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-text/30 hover:text-text/60 transition-colors">
+        <div className="px-3 sm:px-4 h-12 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="w-9 h-9 flex items-center justify-center shrink-0 rounded-lg text-text/30 hover:text-text/60 hover:bg-text/[0.04] transition-colors">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                {sidebarOpen
-                  ? <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  : <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                }
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
               </svg>
             </button>
-            <a href="/" className="text-sm font-bold text-text hover:text-accent transition-colors">AI Студия</a>
+            <a href="/" className="text-sm font-bold text-text hover:text-accent transition-colors truncate">Stone AI</a>
           </div>
-          <div className="flex items-center gap-3">
-            <button onClick={newChat} className="text-[11px] text-accent font-semibold hover:underline">Новый чат</button>
-            <a href="/profile" className="text-text/25 hover:text-accent transition-colors">
+          <div className="flex items-center gap-1 shrink-0">
+            <button onClick={newChat} className="h-9 px-3 rounded-lg text-[11px] text-accent font-semibold hover:bg-accent/5 transition-colors">Новый</button>
+            <a href="/profile" className="w-9 h-9 flex items-center justify-center rounded-lg text-text/25 hover:text-accent hover:bg-text/[0.04] transition-colors">
               <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
               </svg>
@@ -655,38 +651,35 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
         </div>
       </header>
 
-      {/* Mode switcher */}
-      <div className="border-b border-text/[0.06] bg-bg">
-        <div className="max-w-3xl mx-auto px-2 sm:px-4 flex overflow-x-auto">
+      {/* Mode switcher + Model selector — single bar */}
+      <div className="border-b border-text/[0.06] bg-bg shrink-0">
+        {/* Mode tabs */}
+        <div className="max-w-3xl mx-auto px-2 sm:px-4 flex">
           {MODES.map((m) => (
             <button
               key={m.id}
               onClick={() => switchMode(m.id)}
-              className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 py-3 text-xs sm:text-sm font-semibold transition-all border-b-2 whitespace-nowrap min-w-0 ${
+              className={`flex items-center justify-center gap-1 px-2 sm:px-3 py-2 text-[11px] sm:text-xs font-semibold transition-all border-b-2 whitespace-nowrap ${
                 mode === m.id
                   ? `${m.color} border-current`
-                  : "text-text/30 border-transparent hover:text-text/50"
+                  : "text-text/25 border-transparent hover:text-text/40"
               }`}
             >
-              <span className="text-sm sm:text-base">{m.icon}</span>
-              {m.label}
+              <span className="text-xs sm:text-sm">{m.icon}</span>
+              <span className="hidden xs:inline sm:inline">{m.label}</span>
             </button>
           ))}
         </div>
-      </div>
-
-      {/* Model selector */}
-      <div className="border-b border-text/[0.04] bg-bg/50">
-        <div className="max-w-3xl mx-auto px-4 py-2 flex items-center gap-2 overflow-x-auto">
-          <span className="text-[10px] text-text/30 font-semibold shrink-0">Модель:</span>
+        {/* Model chips — horizontal scroll */}
+        <div className="max-w-3xl mx-auto px-3 sm:px-4 py-1.5 flex items-center gap-1.5 overflow-x-auto">
           {MODE_MODELS[mode].map((m) => (
             <button
               key={m.id}
               onClick={() => setSelectedModel(m.id)}
-              className={`px-3 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors shrink-0 ${
+              className={`px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-semibold whitespace-nowrap transition-colors shrink-0 ${
                 selectedModel === m.id
                   ? `${modeConfig.bg} text-white`
-                  : "bg-text/[0.04] text-text/40 hover:text-text/60"
+                  : "bg-text/[0.04] text-text/35 hover:text-text/60"
               }`}
             >
               {m.name}
@@ -698,15 +691,15 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
       {/* Messages / Welcome */}
       <div className="flex-1 overflow-y-auto">
         {messages.length === 0 ? (
-          <div className="max-w-2xl mx-auto px-4 py-8">
-            <div className="text-center mb-8">
-              <div className={`w-20 h-20 mx-auto rounded-3xl ${modeConfig.bg} flex items-center justify-center shadow-xl mb-4`} style={{ boxShadow: `0 10px 25px -5px ${mode === "chat" ? "rgba(217,119,87,0.2)" : mode === "health" ? "rgba(16,185,129,0.2)" : mode === "photo" ? "rgba(236,72,153,0.2)" : mode === "video" ? "rgba(239,68,68,0.2)" : "rgba(6,182,212,0.2)"}` }}>
-                <span className="text-4xl">{modeConfig.icon}</span>
+          <div className="max-w-2xl mx-auto px-4 py-4 sm:py-8">
+            <div className="text-center mb-4 sm:mb-8">
+              <div className={`w-14 h-14 sm:w-20 sm:h-20 mx-auto rounded-2xl sm:rounded-3xl ${modeConfig.bg} flex items-center justify-center shadow-lg mb-3`}>
+                <span className="text-2xl sm:text-4xl">{modeConfig.icon}</span>
               </div>
-              <h2 className="text-xl sm:text-2xl font-extrabold text-text mb-2">
+              <h2 className="text-lg sm:text-2xl font-extrabold text-text mb-1 sm:mb-2">
                 {mode === "chat" ? "AI Чат" : mode === "health" ? "AI Консультант" : mode === "photo" ? "Генерация изображений" : mode === "video" ? "Генерация видео" : "Генерация 3D моделей"}
               </h2>
-              <p className="text-sm text-text/40 max-w-md mx-auto">
+              <p className="text-xs sm:text-sm text-text/40 max-w-md mx-auto">
                 {mode === "chat" ? "Задайте вопрос — AI ответит мгновенно. Выберите модель под задачу"
                   : mode === "health" ? "Загрузите фото или опишите симптомы — AI даст общую информацию и подскажет к какому врачу обратиться"
                   : mode === "photo" ? "Опишите изображение — AI создаст его за секунды"
@@ -719,7 +712,7 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
             {(mode === "3d" || mode === "health") && (
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all mb-6 ${
+                className={`border-2 border-dashed rounded-2xl p-4 sm:p-6 text-center cursor-pointer transition-all mb-4 sm:mb-6 ${
                   mode === "health" ? "border-emerald-300 hover:border-emerald-500 hover:bg-emerald-50/30" : "border-cyan-300 hover:border-cyan-500 hover:bg-cyan-50/30"
                 }`}
               >
@@ -745,14 +738,14 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
             )}
 
             {/* Tips */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {MODE_TIPS[mode].map((tip, i) => (
+            <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
+              {MODE_TIPS[mode].slice(0, 4).map((tip, i) => (
                 <button
                   key={i}
-                  onClick={() => { setInput(tip); }}
-                  className="p-3 rounded-xl border border-text/[0.06] bg-bg hover:border-accent/30 hover:shadow-sm transition-all text-left group"
+                  onClick={() => { setInput(tip); textareaRef.current?.focus(); }}
+                  className="p-2.5 sm:p-3 rounded-xl border border-text/[0.06] bg-bg hover:border-accent/30 hover:shadow-sm transition-all text-left group"
                 >
-                  <span className="text-[12px] sm:text-[13px] text-text/60 group-hover:text-accent transition-colors leading-snug line-clamp-2">{tip}</span>
+                  <span className="text-[11px] sm:text-[13px] text-text/60 group-hover:text-accent transition-colors leading-snug line-clamp-2">{tip}</span>
                 </button>
               ))}
             </div>
