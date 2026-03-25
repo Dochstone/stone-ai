@@ -163,7 +163,7 @@ export default function ModelGrid() {
                                 </div>
                               </div>
                               <a
-                                href={`/studio?model=${model.id}`}
+                                href={`/webchat?model=${model.id}`}
                                 className="block text-center bg-accent text-white px-4 py-3 min-h-[44px] rounded-xl text-sm font-bold hover:bg-accent/90 transition-all"
                                 onClick={(e) => e.stopPropagation()}
                               >
@@ -209,7 +209,7 @@ export default function ModelGrid() {
                             </div>
                           </div>
                           <a
-                            href={`/studio?model=${expandedInRow.id}`}
+                            href={`/webchat?model=${expandedInRow.id}`}
                             className="block text-center bg-accent text-white px-4 py-3 min-h-[48px] rounded-xl text-sm font-bold hover:bg-accent/90 transition-all focus:outline-none focus:ring-2 focus:ring-accent/30 shadow-md shadow-accent/20"
                             onClick={(e) => e.stopPropagation()}
                           >

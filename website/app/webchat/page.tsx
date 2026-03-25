@@ -1,14 +1,11 @@
-import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+import WebChatWrapper from "@/components/WebChatWrapper";
 
-export default function WebChatRedirect({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | undefined };
-}) {
-  const params = new URLSearchParams();
-  if (searchParams.model) params.set("model", searchParams.model);
-  if (searchParams.category) params.set("category", searchParams.category);
-  if (searchParams.ref) params.set("ref", searchParams.ref);
-  const query = params.toString();
-  redirect(`/studio${query ? `?${query}` : ""}`);
+export const metadata: Metadata = {
+  title: "AI Чат",
+  description: "Чат с 65+ нейросетями прямо в браузере. GPT-5, Claude Opus, Gemini Pro и другие.",
+};
+
+export default function AppPage() {
+  return <WebChatWrapper />;
 }

@@ -608,7 +608,7 @@ function ReferralsTab({ stats, loading }: { stats: ReferralStats | null; loading
     return <div className="text-center py-12 text-text/25 text-sm">Загрузка...</div>;
   }
 
-  const refLink = `${SITE_URL}/studio?ref=${stats.referral_code}`;
+  const refLink = `${SITE_URL}/webchat?ref=${stats.referral_code}`;
 
   const copyLink = () => {
     navigator.clipboard.writeText(refLink);
@@ -925,7 +925,7 @@ export default function ProfilePage() {
         <div className="text-center">
           <h1 className="text-2xl font-extrabold text-text mb-3">Личный кабинет</h1>
           <p className="text-sm text-text/40 mb-6">Войдите, чтобы управлять профилем</p>
-          <a href="/studio" className="bg-accent text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors">
+          <a href="/webchat" className="bg-accent text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors">
             Войти
           </a>
         </div>

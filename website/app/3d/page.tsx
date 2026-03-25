@@ -66,7 +66,7 @@ export default function ThreeDPage() {
 
       <ToolExamples subtitle="Примеры использования" examples={examples} />
       <ToolFaq items={faqItems} />
-      <ToolCta title="Создайте 3D модель" subtitle="Загрузите фото или опишите объект — получите GLB за секунды." ctaHref="/studio?category=3d" />
+      <ToolCta title="Создайте 3D модель" subtitle="Загрузите фото или опишите объект — получите GLB за секунды." ctaHref="/webchat?category=3d" />
     </>
   );
 }

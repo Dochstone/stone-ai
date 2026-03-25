@@ -19,7 +19,7 @@ export default function NotFound() {
             На главную
           </a>
           <a
-            href="/studio"
+            href="/webchat"
             className="inline-block border border-accent text-accent px-6 py-3 rounded-xl font-bold text-sm hover:bg-accent/5 transition-colors"
           >
             Открыть чат

@@ -74,7 +74,7 @@ export default function VideoPage() {
 
       <ToolExamples subtitle="Попробуйте эти промты" examples={examples} />
       <ToolFaq items={faqItems} />
-      <ToolCta title="Создайте первое видео" subtitle="Опишите сцену — AI сгенерирует видео за 5-30 секунд." ctaHref="/studio?category=video" />
+      <ToolCta title="Создайте первое видео" subtitle="Опишите сцену — AI сгенерирует видео за 5-30 секунд." ctaHref="/webchat?category=video" />
     </>
   );
 }

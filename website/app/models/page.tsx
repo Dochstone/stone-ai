@@ -13,7 +13,7 @@ import { SITE_URL } from "@/lib/constants";
 export default function ModelsPage() {
   return (
     <div className="pb-20 min-h-screen">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "ItemList", name: "AI модели Stone AI", description: "Каталог 65+ нейросетей: чат, картинки, видео, 3D, аудио, поиск", numberOfItems: 57, itemListElement: [{ "@type": "ListItem", position: 1, name: "GPT-5.4", url: `${SITE_URL}/studio?model=gpt-5.4` }, { "@type": "ListItem", position: 2, name: "Claude Opus 4", url: `${SITE_URL}/studio?model=claude-opus-4` }, { "@type": "ListItem", position: 3, name: "Gemini 2.5 Pro", url: `${SITE_URL}/studio?model=gemini-2.5-pro` }] }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "ItemList", name: "AI модели Stone AI", description: "Каталог 65+ нейросетей: чат, картинки, видео, 3D, аудио, поиск", numberOfItems: 57, itemListElement: [{ "@type": "ListItem", position: 1, name: "GPT-5.4", url: `${SITE_URL}/webchat?model=gpt-5.4` }, { "@type": "ListItem", position: 2, name: "Claude Opus 4", url: `${SITE_URL}/webchat?model=claude-opus-4` }, { "@type": "ListItem", position: 3, name: "Gemini 2.5 Pro", url: `${SITE_URL}/webchat?model=gemini-2.5-pro` }] }) }} />
       <Breadcrumbs items={[{ label: "Модели" }]} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
@@ -33,7 +33,7 @@ export default function ModelsPage() {
         {/* CTA */}
         <div className="mt-16 text-center">
           <a
-            href="/studio"
+            href="/webchat"
             className="inline-block bg-accent text-white px-8 py-4 rounded-xl font-bold hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
           >
             Попробовать бесплатно

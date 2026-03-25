@@ -50,7 +50,7 @@ export default function ReferralPage() {
 
   const copyLink = () => {
     if (!stats?.referral_code) return;
-    const link = `${window.location.origin}/studio?ref=${stats.referral_code}`;
+    const link = `${window.location.origin}/webchat?ref=${stats.referral_code}`;
     navigator.clipboard.writeText(link);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -76,7 +76,7 @@ export default function ReferralPage() {
   if (!auth) return <AuthFormComponent onAuth={setAuth} subtitle="Войдите для реферальной программы" />;
 
   const refLink = stats?.referral_code
-    ? `${typeof window !== "undefined" ? window.location.origin : ""}/studio?ref=${stats.referral_code}`
+    ? `${typeof window !== "undefined" ? window.location.origin : ""}/webchat?ref=${stats.referral_code}`
     : "";
 
   return (
@@ -86,7 +86,7 @@ export default function ReferralPage() {
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
           <a href="/" className="text-lg font-extrabold text-text">Stone AI</a>
           <div className="flex items-center gap-4">
-            <a href="/studio" className="text-xs text-accent font-semibold hover:underline">Чат</a>
+            <a href="/webchat" className="text-xs text-accent font-semibold hover:underline">Чат</a>
             <a href="/pricing" className="text-xs text-text/40 hover:text-text">Пополнить</a>
           </div>
         </div>

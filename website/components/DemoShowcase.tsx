@@ -64,7 +64,7 @@ export default function DemoShowcase() {
             ))}
           </div>
           <div className="text-center mt-4">
-            <a href="/studio?model=nano-banana-pro" className="text-sm text-accent font-semibold hover:underline">
+            <a href="/webchat?model=nano-banana-pro" className="text-sm text-accent font-semibold hover:underline">
               Попробовать генерацию →
             </a>
           </div>
@@ -83,7 +83,7 @@ export default function DemoShowcase() {
                 <span className="text-sm font-bold text-text">AI Видео</span>
               </div>
               <p className="text-xs text-text/40 mb-2">5-10 секунд видео из текста. Kling, Runway, Pika.</p>
-              <a href="/studio?category=video" className="text-xs text-accent font-semibold hover:underline">Попробовать →</a>
+              <a href="/webchat?category=video" className="text-xs text-accent font-semibold hover:underline">Попробовать →</a>
             </div>
           </div>
 
@@ -98,7 +98,7 @@ export default function DemoShowcase() {
                 <span className="text-sm font-bold text-text">3D Модели</span>
               </div>
               <p className="text-xs text-text/40 mb-2">GLB из текста или фото. Tripo v2.5, TripoSR.</p>
-              <a href="/studio?category=3d" className="text-xs text-accent font-semibold hover:underline">Попробовать →</a>
+              <a href="/webchat?category=3d" className="text-xs text-accent font-semibold hover:underline">Попробовать →</a>
             </div>
           </div>
 

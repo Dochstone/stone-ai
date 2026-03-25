@@ -13,7 +13,7 @@ function getAvatarColor(email: string): string {
 
 const tools = [
   { href: "/chat", label: "AI Чат" },
-  { href: "/studio", label: "AI Студия" },
+  { href: "/webchat", label: "AI Студия" },
   { href: "/audio", label: "AI Аудио" },
   { href: "/3d", label: "3D Генерация" },
   { href: "/documents", label: "Анализ документов" },
@@ -117,7 +117,7 @@ export default function Nav() {
           {authEmail ? (
             <>
               <a
-                href="/studio"
+                href="/webchat"
                 className="bg-accent text-white px-4 py-2 min-h-[44px] flex items-center rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors hidden md:inline-flex"
               >
                 Открыть чат
@@ -137,7 +137,7 @@ export default function Nav() {
             </>
           ) : (
             <a
-              href="/studio"
+              href="/webchat"
               className="bg-accent text-white px-4 py-2 min-h-[44px] flex items-center rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors hidden md:inline-flex"
             >
               Начать бесплатно
@@ -209,13 +209,13 @@ export default function Nav() {
                   </div>
                   Личный кабинет
                 </a>
-                <a href="/studio" onClick={() => setMenuOpen(false)}
+                <a href="/webchat" onClick={() => setMenuOpen(false)}
                   className="bg-accent text-white px-5 py-3 min-h-[44px] rounded-xl font-bold text-sm text-center hover:bg-accent/90 transition-colors flex items-center justify-center mt-1">
                   Открыть чат
                 </a>
               </>
             ) : (
-              <a href="/studio" onClick={() => setMenuOpen(false)}
+              <a href="/webchat" onClick={() => setMenuOpen(false)}
                 className="bg-accent text-white px-5 py-3 min-h-[44px] rounded-xl font-bold text-sm text-center hover:bg-accent/90 transition-colors flex items-center justify-center">
                 Начать бесплатно
               </a>

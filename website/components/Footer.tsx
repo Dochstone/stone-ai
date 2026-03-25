@@ -14,7 +14,7 @@ export default function Footer() {
             </p>
             <div className="mt-4 flex flex-col gap-2">
               <a
-                href="/studio"
+                href="/webchat"
                 className="inline-flex items-center gap-2 text-accent text-sm font-semibold hover:underline"
               >
                 Веб-чат &rarr;

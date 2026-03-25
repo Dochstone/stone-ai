@@ -108,7 +108,7 @@ export default function BlogPostPage({ params }: Props) {
             65+ нейросетей в одном окне. 15 бесплатных запросов каждый день.
           </p>
           <a
-            href="/studio"
+            href="/webchat"
             className="inline-block bg-accent text-white px-8 py-3.5 rounded-xl font-bold hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
           >
             Попробовать бесплатно

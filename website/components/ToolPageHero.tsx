@@ -27,7 +27,7 @@ export default function ToolPageHero({ badge, title, highlight, description }: T
 
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
           <a
-            href="/studio"
+            href="/webchat"
             className="bg-accent text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
           >
             Попробовать бесплатно
