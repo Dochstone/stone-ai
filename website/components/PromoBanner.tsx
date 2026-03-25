@@ -6,7 +6,7 @@ export default function PromoBanner() {
           🎁 15 бесплатных запросов каждый день — без привязки карты
         </p>
         <a
-          href="/webchat"
+          href="/studio"
           className="shrink-0 bg-white text-accent px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-white/90 transition-colors"
         >
           Попробовать

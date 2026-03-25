@@ -8,7 +8,7 @@ export default function ScrollToTop() {
   const pathname = usePathname();
 
   // Hide on webchat page
-  const isWebchat = pathname === "/webchat";
+  const isWebchat = pathname === "/studio";
 
   useEffect(() => {
     if (isWebchat) return;

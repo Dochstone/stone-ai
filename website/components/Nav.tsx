@@ -117,7 +117,7 @@ export default function Nav() {
           {authEmail ? (
             <>
               <a
-                href="/webchat"
+                href="/studio"
                 className="bg-accent text-white px-4 py-2 min-h-[44px] flex items-center rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors hidden md:inline-flex"
               >
                 Открыть чат
@@ -137,7 +137,7 @@ export default function Nav() {
             </>
           ) : (
             <a
-              href="/webchat"
+              href="/studio"
               className="bg-accent text-white px-4 py-2 min-h-[44px] flex items-center rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors hidden md:inline-flex"
             >
               Начать бесплатно
@@ -209,13 +209,13 @@ export default function Nav() {
                   </div>
                   Личный кабинет
                 </a>
-                <a href="/webchat" onClick={() => setMenuOpen(false)}
+                <a href="/studio" onClick={() => setMenuOpen(false)}
                   className="bg-accent text-white px-5 py-3 min-h-[44px] rounded-xl font-bold text-sm text-center hover:bg-accent/90 transition-colors flex items-center justify-center mt-1">
                   Открыть чат
                 </a>
               </>
             ) : (
-              <a href="/webchat" onClick={() => setMenuOpen(false)}
+              <a href="/studio" onClick={() => setMenuOpen(false)}
                 className="bg-accent text-white px-5 py-3 min-h-[44px] rounded-xl font-bold text-sm text-center hover:bg-accent/90 transition-colors flex items-center justify-center">
                 Начать бесплатно
               </a>

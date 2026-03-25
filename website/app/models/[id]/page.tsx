@@ -135,7 +135,7 @@ export default function ModelPage({ params }: Props) {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <a
-              href={`/webchat?model=${model.id}`}
+              href={`/studio?model=${model.id}`}
               className="bg-accent text-white px-8 py-3.5 rounded-xl font-bold hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
             >
               Открыть в чате

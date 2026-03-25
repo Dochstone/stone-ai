@@ -72,7 +72,7 @@ export default function Pricing() {
 
   const subscribe = async (tier: string) => {
     const auth = getAuth();
-    if (!auth) { window.location.href = "/webchat"; return; }
+    if (!auth) { window.location.href = "/studio"; return; }
     setLoading(true);
     setResult(null);
     try {
@@ -98,9 +98,9 @@ export default function Pricing() {
   };
 
   const openPlan = (plan: typeof plans[0]) => {
-    if (plan.id === "free") { window.location.href = "/webchat"; return; }
+    if (plan.id === "free") { window.location.href = "/studio"; return; }
     const auth = getAuth();
-    if (!auth) { window.location.href = "/webchat"; return; }
+    if (!auth) { window.location.href = "/studio"; return; }
     setModal(plan);
     setResult(null);
     setPromoResult(null);
@@ -184,7 +184,7 @@ export default function Pricing() {
           }`}>
             {result.message}
             {result.ok && (
-              <a href="/webchat" className="block mt-2 text-accent font-bold hover:underline">
+              <a href="/studio" className="block mt-2 text-accent font-bold hover:underline">
                 Открыть чат →
               </a>
             )}

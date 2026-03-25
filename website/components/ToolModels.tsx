@@ -77,7 +77,7 @@ export default function ToolModels({
 
         <div className="text-center mt-10">
           <a
-            href="/webchat"
+            href="/studio"
             className="inline-block bg-accent text-white px-8 py-3.5 rounded-xl font-bold hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
           >
             Попробовать в чате

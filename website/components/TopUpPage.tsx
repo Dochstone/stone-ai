@@ -154,7 +154,7 @@ export default function TopUpPage() {
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
           <a href="/" className="text-lg font-extrabold text-text">Stone AI</a>
           <div className="flex items-center gap-4">
-            <a href="/webchat" className="text-xs text-accent font-semibold hover:underline">Чат</a>
+            <a href="/studio" className="text-xs text-accent font-semibold hover:underline">Чат</a>
             <span className="text-xs text-text/30">{auth.email}</span>
             <button onClick={logout} className="text-xs text-text/30 hover:text-text">Выйти</button>
           </div>

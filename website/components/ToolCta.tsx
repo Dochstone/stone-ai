@@ -7,7 +7,7 @@ interface ToolCtaProps {
 export default function ToolCta({
   title = "Попробуйте прямо сейчас",
   subtitle = "15 бесплатных запросов каждый день. Бесплатный старт.",
-  ctaHref = "/webchat",
+  ctaHref = "/studio",
 }: ToolCtaProps) {
   return (
     <section className="bg-dark text-white py-20 md:py-28">

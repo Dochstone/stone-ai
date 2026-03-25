@@ -246,7 +246,7 @@ export default function HealthChat() {
               <p className="text-[10px] text-text/30">Общие вопросы здоровья</p>
             </div>
           </div>
-          <a href="/webchat" className="text-[11px] text-accent font-semibold hover:underline">
+          <a href="/studio" className="text-[11px] text-accent font-semibold hover:underline">
             Обычный чат
           </a>
         </div>

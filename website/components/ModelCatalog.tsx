@@ -218,7 +218,7 @@ export default function ModelCatalog() {
                               </div>
                             </div>
                             <a
-                              href={`/webchat?model=${model.id}`}
+                              href={`/studio?model=${model.id}`}
                               className="block text-center bg-accent text-white px-4 py-3 min-h-[44px] rounded-xl text-sm font-bold hover:bg-accent/90 transition-all"
                               onClick={(e) => e.stopPropagation()}
                             >
@@ -267,7 +267,7 @@ export default function ModelCatalog() {
                           </div>
                         </div>
                         <a
-                          href={`/webchat?model=${exp.id}`}
+                          href={`/studio?model=${exp.id}`}
                           className="block text-center bg-accent text-white px-4 py-3 min-h-[48px] rounded-xl text-sm font-bold hover:bg-accent/90 transition-all shadow-md shadow-accent/20"
                           onClick={(e) => e.stopPropagation()}
                         >

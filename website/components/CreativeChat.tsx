@@ -138,8 +138,31 @@ interface Message {
 export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {}) {
   const [auth, setAuth] = useState<AuthState | null>(null);
   const [loaded, setLoaded] = useState(false);
-  const [mode, setMode] = useState<Mode>(initialMode || "chat");
-  const [selectedModel, setSelectedModel] = useState(MODE_MODELS[initialMode || "chat"][0].id);
+
+  // Parse URL params: ?model=X, ?category=X, ?mode=X
+  const getInitial = (): { m: Mode; mdl: string } => {
+    if (typeof window === "undefined") return { m: initialMode || "chat", mdl: MODE_MODELS[initialMode || "chat"][0].id };
+    const p = new URLSearchParams(window.location.search);
+    const urlMode = p.get("mode") as Mode | null;
+    const urlCat = p.get("category");
+    const urlModel = p.get("model");
+    let m: Mode = initialMode || "chat";
+    if (urlMode && MODE_MODELS[urlMode]) m = urlMode;
+    else if (urlCat === "video") m = "video";
+    else if (urlCat === "3d") m = "3d";
+    else if (urlCat === "image" || urlCat === "photo") m = "photo";
+    else if (urlCat === "health") m = "health";
+    if (urlModel) {
+      for (const [mk, models] of Object.entries(MODE_MODELS)) {
+        if (models.some(x => x.id === urlModel)) return { m: mk as Mode, mdl: urlModel };
+      }
+      return { m: "chat", mdl: urlModel };
+    }
+    return { m, mdl: MODE_MODELS[m][0].id };
+  };
+  const _init = getInitial();
+  const [mode, setMode] = useState<Mode>(_init.m);
+  const [selectedModel, setSelectedModel] = useState(_init.mdl);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [generating, setGenerating] = useState(false);
@@ -491,7 +514,7 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
             </a>
             <h1 className="text-sm font-bold text-text">AI Студия</h1>
           </div>
-          <a href="/webchat" className="text-[11px] text-accent font-semibold hover:underline">Текстовый чат</a>
+          <a href="/studio" className="text-[11px] text-accent font-semibold hover:underline">Текстовый чат</a>
         </div>
       </header>
 
