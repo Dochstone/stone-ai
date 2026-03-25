@@ -331,6 +331,7 @@ const PROMPT_TEMPLATES: Record<string, { text: string; model: string }[]> = {
 
 const WELCOME_CONFIG: Record<string, { icon: string; bg: string; title: string; subtitle: string }> = {
   all: { icon: "💬", bg: "bg-accent", title: "Чем могу помочь?", subtitle: "Выберите шаблон или напишите свой запрос" },
+  free: { icon: "✨", bg: "bg-teal", title: "Бесплатные модели", subtitle: "7 моделей без ограничений — 15 запросов в день" },
   image: { icon: "🎨", bg: "bg-pink-500", title: "Генерация изображений", subtitle: "Опишите картинку — AI создаст её за секунды" },
   video: { icon: "🎬", bg: "bg-red-500", title: "Генерация видео", subtitle: "Опишите сцену — AI создаст видео из текста" },
   "3d": { icon: "🧊", bg: "bg-cyan-500", title: "Генерация 3D", subtitle: "Опишите объект или загрузите фото" },
@@ -340,7 +341,7 @@ const WELCOME_CONFIG: Record<string, { icon: string; bg: string; title: string; 
 function WelcomeScreen({ onSuggestion, activeTab }: { onSuggestion: (text: string, modelId: string) => void; activeTab: string }) {
   const [promptCat, setPromptCat] = useState("popular");
   const cfg = WELCOME_CONFIG[activeTab] || WELCOME_CONFIG.all;
-  const isChat = activeTab === "all" || activeTab === "chat";
+  const isChat = activeTab === "all" || activeTab === "chat" || activeTab === "free";
 
   return (
     <div className="flex-1 flex items-start justify-center px-4 overflow-y-auto">
@@ -1468,9 +1469,9 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
             </div>
             <div className="overflow-y-auto flex-1 p-2">
               {(() => {
-                const catMap: Record<string, string[]> = { all: [], chat: ["chat", "search", "reason", "code"], image: ["image"], video: ["video"], "3d": ["3d"], health: ["chat"] };
+                const catMap: Record<string, string[]> = { all: [], free: [], chat: ["chat", "search", "reason", "code"], image: ["image"], video: ["video"], "3d": ["3d"], health: ["chat"] };
                 const cats = catMap[modelCatFilter] || [];
-                let list = modelCatFilter === "all" ? MODELS : MODELS.filter(m => cats.includes(m.category));
+                let list = modelCatFilter === "all" ? MODELS : modelCatFilter === "free" ? MODELS.filter(m => FREE_MODEL_IDS.has(m.id)) : MODELS.filter(m => cats.includes(m.category));
                 if (modelSearch) list = list.filter(m => m.name.toLowerCase().includes(modelSearch.toLowerCase()) || m.company.toLowerCase().includes(modelSearch.toLowerCase()));
                 const bal = auth?.balanceUsd || 0;
                 return [...list].sort((a, b) => {
@@ -1511,6 +1512,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
         <div className="flex px-3 sm:px-4 border-b border-text/[0.04] bg-bg/50 shrink-0">
           {[
             { id: "all", icon: "💬", label: "Чат" },
+            { id: "free", icon: "✨", label: "Free" },
             { id: "image", icon: "🎨", label: "Фото" },
             { id: "video", icon: "🎬", label: "Видео" },
             { id: "3d", icon: "🧊", label: "3D" },
@@ -1521,6 +1523,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
               onClick={() => {
                 setModelCatFilter(t.id);
                 if (t.id === "health") setSelectedModel("gpt-4o-mini");
+                if (t.id === "free") setSelectedModel("gpt-4o-mini");
               }}
               className={`flex-1 flex items-center justify-center gap-1 px-1 sm:px-2.5 py-1.5 text-[10px] sm:text-[11px] font-semibold whitespace-nowrap transition-colors border-b-2 ${
                 modelCatFilter === t.id ? "text-accent border-accent" : "text-text/30 border-transparent hover:text-text/50"
@@ -1533,10 +1536,23 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
         </div>
 
         {/* Quick model chips */}
-        {modelCatFilter !== "all" && (
-          <div className="border-b border-text/[0.04] bg-bg/50 shrink-0">
-            <div className="max-w-3xl mx-auto px-3 sm:px-4 py-1.5 flex items-center gap-1.5 overflow-x-auto">
-              {(modelCatFilter === "image" ? [
+        <div className="border-b border-text/[0.04] bg-bg/50 shrink-0">
+          <div className="max-w-3xl mx-auto px-3 sm:px-4 py-1.5 flex items-center gap-1.5 overflow-x-auto">
+            {(modelCatFilter === "all" ? [
+              { id: "gpt-4o-mini", name: "GPT-4o mini" },
+              { id: "claude-sonnet-4", name: "Claude Sonnet" },
+              { id: "gemini-2.5-pro", name: "Gemini Pro" },
+              { id: "gpt-5.4", name: "GPT-5.4" },
+              { id: "deepseek-r1", name: "DeepSeek R1" },
+            ] : modelCatFilter === "free" ? [
+              { id: "gpt-4o-mini", name: "GPT-4o mini" },
+              { id: "gemini-2.0-flash", name: "Gemini Flash" },
+              { id: "claude-haiku-4.5", name: "Claude Haiku" },
+              { id: "llama-4-maverick", name: "Llama 4" },
+              { id: "mistral-large-25", name: "Mistral Large" },
+              { id: "deepseek-v3", name: "DeepSeek V3" },
+              { id: "nano-banana", name: "Nano Banana" },
+            ] : modelCatFilter === "image" ? [
                 { id: "nano-banana-pro", name: "Nano Banana Pro" },
                 { id: "nano-banana", name: "Nano Banana" },
                 { id: "gpt-5-image", name: "GPT-5 Image" },
@@ -1569,7 +1585,6 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
               ))}
             </div>
           </div>
-        )}
 
         {/* Health disclaimer */}
         {modelCatFilter === "health" && (
