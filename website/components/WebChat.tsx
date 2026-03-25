@@ -1226,7 +1226,11 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
           "Content-Type": "application/json",
           Authorization: `Bearer ${auth.token}`,
         },
-        body: JSON.stringify({ model_id: selectedModel, messages: apiMessages }),
+        body: JSON.stringify({
+          model_id: selectedModel,
+          messages: apiMessages,
+          ...(modelCatFilter === "health" ? { system_prompt: "Ты — AI-ассистент по общим вопросам здоровья. Ты НЕ врач и НЕ ставишь диагнозы. Анализируй фото и описания симптомов, предлагай возможные причины (2-3 варианта), рекомендуй к какому специалисту обратиться. Заверши: \"Для точного диагноза обратитесь к врачу.\" Отвечай на русском." } : {}),
+        }),
         signal: abort.signal,
       });
 
@@ -1563,7 +1567,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
             </div>
             <div className="overflow-y-auto flex-1 p-2">
               {(() => {
-                const catMap: Record<string, string[]> = { all: [], chat: ["chat", "search", "reason", "code"], image: ["image"], video: ["video"], "3d": ["3d"] };
+                const catMap: Record<string, string[]> = { all: [], chat: ["chat", "search", "reason", "code"], image: ["image"], video: ["video"], "3d": ["3d"], health: ["chat"] };
                 const cats = catMap[modelCatFilter] || [];
                 let list = modelCatFilter === "all" ? MODELS : MODELS.filter(m => cats.includes(m.category));
                 if (modelSearch) list = list.filter(m => m.name.toLowerCase().includes(modelSearch.toLowerCase()) || m.company.toLowerCase().includes(modelSearch.toLowerCase()));
@@ -1672,24 +1676,37 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
             </svg>
           </button>
           {[
-            { id: "all", icon: "✨", label: "Все" },
-            { id: "chat", icon: "💬", label: "Текст" },
-            { id: "image", icon: "🖼", label: "Картинки" },
+            { id: "all", icon: "💬", label: "Чат" },
+            { id: "image", icon: "🎨", label: "Фото" },
             { id: "video", icon: "🎬", label: "Видео" },
             { id: "3d", icon: "🧊", label: "3D" },
+            { id: "health", icon: "🏥", label: "Врач" },
           ].map((t) => (
             <button
               key={t.id}
-              onClick={() => setModelCatFilter(t.id)}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors shrink-0 ${
-                modelCatFilter === t.id ? "bg-accent/10 text-accent" : "text-text/30 hover:text-text/50"
+              onClick={() => {
+                setModelCatFilter(t.id);
+                if (t.id === "health") setSelectedModel("gpt-4o-mini");
+              }}
+              className={`flex-1 flex items-center justify-center gap-1 px-1 sm:px-2.5 py-1.5 text-[10px] sm:text-[11px] font-semibold whitespace-nowrap transition-colors border-b-2 ${
+                modelCatFilter === t.id ? "text-accent border-accent" : "text-text/30 border-transparent hover:text-text/50"
               }`}
             >
               <span className="text-xs">{t.icon}</span>
-              <span className="hidden sm:inline">{t.label}</span>
+              {t.label}
             </button>
           ))}
         </div>
+
+        {/* Health disclaimer */}
+        {modelCatFilter === "health" && (
+          <div className="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200/50 dark:border-amber-800/30 shrink-0">
+            <div className="max-w-3xl mx-auto px-4 py-1.5 flex items-center gap-2">
+              <span className="text-amber-500 text-xs shrink-0">&#9888;</span>
+              <p className="text-[10px] text-amber-700 dark:text-amber-400">AI даёт общую информацию, не диагноз. Не заменяет врача.</p>
+            </div>
+          </div>
+        )}
 
         {/* Messages area or Welcome screen or Compare view */}
         {compareMode && (comparePrompt || Object.keys(compareResponses).length > 0) ? (
