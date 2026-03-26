@@ -1400,8 +1400,10 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
           font-size: 0.8rem; line-height: 1.6; -webkit-overflow-scrolling: touch;
         }
         .code-block code { color: rgba(255,255,255,0.85); font-family: 'SF Mono', 'Fira Code', monospace; white-space: pre; }
-        .md-content { overflow-wrap: break-word; word-break: break-word; }
-        .md-content pre { max-width: 100%; }
+        .md-content { overflow-wrap: break-word; word-break: break-word; max-width: 100%; }
+        .md-content pre { max-width: 100%; overflow-x: auto; }
+        .md-content a, .md-content .md-link { word-break: break-all; }
+        .md-content img { max-width: 100%; height: auto; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
         .streaming-cursor::after {
           content: '▊';
@@ -1695,8 +1697,8 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                   </div>
 
                   {/* Message bubble */}
-                  <div className={`max-w-[85%] sm:max-w-[75%] min-w-0 overflow-hidden ${msg.role === "user" ? "text-right" : ""}`}>
-                    <div className={`inline-block text-left rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-[13px] sm:text-[14px] leading-relaxed overflow-hidden ${
+                  <div className={`max-w-[85%] sm:max-w-[75%] min-w-0 ${msg.role === "user" ? "text-right" : ""}`}>
+                    <div className={`inline-block text-left rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-[13px] sm:text-[14px] leading-relaxed overflow-hidden break-words ${
                       msg.role === "user"
                         ? "bg-accent text-white rounded-tr-md"
                         : "bg-text/[0.06] text-text/85 rounded-tl-md"
