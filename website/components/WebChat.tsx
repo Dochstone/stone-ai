@@ -1115,8 +1115,48 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
     setStreaming(false);
   }, []);
 
+  // Image generation via dedicated endpoint
+  const sendImageMessage = useCallback(async () => {
+    if (!auth || !input.trim() || streaming) return;
+    const prompt = input.trim();
+    const userMsg: Message = { role: "user", content: prompt };
+    const history = [...messages, userMsg];
+    setMessages(history);
+    setInput("");
+    setStreaming(true);
+    resetTextarea();
+
+    try {
+      const res = await fetch(`${API_URL}/api/chat/image`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
+        body: JSON.stringify({ prompt, model_id: selectedModel }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: "Ошибка" }));
+        const errMsg = typeof err.detail === "string" ? err.detail : "Ошибка генерации";
+        setMessages([...history, { role: "assistant", content: errMsg }]);
+        setStreaming(false);
+        return;
+      }
+
+      const data = await res.json();
+      const content = data.image_url ? `![Сгенерированное изображение](${data.image_url})` : "Не удалось сгенерировать";
+      setMessages([...history, { role: "assistant", content }]);
+      saveToSession(prompt, content, undefined);
+    } catch {
+      setMessages([...history, { role: "assistant", content: "Ошибка соединения" }]);
+    } finally {
+      setStreaming(false);
+    }
+  }, [auth, input, streaming, messages, selectedModel, saveToSession, resetTextarea]);
+
+  const isImageModel = IMAGE_MODEL_IDS.has(selectedModel);
+
   const sendMessage = useCallback(async () => {
-    // Redirect to video/3D generation
+    // Redirect to image/video/3D generation
+    if (isImageModel) { sendImageMessage(); return; }
     if (isVideoModel) { sendVideoMessage(); return; }
     if (is3DModel) { send3DMessage(); return; }
     if (!auth || (!input.trim() && !pendingFile) || streaming) return;
@@ -1255,7 +1295,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
       setStreaming(false);
       abortRef.current = null;
     }
-  }, [auth, input, streaming, messages, selectedModel, pendingFile, saveToSession, resetTextarea, isVideoModel, sendVideoMessage, is3DModel, send3DMessage, modelCatFilter]);
+  }, [auth, input, streaming, messages, selectedModel, pendingFile, saveToSession, resetTextarea, isImageModel, sendImageMessage, isVideoModel, sendVideoMessage, is3DModel, send3DMessage, modelCatFilter]);
 
   // Auto-send after suggestion card click — switches model first
   const pendingSend = useRef(false);

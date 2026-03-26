@@ -26,6 +26,7 @@ from app.services.limiter import (
     MAX_TOKENS_PREMIUM,
 )
 from app.services.token_billing import calculate_cost, deduct_balance, get_weighted_price
+from app.config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -182,6 +183,97 @@ async def chat(
             "X-Accel-Buffering": "no",
         },
     )
+
+
+# ═══════════════════════════════════════════════════════════
+# Image Generation — OpenAI gpt-image-1 / DALL-E 3
+# ═══════════════════════════════════════════════════════════
+
+IMAGE_MODELS = {"nano-banana", "nano-banana-pro", "gpt-5-image", "gpt-5-image-mini", "flux-schnell", "stable-diffusion-xl"}
+
+
+class ImageGenRequest(BaseModel):
+    prompt: str
+    model_id: str = "nano-banana"
+
+
+@router.post("/chat/image")
+async def generate_image(
+    req: ImageGenRequest,
+    tg_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Generate image using OpenAI gpt-image-1 API."""
+    import httpx
+
+    tg_id = tg_user["id"]
+    db_id = tg_user.get("db_id")
+    await get_or_create_user(db, tg_user)
+
+    # Find user and check access
+    if db_id:
+        result = await db.execute(select(User).where(User.id == db_id))
+    else:
+        result = await db.execute(select(User).where(User.telegram_id == tg_id))
+    db_user = result.scalar_one_or_none()
+
+    tier = db_user.subscription_tier or "free" if db_user else "free"
+    balance = float(db_user.balance_usd or 0) if db_user else 0
+
+    # Free users: 2 images/day
+    if tier == "free" and balance <= 0:
+        from app.services.limiter import get_today_usage
+        img_today = await get_today_usage(db, tg_id, "image") if db_user else 0
+        if img_today >= 2:
+            raise HTTPException(429, "Лимит картинок исчерпан (2/день). Подписка от 390₽/мес.")
+
+    settings = get_settings()
+    openai_key = settings.openai_api_key
+    if not openai_key:
+        raise HTTPException(503, "Image generation not configured")
+
+    try:
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            resp = await client.post(
+                "https://api.openai.com/v1/images/generations",
+                headers={"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"},
+                json={
+                    "model": "gpt-image-1",
+                    "prompt": req.prompt,
+                    "n": 1,
+                    "size": "1024x1024",
+                    "quality": "high",
+                },
+            )
+
+            if resp.status_code != 200:
+                logger.error(f"OpenAI image error {resp.status_code}: {resp.text[:200]}")
+                raise HTTPException(502, "Ошибка генерации изображения")
+
+            data = resp.json()
+            image_data = data["data"][0]
+
+            # Get URL or base64
+            if "url" in image_data:
+                image_url = image_data["url"]
+            elif "b64_json" in image_data:
+                image_url = f"data:image/png;base64,{image_data['b64_json']}"
+            else:
+                raise HTTPException(502, "No image in response")
+
+        # Record usage
+        await record_usage(db, tg_id, req.model_id, tokens_in=0, tokens_out=0, cost_usd=0)
+        await db.commit()
+
+        return {"image_url": image_url, "model": req.model_id}
+
+    except httpx.TimeoutException:
+        raise HTTPException(504, "Таймаут генерации. Попробуйте снова.")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Image gen error: {e}")
+        raise HTTPException(502, "Ошибка генерации")
 
 
 # ═══════════════════════════════════════════════════════════
