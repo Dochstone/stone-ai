@@ -1023,13 +1023,15 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
 
   // Video generation
   const sendVideoMessage = useCallback(async () => {
-    if (!auth || !input.trim() || videoGenerating) return;
+    if (!auth || (!input.trim() && !pendingFile) || videoGenerating) return;
 
     const prompt = input.trim();
-    const userMsg: Message = { role: "user", content: prompt };
+    const imageUrl = pendingFile?.file_type === "image" ? pendingFile.content : undefined;
+    const userMsg: Message = { role: "user", content: prompt || "[Видео из изображения]", file: pendingFile || undefined };
     const history = [...messages, userMsg];
     setMessages(history);
     setInput("");
+    setPendingFile(null);
     setVideoGenerating(true);
     resetTextarea();
 
@@ -1038,7 +1040,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
       const res = await fetch(`${API_URL}/api/video/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
-        body: JSON.stringify({ model_id: selectedModel, prompt }),
+        body: JSON.stringify({ model_id: selectedModel, prompt: prompt || "Animate this image", source_image_url: imageUrl }),
       });
 
       if (!res.ok) {
@@ -1103,7 +1105,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
       setMessages([...history, { role: "assistant", content: "Ошибка соединения" }]);
       setVideoGenerating(false);
     }
-  }, [auth, input, videoGenerating, messages, selectedModel, resetTextarea]);
+  }, [auth, input, videoGenerating, messages, selectedModel, pendingFile, resetTextarea]);
 
   // Stop generation
   const stopGeneration = useCallback(() => {
