@@ -50,6 +50,15 @@ function extractImageUrl(text: string): string | null {
   if (urlMatch) return urlMatch[1];
   const jsonUrlMatch = text.match(/"url"\s*:\s*"(https?:\/\/[^"]+)"/);
   if (jsonUrlMatch) return jsonUrlMatch[1];
+  // OpenAI DALL-E URLs (oaidalleapi blob storage, no file extension)
+  const oaiMatch = text.match(/(https?:\/\/oaidalleapi[^\s"'<>]+)/i);
+  if (oaiMatch) return oaiMatch[1];
+  // fal.media URLs
+  const falMatch = text.match(/(https?:\/\/[^\s"'<>]*fal\.media[^\s"'<>]+)/i);
+  if (falMatch) return falMatch[1];
+  // If content is just a URL on its own line
+  const pureUrl = text.trim();
+  if (pureUrl.match(/^https?:\/\/\S+$/) && (pureUrl.includes("image") || pureUrl.includes("dalle") || pureUrl.includes("fal.media"))) return pureUrl;
   return null;
 }
 
@@ -236,15 +245,12 @@ function MessageContent({ content, role, selectedModel }: { content: string; rol
       {thinkContent && <ThinkingBlock content={thinkContent} />}
 
       {/* Main content */}
-      {imageUrl && isImageModel ? (
-        <ImageWithDownload url={imageUrl} caption={stripImageFromText(displayContent) || undefined} />
-      ) : isImageModel && displayContent.match(/^https?:\/\/\S+$/) ? (
-        <ImageWithDownload url={displayContent.trim()} />
-      ) : imageUrl && !isImageModel ? (
+      {imageUrl ? (
         <>
-          <div className="md-content break-words" dangerouslySetInnerHTML={{ __html: renderMarkdown(stripImageFromText(displayContent) || displayContent) }} />
-          <ImageWithDownload url={imageUrl} />
+          <ImageWithDownload url={imageUrl} caption={stripImageFromText(displayContent) || undefined} />
         </>
+      ) : displayContent.match(/^https?:\/\/\S+$/) ? (
+        <ImageWithDownload url={displayContent.trim()} />
       ) : displayContent ? (
         <div className="md-content break-words" dangerouslySetInnerHTML={{ __html: renderMarkdown(displayContent) }} />
       ) : null}
