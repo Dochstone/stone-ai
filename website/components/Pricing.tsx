@@ -70,28 +70,24 @@ export default function Pricing() {
     } catch { setPromoResult({ ok: false, message: "Ошибка сети" }); }
   };
 
-  const subscribe = async (tier: string) => {
+  const pay = async (tier: string) => {
     const auth = getAuth();
     if (!auth) { window.location.href = "/webchat"; return; }
     setLoading(true);
     setResult(null);
     try {
-      const res = await fetch(`${API_URL}/api/subscribe`, {
+      const res = await fetch(`${API_URL}/api/payment/subscribe`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
         body: JSON.stringify({ tier }),
       });
       const data = await res.json();
-      if (res.ok) {
-        setResult({ ok: true, message: `Тариф ${data.plan_name} активирован! Действует 30 дней.` });
-        setModal(null);
-        // Update balance
-        const saved = JSON.parse(localStorage.getItem("stone_auth") || "{}");
-        saved.balanceUsd = data.new_balance_usd;
-        localStorage.setItem("stone_auth", JSON.stringify(saved));
+      if (res.ok && data.payment_url) {
+        // Redirect to payment page
+        window.location.href = data.payment_url;
       } else {
-        const detail = typeof data.detail === "object" ? data.detail : { message: data.detail };
-        setResult({ ok: false, message: detail.message || "Ошибка" });
+        const detail = typeof data.detail === "object" ? data.detail : { message: data.detail || "Ошибка" };
+        setResult({ ok: false, message: typeof detail === "string" ? detail : detail.message || "Ошибка" });
       }
     } catch { setResult({ ok: false, message: "Ошибка сети" }); }
     setLoading(false);
@@ -241,14 +237,14 @@ export default function Pricing() {
 
             {/* Subscribe button */}
             <button
-              onClick={() => subscribe(modal.id)}
+              onClick={() => pay(modal.id)}
               disabled={loading}
               className="w-full bg-accent text-white py-3.5 min-h-[48px] rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors disabled:opacity-50 mb-3 shadow-md shadow-accent/20"
             >
-              {loading ? "Активация..." : `Подписаться — ${modal.price}${modal.period}`}
+              {loading ? "Создание счёта..." : `Оплатить ${modal.price}${modal.period}`}
             </button>
 
-            <p className="text-text/30 text-[10px] text-center mb-1">Оплата через Telegram Stars, криптовалюту или TON</p>
+            <p className="text-text/30 text-[10px] text-center mb-1">Оплата криптовалютой (USDT, BTC, ETH). Подписка активируется автоматически.</p>
 
             {result && (
               <p className={`text-center text-xs font-medium ${result.ok ? "text-teal" : "text-red-500"}`}>

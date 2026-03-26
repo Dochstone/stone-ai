@@ -251,7 +251,7 @@ async def heleket_webhook(request: Request, db: AsyncSession = Depends(get_db)):
         return {"ok": True, "message": f"Ignored status: {status}"}
 
     result = await db.execute(
-        text("SELECT id, user_tg_id, amount_usd, status FROM transactions "
+        text("SELECT id, user_tg_id, amount_usd, status, product_type, product_id FROM transactions "
              "WHERE provider_id = :pid AND status = 'pending' LIMIT 1"),
         {"pid": f"heleket:{payment_uuid}"}
     )
@@ -261,13 +261,12 @@ async def heleket_webhook(request: Request, db: AsyncSession = Depends(get_db)):
         logger.warning(f"Heleket webhook: transaction not found for uuid={payment_uuid}")
         return {"ok": True, "message": "Transaction not found"}
 
-    tx_id, user_tg_id, usd_amount, tx_status = row
+    tx_id, user_tg_id, usd_amount, tx_status, product_type, product_id = row
 
     if tx_status == "completed":
         return {"ok": True, "message": "Already processed"}
 
-    new_balance = await add_balance(db, user_tg_id, usd_amount)
-
+    # Mark transaction as completed
     await db.execute(
         text("UPDATE transactions SET status = 'completed', tx_hash = :txh WHERE id = :tid"),
         {"txh": payment_uuid, "tid": tx_id}
@@ -277,13 +276,103 @@ async def heleket_webhook(request: Request, db: AsyncSession = Depends(get_db)):
         {"amt": usd_amount, "tid": user_tg_id}
     )
 
+    if product_type == "subscription" and product_id and product_id.startswith("sub:"):
+        # Activate subscription
+        tier = product_id.split(":", 1)[1]
+        from datetime import datetime, timedelta
+        from sqlalchemy import select
+        from app.models import User
+        result = await db.execute(select(User).where(User.telegram_id == user_tg_id))
+        user = result.scalar_one_or_none()
+        if not user:
+            result = await db.execute(select(User).where(User.id == user_tg_id))
+            user = result.scalar_one_or_none()
+        if user:
+            user.subscription_tier = tier
+            user.subscription_started = datetime.utcnow()
+            user.credits_reset_date = datetime.utcnow() + timedelta(days=30)
+            user.monthly_fast_used = 0
+            user.monthly_premium_used = 0
+            user.monthly_images_used = 0
+            user.monthly_videos_used = 0
+            logger.info(f"Subscription activated: user={user_tg_id}, tier={tier}")
+    else:
+        # Top-up balance
+        new_balance = await add_balance(db, user_tg_id, usd_amount)
+        logger.info(f"Balance top-up: user={user_tg_id}, usd={usd_amount}, balance=${new_balance:.6f}")
+
     from app.routers.referral import credit_referrer
     await credit_referrer(db, user_tg_id, usd_amount)
 
     await db.commit()
 
-    logger.info(f"Heleket payment completed: user={user_tg_id}, usd={usd_amount}, balance=${new_balance:.6f}")
     return {"ok": True}
+
+
+# ═══════════════════════════════════════════════════════════
+# SUBSCRIPTION PAYMENT — Create invoice for plan purchase
+# ═══════════════════════════════════════════════════════════
+
+PLAN_PRICES_RUB = {"mini": 390, "max": 890, "max-pro": 1990}
+
+class SubscribePaymentRequest(BaseModel):
+    tier: str  # mini, max, max-pro
+
+
+@router.post("/subscribe")
+async def create_subscribe_payment(
+    req: SubscribePaymentRequest,
+    tg_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create Heleket crypto invoice for subscription payment."""
+    settings = get_settings()
+
+    if req.tier not in PLAN_PRICES_RUB:
+        raise HTTPException(400, "Недопустимый тариф")
+
+    if not settings.heleket_api_key or not settings.heleket_merchant:
+        raise HTTPException(503, "Крипто-оплата временно недоступна")
+
+    price_rub = PLAN_PRICES_RUB[req.tier]
+    price_usd = round(price_rub / USD_TO_RUB, 2)
+
+    user_id = tg_user.get("db_id") or tg_user["id"]
+    order_id = heleket_service.generate_order_id(user_id)
+
+    invoice = await heleket_service.create_invoice(
+        amount_usd=price_usd,
+        order_id=order_id,
+        currency="USD",
+        url_return=f"https://stoneai.ru/pricing?paid={req.tier}",
+        url_success=f"https://stoneai.ru/pricing?paid={req.tier}",
+    )
+
+    if not invoice:
+        raise HTTPException(500, "Не удалось создать счёт")
+
+    tx = Transaction(
+        user_tg_id=tg_user["id"],
+        amount=price_rub,
+        currency="RUB",
+        amount_usd=price_usd,
+        product_type="subscription",
+        product_id=f"sub:{req.tier}",
+        status="pending",
+        provider_id=f"heleket:{invoice.get('uuid', order_id)}",
+    )
+    db.add(tx)
+    await db.commit()
+
+    logger.info(f"Subscribe order: user={user_id}, tier={req.tier}, usd={price_usd}")
+
+    return {
+        "payment_url": invoice.get("url"),
+        "payment_uuid": invoice.get("uuid"),
+        "tier": req.tier,
+        "price_rub": price_rub,
+        "price_usd": price_usd,
+    }
 
 
 @router.get("/crypto/check/{order_id}")
