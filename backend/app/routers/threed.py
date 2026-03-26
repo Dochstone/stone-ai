@@ -49,6 +49,7 @@ async def generate_threed(
     Returns task_id for polling.
     """
     tg_id = tg_user["id"]
+    db_id = tg_user.get("db_id")
 
     model = get_threed_model(req.model_id)
     if not model:
@@ -59,20 +60,31 @@ async def generate_threed(
 
     price = get_threed_price(req.model_id)
 
-    # Pre-charge
-    result = await db.execute(
-        select(User).where(User.telegram_id == tg_id).with_for_update()
-    )
+    # Find user
+    if db_id:
+        result = await db.execute(select(User).where(User.id == db_id).with_for_update())
+    else:
+        result = await db.execute(select(User).where(User.telegram_id == tg_id).with_for_update())
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(404, "Пользователь не найден")
 
+    # Check access: subscription OR balance
+    tier = user.subscription_tier or "free"
+    has_subscription = tier in ("max", "max-pro")
     balance = float(user.balance_usd or 0)
-    if balance < price:
-        raise HTTPException(402, f"Недостаточно средств. Нужно ${price:.2f}, баланс ${balance:.2f}")
 
-    user.balance_usd = round(balance - price, 6)
-    new_balance = float(user.balance_usd)
+    if not has_subscription and balance < price:
+        raise HTTPException(402, {
+            "error": "need_subscription",
+            "message": "3D генерация доступна по подписке Max от 890₽/мес",
+            "upgrade_url": "/pricing",
+        })
+
+    new_balance = balance
+    if not has_subscription and balance >= price:
+        user.balance_usd = round(balance - price, 6)
+        new_balance = float(user.balance_usd)
 
     task_id = str(uuid.uuid4())[:12]
     task = ThreeDTask(

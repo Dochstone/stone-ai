@@ -52,6 +52,7 @@ async def generate_video(
     On failure, balance is refunded.
     """
     tg_id = tg_user["id"]
+    db_id = tg_user.get("db_id")
 
     # Validate model
     model = get_video_model(req.model_id)
@@ -60,21 +61,32 @@ async def generate_video(
 
     price = get_video_price(req.model_id)
 
-    # Check balance and pre-charge
-    result = await db.execute(
-        select(User).where(User.telegram_id == tg_id).with_for_update()
-    )
+    # Find user
+    if db_id:
+        result = await db.execute(select(User).where(User.id == db_id).with_for_update())
+    else:
+        result = await db.execute(select(User).where(User.telegram_id == tg_id).with_for_update())
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(404, "Пользователь не найден")
 
+    # Check access: subscription OR balance
+    tier = user.subscription_tier or "free"
+    has_subscription = tier in ("mini", "max", "max-pro")
     balance = float(user.balance_usd or 0)
-    if balance < price:
-        raise HTTPException(402, f"Недостаточно средств. Нужно ${price:.2f}, баланс ${balance:.2f}")
 
-    # Deduct balance
-    user.balance_usd = round(balance - price, 6)
-    new_balance = float(user.balance_usd)
+    if not has_subscription and balance < price:
+        raise HTTPException(402, {
+            "error": "need_subscription",
+            "message": f"Генерация видео доступна по подписке от 390₽/мес",
+            "upgrade_url": "/pricing",
+        })
+
+    # Deduct from balance only if no subscription
+    new_balance = balance
+    if not has_subscription and balance >= price:
+        user.balance_usd = round(balance - price, 6)
+        new_balance = float(user.balance_usd)
 
     # Create task
     task_id = str(uuid.uuid4())[:12]

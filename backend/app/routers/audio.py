@@ -48,24 +48,31 @@ async def tts_generate(
     Billing: per-token via OpenRouter (gpt-4o-mini-tts).
     """
     tg_id = tg_user["id"]
+    db_id = tg_user.get("db_id")
 
     if not req.text or len(req.text) > 4096:
         raise HTTPException(400, "Текст должен быть от 1 до 4096 символов")
 
-    # Check balance
-    result = await db.execute(
-        select(User).where(User.telegram_id == tg_id)
-    )
+    # Find user
+    if db_id:
+        result = await db.execute(select(User).where(User.id == db_id))
+    else:
+        result = await db.execute(select(User).where(User.telegram_id == tg_id))
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(404, "Пользователь не найден")
 
+    # Check access: subscription OR balance
+    tier = user.subscription_tier or "free"
+    has_subscription = tier in ("max", "max-pro")
     balance = float(user.balance_usd or 0)
-    # Estimate: ~1 token per 4 chars input, ~10x output audio tokens
-    est_tokens = len(req.text) // 4
-    est_cost = (est_tokens * 0.60 / 1_000_000) + (est_tokens * 10 * 2.40 / 1_000_000)
-    if balance < est_cost and balance < 0.01:
-        raise HTTPException(402, f"Недостаточно средств. Баланс ${balance:.2f}")
+
+    if not has_subscription and balance < 0.01:
+        raise HTTPException(402, {
+            "error": "need_subscription",
+            "message": "Аудио доступно по подписке Max от 890₽/мес",
+            "upgrade_url": "/pricing",
+        })
 
     # Generate
     tts_result = await text_to_speech(req.text, req.voice)
