@@ -90,7 +90,7 @@ async def submit_video_generation(
                 json=payload,
             )
 
-            if resp.status_code != 200:
+            if resp.status_code not in (200, 202):
                 error = resp.text[:500]
                 logger.error(f"fal.ai submit error {resp.status_code}: {error}")
                 return {"error": f"fal.ai error {resp.status_code}: {error}"}
@@ -130,7 +130,7 @@ async def check_video_status(model_id: str, fal_request_id: str) -> dict:
                 headers=headers,
             )
 
-            if resp.status_code != 200:
+            if resp.status_code not in (200, 202):
                 return {"status": "FAILED", "error": f"Status check failed: {resp.status_code}"}
 
             data = resp.json()
