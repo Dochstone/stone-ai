@@ -1632,10 +1632,11 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                 { id: "gpt-5-image-mini", name: "GPT-5 Image mini" },
                 { id: "flux-schnell", name: "Flux Schnell" },
               ] : modelCatFilter === "video" ? [
+                { id: "sora-2", name: "Sora 2 Pro" },
+                { id: "veo-3", name: "Veo 3.1" },
                 { id: "minimax", name: "MiniMax Hailuo" },
                 { id: "hunyuan", name: "Hunyuan" },
                 { id: "pika-2", name: "Pika 2" },
-                { id: "ltx-video", name: "LTX Video" },
                 { id: "wan-2", name: "Wan 2.6" },
               ] : modelCatFilter === "3d" ? [
                 { id: "tripo-v2.5", name: "Tripo v2.5" },

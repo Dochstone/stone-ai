@@ -14,8 +14,8 @@ FAL_QUEUE_URL = "https://queue.fal.run"
 VIDEO_MODELS_REGISTRY = [
     # Tier 1: Premium (best quality)
     {"id": "kling-v3",    "name": "Kling 3.0 Pro",     "company": "Kuaishou",  "fal_model": "fal-ai/kling-video/v3/pro",       "duration": "5-15s", "cost": 0.10, "price": 0.30, "active": False},  # BROKEN on fal.ai
-    {"id": "sora-2",      "name": "Sora 2 Pro",        "company": "OpenAI",    "fal_model": "fal-ai/sora-2/text-to-video/pro", "duration": "5-10s", "cost": 0.15, "price": 0.50, "active": False},  # not available
-    {"id": "veo-3",       "name": "Veo 3.1",           "company": "Google",    "fal_model": "fal-ai/veo3.1",                   "duration": "5-10s", "cost": 0.20, "price": 0.65, "active": False},  # not available
+    {"id": "sora-2",      "name": "Sora 2 Pro",        "company": "OpenAI",    "fal_model": "fal-ai/sora-2/text-to-video/pro", "duration": "5-10s", "cost": 0.15, "price": 0.50, "active": True},
+    {"id": "veo-3",       "name": "Veo 3.1",           "company": "Google",    "fal_model": "fal-ai/veo3.1",                   "duration": "5-10s", "cost": 0.20, "price": 0.65, "active": True},
     {"id": "runway-gen3", "name": "Runway Gen-3 Alpha", "company": "Runway",   "fal_model": "fal-ai/runway-gen3/turbo/image-to-video", "duration": "5-10s", "cost": 0.25, "price": 0.85, "active": False},  # image-to-video only
     # Tier 2: Working models
     {"id": "kling-v2",    "name": "Kling v2",          "company": "Kuaishou",  "fal_model": "fal-ai/kling-video/v2/master",    "duration": "5-10s", "cost": 0.07, "price": 0.25, "active": False},  # BROKEN on fal.ai
