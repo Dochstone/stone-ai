@@ -12,7 +12,7 @@ const IMAGE_MODEL_IDS = new Set([
 ]);
 
 const VIDEO_MODEL_IDS = new Set([
-  "kling-v3", "sora-2", "veo-3", "kling-v2", "runway-gen3", "pika-2", "minimax", "pixverse-v5", "luma-dream", "stable-video", "wan-2", "hunyuan", "ltx-video",
+  "kling-v3", "sora-2", "veo-3", "luma-ray2", "luma-ray2-flash", "kling-v2", "runway-gen3", "pika-2", "minimax", "pixverse-v5", "luma-dream", "stable-video", "wan-2", "hunyuan", "ltx-video", "cogvideox", "mochi",
 ]);
 
 const THREED_MODEL_IDS = new Set(["tripo-v2.5", "triposr"]);
@@ -1634,10 +1634,12 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
               ] : modelCatFilter === "video" ? [
                 { id: "sora-2", name: "Sora 2 Pro" },
                 { id: "veo-3", name: "Veo 3.1" },
-                { id: "minimax", name: "MiniMax Hailuo" },
+                { id: "luma-ray2", name: "Luma Ray 2" },
+                { id: "luma-ray2-flash", name: "Ray 2 Flash" },
+                { id: "minimax", name: "MiniMax" },
                 { id: "hunyuan", name: "Hunyuan" },
+                { id: "cogvideox", name: "CogVideoX" },
                 { id: "pika-2", name: "Pika 2" },
-                { id: "wan-2", name: "Wan 2.6" },
               ] : modelCatFilter === "3d" ? [
                 { id: "tripo-v2.5", name: "Tripo v2.5" },
                 { id: "triposr", name: "TripoSR" },
