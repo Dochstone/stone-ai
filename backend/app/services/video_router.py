@@ -167,6 +167,13 @@ async def check_video_status(model_id: str, fal_request_id: str) -> dict:
                 if result_resp.status_code == 200:
                     result = result_resp.json()
                     video_url = result.get("video", {}).get("url") or result.get("output", {}).get("video", {}).get("url") or result.get("video_url")
+                    if not video_url:
+                        # Try to find URL anywhere in response
+                        import re
+                        urls = re.findall(r'https?://[^\s"]+\.mp4[^\s"]*', str(result))
+                        if urls:
+                            video_url = urls[0]
+                        logger.warning(f"fal.ai result keys: {list(result.keys())}, video_url found: {bool(video_url)}")
                     return {
                         "status": "COMPLETED",
                         "video_url": video_url,

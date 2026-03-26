@@ -1727,9 +1727,14 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                           <video
                             src={msg.video.url}
                             controls
+                            autoPlay
+                            muted
+                            loop
                             playsInline
-                            className="max-w-full rounded-xl"
-                            style={{ maxHeight: 360 }}
+                            preload="auto"
+                            className="max-w-full rounded-xl bg-black"
+                            style={{ maxHeight: 360, minHeight: 200 }}
+                            onError={(e) => { (e.target as HTMLVideoElement).poster = ""; }}
                           />
                           <div className="flex items-center gap-3 mt-2">
                             <a
