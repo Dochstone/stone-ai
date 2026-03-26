@@ -51,7 +51,7 @@ async def generate_video(
     Charges balance BEFORE generation. Returns task_id for polling.
     On failure, balance is refunded.
     """
-    tg_id = tg_user["tg_id"]
+    tg_id = tg_user["id"]
 
     # Validate model
     model = get_video_model(req.model_id)
@@ -125,7 +125,7 @@ async def video_status(
     db: AsyncSession = Depends(get_db),
 ):
     """Poll video generation status. Returns video_url when completed."""
-    tg_id = tg_user["tg_id"]
+    tg_id = tg_user["id"]
 
     result = await db.execute(
         select(VideoTask).where(
@@ -197,7 +197,7 @@ async def video_history(
     db: AsyncSession = Depends(get_db),
 ):
     """List user's video generation history."""
-    tg_id = tg_user["tg_id"]
+    tg_id = tg_user["id"]
 
     result = await db.execute(
         select(VideoTask)

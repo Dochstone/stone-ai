@@ -48,7 +48,7 @@ async def generate_threed(
     Start async 3D generation. Charges balance BEFORE generation.
     Returns task_id for polling.
     """
-    tg_id = tg_user["tg_id"]
+    tg_id = tg_user["id"]
 
     model = get_threed_model(req.model_id)
     if not model:
@@ -137,7 +137,7 @@ async def threed_status(
     db: AsyncSession = Depends(get_db),
 ):
     """Poll 3D generation status. Returns model_url when completed."""
-    tg_id = tg_user["tg_id"]
+    tg_id = tg_user["id"]
 
     result = await db.execute(
         select(ThreeDTask).where(
@@ -200,7 +200,7 @@ async def threed_history(
     db: AsyncSession = Depends(get_db),
 ):
     """List user's 3D generation history."""
-    tg_id = tg_user["tg_id"]
+    tg_id = tg_user["id"]
 
     result = await db.execute(
         select(ThreeDTask)

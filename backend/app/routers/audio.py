@@ -47,7 +47,7 @@ async def tts_generate(
     Generate speech from text. Returns base64 audio.
     Billing: per-token via OpenRouter (gpt-4o-mini-tts).
     """
-    tg_id = tg_user["tg_id"]
+    tg_id = tg_user["id"]
 
     if not req.text or len(req.text) > 4096:
         raise HTTPException(400, "Текст должен быть от 1 до 4096 символов")
@@ -104,7 +104,7 @@ async def stt_transcribe(
     Transcribe audio to text via Whisper.
     Billing: $0.02/min (Stone AI price).
     """
-    tg_id = tg_user["tg_id"]
+    tg_id = tg_user["id"]
 
     if not file.content_type or not file.content_type.startswith("audio/"):
         raise HTTPException(400, "Нужен аудиофайл (audio/*)")
