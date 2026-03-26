@@ -238,11 +238,13 @@ async def generate_image(
                 "https://api.openai.com/v1/images/generations",
                 headers={"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"},
                 json={
-                    "model": "gpt-image-1",
+                    "model": "dall-e-3",
                     "prompt": req.prompt,
                     "n": 1,
                     "size": "1024x1024",
-                    "quality": "high",
+                    "quality": "hd",
+                    "style": "natural",
+                    "response_format": "url",
                 },
             )
 

@@ -1142,9 +1142,12 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
       }
 
       const data = await res.json();
-      const content = data.image_url ? `![Сгенерированное изображение](${data.image_url})` : "Не удалось сгенерировать";
-      setMessages([...history, { role: "assistant", content }]);
-      saveToSession(prompt, content, undefined);
+      if (data.image_url) {
+        setMessages([...history, { role: "assistant", content: data.image_url }]);
+        saveToSession(prompt, data.image_url, undefined);
+      } else {
+        setMessages([...history, { role: "assistant", content: "Не удалось сгенерировать изображение" }]);
+      }
     } catch {
       setMessages([...history, { role: "assistant", content: "Ошибка соединения" }]);
     } finally {
