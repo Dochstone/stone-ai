@@ -55,10 +55,14 @@ async def chat(
     5. Send billing info as final SSE chunk
     """
     tg_id = tg_user["id"]
+    db_id = tg_user.get("db_id")
     await get_or_create_user(db, tg_user)
 
-    # Check BYOK
-    result = await db.execute(select(User).where(User.telegram_id == tg_id))
+    # Check BYOK — find user by telegram_id or by db id
+    if db_id:
+        result = await db.execute(select(User).where(User.id == db_id))
+    else:
+        result = await db.execute(select(User).where(User.telegram_id == tg_id))
     db_user = result.scalar_one_or_none()
     byok_key = None
     using_byok = False

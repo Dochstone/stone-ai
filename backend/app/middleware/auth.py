@@ -126,7 +126,7 @@ async def get_current_user(request: Request) -> dict:
             raise HTTPException(401, "User not found")
 
         return {
-            "id": user.telegram_id,
+            "id": user.telegram_id or user.id,
             "db_id": user.id,
             "email": user.email,
             "first_name": user.first_name or (user.email or "").split("@")[0],
