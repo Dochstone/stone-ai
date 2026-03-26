@@ -1386,7 +1386,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
           background: rgba(128,128,128,0.1); padding: 0.15em 0.4em; border-radius: 0.375rem;
           font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.85em; color: var(--accent);
         }
-        .code-block-wrapper { margin: 0.75rem 0; border-radius: 0.75rem; overflow: hidden; border: 1px solid rgba(26,25,22,0.06); max-width: 100%; }
+        .code-block-wrapper { margin: 0.75rem 0; border-radius: 0.75rem; overflow: hidden; border: 1px solid rgba(26,25,22,0.06); max-width: calc(100vw - 100px); }
         .code-block-header {
           display: flex; align-items: center; justify-content: space-between;
           background: #1C1C1E; padding: 0.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.06);
@@ -1700,7 +1700,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
 
                   {/* Message bubble */}
                   <div className={`max-w-[85%] sm:max-w-[75%] min-w-0 ${msg.role === "user" ? "text-right" : ""}`}>
-                    <div className={`inline-block text-left rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-[13px] sm:text-[14px] leading-relaxed overflow-hidden break-words ${
+                    <div className={`${msg.role === "user" ? "inline-block" : "block"} text-left rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-[13px] sm:text-[14px] leading-relaxed break-words overflow-x-auto ${
                       msg.role === "user"
                         ? "bg-accent text-white rounded-tr-md"
                         : "bg-text/[0.06] text-text/85 rounded-tl-md"
