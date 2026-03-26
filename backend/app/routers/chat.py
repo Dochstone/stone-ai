@@ -255,9 +255,15 @@ async def generate_image(
             data = resp.json()
             image_data = data["data"][0]
 
-            # Get URL or base64
-            if "url" in image_data:
-                image_url = image_data["url"]
+            # Always get URL then download and convert to base64
+            # (OpenAI URLs expire after ~1 hour, base64 is permanent)
+            source_url = image_data.get("url")
+            if source_url:
+                img_resp = await client.get(source_url, timeout=30.0)
+                if img_resp.status_code == 200:
+                    image_url = f"data:image/png;base64,{base64.b64encode(img_resp.content).decode('ascii')}"
+                else:
+                    image_url = source_url  # fallback to URL
             elif "b64_json" in image_data:
                 image_url = f"data:image/png;base64,{image_data['b64_json']}"
             else:
