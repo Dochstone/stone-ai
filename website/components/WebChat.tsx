@@ -35,6 +35,8 @@ function getModelLockInfo(modelId: string, balance: number, plan?: string): { lo
   if (plan === "max-pro" || plan === "max") return null; // full access
   if (plan === "mini" && MINI_MODEL_IDS.has(modelId)) return null;
   if (FREE_MODEL_IDS.has(modelId)) return null;
+  // Video/3D/audio — access checked on backend, don't lock on frontend
+  if (VIDEO_MODEL_IDS.has(modelId) || THREED_MODEL_IDS.has(modelId) || IMAGE_MODEL_IDS.has(modelId)) return null;
   if (MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: "Mini", price: "390₽/мес" };
   return { locked: true, tier: "Max", price: "890₽/мес" };
 }
