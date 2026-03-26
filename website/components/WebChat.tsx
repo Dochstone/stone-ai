@@ -1553,7 +1553,6 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                   return (
                     <button key={m.id} onClick={() => {
                       if (lock) { setLockModal({ model: m.name, tier: lock.tier, price: lock.price }); setModelPickerOpen(false); return; }
-                      if (selectedModel !== m.id) { setActiveSessionId(null); setMessages([]); }
                       setSelectedModel(m.id); setModelPickerOpen(false); setModelSearch("");
                     }} className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left transition-colors ${
                       selectedModel === m.id ? "bg-accent/5 border border-accent/20" : "hover:bg-bg"
@@ -1649,7 +1648,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
               ] : []).map((m) => (
                 <button
                   key={m.id}
-                  onClick={() => { if (selectedModel !== m.id) { setSelectedModel(m.id); setActiveSessionId(null); setMessages([]); } }}
+                  onClick={() => { setSelectedModel(m.id); }}
                   className={`px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-semibold whitespace-nowrap transition-colors shrink-0 ${
                     selectedModel === m.id
                       ? "bg-accent text-white"
