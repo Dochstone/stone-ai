@@ -22,6 +22,7 @@ interface UserRow {
   username: string | null;
   first_name: string | null;
   balance_usd: number;
+  subscription_tier: string;
   total_deposited_usd: number;
   total_requests: number;
   total_tokens_used: number;
@@ -242,8 +243,8 @@ export default function AdminPage() {
                     <th className="text-left py-2.5 px-4">ID</th>
                     <th className="text-left py-2.5 px-4">Имя</th>
                     <th className="text-left py-2.5 px-4">Email</th>
+                    <th className="text-center py-2.5 px-4">Подписка</th>
                     <th className="text-right py-2.5 px-4">Баланс</th>
-                    <th className="text-right py-2.5 px-4">Пополнил</th>
                     <th className="text-right py-2.5 px-4">Запросов</th>
                     <th className="text-left py-2.5 px-4">Дата</th>
                   </tr>
@@ -254,8 +255,36 @@ export default function AdminPage() {
                       <td className="py-2.5 px-4 font-mono text-text/40">{u.tg_id || u.id}</td>
                       <td className="py-2.5 px-4">{u.first_name || u.username || "—"}</td>
                       <td className="py-2.5 px-4 text-text/50">{u.email || "—"}</td>
+                      <td className="py-2.5 px-4 text-center">
+                        <select
+                          value={u.subscription_tier}
+                          onChange={async (e) => {
+                            const newTier = e.target.value;
+                            const res = await fetch(`${API_URL}/api/admin/web/users/${u.id}/subscription`, {
+                              method: "PATCH",
+                              headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                              body: JSON.stringify({ tier: newTier }),
+                            });
+                            if (res.ok) {
+                              setUsers(prev => prev.map(x => x.id === u.id ? { ...x, subscription_tier: newTier } : x));
+                            } else {
+                              alert("Ошибка смены тарифа");
+                            }
+                          }}
+                          className={`text-xs font-bold px-2 py-1 rounded-lg border-0 cursor-pointer ${
+                            u.subscription_tier === "max-pro" ? "bg-gradient-to-r from-amber-100 to-orange-100 text-amber-700"
+                            : u.subscription_tier === "max" ? "bg-accent/10 text-accent"
+                            : u.subscription_tier === "mini" ? "bg-blue-100 text-blue-700"
+                            : "bg-gray-100 text-gray-500"
+                          }`}
+                        >
+                          <option value="free">Free</option>
+                          <option value="mini">Mini</option>
+                          <option value="max">Max</option>
+                          <option value="max-pro">Max Pro</option>
+                        </select>
+                      </td>
                       <td className="py-2.5 px-4 text-right font-mono">${u.balance_usd.toFixed(2)}</td>
-                      <td className="py-2.5 px-4 text-right font-mono text-teal">${u.total_deposited_usd.toFixed(2)}</td>
                       <td className="py-2.5 px-4 text-right font-mono">{u.total_requests}</td>
                       <td className="py-2.5 px-4 text-text/40 text-xs">{u.joined_at?.slice(0, 10) || "—"}</td>
                     </tr>

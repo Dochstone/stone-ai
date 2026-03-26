@@ -4,6 +4,7 @@ import os
 from datetime import date, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from pydantic import BaseModel
 from sqlalchemy import select, func, case, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -285,6 +286,7 @@ async def web_admin_users(
                 "first_name": u.first_name,
                 "balance_usd": round(float(u.balance_usd or 0), 4),
                 "total_deposited_usd": round(float(u.total_deposited_usd or 0), 2),
+                "subscription_tier": u.subscription_tier or "free",
                 "total_requests": u.total_requests or 0,
                 "total_tokens_used": u.total_tokens_used or 0,
                 "joined_at": u.joined_at.isoformat() if u.joined_at else None,
@@ -294,6 +296,49 @@ async def web_admin_users(
         "total": total_count,
         "offset": offset,
         "limit": limit,
+    }
+
+
+class UpdateSubscriptionRequest(BaseModel):
+    tier: str  # free, mini, max, max-pro
+
+
+@router.patch("/web/users/{user_id}/subscription")
+async def web_admin_update_subscription(
+    user_id: int,
+    body: UpdateSubscriptionRequest,
+    _admin: dict = Depends(require_web_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Admin: change a user's subscription tier."""
+    valid_tiers = {"free", "mini", "max", "max-pro"}
+    if body.tier not in valid_tiers:
+        raise HTTPException(400, f"Invalid tier: {body.tier}. Valid: {', '.join(valid_tiers)}")
+
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(404, "User not found")
+
+    old_tier = user.subscription_tier or "free"
+    user.subscription_tier = body.tier if body.tier != "free" else None
+
+    # Reset monthly counters on upgrade
+    if body.tier != old_tier:
+        user.monthly_fast_used = 0
+        user.monthly_premium_used = 0
+        user.monthly_images_used = 0
+        user.monthly_videos_used = 0
+
+    await db.flush()
+
+    return {
+        "status": "ok",
+        "user_id": user_id,
+        "old_tier": old_tier,
+        "new_tier": body.tier,
+        "email": user.email,
+        "username": user.username,
     }
 
 
