@@ -998,7 +998,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
         return;
       }
 
-      setMessages([...history, { role: "assistant", content: `Генерация 3D модели... (~${data.estimated_seconds || 60}с)\n${data.model} · $${data.cost_usd?.toFixed(2) || "0.00"}` }]);
+      setMessages([...history, { role: "assistant", content: `Генерация 3D модели... (~${data.estimated_seconds || 60}с)` }]);
 
       // Poll
       let attempts = 0;
@@ -1073,7 +1073,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
       }
 
       // Show processing message
-      setMessages([...history, { role: "assistant", content: `Генерация видео... (~${data.estimated_seconds || 60}с)\n${data.model} · $${data.cost_usd?.toFixed(2) || "0.00"}` }]);
+      setMessages([...history, { role: "assistant", content: `Генерация видео... (~${data.estimated_seconds || 60}с)` }]);
 
       // Poll for status
       let attempts = 0;
