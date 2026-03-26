@@ -1498,6 +1498,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                   return (
                     <button key={m.id} onClick={() => {
                       if (lock) { setLockModal({ model: m.name, tier: lock.tier, price: lock.price }); setModelPickerOpen(false); return; }
+                      if (selectedModel !== m.id) { setActiveSessionId(null); setMessages([]); }
                       setSelectedModel(m.id); setModelPickerOpen(false); setModelSearch("");
                     }} className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left transition-colors ${
                       selectedModel === m.id ? "bg-accent/5 border border-accent/20" : "hover:bg-bg"
@@ -1536,9 +1537,12 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
             <button
               key={t.id}
               onClick={() => {
-                setModelCatFilter(t.id);
-                if (t.id === "health") setSelectedModel("gpt-4o-mini");
-                if (t.id === "free") setSelectedModel("gpt-4o-mini");
+                if (modelCatFilter !== t.id) {
+                  setModelCatFilter(t.id);
+                  setActiveSessionId(null);
+                  setMessages([]);
+                  if (t.id === "health" || t.id === "free") setSelectedModel("gpt-4o-mini");
+                }
               }}
               className={`flex-1 flex items-center justify-center gap-1 px-1 sm:px-2.5 py-1.5 text-[10px] sm:text-[11px] font-semibold whitespace-nowrap transition-colors border-b-2 ${
                 modelCatFilter === t.id ? "text-accent border-accent" : "text-text/30 border-transparent hover:text-text/50"
@@ -1590,7 +1594,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
               ] : []).map((m) => (
                 <button
                   key={m.id}
-                  onClick={() => setSelectedModel(m.id)}
+                  onClick={() => { if (selectedModel !== m.id) { setSelectedModel(m.id); setActiveSessionId(null); setMessages([]); } }}
                   className={`px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-semibold whitespace-nowrap transition-colors shrink-0 ${
                     selectedModel === m.id
                       ? "bg-accent text-white"
