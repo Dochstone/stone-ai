@@ -121,14 +121,31 @@ async def check_video_status(model_id: str, fal_request_id: str) -> dict:
         return {"status": "FAILED", "error": "Unknown model"}
 
     fal_model = model["fal_model"]
+    # Base model path for status (strip version suffix like /v3/pro, /v2/master)
+    # e.g. fal-ai/kling-video/v3/pro → fal-ai/kling-video
+    fal_base = fal_model.split("/")[0] + "/" + fal_model.split("/")[1] if "/" in fal_model else fal_model
+    # Keep first two path segments: fal-ai/kling-video, fal-ai/minimax-video, etc.
+    parts = fal_model.split("/")
+    if len(parts) >= 2:
+        fal_base = parts[0] + "/" + parts[1]
+    else:
+        fal_base = fal_model
     headers = {"Authorization": f"Key {settings.fal_api_key}"}
 
     try:
         async with httpx.AsyncClient(timeout=15.0) as client:
+            # Try full path first, fallback to base path
             resp = await client.get(
                 f"{FAL_QUEUE_URL}/{fal_model}/requests/{fal_request_id}/status",
                 headers=headers,
             )
+
+            if resp.status_code == 405 and fal_base != fal_model:
+                # Retry with base model path (fal.ai quirk for versioned models)
+                resp = await client.get(
+                    f"{FAL_QUEUE_URL}/{fal_base}/requests/{fal_request_id}/status",
+                    headers=headers,
+                )
 
             if resp.status_code not in (200, 202):
                 return {"status": "FAILED", "error": f"Status check failed: {resp.status_code}"}
@@ -137,11 +154,16 @@ async def check_video_status(model_id: str, fal_request_id: str) -> dict:
             status = data.get("status", "UNKNOWN")
 
             if status == "COMPLETED":
-                # Fetch the actual result
+                # Fetch the actual result — try both paths
                 result_resp = await client.get(
-                    f"{FAL_QUEUE_URL}/{fal_model}/requests/{fal_request_id}",
+                    f"{FAL_QUEUE_URL}/{fal_base}/requests/{fal_request_id}",
                     headers=headers,
                 )
+                if result_resp.status_code != 200:
+                    result_resp = await client.get(
+                        f"{FAL_QUEUE_URL}/{fal_model}/requests/{fal_request_id}",
+                        headers=headers,
+                    )
                 if result_resp.status_code == 200:
                     result = result_resp.json()
                     video_url = result.get("video", {}).get("url") or result.get("output", {}).get("video", {}).get("url") or result.get("video_url")

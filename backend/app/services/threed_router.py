@@ -115,6 +115,8 @@ async def check_threed_status(model_id: str, fal_request_id: str) -> dict:
         return {"status": "FAILED", "error": "Unknown model"}
 
     fal_model = model["fal_model"]
+    parts = fal_model.split("/")
+    fal_base = parts[0] + "/" + parts[1] if len(parts) >= 2 else fal_model
     headers = {"Authorization": f"Key {settings.fal_api_key}"}
 
     try:
@@ -124,6 +126,12 @@ async def check_threed_status(model_id: str, fal_request_id: str) -> dict:
                 headers=headers,
             )
 
+            if resp.status_code == 405 and fal_base != fal_model:
+                resp = await client.get(
+                    f"{FAL_QUEUE_URL}/{fal_base}/requests/{fal_request_id}/status",
+                    headers=headers,
+                )
+
             if resp.status_code not in (200, 202):
                 return {"status": "FAILED", "error": f"Status check failed: {resp.status_code}"}
 
@@ -132,9 +140,14 @@ async def check_threed_status(model_id: str, fal_request_id: str) -> dict:
 
             if status == "COMPLETED":
                 result_resp = await client.get(
-                    f"{FAL_QUEUE_URL}/{fal_model}/requests/{fal_request_id}",
+                    f"{FAL_QUEUE_URL}/{fal_base}/requests/{fal_request_id}",
                     headers=headers,
                 )
+                if result_resp.status_code != 200:
+                    result_resp = await client.get(
+                        f"{FAL_QUEUE_URL}/{fal_model}/requests/{fal_request_id}",
+                        headers=headers,
+                    )
                 if result_resp.status_code == 200:
                     result = result_resp.json()
                     model_url = (
