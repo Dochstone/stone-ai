@@ -30,8 +30,10 @@ const MINI_MODEL_IDS = new Set([
   "nano-banana-pro", "gpt-5-image-mini", "gpt-5-image",
 ]);
 
-function getModelLockInfo(modelId: string, balance: number): { locked: boolean; tier: string; price: string } | null {
-  if (balance > 0) return null; // balance = no locks
+function getModelLockInfo(modelId: string, balance: number, plan?: string): { locked: boolean; tier: string; price: string } | null {
+  if (balance > 0) return null;
+  if (plan === "max-pro" || plan === "max") return null; // full access
+  if (plan === "mini" && MINI_MODEL_IDS.has(modelId)) return null;
   if (FREE_MODEL_IDS.has(modelId)) return null;
   if (MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: "Mini", price: "390₽/мес" };
   return { locked: true, tier: "Max", price: "890₽/мес" };
@@ -1490,11 +1492,11 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                 if (modelSearch) list = list.filter(m => m.name.toLowerCase().includes(modelSearch.toLowerCase()) || m.company.toLowerCase().includes(modelSearch.toLowerCase()));
                 const bal = auth?.balanceUsd || 0;
                 return [...list].sort((a, b) => {
-                  const aL = getModelLockInfo(a.id, bal) !== null, bL = getModelLockInfo(b.id, bal) !== null;
+                  const aL = getModelLockInfo(a.id, bal, limits?.plan) !== null, bL = getModelLockInfo(b.id, bal, limits?.plan) !== null;
                   if (!aL && bL) return -1; if (aL && !bL) return 1;
                   return a.pricePerMillion - b.pricePerMillion;
                 }).map(m => {
-                  const lock = getModelLockInfo(m.id, bal);
+                  const lock = getModelLockInfo(m.id, bal, limits?.plan);
                   return (
                     <button key={m.id} onClick={() => {
                       if (lock) { setLockModal({ model: m.name, tier: lock.tier, price: lock.price }); setModelPickerOpen(false); return; }
@@ -1803,7 +1805,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
               </div>
               <TemplatesPicker onSelect={(text: string, modelId: string) => {
                 setInput(text);
-                const lock = getModelLockInfo(modelId, auth?.balanceUsd || 0);
+                const lock = getModelLockInfo(modelId, auth?.balanceUsd || 0, limits?.plan);
                 if (!lock) setSelectedModel(modelId);
                 setShowTemplates(false);
               }} />
