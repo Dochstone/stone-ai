@@ -1,6 +1,50 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+
+/* ── Video Cycler — crossfade between multiple videos ── */
+function VideoCycler({ sources }: { sources: string[] }) {
+  const [idx, setIdx] = useState(0);
+  const [nextIdx, setNextIdx] = useState(1);
+  const [fading, setFading] = useState(false);
+  const videoARef = useRef<HTMLVideoElement>(null);
+  const videoBRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFading(true);
+      setTimeout(() => {
+        setIdx(prev => {
+          const next = (prev + 1) % sources.length;
+          setNextIdx((next + 1) % sources.length);
+          return next;
+        });
+        setFading(false);
+      }, 1200);
+    }, 7000);
+    return () => clearInterval(interval);
+  }, [sources.length]);
+
+  return (
+    <>
+      <video
+        ref={videoARef}
+        key={sources[idx]}
+        src={sources[idx]}
+        autoPlay muted loop playsInline
+        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-[1200ms]"
+        style={{ opacity: fading ? 0 : 1 }}
+      />
+      <video
+        ref={videoBRef}
+        src={sources[nextIdx]}
+        autoPlay muted loop playsInline
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{ opacity: 0.01 }}
+      />
+    </>
+  );
+}
 
 /* ── Floating model cards around the mockup ── */
 const floatingModels = [
@@ -261,7 +305,7 @@ export default function Hero() {
           {onboardingStep === 0 && (
             <div className="h-full flex flex-col relative">
               <div className="absolute inset-0">
-                <video src="/demo/veo-02.mp4" autoPlay muted loop playsInline className="w-full h-full object-cover" />
+                <VideoCycler sources={["/demo/veo-02.mp4", "/demo/veo-06.mp4", "/demo/veo-09.mp4"]} />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-transparent to-transparent" />
               </div>
               <div className="relative flex-1 flex flex-col justify-end p-6 pb-8">
@@ -285,7 +329,7 @@ export default function Hero() {
           {onboardingStep === 1 && (
             <div className="h-full flex flex-col relative">
               <div className="absolute inset-0">
-                <video src="/demo/veo-06.mp4" autoPlay muted loop playsInline className="w-full h-full object-cover" />
+                <VideoCycler sources={["/demo/veo-03.mp4", "/demo/veo-05.mp4", "/demo/veo-10.mp4"]} />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-transparent to-transparent" />
               </div>
               <div className="relative flex-1 flex flex-col justify-end p-6 pb-8">
@@ -318,8 +362,8 @@ export default function Hero() {
           {onboardingStep === 2 && (
             <div className="h-full flex flex-col relative">
               <div className="absolute inset-0">
-                <video src="/demo/veo-10.mp4" autoPlay muted loop playsInline className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/30 to-transparent" />
+                <VideoCycler sources={["/demo/veo-04.mp4", "/demo/veo-07.mp4", "/demo/veo-08.mp4"]} />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/20 to-transparent" />
               </div>
               <div className="relative flex-1 flex flex-col justify-end p-6 pb-8">
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-white mb-1">
