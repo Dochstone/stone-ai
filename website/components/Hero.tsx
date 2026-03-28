@@ -261,8 +261,8 @@ export default function Hero() {
           {onboardingStep === 0 && (
             <div className="h-full flex flex-col relative">
               <div className="absolute inset-0">
-                <video src="/demo/onboard-1.mp4" autoPlay muted loop playsInline className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/30 to-[#0a0a0f]/10" />
+                <video src="/demo/veo-02.mp4" autoPlay muted loop playsInline className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-transparent to-transparent" />
               </div>
               <div className="relative flex-1 flex flex-col justify-end p-6 pb-8">
                 <div className="inline-flex items-center gap-1.5 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold px-3 py-1 rounded-full mb-4 w-fit">
@@ -285,8 +285,8 @@ export default function Hero() {
           {onboardingStep === 1 && (
             <div className="h-full flex flex-col relative">
               <div className="absolute inset-0">
-                <video src="/demo/onboard-2.mp4" autoPlay muted loop playsInline className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/40 to-[#0a0a0f]/20" />
+                <video src="/demo/veo-06.mp4" autoPlay muted loop playsInline className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-transparent to-transparent" />
               </div>
               <div className="relative flex-1 flex flex-col justify-end p-6 pb-8">
                 <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-3">
@@ -318,8 +318,8 @@ export default function Hero() {
           {onboardingStep === 2 && (
             <div className="h-full flex flex-col relative">
               <div className="absolute inset-0">
-                <video src="/demo/onboard-3.mp4" autoPlay muted loop playsInline className="w-full h-full object-cover opacity-40" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/60 to-[#0a0a0f]/30" />
+                <video src="/demo/veo-10.mp4" autoPlay muted loop playsInline className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/30 to-transparent" />
               </div>
               <div className="relative flex-1 flex flex-col justify-end p-6 pb-8">
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-white mb-1">
