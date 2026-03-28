@@ -2,45 +2,66 @@
 
 import { useState, useEffect, useRef } from "react";
 
-/* ── Video Cycler — crossfade between multiple videos ── */
+/* ── Video Cycler — smooth crossfade between multiple videos ── */
 function VideoCycler({ sources }: { sources: string[] }) {
-  const [idx, setIdx] = useState(0);
-  const [nextIdx, setNextIdx] = useState(1);
-  const [fading, setFading] = useState(false);
-  const videoARef = useRef<HTMLVideoElement>(null);
-  const videoBRef = useRef<HTMLVideoElement>(null);
+  const [activeSlot, setActiveSlot] = useState<"a" | "b">("a");
+  const [srcA, setSrcA] = useState(sources[0]);
+  const [srcB, setSrcB] = useState(sources[1] || sources[0]);
+  const idxRef = useRef(0);
+  const refA = useRef<HTMLVideoElement>(null);
+  const refB = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
+    // Preload first video immediately
+    if (refA.current) {
+      refA.current.load();
+      refA.current.play().catch(() => {});
+    }
+    if (refB.current) {
+      refB.current.load();
+    }
+
     const interval = setInterval(() => {
-      setFading(true);
-      setTimeout(() => {
-        setIdx(prev => {
-          const next = (prev + 1) % sources.length;
-          setNextIdx((next + 1) % sources.length);
-          return next;
-        });
-        setFading(false);
-      }, 1200);
+      idxRef.current = (idxRef.current + 1) % sources.length;
+      const nextSrc = sources[idxRef.current];
+      const preloadIdx = (idxRef.current + 1) % sources.length;
+
+      if (activeSlot === "a") {
+        // B becomes active, preload next into A
+        setSrcB(nextSrc);
+        setTimeout(() => {
+          refB.current?.play().catch(() => {});
+          setActiveSlot("b");
+          // Preload next into A
+          setTimeout(() => setSrcA(sources[preloadIdx]), 1500);
+        }, 100);
+      } else {
+        setSrcA(nextSrc);
+        setTimeout(() => {
+          refA.current?.play().catch(() => {});
+          setActiveSlot("a");
+          setTimeout(() => setSrcB(sources[preloadIdx]), 1500);
+        }, 100);
+      }
     }, 7000);
     return () => clearInterval(interval);
-  }, [sources.length]);
+  }, []);
 
   return (
     <>
       <video
-        ref={videoARef}
-        key={sources[idx]}
-        src={sources[idx]}
-        autoPlay muted loop playsInline
-        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-[1200ms]"
-        style={{ opacity: fading ? 0 : 1 }}
+        ref={refA}
+        src={srcA}
+        autoPlay muted loop playsInline preload="auto"
+        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-[1500ms] ease-in-out"
+        style={{ opacity: activeSlot === "a" ? 1 : 0 }}
       />
       <video
-        ref={videoBRef}
-        src={sources[nextIdx]}
-        autoPlay muted loop playsInline
-        className="absolute inset-0 w-full h-full object-cover"
-        style={{ opacity: 0.01 }}
+        ref={refB}
+        src={srcB}
+        muted loop playsInline preload="auto"
+        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-[1500ms] ease-in-out"
+        style={{ opacity: activeSlot === "b" ? 1 : 0 }}
       />
     </>
   );
