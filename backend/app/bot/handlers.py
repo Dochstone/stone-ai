@@ -1,7 +1,7 @@
 """Telegram bot handlers — /start, /help, /plan commands."""
 
 from aiogram import Router, F
-from aiogram.types import Message, WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import Message, WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton, WebAppInfo as WAI
 from aiogram.filters import Command
 
 from app.config import get_settings
@@ -35,6 +35,22 @@ async def cmd_start(message: Message):
         ],
     ])
 
+    # Bottom persistent buttons
+    reply_kb = ReplyKeyboardMarkup(
+        keyboard=[
+            [
+                KeyboardButton(text="🚀 Открыть Stone AI", web_app=WAI(url=webapp_url)),
+                KeyboardButton(text="💎 Тарифы", web_app=WAI(url=f"{webapp_url}?tab=plans")),
+            ],
+            [
+                KeyboardButton(text="❓ Помощь"),
+                KeyboardButton(text="🌐 Сайт"),
+            ],
+        ],
+        resize_keyboard=True,
+        is_persistent=True,
+    )
+
     await message.answer(
         "<b>Stone AI — 65+ нейросетей в одном окне</b>\n\n"
         "GPT-5.4, Claude Opus, Gemini Pro, DeepSeek, Sora 2 — "
@@ -43,6 +59,12 @@ async def cmd_start(message: Message):
         "⭐ <b>Подписка от 390₽/мес</b> — все 65+ моделей\n\n"
         "Нажми кнопку ниже, чтобы начать 👇",
         parse_mode="HTML",
+        reply_markup=reply_kb,
+    )
+
+    # Also send inline keyboard
+    await message.answer(
+        "Быстрые ссылки:",
         reply_markup=keyboard,
     )
 
@@ -160,3 +182,22 @@ async def callback_plans(callback):
 async def callback_help(callback):
     await cmd_help(callback.message)
     await callback.answer()
+
+
+# Reply keyboard button handlers
+@router.message(F.text == "❓ Помощь")
+async def reply_help(message: Message):
+    await cmd_help(message)
+
+
+@router.message(F.text == "🌐 Сайт")
+async def reply_website(message: Message):
+    await message.answer(
+        "🌐 <b>Stone AI — Веб-версия</b>\n\n"
+        "Полный чат с историей, все модели:\n"
+        "👉 <a href='https://stoneai.ru/webchat'>stoneai.ru/webchat</a>\n\n"
+        "Тарифы и оплата:\n"
+        "👉 <a href='https://stoneai.ru/pricing'>stoneai.ru/pricing</a>",
+        parse_mode="HTML",
+        disable_web_page_preview=True,
+    )
