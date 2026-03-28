@@ -782,10 +782,8 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
       setSidebarOpen(false);
     }
-    // Show onboarding for first-time users
-    if (!localStorage.getItem("stone_onboarded")) {
-      setShowOnboarding(true);
-    }
+    // Show onboarding (DEBUG: always show — remove after testing)
+    setShowOnboarding(true);
   }, []);
 
   // Fetch usage limits
