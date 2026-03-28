@@ -20,7 +20,6 @@ const tools = [
   { href: "/documents", label: "Анализ документов" },
   { href: "/search", label: "AI Поиск" },
   { href: "/code", label: "Код-ассистент" },
-  { href: "/health", label: "AI Консультант" },
 ];
 
 export default function Nav() {
