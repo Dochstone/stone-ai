@@ -334,16 +334,14 @@ function ModelCard({
       </div>
       <div style={{ fontSize: 9, color: '#4a7a5a', marginTop: 2 }}>{model.company}</div>
 
-      {/* Price */}
+      {/* Tier badge */}
       <div style={{
         fontSize: 9, fontWeight: 800, marginTop: 'auto', paddingTop: 6,
         color: isPremium ? '#bf5af2' : '#00cc66',
         background: isPremium ? 'rgba(191,90,242,0.1)' : `rgba(${p.primaryRgb},0.1)`,
         padding: '2px 6px', borderRadius: 5, display: 'inline-block',
       }}>
-        {isPremium
-          ? (priceWeighted && priceWeighted > 0 ? `$${priceWeighted.toFixed(1)}/M` : 'PRO')
-          : 'FREE'}
+        {isPremium ? 'PRO' : 'FREE'}
       </div>
     </div>
   )
