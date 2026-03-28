@@ -200,6 +200,10 @@ export default function Nav() {
             </a>
 
             <div className="border-t border-text/5 my-2" />
+            <a href="/pricing" onClick={() => setMenuOpen(false)}
+              className="border-2 border-accent text-accent px-5 py-3 min-h-[44px] rounded-xl font-bold text-sm text-center hover:bg-accent hover:text-white transition-colors flex items-center justify-center">
+              Тарифы от 390₽
+            </a>
             {authEmail ? (
               <>
                 <a href="/profile" onClick={() => setMenuOpen(false)}

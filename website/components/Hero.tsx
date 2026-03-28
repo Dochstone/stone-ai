@@ -267,6 +267,7 @@ export default function Hero() {
               Посмотреть модели
             </a>
           </div>
+          <p className="mt-3 text-xs text-text/30">Бесплатно 15 запросов/день · Подписка от 390₽/мес</p>
           <p className="text-[11px] text-text/35 mt-4 text-center">
             Бесплатно · Без карты · 15 запросов в день
           </p>

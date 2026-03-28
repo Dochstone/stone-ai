@@ -426,6 +426,19 @@ function WelcomeScreen({ onSuggestion, activeTab }: { onSuggestion: (text: strin
             ))}
           </div>
         )}
+
+        {/* Upgrade CTA */}
+        {activeTab === "all" && (
+          <div className="mt-6 max-w-lg mx-auto">
+            <a href="/pricing" className="flex items-center justify-between bg-accent/5 hover:bg-accent/10 border border-accent/15 rounded-xl px-4 py-3 transition-colors">
+              <div>
+                <p className="text-[12px] font-bold text-text">Хотите GPT-5.4 и Claude Opus?</p>
+                <p className="text-[10px] text-text/40">Безлимит от 390₽/мес</p>
+              </div>
+              <span className="text-accent text-xs font-bold shrink-0">Тарифы →</span>
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -500,6 +513,7 @@ function Sidebar({
   onNewChat,
   onDeleteSession,
   onRenameSession,
+  plan,
 }: {
   open: boolean;
   onToggle: () => void;
@@ -509,6 +523,7 @@ function Sidebar({
   onNewChat: () => void;
   onDeleteSession: (id: number) => void;
   onRenameSession: (id: number, title: string) => void;
+  plan?: string;
 }) {
   const [sidebarSearch, setSidebarSearch] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -631,6 +646,16 @@ function Sidebar({
             </div>
           )}
         </div>
+
+        {/* Upgrade CTA — only for free/mini */}
+        {plan !== "max" && plan !== "max-pro" && (
+          <div className="p-3 shrink-0 border-t border-text/[0.06]">
+            <a href="/pricing" className="block bg-accent/10 hover:bg-accent/15 rounded-xl p-3 transition-colors text-center">
+              <p className="text-[11px] font-bold text-accent">Безлимит от 390₽/мес</p>
+              <p className="text-[9px] text-text/40 mt-0.5">GPT-5.4, Claude Opus, видео</p>
+            </a>
+          </div>
+        )}
 
       </div>
     </>
@@ -1447,6 +1472,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
         onNewChat={newChat}
         onDeleteSession={deleteSession}
         onRenameSession={renameSession}
+        plan={limits?.plan}
       />
 
       {/* Main chat area */}
@@ -1824,6 +1850,16 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                   </div>
                 </div>
               ))}
+
+              {/* Upgrade nudge — every 5th response for free users */}
+              {messages.length > 0 && messages.length % 5 === 0 && !streaming && limits?.plan !== "max" && limits?.plan !== "max-pro" && (
+                <div className="max-w-3xl mx-auto px-3 sm:px-4">
+                  <a href="/pricing" className="flex items-center justify-between bg-accent/5 border border-accent/10 rounded-xl px-4 py-2.5 hover:bg-accent/10 transition-colors">
+                    <span className="text-[11px] text-text/50">Нравится? <span className="font-bold text-accent">Безлимит от 390₽/мес</span></span>
+                    <span className="text-[10px] text-accent font-semibold">Тарифы →</span>
+                  </a>
+                </div>
+              )}
 
               {/* Streaming dots — only when no content yet */}
               {showStreamingDots && (

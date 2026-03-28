@@ -102,17 +102,13 @@ export default function BlogPostPage({ params }: Props) {
         </div>
 
         {/* CTA */}
-        <div className="mt-14 bg-white rounded-2xl border border-text/5 p-8 text-center">
-          <h3 className="font-bold text-lg mb-2">Попробуйте Stone AI</h3>
-          <p className="text-text/50 text-sm mb-6">
-            65+ нейросетей в одном окне. 15 бесплатных запросов каждый день.
-          </p>
-          <a
-            href="/webchat"
-            className="inline-block bg-accent text-white px-8 py-3.5 rounded-xl font-bold hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
-          >
-            Попробовать бесплатно
-          </a>
+        <div className="mt-10 bg-accent/5 border border-accent/10 rounded-2xl p-6 sm:p-8 text-center">
+          <h3 className="font-extrabold text-lg mb-2">Попробуйте Stone AI бесплатно</h3>
+          <p className="text-text/50 text-sm mb-4">15 запросов каждый день, 7 моделей. Подписка от 390₽/мес открывает 65+ нейросетей.</p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <a href="/webchat" className="bg-accent text-white px-8 py-3 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors">Начать бесплатно</a>
+            <a href="/pricing" className="border-2 border-text/15 text-text px-8 py-3 rounded-xl font-bold text-sm hover:border-accent hover:text-accent transition-colors">Смотреть тарифы</a>
+          </div>
         </div>
 
         {/* More articles */}
