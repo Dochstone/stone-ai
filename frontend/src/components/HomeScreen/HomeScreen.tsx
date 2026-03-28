@@ -170,7 +170,7 @@ export function HomeScreen() {
           }} />
         </div>
 
-        {/* Balance row */}
+        {/* Subscription tier */}
         <div style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           background: `rgba(${p.primaryRgb},0.06)`,
@@ -178,28 +178,13 @@ export function HomeScreen() {
           borderRadius: 10, padding: '10px 14px',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 16 }}>💰</span>
-            <span style={{ color: '#aab8aa', fontSize: 13 }}>Баланс</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: user.plan === 'max' || user.plan === 'max-pro' ? '#ff9500' : user.plan === 'mini' ? '#007aff' : '#5a8a70', background: user.plan === 'max' || user.plan === 'max-pro' ? 'rgba(255,149,0,0.15)' : user.plan === 'mini' ? 'rgba(0,122,255,0.15)' : 'rgba(90,138,112,0.15)', padding: '4px 10px', borderRadius: 8 }}>
+              {user.plan === 'max-pro' ? 'MAX PRO' : user.plan === 'max' ? 'MAX' : user.plan === 'mini' ? 'MINI' : 'FREE'}
+            </span>
+            <span style={{ fontSize: 10, color: '#5a8a70', cursor: 'pointer' }} onClick={() => window.open('https://stoneai.ru/pricing', '_blank')}>
+              {user.plan === 'free' || user.plan === 'per_token' ? 'Подписка от 390₽ →' : 'Управление →'}
+            </span>
           </div>
-          {user.balanceUsd > 0 ? (
-            <span style={{
-              color: p.primary, fontWeight: 800, fontSize: 16,
-              filter: `drop-shadow(0 0 6px rgba(${p.primaryRgb},0.5))`,
-            }}>
-              ${user.balanceUsd.toFixed(2)}
-            </span>
-          ) : (
-            <span
-              onClick={() => { haptic('light'); setScreen('plans') }}
-              style={{
-                background: `linear-gradient(135deg, ${p.primary}, ${p.secondary})`,
-                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                fontSize: 13, fontWeight: 700, cursor: 'pointer',
-              }}
-            >
-              Пополнить →
-            </span>
-          )}
         </div>
       </div>
 

@@ -28,7 +28,7 @@ export function ProfileScreen() {
   const stats = [
     { icon: '📊', value: fmt(safeNum(user.liteToday) + safeNum(user.premiumToday)), label: 'Сегодня', color: p.primary },
     { icon: '⚡', value: fmt(safeNum(user.totalRequests)), label: 'Всего запросов', color: p.secondary || p.primary },
-    { icon: '💰', value: `$${safeNum(user.balanceUsd).toFixed(2)}`, label: 'Баланс', color: '#f5a623' },
+    { icon: '⭐', value: user.plan === 'max-pro' ? 'Max Pro' : user.plan === 'max' ? 'Max' : user.plan === 'mini' ? 'Mini' : 'Free', label: 'Подписка', color: '#ff9500' },
     { icon: '📉', value: `$${safeNum(user.totalDepositedUsd).toFixed(2)}`, label: 'Внесено', color: '#bf5af2' },
   ]
 
@@ -97,9 +97,9 @@ export function ProfileScreen() {
 
       <div style={{ height: 12 }} />
 
-      {/* ═══ Wallet / Payment methods ═══ */}
+      {/* ═══ Subscription management ═══ */}
       <div
-        onClick={() => setScreen('plans')}
+        onClick={() => window.open('https://stoneai.ru/pricing', '_blank')}
         style={{
           background: 'rgba(8,16,12,0.95)',
           border: `1px solid rgba(${p.primaryRgb},0.2)`,
@@ -108,26 +108,13 @@ export function ProfileScreen() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 22 }}>💳</span>
+          <span style={{ fontSize: 22 }}>⭐</span>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: '#e0f8ec', marginBottom: 4 }}>
-              Пополнить баланс
+              Управление подпиской
             </div>
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              {[
-                { icon: '⭐', label: 'Stars' },
-                { icon: '💎', label: 'TON' },
-                { icon: '💳', label: 'Карта/СБП' },
-                { icon: '🪙', label: 'Крипто' },
-              ].map(m => (
-                <span key={m.label} style={{
-                  fontSize: 10, color: '#8aaa98',
-                  background: 'rgba(255,255,255,0.04)',
-                  padding: '2px 7px', borderRadius: 5,
-                }}>
-                  {m.icon} {m.label}
-                </span>
-              ))}
+            <div style={{ fontSize: 10, color: '#8aaa98' }}>
+              {user.plan === 'free' || user.plan === 'per_token' ? 'Подписка от 390₽/мес' : `Тариф: ${user.plan === 'max-pro' ? 'Max Pro' : user.plan === 'max' ? 'Max' : user.plan === 'mini' ? 'Mini' : 'Free'}`}
             </div>
           </div>
           <span style={{
@@ -228,6 +215,17 @@ export function ProfileScreen() {
 
       <div style={{ height: 10 }} />
 
+      {/* Website link */}
+      <div onClick={() => window.open('https://stoneai.ru', '_blank')} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 16px', background: 'rgba(255,149,0,0.08)', borderRadius: 12, cursor: 'pointer', border: '1px solid rgba(255,149,0,0.15)' }}>
+        <span style={{ fontSize: 18 }}>🌐</span>
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#e0f8ec' }}>Открыть stoneai.ru</div>
+          <div style={{ fontSize: 10, color: '#5a8a70' }}>Веб-чат с полным функционалом</div>
+        </div>
+      </div>
+
+      <div style={{ height: 10 }} />
+
       {/* Usage history */}
       <UsageHistory palette={p} />
 
@@ -238,7 +236,7 @@ export function ProfileScreen() {
         textAlign: 'center', padding: '12px 0',
         fontFamily: 'monospace', fontSize: 10, color: '#3a6a50',
       }}>
-        Stone AI v2.0 &bull; 47 models &bull; Stars / TON / Card / Crypto
+        Stone AI v2.0 &bull; 50+ models &bull; stoneai.ru
       </div>
     </div>
   )
@@ -305,7 +303,7 @@ function UsageHistory({ palette }: { palette: any }) {
       >
         <span style={{ fontSize: 20 }}>📊</span>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#e0f0e8' }}>История расходов</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#e0f0e8' }}>История запросов</div>
           <div style={{ fontSize: 10, color: '#5a8a70', marginTop: 2 }}>Последние 20 запросов</div>
         </div>
         <div style={{
@@ -349,9 +347,9 @@ function UsageHistory({ palette }: { palette: any }) {
               </div>
               <div style={{
                 fontSize: 11, fontWeight: 800, flexShrink: 0,
-                color: h.cost_usd > 0 ? '#bf5af2' : p.primary,
+                color: h.tier === 'premium' ? '#bf5af2' : p.primary,
               }}>
-                {h.cost_usd > 0 ? `-$${h.cost_usd.toFixed(4)}` : 'FREE'}
+                {h.tier === 'premium' ? 'PRO' : 'FREE'}
               </div>
             </div>
           ))}

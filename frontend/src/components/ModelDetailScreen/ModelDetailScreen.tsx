@@ -51,7 +51,7 @@ export function ModelDetailScreen() {
 
   const model = selectedModel
   const isPremium = model.tier === 'premium'
-  const hasSub = user.plan === 'plus' || user.plan === 'max'
+  const hasSub = user.plan === 'mini' || user.plan === 'max' || user.plan === 'max-pro'
   const hasPass = user.hasPass
   const canUsePremium = hasSub || hasPass
   const descKey = MODEL_DESC_KEY[model.id] || 'mdesc_gpt4o_mini'

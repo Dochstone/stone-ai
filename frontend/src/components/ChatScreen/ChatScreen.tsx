@@ -13,7 +13,7 @@ import { renderMarkdown } from '../../utils/markdown'
 import { AdBanner } from '../AdBanner/AdBanner'
 import { haptic } from '../../utils/telegram'
 
-const LOW_BALANCE_THRESHOLD = 0.50
+// const LOW_BALANCE_THRESHOLD = 0.50 // removed: subscription model
 
 export function ChatScreen() {
   const { models, modelId, setModelId, messages, isStreaming, user, palette, setScreen } = useStore()
@@ -21,7 +21,7 @@ export function ChatScreen() {
   const { sendMessage } = useChat()
   const [input, setInput] = useState('')
   const [showModels, setShowModels] = useState(false)
-  const [showBalanceCard, setShowBalanceCard] = useState(false)
+  // showBalanceCard state removed — subscription model
   const endRef = useRef<HTMLDivElement>(null)
   const p = palette
 
@@ -38,8 +38,7 @@ export function ChatScreen() {
     sendMessage(txt)
   }
 
-  const showAd = user.balanceUsd <= 0
-  const lowBalance = user.balanceUsd > 0 && user.balanceUsd < LOW_BALANCE_THRESHOLD
+  const showAd = user.plan === 'free' || user.plan === 'per_token'
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
@@ -78,18 +77,18 @@ export function ChatScreen() {
           </div>
         </div>
 
-        {/* Balance — clickable, opens stats card */}
+        {/* Subscription tier badge */}
         <div
-          onClick={() => { setShowBalanceCard(!showBalanceCard); haptic('light') }}
+          onClick={() => { setScreen('plans'); haptic('light') }}
           style={{
             fontSize: 11, fontWeight: 700,
-            color: lowBalance ? '#f5a623' : p.primary,
-            background: lowBalance ? 'rgba(245,166,35,0.1)' : `rgba(${p.primaryRgb},0.1)`,
+            color: p.primary,
+            background: `rgba(${p.primaryRgb},0.1)`,
             padding: '4px 8px', borderRadius: 6, cursor: 'pointer',
             transition: 'all 0.2s',
           }}
         >
-          ${user.balanceUsd.toFixed(2)}
+          {user.plan === 'max-pro' ? 'Max Pro' : user.plan === 'max' ? 'Max' : user.plan === 'mini' ? 'Mini' : 'Free'}
         </div>
 
         <Tag
@@ -98,105 +97,7 @@ export function ChatScreen() {
         />
       </div>
 
-      {/* ═══ Balance stats card (popup) ═══ */}
-      {showBalanceCard && (
-        <div style={{
-          position: 'absolute', top: 60, right: 12, zIndex: 200,
-          background: 'rgba(10,18,14,0.98)',
-          border: `1px solid rgba(${p.primaryRgb},0.25)`,
-          borderRadius: 14, padding: 16, width: 260,
-          boxShadow: `0 8px 32px rgba(0,0,0,0.5), 0 0 16px rgba(${p.primaryRgb},0.1)`,
-          animation: 'fadeIn 0.15s ease-out',
-        }}>
-          {/* Balance */}
-          <div style={{ textAlign: 'center', marginBottom: 12 }}>
-            <div style={{ fontSize: 9, color: '#668877', fontWeight: 600, letterSpacing: 1, marginBottom: 4 }}>
-              БАЛАНС
-            </div>
-            <div style={{
-              fontSize: 28, fontWeight: 900,
-              color: lowBalance ? '#f5a623' : p.primary,
-            }}>
-              ${user.balanceUsd.toFixed(2)}
-            </div>
-          </div>
-
-          {/* Last request */}
-          {user.lastRequestCost !== null && user.lastRequestCost > 0 && (
-            <div style={{
-              background: `rgba(${p.primaryRgb},0.06)`,
-              border: `1px solid rgba(${p.primaryRgb},0.12)`,
-              borderRadius: 8, padding: '8px 10px', marginBottom: 8,
-            }}>
-              <div style={{ fontSize: 9, color: '#668877', marginBottom: 3 }}>Последний запрос</div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
-                <span style={{ color: '#aab8aa' }}>
-                  {user.lastRequestTokens ? `${user.lastRequestTokens.toLocaleString()} ток.` : '—'}
-                </span>
-                <span style={{ color: '#bf5af2', fontWeight: 700 }}>
-                  -${user.lastRequestCost.toFixed(4)}
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* Session total */}
-          {user.sessionCostUsd > 0 && (
-            <div style={{
-              display: 'flex', justifyContent: 'space-between',
-              fontSize: 11, padding: '6px 0', marginBottom: 8,
-              borderBottom: '1px solid rgba(255,255,255,0.06)',
-            }}>
-              <span style={{ color: '#668877' }}>За сессию</span>
-              <span style={{ color: '#bf5af2', fontWeight: 700 }}>
-                -${user.sessionCostUsd.toFixed(4)}
-              </span>
-            </div>
-          )}
-
-          {/* Top up button */}
-          <button
-            onClick={() => { setShowBalanceCard(false); setScreen('plans'); haptic('medium') }}
-            style={{
-              width: '100%', padding: '10px', borderRadius: 10, border: 'none',
-              background: `linear-gradient(135deg, ${p.primary}, ${p.secondary})`,
-              color: '#000', fontWeight: 800, fontSize: 12, cursor: 'pointer',
-            }}
-          >
-            Пополнить баланс
-          </button>
-
-          {/* Close zone */}
-          <div
-            onClick={() => setShowBalanceCard(false)}
-            style={{
-              textAlign: 'center', marginTop: 8,
-              fontSize: 10, color: '#5a8a70', cursor: 'pointer',
-            }}
-          >
-            закрыть
-          </div>
-        </div>
-      )}
-
-      {/* ═══ Low balance warning ═══ */}
-      {lowBalance && !isStreaming && messages.length > 0 && (
-        <div
-          onClick={() => { setScreen('plans'); haptic('light') }}
-          style={{
-            padding: '6px 16px',
-            background: 'rgba(245,166,35,0.08)',
-            borderBottom: '1px solid rgba(245,166,35,0.15)',
-            display: 'flex', alignItems: 'center', gap: 6,
-            cursor: 'pointer',
-          }}
-        >
-          <span style={{ fontSize: 12 }}>⚠️</span>
-          <span style={{ fontSize: 11, color: '#f5a623', fontWeight: 600 }}>
-            Баланс ${user.balanceUsd.toFixed(2)} — может не хватить. Пополнить →
-          </span>
-        </div>
-      )}
+      {/* Balance stats card and low balance warning removed — subscription model */}
 
       {/* ═══ Model selector dropdown ═══ */}
       {showModels && (

@@ -171,270 +171,81 @@ export function PlansScreen() {
     <div style={{ padding: '16px 16px 90px', minHeight: '100vh' }}>
 
       {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: 20 }}>
-        <h1 style={{
-          fontSize: 26, fontWeight: 800, margin: 0,
-          background: `linear-gradient(135deg, ${p.primary}, ${p.secondary})`,
-          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-        }}>
-          Баланс
-        </h1>
-        <p style={{ color: '#888', fontSize: 12, marginTop: 4 }}>
-          Платите за реально использованные токены
-        </p>
+      <div style={{ textAlign: 'center', padding: '20px 16px' }}>
+        <div style={{ fontSize: 20, fontWeight: 800, color: '#e0f8ec', marginBottom: 8 }}>Выберите тариф</div>
+        <div style={{ fontSize: 12, color: '#5a8a70' }}>Подписка от 390₽/мес</div>
       </div>
 
-      {/* ═══ Balance Card ═══ */}
+      {/* Current plan badge */}
       <SolidCard style={{ textAlign: 'center', border: `1px solid rgba(${p.primaryRgb},0.4)` }}>
         <div style={{ fontSize: 11, color: '#668877', marginBottom: 4, fontWeight: 600, letterSpacing: 1 }}>
-          ТВОЙ БАЛАНС
+          ТЕКУЩИЙ ТАРИФ
         </div>
         <div style={{
-          fontSize: 52, fontWeight: 900, lineHeight: 1,
+          fontSize: 32, fontWeight: 900, lineHeight: 1,
           background: `linear-gradient(135deg, ${p.primary}, ${p.secondary})`,
           WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-          filter: `drop-shadow(0 0 20px rgba(${p.primaryRgb},0.4))`,
         }}>
-          ${user.balanceUsd.toFixed(2)}
+          {user.plan === 'max-pro' ? 'MAX PRO' : user.plan === 'max' ? 'MAX' : user.plan === 'mini' ? 'MINI' : 'FREE'}
         </div>
-        {user.balanceUsd > 0 && (
-          <div style={{ fontSize: 12, color: '#668877', marginTop: 8 }}>
-            ≈ {gptEstimate === Infinity ? '∞' : gptEstimate} зап. GPT-4.1
-            {opusEstimate > 0 && opusEstimate !== Infinity && ` · ${opusEstimate} зап. Opus`}
-          </div>
-        )}
       </SolidCard>
 
-      {/* ═══ Top-up Block ═══ */}
-      <SolidCard style={{ border: `1px solid rgba(${p.primaryRgb},0.3)` }}>
-        <div style={{ fontSize: 11, color: p.primary, fontWeight: 700, letterSpacing: 1.5, marginBottom: 14 }}>
-          ⚡ ПОПОЛНИТЬ БАЛАНС
-        </div>
-
-        {/* Quick amounts */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-          {QUICK_AMOUNTS.map(a => {
-            const selected = amountUsd === String(a)
-            return (
-              <button
-                key={a}
-                onClick={() => { setAmountUsd(String(a)); haptic('light') }}
-                style={{
-                  flex: 1, padding: '10px 0', borderRadius: 10, border: 'none',
-                  background: selected
-                    ? `linear-gradient(135deg, ${p.primary}, ${p.secondary})`
-                    : 'rgba(255,255,255,0.08)',
-                  color: selected ? '#000' : '#cce8d8',
-                  fontWeight: 800, fontSize: 14, cursor: 'pointer',
-                  boxShadow: selected ? `0 0 16px rgba(${p.primaryRgb},0.5)` : 'none',
-                  transform: selected ? 'scale(1.05)' : 'scale(1)',
-                  transition: 'all 0.15s',
-                }}
-              >
-                ${a}
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Custom input */}
-        <div style={{ position: 'relative', marginBottom: 12 }}>
-          <span style={{
-            position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
-            color: p.primary, fontSize: 18, fontWeight: 800,
-          }}>$</span>
-          <input
-            type="number" min="1" placeholder="Своя сумма"
-            value={amountUsd}
-            onChange={e => setAmountUsd(e.target.value)}
-            style={{
-              width: '100%', padding: '14px 14px 14px 32px', borderRadius: 12,
-              border: `1.5px solid rgba(${p.primaryRgb},${usd > 0 ? '0.5' : '0.2'})`,
-              background: 'rgba(0,255,136,0.04)', color: '#e0f8ec',
-              fontSize: 16, fontWeight: 700, boxSizing: 'border-box', outline: 'none',
-            }}
-          />
-        </div>
-
-        {/* Preview */}
-        {usd >= 1 && (
-          <div style={{
-            background: `linear-gradient(135deg, rgba(${p.primaryRgb},0.15), rgba(${p.secondaryRgb},0.08))`,
-            border: `1px solid rgba(${p.primaryRgb},0.35)`,
-            borderRadius: 12, padding: '12px 16px', marginBottom: 14,
-          }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: p.primary }}>
-              Пополнить ${usd.toFixed(2)} за ⭐ {starsNeeded.toLocaleString()}
-            </div>
-            <div style={{ fontSize: 11, color: '#668877', marginTop: 4 }}>
-              ≈ {estimateRequests('gpt-4.1', usd)} зап. GPT-4.1
-              {' · '}
-              ≈ {estimateRequests('gpt-4o-mini', usd)} зап. GPT-4o mini
-            </div>
-          </div>
-        )}
-
-        {/* Pay button */}
-        <button
-          onClick={() => {
-            if (usd < 1) return showToast('Введи сумму от $1', false)
-            haptic('medium')
-            setShowPayModal(true)
-          }}
-          disabled={buying || !!paymentLoading || tonPaymentLoading || usd < 1}
+      {/* ═══ Plan Cards ═══ */}
+      {[
+        { name: 'Free', price: '0₽', features: ['5 Lite-моделей', '15 запросов/день', 'Базовая скорость'], color: '#5a8a70', current: user.plan === 'free' || user.plan === 'per_token' },
+        { name: 'Mini', price: '390₽/мес', features: ['Все 50+ моделей', '100 запросов/день', 'Быстрая скорость', 'Без рекламы'], color: '#007aff', current: user.plan === 'mini' },
+        { name: 'Max', price: '990₽/мес', features: ['Все 50+ моделей', '500 запросов/день', 'Максимальная скорость', 'Без рекламы', 'Приоритетная поддержка'], color: '#ff9500', current: user.plan === 'max' },
+        { name: 'Max Pro', price: '2490₽/мес', features: ['Все 50+ моделей', 'Безлимит запросов', 'Максимальная скорость', 'Без рекламы', 'Приоритетная поддержка', 'API доступ'], color: '#ff3b30', current: user.plan === 'max-pro' },
+      ].map(plan => (
+        <SolidCard
+          key={plan.name}
           style={{
-            width: '100%', padding: '16px', borderRadius: 14, border: 'none',
-            background: usd >= 1
-              ? `linear-gradient(135deg, ${p.primary}, ${p.secondary})`
-              : 'rgba(255,255,255,0.05)',
-            color: usd >= 1 ? '#000' : '#334433',
-            fontWeight: 900, fontSize: 17, cursor: usd >= 1 ? 'pointer' : 'default',
-            opacity: buying || tonPaymentLoading ? 0.7 : 1,
-            boxShadow: usd >= 1 ? `0 4px 24px rgba(${p.primaryRgb},0.5)` : 'none',
-            transition: 'all 0.2s',
+            border: plan.current ? `2px solid ${plan.color}` : `1px solid rgba(${p.primaryRgb},0.15)`,
+            position: 'relative',
           }}
         >
-          {buying || tonPaymentLoading
-            ? (tonPaymentStatus === 'verifying' ? '⏳ Проверяем транзакцию...' : '⏳ Обрабатываем...')
-            : usd >= 1
-              ? `Пополнить $${usd.toFixed(2)}`
-              : 'Введи сумму'}
-        </button>
-      </SolidCard>
-
-      {/* ═══ Model Prices ═══ */}
-      <SolidCard>
-        <div style={{ fontSize: 11, color: p.primary, marginBottom: 10, fontWeight: 700, letterSpacing: 1.5 }}>
-          💰 СТОИМОСТЬ МОДЕЛЕЙ ($/1M токенов)
-        </div>
-
-        {/* Filter tabs */}
-        <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
-          {(['all', 'lite', 'premium'] as const).map(f => {
-            const labels = { all: 'Все', lite: '🆓 Бесплатные', premium: '💎 Платные' }
-            const active = modelFilter === f
-            return (
-              <button
-                key={f}
-                onClick={() => { setModelFilter(f); haptic('light') }}
-                style={{
-                  padding: '6px 12px', borderRadius: 8, border: 'none',
-                  background: active ? `rgba(${p.primaryRgb},0.2)` : 'rgba(255,255,255,0.05)',
-                  color: active ? p.primary : '#668877',
-                  fontSize: 11, fontWeight: 700, cursor: 'pointer',
-                }}
-              >
-                {labels[f]}
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Model list */}
-        {filteredModels.map(m => {
-          const isExpanded = expandedModel === m.id
-          const price = user.modelPrices[m.id] || { weighted: m.price_weighted || 0, input: m.price_input || 0, output: m.price_output || 0 }
-          const costPerReq = price.weighted * AVG_TOKENS_PER_REQUEST / 1_000_000
-          const canAfford = m.tier === 'lite' || user.balanceUsd >= costPerReq
-
-          return (
+          {plan.current && (
+            <div style={{
+              position: 'absolute', top: -1, right: 16,
+              background: plan.color, color: '#000',
+              fontSize: 9, fontWeight: 800, padding: '3px 10px',
+              borderRadius: '0 0 6px 6px',
+            }}>
+              ТЕКУЩИЙ
+            </div>
+          )}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <div style={{ fontSize: 18, fontWeight: 800, color: plan.color }}>{plan.name}</div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: '#e0f8ec' }}>{plan.price}</div>
+          </div>
+          {plan.features.map(f => (
+            <div key={f} style={{ fontSize: 12, color: '#8aaa98', padding: '3px 0', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ color: plan.color, fontSize: 10 }}>✓</span> {f}
+            </div>
+          ))}
+          {!plan.current && (
             <div
-              key={m.id}
-              onClick={() => { setExpandedModel(isExpanded ? null : m.id); haptic('light') }}
+              onClick={() => window.open('https://stoneai.ru/pricing', '_blank')}
               style={{
-                padding: '10px 0',
-                borderBottom: '1px solid rgba(255,255,255,0.06)',
-                cursor: 'pointer',
+                marginTop: 12, textAlign: 'center', padding: '10px',
+                borderRadius: 10, cursor: 'pointer',
+                background: `${plan.color}18`,
+                border: `1px solid ${plan.color}30`,
+                color: plan.color, fontWeight: 700, fontSize: 13,
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ fontSize: 20, width: 28, textAlign: 'center' }}>{m.icon}</span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: '#e0f8ec' }}>{m.name}</div>
-                  <div style={{ fontSize: 10, color: '#4a7a5a', marginTop: 1 }}>{m.company}</div>
-                </div>
-                <div style={{
-                  fontSize: 11, fontWeight: 800, textAlign: 'right',
-                  color: m.tier === 'lite' ? '#00cc66' : canAfford ? p.primary : '#446644',
-                }}>
-                  {m.tier === 'lite' ? 'FREE' : `$${price.weighted.toFixed(2)}`}
-                  <div style={{ fontSize: 9, color: '#4a6a5a', fontWeight: 500 }}>
-                    {m.tier === 'lite' ? '10+5/день' : `~$${costPerReq.toFixed(4)}/зап`}
-                  </div>
-                </div>
-              </div>
-
-              {isExpanded && (
-                <div style={{
-                  marginTop: 8, marginLeft: 38,
-                  fontSize: 11, color: '#7aaa8a', lineHeight: 1.6,
-                  background: `rgba(${p.primaryRgb},0.05)`,
-                  border: `1px solid rgba(${p.primaryRgb},0.1)`,
-                  borderRadius: 8, padding: '8px 12px',
-                }}>
-                  <div>{m.desc}</div>
-                  {m.tier !== 'lite' && (
-                    <>
-                      <div style={{ marginTop: 6, fontSize: 10, color: '#556655' }}>
-                        Input: ${price.input.toFixed(2)}/M · Output: ${price.output.toFixed(2)}/M
-                      </div>
-                      <div style={{ fontSize: 10, color: '#556655' }}>
-                        Контекст: {m.context_length || '—'} · {m.category || 'chat'}
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
+              Выбрать →
             </div>
-          )
-        })}
-      </SolidCard>
+          )}
+        </SolidCard>
+      ))}
 
-      {/* ═══ Cost Calculator ═══ */}
-      <SolidCard>
-        <div style={{ fontSize: 11, color: p.primary, fontWeight: 700, letterSpacing: 1.5, marginBottom: 10 }}>
-          🧮 КАЛЬКУЛЯТОР
+      {/* Pay on website button */}
+      <div style={{ textAlign: 'center', padding: 16 }}>
+        <div onClick={() => window.open('https://stoneai.ru/pricing', '_blank')} style={{ background: `rgba(${p.primaryRgb},0.15)`, color: p.primary, padding: '12px 24px', borderRadius: 12, fontWeight: 700, fontSize: 14, cursor: 'pointer', border: `1px solid rgba(${p.primaryRgb},0.3)` }}>
+          Оплатить на сайте →
         </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10 }}>
-          <input
-            type="number" min="1" value={calcRequests}
-            onChange={e => setCalcRequests(e.target.value)}
-            style={{
-              width: 60, padding: '8px 10px', borderRadius: 8,
-              border: `1px solid rgba(${p.primaryRgb},0.3)`,
-              background: 'rgba(0,255,136,0.04)', color: '#e0f8ec',
-              fontSize: 14, fontWeight: 700, textAlign: 'center', outline: 'none',
-            }}
-          />
-          <span style={{ color: '#668877', fontSize: 12 }}>запросов к</span>
-          <select
-            value={calcModel}
-            onChange={e => setCalcModel(e.target.value)}
-            style={{
-              flex: 1, padding: '8px 10px', borderRadius: 8,
-              border: `1px solid rgba(${p.primaryRgb},0.3)`,
-              background: 'rgba(8,16,12,0.95)', color: '#e0f8ec',
-              fontSize: 12, fontWeight: 600, outline: 'none',
-            }}
-          >
-            {models.filter(m => m.tier === 'premium').map(m => (
-              <option key={m.id} value={m.id}>{m.name}</option>
-            ))}
-          </select>
-        </div>
-        <div style={{
-          textAlign: 'center', padding: '10px', borderRadius: 10,
-          background: `rgba(${p.primaryRgb},0.08)`,
-          border: `1px solid rgba(${p.primaryRgb},0.2)`,
-        }}>
-          <span style={{ fontSize: 24, fontWeight: 900, color: p.primary }}>
-            ${calcCost.toFixed(2)}
-          </span>
-          <div style={{ fontSize: 10, color: '#668877', marginTop: 2 }}>
-            при ~{AVG_TOKENS_PER_REQUEST.toLocaleString()} токенов/запрос
-          </div>
-        </div>
-      </SolidCard>
+      </div>
 
       {/* ═══ FAQ ═══ */}
       <SolidCard>
@@ -442,11 +253,11 @@ export function PlansScreen() {
           ❓ КАК ЭТО РАБОТАЕТ
         </div>
         {[
-          ['💳', 'Пополни баланс от $1', 'Stars, TON, карта, крипто'],
-          ['📊', 'Платишь за реальные токены', '~750 слов = 1000 токенов. Стоимость зависит от модели'],
-          ['🆓', '5 Lite моделей бесплатно', '10 запросов/день + 5 за рекламу'],
-          ['⚡', 'Списание после ответа', 'Ошибка AI — баланс не тратится'],
-          ['♾️', 'Баланс не сгорает', 'Остаток хранится бессрочно'],
+          ['⭐', 'Выберите тариф', 'Free, Mini, Max или Max Pro'],
+          ['🌐', 'Оплатите на сайте', 'stoneai.ru/pricing — карта, СБП, крипто'],
+          ['🆓', 'Free моделей бесплатно', '15 запросов/день к Lite моделям'],
+          ['🚀', 'Подписка = все модели', 'Mini и выше — доступ ко всем 50+ моделям'],
+          ['♾️', 'Подписка автопродляется', 'Отмена в любой момент на сайте'],
         ].map(([icon, title, desc]) => (
           <div key={title} style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
             <span style={{ fontSize: 16, flexShrink: 0 }}>{icon}</span>
