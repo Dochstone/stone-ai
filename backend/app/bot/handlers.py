@@ -16,32 +16,32 @@ async def cmd_start(message: Message):
 
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
-            text="Открыть приложение",
+            text="🚀 Открыть Stone AI",
             web_app=WebAppInfo(url=webapp_url),
+        )],
+        [InlineKeyboardButton(
+            text="🌐 Открыть на сайте",
+            url="https://stoneai.ru/webchat",
         )],
         [
             InlineKeyboardButton(
-                text="Модели и цены",
+                text="💎 Тарифы",
                 web_app=WebAppInfo(url=f"{webapp_url}?tab=plans"),
             ),
             InlineKeyboardButton(
-                text="Пополнить баланс",
-                web_app=WebAppInfo(url=f"{webapp_url}?tab=plans&action=topup"),
+                text="❓ Помощь",
+                url="https://t.me/stoneaisupport",
             ),
         ],
-        [InlineKeyboardButton(
-            text="Поддержка @stoneaisupport",
-            url="https://t.me/stoneaisupport",
-        )],
     ])
 
     await message.answer(
-        "<b>Stone AI — 50+ AI-моделей без VPN</b>\n\n"
-        "GPT-5, Claude, Gemini, Grok, DeepSeek и другие — "
-        "прямо в Telegram.\n\n"
-        "Платите только за токены — от $1.\n\n"
-        "5 моделей бесплатно, 10 запросов в день.\n"
-        "Нажмите кнопку ниже, чтобы начать:",
+        "<b>Stone AI — 65+ нейросетей в одном окне</b>\n\n"
+        "GPT-5.4, Claude Opus, Gemini Pro, DeepSeek, Sora 2 — "
+        "текст, картинки, видео, 3D и аудио.\n\n"
+        "✅ <b>Бесплатно</b> — 15 запросов/день, 7 моделей\n"
+        "⭐ <b>Подписка от 390₽/мес</b> — все 65+ моделей\n\n"
+        "Нажми кнопку ниже, чтобы начать 👇",
         parse_mode="HTML",
         reply_markup=keyboard,
     )
@@ -53,24 +53,26 @@ async def cmd_help(message: Message):
         "<b>Stone AI — Помощь</b>\n\n"
         "<b>Команды:</b>\n"
         "/start — Главное меню\n"
-        "/plan — Текущий тариф и баланс\n"
+        "/plan — Текущий тариф\n"
         "/help — Эта справка\n\n"
-        "<b>50+ моделей:</b>\n"
-        "Бесплатные: GPT-4o mini, Claude Haiku, Gemini Flash, "
-        "Llama 4 Maverick, Mistral Large\n"
-        "Premium: GPT-5.1, Claude Opus 4, Gemini 2.5 Pro, "
-        "Grok 3, DeepSeek R1, Perplexity Pro, Flux и другие\n\n"
-        "<b>Оплата:</b> Stars, карты/СБП, USDT/BTC/ETH\n\n"
-        "Поддержка: @stoneaisupport",
+        "<b>Бесплатные модели (15 запросов/день):</b>\n"
+        "GPT-4o mini, Claude Haiku, Gemini Flash, "
+        "Llama 4, Mistral Large, DeepSeek V3, Nano Banana\n\n"
+        "<b>Подписка от 390₽/мес:</b>\n"
+        "Mini — 20+ моделей, 500 запросов\n"
+        "Max — 65+ моделей, 2000 запросов, видео\n"
+        "Max Pro — 10000 запросов, API\n\n"
+        "<b>Оплата:</b> Telegram Stars, крипто (USDT/BTC/ETH), TON\n\n"
+        "🌐 Сайт: stoneai.ru\n"
+        "💬 Поддержка: @stoneaisupport",
         parse_mode="HTML",
     )
 
 
 @router.message(Command("plan"))
 async def cmd_plan(message: Message):
-    """Show user's current plan and balance from DB."""
+    """Show user's current subscription tier."""
     from app.database import async_session
-    from app.services.limiter import get_user_plan, get_active_subscription, get_today_usage, LIMITS, FREE_DAILY_LIMIT
     from sqlalchemy import select
     from app.models import User
 
@@ -78,43 +80,53 @@ async def cmd_plan(message: Message):
 
     try:
         async with async_session() as db:
-            plan = await get_user_plan(db, tg_id)
-            sub = await get_active_subscription(db, tg_id)
-            lite_today = await get_today_usage(db, tg_id, "lite")
-            premium_today = await get_today_usage(db, tg_id, "premium")
-            limits = LIMITS.get(plan, LIMITS["free"])
-
             result = await db.execute(select(User).where(User.telegram_id == tg_id))
             user = result.scalar_one_or_none()
-            balance = float(user.balance_usd or 0) if user else 0.0
-            rewarded = int(user.rewarded_today or 0) if user else 0
 
-        plan_emoji = {"free": "FREE", "plus": "PLUS", "max": "MAX"}.get(plan, "FREE")
+            if not user:
+                text = (
+                    "<b>Тариф: FREE</b>\n\n"
+                    "7 моделей, 15 запросов/день\n\n"
+                    "Подписка от 390₽/мес открывает 65+ моделей."
+                )
+            else:
+                tier = user.subscription_tier or "free"
+                tier_name = {"mini": "Mini", "max": "Max", "max-pro": "Max Pro"}.get(tier, "Free")
+                tier_emoji = {"mini": "💙", "max": "🧡", "max-pro": "⭐"}.get(tier, "🆓")
 
-        lite_limit = FREE_DAILY_LIMIT + rewarded
-        premium_limit = "безлимит" if limits["premium"] == -1 else str(limits["premium"])
+                text = f"<b>Тариф: {tier_emoji} {tier_name}</b>\n\n"
 
-        text = f"<b>Тариф: {plan_emoji}</b>\n\n"
-        text += f"Баланс: <b>${balance:.2f}</b>\n"
-        text += f"Бесплатных сегодня: {lite_today}/{lite_limit}\n"
-
-        if plan != "free":
-            text += f"Premium сегодня: {premium_today}/{premium_limit}\n"
-
-        if sub:
-            text += f"\nПодписка до: {sub.expires_at.strftime('%d.%m.%Y')}"
-        elif balance == 0 and plan == "free":
-            text += "\nПополните баланс для доступа ко всем 50 моделям."
+                if tier == "free":
+                    text += "7 моделей, 15 запросов/день\n\n"
+                    text += "Подписка от 390₽/мес открывает 65+ моделей."
+                else:
+                    if user.credits_reset_date:
+                        text += f"Действует до: {user.credits_reset_date.strftime('%d.%m.%Y')}\n"
+                    text += f"Запросов использовано: {user.monthly_fast_used or 0}\n"
+                    if tier in ("max", "max-pro"):
+                        text += f"Картинок: {user.monthly_images_used or 0}\n"
+                        text += f"Видео: {user.monthly_videos_used or 0}\n"
 
     except Exception:
         text = (
-            "<b>Тариф: FREE</b>\n\n"
-            "Баланс: $0.00\n"
-            "5 моделей бесплатно, 10 запросов/день\n\n"
-            "Пополните баланс для доступа ко всем 50 моделям."
+            "<b>Тариф: 🆓 Free</b>\n\n"
+            "7 моделей, 15 запросов/день\n\n"
+            "Подписка от 390₽/мес."
         )
 
-    await message.answer(text, parse_mode="HTML")
+    settings = get_settings()
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(
+            text="💎 Выбрать тариф",
+            web_app=WebAppInfo(url=f"{settings.webapp_url}?tab=plans"),
+        )],
+        [InlineKeyboardButton(
+            text="🌐 Оплатить на сайте",
+            url="https://stoneai.ru/pricing",
+        )],
+    ])
+
+    await message.answer(text, parse_mode="HTML", reply_markup=keyboard)
 
 
 @router.callback_query(F.data == "plans")
@@ -122,19 +134,22 @@ async def callback_plans(callback):
     settings = get_settings()
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
-            text="Открыть тарифы",
+            text="💎 Открыть тарифы",
             web_app=WebAppInfo(url=f"{settings.webapp_url}?tab=plans"),
+        )],
+        [InlineKeyboardButton(
+            text="🌐 Оплатить на сайте",
+            url="https://stoneai.ru/pricing",
         )],
     ])
 
     await callback.message.answer(
-        "<b>Цены Stone AI</b>\n\n"
-        "<b>FREE</b> — 5 моделей бесплатно\n"
-        "10 запросов/день (+5 за рекламу)\n\n"
-        "<b>Per-token</b> — пополните баланс\n"
-        "50+ моделей, безлимитные запросы\n"
-        "От $0.24 за 1M токенов\n\n"
-        "Оплата: Stars, карты, СБП, крипто",
+        "<b>Тарифы Stone AI</b>\n\n"
+        "🆓 <b>Free</b> — 0₽, 7 моделей, 15 запросов/день\n"
+        "💙 <b>Mini</b> — 390₽/мес, 20+ моделей, 500 запросов\n"
+        "🧡 <b>Max</b> — 890₽/мес, 65+ моделей, видео, 3D\n"
+        "⭐ <b>Max Pro</b> — 1990₽/мес, безлимит, API\n\n"
+        "Оплата: Stars, крипто, TON",
         parse_mode="HTML",
         reply_markup=keyboard,
     )

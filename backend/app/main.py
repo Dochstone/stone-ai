@@ -66,6 +66,13 @@ async def lifespan(app: FastAPI):
                 allowed_updates=["message", "callback_query", "pre_checkout_query"],
             )
             logger.info(f"✅ Webhook set: {webhook_url[:60]}...")
+            # Set bot commands menu
+            from aiogram.types import BotCommand
+            await bot.set_my_commands([
+                BotCommand(command="start", description="🚀 Открыть Stone AI"),
+                BotCommand(command="plan", description="💎 Мой тариф"),
+                BotCommand(command="help", description="❓ Помощь"),
+            ])
         except Exception as e:
             logger.error(f"❌ Failed to set webhook: {e}")
         logger.info("✅ Bot initialized in webhook mode")
