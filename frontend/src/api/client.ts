@@ -5,7 +5,7 @@
 
 import { getInitData } from '../utils/telegram'
 
-const API_BASE = import.meta.env.VITE_API_URL || ''
+const API_BASE = import.meta.env.VITE_API_URL || 'https://stone-ai-production.up.railway.app'
 
 function getHeaders(): Record<string, string> {
   const initData = getInitData()
