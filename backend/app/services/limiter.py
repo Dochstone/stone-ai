@@ -192,32 +192,29 @@ def _next_streak_milestone(current_streak: int) -> int:
 
 async def check_can_request(db: AsyncSession, tg_id: int, model_id: str) -> dict:
     """
-    Check if user can make a request to the specified model.
-
-    Logic:
-    1. Determine model category (fast / premium / image).
-    2. Get today's usage count for that category.
-    3. Get streak bonuses from user object.
-    4. effective_limit = base_limit + streak_bonus_for_category.
-    5. If used >= effective_limit AND balance_usd <= 0 AND subscription_tier == "free":
-       -> denied with upgrade message.
-    6. If balance > 0: always allow (per-token billing, no limits).
-    7. If allowed AND subscription_tier == "free": add delay.
-
-    Returns dict with: allowed, reason, plan, tier, category, used_today,
-                       limit, has_pass, billing, delay (optional).
+    Check if user can make a request — delegates to daily_limits system.
     """
-    tier = get_model_tier(model_id)
-    category = get_model_category(model_id)
+    from app.services.daily_limits import check_daily_limit
 
     # Load user
     result = await db.execute(select(User).where(User.telegram_id == tg_id))
     user = result.scalar_one_or_none()
+    if not user:
+        # Try by id (web users)
+        result = await db.execute(select(User).where(User.id == tg_id))
+        user = result.scalar_one_or_none()
+
     balance = float(user.balance_usd or 0) if user else 0.0
     sub_tier = (user.subscription_tier or "free") if user else "free"
 
-    base = {
-        "plan": sub_tier,
+    return await check_daily_limit(db, tg_id, model_id, sub_tier, balance)
+
+
+
+# NOTE: Old check_can_request body (lines 212-337) removed.
+# Now delegated to daily_limits.check_daily_limit()
+_DEAD_CODE_REMOVED = {
+        "plan": "removed",
         "tier": tier,
         "category": category,
         "has_pass": False,
@@ -345,53 +342,9 @@ async def check_can_request(db: AsyncSession, tg_id: int, model_id: str) -> dict
 # ─── Limits endpoint helper ───
 
 async def get_free_limits(db: AsyncSession, user: User) -> dict:
-    """
-    Return current usage vs limits for /api/user/limits endpoint.
-
-    Works for any user: free-plan users see their limits & bonuses,
-    paid users see unlimited (-1).
-    """
-    tg_id = user.telegram_id
-    sub_tier = user.subscription_tier or "free"
-
-    # Count today's fast usage (tier == 'lite' in Usage table)
-    fast_used = await _get_today_category_usage(db, tg_id, "fast")
-    # Count today's premium usage (tier == 'premium' in Usage table)
-    premium_used = await _get_today_category_usage(db, tg_id, "premium")
-    # Image & video from user counters
-    image_used = int(user.daily_image_used or 0)
-    video_used = int(user.weekly_video_used or 0)
-
-    # Streak bonuses
-    streak_fast = int(user.streak_bonus_fast or 0)
-    streak_images = int(user.streak_bonus_images or 0)
-    streak_video = int(user.streak_bonus_video or 0)
-    login_streak = int(user.login_streak or 0)
-
-    return {
-        "plan": sub_tier,
-        "text": {
-            "used": fast_used,
-            "limit": FREE_LIMITS["text"] + streak_fast if sub_tier == "free" else -1,
-            "bonus": streak_fast,
-        },
-        "image": {
-            "used": image_used,
-            "limit": FREE_LIMITS["image"] + streak_images if sub_tier == "free" else -1,
-            "bonus": streak_images,
-        },
-        "video": {
-            "used": video_used,
-            "limit": FREE_LIMITS["video"] if sub_tier == "free" else -1,
-            "bonus": 0,
-        },
-        "free_models": list(FREE_MODELS),
-        "streak": {
-            "days": login_streak,
-            "next_bonus_at": _next_streak_milestone(login_streak),
-        },
-        "has_delay": sub_tier == "free" and float(user.balance_usd or 0) <= 0,
-    }
+    """Return current usage vs limits — delegates to daily_limits system."""
+    from app.services.daily_limits import get_limits_info
+    return await get_limits_info(db, user)
 
 
 # ─── Usage recording (preserved from original) ───
@@ -424,16 +377,10 @@ async def record_usage(
     if user:
         user.total_requests = (user.total_requests or 0) + 1
         user.total_tokens_used = (user.total_tokens_used or 0) + tokens_in + tokens_out
-        if tier == "lite":
-            user.daily_lite_used = (user.daily_lite_used or 0) + 1
-        else:
-            user.daily_premium_used = (user.daily_premium_used or 0) + 1
 
-    # Decrement pass if used
-    active_pass = await get_active_pass(db, tg_id)
-    if active_pass and tier == "premium":
-        active_pass.requests_left -= 1
-        if active_pass.requests_left <= 0:
-            active_pass.is_active = False
+    # Increment daily usage counters
+    from app.services.daily_limits import increment_usage
+    sub_tier = (user.subscription_tier or "free") if user else "free"
+    await increment_usage(db, tg_id, model_id, sub_tier)
 
     await db.flush()

@@ -79,9 +79,33 @@ async def lifespan(app: FastAPI):
     else:
         logger.warning("⚠️ Bot token not configured — running API only")
 
+    # Start daily rollover background task
+    import asyncio
+    from datetime import datetime, timedelta, timezone as tz
+
+    async def daily_rollover_loop():
+        MSK = tz(timedelta(hours=3))
+        while True:
+            now = datetime.now(MSK)
+            tomorrow = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+            sleep_sec = (tomorrow - now).total_seconds()
+            logger.info(f"Daily rollover: next run in {sleep_sec/3600:.1f}h ({tomorrow.isoformat()})")
+            await asyncio.sleep(sleep_sec)
+            try:
+                from app.services.daily_limits import process_daily_rollover
+                from app.database import async_session
+                async with async_session() as db:
+                    count = await process_daily_rollover(db)
+                logger.info(f"✅ Daily rollover completed: {count} users")
+            except Exception as e:
+                logger.error(f"❌ Daily rollover error: {e}")
+
+    rollover_task = asyncio.create_task(daily_rollover_loop())
+
     yield
 
     # Shutdown
+    rollover_task.cancel()
     if bot:
         await bot.session.close()
     logger.info("👋 Stone AI shut down")
