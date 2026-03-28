@@ -326,7 +326,7 @@ export default function Hero() {
           {onboardingStep === 0 && (
             <div className="h-full flex flex-col relative">
               <div className="absolute inset-0">
-                <VideoCycler sources={["/demo/veo-02.mp4", "/demo/veo-06.mp4", "/demo/veo-09.mp4"]} />
+                <VideoCycler sources={["/demo/veo-02.mp4", "/demo/veo-06.mp4", "/demo/onboard-5.mp4"]} />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-transparent to-transparent" />
               </div>
               <div className="relative flex-1 flex flex-col justify-end p-6 pb-8">
@@ -350,7 +350,7 @@ export default function Hero() {
           {onboardingStep === 1 && (
             <div className="h-full flex flex-col relative">
               <div className="absolute inset-0">
-                <VideoCycler sources={["/demo/veo-03.mp4", "/demo/veo-05.mp4", "/demo/veo-10.mp4"]} />
+                <VideoCycler sources={["/demo/veo-03.mp4", "/demo/veo-05.mp4", "/demo/onboard-2.mp4"]} />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-transparent to-transparent" />
               </div>
               <div className="relative flex-1 flex flex-col justify-end p-6 pb-8">
@@ -383,7 +383,7 @@ export default function Hero() {
           {onboardingStep === 2 && (
             <div className="h-full flex flex-col relative">
               <div className="absolute inset-0">
-                <VideoCycler sources={["/demo/veo-04.mp4", "/demo/veo-07.mp4", "/demo/veo-08.mp4"]} />
+                <VideoCycler sources={["/demo/onboard-3.mp4", "/demo/veo-07.mp4", "/demo/veo-08.mp4"]} />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/20 to-transparent" />
               </div>
               <div className="relative flex-1 flex flex-col justify-end p-6 pb-8">
