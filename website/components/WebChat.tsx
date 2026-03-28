@@ -1611,7 +1611,6 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
             { id: "free", icon: "✨", label: "Free" },
             { id: "image", icon: "🎨", label: "Фото" },
             { id: "video", icon: "🎬", label: "Видео" },
-            { id: "3d", icon: "🧊", label: "3D" },
           ].map((t) => (
             <button
               key={t.id}

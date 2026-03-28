@@ -483,16 +483,6 @@ export default function ToolCards() {
           {/* ── Audio — interactive equalizer ── */}
           <AudioCard />
 
-          {/* ── 3D — real rotating model ── */}
-          <a href="/3d" className="bg-[var(--color-card-dark)] rounded-2xl block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[220px]">
-            <div className="absolute inset-0" dangerouslySetInnerHTML={{ __html: `<model-viewer src="/demo/model-demo.glb" auto-rotate camera-controls touch-action="pan-y" interaction-prompt="none" style="width:100%;height:100%;background:#1C1C1E" shadow-intensity="0.5" exposure="1.5"></model-viewer>` }} />
-            <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-card-dark)] via-transparent to-transparent pointer-events-none" />
-            <div className="relative z-10 p-6 flex flex-col justify-end h-full pointer-events-none">
-              <span className="inline-block bg-cyan-500/30 text-cyan-300 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-2 w-fit">Tripo + TripoSR</span>
-              <h3 className="font-bold text-lg text-white mb-1">3D Модели</h3>
-              <p className="text-white/50 text-[13px]">Нейросеть создаёт 3D из текста или фото. GLB для игр и печати. Вращайте!</p>
-            </div>
-          </a>
 
           {/* ── Deep Analysis — live reasoning chain, FIXED HEIGHT ── */}
           <a href="/chat" className="bg-[var(--color-card-dark)] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative" style={{ height: 320 }}>
