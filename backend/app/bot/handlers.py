@@ -35,22 +35,8 @@ async def cmd_start(message: Message):
         ],
     ])
 
-    # Bottom persistent buttons
-    reply_kb = ReplyKeyboardMarkup(
-        keyboard=[
-            [
-                KeyboardButton(text="🚀 Открыть Stone AI", web_app=WAI(url=webapp_url)),
-                KeyboardButton(text="💎 Тарифы", web_app=WAI(url=f"{webapp_url}?tab=plans")),
-            ],
-            [
-                KeyboardButton(text="❓ Помощь"),
-                KeyboardButton(text="🌐 Сайт"),
-            ],
-        ],
-        resize_keyboard=True,
-        is_persistent=True,
-    )
-
+    # Remove old reply keyboard if exists
+    from aiogram.types import ReplyKeyboardRemove
     await message.answer(
         "<b>Stone AI — 65+ нейросетей в одном окне</b>\n\n"
         "GPT-5.4, Claude Opus, Gemini Pro, DeepSeek, Sora 2 — "
@@ -59,12 +45,11 @@ async def cmd_start(message: Message):
         "⭐ <b>Подписка от 390₽/мес</b> — все 65+ моделей\n\n"
         "Нажми кнопку ниже, чтобы начать 👇",
         parse_mode="HTML",
-        reply_markup=reply_kb,
+        reply_markup=ReplyKeyboardRemove(),
     )
 
-    # Also send inline keyboard
     await message.answer(
-        "Быстрые ссылки:",
+        "👇 Выберите действие:",
         reply_markup=keyboard,
     )
 
