@@ -409,41 +409,28 @@ async def text_chat(message: Message):
     try:
         async with httpx.AsyncClient(timeout=60.0) as client:
             resp = await client.post(
-                f"https://stone-ai-production.up.railway.app/api/chat",
+                "https://openrouter.ai/api/v1/chat/completions",
                 headers={
+                    "Authorization": f"Bearer {settings.openrouter_api_key}",
                     "Content-Type": "application/json",
-                    "X-TG-ID": str(tg_id),
-                    "Authorization": f"tma fake:{tg_id}",
+                    "HTTP-Referer": "https://stoneai.ru",
                 },
                 json={
-                    "model_id": "gpt-4o-mini",
+                    "model": "openai/gpt-4o-mini",
                     "messages": [{"role": "user", "content": text}],
+                    "max_tokens": 2048,
                 },
             )
 
             if resp.status_code != 200:
-                await wait_msg.edit_text("❌ Ошибка. Попробуйте через /start → Открыть Stone AI")
+                await wait_msg.edit_text("❌ Ошибка. Попробуйте позже.")
                 return
 
-            # Parse SSE response
-            full_text = ""
-            for line in resp.text.split("\n"):
-                if not line.startswith("data: "):
-                    continue
-                payload = line[6:].strip()
-                if payload == "[DONE]":
-                    break
-                try:
-                    import json
-                    data = json.loads(payload)
-                    content = data.get("content") or data.get("choices", [{}])[0].get("delta", {}).get("content", "")
-                    if content:
-                        full_text += content
-                except:
-                    pass
+            import json
+            data = resp.json()
+            full_text = data.get("choices", [{}])[0].get("message", {}).get("content", "")
 
             if full_text:
-                # Truncate if too long for Telegram
                 if len(full_text) > 4000:
                     full_text = full_text[:4000] + "..."
                 await wait_msg.edit_text(full_text, parse_mode=None)
