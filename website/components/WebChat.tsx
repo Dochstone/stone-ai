@@ -782,8 +782,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
       setSidebarOpen(false);
     }
-    // Show onboarding (DEBUG: always show — remove after testing)
-    setShowOnboarding(true);
+    // Onboarding moved to landing page (Hero component)
   }, []);
 
   // Fetch usage limits
