@@ -192,10 +192,10 @@ export function PlansScreen() {
 
       {/* ═══ Plan Cards ═══ */}
       {[
-        { name: 'Free', price: '0₽', features: ['5 Lite-моделей', '15 запросов/день', 'Базовая скорость'], color: '#5a8a70', current: user.plan === 'free' || user.plan === 'per_token' },
-        { name: 'Mini', price: '390₽/мес', features: ['Все 50+ моделей', '100 запросов/день', 'Быстрая скорость', 'Без рекламы'], color: '#007aff', current: user.plan === 'mini' },
-        { name: 'Max', price: '990₽/мес', features: ['Все 50+ моделей', '500 запросов/день', 'Максимальная скорость', 'Без рекламы', 'Приоритетная поддержка'], color: '#ff9500', current: user.plan === 'max' },
-        { name: 'Max Pro', price: '2490₽/мес', features: ['Все 50+ моделей', 'Безлимит запросов', 'Максимальная скорость', 'Без рекламы', 'Приоритетная поддержка', 'API доступ'], color: '#ff3b30', current: user.plan === 'max-pro' },
+        { id: 'free', name: 'Free', price: '0₽', stars: 0, tier: 'free', features: ['7 моделей', '15 запросов/день', '2 картинки/день'], color: '#5a8a70', current: user.plan === 'free' || user.plan === 'per_token' },
+        { id: 'mini', name: 'Mini', price: '390₽/мес', stars: 300, tier: 'mini', features: ['20+ моделей', '500 запросов/мес', '15 картинок, 3 видео', 'GPT-5.1, Claude Sonnet'], color: '#007aff', current: user.plan === 'mini' },
+        { id: 'max', name: 'Max', price: '890₽/мес', stars: 685, tier: 'max', features: ['65+ моделей', '2000 запросов/мес', '50 картинок, 10 видео', 'Claude Opus, 3D, аудио'], color: '#ff9500', current: user.plan === 'max' },
+        { id: 'max-pro', name: 'Max Pro', price: '1 990₽/мес', stars: 1531, tier: 'max-pro', features: ['65+ моделей + API', '10 000 запросов/мес', '300 картинок, 50 видео', 'Приоритет, ранний доступ'], color: '#ff3b30', current: user.plan === 'max-pro' },
       ].map(plan => (
         <SolidCard
           key={plan.name}
@@ -223,29 +223,42 @@ export function PlansScreen() {
               <span style={{ color: plan.color, fontSize: 10 }}>✓</span> {f}
             </div>
           ))}
-          {!plan.current && (
-            <div
-              onClick={() => window.open('https://stoneai.ru/pricing', '_blank')}
-              style={{
-                marginTop: 12, textAlign: 'center', padding: '10px',
-                borderRadius: 10, cursor: 'pointer',
-                background: `${plan.color}18`,
-                border: `1px solid ${plan.color}30`,
-                color: plan.color, fontWeight: 700, fontSize: 13,
-              }}
-            >
-              Выбрать →
+          {!plan.current && plan.stars > 0 && (
+            <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+              <div
+                onClick={async () => {
+                  haptic('medium')
+                  try {
+                    const res = await apiPost('/api/payment/stars/create-subscription', { tier: plan.tier })
+                    if (res.invoice_url) window.open(res.invoice_url, '_blank')
+                  } catch (e) { alert('Ошибка создания инвойса') }
+                }}
+                style={{
+                  flex: 1, textAlign: 'center', padding: '10px',
+                  borderRadius: 10, cursor: 'pointer',
+                  background: `${plan.color}25`,
+                  border: `1px solid ${plan.color}40`,
+                  color: plan.color, fontWeight: 700, fontSize: 13,
+                }}
+              >
+                ⭐ {plan.stars} Stars
+              </div>
+              <div
+                onClick={() => window.open('https://stoneai.ru/pricing', '_blank')}
+                style={{
+                  flex: 1, textAlign: 'center', padding: '10px',
+                  borderRadius: 10, cursor: 'pointer',
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  color: '#8aaa98', fontWeight: 700, fontSize: 13,
+                }}
+              >
+                💎 Крипто
+              </div>
             </div>
           )}
         </SolidCard>
       ))}
-
-      {/* Pay on website button */}
-      <div style={{ textAlign: 'center', padding: 16 }}>
-        <div onClick={() => window.open('https://stoneai.ru/pricing', '_blank')} style={{ background: `rgba(${p.primaryRgb},0.15)`, color: p.primary, padding: '12px 24px', borderRadius: 12, fontWeight: 700, fontSize: 14, cursor: 'pointer', border: `1px solid rgba(${p.primaryRgb},0.3)` }}>
-          Оплатить на сайте →
-        </div>
-      </div>
 
       {/* ═══ FAQ ═══ */}
       <SolidCard>

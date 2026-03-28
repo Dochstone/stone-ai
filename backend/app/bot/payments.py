@@ -11,13 +11,12 @@ from app.config import get_settings
 
 router = Router()
 
-# Stars products (subscriptions and passes, kept for backwards compat)
+# Stars products — subscription plans
+# Price in Stars: RUB price / ~1.3 RUB per Star
 STARS_PRODUCTS = {
-    "plus_stars": {"plan": "plus", "price": 469, "name": "PLUS подписка (1 мес)"},
-    "max_stars": {"plan": "max", "price": 1499, "name": "MAX подписка (1 мес)"},
-    "day_pass": {"price": 59, "name": "Day Pass (24ч)"},
-    "week_pass": {"price": 229, "name": "Week Pass (7 дней)"},
-    "single_query": {"price": 6, "name": "1 Premium запрос"},
+    "sub_mini": {"tier": "mini", "price": 300, "name": "Mini подписка (1 мес)"},
+    "sub_max": {"tier": "max", "price": 685, "name": "Max подписка (1 мес)"},
+    "sub_max_pro": {"tier": "max-pro", "price": 1531, "name": "Max Pro подписка (1 мес)"},
 }
 
 
@@ -62,7 +61,36 @@ async def process_successful_payment(message: Message):
 
     import httpx
 
-    # New format: topup:<user_id>:<usd_amount>
+    # Subscription format: sub:<tier>:<user_id>
+    if parts[0] == "sub" and len(parts) == 3:
+        tier = parts[1]
+        user_id = int(parts[2])
+        tier_names = {"mini": "Mini", "max": "Max", "max-pro": "Max Pro"}
+
+        try:
+            async with httpx.AsyncClient() as client:
+                resp = await client.post(
+                    "http://localhost:8000/api/payment/stars/subscribe",
+                    params={"tg_id": user_id, "tier": tier, "payment_id": provider_id},
+                )
+                if resp.status_code == 200:
+                    await message.answer(
+                        f"✅ <b>Подписка {tier_names.get(tier, tier)} активирована!</b>\n\n"
+                        f"Действует 30 дней\n"
+                        "Все модели теперь доступны 🚀\n\n"
+                        "Откройте приложение или stoneai.ru/webchat",
+                        parse_mode="HTML",
+                    )
+                else:
+                    await message.answer("⚠️ Платёж получен, но активация не удалась. Пишите @stoneaisupport")
+        except Exception:
+            await message.answer(
+                f"⚠️ Платёж получен ({total_amount}⭐), но произошла ошибка.\n"
+                "Мы активируем вручную. Пишите @stoneaisupport"
+            )
+        return
+
+    # Legacy format: topup:<user_id>:<usd_amount>
     if parts[0] == "topup" and len(parts) == 3:
         user_id = int(parts[1])
         usd_amount = float(parts[2])
@@ -71,65 +99,19 @@ async def process_successful_payment(message: Message):
             async with httpx.AsyncClient() as client:
                 resp = await client.post(
                     "http://localhost:8000/api/payment/stars/confirm",
-                    params={
-                        "tg_id": user_id,
-                        "usd_amount": usd_amount,
-                        "payment_id": provider_id,
-                    },
+                    params={"tg_id": user_id, "usd_amount": usd_amount, "payment_id": provider_id},
                 )
                 if resp.status_code == 200:
                     result = resp.json()
                     await message.answer(
-                        f"✅ <b>Баланс пополнен на ${usd_amount:.2f}!</b>\n\n"
-                        f"Текущий баланс: ${result['new_balance_usd']:.2f}\n"
-                        "Откройте приложение — все модели доступны 🚀",
+                        f"✅ <b>Баланс пополнен на ${usd_amount:.2f}!</b>\n"
+                        f"Текущий баланс: ${result['new_balance_usd']:.2f}",
                         parse_mode="HTML",
                     )
                 else:
-                    await message.answer("⚠️ Платёж получен, но активация не удалась. Пишите https://t.me/StoneAIsupport")
+                    await message.answer("⚠️ Платёж получен, но активация не удалась. Пишите @stoneaisupport")
         except Exception:
-            await message.answer(
-                f"⚠️ Платёж получен ({total_amount}⭐), но произошла ошибка.\n"
-                "Мы зачислим вручную. Пишите https://t.me/StoneAIsupport"
-            )
+            await message.answer(f"⚠️ Платёж получен ({total_amount}⭐), ошибка. Пишите @stoneaisupport")
         return
 
-    # Legacy format: <product_id>:<user_id>
-    if len(parts) == 2:
-        product_id, user_id = parts[0], int(parts[1])
-
-        try:
-            async with httpx.AsyncClient() as client:
-                resp = await client.post(
-                    "http://localhost:8000/api/payment/stars/confirm",
-                    params={
-                        "product_id": product_id,
-                        "tg_id": user_id,
-                        "payment_id": provider_id,
-                    },
-                )
-                if resp.status_code == 200:
-                    result = resp.json()
-                    if "plan" in result:
-                        await message.answer(
-                            f"✅ <b>Подписка {result['plan'].upper()} активирована!</b>\n\n"
-                            f"Действует до {result['expires_at'][:10]}\n"
-                            "Откройте приложение — Premium модели теперь доступны 🚀",
-                            parse_mode="HTML",
-                        )
-                    elif "added_usd" in result:
-                        await message.answer(
-                            f"✅ <b>Баланс пополнен!</b>\n"
-                            f"Текущий баланс: ${result['new_balance_usd']:.2f}",
-                            parse_mode="HTML",
-                        )
-                else:
-                    await message.answer("⚠️ Платёж получен, но активация не удалась. Пишите https://t.me/StoneAIsupport")
-        except Exception:
-            await message.answer(
-                f"⚠️ Платёж получен ({total_amount}⭐), но произошла ошибка.\n"
-                "Мы активируем вручную. Пишите https://t.me/StoneAIsupport"
-            )
-        return
-
-    await message.answer("⚠️ Ошибка обработки платежа. Обратитесь в поддержку https://t.me/StoneAIsupport")
+    await message.answer("⚠️ Ошибка обработки платежа. Обратитесь в @stoneaisupport")

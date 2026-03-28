@@ -115,6 +115,114 @@ async def confirm_stars_payment(
     return {"status": "ok", "added_usd": usd_amount, "new_balance_usd": new_balance}
 
 
+# ═══════════════════════════════════════════════════════════
+# Stars Subscription — activate plan after Stars payment
+# ═══════════════════════════════════════════════════════════
+
+PLAN_PRICES_RUB = {"mini": 390, "max": 890, "max-pro": 1990}
+
+class SubscribeStarsRequest(BaseModel):
+    tier: str
+
+
+@router.post("/stars/create-subscription")
+async def create_stars_subscription(
+    req: SubscribeStarsRequest,
+    tg_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create Stars invoice for subscription purchase."""
+    if req.tier not in PLAN_PRICES_RUB:
+        raise HTTPException(400, "Недопустимый тариф")
+
+    from app.bot.payments import STARS_PRODUCTS
+    product_key = f"sub_{req.tier.replace('-', '_')}"
+    product = STARS_PRODUCTS.get(product_key)
+    if not product:
+        raise HTTPException(400, "Тариф не найден")
+
+    from app.main import bot
+    if not bot:
+        raise HTTPException(503, "Bot not configured")
+
+    try:
+        from aiogram.types import LabeledPrice
+        user_id = tg_user["id"]
+        invoice_url = await bot.create_invoice_link(
+            title=f"Stone AI — {product['name']}",
+            description=f"{product['name']}. 65+ нейросетей.",
+            payload=f"sub:{req.tier}:{user_id}",
+            provider_token="",
+            currency="XTR",
+            prices=[LabeledPrice(label=product["name"], amount=product["price"])],
+        )
+        logger.info(f"Stars subscription invoice: user={user_id}, tier={req.tier}, stars={product['price']}")
+        return {
+            "invoice_url": invoice_url,
+            "stars": product["price"],
+            "tier": req.tier,
+            "price_rub": PLAN_PRICES_RUB[req.tier],
+        }
+    except Exception as e:
+        logger.error(f"Stars subscription invoice error: {e}")
+        raise HTTPException(500, f"Ошибка: {str(e)}")
+
+
+@router.post("/stars/subscribe")
+async def confirm_stars_subscription(
+    tg_id: int,
+    tier: str,
+    payment_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """Called by bot after successful Stars subscription payment."""
+    from datetime import timedelta
+
+    if tier not in PLAN_PRICES_RUB:
+        raise HTTPException(400, "Invalid tier")
+
+    result = await db.execute(select(User).where(User.telegram_id == tg_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(404, "User not found")
+
+    user.subscription_tier = tier
+    user.subscription_started = datetime.utcnow()
+    user.credits_reset_date = datetime.utcnow() + timedelta(days=30)
+    user.monthly_fast_used = 0
+    user.monthly_premium_used = 0
+    user.monthly_images_used = 0
+    user.monthly_videos_used = 0
+
+    price_rub = PLAN_PRICES_RUB[tier]
+    price_usd = round(price_rub / 95.0, 2)
+
+    tx = Transaction(
+        user_tg_id=tg_id,
+        amount=price_rub,
+        currency="RUB",
+        amount_usd=price_usd,
+        product_type="subscription",
+        product_id=f"sub:{tier}",
+        status="completed",
+        provider_id=payment_id,
+    )
+    db.add(tx)
+
+    await db.execute(
+        text("UPDATE users SET total_deposited_usd = COALESCE(total_deposited_usd, 0) + :amt WHERE telegram_id = :tid"),
+        {"amt": price_usd, "tid": tg_id}
+    )
+
+    from app.routers.referral import credit_referrer
+    await credit_referrer(db, tg_id, price_usd)
+
+    await db.commit()
+
+    logger.info(f"Stars subscription: user={tg_id}, tier={tier}, stars_paid")
+    return {"status": "ok", "tier": tier}
+
+
 @router.post("/fiat/create-invoice")
 async def create_fiat_invoice(
     req: TopUpRequest,
