@@ -750,6 +750,8 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
 
   const [dragging, setDragging] = useState(false);
   const dragCounterRef = useRef(0);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingStep, setOnboardingStep] = useState(0);
   const [upsellModal, setUpsellModal] = useState<{ type: "limit" | "locked"; model?: string; tier?: string } | null>(null);
 
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -779,6 +781,10 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
     setLoaded(true);
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
       setSidebarOpen(false);
+    }
+    // Show onboarding for first-time users
+    if (!localStorage.getItem("stone_onboarded")) {
+      setShowOnboarding(true);
     }
   }, []);
 
@@ -2087,6 +2093,50 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
           </div>
         </div>
       </div>
+
+      {/* Onboarding */}
+      {showOnboarding && (
+        <div className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center px-4">
+          <div className="bg-bg rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl">
+            {onboardingStep === 0 && (
+              <div className="text-center p-8">
+                <div className="w-20 h-20 mx-auto mb-4 bg-accent rounded-2xl flex items-center justify-center"><span className="text-4xl">🧠</span></div>
+                <h2 className="text-xl font-extrabold text-text mb-2">65+ нейросетей в одном окне</h2>
+                <p className="text-text/50 text-sm mb-6">GPT-5.4, Claude Opus, Gemini Pro, DeepSeek — текст, картинки и видео</p>
+                <button onClick={() => setOnboardingStep(1)} className="w-full bg-accent text-white py-3 rounded-xl font-bold text-sm">Далее</button>
+              </div>
+            )}
+            {onboardingStep === 1 && (
+              <div className="text-center p-8">
+                <div className="w-20 h-20 mx-auto mb-4 bg-teal rounded-2xl flex items-center justify-center"><span className="text-4xl">✨</span></div>
+                <h2 className="text-xl font-extrabold text-text mb-2">15 бесплатных запросов</h2>
+                <p className="text-text/50 text-sm mb-2">Каждый день, 7 моделей, без оплаты</p>
+                <div className="flex flex-wrap justify-center gap-1.5 mb-6">
+                  {["GPT-4o mini", "Gemini Flash", "Claude Haiku", "Llama 4", "DeepSeek V3"].map(m => (
+                    <span key={m} className="text-[10px] bg-text/[0.06] text-text/50 px-2 py-1 rounded-lg">{m}</span>
+                  ))}
+                </div>
+                <button onClick={() => setOnboardingStep(2)} className="w-full bg-accent text-white py-3 rounded-xl font-bold text-sm">Далее</button>
+              </div>
+            )}
+            {onboardingStep === 2 && (
+              <div className="text-center p-8">
+                <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-accent to-teal rounded-2xl flex items-center justify-center"><span className="text-4xl">🚀</span></div>
+                <h2 className="text-xl font-extrabold text-text mb-2">Подписка от 390₽/мес</h2>
+                <p className="text-text/50 text-sm mb-6">Все модели, картинки, видео, без ограничений</p>
+                <button onClick={() => { setShowOnboarding(false); localStorage.setItem("stone_onboarded", "1"); }} className="w-full bg-accent text-white py-3 rounded-xl font-bold text-sm mb-2">Начать бесплатно</button>
+                <a href="/pricing" onClick={() => { setShowOnboarding(false); localStorage.setItem("stone_onboarded", "1"); }} className="block text-accent text-xs font-semibold hover:underline">Смотреть тарифы →</a>
+              </div>
+            )}
+            {/* Progress dots */}
+            <div className="flex justify-center gap-2 pb-6">
+              {[0, 1, 2].map(i => (
+                <div key={i} className={`w-2 h-2 rounded-full transition-colors ${onboardingStep === i ? "bg-accent" : "bg-text/10"}`} />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Lock Modal */}
       {lockModal && (
