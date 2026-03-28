@@ -70,6 +70,8 @@ async def lifespan(app: FastAPI):
             from aiogram.types import BotCommand
             await bot.set_my_commands([
                 BotCommand(command="start", description="🚀 Открыть Stone AI"),
+                BotCommand(command="img", description="🎨 Генерация картинки"),
+                BotCommand(command="video", description="🎬 Генерация видео"),
                 BotCommand(command="plan", description="💎 Мой тариф"),
                 BotCommand(command="help", description="❓ Помощь"),
             ])
