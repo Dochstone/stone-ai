@@ -2094,46 +2094,126 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
         </div>
       </div>
 
-      {/* Onboarding */}
+      {/* Onboarding — immersive fullscreen */}
       {showOnboarding && (
-        <div className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center px-4">
-          <div className="bg-bg rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl">
-            {onboardingStep === 0 && (
-              <div className="text-center p-8">
-                <div className="w-20 h-20 mx-auto mb-4 bg-accent rounded-2xl flex items-center justify-center"><span className="text-4xl">🧠</span></div>
-                <h2 className="text-xl font-extrabold text-text mb-2">65+ нейросетей в одном окне</h2>
-                <p className="text-text/50 text-sm mb-6">GPT-5.4, Claude Opus, Gemini Pro, DeepSeek — текст, картинки и видео</p>
-                <button onClick={() => setOnboardingStep(1)} className="w-full bg-accent text-white py-3 rounded-xl font-bold text-sm">Далее</button>
+        <div className="fixed inset-0 z-[60] bg-[#0a0a0f] flex flex-col">
+          {/* Skip button */}
+          <button
+            onClick={() => { setShowOnboarding(false); localStorage.setItem("stone_onboarded", "1"); }}
+            className="absolute top-4 right-4 z-10 text-white/30 text-xs hover:text-white/60 transition-colors px-3 py-2"
+          >
+            Пропустить
+          </button>
+
+          {/* Step 1: AI-generated images showcase */}
+          {onboardingStep === 0 && (
+            <div className="flex-1 flex flex-col relative overflow-hidden">
+              {/* Background: cycling AI images */}
+              <div className="absolute inset-0 grid grid-cols-3 gap-1 opacity-30">
+                {["/demo/img-cosmos.webp", "/demo/img-portrait.webp", "/demo/img-cyberpunk.webp",
+                  "/demo/img-landscape.webp", "/demo/img-robot.webp", "/demo/img-fantasy.webp",
+                  "/demo/img-astronaut.webp", "/demo/img-aurora.webp", "/demo/img-dragon.webp",
+                ].map((src, i) => (
+                  <img key={i} src={src} alt="" className="w-full h-full object-cover" />
+                ))}
               </div>
-            )}
-            {onboardingStep === 1 && (
-              <div className="text-center p-8">
-                <div className="w-20 h-20 mx-auto mb-4 bg-teal rounded-2xl flex items-center justify-center"><span className="text-4xl">✨</span></div>
-                <h2 className="text-xl font-extrabold text-text mb-2">15 бесплатных запросов</h2>
-                <p className="text-text/50 text-sm mb-2">Каждый день, 7 моделей, без оплаты</p>
-                <div className="flex flex-wrap justify-center gap-1.5 mb-6">
-                  {["GPT-4o mini", "Gemini Flash", "Claude Haiku", "Llama 4", "DeepSeek V3"].map(m => (
-                    <span key={m} className="text-[10px] bg-text/[0.06] text-text/50 px-2 py-1 rounded-lg">{m}</span>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/60 to-transparent" />
+
+              {/* Content */}
+              <div className="relative flex-1 flex flex-col justify-end p-6 pb-8 text-center">
+                <div className="text-5xl mb-4">🧠</div>
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-white mb-3 leading-tight">
+                  65+ нейросетей<br />в одном окне
+                </h1>
+                <p className="text-white/50 text-sm mb-8 max-w-xs mx-auto">
+                  GPT-5.4, Claude Opus, Gemini Pro, DeepSeek, Sora — текст, картинки, видео
+                </p>
+                <button onClick={() => setOnboardingStep(1)} className="w-full max-w-xs mx-auto bg-accent text-white py-3.5 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors">
+                  Далее
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 2: Video generation showcase */}
+          {onboardingStep === 1 && (
+            <div className="flex-1 flex flex-col relative overflow-hidden">
+              {/* Background: looping video */}
+              <div className="absolute inset-0">
+                <video src="/demo/video-1.mp4" autoPlay muted loop playsInline className="w-full h-full object-cover opacity-40" />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/50 to-transparent" />
+
+              <div className="relative flex-1 flex flex-col justify-end p-6 pb-8 text-center">
+                <div className="text-5xl mb-4">✨</div>
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-white mb-3">
+                  15 запросов бесплатно
+                </h1>
+                <p className="text-white/50 text-sm mb-4">Каждый день, без регистрации карты</p>
+                <div className="flex flex-wrap justify-center gap-1.5 mb-8">
+                  {["GPT-4o mini", "Gemini Flash", "Claude Haiku", "Llama 4", "DeepSeek V3", "Nano Banana", "Mistral"].map(m => (
+                    <span key={m} className="text-[10px] bg-white/10 text-white/60 px-2.5 py-1 rounded-full">{m}</span>
                   ))}
                 </div>
-                <button onClick={() => setOnboardingStep(2)} className="w-full bg-accent text-white py-3 rounded-xl font-bold text-sm">Далее</button>
+                <button onClick={() => setOnboardingStep(2)} className="w-full max-w-xs mx-auto bg-accent text-white py-3.5 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors">
+                  Далее
+                </button>
               </div>
-            )}
-            {onboardingStep === 2 && (
-              <div className="text-center p-8">
-                <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-accent to-teal rounded-2xl flex items-center justify-center"><span className="text-4xl">🚀</span></div>
-                <h2 className="text-xl font-extrabold text-text mb-2">Подписка от 390₽/мес</h2>
-                <p className="text-text/50 text-sm mb-6">Все модели, картинки, видео, без ограничений</p>
-                <button onClick={() => { setShowOnboarding(false); localStorage.setItem("stone_onboarded", "1"); }} className="w-full bg-accent text-white py-3 rounded-xl font-bold text-sm mb-2">Начать бесплатно</button>
-                <a href="/pricing" onClick={() => { setShowOnboarding(false); localStorage.setItem("stone_onboarded", "1"); }} className="block text-accent text-xs font-semibold hover:underline">Смотреть тарифы →</a>
-              </div>
-            )}
-            {/* Progress dots */}
-            <div className="flex justify-center gap-2 pb-6">
-              {[0, 1, 2].map(i => (
-                <div key={i} className={`w-2 h-2 rounded-full transition-colors ${onboardingStep === i ? "bg-accent" : "bg-text/10"}`} />
-              ))}
             </div>
+          )}
+
+          {/* Step 3: Pricing CTA */}
+          {onboardingStep === 2 && (
+            <div className="flex-1 flex flex-col relative overflow-hidden">
+              {/* Background: another video */}
+              <div className="absolute inset-0">
+                <video src="/demo/video-5.mp4" autoPlay muted loop playsInline className="w-full h-full object-cover opacity-30" />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/60 to-transparent" />
+
+              <div className="relative flex-1 flex flex-col justify-end p-6 pb-8 text-center">
+                <div className="text-5xl mb-4">🚀</div>
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-white mb-3">
+                  Подписка от 390₽/мес
+                </h1>
+                <p className="text-white/50 text-sm mb-6">Все 65+ моделей, генерация картинок и видео, без ограничений</p>
+
+                {/* Mini pricing cards */}
+                <div className="flex gap-2 justify-center mb-6">
+                  <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-center">
+                    <p className="text-[10px] text-white/30">MINI</p>
+                    <p className="text-lg font-extrabold text-white">390₽</p>
+                  </div>
+                  <div className="bg-accent/20 border border-accent/40 rounded-xl px-4 py-3 text-center relative">
+                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-accent text-white text-[7px] font-bold px-2 py-0.5 rounded-full">ХИТ</div>
+                    <p className="text-[10px] text-white/30">MAX</p>
+                    <p className="text-lg font-extrabold text-white">890₽</p>
+                  </div>
+                  <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-center">
+                    <p className="text-[10px] text-white/30">PRO</p>
+                    <p className="text-lg font-extrabold text-white">1990₽</p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => { setShowOnboarding(false); localStorage.setItem("stone_onboarded", "1"); }}
+                  className="w-full max-w-xs mx-auto bg-accent text-white py-3.5 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors shadow-lg shadow-accent/25 mb-2"
+                >
+                  Начать бесплатно
+                </button>
+                <a href="/pricing" onClick={() => { setShowOnboarding(false); localStorage.setItem("stone_onboarded", "1"); }}
+                  className="text-accent text-xs font-semibold hover:underline">
+                  Смотреть все тарифы →
+                </a>
+              </div>
+            </div>
+          )}
+
+          {/* Progress dots */}
+          <div className="flex justify-center gap-2 py-4 bg-[#0a0a0f]">
+            {[0, 1, 2].map(i => (
+              <div key={i} className={`w-2.5 h-2.5 rounded-full transition-all ${onboardingStep === i ? "bg-accent scale-110" : "bg-white/15"}`} />
+            ))}
           </div>
         </div>
       )}
