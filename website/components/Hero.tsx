@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 
 /* ── Video Cycler — smooth crossfade between multiple videos ── */
-function VideoCycler({ sources }: { sources: string[] }) {
+function VideoCycler({ sources, poster }: { sources: string[]; poster?: string }) {
   const [activeSlot, setActiveSlot] = useState<"a" | "b">("a");
   const [srcA, setSrcA] = useState(sources[0]);
   const [srcB, setSrcB] = useState(sources[1] || sources[0]);
@@ -52,6 +52,7 @@ function VideoCycler({ sources }: { sources: string[] }) {
       <video
         ref={refA}
         src={srcA}
+        poster={poster}
         autoPlay muted loop playsInline preload="auto"
         className="absolute inset-0 w-full h-full object-cover transition-opacity duration-[1500ms] ease-in-out"
         style={{ opacity: activeSlot === "a" ? 1 : 0 }}
@@ -59,6 +60,7 @@ function VideoCycler({ sources }: { sources: string[] }) {
       <video
         ref={refB}
         src={srcB}
+        poster={poster}
         muted loop playsInline preload="auto"
         className="absolute inset-0 w-full h-full object-cover transition-opacity duration-[1500ms] ease-in-out"
         style={{ opacity: activeSlot === "b" ? 1 : 0 }}
@@ -326,7 +328,7 @@ export default function Hero() {
           {onboardingStep === 0 && (
             <div className="h-full flex flex-col relative">
               <div className="absolute inset-0">
-                <VideoCycler sources={["/demo/veo-02.mp4", "/demo/veo-06.mp4", "/demo/onboard-5.mp4"]} />
+                <VideoCycler sources={["/demo/veo-02.mp4", "/demo/veo-06.mp4", "/demo/onboard-5.mp4"]} poster="/demo/veo-02-poster.webp" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-transparent to-transparent" />
               </div>
               <div className="relative flex-1 flex flex-col justify-end p-6 pb-8">
@@ -350,7 +352,7 @@ export default function Hero() {
           {onboardingStep === 1 && (
             <div className="h-full flex flex-col relative">
               <div className="absolute inset-0">
-                <VideoCycler sources={["/demo/veo-03.mp4", "/demo/veo-05.mp4", "/demo/onboard-2.mp4"]} />
+                <VideoCycler sources={["/demo/veo-03.mp4", "/demo/veo-05.mp4", "/demo/onboard-2.mp4"]} poster="/demo/veo-03-poster.webp" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-transparent to-transparent" />
               </div>
               <div className="relative flex-1 flex flex-col justify-end p-6 pb-8">
@@ -383,7 +385,7 @@ export default function Hero() {
           {onboardingStep === 2 && (
             <div className="h-full flex flex-col relative">
               <div className="absolute inset-0">
-                <VideoCycler sources={["/demo/onboard-3.mp4", "/demo/veo-07.mp4", "/demo/veo-08.mp4"]} />
+                <VideoCycler sources={["/demo/onboard-3.mp4", "/demo/veo-07.mp4", "/demo/veo-08.mp4"]} poster="/demo/onboard-3-poster.webp" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/20 to-transparent" />
               </div>
               <div className="relative flex-1 flex flex-col justify-end p-6 pb-8">
