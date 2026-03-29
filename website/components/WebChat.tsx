@@ -2141,49 +2141,44 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
 
       {/* Chat mini-onboarding */}
       {showOnboarding && (
-        <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center px-4" onClick={() => { setShowOnboarding(false); localStorage.setItem("stone_chat_onboarded", "1"); }}>
-          <div className="bg-bg rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            {onboardingStep === 0 && (
-              <div className="p-6 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl overflow-hidden">
-                  <video src="/demo/veo-02.mp4" autoPlay muted loop playsInline className="w-full h-full object-cover" />
-                </div>
-                <h2 className="text-lg font-extrabold text-text mb-2">Добро пожаловать в Stone AI</h2>
-                <p className="text-text/50 text-xs mb-4">65+ нейросетей: текст, картинки, видео — в одном чате</p>
-                <div className="flex flex-wrap justify-center gap-1.5 mb-5">
-                  {["💬 Чат", "🎨 Фото", "🎬 Видео", "✨ Free"].map(t => (
-                    <span key={t} className="text-[10px] bg-text/[0.06] text-text/50 px-2.5 py-1 rounded-full">{t}</span>
-                  ))}
-                </div>
-                <button onClick={() => setOnboardingStep(1)} className="w-full bg-accent text-white py-3 rounded-xl font-bold text-sm">Далее</button>
+        <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-md flex items-center justify-center px-4" onClick={() => { setShowOnboarding(false); localStorage.setItem("stone_chat_onboarded", "1"); }}>
+          <div className="bg-bg rounded-2xl w-full max-w-md shadow-2xl overflow-hidden border border-text/[0.06]" onClick={(e) => e.stopPropagation()}>
+            {/* Video header */}
+            <div className="relative h-36 overflow-hidden">
+              <video src="/demo/veo-02.mp4" autoPlay muted loop playsInline className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/30 to-transparent" />
+              <div className="absolute bottom-3 left-4">
+                <span className="text-2xl font-extrabold text-text">Stone AI</span>
               </div>
-            )}
-            {onboardingStep === 1 && (
-              <div className="p-6 text-center">
-                <div className="flex justify-center gap-2 mb-4">
-                  {["/demo/veo-05.mp4", "/demo/veo-03.mp4"].map((src, i) => (
-                    <div key={i} className="w-20 h-20 rounded-xl overflow-hidden">
-                      <video src={src} autoPlay muted loop playsInline className="w-full h-full object-cover" />
-                    </div>
-                  ))}
-                </div>
-                <h2 className="text-lg font-extrabold text-text mb-2">Выберите как начать</h2>
-                <p className="text-text/50 text-xs mb-5">15 запросов/день бесплатно или безлимит с подпиской</p>
-                <button onClick={() => { setShowOnboarding(false); localStorage.setItem("stone_chat_onboarded", "1"); }}
-                  className="w-full bg-accent text-white py-3 rounded-xl font-bold text-sm mb-2">
-                  Начать бесплатно
-                </button>
-                <a href="/pricing" onClick={() => { setShowOnboarding(false); localStorage.setItem("stone_chat_onboarded", "1"); }}
-                  className="block w-full border-2 border-accent text-accent py-2.5 rounded-xl font-bold text-sm text-center hover:bg-accent hover:text-white transition-colors">
-                  Подписка от 390₽/мес
-                </a>
+            </div>
+
+            <div className="p-6 pt-2">
+              <p className="text-text/50 text-sm mb-5">65+ нейросетей в одном чате. Текст, картинки, видео, код — всё здесь.</p>
+
+              {/* Features */}
+              <div className="grid grid-cols-2 gap-2 mb-5">
+                {[
+                  { icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg>, color: "text-accent", label: "GPT-5, Claude, Gemini" },
+                  { icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" /></svg>, color: "text-pink-500", label: "DALL-E, Flux, Stable" },
+                  { icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" /></svg>, color: "text-blue-500", label: "Sora 2, Veo 3" },
+                  { icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" /></svg>, color: "text-teal", label: "15 запросов/день" },
+                ].map(f => (
+                  <div key={f.label} className="flex items-center gap-2.5 bg-text/[0.03] rounded-xl px-3 py-2.5">
+                    <span className={`${f.color} shrink-0`}>{f.icon}</span>
+                    <span className="text-[11px] font-semibold text-text/70">{f.label}</span>
+                  </div>
+                ))}
               </div>
-            )}
-            {/* Progress */}
-            <div className="flex justify-center gap-2 pb-4">
-              {[0, 1].map(i => (
-                <div key={i} className={`h-1 rounded-full transition-all ${onboardingStep === i ? "bg-accent w-5" : "bg-text/10 w-2"}`} />
-              ))}
+
+              {/* CTA */}
+              <button onClick={() => { setShowOnboarding(false); localStorage.setItem("stone_chat_onboarded", "1"); }}
+                className="w-full bg-accent text-white py-3.5 rounded-xl font-bold text-sm hover:bg-accent/90 transition-all shadow-md shadow-accent/20 mb-2">
+                Начать бесплатно
+              </button>
+              <a href="/pricing" onClick={() => { setShowOnboarding(false); localStorage.setItem("stone_chat_onboarded", "1"); }}
+                className="block text-center text-text/30 text-xs font-medium hover:text-accent transition-colors mt-2">
+                Подписка от 390₽/мес →
+              </a>
             </div>
           </div>
         </div>
