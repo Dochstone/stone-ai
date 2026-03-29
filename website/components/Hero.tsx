@@ -420,7 +420,7 @@ export default function Hero() {
                   Начать бесплатно ✦
                 </button>
                 <a href="/pricing" onClick={closeOnboarding}
-                  className="block text-center text-white/30 text-xs font-medium hover:text-accent transition-colors mt-3">
+                  className="block text-center max-w-sm text-white/30 text-xs font-medium hover:text-accent transition-colors mt-3">
                   Все тарифы и способы оплаты →
                 </a>
               </div>
