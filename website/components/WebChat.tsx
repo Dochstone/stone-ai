@@ -1398,7 +1398,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   }, [sendMessage]);
 
   if (!loaded) return null;
-  if (!auth && !showOnboarding) return <AuthFormComponent onAuth={setAuth} />;
+  if (!auth) return <AuthFormComponent onAuth={setAuth} />;
 
   const aiColor = companyColors[model?.company ?? ""] || "#C4623D";
   const aiLetter = companyIcons[model?.company ?? ""] || "AI";
