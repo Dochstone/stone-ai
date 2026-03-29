@@ -2122,15 +2122,16 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                     </div>
                   ))}
                 </div>
-                <h2 className="text-lg font-extrabold text-text mb-2">Переключай табы</h2>
-                <p className="text-text/50 text-xs mb-1">Выбери модель и пиши — AI ответит мгновенно</p>
-                <p className="text-accent text-xs font-bold mb-5">15 запросов/день бесплатно</p>
+                <h2 className="text-lg font-extrabold text-text mb-2">Выберите как начать</h2>
+                <p className="text-text/50 text-xs mb-5">15 запросов/день бесплатно или безлимит с подпиской</p>
                 <button onClick={() => { setShowOnboarding(false); localStorage.setItem("stone_chat_onboarded", "1"); }}
-                  className="w-full bg-accent text-white py-3 rounded-xl font-bold text-sm">
-                  Начать чат
+                  className="w-full bg-accent text-white py-3 rounded-xl font-bold text-sm mb-2">
+                  Начать бесплатно
                 </button>
                 <a href="/pricing" onClick={() => { setShowOnboarding(false); localStorage.setItem("stone_chat_onboarded", "1"); }}
-                  className="block text-accent/60 text-[11px] mt-2 hover:text-accent">Тарифы от 390₽/мес →</a>
+                  className="block w-full border-2 border-accent text-accent py-2.5 rounded-xl font-bold text-sm text-center hover:bg-accent hover:text-white transition-colors">
+                  Подписка от 390₽/мес
+                </a>
               </div>
             )}
             {/* Progress */}
