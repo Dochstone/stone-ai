@@ -384,7 +384,7 @@ const WELCOME_CONFIG: Record<string, { icon: string; bg: string; title: string; 
   health: { icon: "🏥", bg: "bg-emerald-500", title: "AI Консультант", subtitle: "Загрузите фото или опишите симптомы" },
 };
 
-function WelcomeScreen({ onSuggestion, activeTab }: { onSuggestion: (text: string, modelId: string) => void; activeTab: string }) {
+function WelcomeScreen({ onSuggestion, activeTab, plan }: { onSuggestion: (text: string, modelId: string) => void; activeTab: string; plan?: string }) {
   const [promptCat, setPromptCat] = useState("popular");
   const cfg = WELCOME_CONFIG[activeTab] || WELCOME_CONFIG.all;
   const isChat = activeTab === "all" || activeTab === "chat" || activeTab === "free";
@@ -464,7 +464,7 @@ function WelcomeScreen({ onSuggestion, activeTab }: { onSuggestion: (text: strin
         )}
 
         {/* Upgrade CTA — only for free/mini */}
-        {activeTab === "all" && limits?.plan !== "max" && limits?.plan !== "max-pro" && (
+        {activeTab === "all" && plan !== "max" && plan !== "max-pro" && (
           <div className="mt-6 max-w-lg mx-auto">
             <a href="/pricing" className="flex items-center justify-between bg-accent/5 hover:bg-accent/10 border border-accent/15 rounded-xl px-4 py-3 transition-colors">
               <div>
@@ -1740,7 +1740,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
 
         {/* Messages area or Welcome screen */}
         {messages.length === 0 ? (
-          <WelcomeScreen onSuggestion={handleSuggestionClick} activeTab={modelCatFilter} />
+          <WelcomeScreen onSuggestion={handleSuggestionClick} activeTab={modelCatFilter} plan={limits?.plan} />
         ) : (
           <div className="flex-1 overflow-y-auto relative" ref={messagesContainerRef}>
             <div className="max-w-3xl mx-auto px-3 sm:px-4 py-6 space-y-5">
