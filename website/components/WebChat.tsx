@@ -1848,10 +1848,23 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                             loop
                             playsInline
                             preload="auto"
+                            crossOrigin="anonymous"
                             className="max-w-full rounded-xl bg-black"
-                            style={{ maxHeight: 360, minHeight: 200 }}
-                            onError={(e) => { (e.target as HTMLVideoElement).poster = ""; }}
+                            style={{ maxHeight: 360, minHeight: 200, minWidth: 280 }}
+                            onError={(e) => {
+                              const el = e.target as HTMLVideoElement;
+                              el.style.display = "none";
+                              const fallback = el.parentElement?.querySelector(".video-fallback");
+                              if (fallback) (fallback as HTMLElement).style.display = "block";
+                            }}
                           />
+                          <div className="video-fallback hidden bg-text/[0.04] rounded-xl p-4 text-center" style={{ minHeight: 120 }}>
+                            <p className="text-text/40 text-xs mb-2">Видео не удалось воспроизвести в браузере</p>
+                            <a href={msg.video.url} target="_blank" rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 bg-accent text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-accent/90">
+                              Открыть видео
+                            </a>
+                          </div>
                           <div className="flex items-center gap-3 mt-2">
                             <a
                               href={msg.video.url}
@@ -1863,7 +1876,13 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                               </svg>
                               Скачать
                             </a>
-                            {/* cost hidden — subscription model */}
+                            <a href={msg.video.url} target="_blank" rel="noopener noreferrer"
+                              className="flex items-center gap-1.5 text-[11px] text-text/40 font-semibold hover:text-text/60">
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                              </svg>
+                              Открыть
+                            </a>
                           </div>
                         </div>
                       )}

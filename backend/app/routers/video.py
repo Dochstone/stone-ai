@@ -167,30 +167,14 @@ async def video_status(
 
     if status == "COMPLETED":
         task.status = "completed"
-        raw_url = fal_status.get("video_url")
-        task.video_url = raw_url
+        task.video_url = fal_status.get("video_url")
         task.completed_at = datetime.utcnow()
-
-        # Download video and convert to base64 data URL (fal.ai URLs expire)
-        video_url = raw_url
-        if raw_url and not raw_url.startswith("data:"):
-            try:
-                import httpx, base64
-                async with httpx.AsyncClient(timeout=60.0) as client:
-                    vid_resp = await client.get(raw_url)
-                    if vid_resp.status_code == 200 and len(vid_resp.content) > 1000:
-                        b64 = base64.b64encode(vid_resp.content).decode("ascii")
-                        video_url = f"data:video/mp4;base64,{b64}"
-                        logger.info(f"Video downloaded: {len(vid_resp.content)} bytes")
-            except Exception as e:
-                logger.warning(f"Video download failed, using URL: {e}")
-
         await db.commit()
 
         return {
             "task_id": task.task_id,
             "status": "completed",
-            "video_url": video_url,
+            "video_url": task.video_url,
         }
 
     if status == "FAILED":
