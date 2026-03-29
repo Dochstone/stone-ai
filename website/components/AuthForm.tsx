@@ -365,8 +365,18 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
 
         {tgPolling && (
           <div className="text-center mt-6 bg-[#2AABEE]/10 rounded-xl px-4 py-3">
-            <p className="text-sm font-medium text-[#2AABEE]">Подтвердите вход в Telegram-боте</p>
-            <p className="text-xs text-text/40 mt-1">Нажмите Start в боте, затем вернитесь сюда</p>
+            <p className="text-sm font-medium text-[#2AABEE]">Подтвердите вход в Telegram</p>
+            <p className="text-xs text-text/40 mt-1">
+              1. Откройте Telegram (нажмите &quot;Open in Telegram&quot;)<br/>
+              2. Нажмите Start / Запустить в боте<br/>
+              3. Эта страница обновится автоматически
+            </p>
+            <button
+              onClick={() => window.open(`https://t.me/drifttt55bot?start=web_${tgSessionId}`, "_blank")}
+              className="mt-2 text-xs text-[#2AABEE] hover:underline"
+            >
+              Открыть бота повторно
+            </button>
           </div>
         )}
       </div>
