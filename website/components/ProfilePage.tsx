@@ -873,6 +873,13 @@ export default function ProfilePage() {
         fetch(`${API_URL}/api/byok/status`, { headers }),
       ]);
 
+      // If auth failed — logout
+      if (profileRes.status === "fulfilled" && (profileRes.value.status === 401 || profileRes.value.status === 403)) {
+        localStorage.removeItem("stone_auth");
+        window.location.href = "/webchat";
+        return;
+      }
+
       if (profileRes.status === "fulfilled" && profileRes.value.ok) {
         const data = await profileRes.value.json();
         const u = data.user || data;
@@ -949,6 +956,10 @@ export default function ProfilePage() {
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-3" />
           <p className="text-sm text-text/30">Загрузка профиля...</p>
+          <button onClick={() => { localStorage.removeItem("stone_auth"); window.location.href = "/webchat"; }}
+            className="mt-4 text-xs text-text/20 hover:text-accent transition-colors">
+            Не грузится? Войти заново
+          </button>
         </div>
       </div>
     );
