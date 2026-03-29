@@ -72,6 +72,12 @@ VIDEO_MODELS = {
     "cogvideox", "mochi",
 }
 
+# Models available on free plan (everything else is locked)
+FREE_PLAN_MODELS = (
+    FAST_MODELS
+    | {"nano-banana", "nano-banana-pro"}  # free image models
+)
+
 
 def get_model_category(model_id: str) -> str:
     """Determine model category: fast, premium, opus, image, video."""
@@ -185,8 +191,8 @@ async def check_daily_limit(
     category = get_model_category(model_id)
     limits = DAILY_LIMITS.get(tier, DAILY_LIMITS["free"])
 
-    # Free users can't access premium/opus
-    if tier == "free" and category in ("premium", "opus"):
+    # Free users can only use FREE_PLAN_MODELS
+    if tier == "free" and model_id not in FREE_PLAN_MODELS:
         return {
             "allowed": False,
             "error": "model_locked",
@@ -248,14 +254,12 @@ async def check_daily_limit(
             return _denied(tier, "video", row.video_used, limits["video"], 0, limits["video"])
 
     # Allowed
-    delay = 5 if tier == "free" else 0
     return {
         "allowed": True,
         "billing": "free",
         "plan": tier,
         "tier": tier,
         "category": category,
-        "delay": delay,
         "used_today": getattr(row, f"{category}_used", 0),
         "limit": limits.get(category, 0) + getattr(row, f"rollover_{category}", 0) if category in ("fast", "premium", "opus") else limits.get(category, 0),
     }
