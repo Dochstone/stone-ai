@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import { TELEGRAM_BOT_URL } from "@/lib/models";
 import ThemeToggle from "@/components/ThemeToggle";
+import dynamic from "next/dynamic";
+
+const TonWalletBadge = dynamic(() => import("./TonWalletBadge"), { ssr: false });
 
 function getAvatarColor(email: string): string {
   const colors = ["#C4623D", "#0E9A83", "#4285f4", "#7c3aed", "#ec4899", "#f59e0b", "#06b6d4", "#10a37f"];
@@ -121,6 +124,7 @@ export default function Nav() {
               >
                 Открыть чат
               </a>
+              <TonWalletBadge />
               <a
                 href="/profile"
                 className="hidden md:flex items-center gap-2 hover:opacity-80 transition-opacity"

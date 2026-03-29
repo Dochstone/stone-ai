@@ -3,6 +3,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { MODELS } from "@/lib/models";
 import { SITE_URL } from "@/lib/constants";
+import dynamic from "next/dynamic";
+
+const TonWalletProfile = dynamic(() => import("./TonWalletProfile"), { ssr: false });
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
 
@@ -533,6 +536,8 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
                 className="text-xs font-semibold text-accent hover:underline">Привязать</button>
             )}
           </div>
+          {/* TON Wallet */}
+          <TonWalletProfile />
         </div>
       </div>
 
@@ -950,7 +955,10 @@ export default function ProfilePage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-2xl font-extrabold text-text">Личный кабинет</h1>
-          <button onClick={logout} className="text-xs text-text/30 hover:text-text/60 transition-colors">
+          <button onClick={logout} className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-text/40 bg-text/[0.04] hover:bg-red-50 hover:text-red-500 transition-colors">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+            </svg>
             Выйти
           </button>
         </div>

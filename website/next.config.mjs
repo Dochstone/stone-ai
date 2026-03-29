@@ -31,11 +31,21 @@ const nextConfig = {
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(self), geolocation=(), payment=()" },
-          // CSP temporarily relaxed for TON Connect compatibility
-          // {
-          //   key: "Content-Security-Policy",
-          //   value: "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:",
-          // },
+          {
+            key: "Content-Security-Policy",
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://mc.yandex.ru https://ajax.googleapis.com",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "font-src 'self' https://fonts.gstatic.com",
+              "img-src 'self' data: blob: https: http:",
+              "connect-src 'self' https://stone-ai-production.up.railway.app https://www.google-analytics.com https://mc.yandex.ru wss://mc.yandex.ru https://ajax.googleapis.com https://*.ton.org wss://*.ton.org https://bridge.tonapi.io wss://bridge.tonapi.io https://*.tonapi.io https://connect.tonhubx.com wss://connect.tonhubx.com https://bridge.ton.space wss://bridge.ton.space https://api.coingecko.com https://tonkeeper.com https://raw.githubusercontent.com https://analytics.ton.org https://config.ton.org",
+              "media-src 'self' blob:",
+              "frame-src 'self' https://t.me",
+              "worker-src 'self' blob:",
+              "child-src 'self' blob:",
+            ].join("; "),
+          },
         ],
       },
     ];
