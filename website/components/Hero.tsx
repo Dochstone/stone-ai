@@ -340,9 +340,13 @@ export default function Hero() {
                   Картинки, видео и текст от 65+ нейросетей. GPT-5.4, Claude Opus, Sora 2, DALL-E — всё в одном месте.
                 </p>
                 <button onClick={() => setOnboardingStep(1)}
-                  className="w-full max-w-sm bg-accent text-white py-4 rounded-xl font-bold text-sm hover:bg-accent/90 transition-all shadow-lg shadow-accent/30">
+                  className="w-full max-w-sm bg-accent text-white py-4 rounded-xl font-bold text-sm hover:bg-accent/90 transition-all shadow-lg shadow-accent/30 mb-2">
                   Начать бесплатно ✦
                 </button>
+                <a href="/pricing" onClick={closeOnboarding}
+                  className="block w-full max-w-sm text-center border-2 border-white/20 text-white/70 py-3 rounded-xl font-bold text-sm hover:border-accent hover:text-accent transition-colors">
+                  Подписка от 390₽/мес
+                </a>
               </div>
             </div>
           )}
@@ -373,9 +377,13 @@ export default function Hero() {
                   ))}
                 </div>
                 <button onClick={() => setOnboardingStep(2)}
-                  className="w-full max-w-sm bg-accent text-white py-4 rounded-xl font-bold text-sm hover:bg-accent/90 transition-all shadow-lg shadow-accent/30">
+                  className="w-full max-w-sm bg-accent text-white py-4 rounded-xl font-bold text-sm hover:bg-accent/90 transition-all shadow-lg shadow-accent/30 mb-2">
                   Далее
                 </button>
+                <a href="/pricing" onClick={closeOnboarding}
+                  className="block w-full max-w-sm text-center border-2 border-white/20 text-white/70 py-3 rounded-xl font-bold text-sm hover:border-accent hover:text-accent transition-colors">
+                  Подписка от 390₽/мес
+                </a>
               </div>
             </div>
           )}
