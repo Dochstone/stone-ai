@@ -463,8 +463,8 @@ function WelcomeScreen({ onSuggestion, activeTab }: { onSuggestion: (text: strin
           </div>
         )}
 
-        {/* Upgrade CTA */}
-        {activeTab === "all" && (
+        {/* Upgrade CTA — only for free/mini */}
+        {activeTab === "all" && limits?.plan !== "max" && limits?.plan !== "max-pro" && (
           <div className="mt-6 max-w-lg mx-auto">
             <a href="/pricing" className="flex items-center justify-between bg-accent/5 hover:bg-accent/10 border border-accent/15 rounded-xl px-4 py-3 transition-colors">
               <div>
