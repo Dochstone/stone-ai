@@ -782,7 +782,10 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
       setSidebarOpen(false);
     }
-    // Onboarding moved to landing page (Hero component)
+    // Mini onboarding for chat
+    if (!localStorage.getItem("stone_chat_onboarded")) {
+      setShowOnboarding(true);
+    }
   }, []);
 
   // Fetch usage limits
@@ -2091,137 +2094,51 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
         </div>
       </div>
 
-      {/* Onboarding — Higgsfield-style immersive */}
+      {/* Chat mini-onboarding */}
       {showOnboarding && (
-        <div className="fixed inset-0 z-[60] bg-[#0a0a0f]">
-          {/* Skip */}
-          <button onClick={() => { setShowOnboarding(false); localStorage.setItem("stone_onboarded", "1"); }}
-            className="absolute top-4 right-4 z-20 text-white/30 text-xs hover:text-white/60 px-3 py-2">
-            Пропустить
-          </button>
-          <div className="absolute top-4 right-16 z-20 text-white/20 text-[10px]">{onboardingStep + 1} / 3</div>
-
-          {/* Step 1: Full-screen AI image + FREE badge */}
-          {onboardingStep === 0 && (
-            <div className="h-full flex flex-col relative">
-              <div className="absolute inset-0">
-                <img src="/demo/img-cyberpunk.webp" alt="" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/40 to-[#0a0a0f]/20" />
-              </div>
-              <div className="relative flex-1 flex flex-col justify-end p-6 pb-8">
-                <div className="inline-flex items-center gap-1.5 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold px-3 py-1 rounded-full mb-4 w-fit">
-                  <span>✨</span> БЕСПЛАТНЫЕ ГЕНЕРАЦИИ
+        <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center px-4" onClick={() => { setShowOnboarding(false); localStorage.setItem("stone_chat_onboarded", "1"); }}>
+          <div className="bg-bg rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            {onboardingStep === 0 && (
+              <div className="p-6 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl overflow-hidden">
+                  <video src="/demo/veo-02.mp4" autoPlay muted loop playsInline className="w-full h-full object-cover" />
                 </div>
-                <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-2 leading-tight">
-                  ГЕНЕРИРУЙ<br />С НЕЙРОСЕТЬЮ
-                </h1>
-                <p className="text-white/50 text-sm mb-6 max-w-sm">
-                  Картинки, видео и текст от 65+ нейросетей. GPT-5.4, Claude Opus, Sora 2, DALL-E — всё в одном месте.
-                </p>
-                <button onClick={() => setOnboardingStep(1)}
-                  className="w-full max-w-sm bg-accent text-white py-4 rounded-xl font-bold text-sm hover:bg-accent/90 transition-all shadow-lg shadow-accent/30">
-                  Начать бесплатно ✦
-                </button>
+                <h2 className="text-lg font-extrabold text-text mb-2">Добро пожаловать в Stone AI</h2>
+                <p className="text-text/50 text-xs mb-4">65+ нейросетей: текст, картинки, видео — в одном чате</p>
+                <div className="flex flex-wrap justify-center gap-1.5 mb-5">
+                  {["💬 Чат", "🎨 Фото", "🎬 Видео", "✨ Free"].map(t => (
+                    <span key={t} className="text-[10px] bg-text/[0.06] text-text/50 px-2.5 py-1 rounded-full">{t}</span>
+                  ))}
+                </div>
+                <button onClick={() => setOnboardingStep(1)} className="w-full bg-accent text-white py-3 rounded-xl font-bold text-sm">Далее</button>
               </div>
-            </div>
-          )}
-
-          {/* Step 2: Video background + free tier details */}
-          {onboardingStep === 1 && (
-            <div className="h-full flex flex-col relative">
-              <div className="absolute inset-0">
-                <video src="/demo/video-1.mp4" autoPlay muted loop playsInline className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/50 to-[#0a0a0f]/30" />
-              </div>
-              <div className="relative flex-1 flex flex-col justify-end p-6 pb-8">
-                <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-3">
-                  15 ЗАПРОСОВ<br />КАЖДЫЙ ДЕНЬ
-                </h1>
-                <p className="text-white/50 text-sm mb-5">Бесплатно. Без карты. Навсегда.</p>
-                <div className="grid grid-cols-4 gap-2 mb-6 max-w-sm">
-                  {[
-                    { icon: "💬", label: "Чат", sub: "7 моделей" },
-                    { icon: "🎨", label: "Фото", sub: "2/день" },
-                    { icon: "🎬", label: "Видео", sub: "подписка" },
-                    { icon: "🔍", label: "Поиск", sub: "AI поиск" },
-                  ].map(f => (
-                    <div key={f.label} className="bg-white/5 border border-white/10 rounded-xl p-2.5 text-center">
-                      <span className="text-lg block">{f.icon}</span>
-                      <p className="text-[10px] font-bold text-white/80 mt-1">{f.label}</p>
-                      <p className="text-[8px] text-white/30">{f.sub}</p>
+            )}
+            {onboardingStep === 1 && (
+              <div className="p-6 text-center">
+                <div className="flex justify-center gap-2 mb-4">
+                  {["/demo/veo-05.mp4", "/demo/veo-03.mp4"].map((src, i) => (
+                    <div key={i} className="w-20 h-20 rounded-xl overflow-hidden">
+                      <video src={src} autoPlay muted loop playsInline className="w-full h-full object-cover" />
                     </div>
                   ))}
                 </div>
-                <div className="flex flex-wrap gap-1.5 mb-6">
-                  {["GPT-4o mini", "Gemini Flash", "Claude Haiku", "Llama 4", "DeepSeek V3"].map(m => (
-                    <span key={m} className="text-[9px] bg-white/8 text-white/50 px-2 py-1 rounded-full border border-white/5">{m}</span>
-                  ))}
-                </div>
-                <button onClick={() => setOnboardingStep(2)}
-                  className="w-full max-w-sm bg-accent text-white py-4 rounded-xl font-bold text-sm hover:bg-accent/90 transition-all shadow-lg shadow-accent/30">
-                  Далее
+                <h2 className="text-lg font-extrabold text-text mb-2">Переключай табы</h2>
+                <p className="text-text/50 text-xs mb-1">Выбери модель и пиши — AI ответит мгновенно</p>
+                <p className="text-accent text-xs font-bold mb-5">15 запросов/день бесплатно</p>
+                <button onClick={() => { setShowOnboarding(false); localStorage.setItem("stone_chat_onboarded", "1"); }}
+                  className="w-full bg-accent text-white py-3 rounded-xl font-bold text-sm">
+                  Начать чат
                 </button>
+                <a href="/pricing" onClick={() => { setShowOnboarding(false); localStorage.setItem("stone_chat_onboarded", "1"); }}
+                  className="block text-accent/60 text-[11px] mt-2 hover:text-accent">Тарифы от 390₽/мес →</a>
               </div>
+            )}
+            {/* Progress */}
+            <div className="flex justify-center gap-2 pb-4">
+              {[0, 1].map(i => (
+                <div key={i} className={`h-1 rounded-full transition-all ${onboardingStep === i ? "bg-accent w-5" : "bg-text/10 w-2"}`} />
+              ))}
             </div>
-          )}
-
-          {/* Step 3: Pricing — Higgsfield style */}
-          {onboardingStep === 2 && (
-            <div className="h-full flex flex-col relative">
-              <div className="absolute inset-0">
-                <video src="/demo/video-5.mp4" autoPlay muted loop playsInline className="w-full h-full object-cover opacity-25" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/70 to-[#0a0a0f]/40" />
-              </div>
-              <div className="relative flex-1 flex flex-col justify-end p-6 pb-8">
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-white mb-1">
-                  В 4.5 РАЗА ДЕШЕВЛЕ<br />CHATGPT PLUS
-                </h1>
-                <p className="text-white/40 text-sm mb-5">
-                  ChatGPT Plus = <span className="line-through text-white/25">$20/мес (~1900₽)</span>. Stone AI Max = <span className="text-accent font-bold">890₽/мес</span>
-                </p>
-
-                <div className="flex gap-2 mb-5 max-w-sm">
-                  <div className="flex-1 bg-white/5 border border-white/10 rounded-xl p-3 text-center">
-                    <p className="text-[9px] text-white/30 font-semibold">MINI</p>
-                    <p className="text-xl font-extrabold text-white">390<span className="text-sm text-white/40">₽</span></p>
-                    <p className="text-[8px] text-white/25">20+ моделей</p>
-                  </div>
-                  <div className="flex-1 bg-accent/15 border-2 border-accent/50 rounded-xl p-3 text-center relative">
-                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-accent text-white text-[7px] font-bold px-2.5 py-0.5 rounded-full whitespace-nowrap">BEST VALUE</div>
-                    <p className="text-[9px] text-accent/70 font-semibold">MAX</p>
-                    <p className="text-xl font-extrabold text-white">890<span className="text-sm text-white/40">₽</span></p>
-                    <p className="text-[8px] text-accent/60">65+ моделей</p>
-                  </div>
-                  <div className="flex-1 bg-white/5 border border-white/10 rounded-xl p-3 text-center">
-                    <p className="text-[9px] text-white/30 font-semibold">MAX PRO</p>
-                    <p className="text-xl font-extrabold text-white">1990<span className="text-sm text-white/40">₽</span></p>
-                    <p className="text-[8px] text-white/25">безлимит + API</p>
-                  </div>
-                </div>
-
-                <div className="space-y-1.5 mb-6 max-w-sm">
-                  {["✓ Доступ ко всем моделям", "✓ Картинки и видео", "✓ Без задержек", "✓ Оплата в рублях"].map(f => (
-                    <p key={f} className="text-[11px] text-white/40">{f}</p>
-                  ))}
-                </div>
-
-                <button onClick={() => { setShowOnboarding(false); localStorage.setItem("stone_onboarded", "1"); }}
-                  className="w-full max-w-sm bg-accent text-white py-4 rounded-xl font-bold text-sm hover:bg-accent/90 transition-all shadow-lg shadow-accent/30 mb-2">
-                  Начать бесплатно ✦
-                </button>
-                <a href="/pricing" onClick={() => { setShowOnboarding(false); localStorage.setItem("stone_onboarded", "1"); }}
-                  className="block text-center text-accent/80 text-xs font-semibold hover:text-accent">
-                  Все тарифы и способы оплаты →
-                </a>
-              </div>
-            </div>
-          )}
-
-          {/* Progress dots */}
-          <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-2 py-3 z-10">
-            {[0, 1, 2].map(i => (
-              <div key={i} className={`h-1 rounded-full transition-all ${onboardingStep === i ? "bg-accent w-6" : "bg-white/15 w-2"}`} />
-            ))}
           </div>
         </div>
       )}
