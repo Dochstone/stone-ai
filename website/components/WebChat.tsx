@@ -834,6 +834,51 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
       .catch(() => {});
   }, [auth?.token, messages.length]); // refetch after each message
 
+  // Resume pending video generation on page load
+  useEffect(() => {
+    if (!auth?.token) return;
+    fetch(`${API_URL}/api/video/history`, { headers: { Authorization: `Bearer ${auth.token}` } })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data?.videos) return;
+        const pending = data.videos.find((v: any) => v.status === "pending" || v.status === "processing");
+        if (!pending) return;
+        // Resume polling
+        setVideoGenerating(true);
+        setMessages(prev => {
+          if (prev.some(m => m.content?.includes("Генерация видео"))) return prev;
+          return [...prev, { role: "assistant", content: `Генерация видео... (возобновлено)` }];
+        });
+        const poll = async () => {
+          try {
+            const r = await fetch(`${API_URL}/api/video/status/${pending.task_id}`, {
+              headers: { Authorization: `Bearer ${auth!.token}` },
+            });
+            const s = await r.json();
+            if (s.status === "completed" && s.video_url) {
+              setMessages(prev => prev.map(m =>
+                m.content?.includes("Генерация видео") ? { ...m, content: "Видео готово!", video: { url: s.video_url, cost_usd: pending.cost_usd } } : m
+              ));
+              setVideoGenerating(false);
+              return;
+            }
+            if (s.status === "failed") {
+              setMessages(prev => prev.map(m =>
+                m.content?.includes("Генерация видео") ? { ...m, content: `Ошибка: ${s.error || "Генерация не удалась"}` } : m
+              ));
+              setVideoGenerating(false);
+              return;
+            }
+            pollTimerRef.current = setTimeout(poll, 3000);
+          } catch {
+            pollTimerRef.current = setTimeout(poll, 5000);
+          }
+        };
+        pollTimerRef.current = setTimeout(poll, 1000);
+      })
+      .catch(() => {});
+  }, [auth?.token]); // only on mount
+
   // Auto-scroll
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
