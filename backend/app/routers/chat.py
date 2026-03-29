@@ -192,6 +192,44 @@ async def chat(
 IMAGE_MODELS = {"nano-banana", "nano-banana-pro", "gpt-5-image", "gpt-5-image-mini", "flux-schnell", "stable-diffusion-xl"}
 
 
+def _add_watermark(image_bytes: bytes) -> bytes:
+    """Add 'stoneai.ru' watermark to bottom-right of image for free users."""
+    from PIL import Image, ImageDraw, ImageFont
+    from io import BytesIO
+
+    img = Image.open(BytesIO(image_bytes)).convert("RGBA")
+    w, h = img.size
+
+    # Create transparent overlay
+    overlay = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    draw = ImageDraw.Draw(overlay)
+
+    text = "stoneai.ru"
+    font_size = max(18, w // 40)
+    try:
+        font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", font_size)
+    except Exception:
+        font = ImageFont.load_default()
+
+    bbox = draw.textbbox((0, 0), text, font=font)
+    tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+
+    x = w - tw - 16
+    y = h - th - 12
+
+    # Semi-transparent background
+    draw.rounded_rectangle(
+        [x - 8, y - 4, x + tw + 8, y + th + 4],
+        radius=6, fill=(0, 0, 0, 100),
+    )
+    draw.text((x, y), text, font=font, fill=(255, 255, 255, 180))
+
+    result = Image.alpha_composite(img, overlay).convert("RGB")
+    buf = BytesIO()
+    result.save(buf, format="PNG", optimize=True)
+    return buf.getvalue()
+
+
 class ImageGenRequest(BaseModel):
     prompt: str
     model_id: str = "nano-banana"
@@ -268,6 +306,16 @@ async def generate_image(
                 image_url = f"data:image/png;base64,{image_data['b64_json']}"
             else:
                 raise HTTPException(502, "No image in response")
+
+        # Add watermark for free users
+        if tier == "free" and balance <= 0 and image_url.startswith("data:image"):
+            try:
+                raw_b64 = image_url.split(",", 1)[1]
+                img_bytes = base64.b64decode(raw_b64)
+                watermarked = _add_watermark(img_bytes)
+                image_url = f"data:image/png;base64,{base64.b64encode(watermarked).decode('ascii')}"
+            except Exception as e:
+                logger.warning(f"Watermark failed: {e}")  # skip watermark on error
 
         # Record usage
         await record_usage(db, tg_id, req.model_id, tokens_in=0, tokens_out=0, cost_usd=0)
