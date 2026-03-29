@@ -1,7 +1,7 @@
 "use client";
 
 import { useTonConnectUI, useTonWallet, useTonAddress } from "@tonconnect/ui-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
 const MERCHANT_WALLET = "UQBfxl37Bgf7FVaO4prAM5YA0d9pfJdRL7hymmYZX01Skjc7";
@@ -23,14 +23,32 @@ export default function TonPayButton({
   const wallet = useTonWallet();
   const address = useTonAddress(false);
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState<"idle" | "connecting" | "paying" | "polling">("idle");
+  const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [tonRate, setTonRate] = useState<number>(0);
+  const [connected, setConnected] = useState(false);
 
   const priceUsd = TIER_PRICES_USD[tier];
-  if (!priceUsd) return null;
 
-  // Fetch TON rate on mount
+  // Track wallet connection
+  useEffect(() => {
+    setConnected(!!wallet);
+  }, [wallet]);
+
+  // Listen for connection status changes
+  useEffect(() => {
+    if (!tonConnectUI) return;
+    const unsub = tonConnectUI.onStatusChange((w) => {
+      setConnected(!!w);
+      if (w) {
+        setError("");
+        setStatus("");
+      }
+    });
+    return () => unsub();
+  }, [tonConnectUI]);
+
+  // Fetch TON rate
   useEffect(() => {
     fetch(`${API_URL}/api/payment/ton-rate`)
       .then((r) => r.json())
@@ -38,46 +56,33 @@ export default function TonPayButton({
       .catch(() => setTonRate(3.5));
   }, []);
 
-  const amountTon = tonRate > 0 ? (priceUsd / tonRate) : 0;
+  const amountTon = tonRate > 0 && priceUsd ? (priceUsd / tonRate) : 0;
 
-  const handleClick = async () => {
+  const handlePay = useCallback(async () => {
+    if (!priceUsd) return;
     setError("");
-
-    // If no wallet — open connect modal
-    if (!wallet) {
-      setStatus("connecting");
-      await tonConnectUI.openModal();
-      setStatus("idle");
-      return;
-    }
-
-    // Wallet connected — proceed to payment
-    await handlePay();
-  };
-
-  const handlePay = async () => {
     setLoading(true);
-    setStatus("paying");
-    setError("");
+    setStatus("Подготовка...");
 
     try {
       const authStr = localStorage.getItem("stone_auth");
       if (!authStr) {
-        setError("Сначала войдите в аккаунт");
+        setError("Сначала войдите в аккаунт на сайте");
         setLoading(false);
-        setStatus("idle");
+        setStatus("");
         return;
       }
       const auth = JSON.parse(authStr);
 
       // Get fresh rate
+      setStatus("Получение курса TON...");
       const rateRes = await fetch(`${API_URL}/api/payment/ton-rate`);
       const rateData = await rateRes.json();
       const currentRate = rateData.ton_usd;
       if (!currentRate || currentRate <= 0) {
         setError("Не удалось получить курс TON");
         setLoading(false);
-        setStatus("idle");
+        setStatus("");
         return;
       }
 
@@ -85,6 +90,7 @@ export default function TonPayButton({
       const amountNano = Math.ceil(payAmountTon * 1e9).toString();
 
       // Create order
+      setStatus("Создание заказа...");
       const orderRes = await fetch(`${API_URL}/api/payment/ton-order`, {
         method: "POST",
         headers: {
@@ -97,11 +103,12 @@ export default function TonPayButton({
       if (!orderRes.ok) {
         setError(orderData.detail || "Ошибка создания заказа");
         setLoading(false);
-        setStatus("idle");
+        setStatus("");
         return;
       }
 
       // Send transaction
+      setStatus("Подтвердите в кошельке...");
       await tonConnectUI.sendTransaction({
         validUntil: Math.floor(Date.now() / 1000) + 600,
         messages: [
@@ -113,7 +120,7 @@ export default function TonPayButton({
       });
 
       // Poll for confirmation
-      setStatus("polling");
+      setStatus("Ожидание подтверждения...");
       let confirmed = false;
       for (let i = 0; i < 30; i++) {
         await new Promise((r) => setTimeout(r, 3000));
@@ -131,6 +138,7 @@ export default function TonPayButton({
       }
 
       if (confirmed) {
+        setStatus("");
         onSuccess?.();
       } else {
         setError("Транзакция отправлена. Подписка активируется в течение 1-2 минут.");
@@ -144,41 +152,47 @@ export default function TonPayButton({
     }
 
     setLoading(false);
-    setStatus("idle");
-  };
+    setStatus("");
+  }, [tier, priceUsd, tonConnectUI, onSuccess]);
 
-  const shortAddr = address
-    ? `${address.slice(0, 4)}...${address.slice(-4)}`
-    : "";
+  if (!priceUsd) return null;
+
+  const shortAddr = address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "";
 
   return (
     <div>
-      <button
-        onClick={handleClick}
-        disabled={loading}
-        className="w-full flex items-center justify-center gap-2 bg-[#0098EA] text-white py-3 rounded-xl font-bold text-sm hover:bg-[#0080C0] transition-colors disabled:opacity-50"
-      >
-        <span className="font-extrabold text-base">T</span>
-        {status === "polling"
-          ? "Ожидание подтверждения..."
-          : status === "paying"
-          ? "Подтвердите в кошельке..."
-          : wallet
-          ? `Оплатить ~${amountTon.toFixed(2)} TON (~$${priceUsd})`
-          : "Подключить кошелёк TON"}
-      </button>
-      {wallet && (
-        <div className="flex items-center justify-between mt-1.5">
-          <p className="text-[10px] text-text/30">
-            Кошелёк: {shortAddr}
-          </p>
+      {!connected ? (
+        <button
+          onClick={() => tonConnectUI.openModal()}
+          className="w-full flex items-center justify-center gap-2 bg-[#0098EA] text-white py-3 rounded-xl font-bold text-sm hover:bg-[#0080C0] transition-colors"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Подключить кошелёк TON
+        </button>
+      ) : (
+        <>
           <button
-            onClick={() => tonConnectUI.disconnect()}
-            className="text-[10px] text-text/30 hover:text-red-500 transition-colors"
+            onClick={handlePay}
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-2 bg-[#0098EA] text-white py-3 rounded-xl font-bold text-sm hover:bg-[#0080C0] transition-colors disabled:opacity-60"
           >
-            Отключить
+            <span className="font-extrabold text-base">T</span>
+            {status || `Оплатить ~${amountTon.toFixed(2)} TON (~$${priceUsd})`}
           </button>
-        </div>
+          <div className="flex items-center justify-between mt-1.5 px-1">
+            <p className="text-[10px] text-teal font-medium">
+              {shortAddr}
+            </p>
+            <button
+              onClick={(e) => { e.stopPropagation(); tonConnectUI.disconnect(); }}
+              className="text-[10px] text-text/30 hover:text-red-500 transition-colors"
+            >
+              Отключить
+            </button>
+          </div>
+        </>
       )}
       {error && (
         <p className="text-xs text-red-500 mt-2 text-center">{error}</p>
