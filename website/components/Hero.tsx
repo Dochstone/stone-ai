@@ -416,11 +416,11 @@ export default function Hero() {
                   </div>
                 </div>
                 <button onClick={closeOnboarding}
-                  className="w-full max-w-sm bg-accent text-white py-4 rounded-xl font-bold text-sm hover:bg-accent/90 transition-all shadow-lg shadow-accent/30 mb-2">
+                  className="w-full max-w-sm bg-accent text-white py-4 rounded-xl font-bold text-sm hover:bg-accent/90 transition-all shadow-lg shadow-accent/30">
                   Начать бесплатно ✦
                 </button>
                 <a href="/pricing" onClick={closeOnboarding}
-                  className="block text-center text-accent/80 text-xs font-semibold hover:text-accent mt-1">
+                  className="block text-center text-white/30 text-xs font-medium hover:text-accent transition-colors mt-3">
                   Все тарифы и способы оплаты →
                 </a>
               </div>
