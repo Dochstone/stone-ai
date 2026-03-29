@@ -783,6 +783,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
   const [recording, setRecording] = useState(false);
   const [modelCatFilter, setModelCatFilter] = useState<string>(initialCategory || "all");
+  const tabMessagesRef = useRef<Record<string, Message[]>>({});
 
   const [dragging, setDragging] = useState(false);
   const dragCounterRef = useRef(0);
@@ -1658,9 +1659,13 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
               key={t.id}
               onClick={() => {
                 if (modelCatFilter !== t.id) {
+                  // Save current tab messages
+                  tabMessagesRef.current[modelCatFilter] = messages;
+                  // Restore target tab messages
+                  const saved = tabMessagesRef.current[t.id] || [];
                   setModelCatFilter(t.id);
                   setActiveSessionId(null);
-                  setMessages([]);
+                  setMessages(saved);
                   if (t.id === "health" || t.id === "free") setSelectedModel("gpt-4o-mini");
                 }
               }}
