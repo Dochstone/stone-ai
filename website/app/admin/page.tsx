@@ -27,6 +27,7 @@ interface UserRow {
   total_requests: number;
   total_tokens_used: number;
   joined_at: string | null;
+  last_active: string | null;
 }
 
 interface Transaction {
@@ -309,7 +310,8 @@ export default function AdminPage() {
                     <th className="text-center py-2.5 px-4">Подписка</th>
                     <th className="text-right py-2.5 px-4">Баланс</th>
                     <th className="text-right py-2.5 px-4">Запросов</th>
-                    <th className="text-left py-2.5 px-4">Дата</th>
+                    <th className="text-left py-2.5 px-4">Регистрация</th>
+                    <th className="text-left py-2.5 px-4">Активность</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -350,6 +352,7 @@ export default function AdminPage() {
                       <td className="py-2.5 px-4 text-right font-mono">${u.balance_usd.toFixed(2)}</td>
                       <td className="py-2.5 px-4 text-right font-mono">{u.total_requests}</td>
                       <td className="py-2.5 px-4 text-text/40 text-xs">{u.joined_at?.slice(0, 10) || "—"}</td>
+                      <td className="py-2.5 px-4 text-text/40 text-xs">{u.last_active?.slice(0, 10) || "—"}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -318,6 +318,18 @@ async def web_admin_users(
 
     total_count = await db.scalar(count_q) or 0
 
+    # Get last activity for each user from usage table
+    user_ids = [u.telegram_id or u.id for u in users]
+    last_activity = {}
+    if user_ids:
+        activity_q = await db.execute(
+            select(Usage.user_tg_id, func.max(Usage.created_at).label("last_active"))
+            .where(Usage.user_tg_id.in_(user_ids))
+            .group_by(Usage.user_tg_id)
+        )
+        for row in activity_q.all():
+            last_activity[row.user_tg_id] = row.last_active
+
     return {
         "users": [
             {
@@ -332,6 +344,8 @@ async def web_admin_users(
                 "total_requests": u.total_requests or 0,
                 "total_tokens_used": u.total_tokens_used or 0,
                 "joined_at": u.joined_at.isoformat() if u.joined_at else None,
+                "last_active": last_activity.get(u.telegram_id or u.id, u.last_login_date).isoformat()
+                    if last_activity.get(u.telegram_id or u.id, u.last_login_date) else None,
             }
             for u in users
         ],
