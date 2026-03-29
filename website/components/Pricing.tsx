@@ -187,17 +187,6 @@ export default function Pricing() {
           </div>
         )}
 
-        {/* Payment methods */}
-        <div className="mt-12 text-center">
-          <p className="text-xs text-text/40 font-medium uppercase tracking-wide mb-3">Способы оплаты</p>
-          <div className="flex items-center justify-center gap-3 sm:gap-6 flex-wrap text-xs sm:text-sm text-text/50">
-            <span>Telegram Stars</span>
-            <span className="w-1 h-1 bg-text/20 rounded-full hidden sm:block" />
-            <span>Криптовалюта (USDT, BTC, ETH)</span>
-            <span className="w-1 h-1 bg-text/20 rounded-full hidden sm:block" />
-            <span>TON Connect</span>
-          </div>
-        </div>
       </div>
 
       {/* Payment Modal */}
