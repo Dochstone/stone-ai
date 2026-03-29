@@ -98,14 +98,14 @@ export default function PricingPage() {
             <p className="text-xs text-text/40">Оплата в боте</p>
             <p className="text-[10px] text-[#2AABEE] mt-2 font-semibold opacity-0 group-hover:opacity-100 transition-opacity">Открыть бота →</p>
           </a>
-          <div className="group bg-white border border-text/5 rounded-2xl p-5 text-center hover:border-blue-400/30 hover:shadow-lg hover:shadow-blue-400/5 transition-all relative">
-            <div className="absolute top-2 right-2 bg-text/5 text-text/30 text-[9px] font-bold px-1.5 py-0.5 rounded-md">Скоро</div>
-            <div className="w-12 h-12 bg-gradient-to-br from-[#0098EA] to-[#0080C0] rounded-xl flex items-center justify-center mx-auto mb-3 opacity-50">
+          <a href="#pricing" className="group bg-white border border-text/5 rounded-2xl p-5 text-center hover:border-[#0098EA]/30 hover:shadow-lg hover:shadow-[#0098EA]/5 transition-all cursor-pointer">
+            <div className="w-12 h-12 bg-gradient-to-br from-[#0098EA] to-[#0080C0] rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
               <span className="text-white font-extrabold text-lg">T</span>
             </div>
-            <p className="font-bold text-sm mb-1 text-text/50">TON Connect</p>
-            <p className="text-xs text-text/30">Через Tonkeeper</p>
-          </div>
+            <p className="font-bold text-sm mb-1">TON Connect</p>
+            <p className="text-xs text-text/40">Через Tonkeeper</p>
+            <p className="text-[10px] text-[#0098EA] mt-2 font-semibold opacity-0 group-hover:opacity-100 transition-opacity">Выбрать тариф ↑</p>
+          </a>
           <div className="group bg-white border border-text/5 rounded-2xl p-5 text-center hover:border-teal/30 hover:shadow-lg hover:shadow-teal/5 transition-all cursor-default">
             <div className="w-12 h-12 bg-gradient-to-br from-teal to-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
               <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>

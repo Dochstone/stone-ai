@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
+
+const TonPayButton = dynamic(() => import("./TonPayButton"), { ssr: false });
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
 
@@ -233,7 +236,21 @@ export default function Pricing() {
               {loading ? "Создание счёта..." : `Оплатить ${modal.price}${modal.period}`}
             </button>
 
-            <p className="text-text/30 text-[10px] text-center mb-1">Оплата криптовалютой (USDT, BTC, ETH). Подписка активируется автоматически.</p>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="flex-1 h-px bg-text/10" />
+              <span className="text-[10px] text-text/30">или</span>
+              <div className="flex-1 h-px bg-text/10" />
+            </div>
+
+            <TonPayButton
+              tier={modal.id}
+              onSuccess={() => {
+                setModal(null);
+                setResult({ ok: true, message: `Тариф ${modal.name} активирован через TON!` });
+              }}
+            />
+
+            <p className="text-text/30 text-[10px] text-center mt-3 mb-1">Крипто: USDT, BTC, ETH (Heleket) · TON (Tonkeeper)</p>
 
             {result && (
               <p className={`text-center text-xs font-medium ${result.ok ? "text-teal" : "text-red-500"}`}>

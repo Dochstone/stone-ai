@@ -5,6 +5,7 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 import WebVitals from "@/components/WebVitals";
+import TonProvider from "@/components/TonProvider";
 
 const manrope = Manrope({
   subsets: ["latin", "cyrillic"],
@@ -235,9 +236,11 @@ export default function RootLayout({
         <a href="#main-content" className="skip-link">Перейти к содержанию</a>
         <WebVitals />
         {YM_ID && <script dangerouslySetInnerHTML={{ __html: `window.__ymId=${YM_ID};` }} />}
+        <TonProvider>
         <Nav />
         <main id="main-content">{children}</main>
         <Footer />
+        </TonProvider>
         <ScrollToTop />
       </body>
     </html>

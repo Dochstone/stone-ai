@@ -394,3 +394,147 @@ async def check_crypto_payment(
 
     status, usd_amount = row
     return {"status": status, "usd_amount": usd_amount}
+
+
+# ═══════════════════════════════════════════════════════════
+# TON CONNECT — Pay with TON wallet
+# ═══════════════════════════════════════════════════════════
+
+import time as _time
+import uuid as _uuid
+import httpx
+
+_ton_orders: dict[str, dict] = {}
+
+TON_MERCHANT_WALLET = "UQBfxl37Bgf7FVaO4prAM5YA0d9pfJdRL7hymmYZX01Skjc7"
+TON_PLAN_PRICES_USD = {"mini": 4.0, "max": 9.0, "max-pro": 20.0}
+
+
+@router.get("/ton-rate")
+async def get_ton_rate():
+    """Get current TON/USD rate."""
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            resp = await client.get(
+                "https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd"
+            )
+            data = resp.json()
+            return {"ton_usd": data["the-open-network"]["usd"]}
+    except Exception:
+        return {"ton_usd": 3.5}
+
+
+class TonOrderRequest(BaseModel):
+    tier: str
+    amount_ton: float
+
+
+@router.post("/ton-order")
+async def create_ton_order(
+    req: TonOrderRequest,
+    tg_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create TON payment order with unique comment."""
+    if req.tier not in TON_PLAN_PRICES_USD:
+        raise HTTPException(400, "Недопустимый тариф")
+
+    user_id = tg_user.get("db_id") or tg_user["id"]
+    order_id = _uuid.uuid4().hex[:12]
+    comment = f"stone_{order_id}"
+    price_usd = TON_PLAN_PRICES_USD[req.tier]
+    price_rub = PLAN_PRICES_RUB.get(req.tier, 0)
+
+    _ton_orders[order_id] = {
+        "user_id": user_id, "user_tg_id": tg_user["id"],
+        "tier": req.tier, "amount_ton": req.amount_ton,
+        "amount_usd": price_usd, "comment": comment,
+        "status": "pending", "created_at": _time.time(),
+    }
+
+    tx = Transaction(
+        user_tg_id=tg_user["id"], amount=price_rub, currency="TON",
+        amount_usd=price_usd, product_type="subscription",
+        product_id=f"sub:{req.tier}", status="pending",
+        provider_id=f"ton:{order_id}",
+    )
+    db.add(tx)
+    await db.commit()
+
+    now = _time.time()
+    for k in [k for k, v in _ton_orders.items() if now - v["created_at"] > 3600]:
+        _ton_orders.pop(k, None)
+
+    return {"order_id": order_id, "comment": comment, "amount_ton": req.amount_ton, "wallet": TON_MERCHANT_WALLET}
+
+
+@router.get("/ton-check")
+async def check_ton_payment(
+    order_id: str,
+    tg_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Check if TON payment received via TONAPI."""
+    order = _ton_orders.get(order_id)
+    if not order:
+        raise HTTPException(404, "Заказ не найден")
+    if order["status"] == "confirmed":
+        return {"status": "confirmed"}
+
+    settings = get_settings()
+    tonapi_key = getattr(settings, 'tonapi_key', None)
+
+    try:
+        headers = {"Authorization": f"Bearer {tonapi_key}"} if tonapi_key else {}
+        async with httpx.AsyncClient(timeout=15) as client:
+            resp = await client.get(
+                f"https://tonapi.io/v2/blockchain/accounts/{TON_MERCHANT_WALLET}/transactions?limit=20",
+                headers=headers,
+            )
+            if resp.status_code != 200:
+                return {"status": "pending"}
+
+            for tx_item in resp.json().get("transactions", []):
+                in_msg = tx_item.get("in_msg", {})
+                value = int(in_msg.get("value", 0))
+                decoded = in_msg.get("decoded_body", {})
+                comment_text = decoded.get("text", "") if isinstance(decoded, dict) else ""
+                if not comment_text:
+                    comment_text = in_msg.get("message", "")
+
+                min_amount = int(order["amount_ton"] * 1e9 * 0.95)
+                if value >= min_amount and order["comment"] in str(comment_text):
+                    order["status"] = "confirmed"
+
+                    from datetime import datetime, timedelta
+                    from sqlalchemy import select
+                    from app.models import User
+
+                    result2 = await db.execute(select(User).where(User.id == order["user_id"]))
+                    user = result2.scalar_one_or_none()
+                    if not user:
+                        result2 = await db.execute(select(User).where(User.telegram_id == order["user_tg_id"]))
+                        user = result2.scalar_one_or_none()
+                    if user:
+                        user.subscription_tier = order["tier"]
+                        user.subscription_started = datetime.utcnow()
+                        user.credits_reset_date = datetime.utcnow() + timedelta(days=30)
+                        user.monthly_fast_used = 0
+                        user.monthly_premium_used = 0
+                        user.monthly_images_used = 0
+                        user.monthly_videos_used = 0
+
+                    await db.execute(
+                        text("UPDATE transactions SET status = 'completed' WHERE provider_id = :pid"),
+                        {"pid": f"ton:{order_id}"}
+                    )
+                    from app.routers.referral import credit_referrer
+                    await credit_referrer(db, order["user_tg_id"], order["amount_usd"])
+                    await db.commit()
+                    logger.info(f"TON confirmed: user={order['user_id']}, tier={order['tier']}")
+                    return {"status": "confirmed"}
+
+    except Exception as e:
+        logger.error(f"TON check error: {e}")
+
+    return {"status": "pending"}
