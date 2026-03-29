@@ -326,19 +326,21 @@ export default function Hero() {
           <div className="absolute top-4 right-16 z-20 text-white/20 text-[10px]">{onboardingStep + 1} / 3</div>
 
           {onboardingStep === 0 && (
-            <div className="h-full flex flex-col relative">
-              <div className="absolute inset-0">
+            <div className="h-full flex flex-col md:flex-row">
+              {/* Video — half screen */}
+              <div className="relative flex-1 md:w-1/2">
                 <VideoCycler sources={["/demo/veo-02.mp4", "/demo/veo-06.mp4", "/demo/onboard-5.mp4"]} poster="/demo/veo-02-poster.webp" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-[#0a0a0f] via-transparent to-transparent" />
               </div>
-              <div className="relative flex-1 flex flex-col justify-end p-6 pb-8">
+              {/* Text — half screen */}
+              <div className="relative md:w-1/2 flex flex-col justify-center p-6 md:p-12 pb-8">
                 <div className="inline-flex items-center gap-1.5 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold px-3 py-1 rounded-full mb-4 w-fit">
                   <span>✨</span> БЕСПЛАТНЫЕ ГЕНЕРАЦИИ
                 </div>
-                <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-2 leading-tight">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-3 leading-tight">
                   ГЕНЕРИРУЙ<br />С НЕЙРОСЕТЬЮ
                 </h1>
-                <p className="text-white/50 text-sm mb-6 max-w-sm">
+                <p className="text-white/50 text-sm md:text-base mb-6 max-w-md">
                   Картинки, видео и текст от 65+ нейросетей. GPT-5.4, Claude Opus, Sora 2, DALL-E — всё в одном месте.
                 </p>
                 <button onClick={() => setOnboardingStep(1)}
@@ -350,16 +352,16 @@ export default function Hero() {
           )}
 
           {onboardingStep === 1 && (
-            <div className="h-full flex flex-col relative">
-              <div className="absolute inset-0">
+            <div className="h-full flex flex-col md:flex-row">
+              <div className="relative flex-1 md:w-1/2">
                 <VideoCycler sources={["/demo/veo-03.mp4", "/demo/veo-05.mp4", "/demo/onboard-2.mp4"]} poster="/demo/veo-03-poster.webp" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-[#0a0a0f] via-transparent to-transparent" />
               </div>
-              <div className="relative flex-1 flex flex-col justify-end p-6 pb-8">
-                <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-3">
+              <div className="relative md:w-1/2 flex flex-col justify-center p-6 md:p-12 pb-8">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-3">
                   15 ЗАПРОСОВ<br />КАЖДЫЙ ДЕНЬ
                 </h1>
-                <p className="text-white/50 text-sm mb-5">Бесплатно. Без карты. Навсегда.</p>
+                <p className="text-white/50 text-sm md:text-base mb-5">Бесплатно. Без карты. Навсегда.</p>
                 <div className="grid grid-cols-4 gap-2 mb-6 max-w-sm">
                   {[
                     { icon: "💬", label: "Чат", sub: "7 моделей" },
@@ -383,13 +385,13 @@ export default function Hero() {
           )}
 
           {onboardingStep === 2 && (
-            <div className="h-full flex flex-col relative">
-              <div className="absolute inset-0">
+            <div className="h-full flex flex-col md:flex-row">
+              <div className="relative flex-1 md:w-1/2">
                 <VideoCycler sources={["/demo/onboard-3.mp4", "/demo/veo-07.mp4", "/demo/veo-08.mp4"]} poster="/demo/onboard-3-poster.webp" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-[#0a0a0f] via-transparent to-transparent" />
               </div>
-              <div className="relative flex-1 flex flex-col justify-end p-6 pb-8">
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-white mb-1">
+              <div className="relative md:w-1/2 flex flex-col justify-center p-6 md:p-12 pb-8">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white mb-2">
                   В 4.5 РАЗА ДЕШЕВЛЕ<br />CHATGPT PLUS
                 </h1>
                 <p className="text-white/40 text-sm mb-5">
@@ -418,7 +420,7 @@ export default function Hero() {
                   Начать бесплатно ✦
                 </button>
                 <a href="/pricing" onClick={closeOnboarding}
-                  className="block text-center text-accent/80 text-xs font-semibold hover:text-accent">
+                  className="block text-center text-accent/80 text-xs font-semibold hover:text-accent mt-1">
                   Все тарифы и способы оплаты →
                 </a>
               </div>
