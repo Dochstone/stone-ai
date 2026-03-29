@@ -1,18 +1,18 @@
 const steps = [
   {
     num: "01",
-    title: "Откройте бота",
-    desc: "Нажмите кнопку ниже или найдите @drifttt55bot в Telegram. Никакой регистрации.",
+    title: "Зарегистрируйтесь",
+    desc: "Google, Яндекс, email или Telegram — вход за 5 секунд. Никаких анкет.",
   },
   {
     num: "02",
-    title: "Выберите модель",
-    desc: "65+ моделей: чат, картинки, видео, поиск. От бесплатных GPT-4o mini до мощных GPT-5 и Claude Opus.",
+    title: "Попробуйте бесплатно",
+    desc: "15 запросов в день к 7 моделям — GPT-4o mini, Gemini Flash, Claude Haiku и другие. Без оплаты.",
   },
   {
     num: "03",
-    title: "Пишите и выбирайте тариф",
-    desc: "15 бесплатных запросов в день. Для большего — выберите подписку от 390₽/мес.",
+    title: "Выберите подписку",
+    desc: "От 390₽/мес — 65+ моделей, картинки, видео, 3D. Оплата криптой, TON или Telegram Stars.",
   },
 ];
 
@@ -24,7 +24,7 @@ export default function HowItWorks() {
           Как начать
         </h2>
         <p className="text-text/60 text-center mb-14 max-w-lg mx-auto">
-          Три шага — и вы общаетесь с лучшими AI-моделями мира
+          Три шага — и все нейросети мира у вас в браузере
         </p>
 
         {/* Desktop: 3 columns */}
@@ -42,9 +42,7 @@ export default function HowItWorks() {
 
         {/* Mobile: vertical with connector line */}
         <div className="md:hidden relative max-w-sm mx-auto">
-          {/* Vertical connector */}
           <div className="absolute left-7 top-14 bottom-14 w-px bg-accent/15" />
-
           <div className="space-y-8">
             {steps.map((step) => (
               <div key={step.num} className="flex items-start gap-5">
@@ -60,12 +58,18 @@ export default function HowItWorks() {
           </div>
         </div>
 
-        <div className="text-center mt-12">
+        <div className="flex flex-col sm:flex-row gap-3 justify-center mt-12">
           <a
             href="/webchat"
-            className="inline-block bg-accent text-white px-8 py-4 min-h-[48px] rounded-xl font-bold text-sm hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:ring-offset-2"
+            className="inline-flex items-center justify-center bg-accent text-white px-8 py-4 min-h-[48px] rounded-xl font-bold text-sm hover:bg-accent/90 transition-all shadow-md shadow-accent/20"
           >
-            Начать бесплатно
+            Попробовать бесплатно
+          </a>
+          <a
+            href="/pricing"
+            className="inline-flex items-center justify-center border-2 border-accent text-accent px-8 py-4 min-h-[48px] rounded-xl font-bold text-sm hover:bg-accent hover:text-white transition-all"
+          >
+            Выбрать подписку
           </a>
         </div>
       </div>
