@@ -1,4 +1,4 @@
-"""Referral program — invite friends, earn 10% of their deposits."""
+"""Referral program — invite friends, both get +5 requests + 10% of deposits."""
 
 import logging
 import secrets
@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/referral", tags=["referral"])
 
 REFERRAL_PERCENT = 10  # 10% of deposit
+REFERRAL_BONUS_REQUESTS = 5  # both referrer and referred get +5 fast requests
 
 
 def _generate_code() -> str:
@@ -94,13 +95,29 @@ async def apply_referral_code(
         raise HTTPException(400, "Нельзя использовать свой код")
 
     user.referrer_id = referrer.telegram_id
+
+    # Grant bonus requests to both
+    from app.services.daily_limits import get_or_create_today
+    user_tier = user.subscription_tier or "free"
+    referrer_tier = referrer.subscription_tier or "free"
+
+    user_row = await get_or_create_today(db, tg_id, user_tier)
+    if user_row:
+        user_row.rollover_fast = (user_row.rollover_fast or 0) + REFERRAL_BONUS_REQUESTS
+
+    referrer_tg = referrer.telegram_id or referrer.id
+    referrer_row = await get_or_create_today(db, referrer_tg, referrer_tier)
+    if referrer_row:
+        referrer_row.rollover_fast = (referrer_row.rollover_fast or 0) + REFERRAL_BONUS_REQUESTS
+
     await db.commit()
 
-    logger.info(f"Referral applied: user={tg_id} referred_by={referrer.telegram_id}")
+    logger.info(f"Referral applied: user={tg_id} referred_by={referrer.telegram_id}, +{REFERRAL_BONUS_REQUESTS} requests each")
 
     return {
         "status": "ok",
-        "message": f"Код применён! Ваш реферер получит {REFERRAL_PERCENT}% от ваших пополнений.",
+        "message": f"Вы и ваш друг получили +{REFERRAL_BONUS_REQUESTS} запросов! А ещё {REFERRAL_PERCENT}% от пополнений.",
+        "bonus_requests": REFERRAL_BONUS_REQUESTS,
     }
 
 

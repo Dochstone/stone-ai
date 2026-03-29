@@ -638,9 +638,14 @@ function ReferralsTab({ stats, loading }: { stats: ReferralStats | null; loading
                 {copied ? "Скопировано!" : "Копировать"}
               </button>
             </div>
-            <p className="text-[11px] text-text/30">
-              Вы получаете {stats.referral_percent}% от каждого пополнения приглашённого пользователя.
-            </p>
+            <div className="space-y-1.5">
+              <p className="text-[11px] text-teal font-semibold">
+                Вы и ваш друг получаете +5 запросов при регистрации по ссылке
+              </p>
+              <p className="text-[11px] text-text/30">
+                + {stats.referral_percent}% от каждого пополнения приглашённого пользователя
+              </p>
+            </div>
           </div>
           <img src={qrUrl} alt="QR" width={120} height={120} className="rounded-xl border border-text/[0.06] shrink-0" />
         </div>

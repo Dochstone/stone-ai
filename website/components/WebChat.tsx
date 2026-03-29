@@ -1892,11 +1892,20 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
               ))}
 
               {/* Upgrade nudge — every 5th response for free users */}
-              {messages.length > 0 && messages.length % 5 === 0 && !streaming && limits?.plan !== "max" && limits?.plan !== "max-pro" && (
+              {messages.length > 0 && messages.length % 10 === 5 && !streaming && limits?.plan !== "max" && limits?.plan !== "max-pro" && (
                 <div className="max-w-3xl mx-auto px-3 sm:px-4">
                   <a href="/pricing" className="flex items-center justify-between bg-accent/5 border border-accent/10 rounded-xl px-4 py-2.5 hover:bg-accent/10 transition-colors">
                     <span className="text-[11px] text-text/50">Нравится? <span className="font-bold text-accent">Безлимит от 390₽/мес</span></span>
                     <span className="text-[10px] text-accent font-semibold">Тарифы →</span>
+                  </a>
+                </div>
+              )}
+              {/* Referral nudge — every 10th response */}
+              {messages.length > 0 && messages.length % 10 === 0 && !streaming && (
+                <div className="max-w-3xl mx-auto px-3 sm:px-4">
+                  <a href="/profile?tab=referrals" className="flex items-center justify-between bg-teal/5 border border-teal/10 rounded-xl px-4 py-2.5 hover:bg-teal/10 transition-colors">
+                    <span className="text-[11px] text-text/50">Пригласи друга — <span className="font-bold text-teal">оба получат +5 запросов</span></span>
+                    <span className="text-[10px] text-teal font-semibold">Пригласить →</span>
                   </a>
                 </div>
               )}
