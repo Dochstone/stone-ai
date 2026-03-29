@@ -158,6 +158,25 @@ const companyColors: Record<string, string> = {
 // ─── Message Content ───
 
 function ImageWithDownload({ url, caption }: { url: string; caption?: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const shareText = caption
+    ? `${caption.slice(0, 100)} — создано в Stone AI`
+    : "Создано нейросетью в Stone AI";
+  const shareUrl = "https://stoneai.ru/webchat?utm_source=share&utm_medium=image";
+
+  const shareVK = () => {
+    window.open(`https://vk.com/share.php?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(shareText)}`, "_blank", "width=600,height=400");
+  };
+  const shareTG = () => {
+    window.open(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`, "_blank", "width=600,height=400");
+  };
+  const copyLink = () => {
+    navigator.clipboard.writeText(shareUrl + "\n" + shareText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div>
       <img
@@ -168,15 +187,32 @@ function ImageWithDownload({ url, caption }: { url: string; caption?: string }) 
         onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
       />
       {caption && <div className="whitespace-pre-wrap text-sm mb-2">{caption}</div>}
-      <button
-        onClick={() => downloadImage(url, `stone-ai-${Date.now()}.png`)}
-        className="flex items-center gap-1.5 text-[11px] text-accent font-semibold hover:underline mt-1"
-      >
-        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V3" />
-        </svg>
-        Скачать
-      </button>
+      <div className="flex items-center gap-3 mt-1 flex-wrap">
+        <button
+          onClick={() => downloadImage(url, `stone-ai-${Date.now()}.png`)}
+          className="flex items-center gap-1.5 text-[11px] text-accent font-semibold hover:underline"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V3" />
+          </svg>
+          Скачать
+        </button>
+        <span className="w-px h-3 bg-text/10" />
+        <button onClick={shareTG} className="flex items-center gap-1 text-[11px] text-[#2AABEE] font-semibold hover:underline" title="Поделиться в Telegram">
+          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+          TG
+        </button>
+        <button onClick={shareVK} className="flex items-center gap-1 text-[11px] text-[#4680C2] font-semibold hover:underline" title="Поделиться в VK">
+          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M21.547 7H18.89c-.408 0-.55.184-.55.4 0 .252.144.472.55.472h.68c.36 0 .474.157.398.498-.144.65-.506 1.3-.92 1.952-.253.397-.523.65-.83.65-.254 0-.367-.137-.367-.457V7.74c0-.47-.163-.74-.647-.74H15.58c-.327 0-.52.228-.52.44 0 .46.68.565.75 1.86v2.81c0 .616-.11.728-.352.728-.643 0-2.208-2.36-3.136-5.062C12.14 7.3 11.93 7 11.437 7H8.78c-.484 0-.58.184-.58.4 0 .505.68 3.012 3.17 6.326C13.02 15.917 15.144 17 17.08 17c1.167 0 1.31-.262 1.31-.713v-1.86c0-.486.102-.582.444-.582.252 0 .684.127 1.694 1.083C21.56 15.928 21.69 17 22.58 17h2.67c.484 0 .728-.262.588-.78-.306-1.016-3.29-3.866-3.42-4.048-.252-.324-.18-.47 0-.758.003 0 2.473-3.48 2.73-4.664.126-.396-.072-.75-.598-.75z"/></svg>
+          VK
+        </button>
+        <button onClick={copyLink} className="flex items-center gap-1 text-[11px] text-text/40 font-semibold hover:text-text/60" title="Копировать ссылку">
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-2.06a4.5 4.5 0 00-1.242-7.244l-4.5-4.5a4.5 4.5 0 00-6.364 6.364L5.25 8.81" />
+          </svg>
+          {copied ? "Скопировано!" : "Ссылка"}
+        </button>
+      </div>
     </div>
   );
 }
