@@ -260,9 +260,51 @@ async def web_admin_users(
     limit: int = Query(50, ge=1, le=500),
     offset: int = Query(0, ge=0),
     sort: str = Query("recent", regex="^(recent|balance|requests)$"),
+    search: str = Query("", description="Search by email, name, or username"),
+    tier: str = Query("", description="Filter by subscription tier"),
+    date_from: str = Query("", description="Filter joined after (YYYY-MM-DD)"),
+    date_to: str = Query("", description="Filter joined before (YYYY-MM-DD)"),
 ):
-    """List users for web admin."""
+    """List users for web admin with search and filters."""
     q = select(User)
+    count_q = select(func.count(User.id))
+
+    # Search filter
+    if search.strip():
+        s = f"%{search.strip().lower()}%"
+        search_filter = (
+            func.lower(func.coalesce(User.email, "")).like(s)
+            | func.lower(func.coalesce(User.first_name, "")).like(s)
+            | func.lower(func.coalesce(User.username, "")).like(s)
+        )
+        q = q.where(search_filter)
+        count_q = count_q.where(search_filter)
+
+    # Tier filter
+    if tier.strip():
+        if tier == "free":
+            tier_filter = (User.subscription_tier == None) | (User.subscription_tier == "free")
+        else:
+            tier_filter = User.subscription_tier == tier
+        q = q.where(tier_filter)
+        count_q = count_q.where(tier_filter)
+
+    # Date filters
+    if date_from.strip():
+        try:
+            dt_from = datetime.strptime(date_from.strip(), "%Y-%m-%d")
+            q = q.where(User.joined_at >= dt_from)
+            count_q = count_q.where(User.joined_at >= dt_from)
+        except ValueError:
+            pass
+    if date_to.strip():
+        try:
+            dt_to = datetime.strptime(date_to.strip(), "%Y-%m-%d").replace(hour=23, minute=59, second=59)
+            q = q.where(User.joined_at <= dt_to)
+            count_q = count_q.where(User.joined_at <= dt_to)
+        except ValueError:
+            pass
+
     if sort == "balance":
         q = q.order_by(User.balance_usd.desc())
     elif sort == "requests":
@@ -274,7 +316,7 @@ async def web_admin_users(
     result = await db.execute(q)
     users = result.scalars().all()
 
-    total_count = await db.scalar(select(func.count(User.id))) or 0
+    total_count = await db.scalar(count_q) or 0
 
     return {
         "users": [

@@ -63,6 +63,11 @@ export default function AdminPage() {
   const [promos, setPromos] = useState<any[]>([]);
   const [referrals, setReferrals] = useState<{ referrers: any[]; total_referred_users: number }>({ referrers: [], total_referred_users: 0 });
   const [loading, setLoading] = useState(false);
+  const [userSearch, setUserSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [userTier, setUserTier] = useState("");
+  const [userDateFrom, setUserDateFrom] = useState("");
+  const [userDateTo, setUserDateTo] = useState("");
 
   // Check saved token
   useEffect(() => {
@@ -103,13 +108,24 @@ export default function AdminPage() {
     return res.json();
   }, [token]);
 
+  // Debounce search input
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(userSearch), 400);
+    return () => clearTimeout(t);
+  }, [userSearch]);
+
   useEffect(() => {
     if (!authed || !token) return;
     setLoading(true);
     if (tab === "stats") {
       fetchData("stats").then((d) => { if (d) setStats(d); setLoading(false); });
     } else if (tab === "users") {
-      fetchData("users?limit=100").then((d) => { if (d) { setUsers(d.users); setUsersTotal(d.total); } setLoading(false); });
+      const params = new URLSearchParams({ limit: "200" });
+      if (debouncedSearch) params.set("search", debouncedSearch);
+      if (userTier) params.set("tier", userTier);
+      if (userDateFrom) params.set("date_from", userDateFrom);
+      if (userDateTo) params.set("date_to", userDateTo);
+      fetchData(`users?${params}`).then((d) => { if (d) { setUsers(d.users); setUsersTotal(d.total); } setLoading(false); });
     } else if (tab === "promos") {
       fetchData("promos").then((d) => { if (d) setPromos(d.promos); setLoading(false); });
     } else if (tab === "referrals") {
@@ -117,7 +133,7 @@ export default function AdminPage() {
     } else {
       fetchData("transactions?limit=50").then((d) => { if (d) setTransactions(d.transactions); setLoading(false); });
     }
-  }, [authed, token, tab, fetchData]);
+  }, [authed, token, tab, fetchData, debouncedSearch, userTier, userDateFrom, userDateTo]);
 
   const logout = () => {
     localStorage.removeItem("admin_token");
@@ -231,7 +247,54 @@ export default function AdminPage() {
 
         {/* Users Tab */}
         {tab === "users" && (
-          <div className="bg-white rounded-2xl border border-text/5 overflow-hidden">
+          <div className="space-y-4">
+            {/* Filters */}
+            <div className="bg-white rounded-2xl border border-text/5 p-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <input
+                  type="text"
+                  value={userSearch}
+                  onChange={(e) => setUserSearch(e.target.value)}
+                  placeholder="Поиск: email, имя..."
+                  className="bg-bg border border-text/10 rounded-xl px-3 py-2.5 text-sm col-span-2 sm:col-span-1"
+                />
+                <select
+                  value={userTier}
+                  onChange={(e) => setUserTier(e.target.value)}
+                  className="bg-bg border border-text/10 rounded-xl px-3 py-2.5 text-sm"
+                >
+                  <option value="">Все тарифы</option>
+                  <option value="free">Free</option>
+                  <option value="mini">Mini</option>
+                  <option value="max">Max</option>
+                  <option value="max-pro">Max Pro</option>
+                </select>
+                <input
+                  type="date"
+                  value={userDateFrom}
+                  onChange={(e) => setUserDateFrom(e.target.value)}
+                  className="bg-bg border border-text/10 rounded-xl px-3 py-2.5 text-sm"
+                  title="Дата от"
+                />
+                <input
+                  type="date"
+                  value={userDateTo}
+                  onChange={(e) => setUserDateTo(e.target.value)}
+                  className="bg-bg border border-text/10 rounded-xl px-3 py-2.5 text-sm"
+                  title="Дата до"
+                />
+              </div>
+              {(userSearch || userTier || userDateFrom || userDateTo) && (
+                <button
+                  onClick={() => { setUserSearch(""); setUserTier(""); setUserDateFrom(""); setUserDateTo(""); }}
+                  className="mt-2 text-xs text-accent hover:underline"
+                >
+                  Сбросить фильтры
+                </button>
+              )}
+            </div>
+
+            <div className="bg-white rounded-2xl border border-text/5 overflow-hidden">
             <div className="p-4 border-b border-text/5">
               <span className="font-bold text-sm">Пользователи</span>
               <span className="text-text/40 text-sm ml-2">({usersTotal})</span>
@@ -292,6 +355,7 @@ export default function AdminPage() {
                 </tbody>
               </table>
             </div>
+          </div>
           </div>
         )}
 
