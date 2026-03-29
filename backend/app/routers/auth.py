@@ -1,7 +1,8 @@
-"""Auth API — email/password, Google OAuth, Yandex OAuth, TG linking."""
+"""Auth API — email/password, Google OAuth, Yandex OAuth, TG linking, TG web login."""
 
 import re
 import time
+import uuid
 import logging
 from datetime import datetime
 
@@ -312,7 +313,7 @@ async def google_auth(body: GoogleAuthRequest, request: Request, db: AsyncSessio
 
     # Exchange code for tokens
     try:
-        redirect_uri = body.redirect_uri or "https://website-production-907e.up.railway.app/auth/google/callback"
+        redirect_uri = body.redirect_uri or settings.google_redirect_uri
         async with httpx.AsyncClient() as client:
             token_resp = await client.post(
                 "https://oauth2.googleapis.com/token",
@@ -512,3 +513,116 @@ async def telegram_link(
         },
         token,
     )
+
+
+# ── Telegram Web Login (deep link flow) ──
+
+# In-memory store: session_id -> {user_id, created_at} or "pending"
+_tg_web_sessions: dict[str, dict | str] = {}
+_TG_SESSION_TTL = 300  # 5 minutes
+
+
+def _cleanup_old_sessions():
+    """Remove sessions older than TTL."""
+    now = time.time()
+    expired = [k for k, v in _tg_web_sessions.items()
+               if isinstance(v, dict) and now - v.get("created_at", 0) > _TG_SESSION_TTL
+               or isinstance(v, str) and isinstance(v, str)]
+    # Simple cleanup: just cap size
+    if len(_tg_web_sessions) > 1000:
+        _tg_web_sessions.clear()
+
+
+@router.post("/telegram-web-start")
+async def telegram_web_start():
+    """Generate a session ID for Telegram web login.
+
+    Returns session_id that the website will use to poll for completion.
+    """
+    _cleanup_old_sessions()
+    session_id = uuid.uuid4().hex[:16]
+    _tg_web_sessions[session_id] = {"status": "pending", "created_at": time.time()}
+    return {"session_id": session_id}
+
+
+@router.get("/telegram-web-check")
+async def telegram_web_check(
+    session: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """Poll endpoint — check if Telegram bot confirmed the session.
+
+    Returns {status: "pending"} or {status: "ok", token, user}.
+    """
+    data = _tg_web_sessions.get(session)
+    if not data:
+        raise HTTPException(404, "Session not found or expired")
+
+    if isinstance(data, dict) and data.get("status") == "pending":
+        return {"status": "pending"}
+
+    if isinstance(data, dict) and data.get("status") == "confirmed":
+        user_id = data["user_id"]
+
+        result = await db.execute(select(User).where(User.id == user_id))
+        user = result.scalar_one_or_none()
+        if not user:
+            raise HTTPException(404, "User not found")
+
+        await update_login_streak(db, user)
+        token = create_jwt(user.id, user.email or "")
+
+        # Clean up session
+        _tg_web_sessions.pop(session, None)
+
+        return _set_cookie_response(
+            {
+                "status": "ok",
+                "token": token,
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "username": user.username,
+                    "first_name": user.first_name,
+                    "balance_usd": round(float(user.balance_usd or 0), 4),
+                    "subscription_tier": user.subscription_tier or "free",
+                    "telegram_id": user.telegram_id,
+                },
+            },
+            token,
+        )
+
+    raise HTTPException(400, "Invalid session state")
+
+
+async def confirm_tg_web_session(session_id: str, tg_id: int, tg_user_data: dict):
+    """Called by the bot handler when user presses /start web_{session_id}.
+
+    Creates or finds the user, confirms the session.
+    """
+    from app.database import async_session as get_session
+
+    async with get_session() as db:
+        # Find or create user by telegram_id
+        result = await db.execute(select(User).where(User.telegram_id == tg_id))
+        user = result.scalar_one_or_none()
+
+        if not user:
+            user = User(
+                telegram_id=tg_id,
+                username=tg_user_data.get("username"),
+                first_name=tg_user_data.get("first_name"),
+                language=tg_user_data.get("language_code", "ru"),
+                auth_provider="telegram",
+            )
+            db.add(user)
+            await db.flush()
+
+        _tg_web_sessions[session_id] = {
+            "status": "confirmed",
+            "user_id": user.id,
+            "created_at": time.time(),
+        }
+
+        await db.commit()
+        return user

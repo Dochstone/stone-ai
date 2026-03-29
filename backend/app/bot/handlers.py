@@ -14,6 +14,45 @@ async def cmd_start(message: Message):
     settings = get_settings()
     webapp_url = settings.webapp_url
 
+    # Handle web login deep link: /start web_{session_id}
+    args = message.text.split(maxsplit=1)
+    if len(args) > 1 and args[1].startswith("web_"):
+        session_id = args[1][4:]  # strip "web_" prefix
+        if len(session_id) >= 8:
+            try:
+                from app.routers.auth import confirm_tg_web_session
+                tg_user = message.from_user
+                await confirm_tg_web_session(
+                    session_id,
+                    tg_user.id,
+                    {
+                        "username": tg_user.username,
+                        "first_name": tg_user.first_name,
+                        "language_code": tg_user.language_code or "ru",
+                    },
+                )
+                await message.answer(
+                    "✅ <b>Авторизация подтверждена!</b>\n\n"
+                    "Вернитесь на сайт — вы будете автоматически залогинены.\n\n"
+                    "👉 <a href='https://stoneai.ru/webchat'>stoneai.ru</a>",
+                    parse_mode="HTML",
+                    reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                        [InlineKeyboardButton(
+                            text="🌐 Вернуться на сайт",
+                            url="https://stoneai.ru/webchat",
+                        )],
+                    ]),
+                )
+                return
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).error(f"Web login error: {e}")
+                await message.answer(
+                    "❌ Ссылка для входа истекла. Попробуйте ещё раз на сайте.",
+                    parse_mode="HTML",
+                )
+                return
+
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
             text="🚀 Открыть Stone AI",
