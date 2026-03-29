@@ -244,18 +244,8 @@ function BalanceTab({ profile, transactions }: { profile: UserProfile; transacti
           href="/pricing"
           className="inline-flex items-center gap-2 bg-accent text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors"
         >
-          {profile.plan === "free" ? "Выбрать тариф" : "Сменить тариф"}
+          {profile.plan === "free" ? "Выбрать тариф" : profile.plan === "mini" ? "Улучшить тариф" : "Сменить тариф"}
         </a>
-        {profile.plan === "free" && (
-          <a href="/pricing" className="mt-3 inline-block bg-accent text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors">
-            Выбрать подписку
-          </a>
-        )}
-        {profile.plan === "mini" && (
-          <a href="/pricing" className="mt-3 inline-block border-2 border-accent text-accent px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-accent hover:text-white transition-colors">
-            Улучшить до Max
-          </a>
-        )}
       </div>
 
       {/* Filters */}

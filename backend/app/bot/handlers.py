@@ -14,8 +14,55 @@ async def cmd_start(message: Message):
     settings = get_settings()
     webapp_url = settings.webapp_url
 
-    # Handle web login deep link: /start web_{session_id}
     args = message.text.split(maxsplit=1)
+
+    # Handle account linking deep link: /start link_{user_db_id}
+    if len(args) > 1 and args[1].startswith("link_"):
+        web_user_id = args[1][5:]
+        if web_user_id.isdigit():
+            try:
+                from app.database import async_session
+                from sqlalchemy import select
+                from app.models import User
+
+                tg_id = message.from_user.id
+                async with async_session() as db:
+                    # Find web user
+                    result = await db.execute(select(User).where(User.id == int(web_user_id)))
+                    web_user = result.scalar_one_or_none()
+                    if web_user:
+                        # Check if TG user already exists separately
+                        result2 = await db.execute(select(User).where(User.telegram_id == tg_id))
+                        tg_existing = result2.scalar_one_or_none()
+
+                        if tg_existing and tg_existing.id != web_user.id:
+                            # Merge TG user into web user
+                            web_user.balance_usd = float(web_user.balance_usd or 0) + float(tg_existing.balance_usd or 0)
+                            web_user.total_requests = (web_user.total_requests or 0) + (tg_existing.total_requests or 0)
+                            await db.delete(tg_existing)
+
+                        web_user.telegram_id = tg_id
+                        web_user.username = message.from_user.username or web_user.username
+                        web_user.first_name = message.from_user.first_name or web_user.first_name
+                        web_user.auth_provider = "both"
+                        await db.commit()
+
+                        await message.answer(
+                            "✅ <b>Telegram привязан к аккаунту!</b>\n\n"
+                            f"Email: {web_user.email or '—'}\n"
+                            "Теперь можете входить через Telegram.\n\n"
+                            "👉 <a href='https://stoneai.ru/webchat'>Вернуться на сайт</a>",
+                            parse_mode="HTML",
+                        )
+                        return
+                    else:
+                        await message.answer("❌ Аккаунт не найден.", parse_mode="HTML")
+                        return
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).error(f"Link error: {e}")
+
+    # Handle web login deep link: /start web_{session_id}
     if len(args) > 1 and args[1].startswith("web_"):
         session_id = args[1][4:]  # strip "web_" prefix
         if len(session_id) >= 8:
