@@ -299,10 +299,11 @@ function TrustMarquee() {
 export default function Hero() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(0);
+  const touchStartX = useRef(0);
 
   useEffect(() => {
     if (!localStorage.getItem("stone_onboarded")) {
-      const timer = setTimeout(() => setShowOnboarding(true), 1500);
+      const timer = setTimeout(() => setShowOnboarding(true), 250);
       return () => clearTimeout(timer);
     }
   }, []);
@@ -312,18 +313,43 @@ export default function Hero() {
     localStorage.setItem("stone_onboarded", "1");
   };
 
+  const swipeHandlers = {
+    onTouchStart: (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; },
+    onTouchEnd: (e: React.TouchEvent) => {
+      const diff = touchStartX.current - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 50) {
+        if (diff > 0 && onboardingStep < 2) setOnboardingStep(s => s + 1);
+        if (diff < 0 && onboardingStep > 0) setOnboardingStep(s => s - 1);
+      }
+    },
+  };
+
   return (
     <section className="relative pt-28 pb-10 md:pt-36 md:pb-16 overflow-hidden">
       <GradientMeshBg />
 
       {/* Onboarding popup */}
       {showOnboarding && (
-        <div className="fixed inset-0 z-[60] bg-[#0a0a0f]">
+        <div className="fixed inset-0 z-[60] bg-[#0a0a0f]" {...swipeHandlers}>
           <button onClick={closeOnboarding}
             className="absolute top-4 right-4 z-20 text-white/30 text-xs hover:text-white/60 px-3 py-2">
             Пропустить
           </button>
           <div className="absolute top-4 right-16 z-20 text-white/20 text-[10px]">{onboardingStep + 1} / 3</div>
+
+          {/* Desktop arrows */}
+          {onboardingStep > 0 && (
+            <button onClick={() => setOnboardingStep(s => s - 1)}
+              className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full items-center justify-center text-white/60 hover:bg-white/20 hover:text-white transition-all">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+            </button>
+          )}
+          {onboardingStep < 2 && (
+            <button onClick={() => setOnboardingStep(s => s + 1)}
+              className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full items-center justify-center text-white/60 hover:bg-white/20 hover:text-white transition-all">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+            </button>
+          )}
 
           {onboardingStep === 0 && (
             <div className="h-full flex flex-col md:flex-row">
