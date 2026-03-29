@@ -1,6 +1,6 @@
 "use client";
 
-import { useTonConnectUI } from "@tonconnect/ui-react";
+import { useTonConnectUI, useTonWallet } from "@tonconnect/ui-react";
 import { useState, useEffect, useCallback } from "react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
@@ -20,47 +20,26 @@ export default function TonPayButton({
   onSuccess?: () => void;
 }) {
   const [tonConnectUI] = useTonConnectUI();
+  const wallet = useTonWallet();
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [tonRate, setTonRate] = useState<number>(0);
-  const [walletAddr, setWalletAddr] = useState<string | null>(null);
+  const [debug, setDebug] = useState("");
 
   const priceUsd = TIER_PRICES_USD[tier];
 
-  // Check wallet on mount and poll for changes
+  // Debug: log wallet state every 2s
   useEffect(() => {
-    if (!tonConnectUI) return;
-
-    const checkWallet = () => {
-      const w = tonConnectUI.wallet;
-      if (w && w.account) {
-        setWalletAddr(w.account.address);
-      } else {
-        setWalletAddr(null);
-      }
-    };
-
-    // Check immediately
-    checkWallet();
-
-    // Subscribe to status changes
-    const unsub = tonConnectUI.onStatusChange((w) => {
-      if (w && w.account) {
-        setWalletAddr(w.account.address);
-      } else {
-        setWalletAddr(null);
-      }
-    });
-
-    // Also poll every 2s as backup (bridge can be slow)
-    const interval = setInterval(checkWallet, 2000);
-
-    return () => {
-      unsub();
-      clearInterval(interval);
-    };
-  }, [tonConnectUI]);
+    const interval = setInterval(() => {
+      const w = tonConnectUI?.wallet;
+      const connected = tonConnectUI?.connected;
+      setDebug(
+        `connected: ${connected}, wallet: ${w ? "yes" : "no"}, hook: ${wallet ? "yes" : "no"}`
+      );
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [tonConnectUI, wallet]);
 
   // Fetch TON rate
   useEffect(() => {
@@ -70,8 +49,16 @@ export default function TonPayButton({
       .catch(() => setTonRate(3.5));
   }, []);
 
+  const connected = !!wallet;
   const amountTon = tonRate > 0 && priceUsd ? (priceUsd / tonRate) : 0;
-  const connected = !!walletAddr;
+
+  const handleConnect = useCallback(async () => {
+    try {
+      await tonConnectUI.openModal();
+    } catch (e: any) {
+      setError(e?.message || "Ошибка подключения");
+    }
+  }, [tonConnectUI]);
 
   const handlePay = useCallback(async () => {
     if (!priceUsd) return;
@@ -90,9 +77,8 @@ export default function TonPayButton({
       const auth = JSON.parse(authStr);
 
       const rateRes = await fetch(`${API_URL}/api/payment/ton-rate`);
-      const rateData = await rateRes.json();
-      const currentRate = rateData.ton_usd;
-      if (!currentRate || currentRate <= 0) {
+      const { ton_usd: currentRate } = await rateRes.json();
+      if (!currentRate) {
         setError("Не удалось получить курс TON");
         setLoading(false);
         setStatus("");
@@ -105,19 +91,11 @@ export default function TonPayButton({
       setStatus("Создание заказа...");
       const orderRes = await fetch(`${API_URL}/api/payment/ton-order`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.token}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
         body: JSON.stringify({ tier, amount_ton: payAmountTon }),
       });
       const orderData = await orderRes.json();
-      if (!orderRes.ok) {
-        setError(orderData.detail || "Ошибка создания заказа");
-        setLoading(false);
-        setStatus("");
-        return;
-      }
+      if (!orderRes.ok) { setError(orderData.detail || "Ошибка"); setLoading(false); setStatus(""); return; }
 
       setStatus("Подтвердите в кошельке...");
       await tonConnectUI.sendTransaction({
@@ -126,7 +104,6 @@ export default function TonPayButton({
       });
 
       setStatus("Ожидание подтверждения...");
-      let confirmed = false;
       for (let i = 0; i < 30; i++) {
         await new Promise((r) => setTimeout(r, 3000));
         try {
@@ -135,42 +112,27 @@ export default function TonPayButton({
             { headers: { Authorization: `Bearer ${auth.token}` } }
           );
           const checkData = await checkRes.json();
-          if (checkData.status === "confirmed") {
-            confirmed = true;
-            break;
-          }
+          if (checkData.status === "confirmed") { setStatus(""); onSuccess?.(); setLoading(false); return; }
         } catch {}
       }
-
-      if (confirmed) {
-        setStatus("");
-        onSuccess?.();
-      } else {
-        setError("Транзакция отправлена. Подписка активируется в течение 1-2 минут.");
-      }
+      setError("Транзакция отправлена. Подписка активируется в течение 1-2 минут.");
     } catch (err: any) {
-      if (err?.message?.includes("reject")) {
-        setError("Транзакция отменена");
-      } else {
-        setError(err?.message || "Ошибка оплаты");
-      }
+      setError(err?.message?.includes("reject") ? "Отменено" : (err?.message || "Ошибка"));
     }
-
     setLoading(false);
     setStatus("");
   }, [tier, priceUsd, tonConnectUI, onSuccess]);
 
   if (!priceUsd) return null;
 
-  const shortAddr = walletAddr
-    ? `${walletAddr.slice(0, 6)}...${walletAddr.slice(-4)}`
-    : "";
+  const addr = wallet?.account?.address;
+  const shortAddr = addr ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : "";
 
   return (
     <div>
       {!connected ? (
         <button
-          onClick={() => tonConnectUI.openModal()}
+          onClick={handleConnect}
           className="w-full flex items-center justify-center gap-2 bg-[#0098EA] text-white py-3 rounded-xl font-bold text-sm hover:bg-[#0080C0] transition-colors"
         >
           <span className="font-extrabold text-lg">T</span>
@@ -197,9 +159,9 @@ export default function TonPayButton({
           </div>
         </>
       )}
-      {error && (
-        <p className="text-xs text-red-500 mt-2 text-center">{error}</p>
-      )}
+      {/* Debug info — temporarily visible */}
+      <p className="text-[9px] text-text/20 mt-1 text-center font-mono">{debug}</p>
+      {error && <p className="text-xs text-red-500 mt-2 text-center">{error}</p>}
     </div>
   );
 }
