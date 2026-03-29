@@ -1,6 +1,6 @@
 "use client";
 
-import { useTonConnectUI, useTonWallet } from "@tonconnect/ui-react";
+import { TonConnectButton, useTonConnectUI, useTonWallet } from "@tonconnect/ui-react";
 import { useState, useEffect, useCallback } from "react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
@@ -25,23 +25,9 @@ export default function TonPayButton({
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [tonRate, setTonRate] = useState<number>(0);
-  const [debug, setDebug] = useState("");
 
   const priceUsd = TIER_PRICES_USD[tier];
 
-  // Debug: log wallet state every 2s
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const w = tonConnectUI?.wallet;
-      const connected = tonConnectUI?.connected;
-      setDebug(
-        `connected: ${connected}, wallet: ${w ? "yes" : "no"}, hook: ${wallet ? "yes" : "no"}`
-      );
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [tonConnectUI, wallet]);
-
-  // Fetch TON rate
   useEffect(() => {
     fetch(`${API_URL}/api/payment/ton-rate`)
       .then((r) => r.json())
@@ -52,70 +38,50 @@ export default function TonPayButton({
   const connected = !!wallet;
   const amountTon = tonRate > 0 && priceUsd ? (priceUsd / tonRate) : 0;
 
-  const handleConnect = useCallback(async () => {
-    try {
-      await tonConnectUI.openModal();
-    } catch (e: any) {
-      setError(e?.message || "Ошибка подключения");
-    }
-  }, [tonConnectUI]);
-
   const handlePay = useCallback(async () => {
     if (!priceUsd) return;
     setError("");
     setLoading(true);
-    setStatus("Получение курса...");
 
     try {
       const authStr = localStorage.getItem("stone_auth");
-      if (!authStr) {
-        setError("Сначала войдите в аккаунт на сайте");
-        setLoading(false);
-        setStatus("");
-        return;
-      }
+      if (!authStr) { setError("Сначала войдите в аккаунт"); setLoading(false); return; }
       const auth = JSON.parse(authStr);
 
-      const rateRes = await fetch(`${API_URL}/api/payment/ton-rate`);
-      const { ton_usd: currentRate } = await rateRes.json();
-      if (!currentRate) {
-        setError("Не удалось получить курс TON");
-        setLoading(false);
-        setStatus("");
-        return;
-      }
+      setStatus("Курс TON...");
+      const { ton_usd: rate } = await (await fetch(`${API_URL}/api/payment/ton-rate`)).json();
+      if (!rate) { setError("Не удалось получить курс"); setLoading(false); setStatus(""); return; }
 
-      const payAmountTon = priceUsd / currentRate;
-      const amountNano = Math.ceil(payAmountTon * 1e9).toString();
+      const payTon = priceUsd / rate;
+      const nano = Math.ceil(payTon * 1e9).toString();
 
       setStatus("Создание заказа...");
       const orderRes = await fetch(`${API_URL}/api/payment/ton-order`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
-        body: JSON.stringify({ tier, amount_ton: payAmountTon }),
+        body: JSON.stringify({ tier, amount_ton: payTon }),
       });
-      const orderData = await orderRes.json();
-      if (!orderRes.ok) { setError(orderData.detail || "Ошибка"); setLoading(false); setStatus(""); return; }
+      const order = await orderRes.json();
+      if (!orderRes.ok) { setError(order.detail || "Ошибка"); setLoading(false); setStatus(""); return; }
 
       setStatus("Подтвердите в кошельке...");
       await tonConnectUI.sendTransaction({
         validUntil: Math.floor(Date.now() / 1000) + 600,
-        messages: [{ address: MERCHANT_WALLET, amount: amountNano }],
+        messages: [{ address: MERCHANT_WALLET, amount: nano }],
       });
 
-      setStatus("Ожидание подтверждения...");
+      setStatus("Ожидание...");
       for (let i = 0; i < 30; i++) {
         await new Promise((r) => setTimeout(r, 3000));
         try {
-          const checkRes = await fetch(
-            `${API_URL}/api/payment/ton-check?order_id=${orderData.order_id}`,
+          const { status: s } = await (await fetch(
+            `${API_URL}/api/payment/ton-check?order_id=${order.order_id}`,
             { headers: { Authorization: `Bearer ${auth.token}` } }
-          );
-          const checkData = await checkRes.json();
-          if (checkData.status === "confirmed") { setStatus(""); onSuccess?.(); setLoading(false); return; }
+          )).json();
+          if (s === "confirmed") { onSuccess?.(); setLoading(false); setStatus(""); return; }
         } catch {}
       }
-      setError("Транзакция отправлена. Подписка активируется в течение 1-2 минут.");
+      setError("Транзакция отправлена. Подписка активируется через 1-2 мин.");
     } catch (err: any) {
       setError(err?.message?.includes("reject") ? "Отменено" : (err?.message || "Ошибка"));
     }
@@ -125,43 +91,31 @@ export default function TonPayButton({
 
   if (!priceUsd) return null;
 
-  const addr = wallet?.account?.address;
-  const shortAddr = addr ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : "";
-
   return (
-    <div>
-      {!connected ? (
+    <div className="space-y-2">
+      {/* Step 1: Connect wallet using official TonConnectButton */}
+      <div className="flex items-center gap-3">
+        <div className="shrink-0">
+          <TonConnectButton />
+        </div>
+        <p className="text-xs text-text/40">
+          {connected ? "Кошелёк подключён" : "Подключите кошелёк TON"}
+        </p>
+      </div>
+
+      {/* Step 2: Pay button (only when connected) */}
+      {connected && (
         <button
-          onClick={handleConnect}
-          className="w-full flex items-center justify-center gap-2 bg-[#0098EA] text-white py-3 rounded-xl font-bold text-sm hover:bg-[#0080C0] transition-colors"
+          onClick={handlePay}
+          disabled={loading}
+          className="w-full flex items-center justify-center gap-2 bg-[#0098EA] text-white py-3 rounded-xl font-bold text-sm hover:bg-[#0080C0] transition-colors disabled:opacity-60"
         >
           <span className="font-extrabold text-lg">T</span>
-          Подключить кошелёк TON
+          {status || `Оплатить ~${amountTon.toFixed(2)} TON (~$${priceUsd})`}
         </button>
-      ) : (
-        <>
-          <button
-            onClick={handlePay}
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-[#0098EA] text-white py-3 rounded-xl font-bold text-sm hover:bg-[#0080C0] transition-colors disabled:opacity-60"
-          >
-            <span className="font-extrabold text-lg">T</span>
-            {status || `Оплатить ~${amountTon.toFixed(2)} TON (~$${priceUsd})`}
-          </button>
-          <div className="flex items-center justify-between mt-1.5 px-1">
-            <p className="text-[10px] text-[#0098EA] font-medium">{shortAddr}</p>
-            <button
-              onClick={(e) => { e.stopPropagation(); tonConnectUI.disconnect(); }}
-              className="text-[10px] text-text/30 hover:text-red-500 transition-colors"
-            >
-              Отключить
-            </button>
-          </div>
-        </>
       )}
-      {/* Debug info — temporarily visible */}
-      <p className="text-[9px] text-text/20 mt-1 text-center font-mono">{debug}</p>
-      {error && <p className="text-xs text-red-500 mt-2 text-center">{error}</p>}
+
+      {error && <p className="text-xs text-red-500 text-center">{error}</p>}
     </div>
   );
 }
