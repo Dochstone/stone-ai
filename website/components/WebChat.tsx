@@ -158,44 +158,72 @@ const companyColors: Record<string, string> = {
 // ─── Message Content ───
 
 function VideoPlayer({ url, taskId, token }: { url: string; taskId?: string; token?: string }) {
-  const [src, setSrc] = useState(url);
-  const [failed, setFailed] = useState(false);
+  const [thumb, setThumb] = useState<string | null>(null);
+  const directUrl = url.includes("/api/video/stream/") ? url : (taskId && token ? `${API_URL}/api/video/stream/${taskId}?token=${token}` : url);
 
-  // If direct URL fails, try proxy
-  const handleError = () => {
-    if (taskId && token && src === url) {
-      const proxyUrl = `${API_URL}/api/video/stream/${taskId}?token=${token}`;
-      setSrc(proxyUrl);
-    } else {
-      setFailed(true);
-    }
+  // Generate thumbnail from video
+  useEffect(() => {
+    const video = document.createElement("video");
+    video.crossOrigin = "anonymous";
+    video.muted = true;
+    video.preload = "metadata";
+    video.src = directUrl;
+    video.onloadeddata = () => {
+      video.currentTime = 0.5;
+    };
+    video.onseeked = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext("2d")?.drawImage(video, 0, 0);
+        setThumb(canvas.toDataURL("image/jpeg", 0.8));
+      } catch {}
+    };
+    video.onerror = () => {
+      // Try original URL for thumbnail
+      if (video.src !== url) {
+        video.src = url;
+      }
+    };
+    return () => { video.src = ""; };
+  }, [directUrl, url]);
+
+  const openVideo = () => {
+    window.open(url, "_blank");
   };
 
-  if (failed) {
-    return (
-      <div className="bg-text/[0.04] rounded-xl p-4 text-center" style={{ minHeight: 120 }}>
-        <p className="text-text/40 text-xs mb-2">Видео не удалось воспроизвести</p>
-        <a href={url} target="_blank" rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 bg-accent text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-accent/90">
-          Открыть видео
-        </a>
-      </div>
-    );
-  }
-
   return (
-    <video
-      src={src}
-      controls
-      autoPlay
-      muted
-      loop
-      playsInline
-      preload="auto"
-      className="max-w-full rounded-xl bg-black"
-      style={{ maxHeight: 360, minHeight: 200, minWidth: 280 }}
-      onError={handleError}
-    />
+    <div
+      onClick={openVideo}
+      className="relative rounded-xl overflow-hidden cursor-pointer group"
+      style={{ maxWidth: 360, minHeight: 180 }}
+    >
+      {thumb ? (
+        <img src={thumb} alt="Video preview" className="w-full h-full object-cover" />
+      ) : (
+        <div className="w-full bg-gradient-to-br from-text/[0.08] to-text/[0.04] flex items-center justify-center" style={{ minHeight: 180 }}>
+          <div className="text-center">
+            <svg className="w-8 h-8 text-text/20 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h1.5C5.496 19.5 6 18.996 6 18.375m-3.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-1.5A1.125 1.125 0 0118 18.375M20.625 4.5H3.375m17.25 0c.621 0 1.125.504 1.125 1.125M20.625 4.5h-1.5C18.504 4.5 18 5.004 18 5.625m3.75 0v1.5c0 .621-.504 1.125-1.125 1.125M3.375 4.5c-.621 0-1.125.504-1.125 1.125M3.375 4.5h1.5C5.496 4.5 6 5.004 6 5.625m-3.75 0v1.5c0 .621.504 1.125 1.125 1.125m0 0h1.5m-1.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m1.5-3.75C5.496 8.25 6 7.746 6 7.125v-1.5" />
+            </svg>
+            <p className="text-[10px] text-text/20">Загрузка превью...</p>
+          </div>
+        </div>
+      )}
+      {/* Play button overlay */}
+      <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
+        <div className="w-14 h-14 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+          <svg className="w-6 h-6 text-text ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 5.14v14l11-7-11-7z" />
+          </svg>
+        </div>
+      </div>
+      {/* Label */}
+      <div className="absolute bottom-2 left-2 bg-black/50 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-1 rounded-lg">
+        Нажмите для просмотра
+      </div>
+    </div>
   );
 }
 
