@@ -254,7 +254,7 @@ async def stream_video(
     except Exception:
         raise HTTPException(401, "Invalid token")
 
-    user_id = payload.get("user_id")
+    user_id = payload.get("user_id") or payload.get("sub")
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
     if not user:
