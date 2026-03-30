@@ -809,13 +809,21 @@ function VoiceButton({ text, token }: { text: string; token: string }) {
 export default function WebChat({ initialModel, initialCategory }: { initialModel?: string; initialCategory?: string } = {}) {
   const [auth, setAuth] = useState<AuthState | null>(null);
   const [loaded, setLoaded] = useState(false);
-  const [selectedModel, setSelectedModel] = useState(initialModel && MODELS.some(m => m.id === initialModel) ? initialModel : "gpt-4o-mini");
+  const [selectedModel, setSelectedModel] = useState(() => {
+    if (initialModel && MODELS.some(m => m.id === initialModel)) return initialModel;
+    try { return sessionStorage.getItem("stone_chat_model") || "gpt-4o-mini"; } catch { return "gpt-4o-mini"; }
+  });
   const [lockModal, setLockModal] = useState<{ model: string; tier: string; price: string } | null>(null);
   const [modelPickerOpen, setModelPickerOpen] = useState(false);
   const [modelSearch, setModelSearch] = useState("");
   const [showTemplates, setShowTemplates] = useState(false);
   const [limits, setLimits] = useState<{ plan?: string; text?: { used: number; limit: number }; image?: { used: number; limit: number }; streak?: { days: number } } | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(() => {
+    try {
+      const saved = sessionStorage.getItem("stone_chat_messages");
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -824,7 +832,10 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   const [sessions, setSessions] = useState<ChatSessionItem[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
   const [recording, setRecording] = useState(false);
-  const [modelCatFilter, setModelCatFilter] = useState<string>(initialCategory || "all");
+  const [modelCatFilter, setModelCatFilter] = useState<string>(() => {
+    if (initialCategory) return initialCategory;
+    try { return sessionStorage.getItem("stone_chat_tab") || "all"; } catch { return "all"; }
+  });
   const tabMessagesRef = useRef<Record<string, Message[]>>({});
 
   const [dragging, setDragging] = useState(false);
@@ -832,6 +843,25 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(0);
   const [upsellModal, setUpsellModal] = useState<{ type: "limit" | "locked"; model?: string; tier?: string } | null>(null);
+
+  // Persist chat state to sessionStorage (survives F5)
+  useEffect(() => {
+    try {
+      if (messages.length > 0) {
+        sessionStorage.setItem("stone_chat_messages", JSON.stringify(messages.slice(-50)));
+      } else {
+        sessionStorage.removeItem("stone_chat_messages");
+      }
+    } catch {}
+  }, [messages]);
+
+  useEffect(() => {
+    try { sessionStorage.setItem("stone_chat_model", selectedModel); } catch {}
+  }, [selectedModel]);
+
+  useEffect(() => {
+    try { sessionStorage.setItem("stone_chat_tab", modelCatFilter); } catch {}
+  }, [modelCatFilter]);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
