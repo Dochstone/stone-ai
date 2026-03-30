@@ -120,7 +120,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   file?: FileAttachment;
-  video?: { url: string; taskId?: string; cost_usd?: number };
+  video?: { url: string; directUrl?: string; taskId?: string; cost_usd?: number };
   threed?: { url: string; cost_usd?: number };
   billing?: {
     tokens_in: number;
@@ -1243,7 +1243,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
           const status = await statusRes.json();
 
           if (status.status === "completed" && status.video_url) {
-            setMessages([...history, { role: "assistant", content: `Видео готово!`, video: { url: status.video_url, taskId: data.task_id, cost_usd: data.cost_usd } }]);
+            setMessages([...history, { role: "assistant", content: `Видео готово!`, video: { url: status.video_url, directUrl: status.direct_url || status.video_url, taskId: data.task_id, cost_usd: data.cost_usd } }]);
             setVideoGenerating(false);
             return;
           }
@@ -1885,7 +1885,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                           <VideoPlayer url={msg.video.url} taskId={msg.video.taskId} token={auth?.token} />
                           <div className="flex items-center gap-3 mt-2">
                             <a
-                              href={msg.video.url}
+                              href={msg.video.directUrl || msg.video.url}
                               download={`stone-ai-video-${Date.now()}.mp4`}
                               className="flex items-center gap-1.5 text-[11px] text-accent font-semibold hover:underline"
                             >
@@ -1894,7 +1894,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                               </svg>
                               Скачать
                             </a>
-                            <a href={msg.video.url} target="_blank" rel="noopener noreferrer"
+                            <a href={msg.video.directUrl || msg.video.url} target="_blank" rel="noopener noreferrer"
                               className="flex items-center gap-1.5 text-[11px] text-text/40 font-semibold hover:text-text/60">
                               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />

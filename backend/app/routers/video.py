@@ -4,7 +4,7 @@ import uuid
 import logging
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy import select
@@ -135,6 +135,7 @@ async def generate_video(
 @router.get("/status/{task_id}")
 async def video_status(
     task_id: str,
+    request: Request,
     tg_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -173,10 +174,19 @@ async def video_status(
         task.completed_at = datetime.utcnow()
         await db.commit()
 
+        # Return proxy URL instead of direct fal.ai URL (CORS/expiry issues)
+        from app.middleware.web_auth import extract_jwt_from_request
+        jwt_token = extract_jwt_from_request(request) if request else None
+        if jwt_token:
+            proxy_url = f"https://stone-ai-production.up.railway.app/api/video/stream/{task.task_id}?token={jwt_token}"
+        else:
+            proxy_url = task.video_url
+
         return {
             "task_id": task.task_id,
             "status": "completed",
-            "video_url": task.video_url,
+            "video_url": proxy_url,
+            "direct_url": task.video_url,
         }
 
     if status == "FAILED":
