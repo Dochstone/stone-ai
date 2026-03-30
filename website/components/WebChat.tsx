@@ -1767,7 +1767,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
         {/* Category tabs */}
         <div className="flex px-3 sm:px-4 border-b border-text/[0.04] bg-bg/50 shrink-0">
           {[
-            { id: "all", icon: "💬", label: "Все" },
+            { id: "all", icon: "💬", label: "Чаты" },
             { id: "free", icon: "✨", label: "Free" },
             { id: "image", icon: "🎨", label: "Фото" },
             { id: "video", icon: "🎬", label: "Видео" },
@@ -1801,10 +1801,19 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
           <div className="max-w-3xl mx-auto px-3 sm:px-4 py-1.5 flex items-center gap-1.5 overflow-x-auto">
             {(modelCatFilter === "all" ? [
               { id: "gpt-4o-mini", name: "GPT-4o mini" },
-              { id: "claude-sonnet-4", name: "Claude Sonnet" },
-              { id: "gemini-2.5-pro", name: "Gemini Pro" },
               { id: "gpt-5.4", name: "GPT-5.4" },
+              { id: "gpt-5.1", name: "GPT-5.1" },
+              { id: "claude-sonnet-4", name: "Claude Sonnet" },
+              { id: "claude-opus-4", name: "Claude Opus" },
+              { id: "gemini-2.5-pro", name: "Gemini Pro" },
+              { id: "gemini-2.0-flash", name: "Gemini Flash" },
               { id: "deepseek-r1", name: "DeepSeek R1" },
+              { id: "deepseek-v3", name: "DeepSeek V3" },
+              { id: "grok-3", name: "Grok 3" },
+              { id: "llama-4-maverick", name: "Llama 4" },
+              { id: "mistral-large-25", name: "Mistral Large" },
+              { id: "qwen-3-235b", name: "Qwen 3" },
+              { id: "command-r7", name: "Command R" },
             ] : modelCatFilter === "free" ? [
               { id: "gpt-4o-mini", name: "GPT-4o mini" },
               { id: "gemini-2.0-flash", name: "Gemini Flash" },
