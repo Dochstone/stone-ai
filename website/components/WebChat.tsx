@@ -830,7 +830,9 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   const [pendingFile, setPendingFile] = useState<FileAttachment | null>(null);
   const [uploading, setUploading] = useState(false);
   const [sessions, setSessions] = useState<ChatSessionItem[]>([]);
-  const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
+  const [activeSessionId, setActiveSessionId] = useState<number | null>(() => {
+    try { const s = localStorage.getItem("stone_active_session"); return s ? parseInt(s) : null; } catch { return null; }
+  });
   const [recording, setRecording] = useState(false);
   const [modelCatFilter, setModelCatFilter] = useState<string>(() => {
     if (initialCategory) return initialCategory;
@@ -862,6 +864,13 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   useEffect(() => {
     try { sessionStorage.setItem("stone_chat_tab", modelCatFilter); } catch {}
   }, [modelCatFilter]);
+
+  useEffect(() => {
+    try {
+      if (activeSessionId) localStorage.setItem("stone_active_session", String(activeSessionId));
+      else localStorage.removeItem("stone_active_session");
+    } catch {}
+  }, [activeSessionId]);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -1015,6 +1024,27 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   }, [auth]);
 
   useEffect(() => { fetchSessions(); }, [fetchSessions]);
+
+  // Auto-load saved or last session on mount (persistent history)
+  useEffect(() => {
+    if (!auth?.token || messages.length > 0) return;
+    // If we have a saved session ID, load it
+    const savedId = activeSessionId;
+    if (savedId) {
+      loadSession(savedId);
+      return;
+    }
+    // Otherwise load last session
+    fetch(`${API_URL}/api/chats?limit=1`, {
+      headers: { Authorization: `Bearer ${auth.token}` },
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        const last = data?.sessions?.[0];
+        if (last) loadSession(last.id);
+      })
+      .catch(() => {});
+  }, [auth?.token]); // only on mount
 
   const loadSession = useCallback(async (sessionId: number) => {
     if (!auth) return;
