@@ -120,7 +120,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   file?: FileAttachment;
-  video?: { url: string; cost_usd?: number };
+  video?: { url: string; taskId?: string; cost_usd?: number };
   threed?: { url: string; cost_usd?: number };
   billing?: {
     tokens_in: number;
