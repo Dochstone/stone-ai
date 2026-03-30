@@ -1234,7 +1234,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
             setThreedGenerating(false);
             return;
           }
-          if (attempts < 60) pollTimerRef.current = setTimeout(poll, 3000);
+          if (attempts < 200) pollTimerRef.current = setTimeout(poll, 3000);
           else { setMessages([...history, { role: "assistant", content: "Таймаут генерации." }]); setThreedGenerating(false); }
         } catch { setMessages([...history, { role: "assistant", content: "Ошибка проверки статуса" }]); setThreedGenerating(false); }
       };
@@ -1292,7 +1292,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
 
       // Poll for status
       let attempts = 0;
-      const maxAttempts = 60; // 3s * 60 = 3 minutes max
+      const maxAttempts = 200; // 3s * 200 = 10 minutes max
       const poll = async () => {
         attempts++;
         try {
