@@ -157,6 +157,48 @@ const companyColors: Record<string, string> = {
 
 // ─── Message Content ───
 
+function VideoPlayer({ url, taskId, token }: { url: string; taskId?: string; token?: string }) {
+  const [src, setSrc] = useState(url);
+  const [failed, setFailed] = useState(false);
+
+  // If direct URL fails, try proxy
+  const handleError = () => {
+    if (taskId && token && src === url) {
+      const proxyUrl = `${API_URL}/api/video/stream/${taskId}?token=${token}`;
+      setSrc(proxyUrl);
+    } else {
+      setFailed(true);
+    }
+  };
+
+  if (failed) {
+    return (
+      <div className="bg-text/[0.04] rounded-xl p-4 text-center" style={{ minHeight: 120 }}>
+        <p className="text-text/40 text-xs mb-2">Видео не удалось воспроизвести</p>
+        <a href={url} target="_blank" rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 bg-accent text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-accent/90">
+          Открыть видео
+        </a>
+      </div>
+    );
+  }
+
+  return (
+    <video
+      src={src}
+      controls
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="auto"
+      className="max-w-full rounded-xl bg-black"
+      style={{ maxHeight: 360, minHeight: 200, minWidth: 280 }}
+      onError={handleError}
+    />
+  );
+}
+
 function ImageWithDownload({ url, caption }: { url: string; caption?: string }) {
   const [copied, setCopied] = useState(false);
 
@@ -857,7 +899,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
             const s = await r.json();
             if (s.status === "completed" && s.video_url) {
               setMessages(prev => prev.map(m =>
-                m.content?.includes("Генерация видео") ? { ...m, content: "Видео готово!", video: { url: s.video_url, cost_usd: pending.cost_usd } } : m
+                m.content?.includes("Генерация видео") ? { ...m, content: "Видео готово!", video: { url: s.video_url, taskId: pending.task_id, cost_usd: pending.cost_usd } } : m
               ));
               setVideoGenerating(false);
               return;
@@ -1201,7 +1243,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
           const status = await statusRes.json();
 
           if (status.status === "completed" && status.video_url) {
-            setMessages([...history, { role: "assistant", content: `Видео готово!`, video: { url: status.video_url, cost_usd: data.cost_usd } }]);
+            setMessages([...history, { role: "assistant", content: `Видео готово!`, video: { url: status.video_url, taskId: data.task_id, cost_usd: data.cost_usd } }]);
             setVideoGenerating(false);
             return;
           }
@@ -1840,31 +1882,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                       {/* Video player */}
                       {msg.video && (
                         <div className="mb-2">
-                          <video
-                            src={msg.video.url}
-                            controls
-                            autoPlay
-                            muted
-                            loop
-                            playsInline
-                            preload="auto"
-                            crossOrigin="anonymous"
-                            className="max-w-full rounded-xl bg-black"
-                            style={{ maxHeight: 360, minHeight: 200, minWidth: 280 }}
-                            onError={(e) => {
-                              const el = e.target as HTMLVideoElement;
-                              el.style.display = "none";
-                              const fallback = el.parentElement?.querySelector(".video-fallback");
-                              if (fallback) (fallback as HTMLElement).style.display = "block";
-                            }}
-                          />
-                          <div className="video-fallback hidden bg-text/[0.04] rounded-xl p-4 text-center" style={{ minHeight: 120 }}>
-                            <p className="text-text/40 text-xs mb-2">Видео не удалось воспроизвести в браузере</p>
-                            <a href={msg.video.url} target="_blank" rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 bg-accent text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-accent/90">
-                              Открыть видео
-                            </a>
-                          </div>
+                          <VideoPlayer url={msg.video.url} taskId={msg.video.taskId} token={auth?.token} />
                           <div className="flex items-center gap-3 mt-2">
                             <a
                               href={msg.video.url}

@@ -5,9 +5,11 @@ import logging
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+import httpx
 
 from app.database import get_db
 from app.middleware.auth import get_current_user
@@ -233,3 +235,51 @@ async def video_history(
             for t in tasks
         ]
     }
+
+
+@router.get("/stream/{task_id}")
+async def stream_video(
+    task_id: str,
+    token: str = "",
+    db: AsyncSession = Depends(get_db),
+):
+    """Proxy video stream — bypasses CORS restrictions on fal.ai URLs."""
+    from app.middleware.web_auth import decode_jwt
+
+    # Auth via query param (video src can't send headers)
+    if not token:
+        raise HTTPException(401, "Token required")
+    try:
+        payload = decode_jwt(token)
+    except Exception:
+        raise HTTPException(401, "Invalid token")
+
+    user_id = payload.get("user_id")
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(401, "User not found")
+
+    tg_id = user.telegram_id or user.id
+    result = await db.execute(
+        select(VideoTask).where(VideoTask.task_id == task_id, VideoTask.user_tg_id == tg_id)
+    )
+    task = result.scalar_one_or_none()
+
+    if not task or not task.video_url:
+        raise HTTPException(404, "Video not found")
+
+    async def proxy_stream():
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            async with client.stream("GET", task.video_url) as resp:
+                async for chunk in resp.aiter_bytes(chunk_size=65536):
+                    yield chunk
+
+    return StreamingResponse(
+        proxy_stream(),
+        media_type="video/mp4",
+        headers={
+            "Content-Disposition": f'inline; filename="stone-ai-{task_id}.mp4"',
+            "Cache-Control": "public, max-age=86400",
+        },
+    )
