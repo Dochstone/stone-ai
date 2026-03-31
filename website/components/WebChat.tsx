@@ -8,7 +8,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.
 
 const IMAGE_MODEL_IDS = new Set([
   "nano-banana-pro", "nano-banana", "gpt-5-image", "gpt-5-image-mini",
-  "flux-schnell", "stable-diffusion-xl",
+  "flux-schnell", "stable-diffusion-xl", "kolors-v2", "kolors-v3",
 ]);
 
 const VIDEO_MODEL_IDS = new Set([
@@ -1866,6 +1866,8 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
               { id: "deepseek-v3", name: "DeepSeek V3" },
               { id: "nano-banana", name: "Nano Banana" },
             ] : modelCatFilter === "image" ? [
+                { id: "kolors-v3", name: "KOLORS v3" },
+                { id: "kolors-v2", name: "KOLORS v2" },
                 { id: "nano-banana-pro", name: "Nano Banana Pro" },
                 { id: "nano-banana", name: "Nano Banana" },
                 { id: "gpt-5-image", name: "GPT-5 Image" },

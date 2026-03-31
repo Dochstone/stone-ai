@@ -63,6 +63,7 @@ OPUS_MODELS = {
 IMAGE_MODELS = {
     "nano-banana-pro", "nano-banana", "gpt-5-image",
     "gpt-5-image-mini", "flux-schnell", "stable-diffusion-xl",
+    "kolors-v2", "kolors-v3",
 }
 
 VIDEO_MODELS = {

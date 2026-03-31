@@ -189,7 +189,7 @@ async def chat(
 # Image Generation — OpenAI gpt-image-1 / DALL-E 3
 # ═══════════════════════════════════════════════════════════
 
-IMAGE_MODELS = {"nano-banana", "nano-banana-pro", "gpt-5-image", "gpt-5-image-mini", "flux-schnell", "stable-diffusion-xl"}
+IMAGE_MODELS = {"nano-banana", "nano-banana-pro", "gpt-5-image", "gpt-5-image-mini", "flux-schnell", "stable-diffusion-xl", "kolors-v2", "kolors-v3"}
 
 
 def _add_watermark(image_bytes: bytes) -> bytes:
@@ -266,6 +266,56 @@ async def generate_image(
             raise HTTPException(429, "Лимит картинок исчерпан (2/день). Подписка от 390₽/мес.")
 
     settings = get_settings()
+
+    # KOLORS (Kling) image generation
+    if req.model_id in ("kolors-v2", "kolors-v3") and settings.kling_access_key:
+        try:
+            from app.services.kling_client import create_kling_image, check_kling_image_status
+            import asyncio
+
+            kolors_model = "kolors-v3" if req.model_id == "kolors-v3" else "kolors-v2"
+            result = await create_kling_image(
+                settings.kling_access_key, settings.kling_secret_key,
+                req.prompt, model=kolors_model,
+            )
+            if "error" in result:
+                raise HTTPException(502, f"KOLORS ошибка: {result['error']}")
+
+            task_id = result["task_id"]
+            # Poll for result (max 60s)
+            for _ in range(30):
+                await asyncio.sleep(2)
+                status = await check_kling_image_status(
+                    settings.kling_access_key, settings.kling_secret_key, task_id
+                )
+                if status.get("status") == "COMPLETED" and status.get("images"):
+                    image_source_url = status["images"][0]
+                    # Download and convert to base64
+                    async with httpx.AsyncClient(timeout=30.0) as client:
+                        img_resp = await client.get(image_source_url)
+                        if img_resp.status_code == 200:
+                            image_url = f"data:image/png;base64,{base64.b64encode(img_resp.content).decode('ascii')}"
+                            # Watermark for free
+                            if tier == "free" and balance <= 0:
+                                try:
+                                    watermarked = _add_watermark(img_resp.content)
+                                    image_url = f"data:image/png;base64,{base64.b64encode(watermarked).decode('ascii')}"
+                                except Exception:
+                                    pass
+                            await record_usage(db, tg_id, req.model_id, cost_usd=0)
+                            await db.commit()
+                            return {"image_url": image_url, "model": req.model_id}
+                    break
+                if status.get("status") == "FAILED":
+                    raise HTTPException(502, f"KOLORS: {status.get('error', 'Failed')}")
+
+            raise HTTPException(504, "KOLORS таймаут генерации")
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"KOLORS error: {e}")
+            raise HTTPException(502, "Ошибка KOLORS генерации")
+
     openai_key = settings.openai_api_key
     if not openai_key:
         raise HTTPException(503, "Image generation not configured")
