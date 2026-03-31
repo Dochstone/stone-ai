@@ -120,7 +120,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   file?: FileAttachment;
-  video?: { url: string; directUrl?: string; taskId?: string; cost_usd?: number };
+  video?: { url: string; directUrl?: string; taskId?: string; thumbnailUrl?: string; cost_usd?: number };
   threed?: { url: string; cost_usd?: number };
   billing?: {
     tokens_in: number;
@@ -157,9 +157,10 @@ const companyColors: Record<string, string> = {
 
 // ─── Message Content ───
 
-function VideoPlayer({ url, taskId, token }: { url: string; taskId?: string; token?: string }) {
+function VideoPlayer({ url, taskId, token, thumbnailUrl }: { url: string; taskId?: string; token?: string; thumbnailUrl?: string }) {
+  const [thumbLoaded, setThumbLoaded] = useState(false);
+
   const openVideo = () => {
-    // Try direct fal.ai URL first (better for playback)
     const directUrl = url.includes("fal.media") ? url : (taskId && token ? `${API_URL}/api/video/stream/${taskId}?token=${token}` : url);
     window.open(directUrl, "_blank");
   };
@@ -170,14 +171,24 @@ function VideoPlayer({ url, taskId, token }: { url: string; taskId?: string; tok
       className="relative rounded-2xl overflow-hidden cursor-pointer group"
       style={{ maxWidth: 340 }}
     >
-      {/* Gradient background with animated shimmer */}
-      <div className="w-full aspect-video bg-gradient-to-br from-accent/20 via-purple-500/15 to-blue-500/20 flex items-center justify-center relative">
-        {/* Decorative elements */}
-        <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-4 left-4 w-16 h-16 border border-white/20 rounded-xl rotate-12" />
-          <div className="absolute bottom-6 right-6 w-12 h-12 border border-white/15 rounded-lg -rotate-6" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 border border-white/10 rounded-full" />
-        </div>
+      {/* Thumbnail or gradient fallback */}
+      <div className="w-full aspect-video relative flex items-center justify-center">
+        {thumbnailUrl && (
+          <img
+            src={thumbnailUrl}
+            alt="Video preview"
+            className={`absolute inset-0 w-full h-full object-cover ${thumbLoaded ? "" : "hidden"}`}
+            onLoad={() => setThumbLoaded(true)}
+          />
+        )}
+        {!thumbLoaded && (
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/20 via-purple-500/15 to-blue-500/20 flex items-center justify-center">
+            <div className="absolute inset-0 opacity-30">
+              <div className="absolute top-4 left-4 w-16 h-16 border border-white/20 rounded-xl rotate-12" />
+              <div className="absolute bottom-6 right-6 w-12 h-12 border border-white/15 rounded-lg -rotate-6" />
+            </div>
+          </div>
+        )}
 
         {/* Play button */}
         <div className="relative z-10 w-16 h-16 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
@@ -1305,7 +1316,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
           const status = await statusRes.json();
 
           if (status.status === "completed" && status.video_url) {
-            setMessages([...history, { role: "assistant", content: `Видео готово!`, video: { url: status.video_url, directUrl: status.direct_url || status.video_url, taskId: data.task_id, cost_usd: data.cost_usd } }]);
+            setMessages([...history, { role: "assistant", content: `Видео готово!`, video: { url: status.video_url, directUrl: status.direct_url || status.video_url, taskId: data.task_id, thumbnailUrl: status.thumbnail_url, cost_usd: data.cost_usd } }]);
             setVideoGenerating(false);
             return;
           }
@@ -1953,7 +1964,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                       {/* Video player */}
                       {msg.video && (
                         <div className="mb-2">
-                          <VideoPlayer url={msg.video.url} taskId={msg.video.taskId} token={auth?.token} />
+                          <VideoPlayer url={msg.video.url} taskId={msg.video.taskId} token={auth?.token} thumbnailUrl={msg.video.thumbnailUrl} />
                           <div className="flex items-center gap-3 mt-2">
                             <a
                               href={msg.video.directUrl || msg.video.url}

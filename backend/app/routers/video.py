@@ -182,11 +182,17 @@ async def video_status(
         else:
             proxy_url = task.video_url
 
+        # Generate thumbnail in background
+        thumbnail_url = None
+        if jwt_token:
+            thumbnail_url = f"https://stone-ai-production.up.railway.app/api/video/thumb/{task.task_id}?token={jwt_token}"
+
         return {
             "task_id": task.task_id,
             "status": "completed",
             "video_url": proxy_url,
             "direct_url": task.video_url,
+            "thumbnail_url": thumbnail_url,
         }
 
     if status == "FAILED":
@@ -293,3 +299,83 @@ async def stream_video(
             "Cache-Control": "public, max-age=86400",
         },
     )
+
+
+# In-memory thumbnail cache
+_thumb_cache: dict[str, bytes] = {}
+
+
+@router.get("/thumb/{task_id}")
+async def video_thumbnail(
+    task_id: str,
+    token: str = "",
+    db: AsyncSession = Depends(get_db),
+):
+    """Extract first frame from video as JPEG thumbnail."""
+    from app.middleware.web_auth import decode_jwt
+    from fastapi.responses import Response
+
+    if not token:
+        raise HTTPException(401, "Token required")
+    try:
+        payload = decode_jwt(token)
+    except Exception:
+        raise HTTPException(401, "Invalid token")
+
+    user_id = int(payload.get("user_id") or payload.get("sub") or 0)
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(401, "User not found")
+
+    # Check cache
+    if task_id in _thumb_cache:
+        return Response(content=_thumb_cache[task_id], media_type="image/jpeg",
+                       headers={"Cache-Control": "public, max-age=86400"})
+
+    tg_id = user.telegram_id or user.id
+    result = await db.execute(
+        select(VideoTask).where(VideoTask.task_id == task_id, VideoTask.user_tg_id == tg_id)
+    )
+    task = result.scalar_one_or_none()
+    if not task or not task.video_url:
+        raise HTTPException(404, "Video not found")
+
+    try:
+        # Download first ~500KB of video (enough for first frame)
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.get(task.video_url, headers={"Range": "bytes=0-524287"})
+            video_bytes = resp.content
+
+        # Extract first frame using imageio
+        import imageio.v3 as iio
+        from io import BytesIO
+        from PIL import Image
+
+        frames = iio.imread(BytesIO(video_bytes), plugin="pyav", format_hint=".mp4")
+        if len(frames) > 0:
+            frame = frames[0] if hasattr(frames, '__len__') else frames
+            img = Image.fromarray(frame)
+            # Resize to max 480px wide
+            if img.width > 480:
+                ratio = 480 / img.width
+                img = img.resize((480, int(img.height * ratio)), Image.LANCZOS)
+            buf = BytesIO()
+            img.save(buf, format="JPEG", quality=80)
+            thumb_bytes = buf.getvalue()
+
+            # Cache it
+            _thumb_cache[task_id] = thumb_bytes
+            # Keep cache small
+            if len(_thumb_cache) > 200:
+                oldest = list(_thumb_cache.keys())[:100]
+                for k in oldest:
+                    _thumb_cache.pop(k, None)
+
+            return Response(content=thumb_bytes, media_type="image/jpeg",
+                           headers={"Cache-Control": "public, max-age=86400"})
+
+    except Exception as e:
+        logger.warning(f"Thumbnail generation failed: {e}")
+
+    raise HTTPException(404, "Could not generate thumbnail")
