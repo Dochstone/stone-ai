@@ -104,23 +104,42 @@ async def generate_video(
     db.add(task)
     await db.flush()
 
-    # Submit to fal.ai
-    fal_result = await submit_video_generation(
-        req.model_id, req.prompt, req.source_image_url
-    )
+    # Submit to Kling direct API or fal.ai
+    is_kling = req.model_id.startswith("kling")
+    settings = get_settings()
 
-    if "error" in fal_result:
-        # Refund on failure
-        user.balance_usd = round(new_balance + price, 6)
-        task.status = "failed"
-        task.error_message = fal_result["error"]
+    if is_kling and settings.kling_access_key:
+        from app.services.kling_client import create_kling_video
+        kling_model = "kling-v2-master"
+        if "v1" in req.model_id:
+            kling_model = "kling-v1-6"
+        kling_result = await create_kling_video(
+            settings.kling_access_key, settings.kling_secret_key,
+            req.prompt, model=kling_model,
+            source_image_url=req.source_image_url,
+        )
+        if "error" in kling_result:
+            user.balance_usd = round(new_balance + price, 6)
+            task.status = "failed"
+            task.error_message = kling_result["error"]
+            await db.commit()
+            raise HTTPException(502, f"Ошибка генерации: {kling_result['error']}")
+        task.fal_request_id = f"kling:{kling_result['task_id']}"
+        task.status = "processing"
         await db.commit()
-        raise HTTPException(502, f"Ошибка генерации: {fal_result['error']}")
-
-    # Update task with fal request ID
-    task.fal_request_id = fal_result["request_id"]
-    task.status = "processing"
-    await db.commit()
+    else:
+        fal_result = await submit_video_generation(
+            req.model_id, req.prompt, req.source_image_url
+        )
+        if "error" in fal_result:
+            user.balance_usd = round(new_balance + price, 6)
+            task.status = "failed"
+            task.error_message = fal_result["error"]
+            await db.commit()
+            raise HTTPException(502, f"Ошибка генерации: {fal_result['error']}")
+        task.fal_request_id = fal_result["request_id"]
+        task.status = "processing"
+        await db.commit()
 
     return {
         "task_id": task_id,
@@ -161,11 +180,22 @@ async def video_status(
             "error": task.error_message,
         }
 
-    # Check fal.ai status
     if not task.fal_request_id:
         return {"task_id": task.task_id, "status": task.status}
 
-    fal_status = await check_video_status(task.model_id, task.fal_request_id)
+    # Check Kling direct API or fal.ai
+    is_kling_direct = task.fal_request_id.startswith("kling:")
+    if is_kling_direct:
+        from app.services.kling_client import check_kling_status
+        settings = get_settings()
+        kling_task_id = task.fal_request_id.split(":", 1)[1]
+        is_i2v = bool(task.source_image_url)
+        fal_status = await check_kling_status(
+            settings.kling_access_key, settings.kling_secret_key,
+            kling_task_id, is_image2video=is_i2v,
+        )
+    else:
+        fal_status = await check_video_status(task.model_id, task.fal_request_id)
     status = fal_status.get("status", "UNKNOWN")
 
     if status == "COMPLETED":

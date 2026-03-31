@@ -65,6 +65,10 @@ class Settings:
         self.ton_wallet_address = os.getenv("TON_WALLET_ADDRESS", "")
         self.tonapi_key = os.getenv("TONAPI_KEY", "")
 
+        # Kling AI (direct API)
+        self.kling_access_key = os.getenv("KLING_ACCESS_KEY", "")
+        self.kling_secret_key = os.getenv("KLING_SECRET_KEY", "")
+
         # Lava.ru (Cards RU + SBP)
         self.lava_secret_key = os.getenv("LAVA_SECRET_KEY", "")
         self.lava_shop_id = os.getenv("LAVA_SHOP_ID", "")

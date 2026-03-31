@@ -1872,14 +1872,15 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                 { id: "gpt-5-image-mini", name: "GPT-5 Image mini" },
                 { id: "flux-schnell", name: "Flux Schnell" },
               ] : modelCatFilter === "video" ? [
+                { id: "kling-v3", name: "Kling 3.0" },
                 { id: "sora-2", name: "Sora 2 Pro" },
                 { id: "veo-3", name: "Veo 3.1" },
                 { id: "luma-ray2", name: "Luma Ray 2" },
+                { id: "kling-v2", name: "Kling v2" },
                 { id: "luma-ray2-flash", name: "Ray 2 Flash" },
                 { id: "minimax", name: "MiniMax" },
-                { id: "hunyuan", name: "Hunyuan" },
                 { id: "cogvideox", name: "CogVideoX" },
-                { id: "pika-2", name: "Pika 2" },
+                { id: "hunyuan", name: "Hunyuan" },
               ] : modelCatFilter === "3d" ? [
                 { id: "tripo-v2.5", name: "Tripo v2.5" },
                 { id: "triposr", name: "TripoSR" },

@@ -13,14 +13,14 @@ FAL_QUEUE_URL = "https://queue.fal.run"
 
 VIDEO_MODELS_REGISTRY = [
     # Tier 1: Premium (best quality)
-    {"id": "kling-v3",    "name": "Kling 3.0 Pro",     "company": "Kuaishou",  "fal_model": "fal-ai/kling-video/v3/pro",       "duration": "5-15s", "cost": 0.10, "price": 0.30, "active": False},  # BROKEN on fal.ai
+    {"id": "kling-v3",    "name": "Kling 3.0 Pro",     "company": "Kuaishou",  "fal_model": "direct-kling",                    "duration": "5-10s", "cost": 0.10, "price": 0.30, "active": True},   # Direct Kling API
     {"id": "sora-2",      "name": "Sora 2 Pro",        "company": "OpenAI",    "fal_model": "fal-ai/sora-2/text-to-video/pro", "duration": "5-10s", "cost": 0.15, "price": 0.50, "active": True},
     {"id": "veo-3",       "name": "Veo 3.1",           "company": "Google",    "fal_model": "fal-ai/veo3.1",                   "duration": "5-10s", "cost": 0.20, "price": 0.65, "active": True},
     {"id": "luma-ray2",   "name": "Luma Ray 2",        "company": "Luma",      "fal_model": "fal-ai/luma-dream-machine/ray-2", "duration": "5-10s", "cost": 0.15, "price": 0.50, "active": True},
     {"id": "luma-ray2-flash", "name": "Luma Ray 2 Flash", "company": "Luma",   "fal_model": "fal-ai/luma-dream-machine/ray-2-flash", "duration": "5-10s", "cost": 0.08, "price": 0.30, "active": True},
     {"id": "runway-gen3", "name": "Runway Gen-3 Alpha", "company": "Runway",   "fal_model": "fal-ai/runway-gen3/turbo/image-to-video", "duration": "5-10s", "cost": 0.25, "price": 0.85, "active": False},
     # Tier 2: Working models
-    {"id": "kling-v2",    "name": "Kling v2",          "company": "Kuaishou",  "fal_model": "fal-ai/kling-video/v2/master",    "duration": "5-10s", "cost": 0.07, "price": 0.25, "active": False},
+    {"id": "kling-v2",    "name": "Kling v2 Master",   "company": "Kuaishou",  "fal_model": "direct-kling",                    "duration": "5-10s", "cost": 0.07, "price": 0.25, "active": True},   # Direct Kling API
     {"id": "minimax",     "name": "MiniMax Hailuo",    "company": "MiniMax",   "fal_model": "fal-ai/minimax-hailuo-02",        "duration": "5-10s", "cost": 0.08, "price": 0.28, "active": True},
     {"id": "cogvideox",   "name": "CogVideoX 5B",     "company": "THUDM",     "fal_model": "fal-ai/cogvideox-5b",             "duration": "5s",    "cost": 0.06, "price": 0.20, "active": True},
     {"id": "mochi",       "name": "Mochi v1",          "company": "Genmo",     "fal_model": "fal-ai/mochi-v1",                 "duration": "5s",    "cost": 0.05, "price": 0.18, "active": True},
