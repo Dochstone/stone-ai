@@ -7,7 +7,7 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
-KLING_API_BASE = "https://api.klingai.com"
+KLING_API_BASE = "https://api-singapore.klingai.com"
 
 
 def generate_kling_token(access_key: str, secret_key: str) -> str:
