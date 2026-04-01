@@ -35,8 +35,13 @@ function getModelLockInfo(modelId: string, balance: number, plan?: string): { lo
   if (plan === "max-pro" || plan === "max") return null; // full access
   if (plan === "mini" && MINI_MODEL_IDS.has(modelId)) return null;
   if (FREE_MODEL_IDS.has(modelId)) return null;
-  // Video/3D/audio — access checked on backend, don't lock on frontend
-  if (VIDEO_MODEL_IDS.has(modelId) || THREED_MODEL_IDS.has(modelId) || IMAGE_MODEL_IDS.has(modelId)) return null;
+  // Video/3D — need at least Mini
+  if (VIDEO_MODEL_IDS.has(modelId) || THREED_MODEL_IDS.has(modelId)) {
+    if (!plan || plan === "free") return { locked: true, tier: "Mini", price: "390₽/мес" };
+    return null;
+  }
+  // Images — free users get 2/day, paid get more, don't lock on frontend
+  if (IMAGE_MODEL_IDS.has(modelId)) return null;
   if (MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: "Mini", price: "390₽/мес" };
   return { locked: true, tier: "Max", price: "890₽/мес" };
 }
@@ -1393,6 +1398,9 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   const isImageModel = IMAGE_MODEL_IDS.has(selectedModel);
 
   const sendMessage = useCallback(async () => {
+    // Check if model is locked for free users
+    const lock = getModelLockInfo(selectedModel, auth?.balanceUsd || 0, limits?.plan);
+    if (lock) { setUpsellModal({ type: "locked", model: model?.name, tier: lock.tier }); return; }
     // Redirect to image/video/3D generation
     if (isImageModel) { sendImageMessage(); return; }
     if (isVideoModel) { sendVideoMessage(); return; }
@@ -1891,7 +1899,11 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
               ] : []).map((m) => (
                 <button
                   key={m.id}
-                  onClick={() => { setSelectedModel(m.id); }}
+                  onClick={() => {
+                    const lock = getModelLockInfo(m.id, auth?.balanceUsd || 0, limits?.plan);
+                    if (lock) { setLockModal({ model: m.name, tier: lock.tier, price: lock.price }); return; }
+                    setSelectedModel(m.id);
+                  }}
                   className={`px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-semibold whitespace-nowrap transition-colors shrink-0 ${
                     selectedModel === m.id
                       ? "bg-accent text-white"
