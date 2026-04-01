@@ -8,19 +8,17 @@ import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Генерация видео нейросетью — ИИ из текста в видео",
-  description: "Нейросеть для генерации видео из текста и фото. ИИ-модели Kling v2, Runway Gen-3, Pika 2.0. От $0.15 за видео.",
+  description: "Нейросеть для генерации видео из текста и фото. ИИ-модели Sora 2, Veo 3, Runway Gen-3, Pika 2.0. От $0.15 за видео.",
 };
 
-const modelIds = ["kling-v3", "sora-2", "veo-3", "runway-gen3", "minimax", "pixverse-v5", "kling-v2", "luma-dream", "pika-2", "wan-2", "hunyuan", "ltx-video", "stable-video"];
+const modelIds = ["sora-2", "veo-3", "runway-gen3", "minimax", "pixverse-v5", "luma-dream", "pika-2", "wan-2", "hunyuan", "ltx-video", "stable-video"];
 
 const modelDescriptions: Record<string, string> = {
-  "kling-v3": "Лучшее качество по лучшей цене. Мульти-шот, звук, 1080p. Всего $0.30.",
   "sora-2": "Видео от OpenAI. Лучшая физика и точное следование промптам.",
   "veo-3": "Google Veo 3.1. Нативное 4K, лучший lip-sync и звуковой дизайн.",
   "runway-gen3": "Индустриальный стандарт. Кинематографическое качество для профи.",
   "minimax": "Быстрая генерация. Анимация персонажей, плавное движение.",
   "pixverse-v5": "Кинематографичная камера, контроль сцены, плавные переходы.",
-  "kling-v2": "Предыдущая версия Kling. Хорошее качество по доступной цене.",
   "luma-dream": "Dream Machine от Luma. Реалистичная физика и переходы.",
   "pika-2": "Самая быстрая генерация (<90 сек). Идеальна для соцсетей.",
   "wan-2": "Самая дешёвая — $0.15. 1080p, быстрая, для массового контента.",
@@ -36,8 +34,8 @@ const examples = [
 ];
 
 const faqItems = [
-  { q: "Сколько времени занимает генерация?", a: "От 4 до 30 секунд в зависимости от модели. Pika и Stable Video — быстрее всех. Kling и Runway — дольше, но качественнее." },
-  { q: "Можно ли анимировать свою фотографию?", a: "Да! Загрузите фото и опишите движение. Поддерживают image-to-video: Kling, Runway, Stable Video." },
+  { q: "Сколько времени занимает генерация?", a: "От 4 до 30 секунд в зависимости от модели. Pika и Stable Video — быстрее всех. Sora и Runway — дольше, но качественнее." },
+  { q: "Можно ли анимировать свою фотографию?", a: "Да! Загрузите фото и опишите движение. Поддерживают image-to-video: Runway, Stable Video, Luma." },
   { q: "Какой формат видео?", a: "MP4 файл, который можно скачать и использовать где угодно. Длительность: 3-10 секунд." },
   { q: "Сколько видео включено в подписку?", a: "Mini — 3 видео/мес, Max — 10 видео/мес, Max Pro — 50 видео/мес. Если генерация не удалась — попытка не засчитывается." },
 ];
@@ -50,12 +48,12 @@ export default function VideoPage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Stone AI — AI Видео", applicationCategory: "MultimediaApplication", description: "Генерация видео из текста и фото. Kling v2, Runway Gen-3, Pika 2.0.", offers: { "@type": "Offer", price: "0.15", priceCurrency: "USD" } }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Stone AI — AI Видео", applicationCategory: "MultimediaApplication", description: "Генерация видео из текста и фото. Sora 2, Veo 3, Runway Gen-3, Pika 2.0.", offers: { "@type": "Offer", price: "0.15", priceCurrency: "USD" } }) }} />
       <ToolPageHero breadcrumb="AI Видео"
         badge="5 нейросетей для видео"
         title="Генерация видео нейросетью"
         highlight="из текста и фото"
-        description="ИИ-генератор видео: Kling v2, Runway Gen-3, Pika 2.0, Stable Video, Luma. Нейросеть создаёт видео за секунды. От $0.15 за клип."
+        description="ИИ-генератор видео: Sora 2, Veo 3, Runway Gen-3, Pika 2.0, Luma. Нейросеть создаёт видео за секунды. От $0.15 за клип."
       />
       <ToolModels
         title="Видео-модели"

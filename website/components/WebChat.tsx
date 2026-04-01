@@ -12,7 +12,7 @@ const IMAGE_MODEL_IDS = new Set([
 ]);
 
 const VIDEO_MODEL_IDS = new Set([
-  "kling-v3", "sora-2", "veo-3", "luma-ray2", "luma-ray2-flash", "kling-v2", "runway-gen3", "pika-2", "minimax", "pixverse-v5", "luma-dream", "stable-video", "wan-2", "hunyuan", "ltx-video", "cogvideox", "mochi",
+  "sora-2", "veo-3", "luma-ray2", "luma-ray2-flash", "runway-gen3", "pika-2", "minimax", "pixverse-v5", "luma-dream", "stable-video", "wan-2", "hunyuan", "ltx-video", "cogvideox", "mochi",
 ]);
 
 const THREED_MODEL_IDS = new Set(["tripo-v2.5", "triposr"]);
@@ -428,7 +428,7 @@ const PROMPT_TEMPLATES: Record<string, { text: string; model: string }[]> = {
   ],
 };
 
-// ─── Welcome Screen ───
+// ─── Welcome Screen ─── v2
 
 const WELCOME_CONFIG: Record<string, { icon: string; bg: string; title: string; subtitle: string }> = {
   all: { icon: "💬", bg: "bg-accent", title: "Чем могу помочь?", subtitle: "Выберите шаблон или напишите свой запрос" },
@@ -492,10 +492,10 @@ function WelcomeScreen({ onSuggestion, activeTab, plan }: { onSuggestion: (text:
               { text: "Космическая станция на орбите Юпитера", model: "nano-banana-pro" },
               { text: "Милый кот в костюме астронавта", model: "nano-banana" },
             ] : activeTab === "video" ? [
-              { text: "Камера пролетает над зелёным лесом на рассвете", model: "kling-v3" },
-              { text: "Девушка идёт по пляжу, закат, кинематографично", model: "sora-2" },
-              { text: "Таймлапс ночного города, огни, 4K", model: "veo-3" },
-              { text: "Золотая рыбка в коралловом рифе", model: "kling-v3" },
+              { text: "Камера пролетает над зелёным лесом на рассвете", model: "sora-2" },
+              { text: "Девушка идёт по пляжу, закат, кинематографично", model: "veo-3" },
+              { text: "Таймлапс ночного города, огни, 4K", model: "runway-gen3" },
+              { text: "Золотая рыбка в коралловом рифе", model: "luma-ray2" },
             ] : activeTab === "3d" ? [
               { text: "Средневековый замок, low-poly стиль", model: "tripo-v2.5" },
               { text: "Спортивная машина, фотореалистичная", model: "tripo-v2.5" },
@@ -1874,14 +1874,14 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                 { id: "gpt-5-image-mini", name: "GPT-5 Image mini" },
                 { id: "flux-schnell", name: "Flux Schnell" },
               ] : modelCatFilter === "video" ? [
-                { id: "kling-v3", name: "Kling 3.0" },
                 { id: "sora-2", name: "Sora 2 Pro" },
                 { id: "veo-3", name: "Veo 3.1" },
                 { id: "luma-ray2", name: "Luma Ray 2" },
-                { id: "kling-v2", name: "Kling v2" },
                 { id: "luma-ray2-flash", name: "Ray 2 Flash" },
+                { id: "runway-gen3", name: "Runway Gen-3" },
+                { id: "pika-2", name: "Pika 2.0" },
                 { id: "minimax", name: "MiniMax" },
-                { id: "cogvideox", name: "CogVideoX" },
+                { id: "wan-2", name: "Wan 2" },
                 { id: "hunyuan", name: "Hunyuan" },
               ] : modelCatFilter === "3d" ? [
                 { id: "tripo-v2.5", name: "Tripo v2.5" },
@@ -2405,7 +2405,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                 {[
                   { icon: "🧠", text: "GPT-5.4, Claude Opus, Gemini Pro — топовые модели" },
                   { icon: "🎨", text: "Генерация картинок — Flux, Stable Diffusion, GPT-5 Image" },
-                  { icon: "🎬", text: "Генерация видео — Kling, Runway, Pika" },
+                  { icon: "🎬", text: "Генерация видео — Sora, Runway, Pika" },
                   { icon: "⚡", text: "Без задержек — мгновенные ответы" },
                 ].map((b, i) => (
                   <div key={i} className="flex items-start gap-3">

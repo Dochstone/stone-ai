@@ -81,12 +81,10 @@ export const MODELS: AIModel[] = [
 
   // TIER 7: VIDEO GENERATION (13 models)
   // Premium
-  { id: "kling-v3", name: "Kling 3.0 Pro", company: "Kuaishou", tier: "pro", category: "video", pricePerMillion: 0.30, priceUnit: "/vid", context: "5-15s", description: "Лучшее качество видео. Мульти-шоты, нативный звук, 1080p. Самая низкая цена среди топовых.", strengths: ["Топ качество", "Мульти-шот", "Звук", "$0.30"] },
   { id: "sora-2", name: "Sora 2 Pro", company: "OpenAI", tier: "pro", category: "video", pricePerMillion: 0.50, priceUnit: "/vid", context: "5-10s", description: "Видео-модель от OpenAI. Лучшая физика, сложные сцены, точное следование промптам.", strengths: ["OpenAI", "Физика", "Сложные сцены"] },
   { id: "veo-3", name: "Veo 3.1", company: "Google", tier: "pro", category: "video", pricePerMillion: 0.65, priceUnit: "/vid", context: "5-10s", description: "Видео от Google. Нативное 4K, лучший lip-sync и диалоги, звуковой дизайн.", strengths: ["4K", "Lip-sync", "Звук", "Google"] },
   { id: "runway-gen3", name: "Runway Gen-3", company: "Runway", tier: "pro", category: "video", pricePerMillion: 0.85, priceUnit: "/vid", context: "5-10s", description: "Кинематографическое качество. Индустриальный стандарт для профессионалов.", strengths: ["Кинематографичное", "Профессиональное"] },
   // Mid-range
-  { id: "kling-v2", name: "Kling v2", company: "Kuaishou", tier: "pro", category: "video", pricePerMillion: 0.25, priceUnit: "/vid", context: "5-10s", description: "Предыдущая версия Kling. Хорошее качество по доступной цене.", strengths: ["Качество", "Доступно", "5-10с"] },
   { id: "minimax", name: "MiniMax Hailuo", company: "MiniMax", tier: "pro", category: "video", pricePerMillion: 0.28, priceUnit: "/vid", context: "5-10s", description: "Быстрая генерация от MiniMax. Анимация персонажей, плавное движение.", strengths: ["Быстрая", "Персонажи", "Плавное"] },
   { id: "pixverse-v5", name: "PixVerse v5", company: "PixVerse", tier: "pro", category: "video", pricePerMillion: 0.22, priceUnit: "/vid", context: "5-10s", description: "Кинематографичная камера, плавное движение, хороший контроль сцены.", strengths: ["Камера", "Плавное", "Контроль"] },
   { id: "luma-dream", name: "Luma Dream", company: "Luma", tier: "pro", category: "video", pricePerMillion: 0.35, priceUnit: "/vid", context: "5s", description: "Dream Machine от Luma. Реалистичная физика и кинематичные переходы.", strengths: ["Физика", "Переходы", "5с"] },

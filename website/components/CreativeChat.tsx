@@ -63,7 +63,7 @@ const MODE_MODELS: Record<Mode, { id: string; name: string }[]> = {
     { id: "stable-diffusion-xl", name: "Stable Diffusion XL" },
   ],
   video: [
-    { id: "kling-v2", name: "Kling v2" },
+    { id: "sora-2", name: "Sora 2 Pro" },
     { id: "runway-gen3", name: "Runway Gen3" },
     { id: "pika-2", name: "Pika 2" },
     { id: "stable-video", name: "Stable Video" },
