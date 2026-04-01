@@ -206,7 +206,6 @@ function VideoPlayer({ url, taskId, token, thumbnailUrl }: { url: string; taskId
           </svg>
           <span className="text-xs font-semibold text-text/60">Видео готово</span>
         </div>
-        <span className="text-[10px] text-accent font-semibold group-hover:underline">Смотреть →</span>
       </div>
     </div>
   );
