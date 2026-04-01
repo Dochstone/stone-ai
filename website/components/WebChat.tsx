@@ -532,6 +532,13 @@ function WelcomeScreen({ onSuggestion, activeTab, plan }: { onSuggestion: (text:
               </div>
               <span className="text-accent text-xs font-bold shrink-0">Тарифы →</span>
             </a>
+            <a href="/profile?tab=referrals" className="flex items-center justify-between bg-teal/5 hover:bg-teal/10 border border-teal/10 rounded-xl px-4 py-2.5 mt-2 transition-colors">
+              <div className="flex items-center gap-2">
+                <span>🎁</span>
+                <span className="text-[11px] text-text/50">Пригласи друга — <span className="font-bold text-teal">+5 запросов обоим</span></span>
+              </div>
+              <span className="text-teal text-[10px] font-semibold shrink-0">Пригласить →</span>
+            </a>
           </div>
         )}
       </div>
@@ -2084,7 +2091,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                 </div>
               )}
               {/* Referral nudge — every 10th response */}
-              {messages.length > 0 && messages.length % 10 === 0 && !streaming && (
+              {messages.length > 0 && messages.length % 6 === 0 && !streaming && (
                 <div className="max-w-3xl mx-auto px-3 sm:px-4">
                   <a href="/profile?tab=referrals" className="flex items-center justify-between bg-teal/5 border border-teal/10 rounded-xl px-4 py-2.5 hover:bg-teal/10 transition-colors">
                     <span className="text-[11px] text-text/50">Пригласи друга — <span className="font-bold text-teal">оба получат +5 запросов</span></span>
@@ -2385,6 +2392,9 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                   Смотреть тарифы
                 </a>
               </div>
+              <a href="/profile?tab=referrals" className="flex items-center justify-center gap-2 w-full mt-3 bg-teal/10 text-teal py-2.5 rounded-xl font-semibold text-xs hover:bg-teal/20 transition-colors">
+                🎁 Пригласи друга — оба получат +5 запросов
+              </a>
             </div>
           </div>
         </div>
@@ -2443,6 +2453,9 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
 
               <a href="/pricing" className="block w-full mt-4 bg-accent text-white py-3.5 rounded-xl font-bold text-center text-sm hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20">
                 Выбрать тариф
+              </a>
+              <a href="/profile?tab=referrals" className="flex items-center justify-center gap-2 w-full mt-3 bg-teal/10 text-teal py-3 rounded-xl font-bold text-sm hover:bg-teal/20 transition-colors">
+                <span>🎁</span> Пригласи друга — оба получат +5 запросов
               </a>
               <button onClick={() => setUpsellModal(null)} className="block w-full mt-2 text-text/30 text-xs text-center py-2 hover:text-text/50 transition-colors">
                 Продолжить бесплатно завтра
