@@ -266,9 +266,9 @@ export default function AdminPage() {
                 >
                   <option value="">Все тарифы</option>
                   <option value="free">Free</option>
-                  <option value="mini">Mini</option>
-                  <option value="max">Max</option>
-                  <option value="max-pro">Max Pro</option>
+                  <option value="mini">Start</option>
+                  <option value="max">Pro</option>
+                  <option value="max-pro">Elite</option>
                 </select>
                 <input
                   type="date"
@@ -344,9 +344,9 @@ export default function AdminPage() {
                           }`}
                         >
                           <option value="free">Free</option>
-                          <option value="mini">Mini</option>
-                          <option value="max">Max</option>
-                          <option value="max-pro">Max Pro</option>
+                          <option value="mini">Start</option>
+                          <option value="max">Pro</option>
+                          <option value="max-pro">Elite</option>
                         </select>
                       </td>
                       <td className="py-2.5 px-4 text-right font-mono">${u.balance_usd.toFixed(2)}</td>
@@ -435,9 +435,9 @@ export default function AdminPage() {
                   <option value="credits">Кредиты</option>
                 </select>
                 <select name="tier" className="bg-bg border border-text/10 rounded-lg px-3 py-2 text-xs">
-                  <option value="mini">Mini</option>
-                  <option value="max">Max</option>
-                  <option value="max-pro">Max Pro</option>
+                  <option value="mini">Start</option>
+                  <option value="max">Pro</option>
+                  <option value="max-pro">Elite</option>
                 </select>
                 <input name="days" type="number" defaultValue={7} placeholder="Дней" className="bg-bg border border-text/10 rounded-lg px-3 py-2 text-xs" />
                 <input name="credits" type="number" defaultValue={0} placeholder="Кредитов" className="bg-bg border border-text/10 rounded-lg px-3 py-2 text-xs" />

@@ -36,21 +36,21 @@ function getModelLockInfo(modelId: string, balance: number, plan?: string): { lo
   if (FREE_MODEL_IDS.has(modelId)) return null;
   // Video/3D — need at least Mini
   if (VIDEO_MODEL_IDS.has(modelId) || THREED_MODEL_IDS.has(modelId)) {
-    if (!plan || plan === "free") return { locked: true, tier: "Mini", price: "390₽/мес" };
+    if (!plan || plan === "free") return { locked: true, tier: "Start", price: "390₽/мес" };
     return null;
   }
   // Images — nano-banana is free, rest follow normal tier logic
   if (IMAGE_MODEL_IDS.has(modelId) && !FREE_MODEL_IDS.has(modelId)) {
     if (!plan || plan === "free") {
-      if (MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: "Mini", price: "390₽/мес" };
-      return { locked: true, tier: "Max", price: "890₽/мес" };
+      if (MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: "Start", price: "390₽/мес" };
+      return { locked: true, tier: "Pro", price: "890₽/мес" };
     }
-    if (plan === "mini" && !MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: "Max", price: "890₽/мес" };
+    if (plan === "mini" && !MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: "Pro", price: "890₽/мес" };
     return null;
   }
   if (IMAGE_MODEL_IDS.has(modelId)) return null;
-  if (MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: "Mini", price: "390₽/мес" };
-  return { locked: true, tier: "Max", price: "890₽/мес" };
+  if (MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: "Start", price: "390₽/мес" };
+  return { locked: true, tier: "Pro", price: "890₽/мес" };
 }
 
 // ─── Helpers ───
@@ -1843,8 +1843,8 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
             )}
             {(() => {
               const p = limits?.plan || "free";
-              const bg = p === "max-pro" ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white" : p === "max" ? "bg-accent text-white" : p === "mini" ? "bg-teal text-white" : "bg-text/10 text-text/40";
-              const label = p === "max-pro" ? "Max Pro" : p === "max" ? "Max" : p === "mini" ? "Mini" : "Free";
+              const bg = p === "max-pro" ? "bg-gradient-to-r from-[#F43F5E] to-[#E11D48] text-white" : p === "max" ? "bg-[#A855F7] text-white" : p === "mini" ? "bg-[#22D3EE] text-white" : "bg-text/10 text-text/40";
+              const label = p === "max-pro" ? "Elite" : p === "max" ? "Pro" : p === "mini" ? "Start" : "Free";
               return (
                 <a href="/pricing" className={`text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap hover:opacity-80 transition-opacity ${bg}`}>
                   {label}
@@ -1902,7 +1902,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                         : MINI_MODEL_IDS.has(m.id) ? "bg-blue-100 text-blue-600"
                         : "bg-accent/10 text-accent"
                       }`}>
-                        {lock ? lock.tier : FREE_MODEL_IDS.has(m.id) ? "Бесплатно" : MINI_MODEL_IDS.has(m.id) ? "Mini" : "Max"}
+                        {lock ? lock.tier : FREE_MODEL_IDS.has(m.id) ? "Бесплатно" : MINI_MODEL_IDS.has(m.id) ? "Start" : "Pro"}
                       </span>
                     </button>
                   );
@@ -2482,7 +2482,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                   <p className="text-white/60 text-xs">
                     {upsellModal?.type === "limit"
                       ? "15 бесплатных запросов использованы"
-                      : `Нужен тариф ${lockModal?.tier || (upsellModal?.tier === "max" ? "Max" : "Mini")}`}
+                      : `Нужен тариф ${lockModal?.tier || (upsellModal?.tier === "max" ? "Pro" : "Start")}`}
                   </p>
                 </div>
               </div>

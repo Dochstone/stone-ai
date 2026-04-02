@@ -196,7 +196,7 @@ function OverviewTab({ profile, usage }: { profile: UserProfile; usage: UsageIte
 
       {/* Stats grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatCard label="Тариф" value={profile.plan === "max-pro" ? "Max Pro" : profile.plan === "max" ? "Max" : profile.plan === "mini" ? "Mini" : "Free"} accent />
+        <StatCard label="Тариф" value={profile.plan === "max-pro" ? "Elite" : profile.plan === "max" ? "Pro" : profile.plan === "mini" ? "Start" : "Free"} accent />
         <StatCard label="Запросов" value={profile.stats.total_requests.toLocaleString()} />
         <StatCard label="Всего запросов" value={profile.stats.total_requests.toLocaleString()} />
         <StatCard label="Любимая модель" value={favModel?.name || "—"} sub={favModel?.company} />
@@ -241,7 +241,7 @@ function BalanceTab({ profile, transactions }: { profile: UserProfile; transacti
       <div className="bg-white rounded-2xl border border-text/[0.06] p-8 text-center">
         <div className="text-[11px] font-semibold text-text/35 uppercase tracking-wider mb-2">Текущий тариф</div>
         <div className="text-4xl font-extrabold text-accent mb-4">
-          {profile.plan === "max-pro" ? "Max Pro" : profile.plan === "max" ? "Max" : profile.plan === "mini" ? "Mini" : "Free"}
+          {profile.plan === "max-pro" ? "Elite" : profile.plan === "max" ? "Pro" : profile.plan === "mini" ? "Start" : "Free"}
         </div>
         <a
           href="/pricing"
