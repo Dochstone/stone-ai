@@ -75,7 +75,7 @@ export default function DemoShowcase() {
           {/* Video — lazy loaded */}
           <div className="rounded-2xl overflow-hidden border border-text/[0.06] bg-white">
             <LazyLoad className="w-full aspect-video">
-              <video src="/demo/video-1.mp4" muted loop playsInline autoPlay className="w-full h-full object-cover" />
+              <video src="/demo/video-1.mp4" muted loop playsInline autoPlay preload="none" className="w-full h-full object-cover" />
             </LazyLoad>
             <div className="p-4">
               <div className="flex items-center gap-2 mb-1">

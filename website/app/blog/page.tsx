@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { POSTS } from "@/lib/blog";
+import { SORTED_POSTS as POSTS } from "@/lib/blog";
 
 export const revalidate = 3600;
 

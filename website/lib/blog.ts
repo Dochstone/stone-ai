@@ -475,6 +475,9 @@ export const POSTS: BlogPost[] = [
   },
 ];
 
+/** Posts sorted by date (newest first) */
+export const SORTED_POSTS = [...POSTS].sort((a, b) => b.date.localeCompare(a.date));
+
 export function getPost(slug: string): BlogPost | undefined {
   return POSTS.find((p) => p.slug === slug);
 }

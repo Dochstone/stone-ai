@@ -272,7 +272,7 @@ export default function Pricing() {
                   <span className={`text-2xl font-extrabold ${plan.premium ? "text-amber-400" : ""}`}>{plan.price}</span>
                   {plan.period && <span className={`text-sm ${plan.premium ? "text-white/40" : "text-text/40"}`}>{plan.period}</span>}
                   {plan.oldPrice && (
-                    <span className="text-[10px] font-bold bg-teal/15 text-teal px-1.5 py-0.5 rounded-full">Скидка</span>
+                    <span className="text-[10px] font-bold bg-red-500/10 text-red-500 px-1.5 py-0.5 rounded-full">-{Math.round((1 - plan.priceNum / parseInt(plan.oldPrice.replace(/\s/g, ""))) * 100)}%</span>
                   )}
                 </div>
                 <p className={`text-xs mt-1 ${plan.premium ? "text-white/50" : "text-text/50"}`}>{plan.desc}</p>
@@ -441,7 +441,7 @@ export default function Pricing() {
                     {modal.oldPrice && <span className="text-lg line-through text-text/25">{modal.oldPrice}</span>}
                     <span className="text-3xl font-extrabold" style={{ color: modal.color }}>{modal.price}</span>
                     <span className="text-sm text-text/40 font-semibold">{modal.period}</span>
-                    {modal.oldPrice && <span className="text-[10px] font-bold bg-teal/15 text-teal px-2 py-0.5 rounded-full">Скидка</span>}
+                    {modal.oldPrice && <span className="text-[10px] font-bold bg-red-500/10 text-red-500 px-2 py-0.5 rounded-full">-{Math.round((1 - modal.priceNum / parseInt(modal.oldPrice.replace(/\s/g, ""))) * 100)}%</span>}
                   </div>
                 </div>
 
