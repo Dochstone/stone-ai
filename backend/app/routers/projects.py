@@ -14,7 +14,7 @@ from app.models.user import User
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/projects", tags=["projects"])
 
-PLAN_LIMITS = {"free": 1, "per_token": 1, "mini": 3, "max": 10, "max-pro": 999}
+PLAN_LIMITS = {"free": 1, "per_token": 1, "mini": 3, "start": 3, "max": 10, "pro": 10, "max-pro": 999, "elite": 999}
 
 
 class ProductItem(BaseModel):
