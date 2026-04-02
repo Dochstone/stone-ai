@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { MODELS, type AIModel } from "@/lib/models";
 import AuthFormComponent, { type AuthState } from "@/components/AuthForm";
+import PromptLibrary from "@/components/prompts/PromptLibrary";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
 
@@ -1686,6 +1687,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
 
   // Guest registration prompt modal
   const [showGuestLimit, setShowGuestLimit] = useState(false);
+  const [promptLibOpen, setPromptLibOpen] = useState(false);
   const guestCount = typeof window !== "undefined" ? parseInt(localStorage.getItem("stone_guest_count") || "0") : 0;
 
   const aiColor = companyColors[model?.company ?? ""] || "#C4623D";
@@ -2329,6 +2331,18 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                 </svg>
               </button>
 
+              {/* Prompt library button */}
+              <button
+                onClick={() => setPromptLibOpen(true)}
+                title="Библиотека промптов"
+                className="flex items-center justify-center text-text/25 hover:text-accent transition-colors shrink-0"
+                style={{ width: 38, height: 38 }}
+              >
+                <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                </svg>
+              </button>
+
               {/* Textarea */}
               <textarea
                 ref={textareaRef}
@@ -2570,6 +2584,13 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
           </div>
         </div>
       )}
+
+      {/* Prompt Library drawer */}
+      <PromptLibrary
+        open={promptLibOpen}
+        onClose={() => setPromptLibOpen(false)}
+        onInsert={(text) => setInput(text)}
+      />
 
       {/* Guest limit — registration prompt */}
       {showGuestLimit && !auth && (
