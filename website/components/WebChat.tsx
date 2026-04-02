@@ -1234,6 +1234,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
       // Instant result (TripoSR)
       if (data.status === "completed" && data.model_url) {
         setMessages([...history, { role: "assistant", content: "3D модель готова!", threed: { url: data.model_url, cost_usd: data.cost_usd } }]);
+        saveToSession(prompt || "[3D модель]", `[3d:${data.model_url}]`, { cost_usd: data.cost_usd });
         setThreedGenerating(false);
         return;
       }
@@ -1251,6 +1252,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
 
           if (status.status === "completed" && status.model_url) {
             setMessages([...history, { role: "assistant", content: "3D модель готова!", threed: { url: status.model_url, cost_usd: data.cost_usd } }]);
+            saveToSession(prompt || "[3D модель]", `[3d:${status.model_url}]`, { cost_usd: data.cost_usd });
             setThreedGenerating(false);
             return;
           }
@@ -1269,7 +1271,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
       setMessages([...history, { role: "assistant", content: "Ошибка соединения" }]);
       setThreedGenerating(false);
     }
-  }, [auth, input, threedGenerating, messages, selectedModel, pendingFile, resetTextarea]);
+  }, [auth, input, threedGenerating, messages, selectedModel, pendingFile, resetTextarea, saveToSession]);
 
   // Video generation
   const sendVideoMessage = useCallback(async () => {
@@ -1328,7 +1330,8 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
           const status = await statusRes.json();
 
           if (status.status === "completed" && status.video_url) {
-            setMessages([...history, { role: "assistant", content: `Видео готово!`, video: { url: status.video_url, directUrl: status.direct_url || status.video_url, taskId: data.task_id, thumbnailUrl: status.thumbnail_url, cost_usd: data.cost_usd } }]);
+            setMessages([...history, { role: "assistant", content: "", video: { url: status.video_url, directUrl: status.direct_url || status.video_url, taskId: data.task_id, thumbnailUrl: status.thumbnail_url, cost_usd: data.cost_usd } }]);
+            saveToSession(prompt || "[Видео из изображения]", `[video:${status.video_url}]`, { cost_usd: data.cost_usd });
             setVideoGenerating(false);
             return;
           }
@@ -1355,7 +1358,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
       setMessages([...history, { role: "assistant", content: "Ошибка соединения" }]);
       setVideoGenerating(false);
     }
-  }, [auth, input, videoGenerating, messages, selectedModel, pendingFile, resetTextarea]);
+  }, [auth, input, videoGenerating, messages, selectedModel, pendingFile, resetTextarea, saveToSession]);
 
   // Stop generation
   const stopGeneration = useCallback(() => {
