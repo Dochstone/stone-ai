@@ -137,8 +137,9 @@ export default function PricingPage() {
                   <span className="text-xs font-bold text-blue-600">Mini</span>
                   <p className="text-[10px] text-text/30 mt-0.5">390₽</p>
                 </th>
-                <th className="text-center py-4 px-4 min-w-[90px] bg-accent/[0.03] relative">
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-white text-[8px] font-bold px-2.5 py-0.5 rounded-full">ХИТ</div>
+                <th className="text-center py-4 px-4 min-w-[90px] bg-accent/[0.03]">
+                  <span className="inline-block bg-accent text-white text-[8px] font-bold px-2.5 py-0.5 rounded-full mb-1.5">ХИТ</span>
+                  <br />
                   <span className="text-xs font-bold text-accent">Max</span>
                   <p className="text-[10px] text-text/30 mt-0.5">890₽</p>
                 </th>
