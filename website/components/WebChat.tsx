@@ -2532,8 +2532,8 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                   </a>
                 </div>
 
-                <a href="/pricing?plan=max" className="block w-full mt-4 bg-accent text-white py-3.5 rounded-2xl font-bold text-center text-sm hover:bg-accent/90 transition-all shadow-xl shadow-accent/25 active:scale-[0.98]">
-                  Выбрать тариф
+                <a href="/pricing" className="block w-full mt-4 bg-accent text-white py-3.5 rounded-2xl font-bold text-center text-sm hover:bg-accent/90 transition-all shadow-xl shadow-accent/25 active:scale-[0.98]">
+                  Все тарифы и способы оплаты
                 </a>
 
                 <a href="/profile?tab=referrals" className="flex items-center justify-center gap-2 w-full mt-2.5 text-teal text-xs font-semibold hover:text-teal/80 transition-colors">

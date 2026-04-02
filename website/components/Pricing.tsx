@@ -13,28 +13,28 @@ const plans = [
     badge: null, accent: false,
     features: ["7 моделей (GPT-4o mini, Gemini Flash, Claude Haiku)", "15 запросов в день", "2 картинки в день", "Сохранение истории чатов"],
     locked: ["Премиум модели (GPT-5, Claude Opus)", "Генерация видео, аудио, 3D", "Голосовой ассистент"],
-    cta: "Начать бесплатно", icon: "🆓", color: "#6B7280",
+    cta: "Начать бесплатно", icon: "🆓", color: "#6B7280", img: "",
   },
   {
     id: "mini", name: "Mini", price: "390₽", oldPrice: "590₽", priceNum: 390, premium: false, period: "/мес", desc: "20+ моделей",
     badge: null, accent: false,
     features: ["20+ моделей включая GPT-5.1 и Claude Sonnet", "500 запросов к быстрым моделям", "20 запросов к премиум моделям", "До 5 запросов к Claude Opus", "15 картинок и 3 видео в месяц"],
     locked: ["3D модели и озвучка"],
-    cta: "Выбрать Mini", icon: "⚡", color: "#3B82F6",
+    cta: "Выбрать Mini", icon: "⚡", color: "#3B82F6", img: "/plan-mini.jpg",
   },
   {
     id: "max", name: "Max", price: "890₽", oldPrice: "1 490₽", priceNum: 890, premium: false, period: "/мес", desc: "Все 65+ моделей",
     badge: "Популярный", accent: true,
     features: ["Все 65+ моделей без ограничений", "2 000 запросов к быстрым моделям", "100 запросов к премиум (20 к Opus)", "50 картинок и 10 видео в месяц", "5 3D-моделей и 20 озвучек", "Голосовой ассистент"],
     locked: [],
-    cta: "Выбрать Max", icon: "🔥", color: "#D97757",
+    cta: "Выбрать Max", icon: "🔥", color: "#D97757", img: "/plan-max.jpg",
   },
   {
     id: "max-pro", name: "Max Pro", price: "1 990₽", oldPrice: "2 990₽", priceNum: 1990, premium: true, period: "/мес", desc: "Максимум возможностей",
     badge: "Легенда", accent: false,
     features: ["Все 65+ моделей + доступ к API", "10 000 запросов к быстрым моделям", "500 запросов к премиум (80 к Opus)", "300 картинок и 50 видео в месяц", "30 3D-моделей и 100 озвучек", "Приоритетная скорость ответов", "Ранний доступ к новым моделям"],
     locked: [],
-    cta: "Стать Max Pro", icon: "💎", color: "#F59E0B",
+    cta: "Стать Max Pro", icon: "💎", color: "#F59E0B", img: "/plan-maxpro.jpg",
   },
 ];
 
@@ -335,218 +335,207 @@ export default function Pricing() {
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
           onClick={closeModal}
           style={{
-            background: "rgba(0,0,0,0.7)",
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
+            background: "rgba(0,0,0,0.75)",
+            backdropFilter: "blur(14px)",
+            WebkitBackdropFilter: "blur(14px)",
             animation: closing ? "pricingBackdropOut 0.3s ease forwards" : "pricingBackdropIn 0.25s ease",
           }}
         >
           <div
-            className="bg-bg w-full sm:max-w-lg sm:rounded-3xl rounded-t-3xl shadow-2xl overflow-hidden relative"
+            className="bg-bg w-full sm:max-w-[680px] sm:rounded-3xl rounded-t-3xl shadow-2xl overflow-hidden relative"
             onClick={(e) => e.stopPropagation()}
             style={{
               animation: closing
-                ? "pricingModalOut 0.3s ease forwards sm:pricingDesktopModalOut 0.3s ease forwards"
-                : "pricingModalIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) sm:pricingDesktopModalIn 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+                ? "pricingModalOut 0.3s ease forwards"
+                : "pricingModalIn 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
             }}
           >
-            {/* ─── Header ─── */}
+            {/* Top glow line */}
             <div
-              className={`relative overflow-hidden ${
-                modal.premium
-                  ? "bg-gradient-to-br from-[#1C1C1E] to-[#2C2C2E]"
-                  : "bg-gradient-to-br from-accent to-accent/80 dark:from-accent/90 dark:to-accent/60"
-              }`}
-            >
-              {/* Breathing gradient overlay */}
-              <div
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  background: `radial-gradient(ellipse at 50% 30%, ${modal.premium ? "rgba(245,158,11,0.2)" : "rgba(255,255,255,0.15)"} 0%, transparent 70%)`,
-                  animation: "pricingBreathe 4s ease-in-out infinite",
-                }}
-              />
+              className="absolute top-0 left-0 right-0 h-[2px] z-10"
+              style={{
+                background: `linear-gradient(90deg, transparent, ${modal.premium ? "#F59E0B" : modal.color}, transparent)`,
+                opacity: 0.7,
+              }}
+            />
 
-              {/* Top glow line */}
-              <div
-                className="absolute top-0 left-0 right-0 h-[2px]"
-                style={{
-                  background: `linear-gradient(90deg, transparent, ${modal.premium ? "#F59E0B" : "#fff"}, transparent)`,
-                  opacity: 0.5,
-                }}
-              />
+            {/* Drag handle (mobile) */}
+            <div className="w-9 h-1 rounded-full bg-text/10 mx-auto mt-3 sm:hidden relative z-10" />
 
-              {/* Drag handle (mobile) */}
-              <div className="w-9 h-1 rounded-full bg-white/20 mx-auto mt-3 sm:hidden" />
+            <div className="flex flex-col sm:flex-row">
 
-              {/* Close button */}
-              <button
-                onClick={closeModal}
-                className="absolute top-3 right-3 w-8 h-8 bg-white/10 backdrop-blur rounded-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition-all duration-200 hover:rotate-90 z-10"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
-              </button>
+              {/* ─── Left: Girl image ─── */}
+              {modal.img && (
+                <div className="relative sm:w-[220px] h-[200px] sm:h-auto shrink-0 overflow-hidden">
+                  <img
+                    src={modal.img}
+                    alt=""
+                    className="w-full h-full object-cover object-top"
+                    style={{ animation: "pricingStagger 0.5s ease both 0.05s" }}
+                  />
+                  {/* Gradient overlays for blend */}
+                  <div className="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-bg via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-bg sm:to-transparent opacity-80" />
+                  {/* Color tint matching plan */}
+                  <div
+                    className="absolute inset-0 mix-blend-soft-light opacity-30"
+                    style={{ background: modal.color }}
+                  />
 
-              <div className="text-center px-6 pt-6 pb-5 relative">
-                {/* Floating icon */}
-                <span
-                  className="text-5xl inline-block mb-3"
-                  style={{ animation: "pricingFloat 3s ease-in-out infinite" }}
+                  {/* Mobile: overlay text on image */}
+                  <div className="absolute bottom-3 left-4 right-4 sm:hidden">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-3xl" style={{ animation: "pricingFloat 3s ease-in-out infinite" }}>{modal.icon}</span>
+                      <div>
+                        <h3 className="text-xl font-extrabold text-text">{modal.name}</h3>
+                        <div className="flex items-baseline gap-1.5">
+                          {modal.oldPrice && <span className="text-sm line-through text-text/30">{modal.oldPrice}</span>}
+                          <span className="text-2xl font-extrabold" style={{ color: modal.color }}>{modal.price}</span>
+                          <span className="text-xs text-text/40 font-semibold">{modal.period}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ─── Right: Content ─── */}
+              <div className="flex-1 relative">
+                {/* Close button */}
+                <button
+                  onClick={closeModal}
+                  className="absolute top-3 right-3 w-8 h-8 bg-text/[0.05] hover:bg-text/[0.1] rounded-full flex items-center justify-center text-text/30 hover:text-text/60 transition-all duration-200 hover:rotate-90 z-10"
                 >
-                  {modal.icon}
-                </span>
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
 
-                {/* Badge */}
-                {modal.badge && (
-                  <span
-                    className={`inline-block px-3 py-1 rounded-full text-[10px] font-bold mb-3 ${
-                      modal.premium ? "bg-amber-500/20 text-amber-400" : "bg-white/20 text-white"
-                    }`}
+                {/* Desktop header (hidden on mobile since it's over image) */}
+                <div className="hidden sm:block px-6 pt-5 pb-2">
+                  <div className="flex items-center gap-3 mb-2" style={{ animation: "pricingStagger 0.4s ease both 0.1s" }}>
+                    <span className="text-3xl" style={{ animation: "pricingFloat 3s ease-in-out infinite" }}>{modal.icon}</span>
+                    <div>
+                      {modal.badge && (
+                        <span
+                          className={`inline-block px-2.5 py-0.5 rounded-full text-[9px] font-bold mb-1 ${
+                            modal.premium ? "bg-amber-500/15 text-amber-500" : "bg-accent/10 text-accent"
+                          }`}
+                        >
+                          {modal.premium ? "⭐ " : ""}{modal.badge}
+                        </span>
+                      )}
+                      <h3 className="text-xl font-extrabold text-text">Тариф {modal.name}</h3>
+                    </div>
+                  </div>
+                  <div className="flex items-baseline gap-2 mb-1" style={{ animation: "pricingStagger 0.4s ease both 0.15s" }}>
+                    {modal.oldPrice && <span className="text-lg line-through text-text/25">{modal.oldPrice}</span>}
+                    <span className="text-3xl font-extrabold" style={{ color: modal.color }}>{modal.price}</span>
+                    <span className="text-sm text-text/40 font-semibold">{modal.period}</span>
+                    {modal.oldPrice && <span className="text-[10px] font-bold bg-teal/15 text-teal px-2 py-0.5 rounded-full">Скидка</span>}
+                  </div>
+                </div>
+
+                {/* Features */}
+                <div className="px-6 pt-3 sm:pt-1 pb-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
+                    {modal.features.slice(0, 6).map((f: string, i: number) => (
+                      <div
+                        key={i}
+                        className="flex items-center gap-2 py-1"
+                        style={{ animation: `pricingStagger 0.35s ease both ${0.2 + i * 0.04}s` }}
+                      >
+                        <span className="w-[18px] h-[18px] rounded-full flex items-center justify-center shrink-0 text-[9px]"
+                          style={{ background: `${modal.color}15`, color: modal.color }}>
+                          ✓
+                        </span>
+                        <span className="text-[12px] text-text/60">{f}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Payment section */}
+                <div className="px-6 pb-5 pt-2">
+                  {/* Promo code */}
+                  <div className="mb-3" style={{ animation: "pricingStagger 0.4s ease both 0.35s" }}>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={promo}
+                        onChange={(e) => setPromo(e.target.value.toUpperCase())}
+                        placeholder="Промокод"
+                        className="flex-1 bg-text/[0.04] border border-text/[0.08] rounded-xl px-4 py-2.5 text-sm font-mono uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-accent/30 placeholder:text-text/20 placeholder:normal-case placeholder:tracking-normal placeholder:font-sans transition-all duration-200"
+                      />
+                      <button
+                        onClick={applyPromo}
+                        disabled={!promo.trim()}
+                        className="px-5 py-2.5 bg-text/[0.04] border border-text/[0.08] rounded-xl text-sm font-bold hover:border-accent hover:text-accent transition-all duration-200 disabled:opacity-30 active:scale-95"
+                      >
+                        ОК
+                      </button>
+                    </div>
+                    {promoResult && (
+                      <p className={`mt-2 text-xs font-medium ${promoResult.ok ? "text-teal" : "text-red-500"}`}>
+                        {promoResult.message}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Main pay button with shimmer */}
+                  <button
+                    onClick={() => pay(modal.id)}
+                    disabled={loading}
+                    className="w-full py-3.5 min-h-[50px] rounded-2xl font-bold text-[15px] text-white transition-all duration-200 disabled:opacity-50 active:scale-[0.97] relative overflow-hidden"
                     style={{
-                      animation: "pricingStagger 0.4s ease both 0.1s",
+                      backgroundImage: `linear-gradient(90deg, ${modal.color}, ${modal.color}cc, ${modal.color})`,
+                      backgroundSize: "200% 100%",
+                      animation: "pricingShimmer 3s ease-in-out infinite, pricingStagger 0.4s ease both 0.4s",
+                      boxShadow: `0 8px 24px ${modal.color}30`,
                     }}
                   >
-                    {modal.premium ? "⭐ " : ""}{modal.badge}
-                  </span>
-                )}
-
-                {/* Plan name */}
-                <h3
-                  className="text-2xl font-extrabold text-white mb-2"
-                  style={{ animation: "pricingStagger 0.4s ease both 0.12s" }}
-                >
-                  Тариф {modal.name}
-                </h3>
-
-                {/* Price */}
-                <div
-                  className="flex items-baseline justify-center gap-2"
-                  style={{ animation: "pricingStagger 0.4s ease both 0.18s" }}
-                >
-                  {modal.oldPrice && <span className="text-xl line-through text-white/30">{modal.oldPrice}</span>}
-                  <p className={`text-4xl font-extrabold ${modal.premium ? "text-amber-400" : "text-white"}`}>
-                    {modal.price}<span className="text-lg font-bold text-white/40">{modal.period}</span>
-                  </p>
-                  {modal.oldPrice && <span className="text-[10px] font-bold bg-teal/20 text-teal px-2 py-0.5 rounded-full">Скидка</span>}
-                </div>
-              </div>
-            </div>
-
-            {/* ─── Features ─── */}
-            <div className="px-6 pt-5 pb-2">
-              <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                {modal.features.slice(0, 6).map((f: string, i: number) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-2 py-1.5"
-                    style={{ animation: `pricingStagger 0.35s ease both ${0.25 + i * 0.05}s` }}
-                  >
-                    <span className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 text-[9px] ${
-                      modal.premium ? "bg-amber-500/15 text-amber-500" : "bg-accent/10 text-accent"
-                    }`}>
-                      ✓
-                    </span>
-                    <span className="text-[12px] text-text/60">{f}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* ─── Payment section ─── */}
-            <div className="px-6 pb-6 pt-3">
-              {/* Promo code */}
-              <div
-                className="mb-4"
-                style={{ animation: "pricingStagger 0.4s ease both 0.35s" }}
-              >
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={promo}
-                    onChange={(e) => setPromo(e.target.value.toUpperCase())}
-                    placeholder="Промокод"
-                    className="flex-1 bg-text/[0.04] border border-text/[0.08] rounded-xl px-4 py-2.5 text-sm font-mono uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-accent/30 placeholder:text-text/20 placeholder:normal-case placeholder:tracking-normal placeholder:font-sans transition-all duration-200"
-                  />
-                  <button
-                    onClick={applyPromo}
-                    disabled={!promo.trim()}
-                    className="px-5 py-2.5 bg-text/[0.04] border border-text/[0.08] rounded-xl text-sm font-bold hover:border-accent hover:text-accent transition-all duration-200 disabled:opacity-30 active:scale-95"
-                  >
-                    ОК
+                    {loading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        Создание счёта...
+                      </span>
+                    ) : `Оплатить ${modal.price}${modal.period}`}
                   </button>
-                </div>
-                {promoResult && (
-                  <p className={`mt-2 text-xs font-medium ${promoResult.ok ? "text-teal" : "text-red-500"}`}>
-                    {promoResult.message}
+
+                  {/* Divider */}
+                  <div className="flex items-center gap-3 my-3" style={{ animation: "pricingStagger 0.4s ease both 0.45s" }}>
+                    <div className="flex-1 h-px bg-text/[0.06]" />
+                    <span className="text-[10px] text-text/25 font-medium">или оплатить криптой</span>
+                    <div className="flex-1 h-px bg-text/[0.06]" />
+                  </div>
+
+                  {/* TON */}
+                  <div style={{ animation: "pricingStagger 0.4s ease both 0.5s" }}>
+                    <TonPayButton
+                      tier={modal.id}
+                      onSuccess={() => {
+                        setSuccessAnim(true);
+                        setTimeout(() => {
+                          setSuccessAnim(false);
+                          closeModal();
+                          setResult({ ok: true, message: `Тариф ${modal.name} активирован через TON!` });
+                        }, 2000);
+                      }}
+                    />
+                  </div>
+
+                  <p className="text-text/20 text-[10px] text-center mt-2.5" style={{ animation: "pricingStagger 0.4s ease both 0.55s" }}>
+                    USDT · BTC · ETH · TON
                   </p>
-                )}
+
+                  {result && (
+                    <p className={`text-center text-xs font-medium mt-2 ${result.ok ? "text-teal" : "text-red-500"}`}>
+                      {result.message}
+                    </p>
+                  )}
+                </div>
               </div>
-
-              {/* Main pay button with shimmer */}
-              <button
-                onClick={() => pay(modal.id)}
-                disabled={loading}
-                className={`w-full py-4 min-h-[52px] rounded-2xl font-bold text-[15px] transition-all duration-200 disabled:opacity-50 shadow-xl active:scale-[0.97] ${
-                  modal.premium
-                    ? "text-white shadow-amber-500/25"
-                    : "text-white shadow-accent/25"
-                }`}
-                style={{
-                  backgroundImage: modal.premium
-                    ? "linear-gradient(90deg, #F59E0B, #FB923C, #F59E0B)"
-                    : "linear-gradient(90deg, #D97757, #E8956E, #D97757)",
-                  backgroundSize: "200% 100%",
-                  animation: "pricingShimmer 3s ease-in-out infinite, pricingStagger 0.4s ease both 0.4s",
-                }}
-              >
-                {loading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                    </svg>
-                    Создание счёта...
-                  </span>
-                ) : `Оплатить ${modal.price}${modal.period}`}
-              </button>
-
-              {/* Divider */}
-              <div
-                className="flex items-center gap-3 my-4"
-                style={{ animation: "pricingStagger 0.4s ease both 0.45s" }}
-              >
-                <div className="flex-1 h-px bg-text/[0.06]" />
-                <span className="text-[10px] text-text/25 font-medium">или оплатить криптой</span>
-                <div className="flex-1 h-px bg-text/[0.06]" />
-              </div>
-
-              {/* TON */}
-              <div style={{ animation: "pricingStagger 0.4s ease both 0.5s" }}>
-                <TonPayButton
-                  tier={modal.id}
-                  onSuccess={() => {
-                    setSuccessAnim(true);
-                    setTimeout(() => {
-                      setSuccessAnim(false);
-                      closeModal();
-                      setResult({ ok: true, message: `Тариф ${modal.name} активирован через TON!` });
-                    }, 2000);
-                  }}
-                />
-              </div>
-
-              <p
-                className="text-text/20 text-[10px] text-center mt-3"
-                style={{ animation: "pricingStagger 0.4s ease both 0.55s" }}
-              >
-                USDT · BTC · ETH · TON
-              </p>
-
-              {result && (
-                <p className={`text-center text-xs font-medium mt-2 ${result.ok ? "text-teal" : "text-red-500"}`}>
-                  {result.message}
-                </p>
-              )}
             </div>
           </div>
         </div>
