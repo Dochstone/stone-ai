@@ -1496,16 +1496,27 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   const isImageModel = IMAGE_MODEL_IDS.has(selectedModel);
 
   const sendMessage = useCallback(async () => {
-    // Check if model is locked for free users
-    const lock = getModelLockInfo(selectedModel, auth?.balanceUsd || 0, limits?.plan);
-    if (lock) { setUpsellModal({ type: "locked", model: model?.name, tier: lock.tier }); return; }
-    // Redirect to image/video/3D generation
-    if (isImageModel) { sendImageMessage(); return; }
-    if (isVideoModel) { sendVideoMessage(); return; }
-    if (is3DModel) { send3DMessage(); return; }
-    if (!auth || (!input.trim() && !pendingFile) || streaming) return;
+    // Guests skip lock check — they only use fast models via /api/chat/guest
+    if (auth) {
+      const lock = getModelLockInfo(selectedModel, auth?.balanceUsd || 0, limits?.plan);
+      if (lock) { setUpsellModal({ type: "locked", model: model?.name, tier: lock.tier }); return; }
+      // Redirect to image/video/3D generation (auth required)
+      if (isImageModel) { sendImageMessage(); return; }
+      if (isVideoModel) { sendVideoMessage(); return; }
+      if (is3DModel) { send3DMessage(); return; }
+    }
+    // Guest mode: check limit before sending
+    const isGuest = !auth;
+    if (isGuest) {
+      const gc = parseInt(localStorage.getItem("stone_guest_count") || "0");
+      if (gc >= 10) { setShowGuestLimit(true); return; }
+    }
 
-    const currentFile = pendingFile;
+    if (!isGuest && (!input.trim() && !pendingFile)) return;
+    if (isGuest && !input.trim()) return;
+    if (streaming) return;
+
+    const currentFile = !isGuest ? pendingFile : null;
     const userMsg: Message = { role: "user", content: input.trim() || (currentFile ? `[Файл: ${currentFile.file_name}]` : ""), file: currentFile || undefined };
     const history = [...messages, userMsg];
     setMessages(history);
@@ -1517,7 +1528,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
     const abort = new AbortController();
     abortRef.current = abort;
 
-    const apiMessages = history.slice(-20).map((m) => {
+    const apiMessages = history.slice(isGuest ? -6 : -20).map((m) => {
       if (m.file) {
         if (m.file.file_type === "image") {
           return {
@@ -1536,14 +1547,15 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
     });
 
     try {
-      const res = await fetch(`${API_URL}/api/chat`, {
+      const chatUrl = isGuest ? `${API_URL}/api/chat/guest` : `${API_URL}/api/chat`;
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (!isGuest) headers["Authorization"] = `Bearer ${auth.token}`;
+
+      const res = await fetch(chatUrl, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.token}`,
-        },
+        headers,
         body: JSON.stringify({
-          model_id: selectedModel,
+          model_id: isGuest ? "gpt-4.1-mini" : selectedModel,
           messages: apiMessages,
           ...(modelCatFilter === "health" ? { system_prompt: "Ты — AI-ассистент по общим вопросам здоровья. Ты НЕ врач и НЕ ставишь диагнозы. Анализируй фото и описания симптомов, предлагай возможные причины (2-3 варианта), рекомендуй к какому специалисту обратиться. Заверши: \"Для точного диагноза обратитесь к врачу.\" Отвечай на русском." } : {}),
         }),
@@ -1556,7 +1568,9 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
         // Upsell trigger on limit/lock
         if (res.status === 429 || (res.status === 403 && detail?.error === "model_locked")) {
           setMessages(prev => prev.slice(0, -1)); // remove the user message we just added
-          if (detail?.error === "model_locked") {
+          if (isGuest || detail?.error === "guest_limit") {
+            setShowGuestLimit(true);
+          } else if (detail?.error === "model_locked") {
             setUpsellModal({ type: "locked", model: model?.name, tier: detail?.required_tier || "mini" });
           } else {
             setUpsellModal({ type: "limit" });
@@ -1638,6 +1652,11 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
     } finally {
       setStreaming(false);
       abortRef.current = null;
+      // Increment guest counter
+      if (isGuest) {
+        const gc = parseInt(localStorage.getItem("stone_guest_count") || "0") + 1;
+        localStorage.setItem("stone_guest_count", String(gc));
+      }
     }
   }, [auth, input, streaming, messages, selectedModel, pendingFile, saveToSession, resetTextarea, isImageModel, sendImageMessage, isVideoModel, sendVideoMessage, is3DModel, send3DMessage, modelCatFilter]);
 
@@ -1664,7 +1683,10 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   }, [sendMessage]);
 
   if (!loaded) return null;
-  if (!auth) return <AuthFormComponent onAuth={setAuth} />;
+
+  // Guest registration prompt modal
+  const [showGuestLimit, setShowGuestLimit] = useState(false);
+  const guestCount = typeof window !== "undefined" ? parseInt(localStorage.getItem("stone_guest_count") || "0") : 0;
 
   const aiColor = companyColors[model?.company ?? ""] || "#C4623D";
   const aiLetter = companyIcons[model?.company ?? ""] || "AI";
@@ -2544,6 +2566,27 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                   Продолжить бесплатно
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Guest limit — registration prompt */}
+      {showGuestLimit && !auth && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center backdrop-blur-sm" onClick={() => setShowGuestLimit(false)}>
+          <div className="bg-bg rounded-3xl w-full max-w-sm mx-4 shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-gradient-to-br from-accent to-accent/80 px-6 pt-7 pb-5 text-center">
+              <span className="text-4xl block mb-3">🔓</span>
+              <h3 className="text-xl font-extrabold text-white mb-1">10 запросов использовано</h3>
+              <p className="text-white/60 text-sm">Зарегистрируйтесь — это бесплатно и займёт 30 секунд</p>
+            </div>
+            <div className="px-6 py-5">
+              <div className="space-y-2.5 mb-5">
+                <div className="flex items-center gap-3 text-sm"><span className="text-accent text-xs">✓</span><span className="text-text/60">15 бесплатных запросов каждый день</span></div>
+                <div className="flex items-center gap-3 text-sm"><span className="text-accent text-xs">✓</span><span className="text-text/60">7 моделей включая GPT-4o mini и Claude Haiku</span></div>
+                <div className="flex items-center gap-3 text-sm"><span className="text-accent text-xs">✓</span><span className="text-text/60">Сохранение истории чатов</span></div>
+              </div>
+              <AuthFormComponent onAuth={(a) => { setAuth(a); setShowGuestLimit(false); }} />
             </div>
           </div>
         </div>

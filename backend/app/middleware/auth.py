@@ -136,3 +136,11 @@ async def get_current_user(request: Request) -> dict:
         }
 
     raise HTTPException(status_code=401, detail="Missing authorization (Telegram or JWT)")
+
+
+async def get_current_user_optional(request: Request) -> dict | None:
+    """Same as get_current_user but returns None instead of 401 for guests."""
+    try:
+        return await get_current_user(request)
+    except HTTPException:
+        return None

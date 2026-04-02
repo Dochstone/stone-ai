@@ -8,14 +8,14 @@ import os
 import tempfile
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.database import get_db
-from app.middleware.auth import get_current_user
+from app.middleware.auth import get_current_user, get_current_user_optional
 from app.models.user import User
 from app.services.ai_router import stream_chat_response, get_model_tier, DEFAULT_MODEL
 from app.services.limiter import (
@@ -32,11 +32,82 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api", tags=["chat"])
 
+# ─── Guest (anonymous) rate limiting by IP ───
+GUEST_LIMIT = 10
+_guest_usage: dict[str, int] = {}  # ip -> total requests
+
 
 class ChatRequest(BaseModel):
     model_id: str = DEFAULT_MODEL
     messages: list[dict]
     system_prompt: str | None = None
+
+
+@router.post("/chat/guest")
+async def chat_guest(
+    req: ChatRequest,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    """Guest chat — no auth required, limited to 10 requests per IP, fast models only."""
+    from fastapi import Request as _Req  # noqa: already imported via middleware
+    ip = request.headers.get("X-Forwarded-For", request.client.host if request.client else "unknown").split(",")[0].strip()
+
+    used = _guest_usage.get(ip, 0)
+    if used >= GUEST_LIMIT:
+        raise HTTPException(
+            status_code=429,
+            detail={
+                "error": "guest_limit",
+                "message": f"Бесплатный лимит {GUEST_LIMIT} запросов исчерпан. Зарегистрируйтесь для продолжения.",
+                "used": used,
+                "limit": GUEST_LIMIT,
+            },
+        )
+
+    # Only allow free models for guests
+    from app.services.subscription import FREE_MODELS
+    if req.model_id not in FREE_MODELS:
+        req.model_id = DEFAULT_MODEL
+
+    # Limit messages to last 6 for guests
+    if len(req.messages) > 6:
+        req.messages = req.messages[-6:]
+
+    system_prompt = req.system_prompt
+    max_tokens = MAX_TOKENS_LITE
+
+    async def generate():
+        _guest_usage[ip] = used + 1
+
+        async for chunk in stream_chat_response(req.model_id, req.messages, system_prompt, max_tokens=max_tokens):
+            yield chunk
+
+        billing_data = {
+            "billing": {
+                "tokens_in": 0, "tokens_out": 0,
+                "cost_usd": 0, "balance_usd": 0,
+                "billing_mode": "guest",
+                "guest_used": _guest_usage.get(ip, 0),
+                "guest_limit": GUEST_LIMIT,
+            }
+        }
+        yield f"data: {json.dumps(billing_data)}\n\n"
+
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "Connection": "keep-alive", "X-Accel-Buffering": "no"},
+    )
+
+
+@router.get("/chat/guest/status")
+async def guest_status(request: "Request"):
+    """Check guest usage for current IP."""
+    from fastapi import Request as _Req
+    ip = request.headers.get("X-Forwarded-For", request.client.host if request.client else "unknown").split(",")[0].strip()
+    used = _guest_usage.get(ip, 0)
+    return {"used": used, "limit": GUEST_LIMIT, "remaining": max(0, GUEST_LIMIT - used)}
 
 
 @router.post("/chat")
