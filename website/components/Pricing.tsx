@@ -115,6 +115,10 @@ const KEYFRAMES = `
   0% { opacity: 1; transform: scale(1); }
   100% { opacity: 0; transform: scale(0.92) translateY(10px); }
 }
+@keyframes pricingBorderSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 `;
 
 export default function Pricing() {
@@ -345,8 +349,9 @@ export default function Pricing() {
             animation: closing ? "pricingBackdropOut 0.3s ease forwards" : "pricingBackdropIn 0.25s ease",
           }}
         >
+          {/* Outer wrapper for animated border */}
           <div
-            className="bg-bg w-full sm:max-w-[750px] sm:rounded-3xl rounded-t-3xl shadow-2xl overflow-hidden relative"
+            className="w-full sm:max-w-[750px] sm:rounded-3xl rounded-t-3xl relative overflow-hidden p-[2px]"
             onClick={(e) => e.stopPropagation()}
             style={{
               animation: closing
@@ -354,14 +359,16 @@ export default function Pricing() {
                 : "pricingModalIn 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
             }}
           >
-            {/* Top glow line */}
+            {/* Spinning gradient border */}
             <div
-              className="absolute top-0 left-0 right-0 h-[2px] z-10"
+              className="absolute inset-[-50%] z-0"
               style={{
-                background: `linear-gradient(90deg, transparent, ${modal.premium ? "#F59E0B" : modal.color}, transparent)`,
-                opacity: 0.7,
+                background: `conic-gradient(from 0deg, ${modal.color}, ${modal.color}33, transparent, transparent, transparent, ${modal.color}33, ${modal.color})`,
+                animation: "pricingBorderSpin 4s linear infinite",
               }}
             />
+            {/* Inner content */}
+            <div className="bg-bg relative z-[1] sm:rounded-[22px] rounded-t-[22px] shadow-2xl overflow-hidden">
 
             {/* Drag handle (mobile) */}
             <div className="w-9 h-1 rounded-full bg-text/10 mx-auto mt-3 sm:hidden relative z-10" />
@@ -541,7 +548,8 @@ export default function Pricing() {
                 </div>
               </div>
             </div>
-          </div>
+          </div>{/* /inner content */}
+          </div>{/* /outer border wrapper */}
         </div>
       )}
 
