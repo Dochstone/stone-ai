@@ -2465,74 +2465,85 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
       {/* Upsell Modal — unified for lock + limit */}
       {(upsellModal || lockModal) && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-end sm:items-center justify-center backdrop-blur-sm" onClick={() => { setUpsellModal(null); setLockModal(null); }}>
-          <div className="bg-bg rounded-t-3xl sm:rounded-3xl w-full sm:max-w-lg shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-300" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-bg rounded-t-3xl sm:rounded-3xl w-full sm:max-w-3xl shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="flex flex-col sm:flex-row">
 
-            {/* Hero image + overlay */}
-            <div className="relative h-64 sm:h-72 overflow-hidden">
-              <img src={modelCatFilter === "video" ? "/upsell-video.jpg" : modelCatFilter === "image" ? "/upsell-photo.jpg" : "/upsell-chat.jpg"} alt="" className="w-full h-full object-cover object-center" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-              <button onClick={() => { setUpsellModal(null); setLockModal(null); }} className="absolute top-3 right-3 w-8 h-8 bg-white/10 backdrop-blur rounded-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition-colors">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
-              </button>
-              <div className="absolute bottom-4 left-5 right-5 text-white">
-                <h3 className="text-2xl font-extrabold mb-1">
-                  {upsellModal?.type === "limit" ? "Лимит исчерпан" : `${upsellModal?.model || lockModal?.model} 🔒`}
-                </h3>
-                <p className="text-white/60 text-sm">
-                  {upsellModal?.type === "limit"
-                    ? "15 бесплатных запросов использованы"
-                    : `Нужен тариф ${lockModal?.tier || (upsellModal?.tier === "max" ? "Max" : "Mini")}`}
-                </p>
+              {/* Left — girl image */}
+              <div className="relative sm:w-[280px] h-48 sm:h-auto shrink-0 overflow-hidden">
+                <img src={modelCatFilter === "video" ? "/upsell-video.jpg" : modelCatFilter === "image" ? "/upsell-photo.jpg" : "/upsell-chat.jpg"} alt="" className="w-full h-full object-cover object-center" />
+                <div className="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-black/80 via-black/30 to-transparent" />
+                <button onClick={() => { setUpsellModal(null); setLockModal(null); }} className="absolute top-3 right-3 sm:hidden w-8 h-8 bg-white/10 backdrop-blur rounded-full flex items-center justify-center text-white/60 hover:text-white transition-colors">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+                <div className="absolute bottom-4 left-5 right-5 text-white">
+                  <h3 className="text-xl font-extrabold mb-0.5">
+                    {upsellModal?.type === "limit" ? "Лимит исчерпан" : `${upsellModal?.model || lockModal?.model} 🔒`}
+                  </h3>
+                  <p className="text-white/60 text-xs">
+                    {upsellModal?.type === "limit"
+                      ? "15 бесплатных запросов использованы"
+                      : `Нужен тариф ${lockModal?.tier || (upsellModal?.tier === "max" ? "Max" : "Mini")}`}
+                  </p>
+                </div>
               </div>
-            </div>
 
-            {/* Content */}
-            <div className="px-5 sm:px-6 py-5">
+              {/* Right — pricing */}
+              <div className="flex-1 px-5 sm:px-6 py-5 relative">
+                <button onClick={() => { setUpsellModal(null); setLockModal(null); }} className="hidden sm:flex absolute top-3 right-3 w-8 h-8 bg-text/[0.05] rounded-full items-center justify-center text-text/30 hover:text-text/60 transition-colors">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
 
-              {/* Benefits */}
-              <div className="grid grid-cols-2 gap-2.5 mb-5">
-                {[
-                  { icon: "🧠", title: "65+ моделей", desc: "GPT-5, Claude, Gemini" },
-                  { icon: "🎨", title: "Картинки", desc: "Flux, DALL-E, GPT-5" },
-                  { icon: "🎬", title: "Видео", desc: "Sora, Runway, Pika" },
-                  { icon: "⚡", title: "Без лимитов", desc: "До 10 000 запросов" },
-                ].map((b, i) => (
-                  <div key={i} className="bg-text/[0.03] rounded-xl p-3 flex items-center gap-2.5">
-                    <span className="text-xl">{b.icon}</span>
-                    <div>
-                      <p className="text-xs font-bold text-text">{b.title}</p>
-                      <p className="text-[10px] text-text/40">{b.desc}</p>
+                <p className="text-[11px] text-text/40 font-bold uppercase tracking-wider mb-3">Выберите тариф</p>
+
+                {/* 3 pricing cards */}
+                <div className="space-y-2.5">
+                  <a href="/pricing" className="flex items-center gap-4 p-3.5 rounded-2xl border-2 border-text/[0.08] hover:border-accent/30 transition-all group">
+                    <div className="text-center min-w-[70px]">
+                      <p className="text-2xl font-extrabold text-text group-hover:text-accent transition-colors">390<span className="text-xs font-bold text-text/30">₽</span></p>
+                      <p className="text-[9px] text-text/25 font-semibold">в месяц</p>
                     </div>
-                  </div>
-                ))}
-              </div>
+                    <div className="flex-1 border-l border-text/[0.06] pl-4">
+                      <p className="text-sm font-bold text-text">Mini</p>
+                      <p className="text-[11px] text-text/40">20+ моделей · 500 запросов · 15 картинок · 3 видео</p>
+                    </div>
+                  </a>
 
-              {/* Pricing cards */}
-              <div className="grid grid-cols-2 gap-3">
-                <a href="/pricing" className="block p-4 rounded-2xl border-2 border-text/[0.08] hover:border-accent/40 transition-all text-center group">
-                  <p className="text-[10px] text-text/30 font-bold tracking-wider mb-1">MINI</p>
-                  <p className="text-2xl font-extrabold text-text group-hover:text-accent transition-colors">390<span className="text-sm font-bold text-text/30">₽</span></p>
-                  <p className="text-[10px] text-text/25 mt-0.5">в месяц</p>
+                  <a href="/pricing" className="flex items-center gap-4 p-3.5 rounded-2xl border-2 border-accent bg-accent/5 hover:bg-accent/10 transition-all relative">
+                    <div className="absolute -top-2 right-4 bg-accent text-white text-[9px] font-bold px-3 py-0.5 rounded-full shadow-lg shadow-accent/30">ПОПУЛЯРНЫЙ</div>
+                    <div className="text-center min-w-[70px]">
+                      <p className="text-2xl font-extrabold text-accent">890<span className="text-xs font-bold text-accent/50">₽</span></p>
+                      <p className="text-[9px] text-text/25 font-semibold">в месяц</p>
+                    </div>
+                    <div className="flex-1 border-l border-accent/20 pl-4">
+                      <p className="text-sm font-bold text-text">Max</p>
+                      <p className="text-[11px] text-text/40">65+ моделей · 2 000 запросов · 50 картинок · 10 видео · 3D</p>
+                    </div>
+                  </a>
+
+                  <a href="/pricing" className="flex items-center gap-4 p-3.5 rounded-2xl border-2 border-text/[0.08] hover:border-purple-400/30 transition-all group">
+                    <div className="text-center min-w-[70px]">
+                      <p className="text-2xl font-extrabold text-text group-hover:text-purple-500 transition-colors">1990<span className="text-xs font-bold text-text/30">₽</span></p>
+                      <p className="text-[9px] text-text/25 font-semibold">в месяц</p>
+                    </div>
+                    <div className="flex-1 border-l border-text/[0.06] pl-4">
+                      <p className="text-sm font-bold text-text">Max Pro</p>
+                      <p className="text-[11px] text-text/40">65+ моделей · 10 000 запросов · 300 картинок · 50 видео · API</p>
+                    </div>
+                  </a>
+                </div>
+
+                <a href="/pricing" className="block w-full mt-4 bg-accent text-white py-3.5 rounded-2xl font-bold text-center text-sm hover:bg-accent/90 transition-all shadow-xl shadow-accent/25 active:scale-[0.98]">
+                  Выбрать тариф
                 </a>
-                <a href="/pricing" className="block p-4 rounded-2xl border-2 border-accent bg-accent/5 hover:bg-accent/10 transition-all text-center relative">
-                  <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-accent text-white text-[9px] font-bold px-3 py-0.5 rounded-full shadow-lg shadow-accent/30">ХИТ</div>
-                  <p className="text-[10px] text-text/30 font-bold tracking-wider mb-1">MAX</p>
-                  <p className="text-2xl font-extrabold text-accent">890<span className="text-sm font-bold text-accent/50">₽</span></p>
-                  <p className="text-[10px] text-text/25 mt-0.5">в месяц</p>
+
+                <a href="/profile?tab=referrals" className="flex items-center justify-center gap-2 w-full mt-2.5 text-teal text-xs font-semibold hover:text-teal/80 transition-colors">
+                  🎁 Пригласи друга — +5 запросов обоим
                 </a>
+
+                <button onClick={() => { setUpsellModal(null); setLockModal(null); }} className="block w-full mt-1.5 text-text/20 text-[11px] text-center py-1.5 hover:text-text/40 transition-colors">
+                  Продолжить бесплатно
+                </button>
               </div>
-
-              <a href="/pricing" className="block w-full mt-4 bg-accent text-white py-4 rounded-2xl font-bold text-center text-[15px] hover:bg-accent/90 transition-all shadow-xl shadow-accent/25 active:scale-[0.98]">
-                Выбрать тариф
-              </a>
-
-              <a href="/profile?tab=referrals" className="flex items-center justify-center gap-2 w-full mt-3 bg-teal/10 text-teal py-3 rounded-xl font-bold text-sm hover:bg-teal/15 transition-colors">
-                🎁 Пригласи друга — +5 запросов обоим
-              </a>
-
-              <button onClick={() => { setUpsellModal(null); setLockModal(null); }} className="block w-full mt-2 text-text/25 text-xs text-center py-2 hover:text-text/40 transition-colors">
-                Продолжить бесплатно
-              </button>
             </div>
           </div>
         </div>
