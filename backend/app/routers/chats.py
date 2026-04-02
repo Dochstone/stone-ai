@@ -1,6 +1,7 @@
 """Chat history — persistent sessions and messages."""
 
 import logging
+import secrets
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -250,3 +251,79 @@ async def delete_session(
     await db.delete(session)
 
     return {"status": "ok"}
+
+
+@router.post("/{session_id}/share")
+async def share_session(
+    session_id: int,
+    tg_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Generate a share link for a chat session."""
+    result = await db.execute(
+        select(ChatSession).where(
+            ChatSession.id == session_id,
+            ChatSession.user_tg_id == tg_user["id"],
+        )
+    )
+    session = result.scalar_one_or_none()
+    if not session:
+        raise HTTPException(404, "Chat not found")
+
+    if not session.share_token:
+        session.share_token = secrets.token_urlsafe(16)
+        await db.flush()
+
+    return {"share_token": session.share_token, "share_url": f"https://stoneai.ru/shared/{session.share_token}"}
+
+
+@router.delete("/{session_id}/share")
+async def unshare_session(
+    session_id: int,
+    tg_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Remove share link."""
+    result = await db.execute(
+        select(ChatSession).where(
+            ChatSession.id == session_id,
+            ChatSession.user_tg_id == tg_user["id"],
+        )
+    )
+    session = result.scalar_one_or_none()
+    if not session:
+        raise HTTPException(404, "Chat not found")
+
+    session.share_token = None
+    await db.flush()
+    return {"status": "ok"}
+
+
+@router.get("/shared/{share_token}")
+async def get_shared_chat(
+    share_token: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """Public endpoint — view a shared chat without auth."""
+    result = await db.execute(
+        select(ChatSession).where(ChatSession.share_token == share_token)
+    )
+    session = result.scalar_one_or_none()
+    if not session:
+        raise HTTPException(404, "Shared chat not found")
+
+    result = await db.execute(
+        select(ChatMessage)
+        .where(ChatMessage.session_id == session.id)
+        .order_by(ChatMessage.created_at.asc())
+    )
+    messages = result.scalars().all()
+
+    return {
+        "title": session.title,
+        "model_id": session.model_id,
+        "messages": [
+            {"role": m.role, "content": m.content, "created_at": m.created_at.isoformat() if m.created_at else None}
+            for m in messages
+        ],
+    }

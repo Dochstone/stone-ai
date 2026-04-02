@@ -615,6 +615,7 @@ function Sidebar({
   onNewChat,
   onDeleteSession,
   onRenameSession,
+  onShareSession,
   plan,
 }: {
   open: boolean;
@@ -625,6 +626,7 @@ function Sidebar({
   onNewChat: () => void;
   onDeleteSession: (id: number) => void;
   onRenameSession: (id: number, title: string) => void;
+  onShareSession: (id: number) => void;
   plan?: string;
 }) {
   const [sidebarSearch, setSidebarSearch] = useState("");
@@ -735,6 +737,15 @@ function Sidebar({
                       )}
                     </div>
                   </div>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onShareSession(s.id); }}
+                    className="text-text/10 hover:text-accent p-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                    title="Поделиться"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+                    </svg>
+                  </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); onDeleteSession(s.id); }}
                     className="text-text/10 hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
@@ -1119,6 +1130,21 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
       if (activeSessionId === sessionId) newChat();
     } catch {}
   }, [auth, activeSessionId, newChat]);
+
+  const shareSession = useCallback(async (sessionId: number) => {
+    if (!auth) return;
+    try {
+      const res = await fetch(`${API_URL}/api/chats/${sessionId}/share`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${auth.token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        await navigator.clipboard.writeText(data.share_url);
+        alert("Ссылка скопирована!");
+      }
+    } catch {}
+  }, [auth]);
 
   const renameSession = useCallback(async (sessionId: number, title: string) => {
     if (!auth) return;
@@ -1693,6 +1719,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
         onNewChat={newChat}
         onDeleteSession={deleteSession}
         onRenameSession={renameSession}
+        onShareSession={shareSession}
         plan={limits?.plan}
       />
 

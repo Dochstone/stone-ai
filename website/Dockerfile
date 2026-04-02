@@ -13,8 +13,8 @@ ENV NEXT_PUBLIC_YANDEX_CLIENT_ID=$NEXT_PUBLIC_YANDEX_CLIENT_ID
 COPY package.json package-lock.json ./
 RUN npm ci
 
-COPY . .
 ARG CACHEBUST=1
+COPY . .
 RUN npm run build
 
 FROM node:18-alpine AS runner

@@ -14,6 +14,7 @@ class ChatSession(Base):
     user_tg_id: Mapped[int] = mapped_column(BigInteger, index=True, nullable=False)
     model_id: Mapped[str] = mapped_column(String(64), nullable=False)
     title: Mapped[str] = mapped_column(String(200), default="Новый чат")
+    share_token: Mapped[str | None] = mapped_column(String(32), unique=True, nullable=True, default=None)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
 

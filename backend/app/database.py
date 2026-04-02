@@ -115,6 +115,13 @@ async def init_db():
     # Add missing columns to users table
     await migrate_users_table()
 
+    # Add share_token to chat_sessions
+    async with engine.begin() as conn:
+        try:
+            await conn.execute(text("ALTER TABLE chat_sessions ADD COLUMN share_token VARCHAR(32) UNIQUE"))
+        except Exception:
+            pass  # already exists
+
     # Convert old credits to USD balance (one-time, idempotent)
     await migrate_credits_to_usd()
 
