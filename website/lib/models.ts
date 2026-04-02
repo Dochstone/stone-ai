@@ -65,8 +65,6 @@ export const MODELS: AIModel[] = [
   { id: "gpt-5-image-mini", name: "GPT-5 Image Mini", company: "OpenAI", tier: "pro", category: "image", pricePerMillion: 6.72, context: "128K", description: "Бюджетная генерация от OpenAI. Хороша для быстрых набросков и концептов.", strengths: ["Дешёвая", "Быстрая", "Концепты"] },
   { id: "flux-schnell", name: "Flux Schnell", company: "BFL", tier: "pro", category: "image", pricePerMillion: 0.012, priceUnit: "/img", context: "", description: "Быстрый генератор от Black Forest Labs. Мгновенные результаты.", strengths: ["Мгновенная", "Дешёвая"] },
   { id: "stable-diffusion-xl", name: "SDXL", company: "Stability", tier: "pro", category: "image", pricePerMillion: 0.04, priceUnit: "/img", context: "", description: "Классический Stable Diffusion XL. Хорош для художественных стилей.", strengths: ["Художественные стили", "Дешёвая"] },
-  { id: "kolors-v3", name: "KOLORS v3", company: "Kuaishou", tier: "pro", category: "image", pricePerMillion: 0.02, priceUnit: "/img", context: "", description: "Новейшая модель от Kuaishou. Фотореалистичные изображения с отличной детализацией лиц и текстур.", strengths: ["Фотореализм", "Лица", "Детализация"] },
-  { id: "kolors-v2", name: "KOLORS v2", company: "Kuaishou", tier: "pro", category: "image", pricePerMillion: 0.015, priceUnit: "/img", context: "", description: "Предыдущая версия KOLORS. Хорошее качество по доступной цене.", strengths: ["Качество", "Доступно"] },
 
   // TIER 5: FREE on OpenRouter (7 models)
   { id: "gemma-3-27b", name: "Gemma 3 27B", company: "Google", tier: "pro", category: "chat", pricePerMillion: 1.2, context: "96K", description: "Компактная open-source модель Google. 27B параметров, хороша для быстрых задач.", strengths: ["Open-source", "Быстрая", "96K"] },
