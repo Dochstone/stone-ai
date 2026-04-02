@@ -19,8 +19,8 @@ const THREED_MODEL_IDS = new Set(["tripo-v2.5", "triposr"]);
 
 // Model access tiers for lock icons
 const FREE_MODEL_IDS = new Set([
-  "gpt-4o-mini", "gemini-2.0-flash", "deepseek-v3",
-  "llama-4-maverick", "mistral-small", "qwen-turbo", "nano-banana",
+  "gpt-4o-mini", "gemini-2.0-flash", "claude-haiku-4.5", "deepseek-v3",
+  "llama-4-maverick", "mistral-large-25", "nano-banana",
 ]);
 const MINI_MODEL_IDS = new Set([
   "gpt-4o-mini", "gemini-2.0-flash", "deepseek-v3",
@@ -453,7 +453,8 @@ const WELCOME_CONFIG: Record<string, { icon: string; bg: string; title: string; 
 function WelcomeScreen({ onSuggestion, activeTab, plan }: { onSuggestion: (text: string, modelId: string) => void; activeTab: string; plan?: string }) {
   const [promptCat, setPromptCat] = useState("popular");
   const cfg = WELCOME_CONFIG[activeTab] || WELCOME_CONFIG.all;
-  const isChat = activeTab === "all" || activeTab === "chat" || activeTab === "free";
+  const isChat = activeTab === "all" || activeTab === "chat";
+  const isFree = activeTab === "free";
 
   return (
     <div className="flex-1 flex items-start justify-center px-4 overflow-y-auto">
@@ -466,7 +467,34 @@ function WelcomeScreen({ onSuggestion, activeTab, plan }: { onSuggestion: (text:
           <p className="text-xs sm:text-sm text-text/40">{cfg.subtitle}</p>
         </div>
 
-        {isChat ? (
+        {isFree ? (
+          <>
+            {/* Free models guide */}
+            <div className="max-w-lg mx-auto text-left space-y-2">
+              {[
+                { id: "gpt-4o-mini", name: "GPT-4o mini", icon: "🟢", desc: "Универсальная модель от OpenAI. Тексты, переводы, код, ответы на вопросы.", best: "Лучшая для большинства задач" },
+                { id: "gemini-2.0-flash", name: "Gemini Flash", icon: "⚡", desc: "Самая быстрая модель от Google. Ответ за доли секунды.", best: "Когда важна скорость" },
+                { id: "claude-haiku-4.5", name: "Claude Haiku", icon: "🟣", desc: "Аккуратная модель от Anthropic. Вежливые, структурированные ответы.", best: "Деловые письма, анализ" },
+                { id: "deepseek-v3", name: "DeepSeek V3", icon: "🔵", desc: "Мощная open-source модель. Отлично пишет код и решает задачи.", best: "Код и математика" },
+                { id: "llama-4-maverick", name: "Llama 4", icon: "🦙", desc: "Креативная модель от Meta. Хороша для мозговых штурмов и идей.", best: "Креатив и брейншторм" },
+                { id: "mistral-large-25", name: "Mistral Large", icon: "🌊", desc: "Европейская модель. Хорошо работает с русским и другими языками.", best: "Мультиязычные задачи" },
+                { id: "nano-banana", name: "Nano Banana", icon: "🎨", desc: "Генерация картинок из текста. Единственная бесплатная модель для изображений.", best: "Картинки бесплатно" },
+              ].map((m) => (
+                <button key={m.id} onClick={() => onSuggestion("", m.id)}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl border border-text/[0.06] bg-bg hover:border-accent/30 hover:shadow-sm transition-all group">
+                  <span className="text-2xl shrink-0">{m.icon}</span>
+                  <div className="flex-1 min-w-0 text-left">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[13px] font-bold text-text group-hover:text-accent transition-colors">{m.name}</span>
+                      <span className="text-[9px] bg-teal/10 text-teal font-bold px-1.5 py-0.5 rounded-full">{m.best}</span>
+                    </div>
+                    <p className="text-[11px] text-text/40 leading-snug mt-0.5">{m.desc}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </>
+        ) : isChat ? (
           <>
             {/* Category tabs */}
             <div className="flex gap-1 pb-2 mb-4 justify-center flex-wrap">
@@ -1874,7 +1902,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                         : MINI_MODEL_IDS.has(m.id) ? "bg-blue-100 text-blue-600"
                         : "bg-accent/10 text-accent"
                       }`}>
-                        {lock ? lock.tier : FREE_MODEL_IDS.has(m.id) ? "Free" : MINI_MODEL_IDS.has(m.id) ? "Mini" : "Max"}
+                        {lock ? lock.tier : FREE_MODEL_IDS.has(m.id) ? "Бесплатно" : MINI_MODEL_IDS.has(m.id) ? "Mini" : "Max"}
                       </span>
                     </button>
                   );
@@ -1889,7 +1917,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
         <div className="flex px-3 sm:px-4 border-b border-text/[0.04] bg-bg/50 shrink-0">
           {[
             { id: "all", icon: "💬", label: "Чаты" },
-            { id: "free", icon: "✨", label: "Free" },
+            { id: "free", icon: "✨", label: "Бесплатно" },
             { id: "image", icon: "🎨", label: "Фото" },
             { id: "video", icon: "🎬", label: "Видео" },
           ].map((t) => (
