@@ -2469,7 +2469,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
 
             {/* Hero image + overlay */}
             <div className="relative h-64 sm:h-72 overflow-hidden">
-              <img src={modelCatFilter === "video" ? "/upsell-video.png" : modelCatFilter === "image" ? "/upsell-photo.png" : "/upsell-chat.png"} alt="" className="w-full h-full object-cover object-center" />
+              <img src={modelCatFilter === "video" ? "/upsell-video.png?v=2" : modelCatFilter === "image" ? "/upsell-photo.png?v=2" : "/upsell-chat.png?v=2"} alt="" className="w-full h-full object-cover object-center" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
               <button onClick={() => { setUpsellModal(null); setLockModal(null); }} className="absolute top-3 right-3 w-8 h-8 bg-white/10 backdrop-blur rounded-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition-colors">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
