@@ -1091,14 +1091,33 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
         const data = await res.json();
         setActiveSessionId(sessionId);
         setSelectedModel(data.session.model_id);
-        setMessages(data.messages.map((m: any) => ({
-          role: m.role,
-          content: m.content,
-          billing: m.cost_usd > 0 ? {
-            tokens_in: m.tokens_in, tokens_out: m.tokens_out,
-            cost_usd: m.cost_usd, balance_usd: 0, billing_mode: "per_token",
-          } : undefined,
-        })));
+        setMessages(data.messages.map((m: any) => {
+          const msg: any = {
+            role: m.role,
+            content: m.content,
+            billing: m.cost_usd > 0 ? {
+              tokens_in: m.tokens_in, tokens_out: m.tokens_out,
+              cost_usd: m.cost_usd, balance_usd: 0, billing_mode: "per_token",
+            } : undefined,
+          };
+          // Parse [video:url] from saved content
+          const videoMatch = m.content?.match(/^\[video:(https?:\/\/.+)\]$/);
+          if (videoMatch) {
+            msg.content = "";
+            msg.video = { url: videoMatch[1], directUrl: videoMatch[1] };
+          }
+          // Parse [3d:url] from saved content
+          const threedMatch = m.content?.match(/^\[3d:(https?:\/\/.+)\]$/);
+          if (threedMatch) {
+            msg.content = "3D модель готова!";
+            msg.threed = { url: threedMatch[1] };
+          }
+          // Parse image URLs (saved as plain URL)
+          if (m.role === "assistant" && m.content?.match(/^https?:\/\/.+\.(png|jpg|jpeg|webp)/i)) {
+            msg.content = m.content; // ImageShareCard renders from content URL
+          }
+          return msg;
+        }));
       }
     } catch {}
   }, [auth]);
