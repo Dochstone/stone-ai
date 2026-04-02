@@ -2434,95 +2434,76 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
         </div>
       )}
 
-      {/* Lock Modal */}
-      {lockModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-4" onClick={() => setLockModal(null)}>
-          <div className="bg-bg rounded-2xl p-6 max-w-sm w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="text-center">
-              <div className="w-14 h-14 bg-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">🔒</span>
-              </div>
-              <h3 className="font-extrabold text-lg mb-2">{lockModal.model}</h3>
-              <p className="text-text/50 text-sm mb-6">
-                Доступен на тарифе <span className="font-bold text-accent">{lockModal.tier}</span> ({lockModal.price})
-              </p>
-              <div className="flex gap-3">
-                <button onClick={() => setLockModal(null)}
-                  className="flex-1 border-2 border-text/15 text-text py-2.5 rounded-xl font-bold text-sm hover:border-text/30 transition-colors">
-                  Закрыть
-                </button>
-                <a href="/pricing"
-                  className="flex-1 bg-accent text-white py-2.5 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors text-center">
-                  Смотреть тарифы
-                </a>
-              </div>
-              <a href="/profile?tab=referrals" className="flex items-center justify-center gap-2 w-full mt-3 bg-teal/10 text-teal py-2.5 rounded-xl font-semibold text-xs hover:bg-teal/20 transition-colors">
-                🎁 Пригласи друга — оба получат +5 запросов
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Upsell Modal — unified for lock + limit */}
+      {(upsellModal || lockModal) && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-end sm:items-center justify-center backdrop-blur-sm" onClick={() => { setUpsellModal(null); setLockModal(null); }}>
+          <div className="bg-bg rounded-t-3xl sm:rounded-3xl w-full sm:max-w-lg shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-300" onClick={(e) => e.stopPropagation()}>
 
-      {/* Upsell Modal — triggers on 429 (limit) or 403 (model_locked) */}
-      {upsellModal && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center" onClick={() => setUpsellModal(null)}>
-          <div className="bg-bg rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            {/* Header */}
-            <div className="bg-gradient-to-br from-accent to-accent/80 px-6 pt-8 pb-6 text-white text-center">
-              <div className="w-16 h-16 mx-auto mb-4 bg-white/20 rounded-2xl flex items-center justify-center">
-                <span className="text-3xl">{upsellModal.type === "limit" ? "⚡" : "🔓"}</span>
+            {/* Hero image + overlay */}
+            <div className="relative h-48 sm:h-56 overflow-hidden">
+              <img src="/demo/demo_image_gen.png" alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+              <button onClick={() => { setUpsellModal(null); setLockModal(null); }} className="absolute top-3 right-3 w-8 h-8 bg-white/10 backdrop-blur rounded-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition-colors">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+              <div className="absolute bottom-4 left-5 right-5 text-white">
+                <h3 className="text-2xl font-extrabold mb-1">
+                  {upsellModal?.type === "limit" ? "Лимит исчерпан" : `${upsellModal?.model || lockModal?.model} 🔒`}
+                </h3>
+                <p className="text-white/60 text-sm">
+                  {upsellModal?.type === "limit"
+                    ? "15 бесплатных запросов использованы"
+                    : `Нужен тариф ${lockModal?.tier || (upsellModal?.tier === "max" ? "Max" : "Mini")}`}
+                </p>
               </div>
-              <h3 className="text-xl font-extrabold mb-1">
-                {upsellModal.type === "limit" ? "Запросы на сегодня закончились" : `${upsellModal.model} заблокирована`}
-              </h3>
-              <p className="text-white/70 text-sm">
-                {upsellModal.type === "limit"
-                  ? "Вы использовали 15 бесплатных запросов"
-                  : `Доступна на тарифе ${upsellModal.tier === "max" ? "Max" : "Mini"}`}
-              </p>
             </div>
 
-            {/* Benefits */}
-            <div className="px-6 py-5">
-              <p className="text-[11px] text-text/40 font-semibold uppercase tracking-wider mb-3">Что вы получите</p>
-              <div className="space-y-2.5">
+            {/* Content */}
+            <div className="px-5 sm:px-6 py-5">
+
+              {/* Benefits */}
+              <div className="grid grid-cols-2 gap-2.5 mb-5">
                 {[
-                  { icon: "🧠", text: "GPT-5.4, Claude Opus, Gemini Pro — топовые модели" },
-                  { icon: "🎨", text: "Генерация картинок — Flux, Stable Diffusion, GPT-5 Image" },
-                  { icon: "🎬", text: "Генерация видео — Sora, Runway, Pika" },
-                  { icon: "⚡", text: "Без задержек — мгновенные ответы" },
+                  { icon: "🧠", title: "65+ моделей", desc: "GPT-5, Claude, Gemini" },
+                  { icon: "🎨", title: "Картинки", desc: "Flux, DALL-E, GPT-5" },
+                  { icon: "🎬", title: "Видео", desc: "Sora, Runway, Pika" },
+                  { icon: "⚡", title: "Без лимитов", desc: "До 10 000 запросов" },
                 ].map((b, i) => (
-                  <div key={i} className="flex items-start gap-3">
-                    <span className="text-lg shrink-0">{b.icon}</span>
-                    <span className="text-[13px] text-text/70 leading-snug">{b.text}</span>
+                  <div key={i} className="bg-text/[0.03] rounded-xl p-3 flex items-center gap-2.5">
+                    <span className="text-xl">{b.icon}</span>
+                    <div>
+                      <p className="text-xs font-bold text-text">{b.title}</p>
+                      <p className="text-[10px] text-text/40">{b.desc}</p>
+                    </div>
                   </div>
                 ))}
               </div>
 
-              {/* Pricing */}
-              <div className="grid grid-cols-2 gap-2 mt-5">
-                <a href="/pricing" className="block p-3 rounded-xl border-2 border-accent/20 hover:border-accent transition-colors text-center">
-                  <p className="text-[10px] text-text/40 font-semibold">MINI</p>
-                  <p className="text-lg font-extrabold text-text">390<span className="text-sm font-bold text-text/40">₽</span></p>
-                  <p className="text-[10px] text-text/30">в месяц</p>
+              {/* Pricing cards */}
+              <div className="grid grid-cols-2 gap-3">
+                <a href="/pricing" className="block p-4 rounded-2xl border-2 border-text/[0.08] hover:border-accent/40 transition-all text-center group">
+                  <p className="text-[10px] text-text/30 font-bold tracking-wider mb-1">MINI</p>
+                  <p className="text-2xl font-extrabold text-text group-hover:text-accent transition-colors">390<span className="text-sm font-bold text-text/30">₽</span></p>
+                  <p className="text-[10px] text-text/25 mt-0.5">в месяц</p>
                 </a>
-                <a href="/pricing" className="block p-3 rounded-xl border-2 border-accent bg-accent/5 hover:bg-accent/10 transition-colors text-center relative">
-                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-accent text-white text-[8px] font-bold px-2 py-0.5 rounded-full">ХИТ</div>
-                  <p className="text-[10px] text-text/40 font-semibold">MAX</p>
-                  <p className="text-lg font-extrabold text-text">890<span className="text-sm font-bold text-text/40">₽</span></p>
-                  <p className="text-[10px] text-text/30">в месяц</p>
+                <a href="/pricing" className="block p-4 rounded-2xl border-2 border-accent bg-accent/5 hover:bg-accent/10 transition-all text-center relative">
+                  <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-accent text-white text-[9px] font-bold px-3 py-0.5 rounded-full shadow-lg shadow-accent/30">ХИТ</div>
+                  <p className="text-[10px] text-text/30 font-bold tracking-wider mb-1">MAX</p>
+                  <p className="text-2xl font-extrabold text-accent">890<span className="text-sm font-bold text-accent/50">₽</span></p>
+                  <p className="text-[10px] text-text/25 mt-0.5">в месяц</p>
                 </a>
               </div>
 
-              <a href="/pricing" className="block w-full mt-4 bg-accent text-white py-3.5 rounded-xl font-bold text-center text-sm hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20">
+              <a href="/pricing" className="block w-full mt-4 bg-accent text-white py-4 rounded-2xl font-bold text-center text-[15px] hover:bg-accent/90 transition-all shadow-xl shadow-accent/25 active:scale-[0.98]">
                 Выбрать тариф
               </a>
-              <a href="/profile?tab=referrals" className="flex items-center justify-center gap-2 w-full mt-3 bg-teal/10 text-teal py-3 rounded-xl font-bold text-sm hover:bg-teal/20 transition-colors">
-                <span>🎁</span> Пригласи друга — оба получат +5 запросов
+
+              <a href="/profile?tab=referrals" className="flex items-center justify-center gap-2 w-full mt-3 bg-teal/10 text-teal py-3 rounded-xl font-bold text-sm hover:bg-teal/15 transition-colors">
+                🎁 Пригласи друга — +5 запросов обоим
               </a>
-              <button onClick={() => setUpsellModal(null)} className="block w-full mt-2 text-text/30 text-xs text-center py-2 hover:text-text/50 transition-colors">
-                Продолжить бесплатно завтра
+
+              <button onClick={() => { setUpsellModal(null); setLockModal(null); }} className="block w-full mt-2 text-text/25 text-xs text-center py-2 hover:text-text/40 transition-colors">
+                Продолжить бесплатно
               </button>
             </div>
           </div>
