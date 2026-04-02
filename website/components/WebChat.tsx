@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { MODELS, type AIModel } from "@/lib/models";
 import AuthFormComponent, { type AuthState } from "@/components/AuthForm";
 import PromptLibrary from "@/components/prompts/PromptLibrary";
+import DualChatView from "@/components/chat/DualChatView";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
 
@@ -1686,6 +1687,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   // Guest registration prompt modal
   const [showGuestLimit, setShowGuestLimit] = useState(false);
   const [promptLibOpen, setPromptLibOpen] = useState(false);
+  const [compareMode, setCompareMode] = useState(false);
   const guestCount = typeof window !== "undefined" ? parseInt(localStorage.getItem("stone_guest_count") || "0") : 0;
 
   if (!loaded) return null;
@@ -1849,6 +1851,17 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            {auth && (
+              <button
+                onClick={() => setCompareMode(!compareMode)}
+                title="Сравнить 2 модели"
+                className={`text-[10px] sm:text-xs font-bold px-2 py-1 rounded-full transition-all ${
+                  compareMode ? "bg-accent text-white" : "bg-text/5 text-text/30 hover:text-accent hover:bg-accent/10"
+                }`}
+              >
+                x2 AI
+              </button>
+            )}
             {limits && limits.text && limits.text.limit > 0 && (
               <div className="hidden sm:flex items-center gap-1.5 text-[10px] text-text/40" title={`${limits.text.used}/${limits.text.limit} запросов`}>
                 <div className="w-16 h-1.5 bg-text/10 rounded-full overflow-hidden">
@@ -2049,7 +2062,15 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
           </div>
         )}
 
+        {/* x2 AI Compare Mode */}
+        {compareMode && auth && (
+          <div className="flex-1 min-h-0">
+            <DualChatView token={auth.token} onClose={() => setCompareMode(false)} />
+          </div>
+        )}
+
         {/* Messages area or Welcome screen */}
+        <div style={{ display: compareMode ? "none" : "contents" }}>
         {messages.length === 0 ? (
           <WelcomeScreen onSuggestion={handleSuggestionClick} activeTab={modelCatFilter} plan={limits?.plan} />
         ) : (
@@ -2456,6 +2477,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
           </div>
         </div>
       </div>
+      </div>{/* /compareMode hide */}
 
       {/* Chat mini-onboarding */}
       {showOnboarding && (
