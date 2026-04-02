@@ -31,7 +31,6 @@ const MINI_MODEL_IDS = new Set([
 ]);
 
 function getModelLockInfo(modelId: string, balance: number, plan?: string): { locked: boolean; tier: string; price: string } | null {
-  if (balance > 0) return null;
   if (plan === "max-pro" || plan === "max") return null; // full access
   if (plan === "mini" && MINI_MODEL_IDS.has(modelId)) return null;
   if (FREE_MODEL_IDS.has(modelId)) return null;
@@ -1251,6 +1250,8 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   // 3D generation
   const send3DMessage = useCallback(async () => {
     if (!auth || (!input.trim() && !pendingFile) || threedGenerating) return;
+    const tdLock = getModelLockInfo(selectedModel, auth.balanceUsd || 0, limits?.plan);
+    if (tdLock) { setUpsellModal({ type: "locked", model: MODELS.find(m => m.id === selectedModel)?.name, tier: tdLock.tier }); return; }
 
     const prompt = input.trim() || undefined;
     const imageUrl = pendingFile?.file_type === "image" ? pendingFile.content : undefined;
@@ -1330,6 +1331,8 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   // Video generation
   const sendVideoMessage = useCallback(async () => {
     if (!auth || (!input.trim() && !pendingFile) || videoGenerating) return;
+    const vidLock = getModelLockInfo(selectedModel, auth.balanceUsd || 0, limits?.plan);
+    if (vidLock) { setUpsellModal({ type: "locked", model: MODELS.find(m => m.id === selectedModel)?.name, tier: vidLock.tier }); return; }
 
     const prompt = input.trim();
     const imageUrl = pendingFile?.file_type === "image" ? pendingFile.content : undefined;
@@ -1423,6 +1426,8 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   // Image generation via dedicated endpoint
   const sendImageMessage = useCallback(async () => {
     if (!auth || !input.trim() || streaming) return;
+    const imgLock = getModelLockInfo(selectedModel, auth.balanceUsd || 0, limits?.plan);
+    if (imgLock) { setUpsellModal({ type: "locked", model: MODELS.find(m => m.id === selectedModel)?.name, tier: imgLock.tier }); return; }
     const prompt = input.trim();
     const userMsg: Message = { role: "user", content: prompt };
     const history = [...messages, userMsg];
