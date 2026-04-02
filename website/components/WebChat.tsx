@@ -5,6 +5,7 @@ import { MODELS, type AIModel } from "@/lib/models";
 import AuthFormComponent, { type AuthState } from "@/components/AuthForm";
 import PromptLibrary from "@/components/prompts/PromptLibrary";
 import DualChatView from "@/components/chat/DualChatView";
+import ProjectSelector from "@/components/projects/ProjectSelector";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
 
@@ -1559,6 +1560,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
         body: JSON.stringify({
           model_id: isGuest ? "gpt-4.1-mini" : selectedModel,
           messages: apiMessages,
+          ...(selectedProjectId && !isGuest ? { project_id: selectedProjectId } : {}),
           ...(modelCatFilter === "health" ? { system_prompt: "Ты — AI-ассистент по общим вопросам здоровья. Ты НЕ врач и НЕ ставишь диагнозы. Анализируй фото и описания симптомов, предлагай возможные причины (2-3 варианта), рекомендуй к какому специалисту обратиться. Заверши: \"Для точного диагноза обратитесь к врачу.\" Отвечай на русском." } : {}),
         }),
         signal: abort.signal,
@@ -1688,6 +1690,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   const [showGuestLimit, setShowGuestLimit] = useState(false);
   const [promptLibOpen, setPromptLibOpen] = useState(false);
   const [compareMode, setCompareMode] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const guestCount = typeof window !== "undefined" ? parseInt(localStorage.getItem("stone_guest_count") || "0") : 0;
 
   if (!loaded) return null;
@@ -1851,6 +1854,9 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            {auth && (
+              <ProjectSelector token={auth.token} onChange={setSelectedProjectId} />
+            )}
             {auth && (
               <button
                 onClick={() => setCompareMode(!compareMode)}

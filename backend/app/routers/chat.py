@@ -41,6 +41,7 @@ class ChatRequest(BaseModel):
     model_id: str = DEFAULT_MODEL
     messages: list[dict]
     system_prompt: str | None = None
+    project_id: str | None = None
 
 
 @router.post("/chat/guest")
@@ -177,6 +178,18 @@ async def chat(
 
     # System prompt — allowed for all users
     system_prompt = req.system_prompt if req.system_prompt else None
+
+    # Inject project context if project_id provided
+    if req.project_id:
+        from app.models.project import Project
+        from app.routers.projects import build_project_context
+        proj_result = await db.execute(
+            select(Project).where(Project.id == req.project_id, Project.user_tg_id == tg_id)
+        )
+        proj = proj_result.scalar_one_or_none()
+        if proj:
+            brand_ctx = build_project_context(proj)
+            system_prompt = brand_ctx + "\n\n" + (system_prompt or "")
 
     # Dynamic max_tokens based on billing mode
     max_tokens = MAX_TOKENS_LITE if billing_mode == "free" else MAX_TOKENS_PREMIUM
