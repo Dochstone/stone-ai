@@ -13,28 +13,28 @@ const plans = [
     badge: null, accent: false,
     features: ["7 моделей (GPT-4o mini, Gemini Flash, Claude Haiku)", "15 запросов в день", "2 картинки в день", "Сохранение истории чатов"],
     locked: ["Премиум модели (GPT-5, Claude Opus)", "Генерация видео, аудио, 3D", "Голосовой ассистент"],
-    cta: "Начать бесплатно", icon: "🆓", color: "#6B7280", img: "/plan-free.jpg?v=2",
+    cta: "Начать бесплатно", icon: "🆓", color: "#14B8A6", img: "/plan-free.jpg?v=2",
   },
   {
-    id: "mini", name: "Mini", price: "390₽", oldPrice: "590₽", priceNum: 390, premium: false, period: "/мес", desc: "20+ моделей",
+    id: "mini", name: "Start", price: "390₽", oldPrice: "590₽", priceNum: 390, premium: false, period: "/мес", desc: "20+ моделей",
     badge: null, accent: false,
     features: ["20+ моделей включая GPT-5.1 и Claude Sonnet", "500 запросов к быстрым моделям", "20 запросов к премиум моделям", "До 5 запросов к Claude Opus", "15 картинок и 3 видео в месяц"],
     locked: ["3D модели и озвучка"],
-    cta: "Выбрать Mini", icon: "⚡", color: "#3B82F6", img: "/plan-mini.jpg?v=2",
+    cta: "Выбрать Start", icon: "⚡", color: "#22D3EE", img: "/plan-mini.jpg?v=2",
   },
   {
-    id: "max", name: "Max", price: "890₽", oldPrice: "1 490₽", priceNum: 890, premium: false, period: "/мес", desc: "Все 65+ моделей",
+    id: "max", name: "Pro", price: "890₽", oldPrice: "1 490₽", priceNum: 890, premium: false, period: "/мес", desc: "Все 65+ моделей",
     badge: "Популярный", accent: true,
     features: ["Все 65+ моделей без ограничений", "2 000 запросов к быстрым моделям", "100 запросов к премиум (20 к Opus)", "50 картинок и 10 видео в месяц", "5 3D-моделей и 20 озвучек", "Голосовой ассистент"],
     locked: [],
-    cta: "Выбрать Max", icon: "🔥", color: "#D97757", img: "/plan-max.jpg?v=2",
+    cta: "Выбрать Pro", icon: "🔥", color: "#A855F7", img: "/plan-max.jpg?v=2",
   },
   {
-    id: "max-pro", name: "Max Pro", price: "1 990₽", oldPrice: "2 990₽", priceNum: 1990, premium: true, period: "/мес", desc: "Максимум возможностей",
+    id: "max-pro", name: "Elite", price: "1 990₽", oldPrice: "2 990₽", priceNum: 1990, premium: true, period: "/мес", desc: "Максимум возможностей",
     badge: "Легенда", accent: false,
     features: ["Все 65+ моделей + доступ к API", "10 000 запросов к быстрым моделям", "500 запросов к премиум (80 к Opus)", "300 картинок и 50 видео в месяц", "30 3D-моделей и 100 озвучек", "Приоритетная скорость ответов", "Ранний доступ к новым моделям"],
     locked: [],
-    cta: "Стать Max Pro", icon: "💎", color: "#F59E0B", img: "/plan-maxpro.jpg?v=2",
+    cta: "Стать Elite", icon: "💎", color: "#F43F5E", img: "/plan-maxpro.jpg?v=2",
   },
 ];
 
@@ -227,24 +227,24 @@ export default function Pricing() {
               onClick={() => openPlan(plan)}
               className={`rounded-2xl p-6 relative flex flex-col cursor-pointer group transition-all duration-300 hover:-translate-y-1 ${
                 plan.premium
-                  ? "bg-gradient-to-br from-[#1C1C1E] to-[#2C2C2E] text-white border-2 border-amber-500/30 shadow-xl shadow-amber-500/10 hover:shadow-2xl hover:shadow-amber-500/20 hover:border-amber-500/50"
+                  ? "bg-gradient-to-br from-[#1C1C1E] to-[#2C2C2E] text-white border-2 border-[#F43F5E]/30 shadow-xl shadow-[#F43F5E]/10 hover:shadow-2xl hover:shadow-[#F43F5E]/20 hover:border-[#F43F5E]/50"
                   : plan.accent
-                  ? "bg-bg border-2 border-accent shadow-lg shadow-accent/5 hover:shadow-2xl hover:shadow-accent/15 hover:border-accent/80"
+                  ? "bg-bg border-2 border-[#A855F7] shadow-lg shadow-[#A855F7]/5 hover:shadow-2xl hover:shadow-[#A855F7]/15 hover:border-[#A855F7]/80"
                   : "bg-bg border border-text/5 hover:border-text/15 hover:shadow-lg"
               }`}
               style={plan.accent ? {
                 animation: "pricingGlow 3s ease-in-out infinite",
-                ["--glow-color" as any]: "rgba(217,119,87,0.12)",
+                ["--glow-color" as any]: "rgba(168,85,247,0.12)",
               } : undefined}
             >
               {plan.badge && (
                 <span
                   className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
-                    plan.premium ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white" : "bg-accent text-white"
+                    plan.premium ? "bg-gradient-to-r from-[#F43F5E] to-[#E11D48] text-white" : "bg-[#A855F7] text-white"
                   }`}
                   style={{
                     animation: "pricingPulse 2.5s ease-in-out infinite",
-                    ["--pulse-color" as any]: plan.premium ? "rgba(245,158,11,0.4)" : "rgba(217,119,87,0.4)",
+                    ["--pulse-color" as any]: plan.premium ? "rgba(244,63,94,0.4)" : "rgba(168,85,247,0.4)",
                   }}
                 >
                   {plan.premium ? "⭐ " : ""}{plan.badge}
@@ -277,7 +277,7 @@ export default function Pricing() {
               <ul className="space-y-2.5 text-sm mb-4 flex-1">
                 {plan.features.map((f: string) => (
                   <li key={f} className="flex items-start gap-2.5">
-                    <svg className={`w-4 h-4 mt-0.5 shrink-0 transition-transform duration-200 group-hover:scale-110 ${plan.premium ? "text-amber-400" : plan.accent ? "text-accent" : "text-teal"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <svg className={`w-4 h-4 mt-0.5 shrink-0 transition-transform duration-200 group-hover:scale-110 ${plan.premium ? "text-[#F43F5E]" : plan.accent ? "text-[#A855F7]" : "text-teal"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                     </svg>
                     <span className={`text-[13px] ${plan.premium ? "text-white/70" : "text-text/70"}`}>{f}</span>
@@ -296,13 +296,17 @@ export default function Pricing() {
               <button
                 className={`w-full text-center px-4 py-2.5 min-h-[44px] rounded-xl font-bold text-sm transition-all duration-200 active:scale-[0.97] ${
                   plan.premium
-                    ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 shadow-md shadow-amber-500/20"
+                    ? "text-white shadow-md shadow-[#F43F5E]/20"
                     : plan.accent
-                    ? "bg-accent text-white hover:bg-accent/90 shadow-md shadow-accent/20"
-                    : "border-2 border-text/15 text-text hover:border-accent hover:text-accent"
+                    ? "text-white shadow-md shadow-[#A855F7]/20"
+                    : `border-2 border-text/15 text-text hover:border-[${plan.color}] hover:text-[${plan.color}]`
                 }`}
-                style={plan.accent ? {
-                  backgroundImage: "linear-gradient(90deg, #D97757, #E8956E, #D97757)",
+                style={plan.premium ? {
+                  backgroundImage: "linear-gradient(90deg, #F43F5E, #FB7185, #F43F5E)",
+                  backgroundSize: "200% 100%",
+                  animation: "pricingShimmer 3s ease-in-out infinite",
+                } : plan.accent ? {
+                  backgroundImage: "linear-gradient(90deg, #A855F7, #C084FC, #A855F7)",
                   backgroundSize: "200% 100%",
                   animation: "pricingShimmer 3s ease-in-out infinite",
                   border: "none",

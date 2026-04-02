@@ -6,7 +6,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 export const metadata: Metadata = {
   title: "Тарифы — подписка от 390₽/мес",
   description:
-    "4 тарифа Stone AI: Free (0₽), Mini (390₽), Max (890₽), Max Pro (1990₽). 65+ нейросетей, картинки, видео, 3D. Оплата криптовалютой.",
+    "4 тарифа Stone AI: Free (0₽), Start (390₽), Pro (890₽), Elite (1990₽). 65+ нейросетей, картинки, видео, 3D. Оплата криптовалютой.",
 };
 
 const pricingJsonLd = {
@@ -16,9 +16,9 @@ const pricingJsonLd = {
   description: "65+ нейросетей в одном окне. Подписка от 390₽/мес.",
   offers: [
     { "@type": "Offer", name: "Free", price: "0", priceCurrency: "RUB", description: "15 запросов в день, 7 моделей" },
-    { "@type": "Offer", name: "Mini", price: "390", priceCurrency: "RUB", description: "500 запросов/мес, 20+ моделей" },
-    { "@type": "Offer", name: "Max", price: "890", priceCurrency: "RUB", description: "2000 запросов/мес, 65+ моделей" },
-    { "@type": "Offer", name: "Max Pro", price: "1990", priceCurrency: "RUB", description: "10000 запросов/мес, 65+ моделей + API" },
+    { "@type": "Offer", name: "Start", price: "390", priceCurrency: "RUB", description: "500 запросов/мес, 20+ моделей" },
+    { "@type": "Offer", name: "Pro", price: "890", priceCurrency: "RUB", description: "2000 запросов/мес, 65+ моделей" },
+    { "@type": "Offer", name: "Elite", price: "1990", priceCurrency: "RUB", description: "10000 запросов/мес, 65+ моделей + API" },
   ],
 };
 
@@ -29,14 +29,14 @@ const faqItems = [
   },
   {
     q: "Можно ли попробовать бесплатно?",
-    a: "Да! Тариф Free даёт 15 запросов в день к 7 моделям (GPT-4o mini, Gemini Flash, Claude Haiku и другим). Без оплаты и без регистрации карты.",
+    a: "Да! Тариф Free даёт 15 запросов в день к 7 моделям (GPT-4o mini, Gemini Flash, Claude Haiku и другие). Без оплаты и без регистрации карты.",
   },
   {
-    q: "Чем отличается Mini от Max?",
-    a: "Mini (390₽) — 20+ моделей и 500 запросов/мес. Max (890₽) — все 65+ моделей, 2000 запросов, видео, 3D, аудио. Для большинства задач хватает Mini.",
+    q: "Чем отличается Start от Pro?",
+    a: "Start (390₽) — 20+ моделей и 500 запросов/мес. Pro (890₽) — все 65+ моделей, 2000 запросов, видео, 3D, аудио. Для большинства задач хватает Start.",
   },
   {
-    q: "Что входит в Max Pro?",
+    q: "Что входит в Elite?",
     a: "10 000 запросов/мес, 500 к премиум моделям, 300 картинок, 50 видео, 30 3D, API доступ, приоритетная скорость и ранний доступ к новым моделям.",
   },
   {
@@ -66,7 +66,7 @@ export default function PricingPage() {
             <span className="bg-gradient-to-r from-accent to-teal bg-clip-text text-transparent">все нейросети</span>
           </h1>
           <p className="text-text/50 max-w-2xl mx-auto text-lg">
-            Бесплатный старт — 15 запросов в день. Подписка от 390₽/мес открывает GPT-5.4, Claude Opus, генерацию картинок и видео.
+            Бесплатный старт — 15 запросов в день. Подписка от 390₽/мес открывает GPT-5, Claude Opus, генерацию картинок и видео.
           </p>
         </div>
       </div>
@@ -130,21 +130,21 @@ export default function PricingPage() {
               <tr className="bg-text/[0.02]">
                 <th className="text-left py-4 px-5 text-text/50 font-semibold text-xs uppercase tracking-wider">Функция</th>
                 <th className="text-center py-4 px-4 min-w-[90px]">
-                  <span className="text-xs font-bold text-text/70">Free</span>
+                  <span className="text-xs font-bold text-[#14B8A6]">Free</span>
                   <p className="text-[10px] text-text/30 mt-0.5">0₽</p>
                 </th>
                 <th className="text-center py-4 px-4 min-w-[90px]">
-                  <span className="text-xs font-bold text-blue-600">Mini</span>
+                  <span className="text-xs font-bold text-[#22D3EE]">Start</span>
                   <p className="text-[10px] text-text/30 mt-0.5">390₽</p>
                 </th>
-                <th className="text-center py-4 px-4 min-w-[90px] bg-accent/[0.03]">
-                  <span className="inline-block bg-accent text-white text-[8px] font-bold px-2.5 py-0.5 rounded-full mb-1.5">ХИТ</span>
+                <th className="text-center py-4 px-4 min-w-[90px] bg-[#A855F7]/[0.03]">
+                  <span className="inline-block bg-[#A855F7] text-white text-[8px] font-bold px-2.5 py-0.5 rounded-full mb-1.5">ХИТ</span>
                   <br />
-                  <span className="text-xs font-bold text-accent">Max</span>
+                  <span className="text-xs font-bold text-[#A855F7]">Pro</span>
                   <p className="text-[10px] text-text/30 mt-0.5">890₽</p>
                 </th>
                 <th className="text-center py-4 px-4 min-w-[90px]">
-                  <span className="text-xs font-bold text-amber-600">Max Pro</span>
+                  <span className="text-xs font-bold text-[#F43F5E]">Elite</span>
                   <p className="text-[10px] text-text/30 mt-0.5">1 990₽</p>
                 </th>
               </tr>
@@ -172,7 +172,7 @@ export default function PricingPage() {
                   </td>
                   <td className="py-3.5 px-4 text-center text-[13px] text-text/50">{row.free === "—" ? <span className="text-text/15">—</span> : row.free}</td>
                   <td className="py-3.5 px-4 text-center text-[13px] text-text/60">{row.mini === "—" ? <span className="text-text/15">—</span> : row.mini}</td>
-                  <td className="py-3.5 px-4 text-center text-[13px] font-semibold text-text/80 bg-accent/[0.03]">{row.max === "—" ? <span className="text-text/15">—</span> : row.max}</td>
+                  <td className="py-3.5 px-4 text-center text-[13px] font-semibold text-text/80 bg-[#A855F7]/[0.03]">{row.max === "—" ? <span className="text-text/15">—</span> : row.max}</td>
                   <td className="py-3.5 px-4 text-center text-[13px] font-semibold text-text/80">{row.maxpro === "✓" ? <span className="text-accent text-base">✓</span> : row.maxpro === "—" ? <span className="text-text/15">—</span> : row.maxpro}</td>
                 </tr>
               ))}

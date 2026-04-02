@@ -2497,36 +2497,36 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
 
                 {/* 3 pricing cards */}
                 <div className="space-y-2.5">
-                  <a href="/pricing?plan=mini" className="flex items-center gap-4 p-3.5 rounded-2xl border-2 border-text/[0.08] hover:border-accent/30 transition-all group">
+                  <a href="/pricing?plan=mini" className="flex items-center gap-4 p-3.5 rounded-2xl border-2 border-text/[0.08] hover:border-[#22D3EE]/30 transition-all group">
                     <div className="text-center min-w-[70px]">
-                      <p className="text-2xl font-extrabold text-text group-hover:text-accent transition-colors">390<span className="text-xs font-bold text-text/30">₽</span></p>
+                      <p className="text-2xl font-extrabold text-text group-hover:text-[#22D3EE] transition-colors">390<span className="text-xs font-bold text-text/30">₽</span></p>
                       <p className="text-[9px] text-text/25 font-semibold">в месяц</p>
                     </div>
                     <div className="flex-1 border-l border-text/[0.06] pl-4">
-                      <p className="text-sm font-bold text-text">Mini</p>
+                      <p className="text-sm font-bold text-text">Start</p>
                       <p className="text-[11px] text-text/40">20+ моделей · 500 запросов · 15 картинок · 3 видео</p>
                     </div>
                   </a>
 
-                  <a href="/pricing?plan=max" className="flex items-center gap-4 p-3.5 rounded-2xl border-2 border-accent bg-accent/5 hover:bg-accent/10 transition-all relative">
-                    <div className="absolute -top-2 right-4 bg-accent text-white text-[9px] font-bold px-3 py-0.5 rounded-full shadow-lg shadow-accent/30">ПОПУЛЯРНЫЙ</div>
+                  <a href="/pricing?plan=max" className="flex items-center gap-4 p-3.5 rounded-2xl border-2 border-[#A855F7] bg-[#A855F7]/5 hover:bg-[#A855F7]/10 transition-all relative">
+                    <div className="absolute -top-2 right-4 bg-[#A855F7] text-white text-[9px] font-bold px-3 py-0.5 rounded-full shadow-lg shadow-[#A855F7]/30">ПОПУЛЯРНЫЙ</div>
                     <div className="text-center min-w-[70px]">
-                      <p className="text-2xl font-extrabold text-accent">890<span className="text-xs font-bold text-accent/50">₽</span></p>
+                      <p className="text-2xl font-extrabold text-[#A855F7]">890<span className="text-xs font-bold text-[#A855F7]/50">₽</span></p>
                       <p className="text-[9px] text-text/25 font-semibold">в месяц</p>
                     </div>
-                    <div className="flex-1 border-l border-accent/20 pl-4">
-                      <p className="text-sm font-bold text-text">Max</p>
+                    <div className="flex-1 border-l border-[#A855F7]/20 pl-4">
+                      <p className="text-sm font-bold text-text">Pro</p>
                       <p className="text-[11px] text-text/40">65+ моделей · 2 000 запросов · 50 картинок · 10 видео · 3D</p>
                     </div>
                   </a>
 
-                  <a href="/pricing?plan=max-pro" className="flex items-center gap-4 p-3.5 rounded-2xl border-2 border-text/[0.08] hover:border-purple-400/30 transition-all group">
+                  <a href="/pricing?plan=max-pro" className="flex items-center gap-4 p-3.5 rounded-2xl border-2 border-text/[0.08] hover:border-[#F43F5E]/30 transition-all group">
                     <div className="text-center min-w-[70px]">
-                      <p className="text-2xl font-extrabold text-text group-hover:text-purple-500 transition-colors">1990<span className="text-xs font-bold text-text/30">₽</span></p>
+                      <p className="text-2xl font-extrabold text-text group-hover:text-[#F43F5E] transition-colors">1990<span className="text-xs font-bold text-text/30">₽</span></p>
                       <p className="text-[9px] text-text/25 font-semibold">в месяц</p>
                     </div>
                     <div className="flex-1 border-l border-text/[0.06] pl-4">
-                      <p className="text-sm font-bold text-text">Max Pro</p>
+                      <p className="text-sm font-bold text-text">Elite</p>
                       <p className="text-[11px] text-text/40">65+ моделей · 10 000 запросов · 300 картинок · 50 видео · API</p>
                     </div>
                   </a>
