@@ -9,30 +9,30 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.
 
 const plans = [
   {
-    id: "free", name: "Free", price: "0₽", priceNum: 0, premium: false, period: "", desc: "Для знакомства",
+    id: "free", name: "Free", price: "0₽", oldPrice: "", priceNum: 0, premium: false, period: "", desc: "Для знакомства",
     badge: null, accent: false,
-    features: ["7 моделей (GPT-4o mini, Gemini Flash, DeepSeek V3...)", "15 запросов в день", "2 картинки в день", "История чатов"],
-    locked: ["Премиум модели", "Видео, аудио, 3D", "Голосовой ассистент"],
+    features: ["7 моделей (GPT-4o mini, Gemini Flash, Claude Haiku)", "15 запросов в день", "2 картинки в день", "Сохранение истории чатов"],
+    locked: ["Премиум модели (GPT-5, Claude Opus)", "Генерация видео, аудио, 3D", "Голосовой ассистент"],
     cta: "Начать бесплатно",
   },
   {
-    id: "mini", name: "Mini", price: "390₽", priceNum: 390, premium: false, period: "/мес", desc: "20+ моделей",
+    id: "mini", name: "Mini", price: "390₽", oldPrice: "590₽", priceNum: 390, premium: false, period: "/мес", desc: "20+ моделей",
     badge: null, accent: false,
-    features: ["20+ моделей (+ GPT-5.1, Claude Sonnet, DeepSeek R1)", "500 запросов/мес к быстрым", "20 к премиум (до 5 к Claude Opus)", "15 картинок, 3 видео/мес", "История чатов"],
-    locked: ["Аудио, 3D"],
+    features: ["20+ моделей включая GPT-5.1 и Claude Sonnet", "500 запросов к быстрым моделям", "20 запросов к премиум моделям", "До 5 запросов к Claude Opus", "15 картинок и 3 видео в месяц"],
+    locked: ["3D модели и озвучка"],
     cta: "Выбрать Mini",
   },
   {
-    id: "max", name: "Max", price: "890₽", priceNum: 890, premium: false, period: "/мес", desc: "Все 65+ моделей",
+    id: "max", name: "Max", price: "890₽", oldPrice: "1 490₽", priceNum: 890, premium: false, period: "/мес", desc: "Все 65+ моделей",
     badge: "Популярный", accent: true,
-    features: ["Все 65+ моделей", "2 000 запросов/мес к быстрым", "100 к премиум (до 20 к Opus)", "50 картинок, 10 видео/мес", "5 3D, 20 озвучек", "Голосовой ассистент"],
+    features: ["Все 65+ моделей без ограничений", "2 000 запросов к быстрым моделям", "100 запросов к премиум (20 к Opus)", "50 картинок и 10 видео в месяц", "5 3D-моделей и 20 озвучек", "Голосовой ассистент"],
     locked: [],
     cta: "Выбрать Max",
   },
   {
-    id: "max-pro", name: "Max Pro", price: "1 990₽", priceNum: 1990, premium: true, period: "/мес", desc: "Максимум возможностей",
+    id: "max-pro", name: "Max Pro", price: "1 990₽", oldPrice: "2 990₽", priceNum: 1990, premium: true, period: "/мес", desc: "Максимум возможностей",
     badge: "Легенда", accent: false,
-    features: ["Все 65+ моделей + API доступ", "10 000 запросов/мес к быстрым", "500 к премиум (до 80 к Opus)", "300 картинок, 50 видео/мес", "30 3D, 100 озвучек", "Приоритетная скорость", "Ранний доступ к новым моделям"],
+    features: ["Все 65+ моделей + доступ к API", "10 000 запросов к быстрым моделям", "500 запросов к премиум (80 к Opus)", "300 картинок и 50 видео в месяц", "30 3D-моделей и 100 озвучек", "Приоритетная скорость ответов", "Ранний доступ к новым моделям"],
     locked: [],
     cta: "Стать Max Pro",
   },
@@ -148,24 +148,34 @@ export default function Pricing() {
 
               <div className="mb-4">
                 <h3 className={`text-lg font-extrabold ${plan.premium ? "text-white" : ""}`}>{plan.name}</h3>
-                <div className="mt-1">
+                <div className="mt-1 flex items-baseline gap-2">
+                  {plan.oldPrice && (
+                    <span className={`text-sm line-through ${plan.premium ? "text-white/30" : "text-text/30"}`}>{plan.oldPrice}</span>
+                  )}
                   <span className={`text-2xl font-extrabold ${plan.premium ? "text-amber-400" : ""}`}>{plan.price}</span>
                   {plan.period && <span className={`text-sm ${plan.premium ? "text-white/40" : "text-text/40"}`}>{plan.period}</span>}
+                  {plan.oldPrice && (
+                    <span className="text-[10px] font-bold bg-teal/15 text-teal px-1.5 py-0.5 rounded-full">Скидка</span>
+                  )}
                 </div>
                 <p className={`text-xs mt-1 ${plan.premium ? "text-white/50" : "text-text/50"}`}>{plan.desc}</p>
               </div>
 
-              <ul className="space-y-2 text-sm mb-4 flex-1">
+              <ul className="space-y-2.5 text-sm mb-4 flex-1">
                 {plan.features.map((f: string) => (
-                  <li key={f} className="flex items-start gap-2">
-                    <span className={`mt-0.5 shrink-0 text-xs ${plan.premium ? "text-amber-400" : plan.accent ? "text-accent" : "text-teal"}`}>&#10003;</span>
-                    <span className={`text-xs ${plan.premium ? "text-white/70" : "text-text/70"}`}>{f}</span>
+                  <li key={f} className="flex items-start gap-2.5">
+                    <svg className={`w-4 h-4 mt-0.5 shrink-0 ${plan.premium ? "text-amber-400" : plan.accent ? "text-accent" : "text-teal"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                    <span className={`text-[13px] ${plan.premium ? "text-white/70" : "text-text/70"}`}>{f}</span>
                   </li>
                 ))}
                 {plan.locked.map((f: string) => (
-                  <li key={f} className="flex items-start gap-2">
-                    <span className="mt-0.5 shrink-0 text-xs text-text/20">&#128274;</span>
-                    <span className="text-text/40 text-xs line-through">{f}</span>
+                  <li key={f} className="flex items-start gap-2.5">
+                    <svg className="w-4 h-4 mt-0.5 shrink-0 text-text/15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    <span className="text-text/30 text-[13px] line-through">{f}</span>
                   </li>
                 ))}
               </ul>
@@ -224,9 +234,13 @@ export default function Pricing() {
                 </span>
               )}
               <h3 className="text-2xl font-extrabold text-white mb-1">Тариф {modal.name}</h3>
-              <p className={`text-4xl font-extrabold ${modal.premium ? "text-amber-400" : "text-white"}`}>
-                {modal.price}<span className="text-lg font-bold text-white/40">{modal.period}</span>
-              </p>
+              <div className="flex items-baseline justify-center gap-2">
+                {modal.oldPrice && <span className="text-xl line-through text-white/30">{modal.oldPrice}</span>}
+                <p className={`text-4xl font-extrabold ${modal.premium ? "text-amber-400" : "text-white"}`}>
+                  {modal.price}<span className="text-lg font-bold text-white/40">{modal.period}</span>
+                </p>
+                {modal.oldPrice && <span className="text-[10px] font-bold bg-teal/20 text-teal px-2 py-0.5 rounded-full">Скидка</span>}
+              </div>
             </div>
 
             {/* Features */}
