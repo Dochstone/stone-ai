@@ -4,6 +4,7 @@ import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import WebVitals from "@/components/WebVitals";
 import TonProvider from "@/components/TonProvider";
 
@@ -242,6 +243,7 @@ export default function RootLayout({
         <Footer />
         </TonProvider>
         <ScrollToTop />
+        <PWAInstallPrompt />
       </body>
     </html>
   );
