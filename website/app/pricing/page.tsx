@@ -122,38 +122,57 @@ export default function PricingPage() {
 
       {/* Features comparison */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl font-extrabold text-center mb-8">Что входит в каждый тариф</h2>
-        <div className="overflow-x-auto">
+        <h2 className="text-2xl md:text-3xl font-extrabold text-center mb-3">Что входит в каждый тариф</h2>
+        <p className="text-text/40 text-sm text-center mb-10">Подробное сравнение всех возможностей</p>
+        <div className="overflow-x-auto rounded-2xl border border-text/[0.06] bg-bg shadow-sm">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-text/10">
-                <th className="text-left py-3 px-4 text-text/40 font-medium">Функция</th>
-                <th className="text-center py-3 px-3 font-bold">Free</th>
-                <th className="text-center py-3 px-3 font-bold text-blue-600">Mini</th>
-                <th className="text-center py-3 px-3 font-bold text-accent">Max</th>
-                <th className="text-center py-3 px-3 font-bold text-amber-600">Max Pro</th>
+              <tr className="bg-text/[0.02]">
+                <th className="text-left py-4 px-5 text-text/50 font-semibold text-xs uppercase tracking-wider">Функция</th>
+                <th className="text-center py-4 px-4 min-w-[90px]">
+                  <span className="text-xs font-bold text-text/70">Free</span>
+                  <p className="text-[10px] text-text/30 mt-0.5">0₽</p>
+                </th>
+                <th className="text-center py-4 px-4 min-w-[90px]">
+                  <span className="text-xs font-bold text-blue-600">Mini</span>
+                  <p className="text-[10px] text-text/30 mt-0.5">390₽</p>
+                </th>
+                <th className="text-center py-4 px-4 min-w-[90px] bg-accent/[0.03] relative">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-white text-[8px] font-bold px-2.5 py-0.5 rounded-full">ХИТ</div>
+                  <span className="text-xs font-bold text-accent">Max</span>
+                  <p className="text-[10px] text-text/30 mt-0.5">890₽</p>
+                </th>
+                <th className="text-center py-4 px-4 min-w-[90px]">
+                  <span className="text-xs font-bold text-amber-600">Max Pro</span>
+                  <p className="text-[10px] text-text/30 mt-0.5">1 990₽</p>
+                </th>
               </tr>
             </thead>
-            <tbody className="text-[13px]">
+            <tbody>
               {[
-                ["Цена", "0₽", "390₽/мес", "890₽/мес", "1 990₽/мес"],
-                ["Моделей", "7", "20+", "65+", "65+"],
-                ["Текст запросов", "15/день", "500/мес", "2 000/мес", "10 000/мес"],
-                ["Премиум модели", "—", "20/мес", "100/мес", "500/мес"],
-                ["Claude Opus", "—", "5/мес", "20/мес", "80/мес"],
-                ["Картинки", "2/день", "15/мес", "50/мес", "300/мес"],
-                ["Видео", "—", "3/мес", "10/мес", "50/мес"],
-                ["3D модели", "—", "—", "5/мес", "30/мес"],
-                ["Аудио", "—", "—", "20/мес", "100/мес"],
-                ["API доступ", "—", "—", "—", "✓"],
-                ["Приоритет", "—", "—", "—", "✓"],
-              ].map(([feature, free, mini, max, maxpro], i) => (
-                <tr key={i} className="border-b border-text/5 hover:bg-text/[0.02]">
-                  <td className="py-2.5 px-4 text-text/60">{feature}</td>
-                  <td className="py-2.5 px-3 text-center">{free}</td>
-                  <td className="py-2.5 px-3 text-center">{mini}</td>
-                  <td className="py-2.5 px-3 text-center font-medium">{max}</td>
-                  <td className="py-2.5 px-3 text-center font-medium">{maxpro}</td>
+                { icon: "🧠", feature: "AI модели", free: "7", mini: "20+", max: "65+", maxpro: "65+" },
+                { icon: "💬", feature: "Быстрые запросы", free: "15/день", mini: "500/мес", max: "2 000/мес", maxpro: "10 000/мес" },
+                { icon: "⭐", feature: "Премиум модели", free: "—", mini: "20/мес", max: "100/мес", maxpro: "500/мес" },
+                { icon: "🟣", feature: "Claude Opus", free: "—", mini: "5/мес", max: "20/мес", maxpro: "80/мес" },
+                { icon: "🎨", feature: "Картинки", free: "2/день", mini: "15/мес", max: "50/мес", maxpro: "300/мес" },
+                { icon: "🎬", feature: "Видео", free: "—", mini: "3/мес", max: "10/мес", maxpro: "50/мес" },
+                { icon: "🧊", feature: "3D модели", free: "—", mini: "—", max: "5/мес", maxpro: "30/мес" },
+                { icon: "🎤", feature: "Озвучка (TTS)", free: "—", mini: "—", max: "20/мес", maxpro: "100/мес" },
+                { icon: "🔌", feature: "API доступ", free: "—", mini: "—", max: "—", maxpro: "✓" },
+                { icon: "⚡", feature: "Приоритетная скорость", free: "—", mini: "—", max: "—", maxpro: "✓" },
+                { icon: "🚀", feature: "Ранний доступ", free: "—", mini: "—", max: "—", maxpro: "✓" },
+              ].map((row, i) => (
+                <tr key={i} className={`border-t border-text/[0.04] ${i % 2 === 0 ? "" : "bg-text/[0.01]"} hover:bg-accent/[0.02] transition-colors`}>
+                  <td className="py-3.5 px-5">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-base">{row.icon}</span>
+                      <span className="text-[13px] font-medium text-text/70">{row.feature}</span>
+                    </div>
+                  </td>
+                  <td className="py-3.5 px-4 text-center text-[13px] text-text/50">{row.free === "—" ? <span className="text-text/15">—</span> : row.free}</td>
+                  <td className="py-3.5 px-4 text-center text-[13px] text-text/60">{row.mini === "—" ? <span className="text-text/15">—</span> : row.mini}</td>
+                  <td className="py-3.5 px-4 text-center text-[13px] font-semibold text-text/80 bg-accent/[0.03]">{row.max === "—" ? <span className="text-text/15">—</span> : row.max}</td>
+                  <td className="py-3.5 px-4 text-center text-[13px] font-semibold text-text/80">{row.maxpro === "✓" ? <span className="text-accent text-base">✓</span> : row.maxpro === "—" ? <span className="text-text/15">—</span> : row.maxpro}</td>
                 </tr>
               ))}
             </tbody>
