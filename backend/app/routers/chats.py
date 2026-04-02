@@ -158,9 +158,42 @@ async def save_message(
     )
     db.add(msg)
 
-    # Auto-title from first user message
+    # Auto-title from first user message (temporary, will be replaced by AI title)
     if body.role == "user" and session.title == "Новый чат":
         session.title = body.content[:50].strip()
+
+    # Generate smart title after first assistant response
+    msg_count = await db.scalar(
+        select(func.count()).select_from(ChatMessage).where(ChatMessage.session_id == session_id)
+    )
+    if body.role == "assistant" and msg_count <= 2 and session.title != "Новый чат":
+        # We have user+assistant (2 msgs), title is still raw user text — generate smart one
+        try:
+            import httpx
+            import os
+            user_msg = session.title  # first user message (set above)
+            openrouter_key = os.getenv("OPENROUTER_API_KEY")
+            if openrouter_key and len(user_msg) > 5:
+                async with httpx.AsyncClient(timeout=10) as client:
+                    resp = await client.post(
+                        "https://openrouter.ai/api/v1/chat/completions",
+                        headers={"Authorization": f"Bearer {openrouter_key}"},
+                        json={
+                            "model": "openai/gpt-4o-mini",
+                            "messages": [
+                                {"role": "system", "content": "Generate a short chat title (2-5 words, Russian) for this conversation. Reply with ONLY the title, nothing else."},
+                                {"role": "user", "content": user_msg[:200]},
+                            ],
+                            "max_tokens": 20,
+                        },
+                    )
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        title = data["choices"][0]["message"]["content"].strip().strip('"')
+                        if 2 < len(title) < 60:
+                            session.title = title
+        except Exception as e:
+            logger.warning(f"Auto-title failed: {e}")
 
     session.updated_at = datetime.utcnow()
     await db.flush()

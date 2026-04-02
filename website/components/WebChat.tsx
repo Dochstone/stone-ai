@@ -1163,7 +1163,8 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
           cost_usd: billing?.cost_usd || 0,
         }),
       });
-      fetchSessions();
+      // Small delay to let backend generate smart title
+      setTimeout(() => fetchSessions(), 1500);
     } catch {}
   }, [auth, activeSessionId, selectedModel, fetchSessions]);
 
