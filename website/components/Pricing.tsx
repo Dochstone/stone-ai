@@ -40,7 +40,17 @@ const plans = [
 
 export default function Pricing() {
   const [loading, setLoading] = useState(false);
-  const [modal, setModal] = useState<typeof plans[0] | null>(null);
+  const [modal, setModal] = useState<typeof plans[0] | null>(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const planId = params.get("plan");
+      if (planId) {
+        const found = plans.find(p => p.id === planId);
+        if (found && found.id !== "free") return found;
+      }
+    }
+    return null;
+  });
   const [promo, setPromo] = useState("");
   const [promoResult, setPromoResult] = useState<{ ok: boolean; message: string } | null>(null);
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);

@@ -2497,7 +2497,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
 
                 {/* 3 pricing cards */}
                 <div className="space-y-2.5">
-                  <a href="/pricing" className="flex items-center gap-4 p-3.5 rounded-2xl border-2 border-text/[0.08] hover:border-accent/30 transition-all group">
+                  <a href="/pricing?plan=mini" className="flex items-center gap-4 p-3.5 rounded-2xl border-2 border-text/[0.08] hover:border-accent/30 transition-all group">
                     <div className="text-center min-w-[70px]">
                       <p className="text-2xl font-extrabold text-text group-hover:text-accent transition-colors">390<span className="text-xs font-bold text-text/30">₽</span></p>
                       <p className="text-[9px] text-text/25 font-semibold">в месяц</p>
@@ -2508,7 +2508,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                     </div>
                   </a>
 
-                  <a href="/pricing" className="flex items-center gap-4 p-3.5 rounded-2xl border-2 border-accent bg-accent/5 hover:bg-accent/10 transition-all relative">
+                  <a href="/pricing?plan=max" className="flex items-center gap-4 p-3.5 rounded-2xl border-2 border-accent bg-accent/5 hover:bg-accent/10 transition-all relative">
                     <div className="absolute -top-2 right-4 bg-accent text-white text-[9px] font-bold px-3 py-0.5 rounded-full shadow-lg shadow-accent/30">ПОПУЛЯРНЫЙ</div>
                     <div className="text-center min-w-[70px]">
                       <p className="text-2xl font-extrabold text-accent">890<span className="text-xs font-bold text-accent/50">₽</span></p>
@@ -2520,7 +2520,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                     </div>
                   </a>
 
-                  <a href="/pricing" className="flex items-center gap-4 p-3.5 rounded-2xl border-2 border-text/[0.08] hover:border-purple-400/30 transition-all group">
+                  <a href="/pricing?plan=max-pro" className="flex items-center gap-4 p-3.5 rounded-2xl border-2 border-text/[0.08] hover:border-purple-400/30 transition-all group">
                     <div className="text-center min-w-[70px]">
                       <p className="text-2xl font-extrabold text-text group-hover:text-purple-500 transition-colors">1990<span className="text-xs font-bold text-text/30">₽</span></p>
                       <p className="text-[9px] text-text/25 font-semibold">в месяц</p>
@@ -2532,7 +2532,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                   </a>
                 </div>
 
-                <a href="/pricing" className="block w-full mt-4 bg-accent text-white py-3.5 rounded-2xl font-bold text-center text-sm hover:bg-accent/90 transition-all shadow-xl shadow-accent/25 active:scale-[0.98]">
+                <a href="/pricing?plan=max" className="block w-full mt-4 bg-accent text-white py-3.5 rounded-2xl font-bold text-center text-sm hover:bg-accent/90 transition-all shadow-xl shadow-accent/25 active:scale-[0.98]">
                   Выбрать тариф
                 </a>
 
