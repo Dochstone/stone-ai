@@ -62,9 +62,6 @@ export default function Nav() {
 
         {/* Desktop nav — md and up */}
         <div className="hidden md:flex items-center gap-4 lg:gap-6">
-          <a href="/" className="text-text/70 hover:text-text font-medium text-sm transition-colors">
-            Главная
-          </a>
           {/* Tools dropdown */}
           <div
             className="relative"

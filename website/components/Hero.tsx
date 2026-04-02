@@ -297,171 +297,16 @@ function TrustMarquee() {
 }
 
 export default function Hero() {
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  const [onboardingStep, setOnboardingStep] = useState(0);
-  const touchStartX = useRef(0);
-
+  // Mark as onboarded for users who haven't seen it (skip intro slider entirely)
   useEffect(() => {
     if (!localStorage.getItem("stone_onboarded")) {
-      const timer = setTimeout(() => setShowOnboarding(true), 250);
-      return () => clearTimeout(timer);
+      localStorage.setItem("stone_onboarded", "1");
     }
   }, []);
-
-  const closeOnboarding = () => {
-    setShowOnboarding(false);
-    localStorage.setItem("stone_onboarded", "1");
-  };
-
-  const swipeHandlers = {
-    onTouchStart: (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; },
-    onTouchEnd: (e: React.TouchEvent) => {
-      const diff = touchStartX.current - e.changedTouches[0].clientX;
-      if (Math.abs(diff) > 50) {
-        if (diff > 0 && onboardingStep < 2) setOnboardingStep(s => s + 1);
-        if (diff < 0 && onboardingStep > 0) setOnboardingStep(s => s - 1);
-      }
-    },
-  };
 
   return (
     <section className="relative pt-28 pb-10 md:pt-36 md:pb-16 overflow-hidden">
       <GradientMeshBg />
-
-      {/* Onboarding popup */}
-      {showOnboarding && (
-        <div className="fixed inset-0 z-[60] bg-[#0a0a0f]" {...swipeHandlers}>
-          <button onClick={closeOnboarding}
-            className="absolute top-4 right-4 z-20 text-white/30 text-xs hover:text-white/60 px-3 py-2">
-            Пропустить
-          </button>
-          <div className="absolute top-4 right-16 z-20 text-white/20 text-[10px]">{onboardingStep + 1} / 3</div>
-
-          {/* Desktop arrows */}
-          {onboardingStep > 0 && (
-            <button onClick={() => setOnboardingStep(s => s - 1)}
-              className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full items-center justify-center text-white/60 hover:bg-white/20 hover:text-white transition-all">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
-            </button>
-          )}
-          {onboardingStep < 2 && (
-            <button onClick={() => setOnboardingStep(s => s + 1)}
-              className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full items-center justify-center text-white/60 hover:bg-white/20 hover:text-white transition-all">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
-            </button>
-          )}
-
-          {onboardingStep === 0 && (
-            <div className="h-full flex flex-col md:flex-row">
-              {/* Video — half screen */}
-              <div className="relative flex-1 md:w-1/2">
-                <VideoCycler sources={["/demo/veo-02.mp4", "/demo/veo-06.mp4", "/demo/onboard-5.mp4"]} poster="/demo/veo-02-poster.webp" />
-                <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-[#0a0a0f] via-transparent to-transparent" />
-              </div>
-              {/* Text — half screen */}
-              <div className="relative md:w-1/2 flex flex-col justify-center p-6 md:p-12 pb-8">
-                <div className="inline-flex items-center gap-1.5 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold px-3 py-1 rounded-full mb-4 w-fit">
-                  <span>✨</span> БЕСПЛАТНЫЕ ГЕНЕРАЦИИ
-                </div>
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-3 leading-tight">
-                  ГЕНЕРИРУЙ<br />С НЕЙРОСЕТЬЮ
-                </h1>
-                <p className="text-white/50 text-sm md:text-base mb-6 max-w-md">
-                  Картинки, видео и текст от 65+ нейросетей. GPT-5.4, Claude Opus, Sora 2, DALL-E — всё в одном месте.
-                </p>
-                <button onClick={() => setOnboardingStep(1)}
-                  className="w-full max-w-sm bg-accent text-white py-4 rounded-xl font-bold text-sm hover:bg-accent/90 transition-all shadow-lg shadow-accent/30 mb-2">
-                  Начать бесплатно ✦
-                </button>
-              </div>
-            </div>
-          )}
-
-          {onboardingStep === 1 && (
-            <div className="h-full flex flex-col md:flex-row">
-              <div className="relative flex-1 md:w-1/2">
-                <VideoCycler sources={["/demo/veo-03.mp4", "/demo/veo-05.mp4", "/demo/onboard-2.mp4"]} poster="/demo/veo-03-poster.webp" />
-                <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-[#0a0a0f] via-transparent to-transparent" />
-              </div>
-              <div className="relative md:w-1/2 flex flex-col justify-center p-6 md:p-12 pb-8">
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-3">
-                  15 ЗАПРОСОВ<br />КАЖДЫЙ ДЕНЬ
-                </h1>
-                <p className="text-white/50 text-sm md:text-base mb-5">Бесплатно. Без карты. Навсегда.</p>
-                <div className="grid grid-cols-4 gap-2 mb-6 max-w-sm">
-                  {[
-                    { icon: <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg>, color: "from-accent to-orange-500", label: "Чат", sub: "7 моделей" },
-                    { icon: <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" /></svg>, color: "from-pink-500 to-purple-500", label: "Фото", sub: "2/день" },
-                    { icon: <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h1.5C5.496 19.5 6 18.996 6 18.375m-3.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-1.5A1.125 1.125 0 0118 18.375M20.625 4.5H3.375m17.25 0c.621 0 1.125.504 1.125 1.125M20.625 4.5h-1.5C18.504 4.5 18 5.004 18 5.625m3.75 0v1.5c0 .621-.504 1.125-1.125 1.125M3.375 4.5c-.621 0-1.125.504-1.125 1.125M3.375 4.5h1.5C5.496 4.5 6 5.004 6 5.625m-3.75 0v1.5c0 .621.504 1.125 1.125 1.125m0 0h1.5m-1.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m1.5-3.75C5.496 8.25 6 7.746 6 7.125v-1.5M4.875 8.25C5.496 8.25 6 8.754 6 9.375v1.5m0-5.25v5.25m0-5.25C6 5.004 6.504 4.5 7.125 4.5h9.75c.621 0 1.125.504 1.125 1.125m1.125 2.625h1.5m-1.5 0A1.125 1.125 0 0118 7.125v-1.5m1.125 2.625c-.621 0-1.125.504-1.125 1.125v1.5m2.625-2.625c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125M18 5.625v5.25M7.125 12h9.75m-9.75 0A1.125 1.125 0 016 10.875M7.125 12C6.504 12 6 12.504 6 13.125m0-2.25C6 11.496 5.496 12 4.875 12M18 10.875c0 .621-.504 1.125-1.125 1.125M18 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125m-12 5.25v-5.25m0 5.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125m-12 0v-1.5c0-.621-.504-1.125-1.125-1.125M18 18.375v-5.25m0 5.25v-1.5c0-.621.504-1.125 1.125-1.125M18 13.125v1.5c0 .621.504 1.125 1.125 1.125M18 13.125c0-.621.504-1.125 1.125-1.125M6 13.125v1.5c0 .621-.504 1.125-1.125 1.125M6 13.125C6 12.504 5.496 12 4.875 12m-1.5 0h1.5m-1.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125M19.125 12h1.5m0 0c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h1.5m14.25 0h1.5" /></svg>, color: "from-blue-500 to-cyan-400", label: "Видео", sub: "подписка" },
-                    { icon: <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" /></svg>, color: "from-teal to-emerald-400", label: "AI", sub: "65+ моделей" },
-                  ].map(f => (
-                    <div key={f.label} className="bg-white/5 border border-white/10 rounded-xl p-3 text-center">
-                      <div className={`w-10 h-10 mx-auto rounded-lg bg-gradient-to-br ${f.color} flex items-center justify-center text-white mb-1.5`}>
-                        {f.icon}
-                      </div>
-                      <p className="text-[10px] font-bold text-white/80">{f.label}</p>
-                      <p className="text-[8px] text-white/30">{f.sub}</p>
-                    </div>
-                  ))}
-                </div>
-                <button onClick={() => setOnboardingStep(2)}
-                  className="w-full max-w-sm bg-accent text-white py-4 rounded-xl font-bold text-sm hover:bg-accent/90 transition-all shadow-lg shadow-accent/30 mb-2">
-                  Далее
-                </button>
-              </div>
-            </div>
-          )}
-
-          {onboardingStep === 2 && (
-            <div className="h-full flex flex-col md:flex-row">
-              <div className="relative flex-1 md:w-1/2">
-                <VideoCycler sources={["/demo/onboard-3.mp4", "/demo/veo-07.mp4", "/demo/veo-08.mp4"]} poster="/demo/onboard-3-poster.webp" />
-                <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-[#0a0a0f] via-transparent to-transparent" />
-              </div>
-              <div className="relative md:w-1/2 flex flex-col justify-center p-6 md:p-12 pb-8">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white mb-2">
-                  В 4.5 РАЗА ДЕШЕВЛЕ<br />CHATGPT PLUS
-                </h1>
-                <p className="text-white/40 text-sm mb-5">
-                  ChatGPT Plus = <span className="line-through text-white/25">$20/мес (~1900₽)</span>. Stone AI Max = <span className="text-accent font-bold">890₽/мес</span>
-                </p>
-                <div className="flex gap-2 mb-5 max-w-sm">
-                  <div className="flex-1 bg-white/5 border border-white/10 rounded-xl p-3 text-center">
-                    <p className="text-[9px] text-white/30 font-semibold">MINI</p>
-                    <p className="text-xl font-extrabold text-white">390<span className="text-sm text-white/40">₽</span></p>
-                    <p className="text-[8px] text-white/25">20+ моделей</p>
-                  </div>
-                  <div className="flex-1 bg-accent/15 border-2 border-accent/50 rounded-xl p-3 text-center relative">
-                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-accent text-white text-[7px] font-bold px-2.5 py-0.5 rounded-full whitespace-nowrap">BEST VALUE</div>
-                    <p className="text-[9px] text-accent/70 font-semibold">MAX</p>
-                    <p className="text-xl font-extrabold text-white">890<span className="text-sm text-white/40">₽</span></p>
-                    <p className="text-[8px] text-accent/60">65+ моделей</p>
-                  </div>
-                  <div className="flex-1 bg-white/5 border border-white/10 rounded-xl p-3 text-center">
-                    <p className="text-[9px] text-white/30 font-semibold">MAX PRO</p>
-                    <p className="text-xl font-extrabold text-white">1990<span className="text-sm text-white/40">₽</span></p>
-                    <p className="text-[8px] text-white/25">безлимит + API</p>
-                  </div>
-                </div>
-                <button onClick={closeOnboarding}
-                  className="w-full max-w-sm bg-accent text-white py-4 rounded-xl font-bold text-sm hover:bg-accent/90 transition-all shadow-lg shadow-accent/30">
-                  Начать бесплатно ✦
-                </button>
-                <a href="/pricing" onClick={closeOnboarding}
-                  className="block text-center max-w-sm text-white/30 text-xs font-medium hover:text-accent transition-colors mt-3">
-                  Все тарифы и способы оплаты →
-                </a>
-              </div>
-            </div>
-          )}
-
-          <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-2 py-3 z-10">
-            {[0, 1, 2].map(i => (
-              <div key={i} className={`h-1 rounded-full transition-all ${onboardingStep === i ? "bg-accent w-6" : "bg-white/15 w-2"}`} />
-            ))}
-          </div>
-        </div>
-      )}
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
@@ -499,9 +344,6 @@ export default function Hero() {
             </a>
           </div>
           <p className="mt-3 text-xs text-text/30">Бесплатно 15 запросов/день · Подписка от 390₽/мес</p>
-          <p className="text-[11px] text-text/35 mt-4 text-center">
-            Бесплатно · Без карты · 15 запросов в день
-          </p>
 
           <div className="mt-4 flex items-center justify-center">
             <a
