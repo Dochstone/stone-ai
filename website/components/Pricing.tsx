@@ -13,28 +13,28 @@ const plans = [
     badge: null, accent: false,
     features: ["7 моделей (GPT-4o mini, Gemini Flash, Claude Haiku)", "15 запросов в день", "2 картинки в день", "Сохранение истории чатов"],
     locked: ["Премиум модели (GPT-5, Claude Opus)", "Генерация видео, аудио, 3D", "Голосовой ассистент"],
-    cta: "Начать бесплатно", icon: "🆓", color: "#6B7280", img: "/plan-free.jpg",
+    cta: "Начать бесплатно", icon: "🆓", color: "#6B7280", img: "/plan-free.jpg?v=2",
   },
   {
     id: "mini", name: "Mini", price: "390₽", oldPrice: "590₽", priceNum: 390, premium: false, period: "/мес", desc: "20+ моделей",
     badge: null, accent: false,
     features: ["20+ моделей включая GPT-5.1 и Claude Sonnet", "500 запросов к быстрым моделям", "20 запросов к премиум моделям", "До 5 запросов к Claude Opus", "15 картинок и 3 видео в месяц"],
     locked: ["3D модели и озвучка"],
-    cta: "Выбрать Mini", icon: "⚡", color: "#3B82F6", img: "/plan-mini.jpg",
+    cta: "Выбрать Mini", icon: "⚡", color: "#3B82F6", img: "/plan-mini.jpg?v=2",
   },
   {
     id: "max", name: "Max", price: "890₽", oldPrice: "1 490₽", priceNum: 890, premium: false, period: "/мес", desc: "Все 65+ моделей",
     badge: "Популярный", accent: true,
     features: ["Все 65+ моделей без ограничений", "2 000 запросов к быстрым моделям", "100 запросов к премиум (20 к Opus)", "50 картинок и 10 видео в месяц", "5 3D-моделей и 20 озвучек", "Голосовой ассистент"],
     locked: [],
-    cta: "Выбрать Max", icon: "🔥", color: "#D97757", img: "/plan-max.jpg",
+    cta: "Выбрать Max", icon: "🔥", color: "#D97757", img: "/plan-max.jpg?v=2",
   },
   {
     id: "max-pro", name: "Max Pro", price: "1 990₽", oldPrice: "2 990₽", priceNum: 1990, premium: true, period: "/мес", desc: "Максимум возможностей",
     badge: "Легенда", accent: false,
     features: ["Все 65+ моделей + доступ к API", "10 000 запросов к быстрым моделям", "500 запросов к премиум (80 к Opus)", "300 картинок и 50 видео в месяц", "30 3D-моделей и 100 озвучек", "Приоритетная скорость ответов", "Ранний доступ к новым моделям"],
     locked: [],
-    cta: "Стать Max Pro", icon: "💎", color: "#F59E0B", img: "/plan-maxpro.jpg",
+    cta: "Стать Max Pro", icon: "💎", color: "#F59E0B", img: "/plan-maxpro.jpg?v=2",
   },
 ];
 
