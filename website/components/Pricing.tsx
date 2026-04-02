@@ -204,73 +204,105 @@ export default function Pricing() {
 
       {/* Payment Modal */}
       {modal && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center px-4" onClick={() => setModal(null)}>
-          <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="text-center mb-6">
-              <h3 className="text-xl font-extrabold mb-1">Тариф {modal.name}</h3>
-              <p className="text-3xl font-extrabold text-accent">{modal.price}<span className="text-sm text-text/40 font-medium">{modal.period}</span></p>
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-end sm:items-center justify-center backdrop-blur-sm" onClick={() => setModal(null)}>
+          <div className="bg-bg rounded-t-3xl sm:rounded-3xl w-full sm:max-w-lg shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+
+            {/* Header */}
+            <div className={`px-6 pt-7 pb-5 text-center relative ${
+              modal.premium
+                ? "bg-gradient-to-br from-[#1C1C1E] to-[#2C2C2E]"
+                : "bg-gradient-to-br from-accent to-accent/80"
+            }`}>
+              <button onClick={() => setModal(null)} className="absolute top-3 right-3 w-8 h-8 bg-white/10 backdrop-blur rounded-full flex items-center justify-center text-white/60 hover:text-white transition-colors">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+              {modal.badge && (
+                <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-bold mb-3 ${
+                  modal.premium ? "bg-amber-500/20 text-amber-400" : "bg-white/20 text-white"
+                }`}>
+                  {modal.premium ? "⭐ " : ""}{modal.badge}
+                </span>
+              )}
+              <h3 className="text-2xl font-extrabold text-white mb-1">Тариф {modal.name}</h3>
+              <p className={`text-4xl font-extrabold ${modal.premium ? "text-amber-400" : "text-white"}`}>
+                {modal.price}<span className="text-lg font-bold text-white/40">{modal.period}</span>
+              </p>
             </div>
 
-            {/* Promo code */}
-            <div className="mb-6">
-              <label className="block text-xs font-semibold text-text/50 mb-2">Промокод (если есть)</label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={promo}
-                  onChange={(e) => setPromo(e.target.value.toUpperCase())}
-                  placeholder="STONE7"
-                  className="flex-1 bg-bg border border-text/10 rounded-xl px-4 py-2.5 text-sm font-mono uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-accent/30"
-                />
-                <button
-                  onClick={applyPromo}
-                  disabled={!promo.trim()}
-                  className="px-4 py-2.5 bg-bg border border-text/10 rounded-xl text-sm font-bold hover:border-accent hover:text-accent transition-colors disabled:opacity-30"
-                >
-                  ОК
-                </button>
+            {/* Features */}
+            <div className="px-6 pt-4 pb-2">
+              <div className="grid grid-cols-2 gap-2">
+                {modal.features.slice(0, 6).map((f: string, i: number) => (
+                  <div key={i} className="flex items-center gap-2 py-1.5">
+                    <span className={`text-xs shrink-0 ${modal.premium ? "text-amber-500" : "text-accent"}`}>✓</span>
+                    <span className="text-[12px] text-text/60">{f}</span>
+                  </div>
+                ))}
               </div>
-              {promoResult && (
-                <p className={`mt-2 text-xs font-medium ${promoResult.ok ? "text-teal" : "text-red-500"}`}>
-                  {promoResult.message}
+            </div>
+
+            {/* Payment */}
+            <div className="px-6 pb-6 pt-3">
+              {/* Promo code */}
+              <div className="mb-4">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={promo}
+                    onChange={(e) => setPromo(e.target.value.toUpperCase())}
+                    placeholder="Промокод"
+                    className="flex-1 bg-text/[0.04] border border-text/[0.08] rounded-xl px-4 py-2.5 text-sm font-mono uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-accent/30 placeholder:text-text/20 placeholder:normal-case placeholder:tracking-normal placeholder:font-sans"
+                  />
+                  <button
+                    onClick={applyPromo}
+                    disabled={!promo.trim()}
+                    className="px-5 py-2.5 bg-text/[0.04] border border-text/[0.08] rounded-xl text-sm font-bold hover:border-accent hover:text-accent transition-colors disabled:opacity-30"
+                  >
+                    ОК
+                  </button>
+                </div>
+                {promoResult && (
+                  <p className={`mt-2 text-xs font-medium ${promoResult.ok ? "text-teal" : "text-red-500"}`}>
+                    {promoResult.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Pay button */}
+              <button
+                onClick={() => pay(modal.id)}
+                disabled={loading}
+                className={`w-full py-4 min-h-[52px] rounded-2xl font-bold text-[15px] transition-all disabled:opacity-50 shadow-xl active:scale-[0.98] ${
+                  modal.premium
+                    ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-amber-500/25 hover:from-amber-600 hover:to-orange-600"
+                    : "bg-accent text-white shadow-accent/25 hover:bg-accent/90"
+                }`}
+              >
+                {loading ? "Создание счёта..." : `Оплатить ${modal.price}${modal.period}`}
+              </button>
+
+              <div className="flex items-center gap-3 my-3">
+                <div className="flex-1 h-px bg-text/[0.06]" />
+                <span className="text-[10px] text-text/25 font-medium">или оплатить криптой</span>
+                <div className="flex-1 h-px bg-text/[0.06]" />
+              </div>
+
+              <TonPayButton
+                tier={modal.id}
+                onSuccess={() => {
+                  setModal(null);
+                  setResult({ ok: true, message: `Тариф ${modal.name} активирован через TON!` });
+                }}
+              />
+
+              <p className="text-text/20 text-[10px] text-center mt-3">USDT · BTC · ETH · TON</p>
+
+              {result && (
+                <p className={`text-center text-xs font-medium mt-2 ${result.ok ? "text-teal" : "text-red-500"}`}>
+                  {result.message}
                 </p>
               )}
             </div>
-
-            {/* Subscribe button */}
-            <button
-              onClick={() => pay(modal.id)}
-              disabled={loading}
-              className="w-full bg-accent text-white py-3.5 min-h-[48px] rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors disabled:opacity-50 mb-3 shadow-md shadow-accent/20"
-            >
-              {loading ? "Создание счёта..." : `Оплатить ${modal.price}${modal.period}`}
-            </button>
-
-            <div className="flex items-center gap-3 mb-3">
-              <div className="flex-1 h-px bg-text/10" />
-              <span className="text-[10px] text-text/30">или</span>
-              <div className="flex-1 h-px bg-text/10" />
-            </div>
-
-            <TonPayButton
-              tier={modal.id}
-              onSuccess={() => {
-                setModal(null);
-                setResult({ ok: true, message: `Тариф ${modal.name} активирован через TON!` });
-              }}
-            />
-
-            <p className="text-text/30 text-[10px] text-center mt-3 mb-1">Крипто: USDT, BTC, ETH (Heleket) · TON (Tonkeeper)</p>
-
-            {result && (
-              <p className={`text-center text-xs font-medium ${result.ok ? "text-teal" : "text-red-500"}`}>
-                {result.message}
-              </p>
-            )}
-
-            <button onClick={() => setModal(null)} className="w-full text-text/40 text-xs hover:text-accent transition-colors py-2 mt-2">
-              Закрыть
-            </button>
           </div>
         </div>
       )}
