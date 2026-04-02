@@ -342,7 +342,7 @@ export default function Pricing() {
           }}
         >
           <div
-            className="bg-bg w-full sm:max-w-[680px] sm:rounded-3xl rounded-t-3xl shadow-2xl overflow-hidden relative"
+            className="bg-bg w-full sm:max-w-[750px] sm:rounded-3xl rounded-t-3xl shadow-2xl overflow-hidden relative"
             onClick={(e) => e.stopPropagation()}
             style={{
               animation: closing
@@ -366,7 +366,7 @@ export default function Pricing() {
 
               {/* ─── Left: Girl image ─── */}
               {modal.img && (
-                <div className="relative sm:w-[220px] h-[200px] sm:h-auto shrink-0 overflow-hidden">
+                <div className="relative sm:w-[280px] h-[220px] sm:h-auto shrink-0 overflow-hidden">
                   <img
                     src={modal.img}
                     alt=""
