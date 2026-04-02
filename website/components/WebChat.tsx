@@ -2578,7 +2578,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
             <div className="bg-gradient-to-br from-accent to-accent/80 px-6 pt-7 pb-5 text-center">
               <span className="text-4xl block mb-3">🔓</span>
               <h3 className="text-xl font-extrabold text-white mb-1">10 запросов использовано</h3>
-              <p className="text-white/60 text-sm">Зарегистрируйтесь — это бесплатно и займёт 30 секунд</p>
+              <p className="text-white/60 text-sm">Зарегистрируйтесь — это бесплатно + 100₽ на баланс</p>
             </div>
             <div className="px-6 py-5">
               <div className="space-y-2.5 mb-5">

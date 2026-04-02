@@ -74,6 +74,7 @@ async def get_or_create_user(db: AsyncSession, tg_user: dict) -> User:
             username=tg_user.get("username"),
             first_name=tg_user.get("first_name"),
             language=tg_user.get("language_code", "ru"),
+            balance_usd=1.0,  # Welcome bonus ~100₽
         )
         db.add(user)
         await db.flush()

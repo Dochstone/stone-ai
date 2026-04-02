@@ -5,6 +5,7 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
+import WelcomeBonusBanner from "@/components/WelcomeBonusBanner";
 import WebVitals from "@/components/WebVitals";
 import TonProvider from "@/components/TonProvider";
 
@@ -238,6 +239,7 @@ export default function RootLayout({
         <WebVitals />
         {YM_ID && <script dangerouslySetInnerHTML={{ __html: `window.__ymId=${YM_ID};` }} />}
         <TonProvider>
+        <WelcomeBonusBanner />
         <Nav />
         <main id="main-content">{children}</main>
         <Footer />

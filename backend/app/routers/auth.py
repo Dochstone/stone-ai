@@ -183,9 +183,11 @@ async def verify_email(body: VerifyEmailRequest, request: Request, db: AsyncSess
         first_name=email.split("@")[0],
         username=None,
         joined_at=datetime.utcnow(),
+        balance_usd=1.0,  # Welcome bonus ~100₽
     )
     db.add(user)
     await db.flush()
+    logger.info(f"Welcome bonus $1 credited to new email user {email}")
 
     user.last_ip = request.client.host if request.client else None
     await update_login_streak(db, user)
@@ -297,9 +299,11 @@ async def _get_or_create_oauth_user(
         first_name=first_name,
         username=None,
         joined_at=datetime.utcnow(),
+        balance_usd=1.0,  # Welcome bonus ~100₽
     )
     db.add(user)
     await db.flush()
+    logger.info(f"Welcome bonus $1 credited to new OAuth user {email} ({provider})")
     token = create_jwt(user.id, email)
     return user, token
 
@@ -614,9 +618,11 @@ async def confirm_tg_web_session(session_id: str, tg_id: int, tg_user_data: dict
                 first_name=tg_user_data.get("first_name"),
                 language=tg_user_data.get("language_code", "ru"),
                 auth_provider="telegram",
+                balance_usd=1.0,  # Welcome bonus ~100₽
             )
             db.add(user)
             await db.flush()
+            logger.info(f"Welcome bonus $1 credited to new TG web user {tg_id}")
 
         _tg_web_sessions[session_id] = {
             "status": "confirmed",
