@@ -874,6 +874,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
     try { return sessionStorage.getItem("stone_chat_tab") || "all"; } catch { return "all"; }
   });
   const tabMessagesRef = useRef<Record<string, Message[]>>({});
+  const tabSessionRef = useRef<Record<string, number | null>>({});
 
   const [dragging, setDragging] = useState(false);
   const dragCounterRef = useRef(0);
@@ -1883,13 +1884,15 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
               key={t.id}
               onClick={() => {
                 if (modelCatFilter !== t.id) {
-                  // Save current tab messages
+                  // Save current tab state
                   tabMessagesRef.current[modelCatFilter] = messages;
-                  // Restore target tab messages
-                  const saved = tabMessagesRef.current[t.id] || [];
+                  tabSessionRef.current[modelCatFilter] = activeSessionId;
+                  // Restore target tab state
+                  const savedMessages = tabMessagesRef.current[t.id] || [];
+                  const savedSession = tabSessionRef.current[t.id] ?? null;
                   setModelCatFilter(t.id);
-                  setActiveSessionId(null);
-                  setMessages(saved);
+                  setActiveSessionId(savedSession);
+                  setMessages(savedMessages);
                   if (t.id === "health" || t.id === "free") setSelectedModel("gpt-4o-mini");
                 }
               }}
