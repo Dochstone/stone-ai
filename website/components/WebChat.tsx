@@ -1683,12 +1683,12 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
     }
   }, [sendMessage]);
 
-  if (!loaded) return null;
-
   // Guest registration prompt modal
   const [showGuestLimit, setShowGuestLimit] = useState(false);
   const [promptLibOpen, setPromptLibOpen] = useState(false);
   const guestCount = typeof window !== "undefined" ? parseInt(localStorage.getItem("stone_guest_count") || "0") : 0;
+
+  if (!loaded) return null;
 
   const aiColor = companyColors[model?.company ?? ""] || "#C4623D";
   const aiLetter = companyIcons[model?.company ?? ""] || "AI";
