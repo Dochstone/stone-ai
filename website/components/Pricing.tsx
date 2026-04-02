@@ -217,12 +217,24 @@ export default function Pricing() {
         <div className="fixed inset-0 bg-black/70 z-50 flex items-end sm:items-center justify-center backdrop-blur-sm" onClick={() => setModal(null)}>
           <div className="bg-bg rounded-t-3xl sm:rounded-3xl w-full sm:max-w-lg shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
 
-            {/* Header */}
-            <div className={`px-6 pt-7 pb-5 text-center relative ${
+            {/* Header with girl */}
+            <div className={`text-center relative overflow-hidden ${
               modal.premium
                 ? "bg-gradient-to-br from-[#1C1C1E] to-[#2C2C2E]"
                 : "bg-gradient-to-br from-accent to-accent/80"
             }`}>
+              <div className="flex items-stretch">
+                {/* Girl image */}
+                <div className="w-[140px] sm:w-[170px] shrink-0 relative overflow-hidden hidden sm:block">
+                  <img
+                    src={modal.id === "max-pro" ? "/plan-maxpro.jpg" : modal.id === "max" ? "/plan-max.jpg" : "/plan-mini.jpg"}
+                    alt=""
+                    className="w-full h-full object-cover object-center"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/40" />
+                </div>
+                {/* Text */}
+                <div className="flex-1 px-6 pt-7 pb-5">
               <button onClick={() => setModal(null)} className="absolute top-3 right-3 w-8 h-8 bg-white/10 backdrop-blur rounded-full flex items-center justify-center text-white/60 hover:text-white transition-colors">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
@@ -240,6 +252,8 @@ export default function Pricing() {
                   {modal.price}<span className="text-lg font-bold text-white/40">{modal.period}</span>
                 </p>
                 {modal.oldPrice && <span className="text-[10px] font-bold bg-teal/20 text-teal px-2 py-0.5 rounded-full">Скидка</span>}
+              </div>
+                </div>
               </div>
             </div>
 
