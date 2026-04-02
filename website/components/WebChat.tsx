@@ -40,7 +40,15 @@ function getModelLockInfo(modelId: string, balance: number, plan?: string): { lo
     if (!plan || plan === "free") return { locked: true, tier: "Mini", price: "390₽/мес" };
     return null;
   }
-  // Images — free users get 2/day, paid get more, don't lock on frontend
+  // Images — nano-banana is free, rest follow normal tier logic
+  if (IMAGE_MODEL_IDS.has(modelId) && !FREE_MODEL_IDS.has(modelId)) {
+    if (!plan || plan === "free") {
+      if (MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: "Mini", price: "390₽/мес" };
+      return { locked: true, tier: "Max", price: "890₽/мес" };
+    }
+    if (plan === "mini" && !MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: "Max", price: "890₽/мес" };
+    return null;
+  }
   if (IMAGE_MODEL_IDS.has(modelId)) return null;
   if (MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: "Mini", price: "390₽/мес" };
   return { locked: true, tier: "Max", price: "890₽/мес" };
