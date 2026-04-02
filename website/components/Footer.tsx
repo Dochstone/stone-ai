@@ -48,6 +48,7 @@ export default function Footer() {
               <li><a href="/search" className="hover:text-text transition-colors">AI Поиск</a></li>
               <li><a href="/code" className="hover:text-text transition-colors">Код-ассистент</a></li>
               <li><a href="/translate" className="hover:text-text transition-colors">Переводчик</a></li>
+              <li><a href="/tools/utm-builder" className="hover:text-text transition-colors">UTM-генератор</a></li>
             </ul>
           </div>
 

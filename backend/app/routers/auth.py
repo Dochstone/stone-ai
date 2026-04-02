@@ -183,7 +183,7 @@ async def verify_email(body: VerifyEmailRequest, request: Request, db: AsyncSess
         first_name=email.split("@")[0],
         username=None,
         joined_at=datetime.utcnow(),
-        balance_usd=1.0,  # Welcome bonus ~100₽
+        balance_usd=1.05,  # Welcome bonus ≈100₽ ($1.05 × 95₽)
     )
     db.add(user)
     await db.flush()
@@ -299,7 +299,7 @@ async def _get_or_create_oauth_user(
         first_name=first_name,
         username=None,
         joined_at=datetime.utcnow(),
-        balance_usd=1.0,  # Welcome bonus ~100₽
+        balance_usd=1.05,  # Welcome bonus ≈100₽ ($1.05 × 95₽)
     )
     db.add(user)
     await db.flush()
@@ -618,7 +618,7 @@ async def confirm_tg_web_session(session_id: str, tg_id: int, tg_user_data: dict
                 first_name=tg_user_data.get("first_name"),
                 language=tg_user_data.get("language_code", "ru"),
                 auth_provider="telegram",
-                balance_usd=1.0,  # Welcome bonus ~100₽
+                balance_usd=1.05,  # Welcome bonus ≈100₽ ($1.05 × 95₽)
             )
             db.add(user)
             await db.flush()

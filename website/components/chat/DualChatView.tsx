@@ -165,7 +165,8 @@ export default function DualChatView({ token, onClose }: { token: string; onClos
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-text/5 shrink-0">
         <div className="flex items-center gap-2">
           <span className="text-accent font-bold text-sm">x2 AI</span>
-          <span className="text-text/30 text-xs">Сравнение моделей</span>
+          <span className="text-text/30 text-xs hidden sm:inline">Сравнение моделей</span>
+          <span className="text-amber-500/60 text-[10px]">тратит 2 запроса</span>
         </div>
         <button onClick={onClose} className="text-xs font-semibold text-text/40 hover:text-text/70 px-3 py-1.5 rounded-lg hover:bg-text/5 transition-all">
           Обычный чат

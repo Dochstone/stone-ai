@@ -1854,12 +1854,12 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
             {auth && (
               <button
                 onClick={() => setCompareMode(!compareMode)}
-                title="Сравнить 2 модели"
+                title="Сравнить 2 модели (тратит 2 запроса)"
                 className={`text-[10px] sm:text-xs font-bold px-2 py-1 rounded-full transition-all ${
                   compareMode ? "bg-accent text-white" : "bg-text/5 text-text/30 hover:text-accent hover:bg-accent/10"
                 }`}
               >
-                x2 AI
+                {compareMode ? "x2 AI" : "x2"}
               </button>
             )}
             {limits && limits.text && limits.text.limit > 0 && (
