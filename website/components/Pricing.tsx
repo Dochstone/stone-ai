@@ -13,7 +13,7 @@ const plans = [
     badge: null, accent: false,
     features: ["7 моделей (GPT-4o mini, Gemini Flash, Claude Haiku)", "15 запросов в день", "2 картинки в день", "Сохранение истории чатов"],
     locked: ["Премиум модели (GPT-5, Claude Opus)", "Генерация видео, аудио, 3D", "Голосовой ассистент"],
-    cta: "Начать бесплатно", icon: "🆓", color: "#6B7280", img: "",
+    cta: "Начать бесплатно", icon: "🆓", color: "#6B7280", img: "/plan-free.jpg",
   },
   {
     id: "mini", name: "Mini", price: "390₽", oldPrice: "590₽", priceNum: 390, premium: false, period: "/мес", desc: "20+ моделей",
