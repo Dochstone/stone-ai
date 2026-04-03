@@ -192,23 +192,40 @@ export default function Pricing() {
     } catch { setPromoResult({ ok: false, message: "Ошибка сети" }); }
   };
 
-  const pay = async (tier: string) => {
+  const pay = async (tier: string, method: "platega" | "crypto" = "platega") => {
     const auth = getAuth();
     if (!auth) { window.location.href = "/webchat"; return; }
     setLoading(true);
     setResult(null);
     try {
-      const res = await fetch(`${API_URL}/api/payment/subscribe`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
-        body: JSON.stringify({ tier }),
-      });
-      const data = await res.json();
-      if (res.ok && data.payment_url) {
-        window.location.href = data.payment_url;
+      const prices: Record<string, number> = { mini: 4.1, max: 9.4, "max-pro": 21 };
+      const usdAmount = prices[tier] || 10;
+
+      if (method === "platega") {
+        const res = await fetch(`${API_URL}/api/payment/platega/create-order`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
+          body: JSON.stringify({ usd_amount: usdAmount }),
+        });
+        const data = await res.json();
+        if (res.ok && data.payment_url) {
+          window.location.href = data.payment_url;
+        } else {
+          setResult({ ok: false, message: data.detail || "Ошибка создания платежа" });
+        }
       } else {
-        const detail = typeof data.detail === "object" ? data.detail : { message: data.detail || "Ошибка" };
-        setResult({ ok: false, message: typeof detail === "string" ? detail : detail.message || "Ошибка" });
+        const res = await fetch(`${API_URL}/api/payment/subscribe`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
+          body: JSON.stringify({ tier }),
+        });
+        const data = await res.json();
+        if (res.ok && data.payment_url) {
+          window.location.href = data.payment_url;
+        } else {
+          const detail = typeof data.detail === "object" ? data.detail : { message: data.detail || "Ошибка" };
+          setResult({ ok: false, message: typeof detail === "string" ? detail : detail.message || "Ошибка" });
+        }
       }
     } catch { setResult({ ok: false, message: "Ошибка сети" }); }
     setLoading(false);
@@ -373,6 +390,14 @@ export default function Pricing() {
             {/* Drag handle (mobile) */}
             <div className="w-9 h-1 rounded-full bg-text/10 mx-auto mt-3 sm:hidden relative z-10" />
 
+            {/* Close button — global, above everything */}
+            <button
+              onClick={closeModal}
+              className="absolute top-3 right-3 w-9 h-9 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white/80 hover:text-white transition-all z-20 backdrop-blur-sm"
+            >
+              <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+
             <div className="flex flex-col sm:flex-row">
 
               {/* ─── Left: Girl image ─── */}
@@ -382,7 +407,7 @@ export default function Pricing() {
                     src={modal.img}
                     alt=""
                     className="w-full h-full object-cover"
-                    style={{ objectPosition: "center 30%", animation: "pricingStagger 0.5s ease both 0.05s" }}
+                    style={{ objectPosition: "center 45%", animation: "pricingStagger 0.5s ease both 0.05s" }}
                   />
                   {/* Gradient overlays for blend */}
                   <div className="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-bg via-transparent to-transparent" />
@@ -412,13 +437,6 @@ export default function Pricing() {
 
               {/* ─── Right: Content ─── */}
               <div className="flex-1 relative">
-                {/* Close button */}
-                <button
-                  onClick={closeModal}
-                  className="absolute top-3 right-3 w-8 h-8 bg-text/[0.05] hover:bg-text/[0.1] rounded-full flex items-center justify-center text-text/30 hover:text-text/60 transition-all duration-200 hover:rotate-90 z-10"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
 
                 {/* Desktop header (hidden on mobile since it's over image) */}
                 <div className="hidden sm:block px-6 pt-5 pb-2">
@@ -491,54 +509,63 @@ export default function Pricing() {
                     )}
                   </div>
 
-                  {/* Main pay button with shimmer */}
-                  <button
-                    onClick={() => pay(modal.id)}
-                    disabled={loading}
-                    className="w-full py-3.5 min-h-[50px] rounded-2xl font-bold text-[15px] text-white transition-all duration-200 disabled:opacity-50 active:scale-[0.97] relative overflow-hidden"
-                    style={{
-                      backgroundImage: `linear-gradient(90deg, ${modal.color}, ${modal.color}cc, ${modal.color})`,
-                      backgroundSize: "200% 100%",
-                      animation: "pricingShimmer 3s ease-in-out infinite, pricingStagger 0.4s ease both 0.4s",
-                      boxShadow: `0 8px 24px ${modal.color}30`,
-                    }}
-                  >
-                    {loading ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                        </svg>
-                        Создание счёта...
-                      </span>
-                    ) : `Оплатить ${modal.price}${modal.period}`}
-                  </button>
+                  {/* Payment methods */}
+                  <div className="space-y-2" style={{ animation: "pricingStagger 0.4s ease both 0.4s" }}>
+                    <p className="text-[10px] text-text/30 font-semibold uppercase tracking-wider mb-2">Способ оплаты</p>
 
-                  {/* Divider */}
-                  <div className="flex items-center gap-3 my-3" style={{ animation: "pricingStagger 0.4s ease both 0.45s" }}>
-                    <div className="flex-1 h-px bg-text/[0.06]" />
-                    <span className="text-[10px] text-text/25 font-medium">или оплатить криптой</span>
-                    <div className="flex-1 h-px bg-text/[0.06]" />
+                    {/* Platega — Cards RU / SBP */}
+                    <button
+                      onClick={() => pay(modal.id, "platega")}
+                      disabled={loading}
+                      className="w-full flex items-center gap-3 p-3.5 rounded-xl border border-text/[0.08] hover:border-accent/30 hover:bg-accent/5 transition-all disabled:opacity-50 active:scale-[0.98]"
+                    >
+                      <span className="text-xl shrink-0">💳</span>
+                      <div className="flex-1 text-left">
+                        <div className="text-sm font-bold text-text">Карта РФ / СБП</div>
+                        <div className="text-[10px] text-text/40">Мир · Visa · MC · СБП</div>
+                      </div>
+                      <span className="text-xs font-bold text-accent shrink-0">{modal.price}</span>
+                    </button>
+
+                    {/* Crypto via Heleket */}
+                    <button
+                      onClick={() => pay(modal.id, "crypto")}
+                      disabled={loading}
+                      className="w-full flex items-center gap-3 p-3.5 rounded-xl border border-text/[0.08] hover:border-accent/30 hover:bg-accent/5 transition-all disabled:opacity-50 active:scale-[0.98]"
+                    >
+                      <span className="text-xl shrink-0">🪙</span>
+                      <div className="flex-1 text-left">
+                        <div className="text-sm font-bold text-text">Криптовалюта</div>
+                        <div className="text-[10px] text-text/40">USDT · BTC · ETH · SOL</div>
+                      </div>
+                      <span className="text-xs font-bold text-text/40 shrink-0">Heleket</span>
+                    </button>
+
+                    {/* TON Wallet */}
+                    <div className="rounded-xl border border-text/[0.08] overflow-hidden">
+                      <TonPayButton
+                        tier={modal.id}
+                        onSuccess={() => {
+                          setSuccessAnim(true);
+                          setTimeout(() => {
+                            setSuccessAnim(false);
+                            closeModal();
+                            setResult({ ok: true, message: `Тариф ${modal.name} активирован через TON!` });
+                          }, 2000);
+                        }}
+                      />
+                    </div>
                   </div>
 
-                  {/* TON */}
-                  <div style={{ animation: "pricingStagger 0.4s ease both 0.5s" }}>
-                    <TonPayButton
-                      tier={modal.id}
-                      onSuccess={() => {
-                        setSuccessAnim(true);
-                        setTimeout(() => {
-                          setSuccessAnim(false);
-                          closeModal();
-                          setResult({ ok: true, message: `Тариф ${modal.name} активирован через TON!` });
-                        }, 2000);
-                      }}
-                    />
-                  </div>
-
-                  <p className="text-text/20 text-[10px] text-center mt-2.5" style={{ animation: "pricingStagger 0.4s ease both 0.55s" }}>
-                    USDT · BTC · ETH · TON
-                  </p>
+                  {loading && (
+                    <div className="flex items-center justify-center gap-2 mt-3 text-text/40 text-xs">
+                      <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Создание счёта...
+                    </div>
+                  )}
 
                   {result && (
                     <p className={`text-center text-xs font-medium mt-2 ${result.ok ? "text-teal" : "text-red-500"}`}>
