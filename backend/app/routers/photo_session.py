@@ -28,7 +28,7 @@ COST_BACKGROUND = 0.053    # ~5 RUB
 COST_ON_MODEL = 0.158      # ~15 RUB
 COST_MARKETPLACE = 0.084   # ~8 RUB
 
-DEFAULT_IMAGE_MODEL = "nano-banana"
+DEFAULT_IMAGE_MODEL = "gpt-image-1"
 
 OPENROUTER_IMAGE_MODELS = {"nano-banana", "nano-banana-pro", "gpt-image-1", "flux-schnell"}
 
@@ -150,10 +150,44 @@ async def _refund(db: AsyncSession, user: User, new_balance: float, cost_usd: fl
         await db.flush()
 
 
-async def _call_openrouter_image(prompt: str, openrouter_model: str) -> str | None:
-    """Call OpenRouter with a text prompt and extract image URL/data URI from response."""
+async def _generate_image(prompt: str, model_id: str | None = None) -> str | None:
+    """Generate image using OpenAI gpt-image-1 (most reliable) or OpenRouter models."""
     settings = get_settings()
 
+    # Default to gpt-image-1 via OpenAI API (most reliable for image generation)
+    use_openai = model_id in (None, "gpt-image-1", "gpt-5-image", "gpt-5-image-mini") or not model_id
+
+    if use_openai and settings.openai_api_key:
+        try:
+            async with httpx.AsyncClient(timeout=120.0) as client:
+                resp = await client.post(
+                    "https://api.openai.com/v1/images/generations",
+                    headers={"Authorization": f"Bearer {settings.openai_api_key}", "Content-Type": "application/json"},
+                    json={"model": "gpt-image-1", "prompt": prompt, "n": 1, "size": "1024x1024", "quality": "high"},
+                )
+                if resp.status_code != 200:
+                    error_body = resp.text[:300]
+                    logger.error(f"OpenAI image error {resp.status_code}: {error_body}")
+                    if "safety" in error_body.lower():
+                        raise HTTPException(400, "Промпт отклонён системой безопасности.")
+                    raise RuntimeError(f"OpenAI error: {error_body[:200]}")
+
+                data = resp.json()
+                image_data = data["data"][0]
+                if "b64_json" in image_data:
+                    return f"data:image/png;base64,{image_data['b64_json']}"
+                if image_data.get("url"):
+                    img_resp = await client.get(image_data["url"], timeout=30.0)
+                    if img_resp.status_code == 200:
+                        return f"data:image/png;base64,{base64.b64encode(img_resp.content).decode('ascii')}"
+        except HTTPException:
+            raise
+        except Exception as exc:
+            logger.error(f"OpenAI image gen failed: {exc}")
+            raise RuntimeError(str(exc))
+
+    # Fallback: OpenRouter for other models
+    openrouter_model = get_openrouter_model(model_id or "nano-banana")
     async with httpx.AsyncClient(timeout=120.0) as client:
         resp = await client.post(
             "https://openrouter.ai/api/v1/chat/completions",
@@ -163,52 +197,34 @@ async def _call_openrouter_image(prompt: str, openrouter_model: str) -> str | No
                 "X-Title": "Stone AI",
                 "Content-Type": "application/json",
             },
-            json={
-                "model": openrouter_model,
-                "messages": [{"role": "user", "content": f"Generate an image: {prompt}"}],
-                "max_tokens": 8192,
-            },
+            json={"model": openrouter_model, "messages": [{"role": "user", "content": f"Generate an image: {prompt}"}], "max_tokens": 8192},
         )
-
         if resp.status_code != 200:
-            error_body = resp.text[:500]
-            logger.error(f"OpenRouter image error {resp.status_code}: {error_body}")
-            if "safety" in error_body.lower() or "rejected" in error_body.lower():
-                raise HTTPException(400, "Промпт отклонён системой безопасности.")
-            raise RuntimeError(f"OpenRouter API error {resp.status_code}: {error_body[:200]}")
+            raise RuntimeError(f"OpenRouter error {resp.status_code}")
 
         data = resp.json()
-        content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
-        parts = data.get("choices", [{}])[0].get("message", {}).get("parts", [])
+        message = data.get("choices", [{}])[0].get("message", {})
+        content = message.get("content", "")
+        parts = message.get("parts", [])
 
-        image_url = None
-
-        # Check for inline_data in parts (Gemini format)
         for part in parts:
             if isinstance(part, dict) and "inline_data" in part:
-                mime = part["inline_data"].get("mime_type", "image/png")
                 b64 = part["inline_data"].get("data", "")
                 if b64:
-                    image_url = f"data:{mime};base64,{b64}"
-                    break
+                    return f"data:{part['inline_data'].get('mime_type', 'image/png')};base64,{b64}"
 
-        # Check content for markdown image URL
-        if not image_url and content:
+        if content:
             md_match = re.search(r'!\[.*?\]\((https?://[^\s)]+)\)', content)
             if md_match:
-                img_src = md_match.group(1)
                 async with httpx.AsyncClient(timeout=30.0) as dl:
-                    img_resp = await dl.get(img_src)
+                    img_resp = await dl.get(md_match.group(1))
                     if img_resp.status_code == 200:
-                        image_url = f"data:image/png;base64,{base64.b64encode(img_resp.content).decode('ascii')}"
+                        return f"data:image/png;base64,{base64.b64encode(img_resp.content).decode('ascii')}"
+            data_match = re.search(r'(data:image/[^;]+;base64,[A-Za-z0-9+/=]+)', content)
+            if data_match:
+                return data_match.group(1)
 
-            # Check for data URI directly in content
-            if not image_url:
-                data_match = re.search(r'(data:image/[^;]+;base64,[A-Za-z0-9+/=]+)', content)
-                if data_match:
-                    image_url = data_match.group(1)
-
-        return image_url
+        return None
 
 
 # ─── Endpoints ───
@@ -239,11 +255,10 @@ async def change_background(
         f"perfect lighting, clean composition."
     ).strip()
 
-    openrouter_model = _resolve_model(req.model_id)
     model_id_used = req.model_id or DEFAULT_IMAGE_MODEL
 
     try:
-        image_url = await _call_openrouter_image(prompt, openrouter_model)
+        image_url = await _generate_image(prompt, model_id_used)
     except HTTPException:
         await _refund(db, user, new_balance, COST_BACKGROUND, has_sub)
         raise
@@ -302,11 +317,10 @@ async def product_on_model(
         f"natural skin texture, elegant composition, 4K detail."
     ).strip()
 
-    openrouter_model = _resolve_model(req.model_id)
     model_id_used = req.model_id or DEFAULT_IMAGE_MODEL
 
     try:
-        image_url = await _call_openrouter_image(prompt, openrouter_model)
+        image_url = await _generate_image(prompt, model_id_used)
     except HTTPException:
         await _refund(db, user, new_balance, COST_ON_MODEL, has_sub)
         raise
@@ -366,11 +380,10 @@ async def marketplace_card(
         f"photorealistic, commercial catalog quality."
     ).strip()
 
-    openrouter_model = _resolve_model(req.model_id)
     model_id_used = req.model_id or DEFAULT_IMAGE_MODEL
 
     try:
-        image_url = await _call_openrouter_image(prompt, openrouter_model)
+        image_url = await _generate_image(prompt, model_id_used)
     except HTTPException:
         await _refund(db, user, new_balance, COST_MARKETPLACE, has_sub)
         raise
