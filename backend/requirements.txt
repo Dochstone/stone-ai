@@ -32,3 +32,4 @@ pypdf==5.7.0
 orjson==3.10.14
 Pillow>=10.0
 imageio[pyav]>=2.30
+weasyprint>=62.0
