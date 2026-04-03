@@ -6,7 +6,7 @@ import AuthFormComponent, { type AuthState } from "@/components/AuthForm";
 import PromptLibrary from "@/components/prompts/PromptLibrary";
 import DualChatView from "@/components/chat/DualChatView";
 import ProjectSelector from "@/components/projects/ProjectSelector";
-import GenerationOverlay from "@/components/GenerationOverlay";
+// import GenerationOverlay from "@/components/GenerationOverlay"; // temporarily disabled for debugging
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
 
@@ -2611,14 +2611,6 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
           </div>
         </div>
       )}
-
-      {/* Generation overlay with snake game */}
-      <GenerationOverlay
-        isVisible={videoGenerating || threedGenerating}
-        estimatedTime={videoGenerating ? "~30-120 сек" : "~15-60 сек"}
-        onMinimize={() => { /* keep generating in background */ }}
-        token={auth?.token}
-      />
 
       {/* Prompt Library drawer */}
       <PromptLibrary
