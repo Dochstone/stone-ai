@@ -442,8 +442,13 @@ async def generate_image(
             )
 
             if resp.status_code != 200:
-                logger.error(f"OpenAI image error {resp.status_code}: {resp.text[:200]}")
-                raise HTTPException(502, "Ошибка генерации изображения")
+                error_body = resp.text[:500]
+                logger.error(f"OpenAI image error {resp.status_code}: {error_body}")
+                if "safety" in error_body.lower() or "rejected" in error_body.lower():
+                    raise HTTPException(400, "Промпт отклонён системой безопасности. Попробуйте переформулировать запрос.")
+                if "billing" in error_body.lower() or "quota" in error_body.lower():
+                    raise HTTPException(503, "Сервис генерации изображений временно недоступен.")
+                raise HTTPException(502, "Ошибка генерации изображения. Попробуйте позже.")
 
             data = resp.json()
             image_data = data["data"][0]
