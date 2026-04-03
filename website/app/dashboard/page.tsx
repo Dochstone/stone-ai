@@ -106,6 +106,9 @@ export default function DashboardPage() {
   const [recentGens, setRecentGens] = useState<Generation[]>([]);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [loadingGens, setLoadingGens] = useState(true);
+  const [topupAmount, setTopupAmount] = useState<number | null>(null);
+  const [topupLoading, setTopupLoading] = useState(false);
+  const [topupError, setTopupError] = useState("");
 
   useEffect(() => {
     const stored = getAuth();
@@ -206,6 +209,86 @@ export default function DashboardPage() {
             </div>
           ))}
         </div>
+
+        {/* Balance & Top-up */}
+        {auth && (
+          <div className="bg-white rounded-2xl border border-text/5 p-5 mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-xs text-text/40 mb-1">Баланс</p>
+                <p className="text-2xl font-extrabold text-accent">
+                  {loadingProfile ? <Skeleton className="h-8 w-20" /> : `${balanceRub} ₽`}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-text/40 mb-1">Подписка</p>
+                <p className="text-sm font-bold text-text">{loadingProfile ? <Skeleton className="h-5 w-16" /> : tierLabel(plan)}</p>
+              </div>
+            </div>
+
+            <p className="text-[10px] text-text/30 mb-3">Пополнить баланс (карта РФ / СБП)</p>
+            <div className="flex gap-2 mb-3">
+              {[100, 300, 500, 1000].map((amt) => (
+                <button
+                  key={amt}
+                  onClick={() => setTopupAmount(topupAmount === amt ? null : amt)}
+                  className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
+                    topupAmount === amt
+                      ? "bg-accent text-white"
+                      : "bg-text/[0.04] text-text/50 hover:bg-text/[0.08]"
+                  }`}
+                >
+                  {amt}₽
+                </button>
+              ))}
+            </div>
+
+            {topupAmount && (
+              <div className="flex gap-2 animate-fadeIn">
+                <button
+                  onClick={async () => {
+                    if (!auth) return;
+                    setTopupLoading(true);
+                    setTopupError("");
+                    try {
+                      const usd = topupAmount / 95;
+                      const res = await fetch(`${API_URL}/api/payment/platega/create-order`, {
+                        method: "POST",
+                        headers: { Authorization: `Bearer ${auth.token}`, "Content-Type": "application/json" },
+                        body: JSON.stringify({ usd_amount: usd }),
+                      });
+                      const data = await res.json();
+                      if (res.ok && data.payment_url) {
+                        window.location.href = data.payment_url;
+                      } else {
+                        setTopupError(typeof data.detail === "string" ? data.detail : "Ошибка создания платежа");
+                      }
+                    } catch { setTopupError("Ошибка сети"); }
+                    setTopupLoading(false);
+                  }}
+                  disabled={topupLoading}
+                  className="flex-1 py-2.5 rounded-xl bg-accent text-white text-sm font-bold hover:bg-accent/90 disabled:opacity-50 transition-colors"
+                >
+                  {topupLoading ? "Создание..." : `Пополнить ${topupAmount}₽`}
+                </button>
+                <button
+                  onClick={() => { setTopupAmount(null); setTopupError(""); }}
+                  className="px-3 py-2.5 rounded-xl bg-text/[0.04] text-text/40 text-sm hover:bg-text/[0.08] transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
+            {topupError && <p className="text-xs text-red-500 mt-2">{topupError}</p>}
+
+            {plan === "free" && (
+              <Link href="/pricing" className="block mt-3 text-center text-xs text-accent font-semibold hover:underline">
+                Выбрать подписку →
+              </Link>
+            )}
+          </div>
+        )}
 
         {/* Quick links */}
         <h2 className="text-base font-bold text-text mb-4">Инструменты</h2>
