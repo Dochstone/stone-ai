@@ -36,6 +36,7 @@ async def list_templates(
                 "id": t.id, "category": t.category, "title": t.title,
                 "description": t.description, "content": t.content,
                 "variables": t.variables, "usage_count": t.usage_count,
+                "default_model": t.default_model, "cost_rub": t.cost_rub, "icon": t.icon,
             }
             for t in templates
         ]
@@ -97,6 +98,102 @@ async def delete_saved(prompt_id: str, user: dict = Depends(get_current_user), d
     await db.delete(sp)
     await db.commit()
     return {"ok": True}
+
+
+# ─── Wizard: generate from template ───
+
+class WizardGenerateRequest(BaseModel):
+    template_id: str
+    fields: dict[str, str]
+    model_id: str = "gpt-4.1-mini"
+
+
+@router.post("/templates/generate")
+async def wizard_generate(
+    body: WizardGenerateRequest,
+    user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Fill template variables and generate AI response. Deducts from balance."""
+    from app.models.user import User
+    from app.services.ai_router import stream_chat_response
+
+    tg_id = user["id"]
+    db_id = user.get("db_id")
+
+    # Get template
+    result = await db.execute(select(PromptTemplate).where(PromptTemplate.id == body.template_id))
+    tpl = result.scalar_one_or_none()
+    if not tpl:
+        raise HTTPException(404, "Шаблон не найден")
+
+    # Fill variables
+    prompt = tpl.content
+    for key, val in body.fields.items():
+        prompt = prompt.replace(f"{{{key}}}", val)
+
+    # Check balance — cost in rubles, balance in USD
+    cost_rub = tpl.cost_rub or 3.0
+    cost_usd = cost_rub / 95.0  # approximate rate
+
+    if db_id:
+        u_result = await db.execute(select(User).where(User.id == db_id))
+    else:
+        u_result = await db.execute(select(User).where(User.telegram_id == tg_id))
+    db_user = u_result.scalar_one_or_none()
+
+    tier = (db_user.subscription_tier or "free") if db_user else "free"
+    balance = float(db_user.balance_usd or 0) if db_user else 0
+
+    # Free users: 1 free wizard generation per day, then need balance
+    if tier == "free" and balance < cost_usd:
+        raise HTTPException(402, {
+            "error": "insufficient_balance",
+            "message": f"Недостаточно средств. Нужно ~{cost_rub:.0f}₽, баланс {balance * 95:.0f}₽",
+            "cost_rub": cost_rub,
+            "balance_rub": round(balance * 95, 2),
+        })
+
+    # Generate via AI (non-streaming for templates)
+    messages = [{"role": "user", "content": prompt}]
+    full_response = ""
+    async for chunk in stream_chat_response(body.model_id, messages, None, max_tokens=4096):
+        if chunk.startswith("data: "):
+            payload = chunk[6:].strip()
+            if payload == "[DONE]":
+                continue
+            try:
+                import json
+                data = json.loads(payload)
+                content = data.get("content") or (data.get("choices", [{}])[0].get("delta", {}).get("content"))
+                if content:
+                    full_response += content
+            except Exception:
+                pass
+
+    if not full_response:
+        raise HTTPException(502, "Ошибка генерации")
+
+    # Deduct balance
+    if db_user and cost_usd > 0:
+        from sqlalchemy import update as sql_update
+        await db.execute(
+            sql_update(User).where(User.id == db_user.id).values(balance_usd=User.balance_usd - cost_usd)
+        )
+
+    # Increment usage
+    tpl.usage_count += 1
+    await db.commit()
+
+    new_balance = max(0, balance - cost_usd)
+
+    return {
+        "result": full_response,
+        "model": body.model_id,
+        "template": tpl.title,
+        "cost_rub": cost_rub,
+        "balance_rub": round(new_balance * 95, 2),
+    }
 
 
 # ─── Seed: 50 curated prompts ───

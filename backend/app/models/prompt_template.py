@@ -19,6 +19,9 @@ class PromptTemplate(Base):
     variables: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     usage_count: Mapped[int] = mapped_column(Integer, default=0)
     is_system: Mapped[bool] = mapped_column(Boolean, default=True)
+    default_model: Mapped[str | None] = mapped_column(String(50), nullable=True, default="gpt-4.1-mini")
+    cost_rub: Mapped[float | None] = mapped_column(nullable=True, default=3.0)
+    icon: Mapped[str | None] = mapped_column(String(10), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
