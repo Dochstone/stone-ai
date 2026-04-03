@@ -82,6 +82,8 @@ export default function PresentationsPage() {
 
   const stripRef = useRef<HTMLDivElement>(null);
   const touchStartRef = useRef<{ x: number } | null>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [showNotes, setShowNotes] = useState(false);
   const [imageGen, setImageGen] = useState<{ slideIdx: number; model: string } | null>(null);
   const [imageLoading, setImageLoading] = useState(false);
@@ -107,11 +109,18 @@ export default function PresentationsPage() {
     return () => window.removeEventListener("keydown", handler);
   }, [slides.length, fullscreen]);
 
-  // Scroll strip to current slide
+  // Scroll strip thumbnail into view (horizontal only, doesn't move page)
   useEffect(() => {
     if (stripRef.current) {
       const child = stripRef.current.children[currentSlide] as HTMLElement | undefined;
-      child?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+      if (child) {
+        const container = stripRef.current;
+        const childLeft = child.offsetLeft;
+        const childWidth = child.offsetWidth;
+        const containerWidth = container.offsetWidth;
+        const scrollLeft = childLeft - containerWidth / 2 + childWidth / 2;
+        container.scrollTo({ left: scrollLeft, behavior: "smooth" });
+      }
     }
   }, [currentSlide]);
 
@@ -174,6 +183,8 @@ export default function PresentationsPage() {
       setSlides(data.slides || []);
       setGenerationId(data.generation_id || data.id || null);
       fetchHistory(auth.token);
+      // Scroll to preview after generation
+      setTimeout(() => previewRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Произошла ошибка");
     }
@@ -244,6 +255,20 @@ export default function PresentationsPage() {
     const updated = [...slides];
     updated[slideIdx] = { ...updated[slideIdx], image_url: undefined };
     setSlides(updated);
+  };
+
+  const uploadSlideImage = (slideIdx: number, file: File) => {
+    if (file.size > 10 * 1024 * 1024) { setError("Файл слишком большой (макс 10MB)"); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string;
+      if (dataUrl) {
+        const updated = [...slides];
+        updated[slideIdx] = { ...updated[slideIdx], image_url: dataUrl };
+        setSlides(updated);
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const updateSlideField = (idx: number, field: string, value: any) => {
@@ -492,7 +517,7 @@ export default function PresentationsPage() {
 
         {/* Preview */}
         {slides.length > 0 && !loading && (
-          <div className="bg-white rounded-2xl border border-text/5 p-6 sm:p-8 space-y-6 animate-fadeIn">
+          <div ref={previewRef} className="bg-white rounded-2xl border border-text/5 p-6 sm:p-8 space-y-6 animate-fadeIn">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-bold text-text">Предпросмотр</h2>
               <span className="text-sm text-text/40">
@@ -575,15 +600,38 @@ export default function PresentationsPage() {
                   </button>
                 </div>
               ) : (
-                <button
-                  onClick={() => setImageGen({ slideIdx: currentSlide, model: imageModel })}
-                  className="flex items-center gap-1.5 text-xs text-text/40 hover:text-accent transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                  </svg>
-                  Добавить картинку на слайд
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setImageGen({ slideIdx: currentSlide, model: imageModel })}
+                    className="flex items-center gap-1.5 text-xs text-accent font-medium hover:text-accent/80 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                    </svg>
+                    Сгенерировать AI
+                  </button>
+                  <span className="text-text/15">|</span>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center gap-1.5 text-xs text-text/40 hover:text-text/60 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                    </svg>
+                    Загрузить файл
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) uploadSlideImage(currentSlide, file);
+                      e.target.value = "";
+                    }}
+                  />
+                </div>
               )}
             </div>
 
