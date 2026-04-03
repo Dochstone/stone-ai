@@ -140,6 +140,18 @@ export default function Pricing() {
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
   const [successAnim, setSuccessAnim] = useState(false);
   const [payExpanded, setPayExpanded] = useState(false);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (modal) {
+      document.body.style.overflow = "hidden";
+      document.body.style.touchAction = "none";
+    } else {
+      document.body.style.overflow = "";
+      document.body.style.touchAction = "";
+    }
+    return () => { document.body.style.overflow = ""; document.body.style.touchAction = ""; };
+  }, [modal]);
   const stylesRef = useRef(false);
 
   // Inject keyframes
