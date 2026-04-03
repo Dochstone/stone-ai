@@ -360,17 +360,48 @@ export default function SnakeGame({ token, onClose, compact, onShowLeaderboard }
       </div>
 
       {/* D-pad for mobile */}
-      <div className="grid grid-cols-3 gap-1 w-[144px] sm:hidden select-none">
-        <div />
-        <button onTouchStart={() => { if (dirRef.current !== "down") nextDirRef.current = "up"; }} className="w-12 h-12 bg-text/10 rounded-lg flex items-center justify-center text-text/40 text-lg active:bg-text/20 select-none">{"\u2191"}</button>
-        <div />
-        <button onTouchStart={() => { if (dirRef.current !== "right") nextDirRef.current = "left"; }} className="w-12 h-12 bg-text/10 rounded-lg flex items-center justify-center text-text/40 text-lg active:bg-text/20 select-none">{"\u2190"}</button>
-        <button onTouchStart={() => { if (dirRef.current !== "up") nextDirRef.current = "down"; }} className="w-12 h-12 bg-text/10 rounded-lg flex items-center justify-center text-text/40 text-lg active:bg-text/20 select-none">{"\u2193"}</button>
-        <button onTouchStart={() => { if (dirRef.current !== "left") nextDirRef.current = "right"; }} className="w-12 h-12 bg-text/10 rounded-lg flex items-center justify-center text-text/40 text-lg active:bg-text/20 select-none">{"\u2192"}</button>
+      <div className="sm:hidden select-none mt-2">
+        <div className="flex flex-col items-center gap-1.5">
+          <button
+            onTouchStart={(e) => { e.preventDefault(); if (dirRef.current !== "down") nextDirRef.current = "up"; }}
+            className="w-16 h-12 bg-white/[0.08] rounded-xl flex items-center justify-center text-text/50 active:bg-accent/30 active:text-accent transition-colors"
+          >
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
+          </button>
+          <div className="flex gap-1.5">
+            <button
+              onTouchStart={(e) => { e.preventDefault(); if (dirRef.current !== "right") nextDirRef.current = "left"; }}
+              className="w-16 h-12 bg-white/[0.08] rounded-xl flex items-center justify-center text-text/50 active:bg-accent/30 active:text-accent transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+            </button>
+            <button
+              onTouchStart={(e) => { e.preventDefault(); if (dirRef.current !== "up") nextDirRef.current = "down"; }}
+              className="w-16 h-12 bg-white/[0.08] rounded-xl flex items-center justify-center text-text/50 active:bg-accent/30 active:text-accent transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            </button>
+            <button
+              onTouchStart={(e) => { e.preventDefault(); if (dirRef.current !== "left") nextDirRef.current = "right"; }}
+              className="w-16 h-12 bg-white/[0.08] rounded-xl flex items-center justify-center text-text/50 active:bg-accent/30 active:text-accent transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+            </button>
+          </div>
+        </div>
       </div>
 
+      {/* Close button */}
       {onClose && (
-        <button onClick={onClose} className="text-xs text-text/30 hover:text-text/50 transition-colors">Закрыть</button>
+        <button
+          onClick={onClose}
+          className="mt-2 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-text/[0.06] text-text/40 hover:text-text/60 hover:bg-text/[0.1] transition-colors text-xs font-medium"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          Закрыть
+        </button>
       )}
     </div>
   );
