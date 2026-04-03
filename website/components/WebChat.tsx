@@ -572,7 +572,7 @@ function WelcomeScreen({ onSuggestion, activeTab, plan }: { onSuggestion: (text:
               </div>
               <span className="text-accent text-xs font-bold shrink-0">Тарифы →</span>
             </a>
-            <a href="/profile?tab=referrals" className="flex items-center justify-between bg-teal/5 hover:bg-teal/10 border border-teal/10 rounded-xl px-4 py-2.5 mt-2 transition-colors">
+            <a href="/referral" className="flex items-center justify-between bg-teal/5 hover:bg-teal/10 border border-teal/10 rounded-xl px-4 py-2.5 mt-2 transition-colors">
               <div className="flex items-center gap-2">
                 <span>🎁</span>
                 <span className="text-[11px] text-text/50">Пригласи друга — <span className="font-bold text-teal">+5 запросов обоим</span></span>
@@ -2239,7 +2239,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
               {/* Referral nudge — every 10th response */}
               {messages.length > 0 && messages.length % 6 === 0 && !streaming && (
                 <div className="max-w-3xl mx-auto px-3 sm:px-4">
-                  <a href="/profile?tab=referrals" className="flex items-center justify-between bg-teal/5 border border-teal/10 rounded-xl px-4 py-2.5 hover:bg-teal/10 transition-colors">
+                  <a href="/referral" className="flex items-center justify-between bg-teal/5 border border-teal/10 rounded-xl px-4 py-2.5 hover:bg-teal/10 transition-colors">
                     <span className="text-[11px] text-text/50">Пригласи друга — <span className="font-bold text-teal">оба получат +5 запросов</span></span>
                     <span className="text-[10px] text-teal font-semibold">Пригласить →</span>
                   </a>
@@ -2603,7 +2603,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                   Все тарифы и способы оплаты
                 </a>
 
-                <a href="/profile?tab=referrals" className="flex items-center justify-center gap-2 w-full mt-2.5 text-teal text-xs font-semibold hover:text-teal/80 transition-colors">
+                <a href="/referral" className="flex items-center justify-center gap-2 w-full mt-2.5 text-teal text-xs font-semibold hover:text-teal/80 transition-colors">
                   🎁 Пригласи друга — +5 запросов обоим
                 </a>
 
