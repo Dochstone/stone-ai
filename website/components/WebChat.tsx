@@ -922,6 +922,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   const [onboardingStep, setOnboardingStep] = useState(0);
   const [upsellModal, setUpsellModal] = useState<{ type: "limit" | "locked"; model?: string; tier?: string } | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [overlayMinimized, setOverlayMinimized] = useState(false);
 
   // Persist chat state to sessionStorage (survives F5)
   useEffect(() => {
@@ -1002,7 +1003,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
         const pending = data.videos.find((v: any) => v.status === "pending" || v.status === "processing");
         if (!pending) return;
         // Resume polling
-        setVideoGenerating(true);
+        setVideoGenerating(true); setOverlayMinimized(false);
         setMessages(prev => {
           if (prev.some(m => m.content?.includes("Генерация видео"))) return prev;
           return [...prev, { role: "assistant", content: `Генерация видео... (возобновлено)` }];
@@ -1294,7 +1295,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
     setMessages(history);
     setInput("");
     setPendingFile(null);
-    setThreedGenerating(true);
+    setThreedGenerating(true); setOverlayMinimized(false);
     resetTextarea();
 
     try {
@@ -2616,11 +2617,11 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
       )}
 
       {/* Generation overlay with snake game */}
-      {(videoGenerating || threedGenerating) && (
+      {(videoGenerating || threedGenerating) && !overlayMinimized && (
         <GenerationOverlay
           isVisible={true}
           estimatedTime={videoGenerating ? "~30-120 сек" : "~15-60 сек"}
-          onMinimize={() => { setVideoGenerating(false); setThreedGenerating(false); }}
+          onMinimize={() => setOverlayMinimized(true)}
           token={auth?.token}
         />
       )}
