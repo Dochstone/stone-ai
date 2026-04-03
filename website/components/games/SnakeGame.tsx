@@ -294,7 +294,7 @@ export default function SnakeGame({ token, onClose, compact, onShowLeaderboard }
   const speedLabel = `x${(BASE_SPEED / currentSpeed).toFixed(1)}`;
 
   return (
-    <div className="flex flex-col items-center gap-3">
+    <div className="flex flex-col items-center gap-2">
       {/* Header */}
       <div className={`flex items-center justify-between w-full px-1 ${compact ? "max-w-[250px]" : "max-w-[300px]"}`}>
         <div className="flex items-center gap-2">
@@ -328,7 +328,7 @@ export default function SnakeGame({ token, onClose, compact, onShowLeaderboard }
 
       {/* Canvas */}
       <div className="relative" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-        <canvas ref={canvasRef} width={SIZE} height={SIZE} className="rounded-xl border border-text/10" style={{ touchAction: "none" }} />
+        <canvas ref={canvasRef} width={SIZE} height={SIZE} className="rounded-xl border border-text/10 w-full max-w-[300px] sm:max-w-none sm:w-auto" style={{ touchAction: "none", aspectRatio: "1/1" }} />
 
         {gameState === "ready" && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 rounded-xl">
@@ -336,7 +336,10 @@ export default function SnakeGame({ token, onClose, compact, onShowLeaderboard }
             <button onClick={startGame} className="bg-accent text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-accent/90">
               Играть
             </button>
-            <span className="text-[10px] text-white/30 mt-2">WASD / стрелки / свайп</span>
+            <span className="text-[10px] text-white/30 mt-2">
+              <span className="sm:hidden">Свайп или кнопки</span>
+              <span className="hidden sm:inline">WASD / стрелки</span>
+            </span>
           </div>
         )}
 
@@ -371,7 +374,7 @@ export default function SnakeGame({ token, onClose, compact, onShowLeaderboard }
       </div>
 
       {/* D-pad for mobile */}
-      <div className="sm:hidden select-none mt-2">
+      <div className="sm:hidden select-none mt-1">
         <div className="flex flex-col items-center gap-1.5">
           <button
             onTouchStart={(e) => { e.preventDefault(); if (dirRef.current !== "down") nextDirRef.current = "up"; }}

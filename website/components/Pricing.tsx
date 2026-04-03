@@ -381,8 +381,8 @@ export default function Pricing() {
                   <img
                     src={modal.img}
                     alt=""
-                    className="w-full h-full object-cover object-top"
-                    style={{ animation: "pricingStagger 0.5s ease both 0.05s" }}
+                    className="w-full h-full object-cover"
+                    style={{ objectPosition: "center 30%", animation: "pricingStagger 0.5s ease both 0.05s" }}
                   />
                   {/* Gradient overlays for blend */}
                   <div className="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-bg via-transparent to-transparent" />
