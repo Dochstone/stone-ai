@@ -272,12 +272,14 @@ function BalanceTab({ profile, transactions }: { profile: UserProfile; transacti
         <div className="text-4xl font-extrabold text-accent mb-4">
           {profile.plan === "max-pro" ? "Elite" : profile.plan === "max" ? "Pro" : profile.plan === "mini" ? "Start" : "Free"}
         </div>
-        <a
-          href="/pricing"
-          className="inline-flex items-center gap-2 bg-accent text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors"
-        >
-          {profile.plan === "free" ? "Выбрать тариф" : profile.plan === "mini" ? "Улучшить тариф" : "Сменить тариф"}
-        </a>
+        {profile.plan !== "max-pro" && (
+          <a
+            href="/pricing"
+            className="inline-flex items-center gap-2 bg-accent text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors"
+          >
+            {profile.plan === "free" ? "Выбрать тариф" : profile.plan === "mini" ? "Улучшить тариф" : "Сменить тариф"}
+          </a>
+        )}
       </div>
 
       {/* Filters */}
