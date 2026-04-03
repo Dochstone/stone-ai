@@ -1,16 +1,28 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { TELEGRAM_BOT_URL } from "@/lib/models";
 
 export default function Footer() {
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+    try { if (localStorage.getItem("stone_auth")) setLoggedIn(true); } catch {}
+  }, []);
+
   return (
     <footer className="bg-bg border-t border-text/5">
-      <div className="bg-accent/5 border-b border-accent/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-sm text-text/60"><span className="font-bold text-text">65+ нейросетей</span> от 390₽/мес</p>
-          <a href="/pricing" className="bg-accent text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors">
-            Выбрать тариф
-          </a>
+      {/* Pricing CTA — hidden for logged-in users */}
+      {!loggedIn && (
+        <div className="bg-accent/5 border-b border-accent/10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-sm text-text/60"><span className="font-bold text-text">65+ нейросетей</span> от 390₽/мес</p>
+            <a href="/pricing" className="bg-accent text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors">
+              Выбрать тариф
+            </a>
+          </div>
         </div>
-      </div>
+      )}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
           {/* Brand */}
@@ -18,7 +30,7 @@ export default function Footer() {
             <h3 className="text-lg font-extrabold mb-1">Stone AI</h3>
             <p className="text-[9px] text-text/25 tracking-[0.12em] uppercase mb-2">Smart Technology Omniscient Neural Engine</p>
             <p className="text-text/50 text-sm leading-relaxed">
-              65+ нейросетей в одном окне. Подписка от 390₽/мес.
+              65+ нейросетей в одном окне.
             </p>
             <div className="mt-4 flex flex-col gap-2">
               <a

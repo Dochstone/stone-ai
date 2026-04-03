@@ -1,4 +1,16 @@
+"use client";
+
+import { useState, useEffect } from "react";
+
 export default function CtaSection() {
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+    try { if (localStorage.getItem("stone_auth")) setLoggedIn(true); } catch {}
+  }, []);
+
+  if (loggedIn) return null;
+
   return (
     <section className="bg-dark text-white py-20 md:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
