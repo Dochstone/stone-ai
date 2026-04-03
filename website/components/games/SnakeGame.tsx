@@ -2,22 +2,40 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 
-const CELL = 15;
 const GRID = 20;
-const SIZE = CELL * GRID;
 
 type Pos = { x: number; y: number };
 type Dir = "up" | "down" | "left" | "right";
 type State = "ready" | "playing" | "over";
+type Particle = { x: number; y: number; vx: number; vy: number; alpha: number; life: number };
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
 
-export default function SnakeGame({ token, onClose }: { token?: string; onClose?: () => void }) {
+const BASE_SPEED = 150;
+const MIN_SPEED = 60;
+const SPEED_STEP = 8;
+
+function getSpeed(score: number) {
+  return Math.max(MIN_SPEED, BASE_SPEED - Math.floor(score / 5) * SPEED_STEP);
+}
+
+interface SnakeGameProps {
+  token?: string;
+  onClose?: () => void;
+  compact?: boolean;
+  onShowLeaderboard?: () => void;
+}
+
+export default function SnakeGame({ token, onClose, compact, onShowLeaderboard }: SnakeGameProps) {
+  const CELL = compact ? 12.5 : 15;
+  const SIZE = CELL * GRID;
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [score, setScore] = useState(0);
   const [best, setBest] = useState(0);
   const [gameState, setGameState] = useState<State>("ready");
   const [newRecord, setNewRecord] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
 
   const snakeRef = useRef<Pos[]>([{ x: 10, y: 10 }]);
   const foodRef = useRef<Pos>({ x: 15, y: 10 });
@@ -26,11 +44,65 @@ export default function SnakeGame({ token, onClose }: { token?: string; onClose?
   const scoreRef = useRef(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const particlesRef = useRef<Particle[]>([]);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const isMutedRef = useRef(false);
+
+  useEffect(() => { isMutedRef.current = isMuted; }, [isMuted]);
 
   useEffect(() => {
     const b = parseInt(localStorage.getItem("snake_best") || "0");
     setBest(b);
   }, []);
+
+  const playSound = useCallback((type: "eat" | "die" | "start") => {
+    if (isMutedRef.current || !audioCtxRef.current) return;
+    const ctx = audioCtxRef.current;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    if (type === "eat") {
+      osc.type = "sine";
+      osc.frequency.value = 600;
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.1);
+    } else if (type === "die") {
+      osc.type = "sawtooth";
+      osc.frequency.value = 200;
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.3);
+    } else {
+      osc.type = "sine";
+      osc.frequency.value = 440;
+      gain.gain.setValueAtTime(0.12, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.15);
+    }
+  }, []);
+
+  const spawnParticles = useCallback((pos: Pos) => {
+    const particles: Particle[] = [];
+    for (let i = 0; i < 6; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 1 + Math.random() * 2;
+      particles.push({
+        x: pos.x * CELL + CELL / 2,
+        y: pos.y * CELL + CELL / 2,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        alpha: 1,
+        life: 1,
+      });
+    }
+    particlesRef.current = [...particlesRef.current, ...particles];
+  }, [CELL]);
 
   const spawnFood = useCallback(() => {
     const snake = snakeRef.current;
@@ -48,7 +120,7 @@ export default function SnakeGame({ token, onClose }: { token?: string; onClose?
     const food = foodRef.current;
 
     // Background
-    ctx.fillStyle = "#0f1117";
+    ctx.fillStyle = "#0f0f1a";
     ctx.fillRect(0, 0, SIZE, SIZE);
 
     // Grid
@@ -59,26 +131,50 @@ export default function SnakeGame({ token, onClose }: { token?: string; onClose?
       ctx.beginPath(); ctx.moveTo(0, i * CELL); ctx.lineTo(SIZE, i * CELL); ctx.stroke();
     }
 
-    // Food
+    // Food glow
     const pulse = 0.8 + 0.2 * Math.sin(Date.now() / 200);
+    const glowR = CELL * 0.4 * 1.8;
+    ctx.fillStyle = "rgba(239, 68, 68, 0.15)";
+    ctx.beginPath();
+    ctx.arc(food.x * CELL + CELL / 2, food.y * CELL + CELL / 2, glowR, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Food
     const fr = CELL * 0.4 * pulse;
     ctx.fillStyle = "#ef4444";
     ctx.beginPath();
     ctx.arc(food.x * CELL + CELL / 2, food.y * CELL + CELL / 2, fr, 0, Math.PI * 2);
     ctx.fill();
 
-    // Snake
+    // Snake with gradient
     snake.forEach((s, i) => {
       const r = CELL * 0.45;
-      ctx.fillStyle = i === 0 ? "#16a34a" : "#22c55e";
+      const opacity = 1 - (i / snake.length) * 0.5;
+      ctx.fillStyle = i === 0 ? "#16a34a" : `rgba(34, 197, 94, ${opacity})`;
       ctx.beginPath();
       ctx.roundRect(s.x * CELL + (CELL - r * 2) / 2, s.y * CELL + (CELL - r * 2) / 2, r * 2, r * 2, 3);
       ctx.fill();
     });
-  }, []);
+
+    // Particles
+    particlesRef.current = particlesRef.current.filter(p => p.alpha > 0);
+    particlesRef.current.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.alpha -= 0.04;
+      p.life -= 0.04;
+      if (p.alpha > 0) {
+        ctx.fillStyle = `rgba(239, 68, 68, ${p.alpha})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    });
+  }, [CELL, SIZE]);
 
   const gameOver = useCallback(() => {
     setGameState("over");
+    playSound("die");
     if (intervalRef.current) clearInterval(intervalRef.current);
     const s = scoreRef.current;
     const b = parseInt(localStorage.getItem("snake_best") || "0");
@@ -86,7 +182,6 @@ export default function SnakeGame({ token, onClose }: { token?: string; onClose?
       localStorage.setItem("snake_best", String(s));
       setBest(s);
       setNewRecord(true);
-      // Save to server
       if (token) {
         fetch(`${API_URL}/api/games/score`, {
           method: "POST",
@@ -97,7 +192,7 @@ export default function SnakeGame({ token, onClose }: { token?: string; onClose?
     } else {
       setNewRecord(false);
     }
-  }, [token]);
+  }, [token, playSound]);
 
   const tick = useCallback(() => {
     dirRef.current = nextDirRef.current;
@@ -119,6 +214,8 @@ export default function SnakeGame({ token, onClose }: { token?: string; onClose?
     if (head.x === foodRef.current.x && head.y === foodRef.current.y) {
       scoreRef.current++;
       setScore(scoreRef.current);
+      spawnParticles(foodRef.current);
+      playSound("eat");
       spawnFood();
     } else {
       snake.pop();
@@ -126,29 +223,33 @@ export default function SnakeGame({ token, onClose }: { token?: string; onClose?
 
     snakeRef.current = snake;
     draw();
-  }, [draw, gameOver, spawnFood]);
+  }, [draw, gameOver, spawnFood, spawnParticles, playSound]);
 
   const startGame = useCallback(() => {
+    if (!audioCtxRef.current) {
+      audioCtxRef.current = new AudioContext();
+    }
     snakeRef.current = [{ x: 10, y: 10 }];
     dirRef.current = "right";
     nextDirRef.current = "right";
     scoreRef.current = 0;
+    particlesRef.current = [];
     setScore(0);
     setNewRecord(false);
     setGameState("playing");
     spawnFood();
     draw();
+    playSound("start");
 
-    const speed = 150;
     if (intervalRef.current) clearInterval(intervalRef.current);
-    intervalRef.current = setInterval(tick, speed);
-  }, [tick, draw, spawnFood]);
+    intervalRef.current = setInterval(tick, BASE_SPEED);
+  }, [tick, draw, spawnFood, playSound]);
 
   // Speed up as score increases
   useEffect(() => {
     if (gameState !== "playing") return;
     if (intervalRef.current) clearInterval(intervalRef.current);
-    const speed = Math.max(70, 150 - Math.floor(scoreRef.current / 5) * 5);
+    const speed = getSpeed(scoreRef.current);
     intervalRef.current = setInterval(tick, speed);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [score, gameState, tick]);
@@ -189,12 +290,29 @@ export default function SnakeGame({ token, onClose }: { token?: string; onClose?
   // Initial draw
   useEffect(() => { draw(); }, [draw]);
 
+  const currentSpeed = getSpeed(score);
+  const speedLabel = `x${(BASE_SPEED / currentSpeed).toFixed(1)}`;
+
   return (
     <div className="flex flex-col items-center gap-3">
-      {/* Score */}
-      <div className="flex items-center justify-between w-full max-w-[300px] px-1">
-        <span className="text-sm font-bold text-text">Счёт: {score}</span>
-        <span className="text-xs text-text/30">Рекорд: {best}</span>
+      {/* Header */}
+      <div className={`flex items-center justify-between w-full px-1 ${compact ? "max-w-[250px]" : "max-w-[300px]"}`}>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-bold text-text">Счёт: {score}</span>
+          <button
+            onClick={() => setIsMuted(m => !m)}
+            className="text-sm text-text/50 hover:text-text/80 transition-colors"
+            title={isMuted ? "Включить звук" : "Выключить звук"}
+          >
+            {isMuted ? "\uD83D\uDD07" : "\uD83D\uDD0A"}
+          </button>
+        </div>
+        <div className="flex items-center gap-3">
+          {gameState === "playing" && (
+            <span className="text-xs text-emerald-400/70 font-mono">{speedLabel}</span>
+          )}
+          <span className="text-xs text-text/30">Рекорд: {best}</span>
+        </div>
       </div>
 
       {/* Canvas */}
@@ -203,7 +321,7 @@ export default function SnakeGame({ token, onClose }: { token?: string; onClose?
 
         {gameState === "ready" && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 rounded-xl">
-            <span className="text-2xl mb-2">🐍</span>
+            <span className="text-2xl mb-2">{"\uD83D\uDC0D"}</span>
             <button onClick={startGame} className="bg-accent text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-accent/90">
               Играть
             </button>
@@ -213,24 +331,42 @@ export default function SnakeGame({ token, onClose }: { token?: string; onClose?
 
         {gameState === "over" && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 rounded-xl">
-            <span className="text-lg font-bold text-white mb-1">Game Over!</span>
-            <span className="text-2xl font-extrabold text-accent mb-1">{score}</span>
-            {newRecord && <span className="text-xs text-amber-400 font-bold mb-2">🎉 Новый рекорд!</span>}
-            <button onClick={startGame} className="bg-accent text-white px-5 py-2 rounded-xl font-bold text-sm hover:bg-accent/90 mb-2">
-              Ещё раз
-            </button>
+            <span className="text-lg font-bold text-white mb-2">Game Over!</span>
+            <span className="text-4xl font-extrabold text-accent mb-1">{score}</span>
+            {newRecord && (
+              <span className="text-sm text-amber-400 font-bold mb-3 animate-bounce">
+                {"\uD83C\uDF89"} Новый рекорд!
+              </span>
+            )}
+            {!newRecord && <div className="mb-3" />}
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={startGame}
+                className="bg-accent text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-accent/90"
+              >
+                Играть снова
+              </button>
+              {onShowLeaderboard && (
+                <button
+                  onClick={onShowLeaderboard}
+                  className="bg-white/10 text-white px-6 py-2 rounded-xl font-bold text-sm hover:bg-white/20 transition-colors"
+                >
+                  Лидерборд
+                </button>
+              )}
+            </div>
           </div>
         )}
       </div>
 
       {/* D-pad for mobile */}
-      <div className="grid grid-cols-3 gap-1 w-[120px] sm:hidden">
+      <div className="grid grid-cols-3 gap-1 w-[144px] sm:hidden select-none">
         <div />
-        <button onTouchStart={() => { if (dirRef.current !== "down") nextDirRef.current = "up"; }} className="w-10 h-10 bg-text/10 rounded-lg flex items-center justify-center text-text/40 active:bg-text/20">↑</button>
+        <button onTouchStart={() => { if (dirRef.current !== "down") nextDirRef.current = "up"; }} className="w-12 h-12 bg-text/10 rounded-lg flex items-center justify-center text-text/40 text-lg active:bg-text/20 select-none">{"\u2191"}</button>
         <div />
-        <button onTouchStart={() => { if (dirRef.current !== "right") nextDirRef.current = "left"; }} className="w-10 h-10 bg-text/10 rounded-lg flex items-center justify-center text-text/40 active:bg-text/20">←</button>
-        <button onTouchStart={() => { if (dirRef.current !== "up") nextDirRef.current = "down"; }} className="w-10 h-10 bg-text/10 rounded-lg flex items-center justify-center text-text/40 active:bg-text/20">↓</button>
-        <button onTouchStart={() => { if (dirRef.current !== "left") nextDirRef.current = "right"; }} className="w-10 h-10 bg-text/10 rounded-lg flex items-center justify-center text-text/40 active:bg-text/20">→</button>
+        <button onTouchStart={() => { if (dirRef.current !== "right") nextDirRef.current = "left"; }} className="w-12 h-12 bg-text/10 rounded-lg flex items-center justify-center text-text/40 text-lg active:bg-text/20 select-none">{"\u2190"}</button>
+        <button onTouchStart={() => { if (dirRef.current !== "up") nextDirRef.current = "down"; }} className="w-12 h-12 bg-text/10 rounded-lg flex items-center justify-center text-text/40 text-lg active:bg-text/20 select-none">{"\u2193"}</button>
+        <button onTouchStart={() => { if (dirRef.current !== "left") nextDirRef.current = "right"; }} className="w-12 h-12 bg-text/10 rounded-lg flex items-center justify-center text-text/40 text-lg active:bg-text/20 select-none">{"\u2192"}</button>
       </div>
 
       {onClose && (

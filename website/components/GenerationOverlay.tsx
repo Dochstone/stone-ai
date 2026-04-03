@@ -1,67 +1,105 @@
 "use client";
 
 import { useState } from "react";
-import SnakeGame from "./games/SnakeGame";
+import dynamic from "next/dynamic";
 import Leaderboard from "./games/Leaderboard";
 
-export default function GenerationOverlay({ isVisible, estimatedTime, onMinimize, token }: {
+const SnakeGame = dynamic(() => import("./games/SnakeGame"), { ssr: false });
+const Game2048 = dynamic(() => import("./games/Game2048"), { ssr: false });
+
+export default function GenerationOverlay({ isVisible, estimatedTime, onMinimize, token, type }: {
   isVisible: boolean;
   estimatedTime?: string;
   onMinimize?: () => void;
   token?: string;
+  type?: string;
 }) {
-  const [showGame, setShowGame] = useState(false);
-  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [view, setView] = useState<"main" | "snake" | "2048" | "leaderboard">("main");
 
   if (!isVisible) return null;
 
+  const typeLabel = type === "video" ? "видео" : type === "audio" ? "аудио" : type === "3d" ? "3D-модели" : "изображения";
+
   return (
-    <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-bg rounded-2xl shadow-2xl border border-text/10 w-full max-w-md overflow-hidden">
-        {!showGame && !showLeaderboard && (
+    <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-[#12121a] rounded-2xl shadow-2xl border border-white/[0.08] w-full max-w-[420px] overflow-hidden">
+        {view === "main" && (
           <div className="p-6 text-center">
-            {/* Spinner */}
-            <div className="w-12 h-12 mx-auto mb-4 rounded-full border-2 border-text/10 border-t-accent animate-spin" />
-            <h3 className="text-base font-bold text-text mb-1">Генерация...</h3>
-            {estimatedTime && <p className="text-xs text-text/40 mb-5">{estimatedTime}</p>}
+            <div className="w-12 h-12 mx-auto mb-4 rounded-full border-2 border-blue-500/30 border-t-blue-500 animate-spin" />
+            <h3 className="text-base font-bold text-white mb-1">Генерация {typeLabel}...</h3>
+            <p className="text-xs text-gray-400 mb-6">{estimatedTime || "~30 секунд"}</p>
 
-            <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-2 gap-3 mb-4">
               <button
-                onClick={() => setShowGame(true)}
-                className="w-full py-3 rounded-xl bg-accent/10 text-accent font-bold text-sm hover:bg-accent/15 transition-colors"
+                onClick={() => setView("snake")}
+                className="flex flex-col items-center gap-2 p-4 bg-white/5 hover:bg-white/10 rounded-xl transition-colors"
               >
-                🎮 Играть пока ждёшь
+                <span className="text-2xl">🐍</span>
+                <span className="text-xs text-gray-300 font-medium">Змейка</span>
               </button>
               <button
-                onClick={() => setShowLeaderboard(true)}
-                className="w-full py-2.5 rounded-xl bg-text/[0.04] text-text/50 font-semibold text-xs hover:bg-text/[0.06] transition-colors"
+                onClick={() => setView("2048")}
+                className="flex flex-col items-center gap-2 p-4 bg-white/5 hover:bg-white/10 rounded-xl transition-colors"
               >
-                🏆 Таблица лидеров
+                <span className="text-2xl">🧩</span>
+                <span className="text-xs text-gray-300 font-medium">2048</span>
               </button>
-              {onMinimize && (
-                <button
-                  onClick={onMinimize}
-                  className="w-full py-2.5 rounded-xl text-text/30 text-xs hover:text-text/50 transition-colors"
-                >
-                  Свернуть в фон
-                </button>
-              )}
             </div>
-          </div>
-        )}
 
-        {showGame && (
-          <div className="p-4">
-            <SnakeGame token={token} onClose={() => setShowGame(false)} />
-          </div>
-        )}
-
-        {showLeaderboard && (
-          <div className="p-4">
-            <Leaderboard />
-            <button onClick={() => setShowLeaderboard(false)} className="w-full mt-3 text-xs text-text/30 hover:text-text/50 py-2">
-              Назад
+            <button
+              onClick={() => setView("leaderboard")}
+              className="w-full py-2.5 rounded-xl bg-white/5 text-gray-400 font-semibold text-xs hover:bg-white/10 transition-colors mb-2"
+            >
+              🏆 Таблица лидеров
             </button>
+
+            {onMinimize && (
+              <button
+                onClick={onMinimize}
+                className="w-full py-2.5 text-sm text-gray-500 hover:text-white transition-colors"
+              >
+                Свернуть в фон — результат появится в галерее
+              </button>
+            )}
+          </div>
+        )}
+
+        {view === "snake" && (
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <button onClick={() => setView("main")} className="text-gray-400 hover:text-white text-sm transition-colors">
+                ← Назад
+              </button>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                <span className="text-[10px] text-gray-400">Генерация идёт...</span>
+              </div>
+            </div>
+            <SnakeGame compact token={token} onClose={() => setView("main")} onShowLeaderboard={() => setView("leaderboard")} />
+          </div>
+        )}
+
+        {view === "2048" && (
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <button onClick={() => setView("main")} className="text-gray-400 hover:text-white text-sm transition-colors">
+                ← Назад
+              </button>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                <span className="text-[10px] text-gray-400">Генерация идёт...</span>
+              </div>
+            </div>
+            <Game2048 compact token={token} onClose={() => setView("main")} onShowLeaderboard={() => setView("leaderboard")} />
+          </div>
+        )}
+
+        {view === "leaderboard" && (
+          <div className="p-4">
+            <button onClick={() => setView("main")} className="text-gray-400 hover:text-white text-sm mb-3 transition-colors">
+              ← Назад
+            </button>
+            <Leaderboard />
           </div>
         )}
       </div>
