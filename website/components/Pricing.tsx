@@ -402,12 +402,12 @@ export default function Pricing() {
 
               {/* ─── Left: Girl image ─── */}
               {modal.img && (
-                <div className="relative sm:w-[280px] h-[220px] sm:h-auto shrink-0 overflow-hidden">
+                <div className="relative sm:w-[280px] h-[260px] sm:h-auto shrink-0 overflow-hidden">
                   <img
                     src={modal.img}
                     alt=""
                     className="w-full h-full object-cover"
-                    style={{ objectPosition: "center 45%", animation: "pricingStagger 0.5s ease both 0.05s" }}
+                    style={{ objectPosition: "center 35%", animation: "pricingStagger 0.5s ease both 0.05s" }}
                   />
                   {/* Gradient overlays for blend */}
                   <div className="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-bg via-transparent to-transparent" />
