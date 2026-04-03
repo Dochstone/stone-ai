@@ -139,6 +139,7 @@ export default function Pricing() {
   const [promoResult, setPromoResult] = useState<{ ok: boolean; message: string } | null>(null);
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
   const [successAnim, setSuccessAnim] = useState(false);
+  const [payExpanded, setPayExpanded] = useState(false);
   const stylesRef = useRef(false);
 
   // Inject keyframes
@@ -510,63 +511,73 @@ export default function Pricing() {
                     )}
                   </div>
 
-                  {/* Payment methods */}
-                  <div className="space-y-2" style={{ animation: "pricingStagger 0.4s ease both 0.4s" }}>
-                    <p className="text-[10px] text-text/30 font-semibold uppercase tracking-wider mb-2">Способ оплаты</p>
+                  {/* Main pay button */}
+                  <button
+                    onClick={() => pay(modal.id, "platega")}
+                    disabled={loading}
+                    className="w-full py-3.5 min-h-[50px] rounded-2xl font-bold text-[15px] text-white transition-all duration-200 disabled:opacity-50 active:scale-[0.97] relative overflow-hidden"
+                    style={{
+                      backgroundImage: `linear-gradient(90deg, ${modal.color}, ${modal.color}cc, ${modal.color})`,
+                      backgroundSize: "200% 100%",
+                      animation: "pricingShimmer 3s ease-in-out infinite, pricingStagger 0.4s ease both 0.4s",
+                      boxShadow: `0 8px 24px ${modal.color}30`,
+                    }}
+                  >
+                    {loading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        Создание счёта...
+                      </span>
+                    ) : `Оплатить ${modal.price}${modal.period}`}
+                  </button>
+                  <p className="text-[10px] text-text/25 text-center mt-1.5" style={{ animation: "pricingStagger 0.4s ease both 0.45s" }}>
+                    Карта РФ · Мир · Visa · MC · СБП
+                  </p>
 
-                    {/* Platega — Cards RU / SBP */}
-                    <button
-                      onClick={() => pay(modal.id, "platega")}
-                      disabled={loading}
-                      className="w-full flex items-center gap-3 p-3.5 rounded-xl border border-text/[0.08] hover:border-accent/30 hover:bg-accent/5 transition-all disabled:opacity-50 active:scale-[0.98]"
-                    >
-                      <span className="text-xl shrink-0">💳</span>
-                      <div className="flex-1 text-left">
-                        <div className="text-sm font-bold text-text">Карта РФ / СБП</div>
-                        <div className="text-[10px] text-text/40">Мир · Visa · MC · СБП</div>
+                  {/* Other methods toggle */}
+                  <button
+                    onClick={() => setPayExpanded(!payExpanded)}
+                    className="w-full flex items-center justify-center gap-1.5 py-2 mt-2 text-[11px] text-text/30 hover:text-text/50 transition-colors"
+                    style={{ animation: "pricingStagger 0.4s ease both 0.5s" }}
+                  >
+                    Другие способы оплаты
+                    <svg className={`w-3.5 h-3.5 transition-transform ${payExpanded ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {payExpanded && (
+                    <div className="space-y-2 mt-1 animate-fadeIn">
+                      <button
+                        onClick={() => pay(modal.id, "crypto")}
+                        disabled={loading}
+                        className="w-full flex items-center gap-3 p-3 rounded-xl border border-text/[0.06] hover:border-accent/20 hover:bg-accent/5 transition-all disabled:opacity-50 active:scale-[0.98]"
+                      >
+                        <span className="text-lg shrink-0">🪙</span>
+                        <div className="flex-1 text-left">
+                          <div className="text-xs font-bold text-text">Криптовалюта</div>
+                          <div className="text-[9px] text-text/35">USDT · BTC · ETH · SOL</div>
+                        </div>
+                      </button>
+                      <div className="rounded-xl border border-text/[0.06] overflow-hidden">
+                        <TonPayButton
+                          tier={modal.id}
+                          onSuccess={() => {
+                            setSuccessAnim(true);
+                            setTimeout(() => {
+                              setSuccessAnim(false);
+                              closeModal();
+                              setResult({ ok: true, message: `Тариф ${modal.name} активирован через TON!` });
+                            }, 2000);
+                          }}
+                        />
                       </div>
-                      <span className="text-xs font-bold text-accent shrink-0">{modal.price}</span>
-                    </button>
-
-                    {/* Crypto via Heleket */}
-                    <button
-                      onClick={() => pay(modal.id, "crypto")}
-                      disabled={loading}
-                      className="w-full flex items-center gap-3 p-3.5 rounded-xl border border-text/[0.08] hover:border-accent/30 hover:bg-accent/5 transition-all disabled:opacity-50 active:scale-[0.98]"
-                    >
-                      <span className="text-xl shrink-0">🪙</span>
-                      <div className="flex-1 text-left">
-                        <div className="text-sm font-bold text-text">Криптовалюта</div>
-                        <div className="text-[10px] text-text/40">USDT · BTC · ETH · SOL</div>
-                      </div>
-                      <span className="text-xs font-bold text-text/40 shrink-0">Heleket</span>
-                    </button>
-
-                    {/* TON Wallet */}
-                    <div className="rounded-xl border border-text/[0.08] overflow-hidden">
-                      <TonPayButton
-                        tier={modal.id}
-                        onSuccess={() => {
-                          setSuccessAnim(true);
-                          setTimeout(() => {
-                            setSuccessAnim(false);
-                            closeModal();
-                            setResult({ ok: true, message: `Тариф ${modal.name} активирован через TON!` });
-                          }, 2000);
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  {loading && (
-                    <div className="flex items-center justify-center gap-2 mt-3 text-text/40 text-xs">
-                      <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                      </svg>
-                      Создание счёта...
                     </div>
                   )}
+
 
                   {result && (
                     <p className={`text-center text-xs font-medium mt-2 ${result.ok ? "text-teal" : "text-red-500"}`}>
