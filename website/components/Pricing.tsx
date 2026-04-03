@@ -402,32 +402,33 @@ export default function Pricing() {
 
               {/* ─── Left: Girl image ─── */}
               {modal.img && (
-                <div className="relative sm:w-[280px] h-[260px] sm:h-auto shrink-0 overflow-hidden">
+                <div className="relative sm:w-[280px] h-[300px] sm:h-auto shrink-0 overflow-hidden">
                   <img
                     src={modal.img}
                     alt=""
                     className="w-full h-full object-cover"
-                    style={{ objectPosition: "center 35%", animation: "pricingStagger 0.5s ease both 0.05s" }}
+                    style={{ objectPosition: "center 25%", animation: "pricingStagger 0.5s ease both 0.05s" }}
                   />
-                  {/* Gradient overlays for blend */}
-                  <div className="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-bg via-transparent to-transparent" />
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-bg sm:to-transparent opacity-80" />
+                  {/* Desktop: side gradient blend */}
+                  <div className="hidden sm:block absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-bg" />
+                  {/* Mobile: bottom gradient only — keeps image visible, text readable */}
+                  <div className="sm:hidden absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-bg via-bg/80 to-transparent" />
                   {/* Color tint matching plan */}
                   <div
-                    className="absolute inset-0 mix-blend-soft-light opacity-30"
+                    className="absolute inset-0 mix-blend-soft-light opacity-20"
                     style={{ background: modal.color }}
                   />
 
                   {/* Mobile: overlay text on image */}
-                  <div className="absolute bottom-3 left-4 right-4 sm:hidden">
-                    <div className="flex items-center gap-2 mb-1">
+                  <div className="absolute bottom-4 left-4 right-4 sm:hidden">
+                    <div className="flex items-center gap-3">
                       <span className="text-3xl" style={{ animation: "pricingFloat 3s ease-in-out infinite" }}>{modal.icon}</span>
                       <div>
-                        <h3 className="text-xl font-extrabold text-text">{modal.name}</h3>
+                        <h3 className="text-xl font-extrabold text-white drop-shadow-lg">{modal.name}</h3>
                         <div className="flex items-baseline gap-1.5">
-                          {modal.oldPrice && <span className="text-sm line-through text-text/30">{modal.oldPrice}</span>}
-                          <span className="text-2xl font-extrabold" style={{ color: modal.color }}>{modal.price}</span>
-                          <span className="text-xs text-text/40 font-semibold">{modal.period}</span>
+                          {modal.oldPrice && <span className="text-sm line-through text-white/40">{modal.oldPrice}</span>}
+                          <span className="text-2xl font-extrabold drop-shadow-lg" style={{ color: modal.color }}>{modal.price}</span>
+                          <span className="text-xs text-white/60 font-semibold">{modal.period}</span>
                         </div>
                       </div>
                     </div>
