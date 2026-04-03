@@ -11,5 +11,6 @@ from app.models.prompt_template import PromptTemplate, SavedPrompt
 from app.models.project import Project
 from app.models.generation import Generation
 from app.models.game_score import GameScore
+from app.models.achievement import Achievement, UserAchievement
 
 __all__ = ["User", "Subscription", "Usage", "Pass", "Transaction", "AdBanner", "AdEvent", "ChatSession", "ChatMessage", "VideoTask", "ThreeDTask", "DailyUsage", "PromptTemplate", "SavedPrompt"]

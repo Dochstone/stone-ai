@@ -1,0 +1,165 @@
+"""Achievements — badges, streaks, milestones with rewards."""
+
+import logging
+from datetime import datetime
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select, func as sqlfunc
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.database import get_db, async_session
+from app.middleware.auth import get_current_user
+from app.models.achievement import Achievement, UserAchievement
+from app.models.user import User
+
+logger = logging.getLogger(__name__)
+router = APIRouter(prefix="/api/achievements", tags=["achievements"])
+
+# ─── Achievement definitions ───
+ACHIEVEMENTS = [
+    # Generation
+    {"slug": "first_image", "title": "Первая картинка", "description": "Сгенерируйте первое изображение", "icon": "🎨", "category": "generation", "condition": {"type": "count", "target": 1, "metric": "images"}, "reward_rub": 10},
+    {"slug": "images_10", "title": "Художник", "description": "Сгенерируйте 10 изображений", "icon": "🖼️", "category": "generation", "condition": {"type": "count", "target": 10, "metric": "images"}, "reward_rub": 20},
+    {"slug": "images_50", "title": "Галерея", "description": "Сгенерируйте 50 изображений", "icon": "🏛️", "category": "generation", "condition": {"type": "count", "target": 50, "metric": "images"}, "reward_rub": 50},
+    {"slug": "images_100", "title": "Мастер кисти", "description": "Сгенерируйте 100 изображений", "icon": "👨‍🎨", "category": "generation", "condition": {"type": "count", "target": 100, "metric": "images"}, "reward_rub": 100},
+    {"slug": "first_video", "title": "Первое видео", "description": "Сгенерируйте первое видео", "icon": "🎬", "category": "generation", "condition": {"type": "count", "target": 1, "metric": "videos"}, "reward_rub": 15},
+    {"slug": "videos_10", "title": "Режиссёр", "description": "Сгенерируйте 10 видео", "icon": "🎥", "category": "generation", "condition": {"type": "count", "target": 10, "metric": "videos"}, "reward_rub": 30},
+    {"slug": "first_3d", "title": "Первая 3D-модель", "description": "Сгенерируйте первую 3D-модель", "icon": "🧊", "category": "generation", "condition": {"type": "count", "target": 1, "metric": "3d"}, "reward_rub": 15},
+    {"slug": "first_audio", "title": "Первая озвучка", "description": "Используйте TTS впервые", "icon": "🔊", "category": "generation", "condition": {"type": "count", "target": 1, "metric": "audio"}, "reward_rub": 10},
+    {"slug": "multiformat", "title": "Мультиформатник", "description": "Используйте все типы генерации", "icon": "🌟", "category": "generation", "condition": {"type": "all_types"}, "reward_rub": 50},
+    {"slug": "models_5", "title": "Исследователь", "description": "Используйте 5 разных моделей", "icon": "🔬", "category": "generation", "condition": {"type": "count", "target": 5, "metric": "unique_models"}, "reward_rub": 20},
+    {"slug": "models_15", "title": "Полиглот AI", "description": "Используйте 15 разных моделей", "icon": "🗣️", "category": "generation", "condition": {"type": "count", "target": 15, "metric": "unique_models"}, "reward_rub": 50},
+    # Chat
+    {"slug": "chat_100", "title": "Собеседник", "description": "Отправьте 100 сообщений", "icon": "💬", "category": "generation", "condition": {"type": "count", "target": 100, "metric": "messages"}, "reward_rub": 20},
+    {"slug": "chat_500", "title": "Оратор", "description": "Отправьте 500 сообщений", "icon": "🎙️", "category": "generation", "condition": {"type": "count", "target": 500, "metric": "messages"}, "reward_rub": 50},
+    {"slug": "chat_1000", "title": "Философ", "description": "Отправьте 1000 сообщений", "icon": "🧠", "category": "generation", "condition": {"type": "count", "target": 1000, "metric": "messages"}, "reward_rub": 100},
+    # Streak
+    {"slug": "streak_3", "title": "3 дня подряд", "description": "Заходите 3 дня подряд", "icon": "🔥", "category": "streak", "condition": {"type": "streak", "target": 3}, "reward_rub": 10},
+    {"slug": "streak_7", "title": "Неделя подряд", "description": "Заходите 7 дней подряд", "icon": "⚡", "category": "streak", "condition": {"type": "streak", "target": 7}, "reward_rub": 25},
+    {"slug": "streak_30", "title": "Месяц подряд", "description": "Заходите 30 дней подряд", "icon": "👑", "category": "streak", "condition": {"type": "streak", "target": 30}, "reward_rub": 100},
+    # Milestone
+    {"slug": "registered", "title": "Добро пожаловать", "description": "Зарегистрируйтесь в Stone AI", "icon": "🎉", "category": "milestone", "condition": {"type": "event", "metric": "registered"}, "reward_rub": 0},
+    {"slug": "first_project", "title": "Бизнесмен", "description": "Создайте первый проект", "icon": "📁", "category": "milestone", "condition": {"type": "event", "metric": "first_project"}, "reward_rub": 10},
+    {"slug": "first_template", "title": "Шаблонщик", "description": "Используйте первый AI-шаблон", "icon": "📝", "category": "milestone", "condition": {"type": "event", "metric": "first_template"}, "reward_rub": 5},
+    {"slug": "spent_100", "title": "Инвестор", "description": "Потратьте 100₽ на генерации", "icon": "💰", "category": "milestone", "condition": {"type": "count", "target": 100, "metric": "spent_rub"}, "reward_rub": 20},
+    {"slug": "spent_1000", "title": "Меценат", "description": "Потратьте 1000₽ на генерации", "icon": "💎", "category": "milestone", "condition": {"type": "count", "target": 1000, "metric": "spent_rub"}, "reward_rub": 100},
+    # Social
+    {"slug": "first_referral", "title": "Амбассадор", "description": "Пригласите первого друга", "icon": "🤝", "category": "social", "condition": {"type": "count", "target": 1, "metric": "referrals"}, "reward_rub": 15},
+    {"slug": "referrals_5", "title": "Лидер мнений", "description": "Пригласите 5 друзей", "icon": "📣", "category": "social", "condition": {"type": "count", "target": 5, "metric": "referrals"}, "reward_rub": 50},
+    {"slug": "snake_50", "title": "Змеелов", "description": "Наберите 50 очков в змейке", "icon": "🐍", "category": "milestone", "condition": {"type": "count", "target": 50, "metric": "snake_score"}, "reward_rub": 15},
+]
+
+
+@router.get("/")
+async def list_achievements(user: dict = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    tg_id = user["id"]
+
+    # Get all achievements
+    result = await db.execute(select(Achievement).order_by(Achievement.category))
+    all_achs = result.scalars().all()
+
+    # Get user progress
+    result = await db.execute(select(UserAchievement).where(UserAchievement.user_tg_id == tg_id))
+    user_achs = {ua.achievement_slug: ua for ua in result.scalars().all()}
+
+    items = []
+    completed = 0
+    for a in all_achs:
+        ua = user_achs.get(a.slug)
+        is_done = ua.is_completed if ua else False
+        if is_done:
+            completed += 1
+        items.append({
+            "slug": a.slug, "title": a.title, "description": a.description,
+            "icon": a.icon, "category": a.category,
+            "target": a.condition.get("target", 1) if a.condition.get("type") != "event" else 1,
+            "progress": ua.progress if ua else 0,
+            "is_completed": is_done,
+            "completed_at": ua.completed_at.isoformat() if ua and ua.completed_at else None,
+            "reward_rub": a.reward_rub,
+        })
+
+    return {"achievements": items, "total": len(all_achs), "completed": completed}
+
+
+@router.post("/seed")
+async def seed_achievements(db: AsyncSession = Depends(get_db)):
+    """Seed achievements (idempotent)."""
+    existing = await db.execute(select(sqlfunc.count()).select_from(Achievement))
+    count = existing.scalar()
+    if count >= len(ACHIEVEMENTS):
+        return {"message": f"Already seeded ({count})", "count": count}
+
+    await db.execute(Achievement.__table__.delete())
+    for a in ACHIEVEMENTS:
+        db.add(Achievement(**a))
+    await db.commit()
+    return {"message": f"Seeded {len(ACHIEVEMENTS)} achievements", "count": len(ACHIEVEMENTS)}
+
+
+# ─── Achievement checker (call from other services) ───
+
+async def check_and_update(tg_id: int, metric: str, value: int = 1) -> list[dict]:
+    """Check and update achievements for a metric. Returns list of newly completed achievements."""
+    unlocked = []
+    try:
+        async with async_session() as db:
+            # Get matching achievements
+            result = await db.execute(select(Achievement))
+            all_achs = result.scalars().all()
+
+            for ach in all_achs:
+                cond = ach.condition
+                if cond.get("type") == "event" and cond.get("metric") == metric:
+                    pass  # event-based
+                elif cond.get("type") == "count" and cond.get("metric") == metric:
+                    pass  # count-based
+                elif cond.get("type") == "streak" and metric == "streak":
+                    pass  # streak-based
+                else:
+                    continue
+
+                # Get or create user achievement
+                ua_result = await db.execute(
+                    select(UserAchievement).where(
+                        UserAchievement.user_tg_id == tg_id,
+                        UserAchievement.achievement_slug == ach.slug,
+                    )
+                )
+                ua = ua_result.scalar_one_or_none()
+
+                if ua and ua.is_completed:
+                    continue
+
+                if not ua:
+                    ua = UserAchievement(user_tg_id=tg_id, achievement_slug=ach.slug, progress=0)
+                    db.add(ua)
+
+                # Update progress
+                target = cond.get("target", 1)
+                if cond.get("type") == "event":
+                    ua.progress = 1
+                elif cond.get("type") == "streak":
+                    ua.progress = value
+                else:
+                    ua.progress = value
+
+                # Check completion
+                if ua.progress >= target and not ua.is_completed:
+                    ua.is_completed = True
+                    ua.completed_at = datetime.utcnow()
+
+                    # Credit reward
+                    if ach.reward_rub > 0:
+                        reward_usd = ach.reward_rub / 95.0
+                        from sqlalchemy import update as sql_update
+                        await db.execute(
+                            sql_update(User).where(User.telegram_id == tg_id).values(
+                                balance_usd=User.balance_usd + reward_usd
+                            )
+                        )
+                    unlocked.append({"slug": ach.slug, "title": ach.title, "icon": ach.icon, "reward_rub": ach.reward_rub})
+
+            await db.commit()
+    except Exception as e:
+        logger.warning(f"Achievement check error: {e}")
+    return unlocked
