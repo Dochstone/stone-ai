@@ -163,11 +163,29 @@ async def stream_chat_response(
     settings = get_settings()
     openrouter_model = get_openrouter_model(model_id)
 
-    # Build messages array
+    # Build messages array with context truncation
+    # Rough estimate: 1 token ≈ 4 chars for English, 2 chars for Russian
+    model_info = next((m for m in MODELS_REGISTRY if m["id"] == model_id), None)
+    ctx_str = model_info["context_length"] if model_info else "128K"
+    max_ctx = int(ctx_str.replace("K", "000").replace("M", "000000")) if isinstance(ctx_str, str) else 128000
+    # Reserve tokens for output and system prompt
+    max_input_chars = (max_ctx - max_tokens - 2000) * 3  # ~3 chars per token average
+
     api_messages = []
     if system_prompt:
         api_messages.append({"role": "system", "content": system_prompt})
-    api_messages.extend(messages)
+
+    # Truncate: always keep last N messages that fit within context
+    truncated = []
+    char_count = 0
+    for msg in reversed(messages):
+        msg_len = len(msg.get("content", "") or "")
+        if char_count + msg_len > max_input_chars and len(truncated) >= 2:
+            break
+        truncated.append(msg)
+        char_count += msg_len
+    truncated.reverse()
+    api_messages.extend(truncated)
 
     api_key = byok_key if byok_key else settings.openrouter_api_key
 
