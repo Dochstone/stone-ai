@@ -152,7 +152,7 @@ export default function DashboardPage() {
   const stats = [
     {
       label: "Баланс",
-      value: profile ? `${balanceRub}\u2009\u20BD` : null,
+      value: profile ? `${balanceRub} ₽` : null,
       color: "text-accent",
     },
     {
@@ -178,7 +178,7 @@ export default function DashboardPage() {
         {/* Welcome header */}
         <div className="mb-8">
           <h1 className="text-2xl font-extrabold text-text mb-1">
-            {auth ? `\u0414\u043E\u0431\u0440\u043E \u043F\u043E\u0436\u0430\u043B\u043E\u0432\u0430\u0442\u044C, ${auth.email}` : "\u0414\u043E\u0431\u0440\u043E \u043F\u043E\u0436\u0430\u043B\u043E\u0432\u0430\u0442\u044C"}
+            {auth ? `Добро пожаловать, ${auth.email}` : "Добро пожаловать"}
           </h1>
           <p className="text-sm text-text/40">{formatDate(new Date())}</p>
         </div>
