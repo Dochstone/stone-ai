@@ -183,30 +183,28 @@ async def create_platega_order(
     tg_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Create a Platega.io payment invoice for card/SBP balance top-up."""
+    """Create a Platega.io SBP QR payment for balance top-up."""
     settings = get_settings()
 
-    if not settings.platega_api_key or not settings.platega_shop_id:
+    if not settings.platega_merchant_id or not settings.platega_secret:
         raise HTTPException(status_code=503, detail="Оплата через Platega временно недоступна")
 
     if req.usd_amount < MIN_TOP_UP_USD:
         raise HTTPException(status_code=400, detail=f"Минимальная сумма ${MIN_TOP_UP_USD:.0f}")
 
-    rub_amount = round(req.usd_amount * USD_TO_RUB, 2)
+    rub_amount = round(req.usd_amount * USD_TO_RUB, 0)
     order_id = platega_service.generate_order_id(tg_user["id"])
 
-    webhook_url = "https://stone-ai-production.up.railway.app/api/payment/platega/webhook"
-
-    invoice = await platega_service.create_invoice(
+    payment = await platega_service.create_payment(
         amount_rub=rub_amount,
-        order_id=order_id,
+        user_id=str(tg_user["id"]),
         description=f"Stone AI · Пополнение баланса: ${req.usd_amount:.2f}",
-        success_url=settings.webapp_url,
-        webhook_url=webhook_url,
     )
 
-    if not invoice:
+    if not payment:
         raise HTTPException(status_code=500, detail="Не удалось создать счёт. Попробуйте позже.")
+
+    transaction_id = payment["transaction_id"]
 
     tx = Transaction(
         user_tg_id=tg_user["id"],
@@ -216,17 +214,16 @@ async def create_platega_order(
         product_type="topup",
         product_id=f"topup_usd:{req.usd_amount:.2f}",
         status="pending",
-        provider_id=f"platega:{invoice.get('id', order_id)}",
+        provider_id=f"platega:{transaction_id}",
     )
     db.add(tx)
     await db.commit()
 
-    logger.info(f"Platega order: user={tg_user['id']}, rub={rub_amount}, usd={req.usd_amount}")
+    logger.info(f"Platega order: user={tg_user['id']}, rub={rub_amount}, usd={req.usd_amount}, txn={transaction_id}")
 
     return {
         "order_id": order_id,
-        "payment_id": invoice.get("id"),
-        "payment_url": invoice.get("url"),
+        "payment_url": payment["redirect_url"],
         "amount_rub": rub_amount,
         "usd_amount": req.usd_amount,
     }
@@ -234,28 +231,32 @@ async def create_platega_order(
 
 @router.post("/platega/webhook")
 async def platega_webhook(request: Request, db: AsyncSession = Depends(get_db)):
-    """Handle Platega.io webhook callback after payment."""
-    settings = get_settings()
-    body_bytes = await request.body()
+    """Handle Platega.io webhook callback after payment.
+
+    Platega sends X-MerchantId and X-Secret headers for verification.
+    Body: {id, amount, currency, status, paymentMethod}
+    Status values: PENDING, CONFIRMED, CANCELED, CHARGEBACKED
+    """
+    merchant_id = request.headers.get("X-MerchantId", "")
+    secret = request.headers.get("X-Secret", "")
+
+    if not platega_service.verify_webhook(merchant_id, secret):
+        logger.warning("Platega webhook: invalid credentials")
+        return {"ok": True}
+
     body = await request.json()
-    signature = request.headers.get("X-Signature", "") or request.headers.get("Signature", "")
 
-    if settings.platega_webhook_secret and signature:
-        if not platega_service.verify_webhook_signature(body_bytes, signature, settings.platega_webhook_secret):
-            logger.warning("Platega webhook: invalid signature")
-            raise HTTPException(status_code=403, detail="Invalid signature")
-
-    # TODO: Adjust field names based on actual Platega webhook payload
     status = body.get("status", "")
-    order_id = body.get("order_id", "")
-    payment_id = body.get("payment_id") or body.get("id", "")
+    transaction_id = body.get("id", "")
+    amount = body.get("amount")
+    currency = body.get("currency", "")
 
-    logger.info(f"Platega webhook: status={status}, order={order_id}, payment_id={payment_id}")
+    logger.info(f"Platega webhook: status={status}, id={transaction_id}, amount={amount} {currency}")
 
-    if status not in ("success", "completed", "paid"):
+    if status != "CONFIRMED":
         return {"ok": True, "message": f"Ignored status: {status}"}
 
-    provider_id = f"platega:{payment_id}" if payment_id else f"platega:{order_id}"
+    provider_id = f"platega:{transaction_id}"
 
     result = await db.execute(
         text("SELECT id, user_tg_id, amount_usd, status FROM transactions "
@@ -264,16 +265,8 @@ async def platega_webhook(request: Request, db: AsyncSession = Depends(get_db)):
     )
     row = result.fetchone()
 
-    if not row and order_id:
-        result = await db.execute(
-            text("SELECT id, user_tg_id, amount_usd, status FROM transactions "
-                 "WHERE provider_id LIKE :pid AND status = 'pending' LIMIT 1"),
-            {"pid": f"platega:%{order_id}%"}
-        )
-        row = result.fetchone()
-
     if not row:
-        logger.warning(f"Platega webhook: transaction not found for order={order_id}")
+        logger.warning(f"Platega webhook: transaction not found for id={transaction_id}")
         return {"ok": True, "message": "Transaction not found"}
 
     tx_id, user_tg_id, usd_amount, tx_status = row
@@ -309,16 +302,16 @@ async def check_platega_payment(
 ):
     """Check Platega payment status (polled by frontend)."""
     result = await db.execute(
-        text("SELECT status, amount_usd FROM transactions "
+        text("SELECT status, amount_usd, provider_id FROM transactions "
              "WHERE provider_id LIKE :pid AND user_tg_id = :tid ORDER BY id DESC LIMIT 1"),
-        {"pid": f"platega:%{order_id}%", "tid": tg_user["id"]}
+        {"pid": f"platega:%", "tid": tg_user["id"]}
     )
     row = result.fetchone()
 
     if not row:
         raise HTTPException(status_code=404, detail="Заказ не найден")
 
-    status, usd_amount = row
+    status, usd_amount, provider_id = row
     return {"status": status, "usd_amount": usd_amount}
 
 

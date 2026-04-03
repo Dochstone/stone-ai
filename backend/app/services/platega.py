@@ -1,21 +1,17 @@
-"""Platega.io payment service — Russian cards (Visa/MC/MIR) + SBP.
+"""Platega.io payment service — SBP QR payments.
 
-API docs: https://platega.io (documentation in dashboard my.platega.io)
+API docs: https://app.platega.io
 Flow:
-  1. POST /api/payment/platega/create-order → creates invoice via Platega API → returns payment URL
-  2. User pays on Platega's hosted page (card / SBP)
-  3. Platega sends webhook to /api/payment/platega/webhook → we verify signature → credit user
+  1. POST /api/payment/platega/create-order -> POST /transaction/process -> redirect URL
+  2. User pays via SBP QR on Platega's hosted page
+  3. Platega sends webhook to /api/payment/platega/webhook (X-MerchantId + X-Secret headers)
   4. Frontend polls /api/payment/platega/check/{order_id} for status
 
 Env vars needed:
-  PLATEGA_API_KEY       — API key from Platega dashboard
-  PLATEGA_SHOP_ID       — shop/merchant ID from Platega dashboard
-  PLATEGA_WEBHOOK_SECRET — secret for verifying webhook signatures
+  PLATEGA_MERCHANT_ID — merchant ID from Platega dashboard
+  PLATEGA_SECRET      — secret key from Platega dashboard
 """
 
-import hashlib
-import hmac
-import json
 import logging
 import uuid
 
@@ -25,128 +21,121 @@ from app.config import get_settings
 
 logger = logging.getLogger(__name__)
 
-PLATEGA_API_BASE = "https://api.platega.io/v1"
+PLATEGA_API_BASE = "https://app.platega.io"
 
 
-def verify_webhook_signature(body: bytes, signature: str, secret: str) -> bool:
-    """Verify webhook signature from Platega.
-
-    TODO: Adjust algorithm once Platega API docs confirm exact signing method.
-    Assuming HMAC-SHA256(raw_body, secret) — most common pattern.
-    """
-    expected = hmac.new(
-        secret.encode("utf-8"),
-        body,
-        hashlib.sha256,
-    ).hexdigest()
-    return hmac.compare_digest(expected, signature)
-
-
-async def create_invoice(
+async def create_payment(
     amount_rub: float,
-    order_id: str,
+    user_id: str,
     description: str = "Stone AI — Пополнение баланса",
-    success_url: str | None = None,
-    fail_url: str | None = None,
-    webhook_url: str | None = None,
 ) -> dict | None:
-    """Create a payment invoice via Platega.io API.
+    """Create a payment via Platega /transaction/process.
 
-    Returns dict with payment URL and order info, or None on error.
-
-    TODO: Adjust request format once Platega API docs are available.
-    Current structure follows common payment gateway patterns.
+    Returns dict with transaction_id, redirect_url, usdt_rate, status or None on error.
     """
     settings = get_settings()
 
-    if not settings.platega_api_key or not settings.platega_shop_id:
+    if not settings.platega_merchant_id or not settings.platega_secret:
         logger.error("Platega credentials not configured")
         return None
 
-    data = {
-        "shop_id": settings.platega_shop_id,
-        "amount": amount_rub,
-        "order_id": order_id,
-        "description": description,
-        "currency": "RUB",
+    headers = {
+        "Content-Type": "application/json",
+        "X-MerchantId": settings.platega_merchant_id,
+        "X-Secret": settings.platega_secret,
     }
 
-    if webhook_url:
-        data["webhook_url"] = webhook_url
-    if success_url:
-        data["success_url"] = success_url
-    if fail_url:
-        data["fail_url"] = fail_url
-
-    headers = {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {settings.platega_api_key}",
+    payload = {
+        "paymentMethod": 2,
+        "paymentDetails": {
+            "amount": int(amount_rub),
+            "currency": "RUB",
+        },
+        "description": description,
+        "return": "https://stoneai.ru/payment/success",
+        "failedUrl": "https://stoneai.ru/payment/failed",
+        "payload": f"user:{user_id}",
     }
 
     try:
         async with httpx.AsyncClient(timeout=15) as client:
             resp = await client.post(
-                f"{PLATEGA_API_BASE}/payment/create",
-                json=data,
+                f"{PLATEGA_API_BASE}/transaction/process",
+                json=payload,
                 headers=headers,
             )
 
             if resp.status_code == 200:
                 result = resp.json()
-                # TODO: Adjust response parsing based on actual Platega API response format
-                payment_url = result.get("payment_url") or result.get("url") or result.get("data", {}).get("url")
-                payment_id = result.get("payment_id") or result.get("id") or result.get("data", {}).get("id")
+                transaction_id = result.get("transactionId")
+                redirect_url = result.get("redirect")
 
-                if payment_url:
-                    logger.info(f"Platega invoice created: {payment_id}, order={order_id}")
+                if transaction_id and redirect_url:
+                    logger.info(f"Platega payment created: {transaction_id}")
                     return {
-                        "id": payment_id,
-                        "url": payment_url,
-                        "amount": amount_rub,
-                        "order_id": order_id,
+                        "transaction_id": transaction_id,
+                        "redirect_url": redirect_url,
+                        "usdt_rate": result.get("usdtRate"),
+                        "status": result.get("status"),
+                        "expires_in": result.get("expiresIn"),
                     }
-                else:
-                    logger.error(f"Platega API: no payment_url in response: {result}")
-                    return None
-            else:
-                logger.error(f"Platega HTTP error: {resp.status_code} {resp.text[:300]}")
+
+                logger.error(f"Platega API: missing transactionId/redirect in response: {result}")
                 return None
 
+            logger.error(f"Platega HTTP error: {resp.status_code} {resp.text[:300]}")
+            return None
+
     except Exception as e:
-        logger.error(f"Platega create_invoice error: {e}")
+        logger.error(f"Platega create_payment error: {e}")
         return None
 
 
-async def check_invoice_status(payment_id: str) -> dict | None:
-    """Check payment status of a Platega invoice.
+async def check_status(transaction_id: str) -> dict | None:
+    """Check payment status via GET /transaction/{transactionId}.
 
-    Returns dict with status info or None on error.
+    Returns dict with status, amount, currency, payload or None on error.
     """
     settings = get_settings()
 
-    if not settings.platega_api_key:
+    if not settings.platega_merchant_id or not settings.platega_secret:
         return None
 
     headers = {
-        "Accept": "application/json",
-        "Authorization": f"Bearer {settings.platega_api_key}",
+        "X-MerchantId": settings.platega_merchant_id,
+        "X-Secret": settings.platega_secret,
     }
 
     try:
         async with httpx.AsyncClient(timeout=10) as client:
             resp = await client.get(
-                f"{PLATEGA_API_BASE}/payment/{payment_id}",
+                f"{PLATEGA_API_BASE}/transaction/{transaction_id}",
                 headers=headers,
             )
 
             if resp.status_code == 200:
-                return resp.json()
+                data = resp.json()
+                return {
+                    "status": data.get("status"),
+                    "amount": data.get("paymentDetails", {}).get("amount"),
+                    "currency": data.get("paymentDetails", {}).get("currency"),
+                    "payload": data.get("payload"),
+                    "amount_usdt": data.get("amountUsdt"),
+                }
             return None
 
     except Exception as e:
         logger.error(f"Platega check_status error: {e}")
         return None
+
+
+def verify_webhook(merchant_id: str, secret: str) -> bool:
+    """Verify webhook authenticity by comparing X-MerchantId and X-Secret headers."""
+    settings = get_settings()
+    return (
+        merchant_id == settings.platega_merchant_id
+        and secret == settings.platega_secret
+    )
 
 
 def generate_order_id(user_tg_id: int) -> str:

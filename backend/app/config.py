@@ -79,9 +79,8 @@ class Settings:
         self.heleket_merchant = os.getenv("HELEKET_MERCHANT", "")
 
         # Platega.io (Cards RU + SBP)
-        self.platega_api_key = os.getenv("PLATEGA_API_KEY", "")
-        self.platega_shop_id = os.getenv("PLATEGA_SHOP_ID", "")
-        self.platega_webhook_secret = os.getenv("PLATEGA_WEBHOOK_SECRET", "")
+        self.platega_merchant_id = os.getenv("PLATEGA_MERCHANT_ID", "")
+        self.platega_secret = os.getenv("PLATEGA_SECRET", "")
 
         # CryptoBot (Phase 3)
         self.cryptobot_api_token = os.getenv("CRYPTOBOT_API_TOKEN", "")
