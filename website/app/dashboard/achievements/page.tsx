@@ -121,8 +121,9 @@ export default function AchievementsPage() {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 animate-fadeIn">
             {filtered.map(a => {
               const canClaim = a.is_completed && !a.reward_claimed && a.reward_rub > 0;
+              const claimed = a.is_completed && (a.reward_claimed || a.reward_rub === 0);
               return (
-                <div key={a.slug} className={`relative border rounded-2xl p-4 text-center transition-all ${
+                <div key={a.slug} className={`relative border rounded-2xl p-4 text-center transition-all flex flex-col ${
                   canClaim
                     ? "bg-accent/5 border-accent/30 ring-2 ring-accent/20 ring-offset-1"
                     : a.is_completed
@@ -141,11 +142,14 @@ export default function AchievementsPage() {
                   )}
 
                   {!a.is_completed && a.target > 1 && (
-                    <p className="text-[9px] text-text/25">{a.progress} / {a.target}</p>
+                    <p className="text-[9px] text-text/25 mb-1">{a.progress} / {a.target}</p>
                   )}
 
-                  {/* Claim button */}
-                  {canClaim && (
+                  {/* Spacer to push button to bottom */}
+                  <div className="flex-1" />
+
+                  {/* Unified button — always present, different states */}
+                  {canClaim ? (
                     <button
                       onClick={() => claimReward(a.slug)}
                       disabled={claiming === a.slug}
@@ -153,13 +157,14 @@ export default function AchievementsPage() {
                     >
                       {claiming === a.slug ? "..." : `Забрать +${a.reward_rub}₽`}
                     </button>
-                  )}
-
-                  {/* Status label (only one shown) */}
-                  {a.is_completed && !canClaim && (
-                    a.reward_rub > 0 && a.reward_claimed
-                      ? <span className="text-[9px] font-bold text-accent">Получено!</span>
-                      : <span className="text-[9px] font-bold text-teal">Выполнено</span>
+                  ) : claimed ? (
+                    <div className="mt-2 w-full py-2 rounded-lg bg-accent/10 text-accent text-[11px] font-bold">
+                      {a.reward_rub > 0 ? `Получено +${a.reward_rub}₽` : "Выполнено"}
+                    </div>
+                  ) : (
+                    <div className="mt-2 w-full py-2 rounded-lg bg-text/[0.04] text-text/25 text-[11px] font-medium">
+                      {a.reward_rub > 0 ? `Награда +${a.reward_rub}₽` : "В процессе"}
+                    </div>
                   )}
 
                   {/* Reward badge */}
