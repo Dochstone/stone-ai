@@ -958,6 +958,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [videoGenerating, setVideoGenerating] = useState(false);
   const [threedGenerating, setThreedGenerating] = useState(false);
+  const [imageGenerating, setImageGenerating] = useState(false);
 
   // Cleanup polling on unmount
   useEffect(() => {
@@ -1469,6 +1470,8 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
     setMessages(history);
     setInput("");
     setStreaming(true);
+    setImageGenerating(true);
+    setOverlayMinimized(false);
     resetTextarea();
 
     try {
@@ -1483,6 +1486,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
         const errMsg = typeof err.detail === "string" ? err.detail : "Ошибка генерации";
         setMessages([...history, { role: "assistant", content: errMsg }]);
         setStreaming(false);
+        setImageGenerating(false);
         return;
       }
 
@@ -1497,6 +1501,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
       setMessages([...history, { role: "assistant", content: "Ошибка соединения" }]);
     } finally {
       setStreaming(false);
+      setImageGenerating(false);
     }
   }, [auth, input, streaming, messages, selectedModel, saveToSession, resetTextarea]);
 
@@ -2617,10 +2622,11 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
       )}
 
       {/* Generation overlay with snake game */}
-      {(videoGenerating || threedGenerating) && !overlayMinimized && (
+      {(videoGenerating || threedGenerating || imageGenerating) && !overlayMinimized && (
         <GenerationOverlay
           isVisible={true}
-          estimatedTime={videoGenerating ? "~30-120 сек" : "~15-60 сек"}
+          estimatedTime={videoGenerating ? "~30-120 сек" : imageGenerating ? "~10-30 сек" : "~15-60 сек"}
+          type={videoGenerating ? "video" : imageGenerating ? "image" : "3d"}
           onMinimize={() => setOverlayMinimized(true)}
           token={auth?.token}
         />
