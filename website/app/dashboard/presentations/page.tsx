@@ -86,6 +86,8 @@ export default function PresentationsPage() {
   const [imageGen, setImageGen] = useState<{ slideIdx: number; model: string } | null>(null);
   const [imageLoading, setImageLoading] = useState(false);
   const [imageModel, setImageModel] = useState("nano-banana");
+  const [editMode, setEditMode] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
 
   useEffect(() => {
     const a = getAuth();
@@ -97,12 +99,13 @@ export default function PresentationsPage() {
   useEffect(() => {
     if (slides.length === 0) return;
     const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && fullscreen) setFullscreen(false);
       if (e.key === "ArrowLeft") setCurrentSlide((p) => Math.max(0, p - 1));
       if (e.key === "ArrowRight") setCurrentSlide((p) => Math.min(slides.length - 1, p + 1));
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [slides.length]);
+  }, [slides.length, fullscreen]);
 
   // Scroll strip to current slide
   useEffect(() => {
@@ -237,6 +240,56 @@ export default function PresentationsPage() {
     const updated = [...slides];
     updated[slideIdx] = { ...updated[slideIdx], image_url: undefined };
     setSlides(updated);
+  };
+
+  const updateSlideField = (idx: number, field: string, value: any) => {
+    const updated = [...slides];
+    updated[idx] = { ...updated[idx], [field]: value };
+    setSlides(updated);
+  };
+
+  const updateBullet = (slideIdx: number, bulletIdx: number, value: string) => {
+    const updated = [...slides];
+    const bullets = [...updated[slideIdx].bullets];
+    bullets[bulletIdx] = value;
+    updated[slideIdx] = { ...updated[slideIdx], bullets };
+    setSlides(updated);
+  };
+
+  const addBullet = (slideIdx: number) => {
+    const updated = [...slides];
+    updated[slideIdx] = { ...updated[slideIdx], bullets: [...updated[slideIdx].bullets, ""] };
+    setSlides(updated);
+  };
+
+  const removeBullet = (slideIdx: number, bulletIdx: number) => {
+    const updated = [...slides];
+    const bullets = updated[slideIdx].bullets.filter((_, i) => i !== bulletIdx);
+    updated[slideIdx] = { ...updated[slideIdx], bullets };
+    setSlides(updated);
+  };
+
+  const duplicateSlide = (idx: number) => {
+    const updated = [...slides];
+    updated.splice(idx + 1, 0, { ...slides[idx] });
+    setSlides(updated);
+    setCurrentSlide(idx + 1);
+  };
+
+  const deleteSlide = (idx: number) => {
+    if (slides.length <= 1) return;
+    const updated = slides.filter((_, i) => i !== idx);
+    setSlides(updated);
+    setCurrentSlide(Math.min(currentSlide, updated.length - 1));
+  };
+
+  const moveSlide = (idx: number, direction: -1 | 1) => {
+    const newIdx = idx + direction;
+    if (newIdx < 0 || newIdx >= slides.length) return;
+    const updated = [...slides];
+    [updated[idx], updated[newIdx]] = [updated[newIdx], updated[idx]];
+    setSlides(updated);
+    setCurrentSlide(newIdx);
   };
 
   const reset = () => {
@@ -530,6 +583,89 @@ export default function PresentationsPage() {
               )}
             </div>
 
+            {/* Edit / Manage slide */}
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={() => setEditMode(!editMode)}
+                className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${
+                  editMode ? "bg-accent text-white" : "text-text/40 hover:text-accent border border-text/10"
+                }`}
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+                </svg>
+                {editMode ? "Готово" : "Редактировать"}
+              </button>
+              <button onClick={() => duplicateSlide(currentSlide)} className="text-xs text-text/40 hover:text-accent transition-colors px-2 py-1.5" title="Дублировать">
+                Дублировать
+              </button>
+              {slides.length > 1 && (
+                <button onClick={() => deleteSlide(currentSlide)} className="text-xs text-red-400 hover:text-red-500 transition-colors px-2 py-1.5" title="Удалить слайд">
+                  Удалить
+                </button>
+              )}
+              <div className="flex items-center gap-1 ml-auto">
+                <button onClick={() => moveSlide(currentSlide, -1)} disabled={currentSlide === 0} className="text-xs text-text/30 hover:text-text/60 disabled:opacity-30 px-1.5 py-1" title="Переместить выше">
+                  ↑
+                </button>
+                <button onClick={() => moveSlide(currentSlide, 1)} disabled={currentSlide === slides.length - 1} className="text-xs text-text/30 hover:text-text/60 disabled:opacity-30 px-1.5 py-1" title="Переместить ниже">
+                  ↓
+                </button>
+              </div>
+            </div>
+
+            {editMode && (
+              <div className="bg-text/[0.02] border border-text/5 rounded-xl p-4 space-y-3">
+                <div>
+                  <label className="text-[10px] font-semibold text-text/40 uppercase mb-1 block">Заголовок</label>
+                  <input
+                    value={slides[currentSlide]?.title || ""}
+                    onChange={(e) => updateSlideField(currentSlide, "title", e.target.value)}
+                    className="w-full bg-bg border border-text/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-accent/50"
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-[10px] font-semibold text-text/40 uppercase">Пункты</label>
+                    <button onClick={() => addBullet(currentSlide)} className="text-[10px] text-accent font-bold">+ Добавить</button>
+                  </div>
+                  {slides[currentSlide]?.bullets.map((b: string, bi: number) => (
+                    <div key={bi} className="flex gap-2 mb-1.5">
+                      <input
+                        value={b}
+                        onChange={(e) => updateBullet(currentSlide, bi, e.target.value)}
+                        className="flex-1 bg-bg border border-text/10 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-accent/50"
+                      />
+                      <button onClick={() => removeBullet(currentSlide, bi)} className="text-red-400 text-xs px-1 hover:text-red-500">×</button>
+                    </div>
+                  ))}
+                </div>
+                <div>
+                  <label className="text-[10px] font-semibold text-text/40 uppercase mb-1 block">Заметки спикера</label>
+                  <textarea
+                    value={slides[currentSlide]?.notes || ""}
+                    onChange={(e) => updateSlideField(currentSlide, "notes", e.target.value)}
+                    rows={2}
+                    className="w-full bg-bg border border-text/10 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-accent/50 resize-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-semibold text-text/40 uppercase mb-1 block">Layout</label>
+                  <select
+                    value={slides[currentSlide]?.layout || "content"}
+                    onChange={(e) => updateSlideField(currentSlide, "layout", e.target.value)}
+                    className="bg-bg border border-text/10 rounded-lg px-3 py-1.5 text-xs focus:outline-none"
+                  >
+                    <option value="title">Title</option>
+                    <option value="content">Content</option>
+                    <option value="section-header">Section Header</option>
+                    <option value="quote">Quote</option>
+                    <option value="two-column">Two Column</option>
+                  </select>
+                </div>
+              </div>
+            )}
+
             {/* Navigation */}
             <div className="flex items-center justify-center gap-4">
               <button
@@ -586,6 +722,15 @@ export default function PresentationsPage() {
             {/* Actions */}
             <div className="flex flex-wrap gap-3">
               <button
+                onClick={() => setFullscreen(true)}
+                className="border border-text/10 text-text/60 font-medium px-5 py-2.5 rounded-xl hover:bg-text/[0.04] transition-colors flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                </svg>
+                Полный экран
+              </button>
+              <button
                 onClick={exportPDF}
                 className="bg-accent text-white font-semibold px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity flex items-center gap-2"
               >
@@ -606,6 +751,33 @@ export default function PresentationsPage() {
               >
                 Копировать JSON
               </button>
+            </div>
+          </div>
+        )}
+
+        {fullscreen && slides.length > 0 && (
+          <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center"
+            onTouchStart={(e) => { touchStartRef.current = { x: e.touches[0].clientX }; }}
+            onTouchEnd={(e) => {
+              if (!touchStartRef.current) return;
+              const dx = e.changedTouches[0].clientX - touchStartRef.current.x;
+              if (dx < -40) setCurrentSlide((p) => Math.min(slides.length - 1, p + 1));
+              if (dx > 40) setCurrentSlide((p) => Math.max(0, p - 1));
+              touchStartRef.current = null;
+            }}
+          >
+            <button onClick={() => setFullscreen(false)} className="absolute top-4 right-4 z-10 text-white/50 hover:text-white p-2" title="Выйти">
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <div className="w-full max-w-5xl px-4">
+              <SlidePreview slide={slides[currentSlide]} style={style} slideNumber={currentSlide + 1} totalSlides={slides.length} />
+            </div>
+            <div className="flex items-center gap-4 mt-6">
+              <button onClick={() => setCurrentSlide((p) => Math.max(0, p - 1))} disabled={currentSlide === 0} className="text-white/50 hover:text-white disabled:opacity-20 text-2xl px-3">&#9664;</button>
+              <span className="text-white/40 text-sm">{currentSlide + 1} / {slides.length}</span>
+              <button onClick={() => setCurrentSlide((p) => Math.min(slides.length - 1, p + 1))} disabled={currentSlide === slides.length - 1} className="text-white/50 hover:text-white disabled:opacity-20 text-2xl px-3">&#9654;</button>
             </div>
           </div>
         )}

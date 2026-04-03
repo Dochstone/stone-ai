@@ -163,6 +163,7 @@ def render_presentation_html(slides: list[dict], style: str, title: str) -> str:
         layout = slide.get("layout", "content")
         slide_title = slide.get("title", "")
         bullets = slide.get("bullets", [])
+        image_url = slide.get("image_url", "") or ""
 
         # Build slide body based on layout
         if layout == "title":
@@ -221,7 +222,28 @@ def render_presentation_html(slides: list[dict], style: str, title: str) -> str:
             right_html = "".join(
                 f'<li style="color:{theme["text"]}; font-size:18px; margin:6px 0; line-height:1.4;">{_esc(b)}</li>' for b in right
             )
-            body = f"""
+            if image_url:
+                all_bullets_html = "".join(
+                    f'<li style="color:{theme["text"]}; font-size:18px; margin:6px 0; line-height:1.4;">{_esc(b)}</li>'
+                    for b in bullets if b.strip() != "---"
+                )
+                body = f"""
+            <div style="background-color:{theme['bg']}; width:960px; height:540px; display:flex;
+                        box-sizing:border-box; page-break-after:always; position:relative;">
+                <div style="width:60%; padding:48px 40px 48px 56px;">
+                    <h2 style="color:{theme['heading']}; font-size:28px; margin:0 0 24px 0;
+                               font-family:'Segoe UI',Arial,sans-serif; font-weight:700;">{_esc(slide_title)}</h2>
+                    <ul style="list-style:none; padding:0; margin:0;">
+                        {all_bullets_html}
+                    </ul>
+                </div>
+                <div style="width:40%; display:flex; align-items:center; justify-content:center; padding:24px;">
+                    <img src="{image_url}" style="max-width:100%; max-height:90%; object-fit:contain; border-radius:8px;" />
+                </div>
+                <div style="position:absolute; bottom:16px; right:24px; color:{theme['text']}; opacity:0.4; font-size:12px;">{idx}</div>
+            </div>"""
+            else:
+                body = f"""
             <div style="background-color:{theme['bg']}; width:960px; height:540px; padding:48px 56px;
                         box-sizing:border-box; page-break-after:always; position:relative;">
                 <h2 style="color:{theme['heading']}; font-size:28px; margin:0 0 24px 0;
@@ -246,7 +268,22 @@ def render_presentation_html(slides: list[dict], style: str, title: str) -> str:
                 f'<span style="color:{theme["bullet"]}; position:absolute; left:0;">●</span> {_esc(b)}</li>'
                 for b in bullets
             )
-            body = f"""
+            if image_url:
+                body = f"""
+            <div style="background-color:{theme['bg']}; width:960px; height:540px; display:flex;
+                        box-sizing:border-box; page-break-after:always; position:relative;">
+                <div style="width:60%; padding:48px 40px 48px 56px;">
+                    <h2 style="color:{theme['heading']}; font-size:28px; margin:0 0 24px 0;
+                               font-family:'Segoe UI',Arial,sans-serif; font-weight:700;">{_esc(slide_title)}</h2>
+                    <ul style="padding:0; margin:0;">{bullets_html}</ul>
+                </div>
+                <div style="width:40%; display:flex; align-items:center; justify-content:center; padding:24px;">
+                    <img src="{image_url}" style="max-width:100%; max-height:90%; object-fit:contain; border-radius:8px;" />
+                </div>
+                <div style="position:absolute; bottom:16px; right:24px; color:{theme['text']}; opacity:0.4; font-size:12px;">{idx}</div>
+            </div>"""
+            else:
+                body = f"""
             <div style="background-color:{theme['bg']}; width:960px; height:540px; padding:48px 56px;
                         box-sizing:border-box; page-break-after:always; position:relative;">
                 <h2 style="color:{theme['heading']}; font-size:28px; margin:0 0 24px 0;
