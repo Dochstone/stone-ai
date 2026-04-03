@@ -179,6 +179,13 @@ async def threed_status(
         task.status = "completed"
         task.model_url = fal_status.get("model_url")
         task.completed_at = datetime.utcnow()
+        # Save to gallery
+        try:
+            from app.models.generation import Generation
+            gen = Generation(user_tg_id=tg_id, type="3d", model=task.model_id, prompt=task.prompt or "", result_url=task.model_url, cost=float(task.cost or 0))
+            db.add(gen)
+        except Exception as e:
+            logger.warning(f"Failed to save 3D generation: {e}")
         await db.commit()
         return {
             "task_id": task.task_id,

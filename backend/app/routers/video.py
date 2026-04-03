@@ -218,6 +218,15 @@ async def video_status(
         if jwt_token:
             thumbnail_url = f"https://stone-ai-production.up.railway.app/api/video/thumb/{task.task_id}?token={jwt_token}"
 
+        # Save to gallery
+        try:
+            from app.models.generation import Generation
+            gen = Generation(user_tg_id=tg_id, type="video", model=task.model_id, prompt=task.prompt or "", result_url=task.video_url, cost=float(task.cost or 0))
+            db.add(gen)
+            await db.commit()
+        except Exception as e:
+            logger.warning(f"Failed to save video generation: {e}")
+
         return {
             "task_id": task.task_id,
             "status": "completed",

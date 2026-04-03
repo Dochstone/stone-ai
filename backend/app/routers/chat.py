@@ -28,7 +28,19 @@ from app.services.limiter import (
 from app.services.token_billing import calculate_cost, deduct_balance, get_weighted_price
 from app.config import get_settings
 
+from app.models.generation import Generation
+
 logger = logging.getLogger(__name__)
+
+
+async def _save_generation(db, tg_id: int, gen_type: str, model: str, prompt: str, result_url: str | None = None, cost: float | None = None):
+    """Save a generation record to the gallery."""
+    try:
+        gen = Generation(user_tg_id=tg_id, type=gen_type, model=model, prompt=prompt, result_url=result_url, cost=cost)
+        db.add(gen)
+        await db.flush()
+    except Exception as e:
+        logger.warning(f"Failed to save generation: {e}")
 
 router = APIRouter(prefix="/api", tags=["chat"])
 
@@ -387,6 +399,7 @@ async def generate_image(
                                 except Exception:
                                     pass
                             await record_usage(db, tg_id, req.model_id, cost_usd=0)
+                            await _save_generation(db, tg_id, "image", req.model_id, req.prompt, image_source_url)
                             await db.commit()
                             return {"image_url": image_url, "model": req.model_id}
                     break
@@ -453,6 +466,7 @@ async def generate_image(
 
         # Record usage
         await record_usage(db, tg_id, req.model_id, tokens_in=0, tokens_out=0, cost_usd=0)
+        await _save_generation(db, tg_id, "image", req.model_id, req.prompt)
         await db.commit()
 
         return {"image_url": image_url, "model": req.model_id}
