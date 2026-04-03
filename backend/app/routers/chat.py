@@ -370,6 +370,93 @@ async def generate_image(
 
     settings = get_settings()
 
+    # OpenRouter image models (Gemini image, etc.) — generate via chat API
+    OPENROUTER_IMAGE_MODELS = {"nano-banana", "nano-banana-pro"}
+    if req.model_id in OPENROUTER_IMAGE_MODELS:
+        try:
+            from app.services.ai_router import get_openrouter_model
+            openrouter_model = get_openrouter_model(req.model_id)
+            api_key = settings.openrouter_api_key
+
+            async with httpx.AsyncClient(timeout=120.0) as client:
+                resp = await client.post(
+                    "https://openrouter.ai/api/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {api_key}",
+                        "HTTP-Referer": settings.webapp_url,
+                        "X-Title": "Stone AI",
+                        "Content-Type": "application/json",
+                    },
+                    json={
+                        "model": openrouter_model,
+                        "messages": [{"role": "user", "content": f"Generate an image: {req.prompt}"}],
+                        "max_tokens": 8192,
+                    },
+                )
+
+                if resp.status_code != 200:
+                    error_body = resp.text[:500]
+                    logger.error(f"OpenRouter image error {resp.status_code}: {error_body}")
+                    if "safety" in error_body.lower() or "rejected" in error_body.lower():
+                        raise HTTPException(400, "Промпт отклонён системой безопасности.")
+                    raise HTTPException(502, f"Ошибка генерации: {error_body[:200]}")
+
+                data = resp.json()
+                content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+
+                # Gemini returns inline_data with base64 image
+                # Check if content contains image data
+                parts = data.get("choices", [{}])[0].get("message", {}).get("parts", [])
+
+                # Try to find image in response — could be inline base64 or URL
+                image_url = None
+
+                # Check for inline_data in parts (Gemini format)
+                for part in parts:
+                    if isinstance(part, dict) and "inline_data" in part:
+                        mime = part["inline_data"].get("mime_type", "image/png")
+                        b64 = part["inline_data"].get("data", "")
+                        if b64:
+                            image_url = f"data:{mime};base64,{b64}"
+                            break
+
+                # If not in parts, check content for markdown image or data URI
+                if not image_url and content:
+                    import re
+                    # Match markdown image: ![...](url)
+                    md_match = re.search(r'!\[.*?\]\((https?://[^\s)]+)\)', content)
+                    if md_match:
+                        img_src = md_match.group(1)
+                        # Download and convert to base64
+                        async with httpx.AsyncClient(timeout=30.0) as dl:
+                            img_resp = await dl.get(img_src)
+                            if img_resp.status_code == 200:
+                                image_url = f"data:image/png;base64,{base64.b64encode(img_resp.content).decode('ascii')}"
+
+                    # Check for data URI directly in content
+                    if not image_url:
+                        data_match = re.search(r'(data:image/[^;]+;base64,[A-Za-z0-9+/=]+)', content)
+                        if data_match:
+                            image_url = data_match.group(1)
+
+                if not image_url:
+                    # Model returned text instead of image — return as text response
+                    logger.warning(f"OpenRouter image model returned text: {content[:100]}")
+                    return {"image_url": None, "text": content, "model": req.model_id}
+
+                await record_usage(db, tg_id, req.model_id, cost_usd=0)
+                await _save_generation(db, tg_id, "image", req.model_id, req.prompt)
+                await db.commit()
+                asyncio.create_task(check_and_update(tg_id, "images", db_user.monthly_images_used or 1 if db_user else 1))
+
+                return {"image_url": image_url, "model": req.model_id}
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"OpenRouter image error: {e}")
+            raise HTTPException(502, f"Ошибка генерации: {str(e)[:200]}")
+
     # KOLORS (Kling) image generation
     if req.model_id in ("kolors-v2", "kolors-v3") and settings.kling_access_key:
         try:
