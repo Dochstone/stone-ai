@@ -9,10 +9,11 @@ const API_URL =
   "https://stone-ai-production.up.railway.app";
 
 interface UserProfile {
-  balance: number;
-  subscription_tier: string;
-  requests_today: number;
-  generations_count: number;
+  balance_usd: number;
+  plan: string;
+  usage: { lite_today: number };
+  stats: { total_requests: number; total_tokens: number };
+  user: { plan: string; balance_usd: number };
 }
 
 interface Generation {
@@ -117,17 +118,23 @@ export default function DashboardPage() {
 
     const headers = { Authorization: `Bearer ${stored.token}` };
 
-    fetch(`${API_URL}/api/user/profile`, { headers })
-      .then((res) => res.json())
+    fetch(`${API_URL}/api/user/me`, { headers })
+      .then((res) => {
+        if (!res.ok) throw new Error("auth");
+        return res.json();
+      })
       .then((data) => setProfile(data))
       .catch(() => {})
       .finally(() => setLoadingProfile(false));
 
     fetch(`${API_URL}/api/generations/?limit=4`, { headers })
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("fetch");
+        return res.json();
+      })
       .then((data) => {
-        const items = Array.isArray(data) ? data : data.items ?? data.results ?? [];
-        setRecentGens(items.slice(0, 4));
+        const items = data.generations ?? data.items ?? data.results ?? [];
+        setRecentGens(Array.isArray(items) ? items.slice(0, 4) : []);
       })
       .catch(() => {})
       .finally(() => setLoadingGens(false));
@@ -153,25 +160,33 @@ export default function DashboardPage() {
     );
   }
 
+  const tierLabel = (t: string) =>
+    t === "max-pro" ? "Elite" : t === "max" ? "Pro" : t === "mini" ? "Start" : "Free";
+
+  const balanceUsd = profile?.balance_usd ?? profile?.user?.balance_usd ?? 0;
+  const plan = profile?.plan ?? profile?.user?.plan ?? "free";
+  const liteToday = profile?.usage?.lite_today ?? 0;
+  const totalRequests = profile?.stats?.total_requests ?? 0;
+
   const stats = [
     {
       label: "Баланс",
-      value: profile ? `${profile.balance.toFixed(0)}\u2009\u20BD` : null,
+      value: profile ? `$${Number(balanceUsd).toFixed(2)}` : null,
       color: "text-accent",
     },
     {
       label: "Запросов сегодня",
-      value: profile ? String(profile.requests_today ?? 0) : null,
+      value: profile ? String(liteToday) : null,
       color: "text-teal",
     },
     {
       label: "Подписка",
-      value: profile ? (profile.subscription_tier || "Free") : null,
+      value: profile ? tierLabel(plan) : null,
       color: "text-text",
     },
     {
-      label: "Генераций всего",
-      value: profile ? String(profile.generations_count ?? 0) : null,
+      label: "Всего запросов",
+      value: profile ? totalRequests.toLocaleString() : null,
       color: "text-purple-600",
     },
   ];
