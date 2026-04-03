@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Skeleton } from "@/components/Skeleton";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
 
@@ -118,19 +119,44 @@ export default function ProjectsPage() {
     fetchProjects();
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-text/30">Загрузка...</div>;
+  if (loading) return (
+    <div className="pb-20">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
+        <div className="flex items-center justify-between mb-8">
+          <div className="space-y-2">
+            <Skeleton className="h-7 w-40" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+          <Skeleton className="h-10 w-36 rounded-xl" />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {[1, 2].map(i => (
+            <div key={i} className="bg-bg border border-text/5 rounded-2xl p-5 space-y-3">
+              <Skeleton className="h-5 w-3/4" />
+              <Skeleton className="h-3 w-full" />
+              <div className="flex gap-1.5">
+                <Skeleton className="h-5 w-16 rounded" />
+                <Skeleton className="h-5 w-20 rounded" />
+              </div>
+              <Skeleton className="h-3 w-1/3" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 
   const auth = getAuth();
   if (!auth) return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+    <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
       <p className="text-text/50">Войдите для управления проектами</p>
       <a href="/webchat" className="bg-accent text-white px-6 py-2.5 rounded-xl font-bold text-sm">Войти</a>
     </div>
   );
 
   return (
-    <div className="min-h-screen pb-20">
-      <div className="max-w-4xl mx-auto px-4 pt-10">
+    <div className="pb-20">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-extrabold text-text">Мои проекты</h1>

@@ -231,7 +231,7 @@ export function PlansScreen() {
     haptic('medium')
     setBuying(true)
     try {
-      const data = await apiPost<{ payment_url: string }>('/api/payment/lava/create-order', {
+      const data = await apiPost<{ payment_url: string }>('/api/payment/platega/create-order', {
         usd_amount: usd, credits: 0,
       })
       if (data.payment_url) window.open(data.payment_url, '_blank')
@@ -589,7 +589,7 @@ export function PlansScreen() {
                 {
                   id: 'card', icon: '💳', title: 'Карта РФ / СБП',
                   subtitle: `≈ ${Math.round(usd * 95).toLocaleString()}₽`,
-                  tag: 'Рубли', tagColor: '#4a90d9',
+                  tag: 'Platega', tagColor: '#4a90d9',
                 },
                 {
                   id: 'crypto', icon: '🪙', title: 'Криптовалюта',

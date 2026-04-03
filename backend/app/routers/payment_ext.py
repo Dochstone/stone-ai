@@ -15,6 +15,7 @@ from app.models import Transaction
 from app.services.token_billing import add_balance
 from app.services import lava as lava_service
 from app.services import heleket as heleket_service
+from app.services import platega as platega_service
 from app.config import get_settings
 
 logger = logging.getLogger(__name__)
@@ -162,6 +163,155 @@ async def check_lava_payment(
         text("SELECT status, amount_usd FROM transactions "
              "WHERE provider_id LIKE :pid AND user_tg_id = :tid ORDER BY id DESC LIMIT 1"),
         {"pid": f"lava:%{order_id}%", "tid": tg_user["id"]}
+    )
+    row = result.fetchone()
+
+    if not row:
+        raise HTTPException(status_code=404, detail="Заказ не найден")
+
+    status, usd_amount = row
+    return {"status": status, "usd_amount": usd_amount}
+
+
+# ═══════════════════════════════════════════════════════════
+# PLATEGA.IO — Russian Cards + SBP (alternative to Lava)
+# ═══════════════════════════════════════════════════════════
+
+@router.post("/platega/create-order")
+async def create_platega_order(
+    req: TopUpRequest,
+    tg_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create a Platega.io payment invoice for card/SBP balance top-up."""
+    settings = get_settings()
+
+    if not settings.platega_api_key or not settings.platega_shop_id:
+        raise HTTPException(status_code=503, detail="Оплата через Platega временно недоступна")
+
+    if req.usd_amount < MIN_TOP_UP_USD:
+        raise HTTPException(status_code=400, detail=f"Минимальная сумма ${MIN_TOP_UP_USD:.0f}")
+
+    rub_amount = round(req.usd_amount * USD_TO_RUB, 2)
+    order_id = platega_service.generate_order_id(tg_user["id"])
+
+    webhook_url = "https://stone-ai-production.up.railway.app/api/payment/platega/webhook"
+
+    invoice = await platega_service.create_invoice(
+        amount_rub=rub_amount,
+        order_id=order_id,
+        description=f"Stone AI · Пополнение баланса: ${req.usd_amount:.2f}",
+        success_url=settings.webapp_url,
+        webhook_url=webhook_url,
+    )
+
+    if not invoice:
+        raise HTTPException(status_code=500, detail="Не удалось создать счёт. Попробуйте позже.")
+
+    tx = Transaction(
+        user_tg_id=tg_user["id"],
+        amount=rub_amount,
+        currency="RUB",
+        amount_usd=req.usd_amount,
+        product_type="topup",
+        product_id=f"topup_usd:{req.usd_amount:.2f}",
+        status="pending",
+        provider_id=f"platega:{invoice.get('id', order_id)}",
+    )
+    db.add(tx)
+    await db.commit()
+
+    logger.info(f"Platega order: user={tg_user['id']}, rub={rub_amount}, usd={req.usd_amount}")
+
+    return {
+        "order_id": order_id,
+        "payment_id": invoice.get("id"),
+        "payment_url": invoice.get("url"),
+        "amount_rub": rub_amount,
+        "usd_amount": req.usd_amount,
+    }
+
+
+@router.post("/platega/webhook")
+async def platega_webhook(request: Request, db: AsyncSession = Depends(get_db)):
+    """Handle Platega.io webhook callback after payment."""
+    settings = get_settings()
+    body_bytes = await request.body()
+    body = await request.json()
+    signature = request.headers.get("X-Signature", "") or request.headers.get("Signature", "")
+
+    if settings.platega_webhook_secret and signature:
+        if not platega_service.verify_webhook_signature(body_bytes, signature, settings.platega_webhook_secret):
+            logger.warning("Platega webhook: invalid signature")
+            raise HTTPException(status_code=403, detail="Invalid signature")
+
+    # TODO: Adjust field names based on actual Platega webhook payload
+    status = body.get("status", "")
+    order_id = body.get("order_id", "")
+    payment_id = body.get("payment_id") or body.get("id", "")
+
+    logger.info(f"Platega webhook: status={status}, order={order_id}, payment_id={payment_id}")
+
+    if status not in ("success", "completed", "paid"):
+        return {"ok": True, "message": f"Ignored status: {status}"}
+
+    provider_id = f"platega:{payment_id}" if payment_id else f"platega:{order_id}"
+
+    result = await db.execute(
+        text("SELECT id, user_tg_id, amount_usd, status FROM transactions "
+             "WHERE provider_id = :pid AND status = 'pending' LIMIT 1"),
+        {"pid": provider_id}
+    )
+    row = result.fetchone()
+
+    if not row and order_id:
+        result = await db.execute(
+            text("SELECT id, user_tg_id, amount_usd, status FROM transactions "
+                 "WHERE provider_id LIKE :pid AND status = 'pending' LIMIT 1"),
+            {"pid": f"platega:%{order_id}%"}
+        )
+        row = result.fetchone()
+
+    if not row:
+        logger.warning(f"Platega webhook: transaction not found for order={order_id}")
+        return {"ok": True, "message": "Transaction not found"}
+
+    tx_id, user_tg_id, usd_amount, tx_status = row
+
+    if tx_status == "completed":
+        return {"ok": True, "message": "Already processed"}
+
+    new_balance = await add_balance(db, user_tg_id, usd_amount)
+
+    await db.execute(
+        text("UPDATE transactions SET status = 'completed' WHERE id = :tid"),
+        {"tid": tx_id}
+    )
+    await db.execute(
+        text("UPDATE users SET total_deposited_usd = COALESCE(total_deposited_usd, 0) + :amt WHERE telegram_id = :tid"),
+        {"amt": usd_amount, "tid": user_tg_id}
+    )
+
+    from app.routers.referral import credit_referrer
+    await credit_referrer(db, user_tg_id, usd_amount)
+
+    await db.commit()
+
+    logger.info(f"Platega payment completed: user={user_tg_id}, usd={usd_amount}, balance=${new_balance:.6f}")
+    return {"ok": True}
+
+
+@router.get("/platega/check/{order_id}")
+async def check_platega_payment(
+    order_id: str,
+    tg_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Check Platega payment status (polled by frontend)."""
+    result = await db.execute(
+        text("SELECT status, amount_usd FROM transactions "
+             "WHERE provider_id LIKE :pid AND user_tg_id = :tid ORDER BY id DESC LIMIT 1"),
+        {"pid": f"platega:%{order_id}%", "tid": tg_user["id"]}
     )
     row = result.fetchone()
 

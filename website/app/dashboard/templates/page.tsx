@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { SkeletonGrid } from "@/components/Skeleton";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
 
@@ -106,8 +107,8 @@ export default function TemplatesPage() {
   };
 
   return (
-    <div className="min-h-screen pb-20">
-      <div className="max-w-6xl mx-auto px-4 pt-10">
+    <div className="pb-20">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-extrabold text-text">AI-шаблоны</h1>
@@ -135,7 +136,7 @@ export default function TemplatesPage() {
 
         {/* Grid */}
         {loading ? (
-          <div className="text-center py-20 text-text/20">Загрузка...</div>
+          <SkeletonGrid cols={3} count={6} />
         ) : templates.length === 0 ? (
           <div className="text-center py-20 text-text/20">Ничего не найдено</div>
         ) : (

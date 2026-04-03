@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { SkeletonGrid } from "@/components/Skeleton";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
 
@@ -102,16 +103,16 @@ export default function GalleryPage() {
 
   const auth = getAuth();
   if (!auth) return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+    <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
       <p className="text-text/50">Войдите для просмотра галереи</p>
       <a href="/webchat" className="bg-accent text-white px-6 py-2.5 rounded-xl font-bold text-sm">Войти</a>
     </div>
   );
 
   return (
-    <div className="min-h-screen pb-20">
-      <div className="max-w-6xl mx-auto px-4 pt-10">
-        <h1 className="text-2xl font-extrabold text-text mb-6">Мои генерации</h1>
+    <div className="pb-20">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
+        <h1 className="text-xl sm:text-2xl font-extrabold text-text mb-6">Мои генерации</h1>
 
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-2 mb-6">
@@ -128,7 +129,9 @@ export default function GalleryPage() {
         </div>
 
         {/* Grid */}
-        {gens.length === 0 && !loading ? (
+        {gens.length === 0 && loading ? (
+          <SkeletonGrid cols={4} count={8} aspectSquare />
+        ) : gens.length === 0 && !loading ? (
           <div className="text-center py-20 bg-text/[0.02] border border-text/5 rounded-2xl">
             <span className="text-5xl block mb-4">🎨</span>
             <h3 className="text-lg font-bold text-text mb-2">Здесь появятся ваши генерации</h3>

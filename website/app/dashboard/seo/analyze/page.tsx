@@ -53,8 +53,8 @@ ${text}
   };
 
   return (
-    <div className="min-h-screen pb-20">
-      <div className="max-w-4xl mx-auto px-4 pt-10">
+    <div className="pb-20">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
         <a href="/dashboard/seo" className="text-xs text-text/30 hover:text-accent mb-4 inline-block">← SEO-модуль</a>
         <h1 className="text-2xl font-extrabold text-text mb-1">Анализатор текста</h1>
         <p className="text-sm text-text/40 mb-6">Вставьте текст — AI оценит SEO-параметры и даст рекомендации</p>

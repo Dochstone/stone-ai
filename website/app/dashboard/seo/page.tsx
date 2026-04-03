@@ -32,8 +32,8 @@ const tools = [
 
 export default function SEOHub() {
   return (
-    <div className="min-h-screen pb-20">
-      <div className="max-w-4xl mx-auto px-4 pt-10">
+    <div className="pb-20">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
         <h1 className="text-2xl font-extrabold text-text mb-2">SEO-модуль</h1>
         <p className="text-sm text-text/40 mb-8">3 инструмента для создания и анализа SEO-контента</p>
 
