@@ -1,12 +1,12 @@
 "use client";
 
 const STYLES = [
-  { id: "modern", name: "Современный", bg: "#ffffff", text: "#1a1a2e", accent: "#4361ee" },
-  { id: "minimal", name: "Минимальный", bg: "#fafafa", text: "#333333", accent: "#666666" },
+  { id: "modern", name: "Современный", bg: "#ffffff", text: "#1a1a2e", accent: "#6c63ff" },
+  { id: "minimal", name: "Минимальный", bg: "#fafafa", text: "#333333", accent: "#000000" },
   { id: "corporate", name: "Корпоративный", bg: "#ffffff", text: "#2c3e50", accent: "#2980b9" },
-  { id: "creative", name: "Креативный", bg: "#1a1a2e", text: "#e8e8e8", accent: "#e94560" },
-  { id: "bold", name: "Яркий", bg: "#000000", text: "#ffffff", accent: "#ffd93d" },
-  { id: "dark", name: "Тёмный", bg: "#0f0f1a", text: "#d1d5db", accent: "#6c8cff" },
+  { id: "creative", name: "Креативный", bg: "#fff8f0", text: "#2d2d2d", accent: "#ff6b6b" },
+  { id: "bold", name: "Яркий", bg: "#0f0f0f", text: "#e0e0e0", accent: "#ffcc00" },
+  { id: "dark", name: "Тёмный", bg: "#1e1e2e", text: "#cdd6f4", accent: "#89b4fa" },
 ];
 
 interface Props {

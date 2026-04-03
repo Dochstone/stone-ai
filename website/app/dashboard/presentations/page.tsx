@@ -32,7 +32,7 @@ const MODELS = [
 ];
 
 const DETAIL_LEVELS = [
-  { id: "brief", label: "Кратко" },
+  { id: "short", label: "Кратко" },
   { id: "medium", label: "Средне" },
   { id: "detailed", label: "Подробно" },
 ];
@@ -72,6 +72,8 @@ export default function PresentationsPage() {
   const [historyLoading, setHistoryLoading] = useState(false);
 
   const stripRef = useRef<HTMLDivElement>(null);
+  const touchStartRef = useRef<{ x: number } | null>(null);
+  const [showNotes, setShowNotes] = useState(false);
 
   useEffect(() => {
     const a = getAuth();
@@ -106,7 +108,15 @@ export default function PresentationsPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        setHistory(data.generations || data.items || []);
+        const items = (data.generations || data.items || []).map((g: any) => ({
+          id: g.id,
+          topic: g.prompt || g.topic || "",
+          slides_count: g.metadata_?.slides_count || 0,
+          style: g.metadata_?.style || "modern",
+          created_at: g.created_at || "",
+          slides: typeof g.result_text === "string" ? JSON.parse(g.result_text || "[]") : (g.slides || []),
+        }));
+        setHistory(items);
       }
     } catch {
       /* ignore */
@@ -135,7 +145,7 @@ export default function PresentationsPage() {
           style,
           audience: audience || undefined,
           detail_level: detailLevel,
-          model: modelId,
+          model_id: modelId,
           language,
         }),
       });
@@ -386,13 +396,42 @@ export default function PresentationsPage() {
               </span>
             </div>
 
-            {/* Main slide */}
-            <SlidePreview
-              slide={slides[currentSlide]}
-              style={style}
-              slideNumber={currentSlide + 1}
-              totalSlides={slides.length}
-            />
+            {/* Main slide with swipe */}
+            <div
+              onTouchStart={(e) => { touchStartRef.current = { x: e.touches[0].clientX }; }}
+              onTouchEnd={(e) => {
+                if (!touchStartRef.current) return;
+                const dx = e.changedTouches[0].clientX - touchStartRef.current.x;
+                if (dx < -40) setCurrentSlide((p) => Math.min(slides.length - 1, p + 1));
+                if (dx > 40) setCurrentSlide((p) => Math.max(0, p - 1));
+                touchStartRef.current = null;
+              }}
+              style={{ touchAction: "pan-y" }}
+            >
+              <SlidePreview
+                slide={slides[currentSlide]}
+                style={style}
+                slideNumber={currentSlide + 1}
+                totalSlides={slides.length}
+              />
+            </div>
+
+            {/* Speaker notes */}
+            {slides[currentSlide]?.notes && (
+              <div>
+                <button
+                  onClick={() => setShowNotes(!showNotes)}
+                  className="text-xs text-text/40 hover:text-text/60 transition-colors"
+                >
+                  {showNotes ? "Скрыть заметки" : "Заметки спикера"}
+                </button>
+                {showNotes && (
+                  <p className="mt-2 text-sm text-text/50 bg-text/[0.03] rounded-xl p-4 leading-relaxed">
+                    {slides[currentSlide].notes}
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Navigation */}
             <div className="flex items-center justify-center gap-4">
@@ -526,12 +565,12 @@ export default function PresentationsPage() {
 
 function StyleDot({ style }: { style: string }) {
   const colors: Record<string, string> = {
-    modern: "#4361ee",
-    minimal: "#666666",
+    modern: "#6c63ff",
+    minimal: "#000000",
     corporate: "#2980b9",
-    creative: "#e94560",
-    bold: "#ffd93d",
-    dark: "#6c8cff",
+    creative: "#ff6b6b",
+    bold: "#ffcc00",
+    dark: "#89b4fa",
   };
   return (
     <span
