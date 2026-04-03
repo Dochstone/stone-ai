@@ -102,6 +102,12 @@ async def delete_saved(prompt_id: str, user: dict = Depends(get_current_user), d
 
 # ─── Wizard: generate from template ───
 
+class DirectGenerateRequest(BaseModel):
+    prompt: str
+    model_id: str = "gpt-4.1-mini"
+    cost_rub: float = 3.0
+
+
 class WizardGenerateRequest(BaseModel):
     template_id: str
     fields: dict[str, str]
@@ -194,6 +200,64 @@ async def wizard_generate(
         "cost_rub": cost_rub,
         "balance_rub": round(new_balance * 95, 2),
     }
+
+
+@router.post("/generate/direct")
+async def direct_generate(
+    body: DirectGenerateRequest,
+    user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Direct AI generation with prompt — used by SEO module and other tools."""
+    from app.models.user import User
+    from app.services.ai_router import stream_chat_response
+
+    tg_id = user["id"]
+    db_id = user.get("db_id")
+    cost_usd = body.cost_rub / 95.0
+
+    if db_id:
+        u_result = await db.execute(select(User).where(User.id == db_id))
+    else:
+        u_result = await db.execute(select(User).where(User.telegram_id == tg_id))
+    db_user = u_result.scalar_one_or_none()
+
+    balance = float(db_user.balance_usd or 0) if db_user else 0
+    tier = (db_user.subscription_tier or "free") if db_user else "free"
+
+    if tier == "free" and balance < cost_usd:
+        raise HTTPException(402, {
+            "error": "insufficient_balance",
+            "message": f"Недостаточно средств. Нужно ~{body.cost_rub:.0f}₽",
+            "balance_rub": round(balance * 95, 2),
+        })
+
+    messages = [{"role": "user", "content": body.prompt}]
+    full_response = ""
+    async for chunk in stream_chat_response(body.model_id, messages, None, max_tokens=8192):
+        if chunk.startswith("data: "):
+            payload = chunk[6:].strip()
+            if payload == "[DONE]":
+                continue
+            try:
+                import json
+                data = json.loads(payload)
+                content = data.get("content") or (data.get("choices", [{}])[0].get("delta", {}).get("content"))
+                if content:
+                    full_response += content
+            except Exception:
+                pass
+
+    if not full_response:
+        raise HTTPException(502, "Ошибка генерации")
+
+    if db_user and cost_usd > 0:
+        from sqlalchemy import update as sql_update
+        await db.execute(sql_update(User).where(User.id == db_user.id).values(balance_usd=User.balance_usd - cost_usd))
+        await db.commit()
+
+    new_balance = max(0, balance - cost_usd)
+    return {"result": full_response, "model": body.model_id, "cost_rub": body.cost_rub, "balance_rub": round(new_balance * 95, 2)}
 
 
 # ─── Seed: 50 curated prompts ───
