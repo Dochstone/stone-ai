@@ -1,3 +1,7 @@
+"use client";
+
+import { useState, useEffect } from "react";
+
 interface ToolCtaProps {
   title?: string;
   subtitle?: string;
@@ -9,6 +13,19 @@ export default function ToolCta({
   subtitle = "15 бесплатных запросов каждый день. Бесплатный старт.",
   ctaHref = "/webchat",
 }: ToolCtaProps) {
+  const [hasPaidPlan, setHasPaidPlan] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("stone_auth");
+      if (!raw) return;
+      const auth = JSON.parse(raw);
+      if (auth?.plan && auth.plan !== "free") setHasPaidPlan(true);
+    } catch {}
+  }, []);
+
+  if (hasPaidPlan) return null;
+
   return (
     <section className="bg-dark text-white py-20 md:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

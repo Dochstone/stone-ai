@@ -297,6 +297,15 @@ function TrustMarquee() {
 }
 
 export default function Hero() {
+  const [hasPaidPlan, setHasPaidPlan] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("stone_auth");
+      if (raw) { const a = JSON.parse(raw); if (a?.plan && a.plan !== "free") setHasPaidPlan(true); }
+    } catch {}
+  }, []);
+
   // Mark as onboarded for users who haven't seen it (skip intro slider entirely)
   useEffect(() => {
     if (!localStorage.getItem("stone_onboarded")) {
@@ -344,7 +353,9 @@ export default function Hero() {
               Посмотреть модели
             </a>
           </div>
-          <p className="mt-3 text-xs text-text/30">Бесплатно 15 запросов/день · Подписка от 390₽/мес</p>
+          {!hasPaidPlan && (
+            <p className="mt-3 text-xs text-text/30">Бесплатно 15 запросов/день · Подписка от 390₽/мес</p>
+          )}
 
           <div className="mt-4 flex items-center justify-center">
             <a
