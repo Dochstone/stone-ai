@@ -1,5 +1,6 @@
 """Projects CRUD — user brands/businesses for AI context."""
 
+import asyncio
 import logging
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -10,6 +11,7 @@ from app.database import get_db
 from app.middleware.auth import get_current_user
 from app.models.project import Project
 from app.models.user import User
+from app.routers.achievements import check_and_update
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/projects", tags=["projects"])
@@ -99,6 +101,10 @@ async def create_project(data: ProjectCreate, user: dict = Depends(get_current_u
     db.add(project)
     await db.commit()
     await db.refresh(project)
+
+    # Achievement: first project created
+    asyncio.create_task(check_and_update(tg_id, "first_project", 1))
+
     return _project_dict(project)
 
 

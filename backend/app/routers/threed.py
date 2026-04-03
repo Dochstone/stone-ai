@@ -1,5 +1,6 @@
 """3D generation endpoints — async generation via fal.ai (Tripo, TripoSR)."""
 
+import asyncio
 import uuid
 import logging
 from datetime import datetime
@@ -20,6 +21,7 @@ from app.services.threed_router import (
     submit_threed_generation,
     check_threed_status,
 )
+from app.routers.achievements import check_and_update
 
 logger = logging.getLogger(__name__)
 
@@ -119,6 +121,7 @@ async def generate_threed(
         task.model_url = fal_result["model_url"]
         task.completed_at = datetime.utcnow()
         await db.commit()
+        asyncio.create_task(check_and_update(tg_id, "3d", 1))
         return {
             "task_id": task_id,
             "status": "completed",
@@ -190,6 +193,7 @@ async def threed_status(
         except Exception as e:
             logger.warning(f"Failed to save 3D generation: {e}")
         await db.commit()
+        asyncio.create_task(check_and_update(tg_id, "3d", 1))
         return {
             "task_id": task.task_id,
             "status": "completed",

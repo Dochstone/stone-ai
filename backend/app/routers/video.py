@@ -1,5 +1,6 @@
 """Video generation endpoints — async generation via fal.ai."""
 
+import asyncio
 import uuid
 import logging
 from datetime import datetime
@@ -24,6 +25,7 @@ from app.services.video_router import (
     check_video_status,
 )
 from app.services.token_billing import deduct_balance
+from app.routers.achievements import check_and_update
 
 logger = logging.getLogger(__name__)
 
@@ -228,6 +230,9 @@ async def video_status(
                 await gen_db.commit()
         except Exception as e:
             logger.warning(f"Failed to save video generation: {e}")
+
+        # Achievement: videos generated
+        asyncio.create_task(check_and_update(tg_id, "videos", 1))
 
         return {
             "task_id": task.task_id,

@@ -29,6 +29,7 @@ from app.services.token_billing import calculate_cost, deduct_balance, get_weigh
 from app.config import get_settings
 
 from app.models.generation import Generation
+from app.routers.achievements import check_and_update
 
 logger = logging.getLogger(__name__)
 
@@ -272,6 +273,10 @@ async def chat(
 
             await db.commit()
 
+            # Achievement: messages sent
+            if db_user:
+                asyncio.create_task(check_and_update(tg_id, "messages", db_user.total_requests or 1))
+
     return StreamingResponse(
         generate(),
         media_type="text/event-stream",
@@ -403,6 +408,7 @@ async def generate_image(
                             await record_usage(db, tg_id, req.model_id, cost_usd=0)
                             await _save_generation(db, tg_id, "image", req.model_id, req.prompt, image_source_url)
                             await db.commit()
+                            asyncio.create_task(check_and_update(tg_id, "images", db_user.monthly_images_used or 1 if db_user else 1))
                             return {"image_url": image_url, "model": req.model_id}
                     break
                 if status.get("status") == "FAILED":
@@ -470,6 +476,8 @@ async def generate_image(
         await record_usage(db, tg_id, req.model_id, tokens_in=0, tokens_out=0, cost_usd=0)
         await _save_generation(db, tg_id, "image", req.model_id, req.prompt)
         await db.commit()
+
+        asyncio.create_task(check_and_update(tg_id, "images", db_user.monthly_images_used or 1 if db_user else 1))
 
         return {"image_url": image_url, "model": req.model_id}
 

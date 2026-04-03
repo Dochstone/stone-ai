@@ -1,5 +1,6 @@
 """Referral program — invite friends, both get +5 requests + 10% of deposits."""
 
+import asyncio
 import logging
 import secrets
 import string
@@ -12,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.middleware.auth import get_current_user
 from app.models import User
+from app.routers.achievements import check_and_update
 
 logger = logging.getLogger(__name__)
 
@@ -111,6 +113,15 @@ async def apply_referral_code(
         referrer_row.rollover_fast = (referrer_row.rollover_fast or 0) + REFERRAL_BONUS_REQUESTS
 
     await db.commit()
+
+    # Achievement: referrals (count for the referrer)
+    referrer_tg_id = referrer.telegram_id or referrer.id
+    # Count total referrals for the referrer
+    referral_count_result = await db.execute(
+        select(func.count(User.id)).where(User.referrer_id == referrer_tg_id)
+    )
+    total_referrals = referral_count_result.scalar() or 0
+    asyncio.create_task(check_and_update(referrer_tg_id, "referrals", total_referrals))
 
     logger.info(f"Referral applied: user={tg_id} referred_by={referrer.telegram_id}, +{REFERRAL_BONUS_REQUESTS} requests each")
 

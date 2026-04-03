@@ -1,5 +1,6 @@
 """Prompt library — curated templates + user saved prompts."""
 
+import asyncio
 import logging
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -9,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.middleware.auth import get_current_user
 from app.models.prompt_template import PromptTemplate, SavedPrompt
+from app.routers.achievements import check_and_update
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["prompts"])
@@ -190,6 +192,9 @@ async def wizard_generate(
     # Increment usage
     tpl.usage_count += 1
     await db.commit()
+
+    # Achievement: first template used
+    asyncio.create_task(check_and_update(tg_id, "first_template", 1))
 
     new_balance = max(0, balance - cost_usd)
 

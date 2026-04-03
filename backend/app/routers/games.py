@@ -1,5 +1,6 @@
 """Games — snake leaderboard with monthly prizes."""
 
+import asyncio
 import logging
 from datetime import datetime
 from fastapi import APIRouter, Depends
@@ -11,6 +12,7 @@ from app.database import get_db
 from app.middleware.auth import get_current_user
 from app.models.game_score import GameScore
 from app.models.user import User
+from app.routers.achievements import check_and_update
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/games", tags=["games"])
@@ -35,11 +37,15 @@ async def save_score(data: ScoreSubmit, user: dict = Depends(get_current_user), 
         if data.score > prev.score:
             prev.score = data.score
             await db.commit()
+            if data.game == "snake":
+                asyncio.create_task(check_and_update(tg_id, "snake_score", data.score))
             return {"saved": True, "score": data.score, "is_new_record": True}
         return {"saved": False, "score": prev.score, "is_new_record": False}
 
     db.add(GameScore(user_tg_id=tg_id, game=data.game, score=data.score, month=month))
     await db.commit()
+    if data.game == "snake":
+        asyncio.create_task(check_and_update(tg_id, "snake_score", data.score))
     return {"saved": True, "score": data.score, "is_new_record": True}
 
 

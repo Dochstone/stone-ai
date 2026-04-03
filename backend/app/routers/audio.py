@@ -1,5 +1,6 @@
 """Audio endpoints — TTS (text-to-speech) and STT (speech-to-text)."""
 
+import asyncio
 import base64
 import logging
 import math
@@ -20,6 +21,7 @@ from app.services.audio_router import (
 )
 from app.services.token_billing import calculate_cost, deduct_balance
 from app.services.limiter import record_usage
+from app.routers.achievements import check_and_update
 
 logger = logging.getLogger(__name__)
 
@@ -91,6 +93,9 @@ async def tts_generate(
 
     await record_usage(db, tg_id, "gpt-audio-mini", tokens_in=tokens_in, tokens_out=tokens_out, cost_usd=cost)
     await db.commit()
+
+    # Achievement: audio (TTS) used
+    asyncio.create_task(check_and_update(tg_id, "audio", 1))
 
     return {
         "audio_b64": tts_result["audio_b64"],

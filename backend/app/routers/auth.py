@@ -1,5 +1,6 @@
 """Auth API — email/password, Google OAuth, Yandex OAuth, TG linking, TG web login."""
 
+import asyncio
 import re
 import time
 import uuid
@@ -25,6 +26,7 @@ from app.middleware.web_auth import (
 from app.config import get_settings
 from app.services.email_service import generate_code, send_verification_code, send_reset_code
 from app.services.streak import update_login_streak
+from app.routers.achievements import check_and_update
 
 logger = logging.getLogger(__name__)
 
@@ -194,6 +196,10 @@ async def verify_email(body: VerifyEmailRequest, request: Request, db: AsyncSess
 
     _pending_codes.pop(email, None)
     token = create_jwt(user.id, email)
+
+    # Achievement: registered
+    asyncio.create_task(check_and_update(user.telegram_id or user.id, "registered", 1))
+
     return _user_response(user, token)
 
 
@@ -304,6 +310,10 @@ async def _get_or_create_oauth_user(
     db.add(user)
     await db.flush()
     logger.info(f"Welcome bonus $1 credited to new OAuth user {email} ({provider})")
+
+    # Achievement: registered
+    asyncio.create_task(check_and_update(user.telegram_id or user.id, "registered", 1))
+
     token = create_jwt(user.id, email)
     return user, token
 
@@ -623,6 +633,9 @@ async def confirm_tg_web_session(session_id: str, tg_id: int, tg_user_data: dict
             db.add(user)
             await db.flush()
             logger.info(f"Welcome bonus $1 credited to new TG web user {tg_id}")
+
+            # Achievement: registered
+            asyncio.create_task(check_and_update(tg_id, "registered", 1))
 
         _tg_web_sessions[session_id] = {
             "status": "confirmed",
