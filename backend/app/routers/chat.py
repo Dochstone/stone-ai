@@ -292,7 +292,7 @@ async def chat(
 # Image Generation — OpenAI gpt-image-1 / DALL-E 3
 # ═══════════════════════════════════════════════════════════
 
-IMAGE_MODELS = {"nano-banana", "nano-banana-pro", "gpt-5-image", "gpt-5-image-mini", "flux-schnell", "stable-diffusion-xl", "kolors-v2", "kolors-v3"}
+IMAGE_MODELS = {"nano-banana", "nano-banana-pro", "gpt-image-1", "gpt-5-image", "gpt-5-image-mini", "flux-schnell", "stable-diffusion-xl", "kolors-v2", "kolors-v3"}
 
 
 def _add_watermark(image_bytes: bytes) -> bytes:
@@ -402,11 +402,13 @@ async def generate_image(
                     raise HTTPException(502, f"Ошибка генерации: {error_body[:200]}")
 
                 data = resp.json()
-                content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+                message = data.get("choices", [{}])[0].get("message", {})
+                content = message.get("content", "")
 
-                # Gemini returns inline_data with base64 image
-                # Check if content contains image data
-                parts = data.get("choices", [{}])[0].get("message", {}).get("parts", [])
+                logger.info(f"OpenRouter image response keys: {list(message.keys())}, content_len={len(content)}, content_start={content[:100] if content else 'empty'}")
+
+                # Check multiple response formats
+                parts = message.get("parts", [])
 
                 # Try to find image in response — could be inline base64 or URL
                 image_url = None

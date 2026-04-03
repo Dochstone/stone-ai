@@ -33,9 +33,9 @@ const MODELS = [
 ];
 
 const IMAGE_MODELS = [
+  { id: "gpt-image-1", name: "GPT Image (рекомендуется)" },
   { id: "nano-banana", name: "Nano Banana (Gemini)" },
   { id: "nano-banana-pro", name: "Nano Banana Pro" },
-  { id: "gpt-5-image", name: "GPT Image" },
   { id: "kolors-v3", name: "KOLORS V3 (Kling)" },
   { id: "flux-schnell", name: "Flux Schnell" },
 ];
@@ -85,7 +85,7 @@ export default function PresentationsPage() {
   const [showNotes, setShowNotes] = useState(false);
   const [imageGen, setImageGen] = useState<{ slideIdx: number; model: string } | null>(null);
   const [imageLoading, setImageLoading] = useState(false);
-  const [imageModel, setImageModel] = useState("nano-banana");
+  const [imageModel, setImageModel] = useState("gpt-image-1");
   const [editMode, setEditMode] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
 
@@ -210,6 +210,7 @@ export default function PresentationsPage() {
   const generateSlideImage = async (slideIdx: number) => {
     if (!auth) return;
     setImageLoading(true);
+    setError("");
     const slide = slides[slideIdx];
     const prompt = `Create a professional presentation illustration for a slide titled "${slide.title}". ${slide.bullets.slice(0, 2).join(". ")}. Clean, modern style, no text on image.`;
     try {
@@ -224,10 +225,13 @@ export default function PresentationsPage() {
           const updated = [...slides];
           updated[slideIdx] = { ...updated[slideIdx], image_url: data.image_url };
           setSlides(updated);
+        } else {
+          setError("Модель не вернула картинку. Попробуйте другую модель (GPT Image или Flux).");
         }
       } else {
         const err = await res.json().catch(() => ({}));
-        setError(typeof err.detail === "string" ? err.detail : "Ошибка генерации картинки");
+        const msg = typeof err.detail === "string" ? err.detail : typeof err.detail === "object" ? err.detail?.message : "Ошибка генерации";
+        setError(msg || "Ошибка генерации картинки");
       }
     } catch {
       setError("Ошибка соединения");
