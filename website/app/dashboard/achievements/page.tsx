@@ -155,14 +155,11 @@ export default function AchievementsPage() {
                     </button>
                   )}
 
-                  {/* Already claimed */}
-                  {a.is_completed && a.reward_claimed && (
-                    <span className="text-[9px] font-bold text-accent">Получено!</span>
-                  )}
-
-                  {/* Completed, no reward */}
-                  {a.is_completed && a.reward_rub === 0 && (
-                    <span className="text-[9px] font-bold text-teal">Выполнено</span>
+                  {/* Status label (only one shown) */}
+                  {a.is_completed && !canClaim && (
+                    a.reward_rub > 0 && a.reward_claimed
+                      ? <span className="text-[9px] font-bold text-accent">Получено!</span>
+                      : <span className="text-[9px] font-bold text-teal">Выполнено</span>
                   )}
 
                   {/* Reward badge */}
