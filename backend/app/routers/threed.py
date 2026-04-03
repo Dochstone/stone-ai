@@ -179,11 +179,14 @@ async def threed_status(
         task.status = "completed"
         task.model_url = fal_status.get("model_url")
         task.completed_at = datetime.utcnow()
-        # Save to gallery
+        # Save to gallery (separate session to avoid breaking main tx)
         try:
             from app.models.generation import Generation
-            gen = Generation(user_tg_id=tg_id, type="3d", model=task.model_id, prompt=task.prompt or "", result_url=task.model_url, cost=float(task.cost or 0))
-            db.add(gen)
+            from app.database import async_session
+            async with async_session() as gen_db:
+                gen = Generation(user_tg_id=tg_id, type="3d", model=task.model_id, prompt=task.prompt or "", result_url=task.model_url, cost=float(task.cost or 0))
+                gen_db.add(gen)
+                await gen_db.commit()
         except Exception as e:
             logger.warning(f"Failed to save 3D generation: {e}")
         await db.commit()

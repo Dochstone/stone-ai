@@ -34,11 +34,13 @@ logger = logging.getLogger(__name__)
 
 
 async def _save_generation(db, tg_id: int, gen_type: str, model: str, prompt: str, result_url: str | None = None, cost: float | None = None):
-    """Save a generation record to the gallery."""
+    """Save a generation record to the gallery. Uses separate session to avoid breaking main transaction."""
     try:
-        gen = Generation(user_tg_id=tg_id, type=gen_type, model=model, prompt=prompt, result_url=result_url, cost=cost)
-        db.add(gen)
-        await db.flush()
+        from app.database import async_session
+        async with async_session() as gen_db:
+            gen = Generation(user_tg_id=tg_id, type=gen_type, model=model, prompt=prompt, result_url=result_url, cost=cost)
+            gen_db.add(gen)
+            await gen_db.commit()
     except Exception as e:
         logger.warning(f"Failed to save generation: {e}")
 

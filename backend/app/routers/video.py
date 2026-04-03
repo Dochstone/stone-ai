@@ -218,12 +218,14 @@ async def video_status(
         if jwt_token:
             thumbnail_url = f"https://stone-ai-production.up.railway.app/api/video/thumb/{task.task_id}?token={jwt_token}"
 
-        # Save to gallery
+        # Save to gallery (separate session to avoid breaking main tx)
         try:
             from app.models.generation import Generation
-            gen = Generation(user_tg_id=tg_id, type="video", model=task.model_id, prompt=task.prompt or "", result_url=task.video_url, cost=float(task.cost or 0))
-            db.add(gen)
-            await db.commit()
+            from app.database import async_session
+            async with async_session() as gen_db:
+                gen = Generation(user_tg_id=tg_id, type="video", model=task.model_id, prompt=task.prompt or "", result_url=task.video_url, cost=float(task.cost or 0))
+                gen_db.add(gen)
+                await gen_db.commit()
         except Exception as e:
             logger.warning(f"Failed to save video generation: {e}")
 
