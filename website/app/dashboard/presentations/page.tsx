@@ -335,34 +335,6 @@ export default function PresentationsPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Auth gate
-  if (auth === null && typeof window !== "undefined") {
-    const checked = getAuth();
-    if (!checked) {
-      return (
-        <div className="pb-20">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
-            <div className="flex flex-col items-center justify-center min-h-[50vh] animate-fadeIn">
-              <div className="bg-white rounded-2xl border border-text/5 p-10 text-center max-w-md">
-                <svg className="w-12 h-12 mx-auto mb-4 text-text/20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                </svg>
-                <h2 className="text-xl font-bold text-text mb-2">Войдите в аккаунт</h2>
-                <p className="text-sm text-text/50 mb-6">Для создания презентаций необходима авторизация</p>
-                <Link
-                  href="/webchat"
-                  className="inline-block bg-accent text-white font-semibold px-6 py-3 rounded-xl hover:opacity-90 transition-opacity"
-                >
-                  Войти
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-  }
-
   return (
     <div className="pb-20">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 space-y-8 animate-fadeIn">
@@ -371,6 +343,13 @@ export default function PresentationsPage() {
           <h1 className="text-2xl sm:text-3xl font-bold text-text">AI-Презентации</h1>
           <p className="text-sm text-text/50 mt-1">Создавайте профессиональные презентации с помощью ИИ</p>
         </div>
+
+        {!getAuth() && (
+          <div className="bg-accent/5 border border-accent/15 rounded-xl p-4 mb-6 flex items-center justify-between">
+            <p className="text-sm text-text/60">Войдите, чтобы использовать все функции</p>
+            <a href="/webchat" className="bg-accent text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-accent/90 transition-colors shrink-0">Войти</a>
+          </div>
+        )}
 
         {/* Form */}
         <div className="bg-white rounded-2xl border border-text/5 p-6 sm:p-8 space-y-6">

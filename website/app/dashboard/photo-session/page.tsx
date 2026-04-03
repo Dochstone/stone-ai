@@ -188,18 +188,6 @@ export default function PhotoSessionPage() {
     a.click();
   };
 
-  const auth = getAuth();
-  if (!auth) {
-    return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
-        <p className="text-text/50">Войдите для использования фотосессии</p>
-        <a href="/webchat" className="bg-accent text-white px-6 py-2.5 rounded-xl font-bold text-sm">
-          Войти
-        </a>
-      </div>
-    );
-  }
-
   const currentPrice = TABS.find((t) => t.id === tab)?.price || 0;
   const canGenerate = imageBase64 && !generating;
 
@@ -213,6 +201,13 @@ export default function PhotoSessionPage() {
             Профессиональные фото товаров за секунды
           </p>
         </div>
+
+        {!getAuth() && (
+          <div className="bg-accent/5 border border-accent/15 rounded-xl p-4 mb-6 flex items-center justify-between">
+            <p className="text-sm text-text/60">Войдите, чтобы использовать все функции</p>
+            <a href="/webchat" className="bg-accent text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-accent/90 transition-colors shrink-0">Войти</a>
+          </div>
+        )}
 
         {/* Tabs */}
         <div className="flex gap-2 mb-6 overflow-x-auto no-scrollbar">

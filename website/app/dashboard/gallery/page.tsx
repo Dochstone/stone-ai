@@ -101,18 +101,17 @@ export default function GalleryPage() {
     setSelected(null);
   };
 
-  const auth = getAuth();
-  if (!auth) return (
-    <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
-      <p className="text-text/50">Войдите для просмотра галереи</p>
-      <a href="/webchat" className="bg-accent text-white px-6 py-2.5 rounded-xl font-bold text-sm">Войти</a>
-    </div>
-  );
-
   return (
     <div className="pb-20">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
         <h1 className="text-xl sm:text-2xl font-extrabold text-text mb-6">Мои генерации</h1>
+
+        {!getAuth() && (
+          <div className="bg-accent/5 border border-accent/15 rounded-xl p-4 mb-6 flex items-center justify-between">
+            <p className="text-sm text-text/60">Войдите, чтобы использовать все функции</p>
+            <a href="/webchat" className="bg-accent text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-accent/90 transition-colors shrink-0">Войти</a>
+          </div>
+        )}
 
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-2 mb-6">

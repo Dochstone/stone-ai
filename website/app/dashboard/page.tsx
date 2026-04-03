@@ -140,26 +140,6 @@ export default function DashboardPage() {
       .finally(() => setLoadingGens(false));
   }, []);
 
-  if (!auth) {
-    return (
-      <div className="pb-20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
-          <div className="flex flex-col items-center justify-center py-32 text-center">
-            <p className="text-lg font-semibold text-text/60 mb-4">
-              Войдите для доступа к панели
-            </p>
-            <Link
-              href="/webchat"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accent text-white font-semibold text-sm hover:opacity-90 transition-opacity"
-            >
-              Перейти к авторизации
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   const tierLabel = (t: string) =>
     t === "max-pro" ? "Elite" : t === "max" ? "Pro" : t === "mini" ? "Start" : "Free";
 
@@ -198,10 +178,17 @@ export default function DashboardPage() {
         {/* Welcome header */}
         <div className="mb-8">
           <h1 className="text-2xl font-extrabold text-text mb-1">
-            {`\u0414\u043E\u0431\u0440\u043E \u043F\u043E\u0436\u0430\u043B\u043E\u0432\u0430\u0442\u044C, ${auth.email}`}
+            {auth ? `\u0414\u043E\u0431\u0440\u043E \u043F\u043E\u0436\u0430\u043B\u043E\u0432\u0430\u0442\u044C, ${auth.email}` : "\u0414\u043E\u0431\u0440\u043E \u043F\u043E\u0436\u0430\u043B\u043E\u0432\u0430\u0442\u044C"}
           </h1>
           <p className="text-sm text-text/40">{formatDate(new Date())}</p>
         </div>
+
+        {!auth && (
+          <div className="bg-accent/5 border border-accent/15 rounded-xl p-4 mb-6 flex items-center justify-between">
+            <p className="text-sm text-text/60">Войдите, чтобы использовать все функции</p>
+            <a href="/webchat" className="bg-accent text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-accent/90 transition-colors shrink-0">Войти</a>
+          </div>
+        )}
 
         {/* Quick stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
