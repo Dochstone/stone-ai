@@ -140,6 +140,9 @@ export default function Pricing() {
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
   const [successAnim, setSuccessAnim] = useState(false);
   const [payExpanded, setPayExpanded] = useState(false);
+  const [swipeY, setSwipeY] = useState(0);
+  const [swiping, setSwiping] = useState(false);
+  const swipeStartRef = useRef<number | null>(null);
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -383,10 +386,28 @@ export default function Pricing() {
           <div
             className="w-full sm:max-w-[750px] sm:rounded-3xl rounded-t-3xl relative overflow-hidden p-[2px]"
             onClick={(e) => e.stopPropagation()}
+            onTouchStart={(e) => {
+              swipeStartRef.current = e.touches[0].clientY;
+              setSwiping(true);
+            }}
+            onTouchMove={(e) => {
+              if (swipeStartRef.current === null) return;
+              const dy = e.touches[0].clientY - swipeStartRef.current;
+              if (dy > 0) setSwipeY(dy);
+            }}
+            onTouchEnd={() => {
+              if (swipeY > 120) closeModal();
+              setSwipeY(0);
+              setSwiping(false);
+              swipeStartRef.current = null;
+            }}
             style={{
-              animation: closing
+              animation: !swiping ? (closing
                 ? "pricingModalOut 0.3s ease forwards"
-                : "pricingModalIn 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
+                : "pricingModalIn 0.5s cubic-bezier(0.16, 1, 0.3, 1)") : "none",
+              transform: swipeY > 0 ? `translateY(${swipeY}px)` : undefined,
+              transition: swiping ? "none" : "transform 0.3s ease",
+              opacity: swipeY > 0 ? Math.max(0.3, 1 - swipeY / 400) : undefined,
             }}
           >
             {/* Spinning gradient border */}
