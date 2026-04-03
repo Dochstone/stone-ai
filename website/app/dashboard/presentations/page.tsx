@@ -168,7 +168,7 @@ export default function PresentationsPage() {
   const exportPDF = async () => {
     if (!auth || !generationId) return;
     try {
-      const res = await fetch(`${API_URL}/api/presentations/export/pdf`, {
+      const res = await fetch(`${API_URL}/api/presentations/export/html`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${auth.token}`,
@@ -176,15 +176,15 @@ export default function PresentationsPage() {
         },
         body: JSON.stringify({ generation_id: generationId }),
       });
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "presentation.pdf";
-      a.click();
-      URL.revokeObjectURL(url);
+      const html = await res.text();
+      const printWindow = window.open("", "_blank");
+      if (printWindow) {
+        printWindow.document.write(html);
+        printWindow.document.close();
+        setTimeout(() => { printWindow.print(); }, 500);
+      }
     } catch {
-      setError("Не удалось экспортировать PDF");
+      setError("Не удалось экспортировать");
     }
   };
 

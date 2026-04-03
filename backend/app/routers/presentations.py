@@ -428,13 +428,13 @@ async def get_presentation(
     }
 
 
-@router.post("/export/pdf")
-async def export_pdf(
+@router.post("/export/html")
+async def export_html(
     req: ExportPDFRequest,
     tg_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Export presentation slides to PDF via weasyprint."""
+    """Export presentation as printable HTML (client uses window.print → PDF)."""
     tg_id = tg_user["id"]
 
     result = await db.execute(
@@ -454,17 +454,4 @@ async def export_pdf(
 
     html = render_presentation_html(slides, style, gen.prompt or "Presentation")
 
-    try:
-        from weasyprint import HTML as WeasyprintHTML
-        pdf_bytes = WeasyprintHTML(string=html).write_pdf()
-    except Exception as exc:
-        logger.error(f"PDF export failed: {exc}")
-        raise HTTPException(500, f"Ошибка экспорта в PDF: {exc}")
-
-    filename = re.sub(r"[^\w\s-]", "", gen.prompt or "presentation")[:60].strip() or "presentation"
-
-    return Response(
-        content=pdf_bytes,
-        media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="{filename}.pdf"'},
-    )
+    return Response(content=html, media_type="text/html")
