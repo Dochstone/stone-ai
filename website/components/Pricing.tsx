@@ -140,6 +140,8 @@ export default function Pricing() {
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
   const [successAnim, setSuccessAnim] = useState(false);
   const [payExpanded, setPayExpanded] = useState(false);
+  const [topupMode, setTopupMode] = useState(false);
+  const [topupAmount, setTopupAmount] = useState(300);
   const [swipeY, setSwipeY] = useState(0);
   const [swiping, setSwiping] = useState(false);
   const swipeStartRef = useRef<number | null>(null);
@@ -206,6 +208,27 @@ export default function Pricing() {
         setPromoResult({ ok: false, message: typeof data.detail === "string" ? data.detail : "Ошибка" });
       }
     } catch { setPromoResult({ ok: false, message: "Ошибка сети" }); }
+  };
+
+  const payTopup = async (amountRub: number) => {
+    const auth = getAuth();
+    if (!auth) { window.location.href = "/webchat"; return; }
+    setLoading(true);
+    setResult(null);
+    try {
+      const res = await fetch(`${API_URL}/api/payment/platega/create-order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
+        body: JSON.stringify({ usd_amount: amountRub / 95 }),
+      });
+      const data = await res.json();
+      if (res.ok && data.payment_url) {
+        window.location.href = data.payment_url;
+      } else {
+        setResult({ ok: false, message: typeof data.detail === "string" ? data.detail : "Ошибка создания платежа" });
+      }
+    } catch { setResult({ ok: false, message: "Ошибка сети" }); }
+    setLoading(false);
   };
 
   const pay = async (tier: string, method: "platega" | "crypto" = "platega") => {
@@ -611,6 +634,48 @@ export default function Pricing() {
                     </div>
                   )}
 
+
+                  {/* Top-up balance section */}
+                  <div className="mt-4 pt-4 border-t border-text/[0.06]" style={{ animation: "pricingStagger 0.4s ease both 0.55s" }}>
+                    <button
+                      onClick={() => setTopupMode(!topupMode)}
+                      className="w-full flex items-center justify-center gap-1.5 py-2 text-[11px] text-text/30 hover:text-text/50 transition-colors"
+                    >
+                      Или пополните баланс для инструментов
+                      <svg className={`w-3.5 h-3.5 transition-transform ${topupMode ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+
+                    {topupMode && (
+                      <div className="mt-3 space-y-3 animate-fadeIn">
+                        <p className="text-[10px] text-text/35">Без подписки — платите только за то, что используете: презентации, фотосессия, SEO и др.</p>
+                        <div className="flex gap-2">
+                          {[100, 300, 500, 1000].map((amt) => (
+                            <button
+                              key={amt}
+                              onClick={() => setTopupAmount(amt)}
+                              className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
+                                topupAmount === amt
+                                  ? "bg-teal text-white"
+                                  : "bg-text/[0.04] text-text/50 hover:bg-text/[0.08]"
+                              }`}
+                            >
+                              {amt}₽
+                            </button>
+                          ))}
+                        </div>
+                        <button
+                          onClick={() => payTopup(topupAmount)}
+                          disabled={loading}
+                          className="w-full py-3 rounded-xl bg-teal text-white text-sm font-bold hover:bg-teal/90 disabled:opacity-50 transition-colors"
+                        >
+                          {loading ? "Создание..." : `Пополнить ${topupAmount}₽`}
+                        </button>
+                        <p className="text-[9px] text-text/20 text-center">Карта РФ · Мир · Visa · MC · СБП</p>
+                      </div>
+                    )}
+                  </div>
 
                   {result && (
                     <p className={`text-center text-xs font-medium mt-2 ${result.ok ? "text-teal" : "text-red-500"}`}>
