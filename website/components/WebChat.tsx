@@ -6,7 +6,6 @@ import AuthFormComponent, { type AuthState } from "@/components/AuthForm";
 import PromptLibrary from "@/components/prompts/PromptLibrary";
 import DualChatView from "@/components/chat/DualChatView";
 import ProjectSelector from "@/components/projects/ProjectSelector";
-// import GenerationOverlay from "@/components/GenerationOverlay"; // temporarily disabled for debugging
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
 
@@ -920,6 +919,7 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(0);
   const [upsellModal, setUpsellModal] = useState<{ type: "limit" | "locked"; model?: string; tier?: string } | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
   // Persist chat state to sessionStorage (survives F5)
   useEffect(() => {
@@ -955,10 +955,6 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [videoGenerating, setVideoGenerating] = useState(false);
   const [threedGenerating, setThreedGenerating] = useState(false);
-  const [showGuestLimit, setShowGuestLimit] = useState(false);
-  const [promptLibOpen, setPromptLibOpen] = useState(false);
-  const [compareMode, setCompareMode] = useState(false);
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
   // Cleanup polling on unmount
   useEffect(() => {
@@ -1691,9 +1687,14 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
     }
   }, [sendMessage]);
 
+  // Guest registration prompt modal
+  const [showGuestLimit, setShowGuestLimit] = useState(false);
+  const [promptLibOpen, setPromptLibOpen] = useState(false);
+  const [compareMode, setCompareMode] = useState(false);
+  const guestCount = typeof window !== "undefined" ? parseInt(localStorage.getItem("stone_guest_count") || "0") : 0;
+
   if (!loaded) return null;
 
-  const guestCount = parseInt(localStorage.getItem("stone_guest_count") || "0");
   const aiColor = companyColors[model?.company ?? ""] || "#C4623D";
   const aiLetter = companyIcons[model?.company ?? ""] || "AI";
   const lastMsg = messages[messages.length - 1];
