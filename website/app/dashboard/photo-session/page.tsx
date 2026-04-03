@@ -30,9 +30,9 @@ const TABS: { id: Tab; label: string; price: number }[] = [
 ];
 
 const MODELS = [
+  { id: "gpt-image-1", label: "GPT Image (рекомендуется)" },
   { id: "nano-banana", label: "Nano Banana" },
   { id: "nano-banana-pro", label: "Nano Banana Pro" },
-  { id: "gpt-image", label: "GPT Image" },
   { id: "flux-schnell", label: "Flux Schnell" },
 ];
 
@@ -42,7 +42,7 @@ const BG_STYLES = ["Белый", "Градиент", "Lifestyle"];
 
 const MARKETPLACES: MarketplaceOption[] = [
   { id: "ozon", name: "OZON", width: 1000, height: 1000, icon: "🟦" },
-  { id: "wb", name: "Wildberries", width: 900, height: 1200, icon: "🟪" },
+  { id: "wildberries", name: "Wildberries", width: 900, height: 1200, icon: "🟪" },
   { id: "avito", name: "Avito", width: 1280, height: 960, icon: "🟩" },
   { id: "universal", name: "Универсальный", width: 1200, height: 1200, icon: "⬜" },
 ];
@@ -62,7 +62,7 @@ export default function PhotoSessionPage() {
   // Shared state
   const [imageBase64, setImageBase64] = useState("");
   const [imagePreview, setImagePreview] = useState("");
-  const [selectedModel, setSelectedModel] = useState("nano-banana");
+  const [selectedModel, setSelectedModel] = useState("gpt-image-1");
   const [generating, setGenerating] = useState(false);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -82,11 +82,7 @@ export default function PhotoSessionPage() {
   const [bgStyle, setBgStyle] = useState("Белый");
 
   useEffect(() => {
-    const auth = getAuth();
-    if (!auth?.token) return;
-    fetch(`${API_URL}/api/photo-session/presets/backgrounds`, {
-      headers: { Authorization: `Bearer ${auth.token}` },
-    })
+    fetch(`${API_URL}/api/photo-session/presets/backgrounds`)
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data)) setPresets(data);
@@ -122,31 +118,39 @@ export default function PhotoSessionPage() {
     setError(null);
     setResultUrl(null);
 
-    const body: Record<string, unknown> = {
-      image: imageBase64,
-      model: selectedModel,
-      tab,
-    };
+    let endpoint = "";
+    let body: Record<string, unknown> = {};
 
     if (tab === "background") {
-      body.prompt = bgPrompt;
+      endpoint = "/api/photo-session/background";
+      body = {
+        image_base64: imageBase64,
+        background_prompt: bgPrompt || "clean professional background",
+        style: null,
+        model_id: selectedModel,
+      };
     } else if (tab === "model") {
-      body.model_description = modelDescription;
-      body.scene = scene;
-      body.pose = pose;
+      endpoint = "/api/photo-session/on-model";
+      body = {
+        product_image_base64: imageBase64,
+        model_description: modelDescription || "professional model",
+        scene: scene,
+        pose: pose,
+        model_id: selectedModel,
+      };
     } else {
-      body.marketplace = marketplace;
-      body.product_name = productName;
-      body.bg_style = bgStyle;
-      const mp = MARKETPLACES.find((m) => m.id === marketplace);
-      if (mp) {
-        body.width = mp.width;
-        body.height = mp.height;
-      }
+      endpoint = "/api/photo-session/marketplace-card";
+      body = {
+        image_base64: imageBase64,
+        platform: marketplace,
+        product_name: productName || "Product",
+        background_color: bgStyle.toLowerCase(),
+        model_id: selectedModel,
+      };
     }
 
     try {
-      const res = await fetch(`${API_URL}/api/photo-session/generate`, {
+      const res = await fetch(`${API_URL}${endpoint}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -157,11 +161,17 @@ export default function PhotoSessionPage() {
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.detail || errData.error || "Ошибка генерации");
+        const msg = typeof errData.detail === "string" ? errData.detail
+          : typeof errData.detail === "object" ? errData.detail?.message
+          : errData.error || "Ошибка генерации";
+        throw new Error(msg);
       }
 
       const data = await res.json();
-      setResultUrl(data.result_url || data.url || null);
+      setResultUrl(data.image_url || data.result_url || null);
+      if (!data.image_url && !data.result_url) {
+        setError("Модель не вернула изображение. Попробуйте другую модель.");
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Произошла ошибка");
     } finally {
