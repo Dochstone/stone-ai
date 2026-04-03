@@ -2,14 +2,35 @@
 
 import { useState, useEffect } from "react";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
+
 export default function CtaSection() {
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [hasPaidPlan, setHasPaidPlan] = useState(false);
 
   useEffect(() => {
-    try { if (localStorage.getItem("stone_auth")) setLoggedIn(true); } catch {}
+    try {
+      const raw = localStorage.getItem("stone_auth");
+      if (!raw) return;
+      const auth = JSON.parse(raw);
+      if (!auth?.token) return;
+      // Quick check: if plan cached
+      if (auth.plan && auth.plan !== "free") { setHasPaidPlan(true); return; }
+      // Fetch plan from API
+      fetch(`${API_URL}/api/user/me`, { headers: { Authorization: `Bearer ${auth.token}` } })
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (!data) return;
+          const plan = data.plan || data.user?.plan || "free";
+          if (plan !== "free") setHasPaidPlan(true);
+          // Cache plan in localStorage
+          auth.plan = plan;
+          localStorage.setItem("stone_auth", JSON.stringify(auth));
+        })
+        .catch(() => {});
+    } catch {}
   }, []);
 
-  if (loggedIn) return null;
+  if (hasPaidPlan) return null;
 
   return (
     <section className="bg-dark text-white py-20 md:py-28">

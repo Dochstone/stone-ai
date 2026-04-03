@@ -4,16 +4,21 @@ import { useState, useEffect } from "react";
 import { TELEGRAM_BOT_URL } from "@/lib/models";
 
 export default function Footer() {
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [hasPaidPlan, setHasPaidPlan] = useState(false);
 
   useEffect(() => {
-    try { if (localStorage.getItem("stone_auth")) setLoggedIn(true); } catch {}
+    try {
+      const raw = localStorage.getItem("stone_auth");
+      if (!raw) return;
+      const auth = JSON.parse(raw);
+      if (auth?.plan && auth.plan !== "free") setHasPaidPlan(true);
+    } catch {}
   }, []);
 
   return (
     <footer className="bg-bg border-t border-text/5">
       {/* Pricing CTA — hidden for logged-in users */}
-      {!loggedIn && (
+      {!hasPaidPlan && (
         <div className="bg-accent/5 border-b border-accent/10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-sm text-text/60"><span className="font-bold text-text">65+ нейросетей</span> от 390₽/мес</p>
