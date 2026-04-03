@@ -125,4 +125,16 @@ async def init_db():
     # Convert old credits to USD balance (one-time, idempotent)
     await migrate_credits_to_usd()
 
+    # Add missing columns to prompt_templates (added in wizard update)
+    async with engine.begin() as conn:
+        for col, defn in [
+            ("default_model", "VARCHAR(50) DEFAULT 'gpt-4.1-mini'"),
+            ("cost_rub", "FLOAT DEFAULT 3.0"),
+            ("icon", "VARCHAR(10)"),
+        ]:
+            try:
+                await conn.execute(text(f"ALTER TABLE prompt_templates ADD COLUMN IF NOT EXISTS {col} {defn}"))
+            except Exception:
+                pass
+
     logger.info("Database initialization complete")
