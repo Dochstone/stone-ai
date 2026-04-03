@@ -328,7 +328,7 @@ export default function SnakeGame({ token, onClose, compact, onShowLeaderboard }
 
       {/* Canvas */}
       <div className="relative" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-        <canvas ref={canvasRef} width={SIZE} height={SIZE} className="rounded-xl border border-text/10 w-full max-w-[300px] sm:max-w-none sm:w-auto" style={{ touchAction: "none", aspectRatio: "1/1" }} />
+        <canvas ref={canvasRef} width={SIZE} height={SIZE} className="rounded-xl border border-text/10" style={{ touchAction: "none" }} />
 
         {gameState === "ready" && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 rounded-xl">
