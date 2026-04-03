@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { TELEGRAM_BOT_URL } from "@/lib/models";
 import ThemeToggle from "@/components/ThemeToggle";
+import WelcomeBonusBanner from "@/components/WelcomeBonusBanner";
 import dynamic from "next/dynamic";
 
 const TonWalletBadge = dynamic(() => import("./TonWalletBadge"), { ssr: false });
@@ -52,6 +53,7 @@ export default function Nav() {
         menuOpen ? "bg-bg shadow-sm" : scrolled ? "bg-bg/90 backdrop-blur-md shadow-sm" : "bg-transparent"
       }`}
     >
+      <WelcomeBonusBanner />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-14 md:h-16">
         <a href="/" className="flex items-center gap-2 shrink-0 min-w-0">
           <span className="text-xl font-extrabold text-text">Stone AI</span>
