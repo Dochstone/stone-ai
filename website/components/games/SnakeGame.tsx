@@ -306,12 +306,23 @@ export default function SnakeGame({ token, onClose, compact, onShowLeaderboard }
           >
             {isMuted ? "\uD83D\uDD07" : "\uD83D\uDD0A"}
           </button>
-        </div>
-        <div className="flex items-center gap-3">
           {gameState === "playing" && (
-            <span className="text-xs text-emerald-400/70 font-mono">{speedLabel}</span>
+            <span className="text-[10px] text-emerald-400/70 font-mono">{speedLabel}</span>
           )}
+        </div>
+        <div className="flex items-center gap-2">
           <span className="text-xs text-text/30">Рекорд: {best}</span>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="w-7 h-7 rounded-lg bg-text/[0.08] hover:bg-red-500/20 hover:text-red-400 text-text/30 flex items-center justify-center transition-colors"
+              title="Закрыть"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
 
@@ -391,18 +402,6 @@ export default function SnakeGame({ token, onClose, compact, onShowLeaderboard }
         </div>
       </div>
 
-      {/* Close button */}
-      {onClose && (
-        <button
-          onClick={onClose}
-          className="mt-2 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-text/[0.06] text-text/40 hover:text-text/60 hover:bg-text/[0.1] transition-colors text-xs font-medium"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-          Закрыть
-        </button>
-      )}
     </div>
   );
 }
