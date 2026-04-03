@@ -6,6 +6,7 @@ import { SITE_URL } from "@/lib/constants";
 import dynamic from "next/dynamic";
 
 const TonWalletProfile = dynamic(() => import("./TonWalletProfile"), { ssr: false });
+import AuthForm, { AuthState as AuthFormState } from "./AuthForm";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
 
@@ -901,10 +902,11 @@ export default function ProfilePage() {
         fetch(`${API_URL}/api/byok/status`, { headers }),
       ]);
 
-      // If auth failed — logout
+      // If auth failed — clear token and show login form (don't redirect)
       if (profileRes.status === "fulfilled" && (profileRes.value.status === 401 || profileRes.value.status === 403)) {
         localStorage.removeItem("stone_auth");
-        window.location.href = "/webchat";
+        setAuth(null);
+        setLoading(false);
         return;
       }
 
@@ -966,15 +968,12 @@ export default function ProfilePage() {
 
   if (!auth) {
     return (
-      <div className="min-h-screen bg-bg flex items-center justify-center pt-20">
-        <div className="text-center">
-          <h1 className="text-2xl font-extrabold text-text mb-3">Личный кабинет</h1>
-          <p className="text-sm text-text/40 mb-6">Войдите, чтобы управлять профилем</p>
-          <a href="/webchat" className="bg-accent text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors">
-            Войти
-          </a>
-        </div>
-      </div>
+      <AuthForm
+        onAuth={(a: AuthFormState) => {
+          setAuth(a);
+        }}
+        subtitle="Войдите для доступа к личному кабинету"
+      />
     );
   }
 
@@ -984,7 +983,7 @@ export default function ProfilePage() {
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-3" />
           <p className="text-sm text-text/30">Загрузка профиля...</p>
-          <button onClick={() => { localStorage.removeItem("stone_auth"); window.location.href = "/webchat"; }}
+          <button onClick={() => { localStorage.removeItem("stone_auth"); setAuth(null); }}
             className="mt-4 text-xs text-text/20 hover:text-accent transition-colors">
             Не грузится? Войти заново
           </button>
