@@ -164,6 +164,7 @@ export default function DashboardPage() {
     t === "max-pro" ? "Elite" : t === "max" ? "Pro" : t === "mini" ? "Start" : "Free";
 
   const balanceUsd = profile?.balance_usd ?? profile?.user?.balance_usd ?? 0;
+  const balanceRub = Math.round(Number(balanceUsd) * 95);
   const plan = profile?.plan ?? profile?.user?.plan ?? "free";
   const liteToday = profile?.usage?.lite_today ?? 0;
   const totalRequests = profile?.stats?.total_requests ?? 0;
@@ -171,7 +172,7 @@ export default function DashboardPage() {
   const stats = [
     {
       label: "Баланс",
-      value: profile ? `$${Number(balanceUsd).toFixed(2)}` : null,
+      value: profile ? `${balanceRub}\u2009\u20BD` : null,
       color: "text-accent",
     },
     {

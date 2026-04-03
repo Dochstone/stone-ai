@@ -207,7 +207,7 @@ function OverviewTab({ profile, usage }: { profile: UserProfile; usage: UsageIte
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard label="Тариф" value={profile.plan === "max-pro" ? "Elite" : profile.plan === "max" ? "Pro" : profile.plan === "mini" ? "Start" : "Free"} accent />
         <StatCard label="Запросов" value={profile.stats.total_requests.toLocaleString()} />
-        <StatCard label="Баланс" value={`$${profile.balance_usd.toFixed(2)}`} accent />
+        <StatCard label="Баланс" value={`${Math.round(profile.balance_usd * 95)}\u2009\u20BD`} accent />
         <StatCard label="Любимая модель" value={favModel?.name || "—"} sub={favModel?.company} />
       </div>
 
