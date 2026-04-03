@@ -5,6 +5,7 @@ interface SlideData {
   bullets: string[];
   notes: string;
   layout: string;
+  image_url?: string;
 }
 
 interface Props {
@@ -68,6 +69,27 @@ export default function SlidePreview({ slide, style, slideNumber, totalSlides, c
         );
 
       case "two-column": {
+        // If image exists, show text left + image right
+        if (slide.image_url) {
+          return (
+            <div className="flex h-full" style={{ backgroundColor: theme.bg }}>
+              <div className="w-[55%] flex flex-col py-8 px-10">
+                <h2 className="text-[1.5em] font-bold mb-6" style={{ color: theme.text }}>{slide.title}</h2>
+                <ul className="flex-1 space-y-3">
+                  {slide.bullets.map((b, i) => (
+                    <li key={i} className="flex items-start gap-2 text-[0.85em] leading-relaxed">
+                      <span className="mt-1.5 w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: theme.accent }} />
+                      <span style={{ color: theme.text }}>{b}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="w-[45%] flex items-center justify-center p-4">
+                <img src={slide.image_url} alt="" className="max-w-full max-h-full object-contain rounded-lg shadow-md" />
+              </div>
+            </div>
+          );
+        }
         const mid = Math.ceil(slide.bullets.length / 2);
         const left = slide.bullets.slice(0, mid);
         const right = slide.bullets.slice(mid);
@@ -98,17 +120,24 @@ export default function SlidePreview({ slide, style, slideNumber, totalSlides, c
 
       default: // "content"
         return (
-          <div className="flex flex-col h-full px-10 py-8" style={{ backgroundColor: theme.bg }}>
-            <h2 className="text-[1.5em] font-bold mb-2" style={{ color: theme.text }}>{slide.title}</h2>
-            <div className="w-10 h-0.5 rounded mb-5" style={{ backgroundColor: theme.accent }} />
-            <ul className="flex-1 space-y-3">
-              {slide.bullets.map((b, i) => (
-                <li key={i} className="flex items-start gap-3 text-[0.85em] leading-relaxed">
-                  <span className="mt-1.5 w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: theme.accent }} />
-                  <span style={{ color: theme.text }}>{b}</span>
-                </li>
-              ))}
-            </ul>
+          <div className="flex h-full" style={{ backgroundColor: theme.bg }}>
+            <div className={`flex flex-col py-8 px-10 ${slide.image_url ? "w-[60%]" : "w-full"}`}>
+              <h2 className="text-[1.5em] font-bold mb-2" style={{ color: theme.text }}>{slide.title}</h2>
+              <div className="w-10 h-0.5 rounded mb-5" style={{ backgroundColor: theme.accent }} />
+              <ul className="flex-1 space-y-3">
+                {slide.bullets.map((b, i) => (
+                  <li key={i} className="flex items-start gap-3 text-[0.85em] leading-relaxed">
+                    <span className="mt-1.5 w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: theme.accent }} />
+                    <span style={{ color: theme.text }}>{b}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {slide.image_url && (
+              <div className="w-[40%] flex items-center justify-center p-4">
+                <img src={slide.image_url} alt="" className="max-w-full max-h-full object-contain rounded-lg shadow-md" />
+              </div>
+            )}
           </div>
         );
     }

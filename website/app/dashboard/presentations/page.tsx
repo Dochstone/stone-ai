@@ -12,6 +12,7 @@ interface SlideData {
   bullets: string[];
   notes: string;
   layout: string;
+  image_url?: string;
 }
 
 interface HistoryItem {
@@ -29,6 +30,14 @@ const MODELS = [
   { id: "claude-sonnet-4", name: "Claude Sonnet 4" },
   { id: "deepseek-v3", name: "DeepSeek V3" },
   { id: "gemini-2.5-flash", name: "Gemini 2.5 Flash" },
+];
+
+const IMAGE_MODELS = [
+  { id: "nano-banana", name: "Nano Banana (Gemini)" },
+  { id: "nano-banana-pro", name: "Nano Banana Pro" },
+  { id: "gpt-5-image", name: "GPT Image" },
+  { id: "kolors-v3", name: "KOLORS V3 (Kling)" },
+  { id: "flux-schnell", name: "Flux Schnell" },
 ];
 
 const DETAIL_LEVELS = [
@@ -74,6 +83,9 @@ export default function PresentationsPage() {
   const stripRef = useRef<HTMLDivElement>(null);
   const touchStartRef = useRef<{ x: number } | null>(null);
   const [showNotes, setShowNotes] = useState(false);
+  const [imageGen, setImageGen] = useState<{ slideIdx: number; model: string } | null>(null);
+  const [imageLoading, setImageLoading] = useState(false);
+  const [imageModel, setImageModel] = useState("nano-banana");
 
   useEffect(() => {
     const a = getAuth();
@@ -190,6 +202,41 @@ export default function PresentationsPage() {
 
   const copyJSON = () => {
     navigator.clipboard.writeText(JSON.stringify(slides, null, 2));
+  };
+
+  const generateSlideImage = async (slideIdx: number) => {
+    if (!auth) return;
+    setImageLoading(true);
+    const slide = slides[slideIdx];
+    const prompt = `Create a professional presentation illustration for a slide titled "${slide.title}". ${slide.bullets.slice(0, 2).join(". ")}. Clean, modern style, no text on image.`;
+    try {
+      const res = await fetch(`${API_URL}/api/chat/image`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${auth.token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt, model_id: imageModel }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.image_url) {
+          const updated = [...slides];
+          updated[slideIdx] = { ...updated[slideIdx], image_url: data.image_url };
+          setSlides(updated);
+        }
+      } else {
+        const err = await res.json().catch(() => ({}));
+        setError(typeof err.detail === "string" ? err.detail : "Ошибка генерации картинки");
+      }
+    } catch {
+      setError("Ошибка соединения");
+    }
+    setImageLoading(false);
+    setImageGen(null);
+  };
+
+  const removeSlideImage = (slideIdx: number) => {
+    const updated = [...slides];
+    updated[slideIdx] = { ...updated[slideIdx], image_url: undefined };
+    setSlides(updated);
   };
 
   const reset = () => {
@@ -432,6 +479,56 @@ export default function PresentationsPage() {
                 )}
               </div>
             )}
+
+            {/* Slide image controls */}
+            <div className="flex flex-wrap items-center gap-3">
+              {slides[currentSlide]?.image_url ? (
+                <>
+                  <div className="flex items-center gap-2 text-xs text-teal font-medium">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Картинка добавлена
+                  </div>
+                  <button onClick={() => removeSlideImage(currentSlide)} className="text-xs text-red-400 hover:text-red-500 transition-colors">
+                    Удалить
+                  </button>
+                  <button onClick={() => setImageGen({ slideIdx: currentSlide, model: imageModel })} className="text-xs text-text/40 hover:text-accent transition-colors">
+                    Заменить
+                  </button>
+                </>
+              ) : imageGen?.slideIdx === currentSlide ? (
+                <div className="flex items-center gap-2 w-full">
+                  <select
+                    value={imageModel}
+                    onChange={(e) => setImageModel(e.target.value)}
+                    className="bg-bg border border-text/10 rounded-lg px-2 py-1.5 text-xs focus:outline-none"
+                  >
+                    {IMAGE_MODELS.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                  </select>
+                  <button
+                    onClick={() => generateSlideImage(currentSlide)}
+                    disabled={imageLoading}
+                    className="bg-accent text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-accent/90 disabled:opacity-50 transition-colors"
+                  >
+                    {imageLoading ? "Генерация..." : "Создать"}
+                  </button>
+                  <button onClick={() => setImageGen(null)} className="text-xs text-text/30 hover:text-text/50">
+                    Отмена
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setImageGen({ slideIdx: currentSlide, model: imageModel })}
+                  className="flex items-center gap-1.5 text-xs text-text/40 hover:text-accent transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                  </svg>
+                  Добавить картинку на слайд
+                </button>
+              )}
+            </div>
 
             {/* Navigation */}
             <div className="flex items-center justify-center gap-4">
