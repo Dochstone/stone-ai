@@ -700,12 +700,20 @@ function Sidebar({
               </svg>
               <span className="text-[13px] font-semibold text-white">Новый чат</span>
             </button>
+            <a
+              href="/dashboard"
+              className="w-9 h-9 flex items-center justify-center rounded-xl bg-teal/10 hover:bg-teal/20 text-teal transition-colors shrink-0"
+              title="Панель инструментов"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+              </svg>
+            </a>
             <button
               onClick={onToggle}
               className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-text/[0.06] text-text/30 hover:text-text/60 transition-colors shrink-0"
               aria-label="Закрыть sidebar"
             >
-              {/* Chevron on desktop, X on mobile */}
               <svg className="w-4 h-4 hidden lg:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" d="M11 19l-7-7 7-7" />
               </svg>
@@ -798,34 +806,6 @@ function Sidebar({
               ))}
             </div>
           )}
-        </div>
-
-        {/* Quick links to dashboard */}
-        <div className="px-2 py-2 shrink-0 border-t border-text/[0.06] space-y-0.5">
-          <a href="/dashboard" className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-text/40 hover:text-accent hover:bg-accent/5 transition-colors">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-            </svg>
-            <span className="text-[12px] font-semibold">Панель</span>
-          </a>
-          <a href="/dashboard/templates" className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-text/40 hover:text-accent hover:bg-accent/5 transition-colors">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <span className="text-[12px] font-semibold">Шаблоны</span>
-          </a>
-          <a href="/dashboard/presentations" className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-text/40 hover:text-accent hover:bg-accent/5 transition-colors">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5" />
-            </svg>
-            <span className="text-[12px] font-semibold">Презентации</span>
-          </a>
-          <a href="/dashboard/photo-session" className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-text/40 hover:text-accent hover:bg-accent/5 transition-colors">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
-            </svg>
-            <span className="text-[12px] font-semibold">Фотосессия</span>
-          </a>
         </div>
 
         {/* Upgrade CTA — only for free/mini */}
