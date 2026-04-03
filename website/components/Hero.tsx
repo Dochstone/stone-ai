@@ -341,16 +341,16 @@ export default function Hero() {
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
             <a
               href="/webchat"
-              className="relative bg-accent text-white px-8 py-4 min-h-[44px] rounded-xl font-bold text-sm hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:ring-offset-2"
+              className="bg-accent text-white px-8 py-4 min-h-[44px] rounded-xl font-bold text-sm hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:ring-offset-2"
             >
-              Открыть чат бесплатно
-              <span className="absolute -top-2 -right-2 bg-teal text-white text-[9px] font-bold px-2 py-0.5 rounded-full animate-pulse">NEW</span>
+              Открыть чат
             </a>
             <a
-              href="/models"
-              className="border-2 border-text/15 text-text px-8 py-4 min-h-[44px] rounded-xl font-bold text-sm hover:border-accent hover:text-accent transition-colors focus:outline-none focus:ring-2 focus:ring-accent/30 focus:ring-offset-2"
+              href="/dashboard"
+              className="relative bg-teal text-white px-8 py-4 min-h-[44px] rounded-xl font-bold text-sm hover:bg-teal/90 transition-all hover:shadow-lg hover:shadow-teal/25 focus:outline-none focus:ring-2 focus:ring-teal/30 focus:ring-offset-2"
             >
-              Посмотреть модели
+              Панель инструментов
+              <span className="absolute -top-2 -right-2 bg-accent text-white text-[9px] font-bold px-2 py-0.5 rounded-full animate-pulse">NEW</span>
             </a>
           </div>
           {!hasPaidPlan && (
