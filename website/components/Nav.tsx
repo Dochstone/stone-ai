@@ -159,12 +159,18 @@ export default function Nav() {
           {/* Burger — visible below md (768px) */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden flex flex-col justify-center items-center w-11 h-11 shrink-0 gap-1.5"
+            className="md:hidden flex items-center justify-center w-11 h-11 shrink-0"
             aria-label={menuOpen ? "Закрыть меню" : "Открыть меню"} aria-expanded={menuOpen}
           >
-            <span className={`block w-5 h-0.5 bg-text transition-all origin-center ${menuOpen ? "rotate-45 translate-y-[4px]" : ""}`} />
-            <span className={`block w-5 h-0.5 bg-text transition-all ${menuOpen ? "opacity-0 scale-0" : ""}`} />
-            <span className={`block w-5 h-0.5 bg-text transition-all origin-center ${menuOpen ? "-rotate-45 -translate-y-[4px]" : ""}`} />
+            {menuOpen ? (
+              <svg className="w-6 h-6 text-text" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="w-6 h-6 text-text" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              </svg>
+            )}
           </button>
         </div>
       </div>
@@ -211,10 +217,12 @@ export default function Nav() {
             </a>
 
             <div className="border-t border-text/5 my-2" />
-            <a href="/pricing" onClick={() => setMenuOpen(false)}
-              className="border-2 border-accent text-accent px-5 py-3 min-h-[44px] rounded-xl font-bold text-sm text-center hover:bg-accent hover:text-white transition-colors flex items-center justify-center">
-              Тарифы от 390₽
-            </a>
+            {!authEmail && (
+              <a href="/pricing" onClick={() => setMenuOpen(false)}
+                className="border-2 border-accent text-accent px-5 py-3 min-h-[44px] rounded-xl font-bold text-sm text-center hover:bg-accent hover:text-white transition-colors flex items-center justify-center">
+                Тарифы от 390₽
+              </a>
+            )}
             {authEmail ? (
               <>
                 <a href="/dashboard" onClick={() => setMenuOpen(false)}
