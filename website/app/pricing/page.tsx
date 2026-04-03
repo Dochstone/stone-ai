@@ -1,13 +1,9 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useState, useEffect } from "react";
 import Pricing from "@/components/Pricing";
-import FAQ from "@/components/FAQ";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
-export const metadata: Metadata = {
-  title: "Тарифы — подписка от 390₽/мес",
-  description:
-    "4 тарифа Stone AI: Free (0₽), Start (390₽), Pro (890₽), Elite (1990₽). 65+ нейросетей, картинки, видео, 3D. Оплата криптовалютой.",
-};
 
 const pricingJsonLd = {
   "@context": "https://schema.org",
@@ -50,6 +46,17 @@ const faqItems = [
 ];
 
 export default function PricingPage() {
+  const [hasPaidPlan, setHasPaidPlan] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("stone_auth");
+      if (!raw) return;
+      const auth = JSON.parse(raw);
+      if (auth?.plan && auth.plan !== "free") setHasPaidPlan(true);
+    } catch {}
+  }, []);
+
   return (
     <div className="pb-20 min-h-screen">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingJsonLd) }} />
@@ -66,7 +73,9 @@ export default function PricingPage() {
             <span className="bg-gradient-to-r from-accent to-teal bg-clip-text text-transparent">все нейросети</span>
           </h1>
           <p className="text-text/50 max-w-2xl mx-auto text-lg">
-            Бесплатный старт — 15 запросов в день. Подписка от 390₽/мес открывает GPT-5, Claude Opus, генерацию картинок и видео.
+            {hasPaidPlan
+              ? "Управляйте подпиской и сравнивайте тарифы."
+              : "Бесплатный старт — 15 запросов в день. Подписка от 390₽/мес открывает GPT-5, Claude Opus, генерацию картинок и видео."}
           </p>
         </div>
       </div>
@@ -199,18 +208,20 @@ export default function PricingPage() {
         </div>
       </div>
 
-      {/* Bottom CTA */}
-      <div className="max-w-3xl mx-auto px-4 mt-16">
-        <div className="bg-gradient-to-br from-accent/5 to-teal/5 border border-accent/10 rounded-2xl p-8 sm:p-10 text-center">
-          <h2 className="text-2xl font-extrabold mb-2">Начните прямо сейчас</h2>
-          <p className="text-text/50 text-sm mb-6">15 бесплатных запросов каждый день. Без регистрации карты.</p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <a href="/webchat" className="bg-accent text-white px-8 py-3.5 rounded-xl font-bold text-sm hover:bg-accent/90 transition-all shadow-md shadow-accent/20">
-              Попробовать бесплатно
-            </a>
+      {/* Bottom CTA — hidden for paid subscribers */}
+      {!hasPaidPlan && (
+        <div className="max-w-3xl mx-auto px-4 mt-16">
+          <div className="bg-gradient-to-br from-accent/5 to-teal/5 border border-accent/10 rounded-2xl p-8 sm:p-10 text-center">
+            <h2 className="text-2xl font-extrabold mb-2">Начните прямо сейчас</h2>
+            <p className="text-text/50 text-sm mb-6">15 бесплатных запросов каждый день. Без регистрации карты.</p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <a href="/webchat" className="bg-accent text-white px-8 py-3.5 rounded-xl font-bold text-sm hover:bg-accent/90 transition-all shadow-md shadow-accent/20">
+                Попробовать бесплатно
+              </a>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
