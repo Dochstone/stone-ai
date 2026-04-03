@@ -955,6 +955,10 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
   const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [videoGenerating, setVideoGenerating] = useState(false);
   const [threedGenerating, setThreedGenerating] = useState(false);
+  const [showGuestLimit, setShowGuestLimit] = useState(false);
+  const [promptLibOpen, setPromptLibOpen] = useState(false);
+  const [compareMode, setCompareMode] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
   // Cleanup polling on unmount
   useEffect(() => {
@@ -1687,15 +1691,9 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
     }
   }, [sendMessage]);
 
-  // Guest registration prompt modal
-  const [showGuestLimit, setShowGuestLimit] = useState(false);
-  const [promptLibOpen, setPromptLibOpen] = useState(false);
-  const [compareMode, setCompareMode] = useState(false);
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
-  const guestCount = typeof window !== "undefined" ? parseInt(localStorage.getItem("stone_guest_count") || "0") : 0;
-
   if (!loaded) return null;
 
+  const guestCount = parseInt(localStorage.getItem("stone_guest_count") || "0");
   const aiColor = companyColors[model?.company ?? ""] || "#C4623D";
   const aiLetter = companyIcons[model?.company ?? ""] || "AI";
   const lastMsg = messages[messages.length - 1];
