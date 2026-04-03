@@ -2180,8 +2180,8 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
                         <MessageContent content={msg.content} role={msg.role} selectedModel={selectedModel} />
                       </div>
 
-                      {/* Action buttons for AI messages */}
-                      {msg.role === "assistant" && msg.content && (
+                      {/* Action buttons for AI messages — hide for image/video/3D */}
+                      {msg.role === "assistant" && msg.content && !msg.video && !msg.threed && !msg.content.match(/^data:image\//) && !(msg.content.match(/\.(png|jpg|jpeg|webp|gif)(\?|$)/i) && msg.content.startsWith("http")) && (
                         <div className="flex items-center gap-1 mt-2">
                           {/* Copy */}
                           <button
