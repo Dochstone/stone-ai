@@ -30,3 +30,4 @@ class UserAchievement(Base):
     progress: Mapped[int] = mapped_column(Integer, default=0)
     is_completed: Mapped[bool] = mapped_column(Boolean, default=False)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    reward_claimed: Mapped[bool] = mapped_column(Boolean, default=False)

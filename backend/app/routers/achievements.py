@@ -76,9 +76,61 @@ async def list_achievements(user: dict = Depends(get_current_user), db: AsyncSes
             "is_completed": is_done,
             "completed_at": ua.completed_at.isoformat() if ua and ua.completed_at else None,
             "reward_rub": a.reward_rub,
+            "reward_claimed": ua.reward_claimed if ua else False,
         })
 
     return {"achievements": items, "total": len(all_achs), "completed": completed}
+
+
+@router.post("/{slug}/claim")
+async def claim_reward(slug: str, user: dict = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    """Claim reward for a completed achievement."""
+    tg_id = user["id"]
+
+    # Find achievement
+    result = await db.execute(select(Achievement).where(Achievement.slug == slug))
+    ach = result.scalar_one_or_none()
+    if not ach:
+        raise HTTPException(404, "Достижение не найдено")
+
+    # Find user progress
+    result = await db.execute(
+        select(UserAchievement).where(
+            UserAchievement.user_tg_id == tg_id,
+            UserAchievement.achievement_slug == slug,
+        )
+    )
+    ua = result.scalar_one_or_none()
+
+    if not ua or not ua.is_completed:
+        raise HTTPException(400, "Достижение ещё не выполнено")
+
+    if ua.reward_claimed:
+        raise HTTPException(400, "Награда уже получена")
+
+    if ach.reward_rub <= 0:
+        raise HTTPException(400, "У этого достижения нет награды")
+
+    # Credit reward
+    reward_usd = ach.reward_rub / 95.0
+    from sqlalchemy import update as sql_update
+    await db.execute(
+        sql_update(User).where(
+            (User.telegram_id == tg_id) | (User.id == tg_id)
+        ).values(balance_usd=User.balance_usd + reward_usd)
+    )
+
+    ua.reward_claimed = True
+    await db.commit()
+
+    logger.info(f"Achievement reward claimed: user={tg_id}, slug={slug}, reward={ach.reward_rub}₽")
+
+    return {
+        "slug": slug,
+        "reward_rub": ach.reward_rub,
+        "reward_usd": round(reward_usd, 4),
+        "message": f"+{ach.reward_rub}₽ на баланс!",
+    }
 
 
 @router.post("/seed")
@@ -143,20 +195,11 @@ async def check_and_update(tg_id: int, metric: str, value: int = 1) -> list[dict
                 else:
                     ua.progress = value
 
-                # Check completion
+                # Check completion (reward NOT auto-credited — user must claim)
                 if ua.progress >= target and not ua.is_completed:
                     ua.is_completed = True
                     ua.completed_at = datetime.utcnow()
-
-                    # Credit reward
-                    if ach.reward_rub > 0:
-                        reward_usd = ach.reward_rub / 95.0
-                        from sqlalchemy import update as sql_update
-                        await db.execute(
-                            sql_update(User).where(User.telegram_id == tg_id).values(
-                                balance_usd=User.balance_usd + reward_usd
-                            )
-                        )
+                    ua.reward_claimed = False
                     unlocked.append({"slug": ach.slug, "title": ach.title, "icon": ach.icon, "reward_rub": ach.reward_rub})
 
             await db.commit()
