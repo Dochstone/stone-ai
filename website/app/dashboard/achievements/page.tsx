@@ -59,7 +59,7 @@ export default function AchievementsPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-extrabold text-text">Достижения</h1>
+            <h1 className="text-xl sm:text-2xl font-extrabold text-text">Достижения</h1>
             <p className="text-sm text-text/40 mt-1">{completed} из {total} получено</p>
           </div>
           <div className="text-right">
@@ -86,7 +86,7 @@ export default function AchievementsPage() {
         {loading ? (
           <SkeletonAchievements count={8} />
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 animate-fadeIn">
             {filtered.map(a => (
               <div key={a.slug} className={`relative border rounded-2xl p-4 text-center transition-all ${
                 a.is_completed

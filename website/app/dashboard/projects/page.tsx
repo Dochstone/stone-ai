@@ -159,7 +159,7 @@ export default function ProjectsPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-extrabold text-text">Мои проекты</h1>
+            <h1 className="text-xl sm:text-2xl font-extrabold text-text">Мои проекты</h1>
             <p className="text-sm text-text/40 mt-1">{projects.length} из {limit} · тариф {plan}</p>
           </div>
           <button
@@ -181,7 +181,7 @@ export default function ProjectsPage() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fadeIn">
             {projects.map(p => (
               <div key={p.id} className={`bg-bg border rounded-2xl p-5 relative ${p.is_default ? "border-accent/30" : "border-text/5"}`}>
                 {p.is_default && (

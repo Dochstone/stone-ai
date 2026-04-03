@@ -58,8 +58,14 @@ export default function SEOMetaPage() {
   return (
     <div className="pb-20">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
-        <a href="/dashboard/seo" className="text-xs text-text/30 hover:text-accent mb-4 inline-block">← SEO-модуль</a>
-        <h1 className="text-2xl font-extrabold text-text mb-1">Мета-теги</h1>
+        <nav className="flex items-center gap-1.5 text-xs text-text/30 mb-4">
+          <a href="/dashboard" className="hover:text-accent transition-colors">Панель</a>
+          <span>/</span>
+          <a href="/dashboard/seo" className="hover:text-accent transition-colors">SEO</a>
+          <span>/</span>
+          <span className="text-text/50">Мета-теги</span>
+        </nav>
+        <h1 className="text-xl sm:text-2xl font-extrabold text-text mb-1">Мета-теги</h1>
         <p className="text-sm text-text/40 mb-6">Title, Description, Keywords, Open Graph — с превью в Google</p>
 
         <div className="space-y-4 max-w-xl">

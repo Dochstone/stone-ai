@@ -323,18 +323,19 @@ export default function Hero() {
           </h1>
 
           <p className="mt-6 text-lg md:text-xl text-text/60 max-w-2xl mx-auto leading-relaxed">
-            GPT-5, Claude, Gemini, Midjourney, Sora и ещё 60 нейросетей.
+            GPT-5, Claude, Gemini, Midjourney, Sora и ещё 60+ нейросетей.
             <br className="hidden sm:block" />
-            Пишите тексты, генерируйте картинки и видео, анализируйте документы — в одном окне.
+            Тексты, картинки, видео, SEO-статьи, шаблоны — всё в одном окне.
           </p>
 
           {/* CTA buttons */}
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
             <a
               href="/webchat"
-              className="bg-accent text-white px-8 py-4 min-h-[44px] rounded-xl font-bold text-sm hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:ring-offset-2"
+              className="relative bg-accent text-white px-8 py-4 min-h-[44px] rounded-xl font-bold text-sm hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:ring-offset-2"
             >
-              Открыть чат
+              Открыть чат бесплатно
+              <span className="absolute -top-2 -right-2 bg-teal text-white text-[9px] font-bold px-2 py-0.5 rounded-full animate-pulse">NEW</span>
             </a>
             <a
               href="/models"
@@ -368,8 +369,8 @@ export default function Hero() {
           </div>
           <div className="w-px h-12 sm:h-16 bg-text/10" />
           <div className="text-center">
-            <span className="block text-[32px] sm:text-[40px] md:text-[48px] leading-none font-black text-teal">4</span>
-            <span className="mt-1 block">способа оплаты</span>
+            <span className="block text-[32px] sm:text-[40px] md:text-[48px] leading-none font-black text-teal">5</span>
+            <span className="mt-1 block">способов оплаты</span>
           </div>
           <div className="w-px h-12 sm:h-16 bg-text/10" />
           <div className="text-center">

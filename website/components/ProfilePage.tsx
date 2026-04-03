@@ -171,7 +171,7 @@ function OverviewTab({ profile, usage }: { profile: UserProfile; usage: UsageIte
   return (
     <div className="space-y-6">
       {/* Profile card */}
-      <div className="bg-white rounded-2xl border border-text/[0.06] p-6 flex items-center gap-5">
+      <div className="bg-white rounded-2xl border border-text/[0.06] p-6 flex items-center gap-5 hover:border-accent/15 transition-colors">
         <div
           className="w-16 h-16 rounded-full flex items-center justify-center shrink-0"
           style={{ backgroundColor: getAvatarColor(profile.email) }}
@@ -198,12 +198,31 @@ function OverviewTab({ profile, usage }: { profile: UserProfile; usage: UsageIte
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard label="Тариф" value={profile.plan === "max-pro" ? "Elite" : profile.plan === "max" ? "Pro" : profile.plan === "mini" ? "Start" : "Free"} accent />
         <StatCard label="Запросов" value={profile.stats.total_requests.toLocaleString()} />
-        <StatCard label="Всего запросов" value={profile.stats.total_requests.toLocaleString()} />
+        <StatCard label="Баланс" value={`$${profile.balance_usd.toFixed(2)}`} accent />
         <StatCard label="Любимая модель" value={favModel?.name || "—"} sub={favModel?.company} />
       </div>
 
       {/* Chart */}
       <BarChart data={days} />
+
+      {/* Quick links */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <a href="/dashboard/templates" className="bg-white rounded-2xl border border-text/[0.06] p-4 hover:shadow-md hover:border-accent/20 transition-all group">
+          <div className="text-lg mb-1">📝</div>
+          <div className="text-xs font-bold text-text group-hover:text-accent transition-colors">AI-шаблоны</div>
+          <div className="text-[10px] text-text/30 mt-0.5">50+ готовых промптов</div>
+        </a>
+        <a href="/dashboard/gallery" className="bg-white rounded-2xl border border-text/[0.06] p-4 hover:shadow-md hover:border-accent/20 transition-all group">
+          <div className="text-lg mb-1">🎨</div>
+          <div className="text-xs font-bold text-text group-hover:text-accent transition-colors">Галерея</div>
+          <div className="text-[10px] text-text/30 mt-0.5">Все генерации</div>
+        </a>
+        <a href="/dashboard/seo" className="bg-white rounded-2xl border border-text/[0.06] p-4 hover:shadow-md hover:border-accent/20 transition-all group">
+          <div className="text-lg mb-1">🔍</div>
+          <div className="text-xs font-bold text-text group-hover:text-accent transition-colors">SEO-модуль</div>
+          <div className="text-[10px] text-text/30 mt-0.5">Статьи, анализ, мета</div>
+        </a>
+      </div>
     </div>
   );
 }

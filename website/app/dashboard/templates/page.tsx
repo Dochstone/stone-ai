@@ -111,7 +111,7 @@ export default function TemplatesPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-extrabold text-text">AI-шаблоны</h1>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-text">AI-шаблоны</h1>
           <p className="text-sm text-text/40 mt-1">Заполните форму — AI сгенерирует результат. 50+ шаблонов для маркетинга, SMM, SEO и бизнеса.</p>
         </div>
 
@@ -140,7 +140,7 @@ export default function TemplatesPage() {
         ) : templates.length === 0 ? (
           <div className="text-center py-20 text-text/20">Ничего не найдено</div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-fadeIn">
             {templates.map(tpl => (
               <button
                 key={tpl.id}

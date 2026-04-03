@@ -139,7 +139,7 @@ export default function GalleryPage() {
             <a href="/webchat" className="bg-accent text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-accent/90">Открыть чат</a>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 animate-fadeIn">
             {gens.map(g => (
               <div key={g.id} onClick={() => setSelected(g)}
                 className="relative bg-bg border border-text/5 rounded-xl overflow-hidden cursor-pointer group hover:border-text/15 transition-all">
@@ -179,7 +179,7 @@ export default function GalleryPage() {
 
         {/* Infinite scroll trigger */}
         <div ref={loaderRef} className="h-10 flex items-center justify-center">
-          {loading && <span className="text-text/20 text-sm">Загрузка...</span>}
+          {loading && <div className="flex items-center gap-2 text-text/20 text-sm"><svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>Загрузка...</div>}
         </div>
       </div>
 
