@@ -425,19 +425,19 @@ async def generate_image(
     if not openai_key:
         raise HTTPException(503, "Image generation not configured")
 
+    logger.info(f"Image generation: user={tg_id}, model={req.model_id}, prompt={req.prompt[:100]}")
+
     try:
         async with httpx.AsyncClient(timeout=120.0) as client:
             resp = await client.post(
                 "https://api.openai.com/v1/images/generations",
                 headers={"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"},
                 json={
-                    "model": "dall-e-3",
+                    "model": "gpt-image-1",
                     "prompt": req.prompt,
                     "n": 1,
                     "size": "1024x1024",
-                    "quality": "hd",
-                    "style": "natural",
-                    "response_format": "url",
+                    "quality": "high",
                 },
             )
 
@@ -453,17 +453,16 @@ async def generate_image(
             data = resp.json()
             image_data = data["data"][0]
 
-            # Always get URL then download and convert to base64
-            # (OpenAI URLs expire after ~1 hour, base64 is permanent)
-            source_url = image_data.get("url")
-            if source_url:
+            # gpt-image-1 returns b64_json by default, dall-e-3 returns url
+            if "b64_json" in image_data:
+                image_url = f"data:image/png;base64,{image_data['b64_json']}"
+            elif image_data.get("url"):
+                source_url = image_data["url"]
                 img_resp = await client.get(source_url, timeout=30.0)
                 if img_resp.status_code == 200:
                     image_url = f"data:image/png;base64,{base64.b64encode(img_resp.content).decode('ascii')}"
                 else:
-                    image_url = source_url  # fallback to URL
-            elif "b64_json" in image_data:
-                image_url = f"data:image/png;base64,{image_data['b64_json']}"
+                    image_url = source_url
             else:
                 raise HTTPException(502, "No image in response")
 
