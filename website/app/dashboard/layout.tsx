@@ -194,7 +194,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
             {/* ═══ Chat mode collapsed: icons with hover labels ═══ */}
             {isChat && !sidebarHover && (
-              <div className="hidden lg:flex flex-col items-center gap-0.5">
+              <div className="hidden lg:flex flex-col items-center gap-0.5 pl-0.5">
                 {/* AI categories */}
                 {CHAT_CATEGORIES.map((c) => (
                   <button
@@ -372,7 +372,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </nav>
 
           {/* Sticky bottom — Theme + Profile */}
-          <div className={`shrink-0 border-t border-text/5 ${isChat && !sidebarHover ? "py-1.5 flex flex-col items-center gap-0.5" : "p-3"}`}>
+          <div className={`shrink-0 border-t border-text/5 ${isChat && !sidebarHover ? "py-1.5 flex flex-col items-center gap-0.5 pl-0.5" : "p-3"}`}>
             <div className={`${isChat && !sidebarHover ? "" : "flex items-center justify-between mb-2"}`}>
               {(!isChat || sidebarHover) && <span className="text-[9px] text-text/20 font-medium">Тема</span>}
               <ThemeToggle compact={isChat && !sidebarHover} />
