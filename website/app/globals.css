@@ -26,6 +26,42 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 
+/* ── Scrollbars — thin, auto-hide ── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+*:hover {
+  scrollbar-color: rgba(0,0,0,0.15) transparent;
+}
+.dark *:hover {
+  scrollbar-color: rgba(255,255,255,0.12) transparent;
+}
+*::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 10px;
+  transition: background 0.3s;
+}
+*:hover::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.15);
+}
+.dark *:hover::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.12);
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.25);
+}
+.dark *::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.2);
+}
+
 /* ── Dark mode overrides — WCAG AA compliant (4.5:1 min contrast) ── */
 
 /* Backgrounds */
