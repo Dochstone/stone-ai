@@ -371,10 +371,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </nav>
 
           {/* Sticky bottom — Theme + Profile */}
-          <div className={`shrink-0 border-t border-text/5 ${isChat && !sidebarHover ? "p-1.5" : "p-3"}`}>
-            <div className={`${isChat && !sidebarHover ? "flex items-center justify-center mb-1" : "flex items-center justify-between mb-2"}`}>
+          <div className={`shrink-0 border-t border-text/5 ${isChat && !sidebarHover ? "px-0.5 py-1.5" : "p-3"}`}>
+            <div className={`${isChat && !sidebarHover ? "flex justify-center mb-1" : "flex items-center justify-between mb-2"}`}>
               {(!isChat || sidebarHover) && <span className="text-[9px] text-text/20 font-medium">Тема</span>}
-              <div className={isChat && !sidebarHover ? "mx-auto" : ""}><ThemeToggle /></div>
+              <ThemeToggle />
             </div>
             {authEmail ? (
               <Link
