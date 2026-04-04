@@ -327,8 +327,9 @@ export default function SnakeGame({ token, onClose, compact, onShowLeaderboard }
       </div>
 
       {/* Canvas */}
-      <div className="relative" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-        <canvas ref={canvasRef} width={SIZE} height={SIZE} className="rounded-xl border border-text/10" style={{ touchAction: "none" }} />
+      <div className="w-full flex justify-center">
+      <div className="relative" style={{ maxWidth: SIZE, width: "100%" }} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+        <canvas ref={canvasRef} width={SIZE} height={SIZE} className="rounded-xl border border-text/10 w-full h-auto" style={{ touchAction: "none" }} />
 
         {gameState === "ready" && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 rounded-xl">
@@ -372,9 +373,10 @@ export default function SnakeGame({ token, onClose, compact, onShowLeaderboard }
           </div>
         )}
       </div>
+      </div>
 
       {/* D-pad for mobile */}
-      <div className="sm:hidden select-none mt-1">
+      <div className="sm:hidden select-none mt-1 w-full flex justify-center">
         <div className="flex flex-col items-center gap-1.5">
           <button
             onTouchStart={(e) => { e.preventDefault(); if (dirRef.current !== "down") nextDirRef.current = "up"; }}

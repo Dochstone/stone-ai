@@ -7,7 +7,7 @@ import { getAuth, API_URL } from "@/lib/auth";
 interface Gen {
   id: string; type: string; model: string; prompt: string;
   result_url: string | null; result_text: string | null;
-  metadata: any; is_favorite: boolean; cost: number | null;
+  metadata: Record<string, unknown>; is_favorite: boolean; cost: number | null;
   project_id: string | null; created_at: string | null;
 }
 

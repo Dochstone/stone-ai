@@ -109,7 +109,16 @@ export default function PresentationsPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        const items = (data.generations || data.items || []).map((g: any) => ({
+        interface GenerationRecord {
+          id: string;
+          prompt?: string;
+          topic?: string;
+          metadata_?: { slides_count?: number; style?: string };
+          created_at?: string;
+          result_text?: string;
+          slides?: SlideData[];
+        }
+        const items = (data.generations || data.items || []).map((g: GenerationRecord) => ({
           id: g.id,
           topic: g.prompt || g.topic || "",
           slides_count: g.metadata_?.slides_count || 0,
@@ -248,10 +257,12 @@ export default function PresentationsPage() {
         const bulletText = slide.bullets.map(b => ({ text: b, options: { bullet: { type: "number" as const }, color: t.text, fontSize: 16, breakLine: true } }));
 
         if (slide.image_url && !slide.image_url.startsWith("data:")) {
-          s.addText(bulletText as any, { x: 0.5, y: 1.3, w: 5, h: 3.5, valign: "top", paraSpaceAfter: 8 });
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- pptxgenjs addText expects its own internal type
+          s.addText(bulletText as unknown as Parameters<typeof s.addText>[0], { x: 0.5, y: 1.3, w: 5, h: 3.5, valign: "top", paraSpaceAfter: 8 });
           try { s.addImage({ path: slide.image_url, x: 5.8, y: 1.3, w: 3.7, h: 3.5 }); } catch { /* image fetch may fail */ }
         } else {
-          s.addText(bulletText as any, { x: 0.5, y: 1.3, w: 9, h: 3.5, valign: "top", paraSpaceAfter: 8 });
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- pptxgenjs addText expects its own internal type
+          s.addText(bulletText as unknown as Parameters<typeof s.addText>[0], { x: 0.5, y: 1.3, w: 9, h: 3.5, valign: "top", paraSpaceAfter: 8 });
         }
       }
 
@@ -325,7 +336,7 @@ export default function PresentationsPage() {
     reader.readAsDataURL(file);
   };
 
-  const updateSlideField = (idx: number, field: string, value: any) => {
+  const updateSlideField = (idx: number, field: keyof SlideData, value: string | string[]) => {
     const updated = [...slides];
     updated[idx] = { ...updated[idx], [field]: value };
     setSlides(updated);
