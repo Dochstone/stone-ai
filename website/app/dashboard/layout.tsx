@@ -77,8 +77,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [chatCategory, setChatCategory] = useState("all");
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const isChat = pathname === "/dashboard/chat";
-  // collapsed = desktop only, chat mode, sidebar not hovered
-  const collapsed = isChat && !sidebarHover;
+  // collapsed = desktop only, chat mode, sidebar not hovered and not open on mobile
+  const collapsed = isChat && !sidebarHover && !sidebarOpen;
 
   const CHAT_CATEGORIES = [
     { id: "all", label: "Все чаты", svg: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" },
@@ -412,7 +412,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Main content */}
         <main className="flex-1 min-w-0">
           {chatLoaded && (
-            <div className={`${isChat ? "block h-[calc(100dvh-48px)] lg:h-dvh" : "hidden"}`}>
+            <div className={`${isChat ? "block lg:h-dvh" : "hidden"}`} style={isChat ? { height: "calc(100dvh - 48px - var(--kb-height, 0px))" } : undefined}>
               <WebChat embedded initialCategory={chatCategory} />
             </div>
           )}
