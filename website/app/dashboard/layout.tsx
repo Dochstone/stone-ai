@@ -114,7 +114,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </svg>
                 Навигация
               </button>
-              <Link href="/webchat" className="text-xs font-bold text-accent">
+              <Link href="/dashboard/chat" className="text-xs font-bold text-accent">
                 Открыть чат
               </Link>
             </>
@@ -136,7 +136,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           className={`
             fixed lg:sticky top-14 md:top-16 z-40 lg:z-0
             h-[calc(100vh-56px)] md:h-[calc(100vh-64px)]
-            ${isChat ? "w-12 lg:w-12" : "w-64"} shrink-0
+            ${isChat ? "w-64 lg:w-12" : "w-64"} shrink-0
             bg-bg lg:bg-transparent
             border-r border-text/5
             overflow-y-auto overscroll-contain
@@ -144,7 +144,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
           `}
         >
-          <nav className={`${isChat ? "p-1.5 space-y-1" : "p-4 space-y-6"}`}>
+          <nav className={`${isChat ? "p-4 lg:p-1.5 space-y-6 lg:space-y-1" : "p-4 space-y-6"}`}>
             {/* User card */}
             {authEmail && !isChat && (
               <Link
@@ -169,8 +169,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {/* Nav groups */}
             {NAV_ITEMS.map((group) => (
               <div key={group.group}>
-                {!isChat && (
-                  <div className="text-[10px] font-bold text-text/30 uppercase tracking-[1.5px] px-3 mb-2">
+                {(!isChat || (isChat && typeof window !== "undefined" && window.innerWidth < 1024)) && (
+                  <div className={`text-[10px] font-bold text-text/30 uppercase tracking-[1.5px] px-3 mb-2 ${isChat ? "lg:hidden" : ""}`}>
                     {group.group}
                   </div>
                 )}
@@ -178,22 +178,42 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   {group.items.map((item) => {
                     const active = isActive(item.href);
                     return isChat ? (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        title={item.label}
-                        onClick={() => setSidebarOpen(false)}
-                        className={`
-                          flex items-center justify-center p-2 rounded-lg
-                          transition-all duration-150
-                          ${active
-                            ? "bg-accent/10 text-accent"
-                            : "text-text/50 hover:text-text/80 hover:bg-text/[0.04]"
-                          }
-                        `}
-                      >
-                        <NavIcon d={item.icon} />
-                      </Link>
+                      <>
+                        {/* Desktop: icon only */}
+                        <Link
+                          key={item.href + "-lg"}
+                          href={item.href}
+                          title={item.label}
+                          onClick={() => setSidebarOpen(false)}
+                          className={`
+                            hidden lg:flex items-center justify-center p-2 rounded-lg
+                            transition-all duration-150
+                            ${active
+                              ? "bg-accent/10 text-accent"
+                              : "text-text/50 hover:text-text/80 hover:bg-text/[0.04]"
+                            }
+                          `}
+                        >
+                          <NavIcon d={item.icon} />
+                        </Link>
+                        {/* Mobile: full with text */}
+                        <Link
+                          key={item.href + "-sm"}
+                          href={item.href}
+                          onClick={() => setSidebarOpen(false)}
+                          className={`
+                            flex lg:hidden items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+                            transition-all duration-150
+                            ${active
+                              ? "bg-accent/10 text-accent font-semibold"
+                              : "text-text/50 hover:text-text/80 hover:bg-text/[0.04]"
+                            }
+                          `}
+                        >
+                          <NavIcon d={item.icon} />
+                          <span className="truncate">{item.label}</span>
+                        </Link>
+                      </>
                     ) : (
                       <Link
                         key={item.href}
