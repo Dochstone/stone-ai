@@ -10,14 +10,14 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.
 const plans = [
   {
     id: "free", name: "Pay-per-Use", price: "от 5₽", oldPrice: "", priceNum: 0, premium: false, period: "/запрос", desc: "Без подписки",
-    badge: null, accent: false,
+    badge: "Гибкий", accent: false,
     features: ["15 бесплатных чат-запросов/день", "AI-шаблоны от 10₽", "SEO-статьи от 15₽", "AI-презентации от 40₽", "Фотосессия товаров от 15₽", "Пополнение от 100₽"],
     locked: [],
     cta: "Пополнить баланс", icon: "💰", color: "#14B8A6", img: "/plan-payperuse.jpg",
   },
   {
     id: "mini", name: "Start", price: "390₽", oldPrice: "590₽", priceNum: 390, premium: false, period: "/мес", desc: "20+ моделей",
-    badge: null, accent: false,
+    badge: "Старт", accent: false,
     features: ["20+ моделей включая GPT-5.1 и Claude Sonnet", "500 запросов к быстрым моделям", "20 запросов к премиум моделям", "До 5 запросов к Claude Opus", "15 картинок и 3 видео в месяц"],
     locked: ["3D модели и озвучка"],
     cta: "Выбрать Start", icon: "⚡", color: "#22D3EE", img: "/plan-mini.jpg?v=2",
@@ -303,11 +303,14 @@ export default function Pricing() {
               {plan.badge && (
                 <span
                   className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
-                    plan.premium ? "bg-gradient-to-r from-[#F43F5E] to-[#E11D48] text-white" : "bg-[#A855F7] text-white"
+                    plan.premium ? "bg-gradient-to-r from-[#F43F5E] to-[#E11D48] text-white"
+                    : plan.accent ? "bg-[#A855F7] text-white"
+                    : plan.id === "mini" ? "bg-[#22D3EE] text-white"
+                    : "bg-[#14B8A6] text-white"
                   }`}
                   style={{
                     animation: "pricingPulse 2.5s ease-in-out infinite",
-                    ["--pulse-color" as any]: plan.premium ? "rgba(244,63,94,0.4)" : "rgba(168,85,247,0.4)",
+                    ["--pulse-color" as any]: plan.premium ? "rgba(244,63,94,0.4)" : plan.accent ? "rgba(168,85,247,0.4)" : plan.id === "mini" ? "rgba(34,211,238,0.4)" : "rgba(20,184,166,0.4)",
                   }}
                 >
                   {plan.premium ? "⭐ " : ""}{plan.badge}
@@ -479,7 +482,7 @@ export default function Pricing() {
                     style={{ objectPosition: "center 25%", animation: "pricingStagger 0.5s ease both 0.05s" }}
                   />
                   {/* Darken overlay for contrast */}
-                  <div className="absolute inset-0 bg-black/25" />
+                  <div className="absolute inset-0 bg-black/45" />
                   {/* Desktop: side gradient blend */}
                   <div className="hidden sm:block absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-bg" />
                   {/* Mobile: bottom gradient only — keeps image visible, text readable */}
@@ -495,6 +498,11 @@ export default function Pricing() {
                     <div className="flex items-center gap-3">
                       <span className="text-3xl" style={{ animation: "pricingFloat 3s ease-in-out infinite" }}>{modal.icon}</span>
                       <div>
+                        {modal.badge && (
+                          <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold text-white mb-1" style={{ backgroundColor: modal.color }}>
+                            {modal.premium ? "⭐ " : ""}{modal.badge}
+                          </span>
+                        )}
                         <h3 className="text-xl font-extrabold text-white drop-shadow-lg">{modal.name}</h3>
                         <div className="flex items-baseline gap-1.5">
                           {modal.oldPrice && <span className="text-sm line-through text-white/40">{modal.oldPrice}</span>}
@@ -517,9 +525,8 @@ export default function Pricing() {
                     <div>
                       {modal.badge && (
                         <span
-                          className={`inline-block px-2.5 py-0.5 rounded-full text-[9px] font-bold mb-1 ${
-                            modal.premium ? "bg-amber-500/15 text-amber-500" : "bg-accent/10 text-accent"
-                          }`}
+                          className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-bold mb-1 text-white"
+                          style={{ backgroundColor: modal.color }}
                         >
                           {modal.premium ? "⭐ " : ""}{modal.badge}
                         </span>
@@ -558,31 +565,73 @@ export default function Pricing() {
                 <div className="px-6 pb-5 pt-2">
 
                   {modal.id === "free" ? (
-                    /* ═══ Pay-per-Use: top-up only ═══ */
-                    <div style={{ animation: "pricingStagger 0.4s ease both 0.35s" }}>
-                      <p className="text-[10px] text-text/30 font-semibold uppercase tracking-wider mb-2">Пополнить баланс</p>
-                      <p className="text-xs text-text/40 mb-4">Платите только за инструменты: шаблоны, презентации, фотосессия, SEO. Без ежемесячной подписки.</p>
-                      <div className="flex gap-2 mb-3">
+                    /* ═══ Pay-per-Use: top-up with promo + payment methods ═══ */
+                    <div>
+                      <p className="text-xs text-text/40 mb-4" style={{ animation: "pricingStagger 0.4s ease both 0.3s" }}>Платите только за инструменты: шаблоны, презентации, фотосессия, SEO. Без ежемесячной подписки.</p>
+                      <div className="flex gap-2 mb-3" style={{ animation: "pricingStagger 0.4s ease both 0.33s" }}>
                         {[100, 300, 500, 1000].map((amt) => (
                           <button
                             key={amt}
                             onClick={() => setTopupAmount(amt)}
                             className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                              topupAmount === amt ? "bg-teal text-white shadow-sm" : "bg-text/[0.04] text-text/50 hover:bg-text/[0.08]"
+                              topupAmount === amt ? "text-white shadow-sm" : "bg-text/[0.04] text-text/50 hover:bg-text/[0.08]"
                             }`}
+                            style={topupAmount === amt ? { backgroundImage: "linear-gradient(90deg, #14B8A6, #2DD4BF, #14B8A6)", backgroundSize: "200% 100%", animation: "pricingShimmer 4s ease-in-out infinite" } : undefined}
                           >
                             {amt}₽
                           </button>
                         ))}
                       </div>
+
+                      {/* Promo code */}
+                      <div className="mb-3" style={{ animation: "pricingStagger 0.4s ease both 0.35s" }}>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={promo}
+                            onChange={(e) => setPromo(e.target.value.toUpperCase())}
+                            placeholder="Промокод"
+                            className="flex-1 bg-text/[0.04] border border-text/[0.08] rounded-xl px-4 py-2.5 text-sm font-mono uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-accent/30 placeholder:text-text/20 placeholder:normal-case placeholder:tracking-normal placeholder:font-sans transition-all duration-200"
+                          />
+                          <button
+                            onClick={applyPromo}
+                            disabled={!promo.trim()}
+                            className="px-5 py-2.5 bg-text/[0.04] border border-text/[0.08] rounded-xl text-sm font-bold hover:border-accent hover:text-accent transition-all duration-200 disabled:opacity-30 active:scale-95"
+                          >
+                            ОК
+                          </button>
+                        </div>
+                        {promoResult && (
+                          <p className={`mt-2 text-xs font-medium ${promoResult.ok ? "text-teal" : "text-red-500"}`}>
+                            {promoResult.message}
+                          </p>
+                        )}
+                      </div>
+
                       <button
                         onClick={() => payTopup(topupAmount)}
                         disabled={loading}
-                        className="w-full py-3.5 rounded-2xl font-bold text-[15px] text-white bg-teal hover:bg-teal/90 disabled:opacity-50 transition-all shadow-md shadow-teal/20"
+                        className="w-full py-3.5 rounded-2xl font-bold text-[15px] text-white disabled:opacity-50 transition-all active:scale-[0.97] relative overflow-hidden"
+                        style={{
+                          backgroundImage: "linear-gradient(90deg, #14B8A6, #2DD4BF, #14B8A6)",
+                          backgroundSize: "200% 100%",
+                          animation: "pricingShimmer 3s ease-in-out infinite, pricingStagger 0.4s ease both 0.38s",
+                          boxShadow: "0 8px 24px rgba(20,184,166,0.3)",
+                        }}
                       >
-                        {loading ? "Создание платежа..." : `Пополнить ${topupAmount}₽`}
+                        {loading ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                            </svg>
+                            Создание платежа...
+                          </span>
+                        ) : `Пополнить ${topupAmount}₽`}
                       </button>
-                      <p className="text-[10px] text-text/25 text-center mt-2">Карта РФ · Мир · Visa · MC · СБП</p>
+                      <p className="text-[10px] text-text/25 text-center mt-1.5" style={{ animation: "pricingStagger 0.4s ease both 0.42s" }}>
+                        Карта РФ · Мир · Visa · MC · СБП
+                      </p>
                       {result && (
                         <p className={`text-center text-xs font-medium mt-3 ${result.ok ? "text-teal" : "text-red-500"}`}>{result.message}</p>
                       )}
