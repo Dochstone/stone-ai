@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { SkeletonAchievements } from "@/components/Skeleton";
 import { getAuth, API_URL } from "@/lib/auth";
+import { logError } from "@/lib/error-logger";
 
 interface Ach {
   slug: string; title: string; description: string; icon: string;
@@ -43,7 +44,7 @@ export default function AchievementsPage() {
         setTotal(data.total || 0);
         setCompleted(data.completed || 0);
       })
-      .catch((e) => { console.error("Failed to load achievements:", e); })
+      .catch((e) => { logError("Achievements fetch", e); })
       .finally(() => { setLoading(false); setFetching(false); });
   };
 

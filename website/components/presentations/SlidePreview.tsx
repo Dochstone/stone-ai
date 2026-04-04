@@ -85,7 +85,7 @@ export default function SlidePreview({ slide, style, slideNumber, totalSlides, c
                 </ul>
               </div>
               <div className="w-[45%] flex items-center justify-center p-4">
-                <img src={slide.image_url} alt="" className="max-w-full max-h-full object-contain rounded-lg shadow-md" />
+                <img src={slide.image_url} alt="" className="max-w-full max-h-full object-contain rounded-lg shadow-md" loading="lazy" decoding="async" />
               </div>
             </div>
           );
@@ -135,7 +135,7 @@ export default function SlidePreview({ slide, style, slideNumber, totalSlides, c
             </div>
             {slide.image_url && (
               <div className="w-[40%] flex items-center justify-center p-4">
-                <img src={slide.image_url} alt="" className="max-w-full max-h-full object-contain rounded-lg shadow-md" />
+                <img src={slide.image_url} alt="" className="max-w-full max-h-full object-contain rounded-lg shadow-md" loading="lazy" decoding="async" />
               </div>
             )}
           </div>

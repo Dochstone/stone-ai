@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Skeleton } from "@/components/Skeleton";
 import { getAuth, API_URL } from "@/lib/auth";
+import { logError } from "@/lib/error-logger";
 
 interface UserProfile {
   balance_usd: number;
@@ -115,7 +116,7 @@ export default function DashboardPage() {
         return res.json();
       })
       .then((data) => setProfile(data))
-      .catch((e) => { console.error("Failed to load profile:", e); })
+      .catch((e) => { logError("Dashboard profile fetch", e); })
       .finally(() => setLoadingProfile(false));
 
     fetch(`${API_URL}/api/generations/?limit=4`, { headers })
@@ -127,7 +128,7 @@ export default function DashboardPage() {
         const items = data.generations ?? data.items ?? data.results ?? [];
         setRecentGens(Array.isArray(items) ? items.slice(0, 4) : []);
       })
-      .catch((e) => { console.error("Failed to load recent generations:", e); })
+      .catch((e) => { logError("Dashboard generations fetch", e); })
       .finally(() => setLoadingGens(false));
   }, []);
 

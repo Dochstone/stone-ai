@@ -51,7 +51,7 @@ export function ImageUploader({ onUpload, preview, onClear }: Props) {
   if (preview) {
     return (
       <div className="relative min-h-[200px] rounded-xl overflow-hidden border border-text/10 bg-text/[0.02]">
-        <img src={preview} alt="Preview" className="w-full h-full object-contain max-h-[400px]" />
+        <img src={preview} alt="Preview" className="w-full h-full object-contain max-h-[400px]" decoding="async" />
         {onClear && (
           <button
             onClick={onClear}

@@ -142,7 +142,7 @@ export default function GalleryPage() {
                 {/* Preview */}
                 <div className="aspect-square bg-text/[0.02] flex items-center justify-center overflow-hidden">
                   {g.type === "image" && g.result_url ? (
-                    <img src={g.result_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                    <img src={g.result_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" decoding="async" sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" />
                   ) : g.type === "video" ? (
                     <div className="flex flex-col items-center gap-1 text-text/20"><span className="text-3xl">🎬</span><span className="text-[10px]">{g.model}</span></div>
                   ) : g.type === "audio" ? (
@@ -186,7 +186,7 @@ export default function GalleryPage() {
             {/* Preview */}
             <div className="relative">
               {selected.type === "image" && selected.result_url ? (
-                <img src={selected.result_url} alt="" className="w-full max-h-[50vh] object-contain bg-black/10" />
+                <img src={selected.result_url} alt="" className="w-full max-h-[50vh] object-contain bg-black/10" decoding="async" />
               ) : selected.type === "video" && selected.result_url ? (
                 <video src={selected.result_url} controls className="w-full max-h-[50vh]" />
               ) : selected.type === "audio" && selected.result_url ? (

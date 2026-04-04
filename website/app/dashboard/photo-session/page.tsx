@@ -5,6 +5,7 @@ import { ImageUploader } from "@/components/photo-session/ImageUploader";
 import { BeforeAfterSlider } from "@/components/photo-session/BeforeAfterSlider";
 import { getAuth, API_URL } from "@/lib/auth";
 import { IMAGE_MODELS } from "@/lib/models-config";
+import { logError } from "@/lib/error-logger";
 
 type Tab = "background" | "model" | "marketplace";
 
@@ -77,7 +78,7 @@ export default function PhotoSessionPage() {
         if (Array.isArray(data)) setPresets(data);
         else if (data.presets) setPresets(data.presets);
       })
-      .catch((e) => { console.error("Failed to load presets:", e); });
+      .catch((e) => { logError("Photo session presets fetch", e); });
   }, []);
 
   const clearImage = () => {
@@ -450,6 +451,8 @@ export default function PhotoSessionPage() {
                     src={resultUrl}
                     alt="Result"
                     className="w-full object-contain max-h-[500px]"
+                    loading="lazy"
+                    decoding="async"
                   />
                 </div>
 

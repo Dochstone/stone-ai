@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
+import { logError } from "@/lib/error-logger";
+
 export default function DashboardError({
   error,
   reset,
@@ -7,6 +10,10 @@ export default function DashboardError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    logError("Dashboard Error Boundary", error);
+  }, [error]);
+
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 px-4">
       <span className="text-4xl">😕</span>
