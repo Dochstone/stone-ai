@@ -48,9 +48,10 @@ const NAV_ITEMS = [
   },
 ];
 
-function NavIcon({ d }: { d: string }) {
+function NavIcon({ d, size }: { d: string; size?: number }) {
+  const s = size || 18;
   return (
-    <svg className="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+    <svg className="shrink-0" style={{ width: s, height: s }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
       <path strokeLinecap="round" strokeLinejoin="round" d={d} />
     </svg>
   );
@@ -206,7 +207,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         : "text-text/30 hover:text-text/50 hover:bg-text/[0.05]"
                     }`}
                   >
-                    <NavIcon d={c.svg} />
+                    <NavIcon d={c.svg} size={20} />
                     <span className="absolute left-full ml-2 px-2.5 py-1 rounded-lg bg-dark text-white text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-lg z-50">
                       {c.label}
                     </span>
@@ -229,7 +230,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         : "text-text/30 hover:text-text/50 hover:bg-text/[0.05]"
                     }`}
                   >
-                    <NavIcon d={item.icon} />
+                    <NavIcon d={item.icon} size={20} />
                     <span className="absolute left-full ml-2 px-2.5 py-1 rounded-lg bg-dark text-white text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-lg z-50">
                       {item.label}
                     </span>
@@ -371,10 +372,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </nav>
 
           {/* Sticky bottom — Theme + Profile */}
-          <div className={`shrink-0 border-t border-text/5 ${isChat && !sidebarHover ? "px-0.5 py-1.5" : "p-3"}`}>
-            <div className={`${isChat && !sidebarHover ? "flex justify-center mb-1" : "flex items-center justify-between mb-2"}`}>
+          <div className={`shrink-0 border-t border-text/5 ${isChat && !sidebarHover ? "p-1" : "p-3"}`}>
+            <div className={`${isChat && !sidebarHover ? "flex justify-center mb-0.5" : "flex items-center justify-between mb-2"}`}>
               {(!isChat || sidebarHover) && <span className="text-[9px] text-text/20 font-medium">Тема</span>}
-              <ThemeToggle />
+              <ThemeToggle compact={isChat && !sidebarHover} />
             </div>
             {authEmail ? (
               <Link

@@ -359,7 +359,7 @@ function Sidebar({
           <div className="flex items-center gap-2">
             <button
               onClick={() => { onNewChat(); if (window.innerWidth < 1024) onToggle(); }}
-              className="flex-1 flex items-center gap-2 border border-accent/30 hover:bg-accent/10 rounded-xl px-3.5 py-2 transition-colors"
+              className="flex-1 flex items-center gap-2 border border-accent/40 hover:bg-accent/10 hover:border-accent/60 rounded-xl px-3.5 py-2 transition-colors"
             >
               <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" d="M12 4v16m8-8H4" />
