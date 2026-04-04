@@ -1440,8 +1440,8 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
       {/* Main chat area */}
       <div className="flex-1 flex flex-col min-w-0 h-full relative">
-        {/* Top bar — hidden when embedded in dashboard (dashboard has its own) */}
-        <div className={`h-14 border-b border-text/[0.06] bg-bg/80 backdrop-blur-sm flex items-center justify-between px-3 sm:px-4 shrink-0 ${embedded ? "hidden" : ""}`}>
+        {/* Top bar — simplified when embedded */}
+        <div className={`${embedded ? "h-10 lg:flex hidden" : "h-14 flex"} border-b border-text/[0.06] bg-bg/80 backdrop-blur-sm items-center justify-between px-3 sm:px-4 shrink-0`}>
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             {/* Sidebar toggle */}
             <button onClick={toggleSidebar} className="text-text/30 hover:text-text/60 transition-colors shrink-0">
