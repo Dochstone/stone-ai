@@ -194,7 +194,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
             {/* ═══ Chat mode collapsed: icons with hover labels ═══ */}
             {isChat && !sidebarHover && (
-              <div className="hidden lg:flex flex-col items-center gap-0.5 pl-1.5">
+              <div className="hidden lg:flex flex-col items-center gap-0.5 pl-2">
                 {/* AI categories */}
                 {CHAT_CATEGORIES.map((c) => (
                   <button
