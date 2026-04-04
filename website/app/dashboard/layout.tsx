@@ -153,8 +153,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Sidebar */}
         <aside
           className={`
-            fixed lg:sticky top-0 z-40 lg:z-0
-            h-screen
+            fixed lg:sticky top-12 lg:top-0 z-40 lg:z-0
+            h-[calc(100dvh-48px)] lg:h-[100dvh]
             ${isChat ? (sidebarHover ? "w-64 lg:w-64" : "w-64 lg:w-12") : "w-64"} shrink-0
             bg-bg ${isChat && sidebarHover ? "lg:shadow-xl lg:shadow-black/10" : "lg:bg-transparent"}
             border-r border-text/5
