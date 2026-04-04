@@ -167,26 +167,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           onMouseLeave={() => { if (isChat) setSidebarHover(false); }}
         >
           <nav className={`flex-1 overflow-y-auto overscroll-contain ${isChat ? (sidebarHover ? "p-3 space-y-4" : "p-3 lg:p-1.5 space-y-4 lg:space-y-1") : "p-3 space-y-4"}`}>
-            {/* User card */}
-            {authEmail && (!isChat || sidebarHover) && (
-              <Link
-                href="/profile"
-                className="flex items-center gap-3 p-3 rounded-xl bg-text/[0.03] hover:bg-text/[0.06] border border-text/5 transition-colors"
-              >
-                <div
-                  className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: getAvatarColor(authEmail) }}
-                >
-                  <span className="text-[11px] font-bold text-white">
-                    {authEmail.slice(0, 2).toUpperCase()}
-                  </span>
-                </div>
-                <div className="min-w-0">
-                  <div className="text-xs font-semibold text-text truncate">{authEmail}</div>
-                  <div className="text-[10px] text-text/40">Личный кабинет</div>
-                </div>
-              </Link>
-            )}
 
             {/* Nav groups */}
             {NAV_ITEMS.map((group) => (
@@ -287,18 +267,38 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           </nav>
 
-          {/* Sticky bottom — Тарифы */}
-          <div className={`shrink-0 border-t border-text/5 ${isChat && !sidebarHover ? "p-1.5 hidden lg:block" : "p-3"}`}>
-            <Link
-              href="/pricing"
-              onClick={() => setSidebarOpen(false)}
-              className={`flex items-center ${isChat && !sidebarHover ? "justify-center p-2 rounded-lg" : "gap-3 px-3 py-2 rounded-xl text-sm font-medium"} text-text/40 hover:text-text/60 hover:bg-text/[0.04] transition-colors`}
-            >
-              <svg className="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-              </svg>
-              {(!isChat || sidebarHover) && <span>Тарифы</span>}
-            </Link>
+          {/* Sticky bottom — Profile / Login */}
+          <div className={`shrink-0 border-t border-text/5 ${isChat && !sidebarHover ? "p-1.5" : "p-3"}`}>
+            {authEmail ? (
+              <Link
+                href="/profile"
+                onClick={() => setSidebarOpen(false)}
+                className={`flex items-center ${isChat && !sidebarHover ? "justify-center p-2 rounded-lg" : "gap-3 px-3 py-2 rounded-xl"} text-text/50 hover:text-text/80 hover:bg-text/[0.04] transition-colors`}
+              >
+                <div
+                  className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: getAvatarColor(authEmail) }}
+                >
+                  <span className="text-[9px] font-bold text-white">{authEmail.slice(0, 2).toUpperCase()}</span>
+                </div>
+                {(!isChat || sidebarHover) && (
+                  <div className="min-w-0">
+                    <div className="text-xs font-medium text-text/60 truncate">{authEmail}</div>
+                  </div>
+                )}
+              </Link>
+            ) : (
+              <Link
+                href="/profile"
+                onClick={() => setSidebarOpen(false)}
+                className={`flex items-center ${isChat && !sidebarHover ? "justify-center p-2 rounded-lg" : "gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"} text-accent hover:bg-accent/5 transition-colors`}
+              >
+                <svg className="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                </svg>
+                {(!isChat || sidebarHover) && <span>Войти</span>}
+              </Link>
+            )}
           </div>
         </aside>
 
