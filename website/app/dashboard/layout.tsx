@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { OnboardingTour } from "@/components/OnboardingTour";
 
 const NAV_ITEMS = [
   {
@@ -46,13 +47,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [authEmail, setAuthEmail] = useState<string | null>(null);
+  const [showTour, setShowTour] = useState(false);
 
   useEffect(() => {
     try {
       const saved = localStorage.getItem("stone_auth");
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed.email) setAuthEmail(parsed.email);
+        if (parsed.email) {
+          setAuthEmail(parsed.email);
+          if (!localStorage.getItem("stone_onboarded_dashboard")) {
+            setShowTour(true);
+          }
+        }
       }
     } catch {}
   }, []);
@@ -194,6 +201,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {children}
         </main>
       </div>
+
+      {showTour && (
+        <OnboardingTour
+          onComplete={() => {
+            setShowTour(false);
+            localStorage.setItem("stone_onboarded_dashboard", "1");
+          }}
+        />
+      )}
     </div>
   );
 }

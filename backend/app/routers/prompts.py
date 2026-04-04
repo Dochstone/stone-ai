@@ -109,7 +109,7 @@ async def marketplace_list(
     category: str | None = None,
     search: str | None = None,
     sort: str = "popular",
-    limit: int = 50,
+    limit: int = 12,
     offset: int = 0,
     db: AsyncSession = Depends(get_db),
 ):

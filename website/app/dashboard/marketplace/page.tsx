@@ -50,6 +50,9 @@ export default function MarketplacePage() {
   const [category, setCategory] = useState("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const PER_PAGE = 12;
 
   // Use template modal
   const [selected, setSelected] = useState<MarketplaceTemplate | null>(null);
@@ -80,13 +83,16 @@ export default function MarketplacePage() {
     if (category !== "all") params.set("category", category);
     if (search) params.set("search", search);
     params.set("sort", tab === "newest" ? "newest" : "popular");
+    params.set("limit", String(PER_PAGE));
+    params.set("offset", String((page - 1) * PER_PAGE));
     try {
       const res = await fetch(`${API_URL}/api/prompts/marketplace?${params}`);
       const data = await res.json();
       setTemplates(data.templates || []);
+      setTotal(data.total || 0);
     } catch { setTemplates([]); }
     setLoading(false);
-  }, [category, search, tab]);
+  }, [category, search, tab, page]);
 
   const fetchMyTemplates = useCallback(async () => {
     const auth = getAuth();
@@ -262,7 +268,7 @@ export default function MarketplacePage() {
         <div className="flex items-start justify-between mb-8">
           <div>
             <h1 className="text-xl sm:text-2xl font-extrabold text-text">Маркетплейс шаблонов</h1>
-            <p className="text-sm text-text/40 mt-1">{templates.length > 0 ? `${templates.length} шаблонов от сообщества` : "Используйте шаблоны сообщества или опубликуйте свои"}</p>
+            <p className="text-sm text-text/40 mt-1">{total > 0 ? `${total} шаблонов от сообщества` : "Используйте шаблоны сообщества или опубликуйте свои"}</p>
           </div>
           <button
             onClick={() => setShowPublish(true)}
@@ -291,7 +297,7 @@ export default function MarketplacePage() {
           ]).map(t => (
             <button
               key={t.id}
-              onClick={() => setTab(t.id)}
+              onClick={() => { setTab(t.id); setPage(1); }}
               className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
                 tab === t.id ? "bg-bg text-text shadow-sm" : "text-text/40 hover:text-text/60"
               }`}
@@ -305,13 +311,13 @@ export default function MarketplacePage() {
         {tab !== "my" && (
           <div className="mb-6">
             <input
-              value={search} onChange={e => setSearch(e.target.value)}
+              value={search} onChange={e => { setSearch(e.target.value); setPage(1); }}
               placeholder="Поиск шаблонов..."
               className="w-full bg-text/[0.04] border border-text/[0.08] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 placeholder:text-text/20 mb-3"
             />
             <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
               {CATEGORIES.map(c => (
-                <button key={c.id} onClick={() => setCategory(c.id)}
+                <button key={c.id} onClick={() => { setCategory(c.id); setPage(1); }}
                   className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                     category === c.id ? "bg-accent text-white" : "bg-text/[0.04] text-text/50 hover:text-text/70"
                   }`}>
@@ -341,6 +347,7 @@ export default function MarketplacePage() {
             )}
           </div>
         ) : (
+          <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-fadeIn">
             {displayTemplates.map(tpl => (
               <div
@@ -416,6 +423,28 @@ export default function MarketplacePage() {
               </div>
             ))}
           </div>
+          {total > PER_PAGE && (
+            <div className="flex items-center justify-center gap-2 mt-8">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="px-3 py-2 rounded-lg border border-text/10 text-sm text-text/50 hover:bg-text/[0.04] disabled:opacity-30 transition-colors"
+              >
+                &larr; Назад
+              </button>
+              <span className="text-sm text-text/40 px-3">
+                {page} из {Math.ceil(total / PER_PAGE)}
+              </span>
+              <button
+                onClick={() => setPage(p => Math.min(Math.ceil(total / PER_PAGE), p + 1))}
+                disabled={page >= Math.ceil(total / PER_PAGE)}
+                className="px-3 py-2 rounded-lg border border-text/10 text-sm text-text/50 hover:bg-text/[0.04] disabled:opacity-30 transition-colors"
+              >
+                Далее &rarr;
+              </button>
+            </div>
+          )}
+          </>
         )}
       </div>
 
