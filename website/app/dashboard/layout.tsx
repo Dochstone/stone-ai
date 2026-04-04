@@ -190,7 +190,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           onMouseEnter={() => { if (isChat) setSidebarHover(true); }}
           onMouseLeave={() => { if (isChat) setSidebarHover(false); }}
         >
-          <nav className={`flex-1 overflow-y-auto overscroll-contain ${isChat ? (sidebarHover ? "p-3 space-y-4" : "p-3 lg:p-1.5 space-y-4 lg:space-y-1") : "p-3 space-y-4"}`}>
+          <nav className={`flex-1 overflow-y-auto overscroll-contain ${isChat ? (sidebarHover ? "p-3 space-y-4" : "p-3 lg:px-2 lg:py-1.5 space-y-4 lg:space-y-1") : "p-3 space-y-4"}`}>
 
             {/* ═══ Chat mode collapsed: icons with hover labels ═══ */}
             {isChat && !sidebarHover && (
