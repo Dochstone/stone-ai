@@ -1,8 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Manrope } from "next/font/google";
 import "./globals.css";
-import Nav from "@/components/Nav";
-import Footer from "@/components/Footer";
+import LayoutShell from "@/components/LayoutShell";
 import ScrollToTop from "@/components/ScrollToTop";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 // WelcomeBonusBanner moved inside Nav to fix z-index overlap
@@ -239,9 +238,7 @@ export default function RootLayout({
         <WebVitals />
         {YM_ID && <script dangerouslySetInnerHTML={{ __html: `window.__ymId=${YM_ID};` }} />}
         <TonProvider>
-        <Nav />
-        <main id="main-content">{children}</main>
-        <Footer />
+        <LayoutShell>{children}</LayoutShell>
         </TonProvider>
         <ScrollToTop />
         <PWAInstallPrompt />

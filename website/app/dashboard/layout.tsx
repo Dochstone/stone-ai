@@ -87,9 +87,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   return (
-    <div className="min-h-screen pt-14 md:pt-16">
+    <div className="min-h-screen">
       {/* Mobile top bar */}
-      <div className="lg:hidden sticky top-14 md:top-16 z-30 bg-bg/95 backdrop-blur-md border-b border-text/5">
+      <div className="lg:hidden sticky top-0 z-30 bg-bg/95 backdrop-blur-md border-b border-text/5">
         <div className="flex items-center justify-between px-4 h-12">
           {isChat ? (
             <>
@@ -143,8 +143,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Sidebar */}
         <aside
           className={`
-            fixed lg:sticky top-14 md:top-16 z-40 lg:z-0
-            h-[calc(100vh-56px)] md:h-[calc(100vh-64px)]
+            fixed lg:sticky top-0 z-40 lg:z-0
+            h-screen
             ${isChat ? (sidebarHover ? "w-64 lg:w-64" : "w-64 lg:w-12") : "w-64"} shrink-0
             bg-bg ${isChat && sidebarHover ? "lg:shadow-xl lg:shadow-black/10" : "lg:bg-transparent"}
             border-r border-text/5
@@ -324,7 +324,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Main content */}
         <main className="flex-1 min-w-0">
           {chatLoaded && (
-            <div className={`${isChat ? "block h-[calc(100vh-56px)] md:h-[calc(100vh-64px)]" : "hidden"}`}>
+            <div className={`${isChat ? "block h-[calc(100vh-48px)] lg:h-screen" : "hidden"}`}>
               <WebChat embedded />
             </div>
           )}
