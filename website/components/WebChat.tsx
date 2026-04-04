@@ -270,6 +270,7 @@ function Sidebar({
   plan,
   activeCategory,
   onCategoryChange,
+  embedded,
 }: {
   open: boolean;
   onToggle: () => void;
@@ -283,6 +284,7 @@ function Sidebar({
   plan?: string;
   activeCategory: string;
   onCategoryChange: (id: string) => void;
+  embedded?: boolean;
 }) {
   const [sidebarSearch, setSidebarSearch] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -352,8 +354,8 @@ function Sidebar({
           </div>
         )}
 
-        {/* Category filter — in sidebar */}
-        <div className="px-3 pb-2 shrink-0 border-b border-text/[0.06]">
+        {/* Category filter — in sidebar (hidden when embedded, categories are in dashboard sidebar) */}
+        {!embedded && <div className="px-3 pb-2 shrink-0 border-b border-text/[0.06]">
           <div className="flex flex-col gap-0.5">
             {[
               { id: "all", icon: "💬", label: "Все чаты" },
@@ -377,7 +379,7 @@ function Sidebar({
               </button>
             ))}
           </div>
-        </div>
+        </div>}
 
         {/* Chat sessions list */}
         <div className="flex-1 overflow-y-auto px-2">
@@ -501,6 +503,21 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
   });
   const tabMessagesRef = useRef<Record<string, Message[]>>({});
   const tabSessionRef = useRef<Record<string, number | null>>({});
+
+  // Sync category from parent (dashboard sidebar)
+  useEffect(() => {
+    if (initialCategory && initialCategory !== modelCatFilter) {
+      // Save current tab
+      tabMessagesRef.current[modelCatFilter] = messages;
+      tabSessionRef.current[modelCatFilter] = activeSessionId;
+      // Switch
+      setModelCatFilter(initialCategory);
+      const savedMessages = tabMessagesRef.current[initialCategory] || [];
+      const savedSession = tabSessionRef.current[initialCategory] ?? null;
+      setActiveSessionId(savedSession);
+      setMessages(savedMessages);
+    }
+  }, [initialCategory]);
 
   const [dragging, setDragging] = useState(false);
   const dragCounterRef = useRef(0);
@@ -1406,6 +1423,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         onShareSession={shareSession}
         plan={limits?.plan}
         activeCategory={modelCatFilter}
+        embedded={embedded}
         onCategoryChange={(id) => {
           if (modelCatFilter !== id) {
             tabMessagesRef.current[modelCatFilter] = messages;

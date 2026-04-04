@@ -71,7 +71,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [authEmail, setAuthEmail] = useState<string | null>(null);
   const [showTour, setShowTour] = useState(false);
   const [chatLoaded, setChatLoaded] = useState(false);
+  const [chatCategory, setChatCategory] = useState("all");
   const isChat = pathname === "/dashboard/chat";
+
+  const CHAT_CATEGORIES = [
+    { id: "all", icon: "💬", label: "Все чаты" },
+    { id: "free", icon: "✨", label: "Бесплатные" },
+    { id: "image", icon: "🎨", label: "Картинки" },
+    { id: "video", icon: "🎬", label: "Видео" },
+  ];
 
   useEffect(() => {
     try {
@@ -167,6 +175,49 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           onMouseLeave={() => { if (isChat) setSidebarHover(false); }}
         >
           <nav className={`flex-1 overflow-y-auto overscroll-contain ${isChat ? (sidebarHover ? "p-3 space-y-4" : "p-3 lg:p-1.5 space-y-4 lg:space-y-1") : "p-3 space-y-4"}`}>
+
+            {/* Chat categories — shown in collapsed sidebar when on chat page */}
+            {isChat && !sidebarHover && (
+              <div className="hidden lg:block space-y-1">
+                {CHAT_CATEGORIES.map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => setChatCategory(c.id)}
+                    title={c.label}
+                    className={`w-full flex items-center justify-center p-2 rounded-lg transition-all duration-150 ${
+                      chatCategory === c.id
+                        ? "bg-accent/10 text-accent"
+                        : "text-text/40 hover:text-text/70 hover:bg-text/[0.04]"
+                    }`}
+                  >
+                    <span className="text-sm">{c.icon}</span>
+                  </button>
+                ))}
+                <div className="border-t border-text/5 my-2" />
+              </div>
+            )}
+
+            {/* Chat categories — full labels for mobile or hover */}
+            {isChat && (sidebarHover || true) && (
+              <div className={`${!sidebarHover ? "lg:hidden" : ""} space-y-0.5 mb-3`}>
+                <div className="text-[10px] font-bold text-text/30 uppercase tracking-[1.5px] px-3 mb-2">Режим AI</div>
+                {CHAT_CATEGORIES.map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => { setChatCategory(c.id); setSidebarOpen(false); }}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
+                      chatCategory === c.id
+                        ? "bg-accent/10 text-accent font-semibold"
+                        : "text-text/40 hover:text-text/70 hover:bg-text/[0.04]"
+                    }`}
+                  >
+                    <span>{c.icon}</span>
+                    <span>{c.label}</span>
+                  </button>
+                ))}
+                <div className="border-t border-text/5 my-2" />
+              </div>
+            )}
 
             {/* Nav groups */}
             {NAV_ITEMS.map((group) => (
@@ -306,7 +357,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <main className="flex-1 min-w-0">
           {chatLoaded && (
             <div className={`${isChat ? "block h-[calc(100vh-48px)] lg:h-screen" : "hidden"}`}>
-              <WebChat embedded />
+              <WebChat embedded initialCategory={chatCategory} />
             </div>
           )}
           {!isChat && children}
