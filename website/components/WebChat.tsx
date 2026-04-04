@@ -1510,7 +1510,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
           font-size: 0.85em;
         }
         @supports(padding-bottom: env(safe-area-inset-bottom)) {
-          .chat-input-safe { padding-bottom: calc(0.625rem + env(safe-area-inset-bottom)); }
+          .chat-input-safe { padding-bottom: env(safe-area-inset-bottom); }
         }
 
         /* Sidebar: mobile = slide overlay, desktop = width transition */
@@ -1996,7 +1996,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
               {/* Model selector — compact */}
               <button
                 onClick={() => setModelPickerOpen(!modelPickerOpen)}
-                className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-text/[0.04] hover:bg-text/[0.08] text-[11px] font-semibold text-text/60 transition-colors max-w-[120px]"
+                className="shrink-0 flex items-center gap-1 px-2 py-1.5 rounded-lg bg-text/[0.04] hover:bg-text/[0.08] text-[11px] font-semibold text-text/60 transition-colors max-w-[80px] sm:max-w-[120px]"
                 title={model?.name}
               >
                 <span className="truncate">{model?.name?.split(" ").slice(0, 2).join(" ") || "Модель"}</span>

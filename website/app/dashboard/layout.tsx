@@ -77,6 +77,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [chatCategory, setChatCategory] = useState("all");
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const isChat = pathname === "/dashboard/chat";
+  // collapsed = desktop only, chat mode, sidebar not hovered
+  const collapsed = isChat && !sidebarHover;
 
   const CHAT_CATEGORIES = [
     { id: "all", label: "Все чаты", svg: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" },
@@ -361,17 +363,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </nav>
 
           {/* Sticky bottom — Theme + Profile */}
-          <div className={`shrink-0 border-t border-text/5 ${isChat && !sidebarHover ? "py-1.5 flex flex-col items-center gap-0.5" : "p-3"}`}>
-            <div className={`${isChat && !sidebarHover ? "" : "flex items-center justify-between mb-2"}`}>
-              {(!isChat || sidebarHover) && <span className="text-[9px] text-text/20 font-medium">Тема</span>}
-              <ThemeToggle compact={isChat && !sidebarHover} />
+          <div className={`shrink-0 border-t border-text/5 ${collapsed ? "hidden lg:flex py-1.5 flex-col items-center gap-0.5" : "p-3"}`}>
+            <div className={`${collapsed ? "" : "flex items-center justify-between mb-2"}`}>
+              {!collapsed && <span className="text-[9px] text-text/20 font-medium">Тема</span>}
+              <ThemeToggle compact={collapsed} />
             </div>
             {authEmail ? (
               <Link
                 href="/profile"
                 onClick={() => setSidebarOpen(false)}
                 aria-label="Профиль"
-                className={`flex items-center ${isChat && !sidebarHover ? "justify-center p-2 rounded-lg" : "gap-3 px-3 py-2 rounded-xl"} text-text/50 hover:text-text/80 hover:bg-text/[0.04] transition-colors`}
+                className={`flex items-center ${collapsed ? "justify-center p-2 rounded-lg" : "gap-3 px-3 py-2 rounded-xl"} text-text/50 hover:text-text/80 hover:bg-text/[0.04] transition-colors`}
               >
                 {userAvatar ? (
                   <img src={userAvatar} alt="" className="w-7 h-7 rounded-full object-cover shrink-0" />
@@ -383,7 +385,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <span className="text-[9px] font-bold text-white">{authEmail.slice(0, 2).toUpperCase()}</span>
                   </div>
                 )}
-                {(!isChat || sidebarHover) && (
+                {!collapsed && (
                   <div className="min-w-0">
                     <div className="text-xs font-medium text-text/60 truncate">{authEmail}</div>
                   </div>
@@ -394,12 +396,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 href="/profile"
                 onClick={() => setSidebarOpen(false)}
                 aria-label="Профиль"
-                className={`flex items-center ${isChat && !sidebarHover ? "justify-center p-2 rounded-lg" : "gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"} text-accent hover:bg-accent/5 transition-colors`}
+                className={`flex items-center ${collapsed ? "justify-center p-2 rounded-lg" : "gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"} text-accent hover:bg-accent/5 transition-colors`}
               >
                 <svg className="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                 </svg>
-                {(!isChat || sidebarHover) && <span>Войти</span>}
+                {!collapsed && <span>Войти</span>}
               </Link>
             )}
           </div>
