@@ -190,18 +190,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           onMouseEnter={() => { if (isChat) setSidebarHover(true); }}
           onMouseLeave={() => { if (isChat) setSidebarHover(false); }}
         >
-          <nav className={`flex-1 overflow-y-auto overscroll-contain ${isChat ? (sidebarHover ? "p-3 space-y-4" : "p-3 lg:px-1.5 lg:py-2 space-y-4 lg:space-y-0.5") : "p-3 space-y-4"}`}>
+          <nav className={`flex-1 overflow-y-auto overscroll-contain ${isChat ? (sidebarHover ? "p-3 space-y-4" : "p-3 lg:p-0 lg:pt-2 space-y-4 lg:space-y-0") : "p-3 space-y-4"}`}>
 
             {/* ═══ Chat mode collapsed: icons with hover labels ═══ */}
             {isChat && !sidebarHover && (
-              <div className="hidden lg:flex flex-col space-y-0.5">
+              <div className="hidden lg:flex flex-col items-center gap-0.5">
                 {/* AI categories */}
                 {CHAT_CATEGORIES.map((c) => (
                   <button
                     key={c.id}
                     onClick={() => setChatCategory(c.id)}
                     aria-label={c.label}
-                    className={`group relative w-full flex items-center justify-center p-2 rounded-lg transition-all duration-150 ${
+                    className={`group relative w-9 h-9 flex items-center justify-center rounded-lg transition-all duration-150 ${
                       chatCategory === c.id
                         ? "bg-accent/10 text-accent"
                         : "text-text/30 hover:text-text/50 hover:bg-text/[0.05]"
@@ -215,7 +215,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 ))}
 
                 {/* Divider */}
-                <div className="mx-auto w-6 h-px bg-text/[0.08] my-1.5" />
+                <div className="w-6 h-px bg-text/[0.08] my-1" />
 
                 {/* Tools */}
                 {NAV_ITEMS.flatMap(g => g.items).filter(i => i.href !== "/dashboard/chat").map((item) => (
@@ -224,7 +224,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     href={item.href}
                     aria-label={item.label}
                     onClick={() => setSidebarOpen(false)}
-                    className={`group relative w-full flex items-center justify-center p-2 rounded-lg transition-all duration-150 ${
+                    className={`group relative w-9 h-9 flex items-center justify-center rounded-lg transition-all duration-150 ${
                       isActive(item.href)
                         ? "text-accent bg-accent/5"
                         : "text-text/30 hover:text-text/50 hover:bg-text/[0.05]"
@@ -372,8 +372,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </nav>
 
           {/* Sticky bottom — Theme + Profile */}
-          <div className={`shrink-0 border-t border-text/5 ${isChat && !sidebarHover ? "px-1.5 py-1.5" : "p-3"}`}>
-            <div className={`${isChat && !sidebarHover ? "flex justify-center mb-0.5" : "flex items-center justify-between mb-2"}`}>
+          <div className={`shrink-0 border-t border-text/5 ${isChat && !sidebarHover ? "py-1.5 flex flex-col items-center gap-0.5" : "p-3"}`}>
+            <div className={`${isChat && !sidebarHover ? "" : "flex items-center justify-between mb-2"}`}>
               {(!isChat || sidebarHover) && <span className="text-[9px] text-text/20 font-medium">Тема</span>}
               <ThemeToggle compact={isChat && !sidebarHover} />
             </div>

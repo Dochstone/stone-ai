@@ -1565,8 +1565,8 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         {/* Top bar — simplified when embedded */}
         <div className={`${embedded ? "h-10 lg:flex hidden" : "h-14 flex"} border-b border-text/[0.06] bg-bg/80 backdrop-blur-sm items-center justify-between px-3 sm:px-4 shrink-0`}>
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            {/* Sidebar toggle — only when NOT embedded */}
-            {!embedded && (
+            {/* Sidebar toggle */}
+            {(!embedded || !sidebarOpen) && (
               <button onClick={toggleSidebar} className="text-text/30 hover:text-text/60 transition-colors shrink-0">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   {sidebarOpen
