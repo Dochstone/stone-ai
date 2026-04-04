@@ -149,6 +149,16 @@ async def lava_webhook(request: Request, db: AsyncSession = Depends(get_db)):
     await db.commit()
 
     logger.info(f"Lava payment completed: user={user_tg_id}, usd={usd_amount}, balance=${new_balance:.6f}")
+
+    try:
+        user_row = await db.execute(text("SELECT email FROM users WHERE telegram_id = :tid OR id = :tid LIMIT 1"), {"tid": user_tg_id})
+        user_email = user_row.scalar()
+        if user_email:
+            from app.services.email_service import send_payment_confirmation
+            send_payment_confirmation(user_email, round(usd_amount * 95), round(new_balance * 95), "Карта РФ / СБП")
+    except Exception as e:
+        logger.warning(f"Failed to send payment email: {e}")
+
     return {"ok": True}
 
 
@@ -291,6 +301,19 @@ async def platega_webhook(request: Request, db: AsyncSession = Depends(get_db)):
     await db.commit()
 
     logger.info(f"Platega payment completed: user={user_tg_id}, usd={usd_amount}, balance=${new_balance:.6f}")
+
+    # Send email notification
+    try:
+        user_row = await db.execute(text("SELECT email FROM users WHERE telegram_id = :tid OR id = :tid LIMIT 1"), {"tid": user_tg_id})
+        user_email = user_row.scalar()
+        if user_email:
+            from app.services.email_service import send_payment_confirmation
+            amount_rub = round(usd_amount * 95)
+            balance_rub = round(new_balance * 95)
+            send_payment_confirmation(user_email, amount_rub, balance_rub, "Карта РФ / СБП")
+    except Exception as e:
+        logger.warning(f"Failed to send payment email: {e}")
+
     return {"ok": True}
 
 
@@ -439,10 +462,28 @@ async def heleket_webhook(request: Request, db: AsyncSession = Depends(get_db)):
             user.monthly_images_used = 0
             user.monthly_videos_used = 0
             logger.info(f"Subscription activated: user={user_tg_id}, tier={tier}")
+            # Email: subscription activated
+            try:
+                user_row2 = await db.execute(text("SELECT email FROM users WHERE telegram_id = :tid OR id = :tid LIMIT 1"), {"tid": user_tg_id})
+                uemail = user_row2.scalar()
+                if uemail:
+                    from app.services.email_service import send_subscription_activated
+                    send_subscription_activated(uemail, tier, round(usd_amount * 95))
+            except Exception as e:
+                logger.warning(f"Failed to send subscription email: {e}")
     else:
         # Top-up balance
         new_balance = await add_balance(db, user_tg_id, usd_amount)
         logger.info(f"Balance top-up: user={user_tg_id}, usd={usd_amount}, balance=${new_balance:.6f}")
+        # Email: balance top-up
+        try:
+            user_row3 = await db.execute(text("SELECT email FROM users WHERE telegram_id = :tid OR id = :tid LIMIT 1"), {"tid": user_tg_id})
+            uemail = user_row3.scalar()
+            if uemail:
+                from app.services.email_service import send_payment_confirmation
+                send_payment_confirmation(uemail, round(usd_amount * 95), round(new_balance * 95), "Криптовалюта")
+        except Exception as e:
+            logger.warning(f"Failed to send payment email: {e}")
 
     from app.routers.referral import credit_referrer
     await credit_referrer(db, user_tg_id, usd_amount)
