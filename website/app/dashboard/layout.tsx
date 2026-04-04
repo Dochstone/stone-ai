@@ -3,7 +3,17 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { OnboardingTour } from "@/components/OnboardingTour";
+
+const WebChat = dynamic(() => import("@/components/WebChat"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-full flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+    </div>
+  ),
+});
 
 const NAV_ITEMS = [
   {
@@ -48,6 +58,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [authEmail, setAuthEmail] = useState<string | null>(null);
   const [showTour, setShowTour] = useState(false);
+  const [chatLoaded, setChatLoaded] = useState(false);
+  const isChat = pathname === "/dashboard/chat";
 
   useEffect(() => {
     try {
@@ -64,6 +76,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     } catch {}
   }, []);
 
+  useEffect(() => {
+    if (isChat && !chatLoaded) setChatLoaded(true);
+  }, [isChat, chatLoaded]);
+
   const isActive = (href: string) => {
     if (href === "/dashboard/seo") return pathname === "/dashboard/seo";
     return pathname === href || pathname.startsWith(href + "/");
@@ -74,18 +90,35 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Mobile top bar */}
       <div className="lg:hidden sticky top-14 md:top-16 z-30 bg-bg/95 backdrop-blur-md border-b border-text/5">
         <div className="flex items-center justify-between px-4 h-12">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="flex items-center gap-2 text-sm font-semibold text-text/70"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-            Навигация
-          </button>
-          <Link href="/webchat" className="text-xs font-bold text-accent">
-            Открыть чат
-          </Link>
+          {isChat ? (
+            <>
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="text-sm font-semibold text-text/70 flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+              <span className="text-sm font-bold text-text">AI Чат</span>
+              <div className="w-5" />
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="flex items-center gap-2 text-sm font-semibold text-text/70"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+                Навигация
+              </button>
+              <Link href="/webchat" className="text-xs font-bold text-accent">
+                Открыть чат
+              </Link>
+            </>
+          )}
         </div>
       </div>
 
@@ -103,17 +136,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           className={`
             fixed lg:sticky top-14 md:top-16 z-40 lg:z-0
             h-[calc(100vh-56px)] md:h-[calc(100vh-64px)]
-            w-64 shrink-0
+            ${isChat ? "w-12 lg:w-12" : "w-64"} shrink-0
             bg-bg lg:bg-transparent
             border-r border-text/5
             overflow-y-auto overscroll-contain
-            transition-transform duration-200 ease-out
+            transition-all duration-200 ease-out
             ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
           `}
         >
-          <nav className="p-4 space-y-6">
+          <nav className={`${isChat ? "p-1.5 space-y-1" : "p-4 space-y-6"}`}>
             {/* User card */}
-            {authEmail && (
+            {authEmail && !isChat && (
               <Link
                 href="/profile"
                 className="flex items-center gap-3 p-3 rounded-xl bg-text/[0.03] hover:bg-text/[0.06] border border-text/5 transition-colors"
@@ -136,13 +169,32 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {/* Nav groups */}
             {NAV_ITEMS.map((group) => (
               <div key={group.group}>
-                <div className="text-[10px] font-bold text-text/30 uppercase tracking-[1.5px] px-3 mb-2">
-                  {group.group}
-                </div>
+                {!isChat && (
+                  <div className="text-[10px] font-bold text-text/30 uppercase tracking-[1.5px] px-3 mb-2">
+                    {group.group}
+                  </div>
+                )}
                 <div className="space-y-0.5">
                   {group.items.map((item) => {
                     const active = isActive(item.href);
-                    return (
+                    return isChat ? (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        title={item.label}
+                        onClick={() => setSidebarOpen(false)}
+                        className={`
+                          flex items-center justify-center p-2 rounded-lg
+                          transition-all duration-150
+                          ${active
+                            ? "bg-accent/10 text-accent"
+                            : "text-text/50 hover:text-text/80 hover:bg-text/[0.04]"
+                          }
+                        `}
+                      >
+                        <NavIcon d={item.icon} />
+                      </Link>
+                    ) : (
                       <Link
                         key={item.href}
                         href={item.href}
@@ -173,36 +225,64 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             ))}
 
             {/* Quick actions */}
-            <div className="border-t border-text/5 pt-4">
-              <Link
-                href="/webchat"
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-accent hover:bg-accent/5 transition-colors"
-              >
-                <svg className="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-                Открыть AI-чат
-              </Link>
-              <Link
-                href="/pricing"
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-text/40 hover:text-text/60 hover:bg-text/[0.04] transition-colors"
-              >
-                <svg className="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                </svg>
-                Тарифы
-              </Link>
-            </div>
+            {isChat ? (
+              <div className="border-t border-text/5 pt-2">
+                <Link
+                  href="/dashboard/chat"
+                  title="AI Чат"
+                  className="flex items-center justify-center p-2 rounded-lg text-accent hover:bg-accent/5 transition-colors"
+                >
+                  <svg className="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </Link>
+                <Link
+                  href="/pricing"
+                  title="Тарифы"
+                  className="flex items-center justify-center p-2 rounded-lg text-text/40 hover:text-text/60 hover:bg-text/[0.04] transition-colors"
+                >
+                  <svg className="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                </Link>
+              </div>
+            ) : (
+              <div className="border-t border-text/5 pt-4">
+                <Link
+                  href="/dashboard/chat"
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-accent hover:bg-accent/5 transition-colors"
+                >
+                  <svg className="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                  Открыть AI-чат
+                </Link>
+                <Link
+                  href="/pricing"
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-text/40 hover:text-text/60 hover:bg-text/[0.04] transition-colors"
+                >
+                  <svg className="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                  Тарифы
+                </Link>
+              </div>
+            )}
           </nav>
         </aside>
 
         {/* Main content */}
         <main className="flex-1 min-w-0">
-          {children}
+          {chatLoaded && (
+            <div className={`${isChat ? "block h-[calc(100vh-56px)] md:h-[calc(100vh-64px)]" : "hidden"}`}>
+              <WebChat embedded />
+            </div>
+          )}
+          {!isChat && children}
         </main>
       </div>
 
-      {showTour && (
+      {showTour && !isChat && (
         <OnboardingTour
           onComplete={() => {
             setShowTour(false);

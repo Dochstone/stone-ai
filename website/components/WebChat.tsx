@@ -436,7 +436,7 @@ function Sidebar({
 
 // ─── Main WebChat ───
 
-export default function WebChat({ initialModel, initialCategory }: { initialModel?: string; initialCategory?: string } = {}) {
+export default function WebChat({ initialModel, initialCategory, embedded }: { initialModel?: string; initialCategory?: string; embedded?: boolean } = {}) {
   const [auth, setAuth] = useState<AuthState | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [selectedModel, setSelectedModel] = useState(() => {
@@ -1265,8 +1265,8 @@ export default function WebChat({ initialModel, initialCategory }: { initialMode
 
   return (
     <div
-      className="h-dvh flex bg-bg overflow-hidden relative"
-      style={{ height: "100dvh" }}
+      className={embedded ? "h-full flex bg-bg overflow-hidden relative" : "h-dvh flex bg-bg overflow-hidden relative"}
+      style={embedded ? undefined : { height: "100dvh" }}
       onDragEnter={(e) => { e.preventDefault(); dragCounterRef.current++; setDragging(true); }}
       onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; }}
       onDragLeave={(e) => { e.preventDefault(); dragCounterRef.current--; if (dragCounterRef.current === 0) setDragging(false); }}
