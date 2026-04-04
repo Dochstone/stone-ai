@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { OnboardingTour } from "@/components/OnboardingTour";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const WebChat = dynamic(() => import("@/components/WebChat"), {
   ssr: false,
@@ -122,15 +123,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 Панель
               </Link>
               <span className="text-sm font-bold text-text">AI Чат</span>
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                aria-label={sidebarOpen ? "Закрыть меню" : "Открыть меню"}
-                className="text-text/40 hover:text-text/70 transition-colors"
-              >
+              <div className="flex items-center gap-1">
+                <ThemeToggle />
+                <button
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  aria-label={sidebarOpen ? "Закрыть меню" : "Открыть меню"}
+                  className="text-text/40 hover:text-text/70 transition-colors"
+                >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
+              </div>
             </>
           ) : (
             <>
@@ -144,9 +148,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </svg>
                 Навигация
               </button>
-              <Link href="/dashboard/chat" className="text-xs font-bold text-accent">
-                Открыть чат
-              </Link>
+              <div className="flex items-center gap-1">
+                <ThemeToggle />
+                <Link href="/dashboard/chat" className="text-xs font-bold text-accent">
+                  Чат
+                </Link>
+              </div>
             </>
           )}
         </div>
@@ -357,8 +364,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           </nav>
 
-          {/* Sticky bottom — Profile / Login */}
+          {/* Sticky bottom — Theme + Profile */}
           <div className={`shrink-0 border-t border-text/5 ${isChat && !sidebarHover ? "p-1.5" : "p-3"}`}>
+            <div className={`${isChat && !sidebarHover ? "flex justify-center mb-1" : "flex items-center justify-between mb-2"}`}>
+              {(!isChat || sidebarHover) && <span className="text-[9px] text-text/20 font-medium">Тема</span>}
+              <ThemeToggle />
+            </div>
             {authEmail ? (
               <Link
                 href="/profile"
