@@ -531,7 +531,9 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [pendingFile, setPendingFile] = useState<FileAttachment | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [sessions, setSessions] = useState<ChatSessionItem[]>([]);
+  const [sessions, setSessions] = useState<ChatSessionItem[]>(() => {
+    try { const c = sessionStorage.getItem("stone_sessions"); return c ? JSON.parse(c) : []; } catch { return []; }
+  });
   const [activeSessionId, setActiveSessionId] = useState<number | null>(() => {
     try { const s = localStorage.getItem("stone_active_session"); return s ? parseInt(s) : null; } catch { return null; }
   });
@@ -735,7 +737,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
   const toggleSidebar = useCallback(() => setSidebarOpen((prev) => !prev), []);
 
-  // Fetch chat sessions
+  // Fetch chat sessions (with sessionStorage cache)
   const fetchSessions = useCallback(async () => {
     if (!auth) return;
     try {
@@ -744,33 +746,30 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
       });
       if (res.ok) {
         const data = await res.json();
-        setSessions(data.sessions || []);
+        const list = data.sessions || [];
+        setSessions(list);
+        try { sessionStorage.setItem("stone_sessions", JSON.stringify(list)); } catch {}
       }
     } catch {}
   }, [auth]);
 
   useEffect(() => { fetchSessions(); }, [fetchSessions]);
 
-  // Auto-load saved or last session on mount (persistent history)
+  // Auto-load saved or last session on mount (uses cached sessions, no extra request)
+  const autoLoadDone = useRef(false);
   useEffect(() => {
-    if (!auth?.token || messages.length > 0) return;
-    // If we have a saved session ID, load it
+    if (!auth?.token || autoLoadDone.current || messages.length > 0) return;
+    autoLoadDone.current = true;
     const savedId = activeSessionId;
     if (savedId) {
       loadSession(savedId);
       return;
     }
-    // Otherwise load last session
-    fetch(`${API_URL}/api/chats?limit=1`, {
-      headers: { Authorization: `Bearer ${auth.token}` },
-    })
-      .then(r => r.ok ? r.json() : null)
-      .then(data => {
-        const last = data?.sessions?.[0];
-        if (last) loadSession(last.id);
-      })
-      .catch(() => {});
-  }, [auth?.token]); // only on mount
+    // Use cached sessions to find last, or wait for fetchSessions to complete
+    if (sessions.length > 0) {
+      loadSession(sessions[0].id);
+    }
+  }, [auth?.token, sessions]); // triggers when sessions load from cache or fetch
 
   const loadSession = useCallback(async (sessionId: number) => {
     if (!auth) return;

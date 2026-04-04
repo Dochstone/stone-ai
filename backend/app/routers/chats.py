@@ -89,8 +89,9 @@ async def get_messages(
     session_id: int,
     tg_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    limit: int = Query(50, ge=1, le=500),
 ):
-    """Get all messages in a session."""
+    """Get messages in a session (last N, default 50)."""
     # Verify ownership
     result = await db.execute(
         select(ChatSession).where(
@@ -102,12 +103,17 @@ async def get_messages(
     if not session:
         raise HTTPException(404, "Chat not found")
 
+    # Get last N messages via subquery (ordered desc, then reversed)
+    total = await db.scalar(
+        select(func.count()).select_from(ChatMessage).where(ChatMessage.session_id == session_id)
+    )
     result = await db.execute(
         select(ChatMessage)
         .where(ChatMessage.session_id == session_id)
-        .order_by(ChatMessage.created_at.asc())
+        .order_by(ChatMessage.created_at.desc())
+        .limit(limit)
     )
-    messages = result.scalars().all()
+    messages = list(reversed(result.scalars().all()))
 
     return {
         "session": {
@@ -115,6 +121,7 @@ async def get_messages(
             "model_id": session.model_id,
             "title": session.title,
         },
+        "total_messages": total,
         "messages": [
             {
                 "id": m.id,
