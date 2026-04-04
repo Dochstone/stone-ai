@@ -1,0 +1,268 @@
+"use client";
+
+import { useState } from "react";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
+
+const IMAGE_MODEL_IDS = new Set([
+  "nano-banana-pro", "nano-banana", "gpt-5-image", "gpt-5-image-mini",
+  "flux-schnell", "stable-diffusion-xl",
+]);
+
+// ─── Helpers ───
+
+function extractImageUrl(text: string): string | null {
+  const b64Match = text.match(/(data:image\/[a-z+]+;base64,[A-Za-z0-9+/=]+)/);
+  if (b64Match) return b64Match[1];
+  const mdMatch = text.match(/!\[.*?\]\((https?:\/\/[^\s)]+)\)/);
+  if (mdMatch) return mdMatch[1];
+  const urlMatch = text.match(/(https?:\/\/[^\s"'<>]+\.(?:png|jpg|jpeg|gif|webp)(?:\?[^\s"'<>]*)?)/i);
+  if (urlMatch) return urlMatch[1];
+  const jsonUrlMatch = text.match(/"url"\s*:\s*"(https?:\/\/[^"]+)"/);
+  if (jsonUrlMatch) return jsonUrlMatch[1];
+  // OpenAI DALL-E URLs (oaidalleapi blob storage, no file extension)
+  const oaiMatch = text.match(/(https?:\/\/oaidalleapi[^\s"'<>]+)/i);
+  if (oaiMatch) return oaiMatch[1];
+  // fal.media URLs
+  const falMatch = text.match(/(https?:\/\/[^\s"'<>]*fal\.media[^\s"'<>]+)/i);
+  if (falMatch) return falMatch[1];
+  // If content is just a URL on its own line
+  const pureUrl = text.trim();
+  if (pureUrl.match(/^https?:\/\/\S+$/) && (pureUrl.includes("image") || pureUrl.includes("dalle") || pureUrl.includes("fal.media"))) return pureUrl;
+  return null;
+}
+
+function downloadImage(url: string, filename: string) {
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+}
+
+function stripImageFromText(content: string): string {
+  return content
+    .replace(/(data:image\/[a-z+]+;base64,[A-Za-z0-9+/=]+)/, "")
+    .replace(/!\[.*?\]\(https?:\/\/[^\s)]+\)/g, "")
+    .replace(/(https?:\/\/[^\s"'<>]+\.(?:png|jpg|jpeg|gif|webp)(?:\?[^\s"'<>]*)?)/gi, "")
+    .replace(/"url"\s*:\s*"https?:\/\/[^"]+"/g, "")
+    .trim();
+}
+
+// ─── Markdown Renderer ───
+
+function renderMarkdown(text: string): string {
+  let html = text
+    .replace(/```(\w*)\n([\s\S]*?)```/g, (_match, lang, code) => {
+      const escaped = code.replace(/</g, "&lt;").replace(/>/g, "&gt;").trimEnd();
+      return `<div class="code-block-wrapper"><div class="code-block-header"><span class="code-lang">${lang || "code"}</span><button class="code-copy-btn" onclick="(function(btn){var code=btn.closest('.code-block-wrapper').querySelector('code').textContent;navigator.clipboard.writeText(code);btn.textContent='Скопировано!';setTimeout(function(){btn.textContent='Копировать'},2000)})(this)">Копировать</button></div><pre class="code-block"><code>${escaped}</code></pre></div>`;
+    })
+    .replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.+?)\*/g, "<em>$1</em>")
+    .replace(/~~(.+?)~~/g, "<del>$1</del>")
+    .replace(/^### (.+)$/gm, '<h3 class="md-h3">$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2 class="md-h2">$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1 class="md-h1">$1</h1>')
+    .replace(/^[*-] (.+)$/gm, '<li class="md-li">$1</li>')
+    .replace(/^\d+\. (.+)$/gm, '<li class="md-li md-oli">$1</li>')
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" class="md-link">$1</a>')
+    .replace(/\n/g, "<br/>");
+
+  html = html.replace(/((?:<li class="md-li">.*?<\/li><br\/>?)+)/g, (match) => {
+    const cleaned = match.replace(/<br\/?>/g, "");
+    return `<ul class="md-ul">${cleaned}</ul>`;
+  });
+
+  return html;
+}
+
+// ─── Sub-components ───
+
+function VideoPlayer({ url, taskId, token, thumbnailUrl }: { url: string; taskId?: string; token?: string; thumbnailUrl?: string }) {
+  const [thumbLoaded, setThumbLoaded] = useState(false);
+
+  const openVideo = () => {
+    const directUrl = url.includes("fal.media") ? url : (taskId && token ? `${API_URL}/api/video/stream/${taskId}?token=${token}` : url);
+    window.open(directUrl, "_blank");
+  };
+
+  return (
+    <div
+      onClick={openVideo}
+      className="relative rounded-2xl overflow-hidden cursor-pointer group"
+      style={{ maxWidth: 340 }}
+    >
+      {/* Thumbnail or gradient fallback */}
+      <div className="w-full aspect-video relative flex items-center justify-center">
+        {thumbnailUrl && (
+          <img
+            src={thumbnailUrl}
+            alt="Video preview"
+            className={`absolute inset-0 w-full h-full object-cover ${thumbLoaded ? "" : "hidden"}`}
+            onLoad={() => setThumbLoaded(true)}
+          />
+        )}
+        {!thumbLoaded && (
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/20 via-purple-500/15 to-blue-500/20 flex items-center justify-center">
+            <div className="absolute inset-0 opacity-30">
+              <div className="absolute top-4 left-4 w-16 h-16 border border-white/20 rounded-xl rotate-12" />
+              <div className="absolute bottom-6 right-6 w-12 h-12 border border-white/15 rounded-lg -rotate-6" />
+            </div>
+          </div>
+        )}
+
+        {/* Play button */}
+        <div className="relative z-10 w-16 h-16 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+          <svg className="w-7 h-7 text-accent ml-1" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 5.14v14l11-7-11-7z" />
+          </svg>
+        </div>
+      </div>
+
+      {/* Bottom bar */}
+      <div className="bg-text/[0.06] px-4 py-2.5 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+          </svg>
+          <span className="text-xs font-semibold text-text/60">Видео готово</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ImageWithDownload({ url, caption }: { url: string; caption?: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const shareText = caption
+    ? `${caption.slice(0, 100)} — создано в Stone AI`
+    : "Создано нейросетью в Stone AI";
+  const shareUrl = "https://stoneai.ru/webchat?utm_source=share&utm_medium=image";
+
+  const shareVK = () => {
+    window.open(`https://vk.com/share.php?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(shareText)}`, "_blank", "width=600,height=400");
+  };
+  const shareTG = () => {
+    window.open(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`, "_blank", "width=600,height=400");
+  };
+  const copyLink = () => {
+    navigator.clipboard.writeText(shareUrl + "\n" + shareText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div>
+      <img
+        src={url}
+        alt="Generated image"
+        className="max-w-full rounded-xl mb-2"
+        style={{ maxHeight: 400 }}
+        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+      />
+      {caption && <div className="whitespace-pre-wrap text-sm mb-2">{caption}</div>}
+      <div className="flex items-center gap-3 mt-1 flex-wrap">
+        <button
+          onClick={() => downloadImage(url, `stone-ai-${Date.now()}.png`)}
+          className="flex items-center gap-1.5 text-[11px] text-accent font-semibold hover:underline"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V3" />
+          </svg>
+          Скачать
+        </button>
+        <span className="w-px h-3 bg-text/10" />
+        <button onClick={shareTG} className="flex items-center gap-1 text-[11px] text-[#2AABEE] font-semibold hover:underline" title="Поделиться в Telegram">
+          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+          TG
+        </button>
+        <button onClick={shareVK} className="flex items-center gap-1 text-[11px] text-[#4680C2] font-semibold hover:underline" title="Поделиться в VK">
+          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M21.547 7H18.89c-.408 0-.55.184-.55.4 0 .252.144.472.55.472h.68c.36 0 .474.157.398.498-.144.65-.506 1.3-.92 1.952-.253.397-.523.65-.83.65-.254 0-.367-.137-.367-.457V7.74c0-.47-.163-.74-.647-.74H15.58c-.327 0-.52.228-.52.44 0 .46.68.565.75 1.86v2.81c0 .616-.11.728-.352.728-.643 0-2.208-2.36-3.136-5.062C12.14 7.3 11.93 7 11.437 7H8.78c-.484 0-.58.184-.58.4 0 .505.68 3.012 3.17 6.326C13.02 15.917 15.144 17 17.08 17c1.167 0 1.31-.262 1.31-.713v-1.86c0-.486.102-.582.444-.582.252 0 .684.127 1.694 1.083C21.56 15.928 21.69 17 22.58 17h2.67c.484 0 .728-.262.588-.78-.306-1.016-3.29-3.866-3.42-4.048-.252-.324-.18-.47 0-.758.003 0 2.473-3.48 2.73-4.664.126-.396-.072-.75-.598-.75z"/></svg>
+          VK
+        </button>
+        <button onClick={copyLink} className="flex items-center gap-1 text-[11px] text-text/40 font-semibold hover:text-text/60" title="Копировать ссылку">
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-2.06a4.5 4.5 0 00-1.242-7.244l-4.5-4.5a4.5 4.5 0 00-6.364 6.364L5.25 8.81" />
+          </svg>
+          {copied ? "Скопировано!" : "Ссылка"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ThinkingBlock({ content }: { content: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="mb-2">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-1.5 text-[11px] text-text/30 hover:text-text/50 transition-colors py-1"
+      >
+        <svg className={`w-3 h-3 transition-transform ${open ? "rotate-90" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+        <span className="font-semibold">Ход мыслей</span>
+        <span className="text-text/15">({content.length} симв.)</span>
+      </button>
+      {open && (
+        <div className="mt-1 pl-3 border-l-2 border-text/10 text-[12px] text-text/40 leading-relaxed max-h-[300px] overflow-y-auto">
+          <div className="whitespace-pre-wrap">{content}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Main Component ───
+
+export default function MessageContent({ content, role, selectedModel }: { content: string; role: string; selectedModel: string }) {
+  if (role !== "assistant" || !content) {
+    return <div className="whitespace-pre-wrap break-words">{content}</div>;
+  }
+
+  // Extract <think>...</think> block
+  const thinkMatch = content.match(/<think>([\s\S]*?)<\/think>/);
+  const thinkContent = thinkMatch ? thinkMatch[1].trim() : null;
+  const displayContent = thinkMatch ? content.replace(/<think>[\s\S]*?<\/think>/, "").trim() : content;
+  // Detect still-thinking (open <think> without close)
+  const isStillThinking = !thinkMatch && content.includes("<think>") && !content.includes("</think>");
+  const partialThink = isStillThinking ? content.replace("<think>", "").trim() : null;
+
+  const imageUrl = extractImageUrl(displayContent);
+  const isImageModel = IMAGE_MODEL_IDS.has(selectedModel);
+
+  return (
+    <div>
+      {/* Still thinking indicator */}
+      {isStillThinking && (
+        <div className="flex items-center gap-2 mb-2 text-[11px] text-text/30">
+          <div className="flex gap-1">
+            <span className="w-1.5 h-1.5 bg-accent/40 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+            <span className="w-1.5 h-1.5 bg-accent/40 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+            <span className="w-1.5 h-1.5 bg-accent/40 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+          </div>
+          <span className="font-semibold">Размышляет...</span>
+        </div>
+      )}
+
+      {/* Completed thinking block */}
+      {thinkContent && <ThinkingBlock content={thinkContent} />}
+
+      {/* Main content */}
+      {imageUrl ? (
+        <>
+          <ImageWithDownload url={imageUrl} caption={stripImageFromText(displayContent) || undefined} />
+        </>
+      ) : displayContent.match(/^https?:\/\/\S+$/) ? (
+        <ImageWithDownload url={displayContent.trim()} />
+      ) : displayContent ? (
+        <div className="md-content break-words" dangerouslySetInnerHTML={{ __html: renderMarkdown(displayContent) }} />
+      ) : null}
+    </div>
+  );
+}
+
+// Re-export sub-components that WebChat.tsx might still use directly
+export { VideoPlayer, ImageWithDownload, renderMarkdown, extractImageUrl, downloadImage, stripImageFromText, ThinkingBlock };
