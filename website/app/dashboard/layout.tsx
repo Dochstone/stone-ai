@@ -55,7 +55,17 @@ function NavIcon({ d }: { d: string }) {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpenRaw] = useState(false);
+  const setSidebarOpen = (open: boolean) => {
+    setSidebarOpenRaw(open);
+    if (open) {
+      document.body.style.overflow = "hidden";
+      document.body.style.touchAction = "none";
+    } else {
+      document.body.style.overflow = "";
+      document.body.style.touchAction = "";
+    }
+  };
   const [sidebarHover, setSidebarHover] = useState(false);
   const [authEmail, setAuthEmail] = useState<string | null>(null);
   const [showTour, setShowTour] = useState(false);
