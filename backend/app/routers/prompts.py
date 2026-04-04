@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.middleware.auth import get_current_user
-from app.models.prompt_template import PromptTemplate, SavedPrompt
+from app.models.prompt_template import PromptTemplate, SavedPrompt, TemplateLike
 from app.routers.achievements import check_and_update
 
 logger = logging.getLogger(__name__)
@@ -100,6 +100,222 @@ async def delete_saved(prompt_id: str, user: dict = Depends(get_current_user), d
     await db.delete(sp)
     await db.commit()
     return {"ok": True}
+
+
+# ─── Marketplace ───
+
+@router.get("/prompts/marketplace")
+async def marketplace_list(
+    category: str | None = None,
+    search: str | None = None,
+    sort: str = "popular",
+    limit: int = 50,
+    offset: int = 0,
+    db: AsyncSession = Depends(get_db),
+):
+    """Public marketplace — community templates."""
+    query = select(PromptTemplate).where(PromptTemplate.is_public == True)
+    if category:
+        query = query.where(PromptTemplate.category == category)
+    if search:
+        query = query.where(
+            PromptTemplate.title.ilike(f"%{search}%") | PromptTemplate.description.ilike(f"%{search}%")
+        )
+    if sort == "newest":
+        query = query.order_by(PromptTemplate.created_at.desc())
+    else:
+        query = query.order_by(PromptTemplate.likes.desc(), PromptTemplate.usage_count.desc())
+    query = query.offset(offset).limit(limit)
+    result = await db.execute(query)
+    templates = result.scalars().all()
+
+    count_q = select(func.count()).select_from(PromptTemplate).where(PromptTemplate.is_public == True)
+    if category:
+        count_q = count_q.where(PromptTemplate.category == category)
+    if search:
+        count_q = count_q.where(
+            PromptTemplate.title.ilike(f"%{search}%") | PromptTemplate.description.ilike(f"%{search}%")
+        )
+    total = (await db.execute(count_q)).scalar() or 0
+
+    return {
+        "templates": [
+            {
+                "id": t.id, "category": t.category, "title": t.title,
+                "description": t.description, "content": t.content,
+                "variables": t.variables, "usage_count": t.usage_count,
+                "likes": t.likes, "author_name": t.author_name,
+                "author_tg_id": t.author_tg_id,
+                "default_model": t.default_model, "cost_rub": t.cost_rub,
+                "created_at": t.created_at.isoformat() if t.created_at else None,
+            }
+            for t in templates
+        ],
+        "total": total,
+    }
+
+
+class PublishTemplateRequest(BaseModel):
+    title: str
+    description: str
+    content: str
+    variables: list[dict] | None = None
+    category: str
+
+
+@router.post("/prompts/publish")
+async def publish_template(
+    body: PublishTemplateRequest,
+    user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Publish a user template to the marketplace."""
+    if len(body.title.strip()) < 3:
+        raise HTTPException(400, "Название должно содержать минимум 3 символа")
+    if len(body.content.strip()) < 10:
+        raise HTTPException(400, "Шаблон должен содержать минимум 10 символов")
+
+    valid_categories = {"marketing", "smm", "seo", "copywriting", "code", "business"}
+    if body.category not in valid_categories:
+        raise HTTPException(400, f"Категория должна быть одной из: {', '.join(valid_categories)}")
+
+    tg_id = user["id"]
+    author_name = user.get("first_name") or user.get("username") or "Аноним"
+
+    tpl = PromptTemplate(
+        category=body.category,
+        title=body.title.strip(),
+        description=body.description.strip(),
+        content=body.content.strip(),
+        variables=body.variables,
+        is_system=False,
+        is_public=True,
+        author_tg_id=tg_id,
+        author_name=author_name,
+    )
+    db.add(tpl)
+    await db.commit()
+    await db.refresh(tpl)
+
+    return {"id": tpl.id, "ok": True}
+
+
+@router.post("/prompts/templates/{template_id}/like")
+async def like_template(
+    template_id: str,
+    user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Toggle like on a template."""
+    tg_id = user["id"]
+
+    result = await db.execute(select(PromptTemplate).where(PromptTemplate.id == template_id))
+    tpl = result.scalar_one_or_none()
+    if not tpl:
+        raise HTTPException(404, "Шаблон не найден")
+
+    existing = await db.execute(
+        select(TemplateLike).where(TemplateLike.template_id == template_id, TemplateLike.user_tg_id == tg_id)
+    )
+    like = existing.scalar_one_or_none()
+
+    if like:
+        await db.delete(like)
+        tpl.likes = max(0, tpl.likes - 1)
+        liked = False
+    else:
+        db.add(TemplateLike(template_id=template_id, user_tg_id=tg_id))
+        tpl.likes += 1
+        liked = True
+
+    await db.commit()
+    return {"ok": True, "liked": liked, "likes": tpl.likes}
+
+
+@router.delete("/prompts/marketplace/{template_id}")
+async def delete_marketplace_template(
+    template_id: str,
+    user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Remove own template from marketplace."""
+    tg_id = user["id"]
+    result = await db.execute(
+        select(PromptTemplate).where(PromptTemplate.id == template_id, PromptTemplate.author_tg_id == tg_id)
+    )
+    tpl = result.scalar_one_or_none()
+    if not tpl:
+        raise HTTPException(404, "Шаблон не найден или нет доступа")
+    await db.delete(tpl)
+    await db.commit()
+    return {"ok": True}
+
+
+@router.get("/prompts/marketplace/my")
+async def my_marketplace_templates(
+    user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """List templates published by the current user."""
+    tg_id = user["id"]
+    result = await db.execute(
+        select(PromptTemplate)
+        .where(PromptTemplate.author_tg_id == tg_id, PromptTemplate.is_public == True)
+        .order_by(PromptTemplate.created_at.desc())
+    )
+    templates = result.scalars().all()
+    return {
+        "templates": [
+            {
+                "id": t.id, "category": t.category, "title": t.title,
+                "description": t.description, "content": t.content,
+                "variables": t.variables, "usage_count": t.usage_count,
+                "likes": t.likes, "author_name": t.author_name,
+                "created_at": t.created_at.isoformat() if t.created_at else None,
+            }
+            for t in templates
+        ]
+    }
+
+
+@router.get("/prompts/marketplace/liked")
+async def my_liked_templates(
+    user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """List template IDs the current user has liked."""
+    tg_id = user["id"]
+    result = await db.execute(
+        select(TemplateLike.template_id).where(TemplateLike.user_tg_id == tg_id)
+    )
+    return {"liked_ids": [row[0] for row in result.all()]}
+
+
+# ─── DB migration helper ───
+
+@router.post("/prompts/migrate-marketplace")
+async def migrate_marketplace(db: AsyncSession = Depends(get_db)):
+    """Run ALTER TABLE to add marketplace columns. Safe to call multiple times."""
+    from sqlalchemy import text
+    migrations = [
+        "ALTER TABLE prompt_templates ADD COLUMN IF NOT EXISTS author_tg_id BIGINT",
+        "ALTER TABLE prompt_templates ADD COLUMN IF NOT EXISTS is_public BOOLEAN DEFAULT false",
+        "ALTER TABLE prompt_templates ADD COLUMN IF NOT EXISTS likes INTEGER DEFAULT 0",
+        "ALTER TABLE prompt_templates ADD COLUMN IF NOT EXISTS author_name VARCHAR(100)",
+        """CREATE TABLE IF NOT EXISTS template_likes (
+            id VARCHAR(36) PRIMARY KEY,
+            template_id VARCHAR(36) NOT NULL,
+            user_tg_id BIGINT NOT NULL,
+            created_at TIMESTAMPTZ DEFAULT NOW(),
+            UNIQUE(template_id, user_tg_id)
+        )""",
+        "CREATE INDEX IF NOT EXISTS ix_template_likes_template_id ON template_likes(template_id)",
+        "CREATE INDEX IF NOT EXISTS ix_template_likes_user_tg_id ON template_likes(user_tg_id)",
+    ]
+    for sql in migrations:
+        await db.execute(text(sql))
+    await db.commit()
+    return {"ok": True, "message": "Marketplace migration complete"}
 
 
 # ─── Wizard: generate from template ───

@@ -2,6 +2,23 @@
 const nextConfig = {
   output: "standalone",
   poweredByHeader: false,
+  webpack: (config, { isServer, webpack }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        os: false,
+        path: false,
+        https: false,
+      };
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(/^node:/, (resource) => {
+          resource.request = resource.request.replace(/^node:/, "");
+        })
+      );
+    }
+    return config;
+  },
   async headers() {
     return [
       {

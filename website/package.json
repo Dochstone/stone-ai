@@ -11,6 +11,7 @@
   "dependencies": {
     "@tonconnect/ui-react": "^2.4.4",
     "next": "^14.2.21",
+    "pptxgenjs": "^4.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
@@ -24,4 +25,3 @@
     "typescript": "^5.4.5"
   }
 }
-

@@ -214,6 +214,83 @@ export default function PresentationsPage() {
     }
   };
 
+  const exportPPTX = async () => {
+    const pptxgen = (await import("pptxgenjs")).default;
+    const pres = new pptxgen();
+
+    const themes: Record<string, {bg: string, text: string, accent: string, titleBg: string, titleText: string}> = {
+      modern: { bg: "FFFFFF", text: "1A1A2E", accent: "6C63FF", titleBg: "6C63FF", titleText: "FFFFFF" },
+      minimal: { bg: "FAFAFA", text: "333333", accent: "000000", titleBg: "111111", titleText: "FFFFFF" },
+      corporate: { bg: "FFFFFF", text: "2C3E50", accent: "2980B9", titleBg: "2980B9", titleText: "FFFFFF" },
+      creative: { bg: "FFF8F0", text: "2D2D2D", accent: "FF6B6B", titleBg: "FF6B6B", titleText: "FFFFFF" },
+      bold: { bg: "0F0F0F", text: "E0E0E0", accent: "FFCC00", titleBg: "FFCC00", titleText: "0F0F0F" },
+      dark: { bg: "1E1E2E", text: "CDD6F4", accent: "89B4FA", titleBg: "313244", titleText: "CDD6F4" },
+    };
+    const t = themes[style] || themes.modern;
+
+    pres.layout = "LAYOUT_16x9";
+
+    for (const slide of slides) {
+      const s = pres.addSlide();
+      const layout = slide.layout || "content";
+
+      if (layout === "title" || layout === "section-header") {
+        s.background = { color: t.titleBg };
+        s.addText(slide.title, {
+          x: 0.5, y: 1.5, w: 9, h: 1.5,
+          fontSize: layout === "title" ? 36 : 28,
+          color: t.titleText, bold: true, align: "center", valign: "middle"
+        });
+        if (slide.bullets.length > 0 && layout === "title") {
+          s.addText(slide.bullets[0], {
+            x: 1, y: 3.2, w: 8, h: 0.8,
+            fontSize: 18, color: t.titleText, align: "center", transparency: 20
+          });
+        }
+      } else if (layout === "quote") {
+        s.background = { color: t.bg };
+        s.addShape(pres.ShapeType.rect, { x: 0.8, y: 1.5, w: 0.08, h: 2, fill: { color: t.accent } });
+        s.addText(`"${slide.bullets[0] || slide.title}"`, {
+          x: 1.2, y: 1.5, w: 7.5, h: 1.5,
+          fontSize: 22, color: t.text, italic: true, align: "left"
+        });
+        if (slide.bullets.length > 1) {
+          s.addText(`— ${slide.bullets[1]}`, {
+            x: 1.2, y: 3.2, w: 7.5, h: 0.5,
+            fontSize: 16, color: t.accent, align: "left"
+          });
+        }
+      } else {
+        s.background = { color: t.bg };
+        s.addText(slide.title, {
+          x: 0.5, y: 0.3, w: 9, h: 0.8,
+          fontSize: 24, color: t.text, bold: true
+        });
+        s.addShape(pres.ShapeType.rect, { x: 0.5, y: 1.05, w: 1, h: 0.06, fill: { color: t.accent } });
+
+        const bulletText = slide.bullets.map(b => ({ text: b, options: { bullet: { type: "number" as const }, color: t.text, fontSize: 16, breakLine: true } }));
+
+        if (slide.image_url && !slide.image_url.startsWith("data:")) {
+          s.addText(bulletText as any, { x: 0.5, y: 1.3, w: 5, h: 3.5, valign: "top", paraSpaceAfter: 8 });
+          try { s.addImage({ path: slide.image_url, x: 5.8, y: 1.3, w: 3.7, h: 3.5 }); } catch { /* image fetch may fail */ }
+        } else {
+          s.addText(bulletText as any, { x: 0.5, y: 1.3, w: 9, h: 3.5, valign: "top", paraSpaceAfter: 8 });
+        }
+      }
+
+      s.addText(`${slides.indexOf(slide) + 1}`, {
+        x: 9, y: 5, w: 0.5, h: 0.3,
+        fontSize: 10, color: t.text, transparency: 60, align: "right"
+      });
+
+      if (slide.notes) {
+        s.addNotes(slide.notes);
+      }
+    }
+
+    pres.writeFile({ fileName: "presentation.pptx" });
+  };
+
   const copyJSON = () => {
     navigator.clipboard.writeText(JSON.stringify(slides, null, 2));
   };
@@ -769,6 +846,15 @@ export default function PresentationsPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 Скачать PDF
+              </button>
+              <button
+                onClick={exportPPTX}
+                className="border border-text/10 text-text/60 font-medium px-5 py-2.5 rounded-xl hover:bg-text/[0.04] transition-colors flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                </svg>
+                PPTX
               </button>
               <button
                 onClick={reset}
