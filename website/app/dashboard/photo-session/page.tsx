@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ImageUploader } from "@/components/photo-session/ImageUploader";
-import { BeforeAfterSlider } from "@/components/photo-session/BeforeAfterSlider";
+import dynamic from "next/dynamic";
+const ImageUploader = dynamic(() => import("@/components/photo-session/ImageUploader").then(m => ({ default: m.ImageUploader })), { ssr: false });
+const BeforeAfterSlider = dynamic(() => import("@/components/photo-session/BeforeAfterSlider").then(m => ({ default: m.BeforeAfterSlider })), { ssr: false });
 import { getAuth, API_URL } from "@/lib/auth";
 import { IMAGE_MODELS } from "@/lib/models-config";
 import { logError } from "@/lib/error-logger";

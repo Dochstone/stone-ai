@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
-import SlidePreview from "@/components/presentations/SlidePreview";
-import StylePicker from "@/components/presentations/StylePicker";
+import dynamic from "next/dynamic";
+const SlidePreview = dynamic(() => import("@/components/presentations/SlidePreview"), { ssr: false });
+const StylePicker = dynamic(() => import("@/components/presentations/StylePicker"), { ssr: false });
 import { getAuth, API_URL } from "@/lib/auth";
 import { CHAT_MODELS, IMAGE_MODELS } from "@/lib/models-config";
 

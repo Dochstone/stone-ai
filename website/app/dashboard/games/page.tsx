@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
-import Leaderboard from "@/components/games/Leaderboard";
+const Leaderboard = dynamic(() => import("@/components/games/Leaderboard"), { ssr: false });
 import { getAuth } from "@/lib/auth";
 
 const SnakeGame = dynamic(() => import("@/components/games/SnakeGame"), { ssr: false });
