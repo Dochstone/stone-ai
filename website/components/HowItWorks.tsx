@@ -60,7 +60,7 @@ export default function HowItWorks() {
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center mt-12">
           <a
-            href="/webchat"
+            href="/dashboard/chat"
             className="inline-flex items-center justify-center bg-accent text-white px-8 py-4 min-h-[48px] rounded-xl font-bold text-sm hover:bg-accent/90 transition-all shadow-md shadow-accent/20"
           >
             Попробовать бесплатно

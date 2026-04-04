@@ -86,7 +86,7 @@ export default function ReferralPage() {
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
           <a href="/" className="text-lg font-extrabold text-text">Stone AI</a>
           <div className="flex items-center gap-4">
-            <a href="/webchat" className="text-xs text-accent font-semibold hover:underline">Чат</a>
+            <a href="/dashboard/chat" className="text-xs text-accent font-semibold hover:underline">Чат</a>
             <a href="/pricing" className="text-xs text-text/40 hover:text-text">Пополнить</a>
           </div>
         </div>

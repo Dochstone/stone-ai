@@ -4,15 +4,15 @@ const POPULAR_TASKS = [
   { label: "Рекламные объявления", href: "/dashboard/templates", emoji: "🎯" },
   { label: "SEO-статьи", href: "/dashboard/seo/article", emoji: "📝" },
   { label: "Контент-планы", href: "/dashboard/templates", emoji: "📅" },
-  { label: "Генерация картинок", href: "/webchat", emoji: "🎨" },
-  { label: "AI Видео", href: "/webchat", emoji: "🎬" },
+  { label: "Генерация картинок", href: "/dashboard/chat", emoji: "🎨" },
+  { label: "AI Видео", href: "/dashboard/chat", emoji: "🎬" },
   { label: "Презентации", href: "/dashboard/presentations", emoji: "📊" },
   { label: "Фотосессия товаров", href: "/dashboard/photo-session", emoji: "📸" },
-  { label: "AI Чат-бот", href: "/webchat", emoji: "🤖" },
-  { label: "Код и дебаг", href: "/webchat", emoji: "💻" },
+  { label: "AI Чат-бот", href: "/dashboard/chat", emoji: "🤖" },
+  { label: "Код и дебаг", href: "/dashboard/chat", emoji: "💻" },
   { label: "Маркетплейс шаблонов", href: "/dashboard/marketplace", emoji: "🏪" },
   { label: "UTM-метки", href: "/tools/utm-builder", emoji: "🔗" },
-  { label: "Озвучка текста", href: "/webchat", emoji: "🔊" },
+  { label: "Озвучка текста", href: "/dashboard/chat", emoji: "🔊" },
 ];
 
 export default function PopularTasks() {

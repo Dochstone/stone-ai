@@ -82,7 +82,7 @@ export default function AudioPage() {
 
       <ToolExamples subtitle="Примеры использования" examples={examples} />
       <ToolFaq items={faqItems} />
-      <ToolCta title="Попробуйте AI Аудио" subtitle="Озвучка и голосовой ввод — прямо в чате." ctaHref="/webchat" />
+      <ToolCta title="Попробуйте AI Аудио" subtitle="Озвучка и голосовой ввод — прямо в чате." ctaHref="/dashboard/chat" />
     </>
   );
 }

@@ -179,7 +179,7 @@ export default function Pricing() {
 
   const openPlan = (plan: typeof plans[0]) => {
     const auth = getAuth();
-    if (!auth && plan.id !== "free") { window.location.href = "/webchat"; return; }
+    if (!auth && plan.id !== "free") { window.location.href = "/dashboard/chat"; return; }
     setModal(plan);
     setTopupMode(plan.id === "free");
     setPayExpanded(false);
@@ -213,7 +213,7 @@ export default function Pricing() {
 
   const payTopup = async (amountRub: number) => {
     const auth = getAuth();
-    if (!auth) { window.location.href = "/webchat"; return; }
+    if (!auth) { window.location.href = "/dashboard/chat"; return; }
     setLoading(true);
     setResult(null);
     try {
@@ -234,7 +234,7 @@ export default function Pricing() {
 
   const pay = async (tier: string, method: "platega" | "crypto" = "platega") => {
     const auth = getAuth();
-    if (!auth) { window.location.href = "/webchat"; return; }
+    if (!auth) { window.location.href = "/dashboard/chat"; return; }
     setLoading(true);
     setResult(null);
     try {
@@ -386,7 +386,7 @@ export default function Pricing() {
           }`}>
             {result.message}
             {result.ok && (
-              <a href="/webchat" className="block mt-2 text-accent font-bold hover:underline">
+              <a href="/dashboard/chat" className="block mt-2 text-accent font-bold hover:underline">
                 Открыть чат →
               </a>
             )}

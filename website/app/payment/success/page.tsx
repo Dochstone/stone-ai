@@ -11,7 +11,7 @@ export default function PaymentSuccessPage() {
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          window.location.href = "/webchat";
+          window.location.href = "/dashboard/chat";
           return 0;
         }
         return prev - 1;
@@ -31,7 +31,7 @@ export default function PaymentSuccessPage() {
         <h1 className="text-2xl font-extrabold text-text mb-2">Оплата прошла!</h1>
         <p className="text-text/50 mb-8">Баланс обновлён. Спасибо за покупку.</p>
         <Link
-          href="/webchat"
+          href="/dashboard/chat"
           className="bg-accent text-white px-8 py-3 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors inline-block"
         >
           Вернуться в чат

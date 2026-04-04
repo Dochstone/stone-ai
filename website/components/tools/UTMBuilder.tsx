@@ -346,7 +346,7 @@ export default function UTMBuilder() {
       <div className="bg-gradient-to-br from-accent/5 to-teal/5 border border-accent/10 rounded-2xl p-6 text-center">
         <p className="text-base font-bold text-text mb-1">Нужны AI-объявления для этой кампании?</p>
         <p className="text-sm text-text/50 mb-4">Создайте заголовки, тексты и офферы с помощью 65+ нейросетей</p>
-        <a href="/webchat" className="inline-block bg-accent text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-accent/90 transition-all shadow-md shadow-accent/20">
+        <a href="/dashboard/chat" className="inline-block bg-accent text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-accent/90 transition-all shadow-md shadow-accent/20">
           Создать с помощью AI
         </a>
       </div>

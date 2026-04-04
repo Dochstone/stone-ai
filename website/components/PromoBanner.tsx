@@ -28,7 +28,7 @@ export default function PromoBanner() {
           15 бесплатных запросов каждый день — без регистрации
         </p>
         <a
-          href="/webchat"
+          href="/dashboard/chat"
           className="shrink-0 bg-white/20 hover:bg-white/30 backdrop-blur text-white px-5 py-2 rounded-xl text-sm font-bold transition-colors"
         >
           Попробовать

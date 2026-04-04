@@ -43,7 +43,7 @@ export default function SharedChatPage() {
         <div className="text-4xl mb-4">🔗</div>
         <h1 className="text-xl font-bold text-text mb-2">Чат не найден</h1>
         <p className="text-text/50 text-sm mb-6">Ссылка недействительна или чат был удалён</p>
-        <a href="/webchat" className="bg-accent text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors">
+        <a href="/dashboard/chat" className="bg-accent text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors">
           Открыть Stone AI
         </a>
       </div>
@@ -59,7 +59,7 @@ export default function SharedChatPage() {
             <h1 className="text-sm font-bold text-text">{chat.title}</h1>
             <p className="text-[10px] text-text/30">{chat.model_id} · {chat.messages.length} сообщений</p>
           </div>
-          <a href="/webchat" className="bg-accent text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-accent/90 transition-colors">
+          <a href="/dashboard/chat" className="bg-accent text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-accent/90 transition-colors">
             Попробовать Stone AI
           </a>
         </div>
@@ -92,7 +92,7 @@ export default function SharedChatPage() {
             <p className="text-xs font-bold text-text">Хотите так же?</p>
             <p className="text-[10px] text-text/40">65+ нейросетей · 15 запросов бесплатно</p>
           </div>
-          <a href="/webchat" className="bg-accent text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20">
+          <a href="/dashboard/chat" className="bg-accent text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20">
             Начать бесплатно
           </a>
         </div>

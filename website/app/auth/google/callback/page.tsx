@@ -35,7 +35,7 @@ export default function GoogleCallback() {
               balanceUsd: data.user.balance_usd || 0,
             })
           );
-          window.location.href = "/webchat";
+          window.location.href = "/dashboard/chat";
         } else {
           setError(data.detail || "Auth failed");
         }
@@ -48,7 +48,7 @@ export default function GoogleCallback() {
       <div className="min-h-screen bg-bg flex items-center justify-center px-4">
         <div className="text-center">
           <p className="text-red-500 text-sm mb-4">{error}</p>
-          <a href="/webchat" className="text-accent text-sm hover:underline">Вернуться</a>
+          <a href="/dashboard/chat" className="text-accent text-sm hover:underline">Вернуться</a>
         </div>
       </div>
     );

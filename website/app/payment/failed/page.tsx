@@ -21,7 +21,7 @@ export default function PaymentFailedPage() {
             Попробовать снова
           </Link>
           <Link
-            href="/webchat"
+            href="/dashboard/chat"
             className="border border-text/10 text-text/60 px-8 py-3 rounded-xl font-medium text-sm hover:bg-text/[0.04] transition-colors"
           >
             Вернуться в чат

@@ -39,7 +39,7 @@ export default function WelcomeBonusBanner() {
           Зарегистрируйтесь — <span className="underline decoration-white/40">+100₽ на баланс</span> для генераций
         </p>
         <a
-          href="/webchat"
+          href="/dashboard/chat"
           className="shrink-0 bg-white/20 hover:bg-white/30 backdrop-blur text-white text-xs font-bold px-3.5 py-1.5 rounded-full transition-colors"
         >
           Начать бесплатно

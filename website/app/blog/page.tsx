@@ -68,7 +68,7 @@ export default function BlogPage() {
 
         <div className="text-center mt-16">
           <a
-            href="/webchat"
+            href="/dashboard/chat"
             className="inline-block bg-accent text-white px-8 py-4 rounded-xl font-bold hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
           >
             Попробовать бесплатно

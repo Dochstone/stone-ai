@@ -11,7 +11,7 @@ interface ToolCtaProps {
 export default function ToolCta({
   title = "Попробуйте прямо сейчас",
   subtitle = "15 бесплатных запросов каждый день. Бесплатный старт.",
-  ctaHref = "/webchat",
+  ctaHref = "/dashboard/chat",
 }: ToolCtaProps) {
   const [hasPaidPlan, setHasPaidPlan] = useState(false);
 

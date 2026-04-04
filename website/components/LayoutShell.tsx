@@ -7,7 +7,7 @@ import Footer from "./Footer";
 export default function LayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isDashboard = pathname.startsWith("/dashboard");
-  const isWebchat = pathname === "/webchat";
+  const isWebchat = pathname === "/dashboard/chat";
   const hideChrome = isDashboard || isWebchat;
 
   return (

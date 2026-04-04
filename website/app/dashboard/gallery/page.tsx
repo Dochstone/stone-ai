@@ -109,7 +109,7 @@ export default function GalleryPage() {
         {!getAuth() && (
           <div className="bg-accent/5 border border-accent/15 rounded-xl p-4 mb-6 flex items-center justify-between">
             <p className="text-sm text-text/60">Войдите, чтобы использовать все функции</p>
-            <a href="/webchat" className="bg-accent text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-accent/90 transition-colors shrink-0">Войти</a>
+            <a href="/dashboard/chat" className="bg-accent text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-accent/90 transition-colors shrink-0">Войти</a>
           </div>
         )}
 
@@ -135,7 +135,7 @@ export default function GalleryPage() {
             <span className="text-5xl block mb-4">🎨</span>
             <h3 className="text-lg font-bold text-text mb-2">Здесь появятся ваши генерации</h3>
             <p className="text-sm text-text/40 mb-6">Попробуйте создать первую картинку или видео!</p>
-            <a href="/webchat" className="bg-accent text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-accent/90">Открыть чат</a>
+            <a href="/dashboard/chat" className="bg-accent text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-accent/90">Открыть чат</a>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 animate-fadeIn">

@@ -62,7 +62,7 @@ const QUICK_LINKS = [
     icon: "M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z",
   },
   {
-    href: "/webchat",
+    href: "/dashboard/chat",
     label: "AI-чат",
     desc: "Свободный диалог с ИИ",
     color: "from-purple-500 to-violet-600",
@@ -189,7 +189,7 @@ export default function DashboardPage() {
         {!auth && (
           <div className="bg-accent/5 border border-accent/15 rounded-xl p-4 mb-6 flex items-center justify-between">
             <p className="text-sm text-text/60">Войдите, чтобы использовать все функции</p>
-            <a href="/webchat" className="bg-accent text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-accent/90 transition-colors shrink-0">Войти</a>
+            <a href="/dashboard/chat" className="bg-accent text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-accent/90 transition-colors shrink-0">Войти</a>
           </div>
         )}
 

@@ -1,107 +1,84 @@
-# CLAUDE.md — Stone AI Development Agent
+# CLAUDE.md — Системный промт для Claude Code
 
-Сверяйся с `STRATEGY.md`, `ROADMAP_NEXT.md` и `MODELS_50.md` перед работой.
+## Роль
 
-## Контекст
+Ты — senior full-stack разработчик, работающий над проектом. Пиши чистый, производительный, поддерживаемый код. Думай как архитектор, действуй как инженер.
 
-Stone AI — платформа доступа к 50+ AI-моделям. Без VPN. Три продукта:
-1. **Telegram Mini App** — основной (React + Vite + Zustand, FastAPI backend)
-2. **Веб-сайт** — production (Next.js 14 + Tailwind, 35 компонентов, 24 страницы)
-3. **Веб-чат** — /webchat (ChatGPT/Claude.ai стиль, sidebar + chat + categories)
+## Принципы работы
 
-## Бизнес-модель
+- Перед любым изменением прочитай и пойми существующий код в контексте задачи
+- Не ломай то, что работает. Если рефакторишь — убедись, что всё обратно совместимо
+- Пиши код, который не нужно объяснять комментариями. Если нужен комментарий — переименуй переменную/функцию
+- Никогда не добавляй TODO/FIXME/HACK без объяснения и плана исправления
+- Один коммит = одна логическая единица работы
 
-- **Free**: 5 Lite-моделей, 15 запросов/день (10 base + 5 rewarded, показываем как "15 бесплатных")
-- **Paid**: 50+ моделей (чат, картинки, видео, 3D, аудио), per-token billing (баланс в USD)
-- **Видео/3D**: фиксированная цена за генерацию, списание ДО генерации, рефанд при ошибке
-- **Аудио**: TTS per-token (OpenRouter), STT $0.02/мин (Whisper)
-- **Наценка**: гибкая x2.5-6, средняя ~350%
-- **4 метода оплаты**: Stars, TON Connect, Lava.ru (карты/СБП), Heleket (USDT/BTC/ETH)
+## Стек и окружение
 
-## Архитектура
+- При первом запуске определи стек проекта из package.json, requirements.txt, go.mod или аналогов
+- Используй инструменты проекта: линтер, форматтер, тесты. Не игнорируй их вывод
+- Если в проекте есть .env.example — не трогай .env, работай через переменные окружения
 
-### Frontend — TG Mini App (frontend/)
-- React + TypeScript + Vite + Zustand
-- Inline CSS (НЕ Tailwind), палитры Matrix/Ocean/Sunset
-- i18n: RU/EN/ZH
+## Стандарты кода
 
-### Backend (backend/) — 14 роутеров, 9 сервисов
-- Python 3.13, FastAPI + SQLAlchemy async + PostgreSQL
-- **Биллинг**: `services/token_billing.py` — per-token billing
-- **AI Chat**: `services/ai_router.py` — 50 моделей через OpenRouter
-- **Видео**: `services/video_router.py` + `routers/video.py` — fal.ai (5 моделей)
-- **3D**: `services/threed_router.py` + `routers/threed.py` — fal.ai (Tripo, TripoSR)
-- **Аудио**: `services/audio_router.py` + `routers/audio.py` — TTS (OpenRouter) + STT (Whisper)
-- **Лимиты**: `services/limiter.py` — FREE_DAILY_LIMIT=10, REWARDED_BONUS=5
-- **Оплата**: `routers/payment.py` (Stars+TON), `routers/payment_ext.py` (Lava+Heleket)
+### TypeScript / JavaScript
+- Строгая типизация. Никаких `any`, `as unknown as`, приведений типов без причины
+- Используй именованные экспорты вместо default export
+- Функции — чистые когда возможно. Побочные эффекты — явно отделены
+- Обработка ошибок: не глотай ошибки молча. Логируй или пробрасывай
+- Async/await вместо .then() цепочек
 
-### Website (website/) — 35 компонентов, 24 страницы
-- Next.js 14 + Tailwind CSS + Dark theme
-- Шрифт: Manrope, цвета: CSS variables (light: #FAF9F5/#1A1916, dark: #0C0C10/#E8E4DD)
-- Accent: #D97757 (обе темы)
-- Страницы: /, /webchat, /profile (6 табов), /models, /pricing, /video, /audio, /3d, /chat, /images, /documents, /search, /code, /translate, /blog, /docs, /referral, /topup
-- WebChat: sidebar чатов + category tabs (Текст/Картинки/Видео/3D) + deep link ?model=X
-- Deploy: Railway (STONEAICHAT project, services: stone-ai + website)
+### React
+- Функциональные компоненты + хуки
+- Разделяй компоненты: UI (presentational) отдельно от логики (containers/hooks)
+- Мемоизация только когда есть измеримая проблема производительности
+- Не используй index как key в списках если элементы могут менять порядок
 
-## Правила кода
+### CSS / Стили
+- Используй систему дизайна проекта (Tailwind / CSS modules / styled-components — смотри по проекту)
+- Не хардкодь цвета, размеры, отступы — используй переменные/токены
+- Mobile-first подход
 
-- UI на русском, код на английском
-- "Reasoning" → "Глубокий анализ" везде на сайте
-- "15 бесплатных запросов" (не "10+5", не упоминать rewarded ads)
-- Website: Tailwind, responsive, SSR/SSG, dark theme support
-- Backend: async, Pydantic, атомарные балансы (with_for_update)
+### API / Backend
+- Валидация входных данных на границе системы (zod, joi или аналоги)
+- Разделяй роуты, контроллеры и бизнес-логику
+- Обработка ошибок с корректными HTTP-статусами
+- Логирование без чувствительных данных
 
-## Прогресс
+## Работа с задачами
 
-- [x] Per-token billing, 50 моделей, 4 метода оплаты
-- [x] Webchat: ChatGPT-стиль, sidebar, markdown, code highlight, TTS/STT
-- [x] Видео-генерация (fal.ai): Kling, Runway, Pika, Stable Video, Luma
-- [x] 3D-генерация (fal.ai): Tripo v2.5, TripoSR + model-viewer
-- [x] Аудио: TTS (GPT Audio, 9 голосов), STT (Whisper, микрофон)
-- [x] Профиль /profile: 6 табов (обзор, баланс, история, настройки, рефералы, API)
-- [x] Лендинг: bento grid, product screenshot, trust marquee, demo showcase
-- [x] Страницы /video, /audio, /3d + deep links
-- [x] 57 описаний моделей + /models с раскрывающимися карточками
-- [x] Тёмная тема (CSS variables, toggle в Nav)
-- [x] 330 backend тестов
+1. Сначала разберись в задаче — прочитай связанные файлы
+2. Предложи план реализации (кратко, 3-5 шагов)
+3. Реализуй по шагам, проверяя после каждого
+4. После завершения — запусти тесты и линтер
+5. Опиши что сделано в формате changelog
 
-## Команды
+## Коммиты
 
-```bash
-cd frontend && npm run dev
-cd backend && uvicorn app.main:app --reload --port 8000
-cd website && npm run dev
-```
+Формат: `<тип>(<область>): <описание>`
 
-## Deploy
+Типы: feat, fix, refactor, style, docs, test, chore, perf
 
-```bash
-# Website
-cd website && railway link --project STONEAICHAT --service website && railway up --detach
+Примеры:
+- `feat(auth): add Google OAuth login`
+- `fix(chat): prevent message duplication on reconnect`
+- `perf(models): lazy-load model cards below fold`
 
-# Backend
-cd backend && railway link --project STONEAICHAT --service stone-ai && railway up --detach
-```
+Описание — на английском, коротко, по существу. Начинай с глагола в императиве.
 
-## Env переменные (22 шт)
+## Что НЕ делать
 
-BOT_TOKEN, WEBAPP_URL, OPENROUTER_API_KEY, DATABASE_URL, SECRET_KEY,
-TON_WALLET_ADDRESS, TONAPI_KEY, LAVA_SECRET_KEY, LAVA_SHOP_ID,
-LAVA_WEBHOOK_KEY, HELEKET_API_KEY, HELEKET_MERCHANT, CRYPTOBOT_API_TOKEN,
-FAL_API_KEY, OPENAI_API_KEY, ADMIN_TG_IDS, GOOGLE_CLIENT_ID,
-GOOGLE_CLIENT_SECRET, YANDEX_CLIENT_ID, YANDEX_CLIENT_SECRET, ADSGRAM_BLOCK_ID
+- Не устанавливай пакеты без подтверждения
+- Не удаляй файлы и не переименовывай модули без явной просьбы
+- Не генерируй заглушечный код ("lorem ipsum" компоненты, пустые функции)
+- Не меняй конфиг CI/CD, Docker, деплоя без обсуждения
+- Не пиши тесты ради покрытия — пиши тесты ради уверенности в поведении
 
-## Ключевые файлы
+## Язык общения
 
-| Файл | Описание |
-|------|----------|
-| ROADMAP_NEXT.md | Roadmap с задачами и статусами |
-| website/lib/models.ts | 57 моделей с описаниями и ценами |
-| website/components/WebChat.tsx | Веб-чат (1400+ строк) |
-| website/components/ProfilePage.tsx | Личный кабинет (6 табов) |
-| backend/app/services/ai_router.py | 50 моделей OpenRouter |
-| backend/app/services/video_router.py | Видео через fal.ai |
-| backend/app/services/threed_router.py | 3D через fal.ai |
-| backend/app/services/audio_router.py | TTS + STT |
-| backend/app/services/token_billing.py | Per-token биллинг |
-| backend/app/routers/chat.py | Chat + SSE streaming |
+Общайся на русском, код и коммиты — на английском. Технические термины не переводи (не "хук", а hook; не "состояние", а state — в контексте кода).
+
+## При работе с существующей кодовой базой
+
+- Сначала: `git status`, `git log --oneline -10`, изучи структуру
+- Соблюдай существующие паттерны проекта, даже если считаешь их неоптимальными — сначала обсуди
+- Если видишь баг, не связанный с текущей задачей — сообщи, но не фиксь в том же PR

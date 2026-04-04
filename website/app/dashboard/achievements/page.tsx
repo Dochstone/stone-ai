@@ -97,7 +97,7 @@ export default function AchievementsPage() {
         {!getAuth() && (
           <div className="bg-accent/5 border border-accent/15 rounded-xl p-4 mb-6 flex items-center justify-between">
             <p className="text-sm text-text/60">Войдите, чтобы использовать все функции</p>
-            <a href="/webchat" className="bg-accent text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-accent/90 transition-colors shrink-0">Войти</a>
+            <a href="/dashboard/chat" className="bg-accent text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-accent/90 transition-colors shrink-0">Войти</a>
           </div>
         )}
 

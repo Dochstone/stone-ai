@@ -32,7 +32,7 @@ export default function YandexCallback() {
               balanceUsd: data.user.balance_usd || 0,
             })
           );
-          window.location.href = "/webchat";
+          window.location.href = "/dashboard/chat";
         } else {
           setError(data.detail || "Auth failed");
         }
@@ -45,7 +45,7 @@ export default function YandexCallback() {
       <div className="min-h-screen bg-bg flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-500 mb-4">{error}</p>
-          <a href="/webchat" className="text-accent hover:underline">Вернуться</a>
+          <a href="/dashboard/chat" className="text-accent hover:underline">Вернуться</a>
         </div>
       </div>
     );
