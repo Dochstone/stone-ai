@@ -13,7 +13,7 @@ const plans = [
     badge: null, accent: false,
     features: ["15 бесплатных чат-запросов/день", "AI-шаблоны от 10₽", "SEO-статьи от 15₽", "AI-презентации от 40₽", "Фотосессия товаров от 15₽", "Пополнение от 100₽"],
     locked: [],
-    cta: "Пополнить баланс", icon: "💰", color: "#14B8A6", img: "",
+    cta: "Пополнить баланс", icon: "💰", color: "#14B8A6", img: "/plan-payperuse.jpg",
   },
   {
     id: "mini", name: "Start", price: "390₽", oldPrice: "590₽", priceNum: 390, premium: false, period: "/мес", desc: "20+ моделей",
