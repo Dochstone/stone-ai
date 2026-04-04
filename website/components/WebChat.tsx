@@ -1647,54 +1647,65 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
           </div>
         </div>
 
-        {/* Model Picker Panel */}
+        {/* Model Picker — mobile: fullscreen sheet, desktop: bottom panel */}
         {modelPickerOpen && (
-          <div className="absolute bottom-16 left-0 right-0 z-[45] bg-bg border-t border-text/10 shadow-lg max-h-[50vh] sm:max-h-[60vh] flex flex-col rounded-t-xl">
-            <div className="p-3 border-b border-text/5 shrink-0">
-              <input type="text" value={modelSearch} onChange={(e) => setModelSearch(e.target.value)}
-                placeholder="Поиск модели..." autoFocus
-                className="w-full bg-bg border border-text/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent/30" />
+          <>
+            <div className="fixed inset-0 z-[44] bg-black/30 backdrop-blur-sm sm:hidden" onClick={() => { setModelPickerOpen(false); setModelSearch(""); }} />
+            <div className="hidden sm:block fixed inset-0 z-[44]" onClick={() => { setModelPickerOpen(false); setModelSearch(""); }} />
+            <div className="fixed inset-x-0 bottom-0 top-12 z-[45] bg-bg flex flex-col rounded-t-2xl shadow-2xl sm:absolute sm:top-auto sm:bottom-16 sm:rounded-t-xl sm:max-h-[60vh] sm:shadow-lg border-t border-text/10">
+              {/* Header */}
+              <div className="p-3 border-b border-text/5 shrink-0">
+                <div className="flex items-center gap-2 mb-2 sm:hidden">
+                  <span className="text-sm font-bold text-text flex-1">Выбор модели</span>
+                  <button onClick={() => { setModelPickerOpen(false); setModelSearch(""); }} className="text-text/30 hover:text-text/60 p-1">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
+                <input type="text" value={modelSearch} onChange={(e) => setModelSearch(e.target.value)}
+                  placeholder="Поиск модели..." autoFocus
+                  className="w-full bg-text/[0.03] border border-text/10 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-accent/30" />
+              </div>
+              {/* List */}
+              <div className="overflow-y-auto flex-1 p-2">
+                {(() => {
+                  const catMap: Record<string, string[]> = { all: [], free: [], chat: ["chat", "search", "reason", "code"], image: ["image"], video: ["video"], "3d": ["3d"], health: ["chat"] };
+                  const cats = catMap[modelCatFilter] || [];
+                  let list = modelCatFilter === "all" ? MODELS : modelCatFilter === "free" ? MODELS.filter(m => FREE_MODEL_IDS.has(m.id)) : MODELS.filter(m => cats.includes(m.category));
+                  if (modelSearch) list = list.filter(m => m.name.toLowerCase().includes(modelSearch.toLowerCase()) || m.company.toLowerCase().includes(modelSearch.toLowerCase()));
+                  const bal = auth?.balanceUsd || 0;
+                  return [...list].sort((a, b) => {
+                    const aL = getModelLockInfo(a.id, bal, limits?.plan) !== null, bL = getModelLockInfo(b.id, bal, limits?.plan) !== null;
+                    if (!aL && bL) return -1; if (aL && !bL) return 1;
+                    return a.pricePerMillion - b.pricePerMillion;
+                  }).map(m => {
+                    const lock = getModelLockInfo(m.id, bal, limits?.plan);
+                    return (
+                      <button key={m.id} onClick={() => {
+                        if (lock) { setLockModal({ model: m.name, tier: lock.tier, price: lock.price }); setModelPickerOpen(false); return; }
+                        setSelectedModel(m.id); setModelPickerOpen(false); setModelSearch("");
+                      }} className={`w-full flex items-center gap-3 px-3 py-3 sm:py-2 rounded-xl text-left transition-colors ${
+                        selectedModel === m.id ? "bg-accent/5 border border-accent/20" : "hover:bg-text/[0.03] active:bg-text/[0.06]"
+                      } ${lock ? "opacity-50" : ""}`}>
+                        <div className="flex-1 min-w-0">
+                          <span className="text-[14px] sm:text-sm font-semibold truncate block">{lock ? "🔒 " : ""}{m.name}</span>
+                          <span className="text-[11px] sm:text-[10px] text-text/30">{m.company} · {m.context}</span>
+                        </div>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
+                          lock ? "bg-text/5 text-text/30"
+                          : FREE_MODEL_IDS.has(m.id) ? "bg-teal-light text-teal"
+                          : MINI_MODEL_IDS.has(m.id) ? "bg-blue-100 text-blue-600"
+                          : "bg-accent/10 text-accent"
+                        }`}>
+                          {lock ? lock.tier : FREE_MODEL_IDS.has(m.id) ? "Бесплатно" : MINI_MODEL_IDS.has(m.id) ? "Start" : "Pro"}
+                        </span>
+                      </button>
+                    );
+                  });
+                })()}
+              </div>
             </div>
-            <div className="overflow-y-auto flex-1 p-2">
-              {(() => {
-                const catMap: Record<string, string[]> = { all: [], free: [], chat: ["chat", "search", "reason", "code"], image: ["image"], video: ["video"], "3d": ["3d"], health: ["chat"] };
-                const cats = catMap[modelCatFilter] || [];
-                let list = modelCatFilter === "all" ? MODELS : modelCatFilter === "free" ? MODELS.filter(m => FREE_MODEL_IDS.has(m.id)) : MODELS.filter(m => cats.includes(m.category));
-                if (modelSearch) list = list.filter(m => m.name.toLowerCase().includes(modelSearch.toLowerCase()) || m.company.toLowerCase().includes(modelSearch.toLowerCase()));
-                const bal = auth?.balanceUsd || 0;
-                return [...list].sort((a, b) => {
-                  const aL = getModelLockInfo(a.id, bal, limits?.plan) !== null, bL = getModelLockInfo(b.id, bal, limits?.plan) !== null;
-                  if (!aL && bL) return -1; if (aL && !bL) return 1;
-                  return a.pricePerMillion - b.pricePerMillion;
-                }).map(m => {
-                  const lock = getModelLockInfo(m.id, bal, limits?.plan);
-                  return (
-                    <button key={m.id} onClick={() => {
-                      if (lock) { setLockModal({ model: m.name, tier: lock.tier, price: lock.price }); setModelPickerOpen(false); return; }
-                      setSelectedModel(m.id); setModelPickerOpen(false); setModelSearch("");
-                    }} className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left transition-colors ${
-                      selectedModel === m.id ? "bg-accent/5 border border-accent/20" : "hover:bg-bg"
-                    } ${lock ? "opacity-50" : ""}`}>
-                      <div className="flex-1 min-w-0">
-                        <span className="text-sm font-semibold truncate block">{lock ? "🔒 " : ""}{m.name}</span>
-                        <span className="text-[10px] text-text/30">{m.company} · {m.context}</span>
-                      </div>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
-                        lock ? "bg-text/5 text-text/30"
-                        : FREE_MODEL_IDS.has(m.id) ? "bg-teal-light text-teal"
-                        : MINI_MODEL_IDS.has(m.id) ? "bg-blue-100 text-blue-600"
-                        : "bg-accent/10 text-accent"
-                      }`}>
-                        {lock ? lock.tier : FREE_MODEL_IDS.has(m.id) ? "Бесплатно" : MINI_MODEL_IDS.has(m.id) ? "Start" : "Pro"}
-                      </span>
-                    </button>
-                  );
-                });
-              })()}
-            </div>
-          </div>
+          </>
         )}
-        {modelPickerOpen && <div className="fixed inset-0 z-[44] bg-black/30 backdrop-blur-sm" onClick={() => { setModelPickerOpen(false); setModelSearch(""); }} />}
 
         {/* Category tabs moved to sidebar */}
 
