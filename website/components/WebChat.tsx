@@ -268,6 +268,8 @@ function Sidebar({
   onRenameSession,
   onShareSession,
   plan,
+  activeCategory,
+  onCategoryChange,
 }: {
   open: boolean;
   onToggle: () => void;
@@ -279,6 +281,8 @@ function Sidebar({
   onRenameSession: (id: number, title: string) => void;
   onShareSession: (id: number) => void;
   plan?: string;
+  activeCategory: string;
+  onCategoryChange: (id: string) => void;
 }) {
   const [sidebarSearch, setSidebarSearch] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -347,6 +351,33 @@ function Sidebar({
             />
           </div>
         )}
+
+        {/* Category filter — in sidebar */}
+        <div className="px-3 pb-2 shrink-0 border-b border-text/[0.06]">
+          <div className="flex flex-col gap-0.5">
+            {[
+              { id: "all", icon: "💬", label: "Все чаты" },
+              { id: "free", icon: "✨", label: "Бесплатные" },
+              { id: "image", icon: "🎨", label: "Картинки" },
+              { id: "video", icon: "🎬", label: "Видео" },
+            ].map((t) => (
+              <button
+                key={t.id}
+                onClick={() => {
+                  onCategoryChange(t.id);
+                }}
+                className={`flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-semibold transition-colors ${
+                  activeCategory === t.id
+                    ? "bg-accent/10 text-accent"
+                    : "text-text/40 hover:text-text/60 hover:bg-text/[0.04]"
+                }`}
+              >
+                <span>{t.icon}</span>
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* Chat sessions list */}
         <div className="flex-1 overflow-y-auto px-2">
@@ -1374,6 +1405,19 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         onRenameSession={renameSession}
         onShareSession={shareSession}
         plan={limits?.plan}
+        activeCategory={modelCatFilter}
+        onCategoryChange={(id) => {
+          if (modelCatFilter !== id) {
+            tabMessagesRef.current[modelCatFilter] = messages;
+            tabSessionRef.current[modelCatFilter] = activeSessionId;
+            const savedMessages = tabMessagesRef.current[id] || [];
+            const savedSession = tabSessionRef.current[id] ?? null;
+            setModelCatFilter(id);
+            setActiveSessionId(savedSession);
+            setMessages(savedMessages);
+            if (id === "health" || id === "free") setSelectedModel("gpt-4o-mini");
+          }
+        }}
       />
 
       {/* Main chat area */}
@@ -1399,15 +1443,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
               >
                 {aiLetter}
               </div>
-              <button
-                onClick={() => setModelPickerOpen(!modelPickerOpen)}
-                className="flex items-center gap-1 bg-transparent font-bold text-[13px] sm:text-sm text-text cursor-pointer focus:outline-none min-w-0 max-w-[140px] sm:max-w-[220px] truncate"
-              >
-                {model?.name || "Модель"}
-                <svg className="w-3 h-3 text-text/30 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" d="M6 9l6 6 6-6" />
-                </svg>
-              </button>
+              <span className="text-xs text-text/40 font-medium truncate max-w-[140px] sm:max-w-[220px]">{model?.name || "AI Чат"}</span>
               <span className={`text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
                 FREE_MODEL_IDS.has(selectedModel) ? "bg-teal-light text-teal" : MINI_MODEL_IDS.has(selectedModel) ? "bg-blue-100 text-blue-700" : "bg-accent/10 text-accent"
               }`}>
@@ -1472,7 +1508,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
         {/* Model Picker Panel */}
         {modelPickerOpen && (
-          <div className="absolute top-14 left-0 right-0 z-[45] bg-bg border-b border-text/10 shadow-lg max-h-[50vh] sm:max-h-[60vh] flex flex-col">
+          <div className="absolute bottom-16 left-0 right-0 z-[45] bg-bg border-t border-text/10 shadow-lg max-h-[50vh] sm:max-h-[60vh] flex flex-col rounded-t-xl">
             <div className="p-3 border-b border-text/5 shrink-0">
               <input type="text" value={modelSearch} onChange={(e) => setModelSearch(e.target.value)}
                 placeholder="Поиск модели..." autoFocus
@@ -1519,39 +1555,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         )}
         {modelPickerOpen && <div className="fixed inset-0 z-[44]" onClick={() => { setModelPickerOpen(false); setModelSearch(""); }} />}
 
-        {/* Category tabs */}
-        <div className="flex px-3 sm:px-4 border-b border-text/[0.04] bg-bg/50 shrink-0">
-          {[
-            { id: "all", icon: "💬", label: "Чаты" },
-            { id: "free", icon: "✨", label: "Бесплатно" },
-            { id: "image", icon: "🎨", label: "Фото" },
-            { id: "video", icon: "🎬", label: "Видео" },
-          ].map((t) => (
-            <button
-              key={t.id}
-              onClick={() => {
-                if (modelCatFilter !== t.id) {
-                  // Save current tab state
-                  tabMessagesRef.current[modelCatFilter] = messages;
-                  tabSessionRef.current[modelCatFilter] = activeSessionId;
-                  // Restore target tab state
-                  const savedMessages = tabMessagesRef.current[t.id] || [];
-                  const savedSession = tabSessionRef.current[t.id] ?? null;
-                  setModelCatFilter(t.id);
-                  setActiveSessionId(savedSession);
-                  setMessages(savedMessages);
-                  if (t.id === "health" || t.id === "free") setSelectedModel("gpt-4o-mini");
-                }
-              }}
-              className={`flex-1 flex items-center justify-center gap-1 px-1 sm:px-2.5 py-1.5 text-[10px] sm:text-[11px] font-semibold whitespace-nowrap transition-colors border-b-2 ${
-                modelCatFilter === t.id ? "text-accent border-accent" : "text-text/30 border-transparent hover:text-text/50"
-              }`}
-            >
-              <span className="text-xs">{t.icon}</span>
-              {t.label}
-            </button>
-          ))}
-        </div>
+        {/* Category tabs moved to sidebar */}
 
         {/* Quick model chips */}
         <div className="border-b border-text/[0.04] bg-bg/50 shrink-0">
@@ -1930,6 +1934,18 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
               >
                 <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                </svg>
+              </button>
+
+              {/* Model selector — compact */}
+              <button
+                onClick={() => setModelPickerOpen(!modelPickerOpen)}
+                className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-text/[0.04] hover:bg-text/[0.08] text-[11px] font-semibold text-text/60 transition-colors max-w-[120px]"
+                title={model?.name}
+              >
+                <span className="truncate">{model?.name?.split(" ").slice(0, 2).join(" ") || "Модель"}</span>
+                <svg className="w-3 h-3 shrink-0 text-text/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
 
