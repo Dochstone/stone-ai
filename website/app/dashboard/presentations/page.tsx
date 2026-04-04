@@ -551,7 +551,7 @@ export default function PresentationsPage() {
                 Генерация...
               </span>
             ) : (
-              "Сгенерировать (38\u20BD)"
+              "Сгенерировать (40\u20BD)"
             )}
           </button>
         </div>

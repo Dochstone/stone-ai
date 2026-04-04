@@ -24,8 +24,8 @@ router = APIRouter(prefix="/api/photo-session", tags=["photo-session"])
 
 # ─── Costs (USD, approx RUB / 95) ───
 
-COST_BACKGROUND = 0.126    # ~12 RUB
-COST_ON_MODEL = 0.40       # ~38 RUB
+COST_BACKGROUND = 0.158    # ~15 RUB
+COST_ON_MODEL = 0.421      # ~40 RUB
 COST_MARKETPLACE = 0.21    # ~20 RUB
 
 DEFAULT_IMAGE_MODEL = "gpt-image-1"

@@ -22,7 +22,7 @@ from app.services.ai_router import get_openrouter_model, DEFAULT_MODEL
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/presentations", tags=["presentations"])
 
-COST_USD = 0.40  # ~38 RUB / 95
+COST_USD = 0.421  # ~40 RUB / 95
 
 
 # ─── Schemas ───

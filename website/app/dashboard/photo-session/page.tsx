@@ -24,8 +24,8 @@ interface MarketplaceOption {
 }
 
 const TABS: { id: Tab; label: string; price: number }[] = [
-  { id: "background", label: "Смена фона", price: 12 },
-  { id: "model", label: "На модели", price: 38 },
+  { id: "background", label: "Смена фона", price: 15 },
+  { id: "model", label: "На модели", price: 40 },
   { id: "marketplace", label: "Маркетплейс", price: 20 },
 ];
 

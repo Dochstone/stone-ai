@@ -161,7 +161,7 @@ export default function TemplatesPage() {
                     ))}
                     {(tpl.variables?.length || 0) > 3 && <span className="text-[9px] text-text/20">+{(tpl.variables?.length || 0) - 3}</span>}
                   </div>
-                  <span className="text-[10px] text-text/25">{tpl.cost_rub || 8}₽</span>
+                  <span className="text-[10px] text-text/25">{tpl.cost_rub || 10}₽</span>
                 </div>
               </button>
             ))}
@@ -221,7 +221,7 @@ export default function TemplatesPage() {
                 disabled={generating}
                 className="w-full py-3 rounded-xl text-sm font-bold text-white bg-accent hover:bg-accent/90 disabled:opacity-50 shadow-md shadow-accent/20 transition-all"
               >
-                {generating ? "Генерация..." : `Сгенерировать · ${selected.cost_rub || 3}₽`}
+                {generating ? "Генерация..." : `Сгенерировать · ${selected.cost_rub || 10}₽`}
               </button>
             </div>
           </div>

@@ -323,7 +323,7 @@ async def migrate_marketplace(db: AsyncSession = Depends(get_db)):
 class DirectGenerateRequest(BaseModel):
     prompt: str
     model_id: str = "gpt-4.1-mini"
-    cost_rub: float = 8.0
+    cost_rub: float = 10.0
 
 
 class WizardGenerateRequest(BaseModel):
@@ -357,7 +357,7 @@ async def wizard_generate(
         prompt = prompt.replace(f"{{{key}}}", val)
 
     # Check balance — cost in rubles, balance in USD
-    cost_rub = tpl.cost_rub or 8.0
+    cost_rub = tpl.cost_rub or 10.0
     cost_usd = cost_rub / 95.0  # approximate rate
 
     # Expensive models cost 3x
