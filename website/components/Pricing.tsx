@@ -9,11 +9,11 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.
 
 const plans = [
   {
-    id: "free", name: "Free", price: "0₽", oldPrice: "", priceNum: 0, premium: false, period: "", desc: "Для знакомства",
+    id: "free", name: "Pay-per-Use", price: "от 2₽", oldPrice: "", priceNum: 0, premium: false, period: "/запрос", desc: "Без подписки",
     badge: null, accent: false,
-    features: ["7 моделей (GPT-4o mini, Gemini Flash, Claude Haiku)", "15 запросов в день", "2 картинки в день", "Сохранение истории чатов"],
-    locked: ["Премиум модели (GPT-5, Claude Opus)", "Генерация видео, аудио, 3D", "Голосовой ассистент"],
-    cta: "Начать бесплатно", icon: "🆓", color: "#14B8A6", img: "/plan-free.jpg?v=2",
+    features: ["15 бесплатных чат-запросов/день", "AI-шаблоны от 3₽", "SEO-статьи от 5₽", "AI-презентации от 15₽", "Фотосессия товаров от 5₽", "Пополнение от 100₽"],
+    locked: [],
+    cta: "Пополнить баланс", icon: "💰", color: "#14B8A6", img: "",
   },
   {
     id: "mini", name: "Start", price: "390₽", oldPrice: "590₽", priceNum: 390, premium: false, period: "/мес", desc: "20+ моделей",
@@ -178,10 +178,11 @@ export default function Pricing() {
   };
 
   const openPlan = (plan: typeof plans[0]) => {
-    if (plan.id === "free") { window.location.href = "/webchat"; return; }
     const auth = getAuth();
-    if (!auth) { window.location.href = "/webchat"; return; }
+    if (!auth && plan.id !== "free") { window.location.href = "/webchat"; return; }
     setModal(plan);
+    setTopupMode(plan.id === "free");
+    setPayExpanded(false);
     setResult(null);
     setPromoResult(null);
     setPromo("");
@@ -542,6 +543,39 @@ export default function Pricing() {
 
                 {/* Payment section */}
                 <div className="px-6 pb-5 pt-2">
+
+                  {modal.id === "free" ? (
+                    /* ═══ Pay-per-Use: top-up only ═══ */
+                    <div style={{ animation: "pricingStagger 0.4s ease both 0.35s" }}>
+                      <p className="text-[10px] text-text/30 font-semibold uppercase tracking-wider mb-2">Пополнить баланс</p>
+                      <p className="text-xs text-text/40 mb-4">Платите только за инструменты: шаблоны, презентации, фотосессия, SEO. Без ежемесячной подписки.</p>
+                      <div className="flex gap-2 mb-3">
+                        {[100, 300, 500, 1000].map((amt) => (
+                          <button
+                            key={amt}
+                            onClick={() => setTopupAmount(amt)}
+                            className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                              topupAmount === amt ? "bg-teal text-white shadow-sm" : "bg-text/[0.04] text-text/50 hover:bg-text/[0.08]"
+                            }`}
+                          >
+                            {amt}₽
+                          </button>
+                        ))}
+                      </div>
+                      <button
+                        onClick={() => payTopup(topupAmount)}
+                        disabled={loading}
+                        className="w-full py-3.5 rounded-2xl font-bold text-[15px] text-white bg-teal hover:bg-teal/90 disabled:opacity-50 transition-all shadow-md shadow-teal/20"
+                      >
+                        {loading ? "Создание платежа..." : `Пополнить ${topupAmount}₽`}
+                      </button>
+                      <p className="text-[10px] text-text/25 text-center mt-2">Карта РФ · Мир · Visa · MC · СБП</p>
+                      {result && (
+                        <p className={`text-center text-xs font-medium mt-3 ${result.ok ? "text-teal" : "text-red-500"}`}>{result.message}</p>
+                      )}
+                    </div>
+                  ) : (
+                  <>
                   {/* Promo code */}
                   <div className="mb-3" style={{ animation: "pricingStagger 0.4s ease both 0.35s" }}>
                     <div className="flex gap-2">
@@ -681,6 +715,8 @@ export default function Pricing() {
                     <p className={`text-center text-xs font-medium mt-2 ${result.ok ? "text-teal" : "text-red-500"}`}>
                       {result.message}
                     </p>
+                  )}
+                  </>
                   )}
                 </div>
               </div>
