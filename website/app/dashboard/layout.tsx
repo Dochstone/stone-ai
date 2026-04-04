@@ -56,6 +56,7 @@ function NavIcon({ d }: { d: string }) {
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarHover, setSidebarHover] = useState(false);
   const [authEmail, setAuthEmail] = useState<string | null>(null);
   const [showTour, setShowTour] = useState(false);
   const [chatLoaded, setChatLoaded] = useState(false);
@@ -92,16 +93,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex items-center justify-between px-4 h-12">
           {isChat ? (
             <>
+              <Link
+                href="/dashboard"
+                className="text-sm font-semibold text-text/50 flex items-center gap-1 hover:text-accent transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+                Панель
+              </Link>
+              <span className="text-sm font-bold text-text">AI Чат</span>
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="text-sm font-semibold text-text/70 flex items-center gap-2"
+                className="text-text/40 hover:text-text/70 transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
-              <span className="text-sm font-bold text-text">AI Чат</span>
-              <div className="w-5" />
             </>
           ) : (
             <>
@@ -136,17 +145,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           className={`
             fixed lg:sticky top-14 md:top-16 z-40 lg:z-0
             h-[calc(100vh-56px)] md:h-[calc(100vh-64px)]
-            ${isChat ? "w-64 lg:w-12" : "w-64"} shrink-0
-            bg-bg lg:bg-transparent
+            ${isChat ? (sidebarHover ? "w-64 lg:w-64" : "w-64 lg:w-12") : "w-64"} shrink-0
+            bg-bg ${isChat && sidebarHover ? "lg:shadow-xl lg:shadow-black/10" : "lg:bg-transparent"}
             border-r border-text/5
             overflow-y-auto overscroll-contain
             transition-all duration-200 ease-out
             ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
           `}
+          onMouseEnter={() => { if (isChat) setSidebarHover(true); }}
+          onMouseLeave={() => { if (isChat) setSidebarHover(false); }}
         >
-          <nav className={`${isChat ? "p-4 lg:p-1.5 space-y-6 lg:space-y-1" : "p-4 space-y-6"}`}>
+          <nav className={`${isChat ? (sidebarHover ? "p-4 space-y-6" : "p-4 lg:p-1.5 space-y-6 lg:space-y-1") : "p-4 space-y-6"}`}>
             {/* User card */}
-            {authEmail && !isChat && (
+            {authEmail && (!isChat || sidebarHover) && (
               <Link
                 href="/profile"
                 className="flex items-center gap-3 p-3 rounded-xl bg-text/[0.03] hover:bg-text/[0.06] border border-text/5 transition-colors"
@@ -169,8 +180,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {/* Nav groups */}
             {NAV_ITEMS.map((group) => (
               <div key={group.group}>
-                {(!isChat || (isChat && typeof window !== "undefined" && window.innerWidth < 1024)) && (
-                  <div className={`text-[10px] font-bold text-text/30 uppercase tracking-[1.5px] px-3 mb-2 ${isChat ? "lg:hidden" : ""}`}>
+                {(!isChat || sidebarHover) && (
+                  <div className={`text-[10px] font-bold text-text/30 uppercase tracking-[1.5px] px-3 mb-2 ${isChat && !sidebarHover ? "lg:hidden" : ""}`}>
                     {group.group}
                   </div>
                 )}
@@ -178,31 +189,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   {group.items.map((item) => {
                     const active = isActive(item.href);
                     return isChat ? (
-                      <>
-                        {/* Desktop: icon only */}
+                      sidebarHover ? (
                         <Link
-                          key={item.href + "-lg"}
+                          key={item.href}
                           href={item.href}
-                          title={item.label}
-                          onClick={() => setSidebarOpen(false)}
+                          onClick={() => { setSidebarOpen(false); setSidebarHover(false); }}
                           className={`
-                            hidden lg:flex items-center justify-center p-2 rounded-lg
-                            transition-all duration-150
-                            ${active
-                              ? "bg-accent/10 text-accent"
-                              : "text-text/50 hover:text-text/80 hover:bg-text/[0.04]"
-                            }
-                          `}
-                        >
-                          <NavIcon d={item.icon} />
-                        </Link>
-                        {/* Mobile: full with text */}
-                        <Link
-                          key={item.href + "-sm"}
-                          href={item.href}
-                          onClick={() => setSidebarOpen(false)}
-                          className={`
-                            flex lg:hidden items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+                            flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
                             transition-all duration-150
                             ${active
                               ? "bg-accent/10 text-accent font-semibold"
@@ -213,7 +206,44 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                           <NavIcon d={item.icon} />
                           <span className="truncate">{item.label}</span>
                         </Link>
-                      </>
+                      ) : (
+                        <>
+                          {/* Desktop: icon only */}
+                          <Link
+                            key={item.href + "-lg"}
+                            href={item.href}
+                            title={item.label}
+                            onClick={() => setSidebarOpen(false)}
+                            className={`
+                              hidden lg:flex items-center justify-center p-2 rounded-lg
+                              transition-all duration-150
+                              ${active
+                                ? "bg-accent/10 text-accent"
+                                : "text-text/50 hover:text-text/80 hover:bg-text/[0.04]"
+                              }
+                            `}
+                          >
+                            <NavIcon d={item.icon} />
+                          </Link>
+                          {/* Mobile: full with text */}
+                          <Link
+                            key={item.href + "-sm"}
+                            href={item.href}
+                            onClick={() => setSidebarOpen(false)}
+                            className={`
+                              flex lg:hidden items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+                              transition-all duration-150
+                              ${active
+                                ? "bg-accent/10 text-accent font-semibold"
+                                : "text-text/50 hover:text-text/80 hover:bg-text/[0.04]"
+                              }
+                            `}
+                          >
+                            <NavIcon d={item.icon} />
+                            <span className="truncate">{item.label}</span>
+                          </Link>
+                        </>
+                      )
                     ) : (
                       <Link
                         key={item.href}
@@ -245,8 +275,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             ))}
 
             {/* Quick actions */}
-            {isChat ? (
-              <div className="border-t border-text/5 pt-2">
+            {isChat && !sidebarHover ? (
+              <div className="border-t border-text/5 pt-2 hidden lg:block">
                 <Link
                   href="/dashboard/chat"
                   title="AI Чат"
