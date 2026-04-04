@@ -1461,12 +1461,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
               >
                 {aiLetter}
               </div>
-              <span className="text-xs text-text/40 font-medium truncate max-w-[140px] sm:max-w-[220px]">{model?.name || "AI Чат"}</span>
-              <span className={`text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
-                FREE_MODEL_IDS.has(selectedModel) ? "bg-teal-light text-teal" : MINI_MODEL_IDS.has(selectedModel) ? "bg-blue-100 text-blue-700" : "bg-accent/10 text-accent"
-              }`}>
-                {model?.context || ""}
-              </span>
+              <span className="text-xs text-text/40 font-medium">AI Чат</span>
             </div>
           </div>
 
