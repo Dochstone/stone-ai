@@ -323,7 +323,7 @@ async def migrate_marketplace(db: AsyncSession = Depends(get_db)):
 class DirectGenerateRequest(BaseModel):
     prompt: str
     model_id: str = "gpt-4.1-mini"
-    cost_rub: float = 3.0
+    cost_rub: float = 8.0
 
 
 class WizardGenerateRequest(BaseModel):
@@ -357,8 +357,14 @@ async def wizard_generate(
         prompt = prompt.replace(f"{{{key}}}", val)
 
     # Check balance — cost in rubles, balance in USD
-    cost_rub = tpl.cost_rub or 3.0
+    cost_rub = tpl.cost_rub or 8.0
     cost_usd = cost_rub / 95.0  # approximate rate
+
+    # Expensive models cost 3x
+    EXPENSIVE_MODELS = {"gpt-4.1", "claude-sonnet-4", "claude-sonnet-4.5", "deepseek-r1"}
+    if body.model_id in EXPENSIVE_MODELS:
+        cost_rub *= 3
+        cost_usd = cost_rub / 95.0
 
     if db_id:
         u_result = await db.execute(select(User).where(User.id == db_id))
@@ -435,7 +441,11 @@ async def direct_generate(
 
     tg_id = user["id"]
     db_id = user.get("db_id")
-    cost_usd = body.cost_rub / 95.0
+
+    # Expensive models cost 3x
+    EXPENSIVE_MODELS = {"gpt-4.1", "claude-sonnet-4", "claude-sonnet-4.5", "deepseek-r1"}
+    actual_cost_rub = body.cost_rub * 3 if body.model_id in EXPENSIVE_MODELS else body.cost_rub
+    cost_usd = actual_cost_rub / 95.0
 
     if db_id:
         u_result = await db.execute(select(User).where(User.id == db_id))
@@ -449,7 +459,7 @@ async def direct_generate(
     if tier == "free" and balance < cost_usd:
         raise HTTPException(402, {
             "error": "insufficient_balance",
-            "message": f"Недостаточно средств. Нужно ~{body.cost_rub:.0f}₽",
+            "message": f"Недостаточно средств. Нужно ~{actual_cost_rub:.0f}₽",
             "balance_rub": round(balance * 95, 2),
         })
 
@@ -478,7 +488,7 @@ async def direct_generate(
         await db.commit()
 
     new_balance = max(0, balance - cost_usd)
-    return {"result": full_response, "model": body.model_id, "cost_rub": body.cost_rub, "balance_rub": round(new_balance * 95, 2)}
+    return {"result": full_response, "model": body.model_id, "cost_rub": actual_cost_rub, "balance_rub": round(new_balance * 95, 2)}
 
 
 # ─── Seed: 50 curated prompts ───

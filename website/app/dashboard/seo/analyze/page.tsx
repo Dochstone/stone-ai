@@ -43,7 +43,7 @@ ${text}
       const res = await fetch(`${API_URL}/api/generate/direct`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
-        body: JSON.stringify({ prompt, model_id: "gpt-4.1-mini", cost_rub: 3.0 }),
+        body: JSON.stringify({ prompt, model_id: "gpt-4.1-mini", cost_rub: 8.0 }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.detail?.message || data.detail || "Ошибка"); }
@@ -77,7 +77,7 @@ ${text}
             </div>
             <button onClick={analyze} disabled={loading || text.length < 100}
               className="w-full mt-3 py-3 rounded-xl text-sm font-bold text-white bg-accent hover:bg-accent/90 disabled:opacity-40 shadow-md shadow-accent/20">
-              {loading ? "Анализ..." : "Анализировать · 3₽"}
+              {loading ? "Анализ..." : "Анализировать · 8₽"}
             </button>
           </div>
 

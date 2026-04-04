@@ -9,9 +9,9 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.
 
 const plans = [
   {
-    id: "free", name: "Pay-per-Use", price: "от 2₽", oldPrice: "", priceNum: 0, premium: false, period: "/запрос", desc: "Без подписки",
+    id: "free", name: "Pay-per-Use", price: "от 5₽", oldPrice: "", priceNum: 0, premium: false, period: "/запрос", desc: "Без подписки",
     badge: null, accent: false,
-    features: ["15 бесплатных чат-запросов/день", "AI-шаблоны от 3₽", "SEO-статьи от 5₽", "AI-презентации от 15₽", "Фотосессия товаров от 5₽", "Пополнение от 100₽"],
+    features: ["15 бесплатных чат-запросов/день", "AI-шаблоны от 8₽", "SEO-статьи от 12₽", "AI-презентации от 38₽", "Фотосессия товаров от 12₽", "Пополнение от 100₽"],
     locked: [],
     cta: "Пополнить баланс", icon: "💰", color: "#14B8A6", img: "",
   },

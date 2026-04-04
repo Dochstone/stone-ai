@@ -47,7 +47,7 @@ export default function SEOArticlePage() {
       const res = await fetch(`${API_URL}/api/generate/direct`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
-        body: JSON.stringify({ prompt, model_id: model, cost_rub: 5.0 }),
+        body: JSON.stringify({ prompt, model_id: model, cost_rub: 12.0 }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.detail?.message || data.detail || "Ошибка"); }
@@ -102,7 +102,7 @@ export default function SEOArticlePage() {
             {error && <p className="text-xs text-red-500">{error}</p>}
             <button onClick={generate} disabled={loading || !topic.trim()}
               className="w-full py-3 rounded-xl text-sm font-bold text-white bg-accent hover:bg-accent/90 disabled:opacity-40 shadow-md shadow-accent/20">
-              {loading ? "Генерация..." : "Сгенерировать · 5₽"}
+              {loading ? "Генерация..." : "Сгенерировать · 12₽"}
             </button>
             {cost && <p className="text-[10px] text-text/25 text-center">Списано {cost.cost}₽ · Баланс: {cost.balance}₽</p>}
           </div>

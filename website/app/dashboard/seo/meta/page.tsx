@@ -46,7 +46,7 @@ export default function SEOMetaPage() {
       const res = await fetch(`${API_URL}/api/generate/direct`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
-        body: JSON.stringify({ prompt, model_id: "gpt-4.1-mini", cost_rub: 2.0 }),
+        body: JSON.stringify({ prompt, model_id: "gpt-4.1-mini", cost_rub: 5.0 }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.detail?.message || data.detail || "Ошибка"); }
@@ -77,7 +77,7 @@ export default function SEOMetaPage() {
           {error && <p className="text-xs text-red-500">{error}</p>}
           <button onClick={generate} disabled={loading || !input.trim()}
             className="w-full py-3 rounded-xl text-sm font-bold text-white bg-accent hover:bg-accent/90 disabled:opacity-40 shadow-md shadow-accent/20">
-            {loading ? "Генерация..." : "Сгенерировать мета-теги · 2₽"}
+            {loading ? "Генерация..." : "Сгенерировать мета-теги · 5₽"}
           </button>
         </div>
 

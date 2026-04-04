@@ -161,7 +161,7 @@ export default function TemplatesPage() {
                     ))}
                     {(tpl.variables?.length || 0) > 3 && <span className="text-[9px] text-text/20">+{(tpl.variables?.length || 0) - 3}</span>}
                   </div>
-                  <span className="text-[10px] text-text/25">{tpl.cost_rub || 3}₽</span>
+                  <span className="text-[10px] text-text/25">{tpl.cost_rub || 8}₽</span>
                 </div>
               </button>
             ))}
