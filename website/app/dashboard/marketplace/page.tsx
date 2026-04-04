@@ -58,6 +58,7 @@ export default function MarketplacePage() {
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<{ text: string; model: string; cost: number; balance: number } | null>(null);
   const [error, setError] = useState("");
+  const [copied, setCopied] = useState(false);
 
   // Publish modal
   const [showPublish, setShowPublish] = useState(false);
@@ -174,7 +175,11 @@ export default function MarketplacePage() {
   };
 
   const copyResult = () => {
-    if (result) navigator.clipboard.writeText(result.text);
+    if (result) {
+      navigator.clipboard.writeText(result.text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   const handlePublish = async () => {
@@ -235,6 +240,19 @@ export default function MarketplacePage() {
     setPubVars(prev => prev.filter((_, i) => i !== index));
   };
 
+  const autoExtractVars = (content: string) => {
+    const matches = content.match(/\{(\w+)\}/g);
+    if (!matches) return;
+    const names = Array.from(new Set(matches.map(m => m.slice(1, -1))));
+    const existingNames = pubVars.map(v => v.name);
+    const newVars = names.filter(n => !existingNames.includes(n)).map(n => ({
+      name: n,
+      label: n.charAt(0).toUpperCase() + n.slice(1).replace(/_/g, " "),
+      placeholder: "",
+    }));
+    if (newVars.length > 0) setPubVars(prev => [...prev, ...newVars]);
+  };
+
   const displayTemplates = tab === "my" ? myTemplates : templates;
 
   return (
@@ -244,7 +262,7 @@ export default function MarketplacePage() {
         <div className="flex items-start justify-between mb-8">
           <div>
             <h1 className="text-xl sm:text-2xl font-extrabold text-text">Маркетплейс шаблонов</h1>
-            <p className="text-sm text-text/40 mt-1">Используйте шаблоны сообщества или опубликуйте свои</p>
+            <p className="text-sm text-text/40 mt-1">{templates.length > 0 ? `${templates.length} шаблонов от сообщества` : "Используйте шаблоны сообщества или опубликуйте свои"}</p>
           </div>
           <button
             onClick={() => setShowPublish(true)}
@@ -256,6 +274,13 @@ export default function MarketplacePage() {
             Опубликовать свой
           </button>
         </div>
+
+        {!getAuth() && (
+          <div className="bg-accent/5 border border-accent/15 rounded-xl p-4 mb-6 flex items-center justify-between">
+            <p className="text-sm text-text/60">Войдите, чтобы публиковать и оценивать шаблоны</p>
+            <a href="/webchat" className="bg-accent text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-accent/90 transition-colors shrink-0">Войти</a>
+          </div>
+        )}
 
         {/* Tabs */}
         <div className="flex gap-1 mb-4 bg-text/[0.04] rounded-xl p-1 w-fit">
@@ -301,16 +326,17 @@ export default function MarketplacePage() {
         {loading && tab !== "my" ? (
           <SkeletonGrid cols={3} count={6} />
         ) : displayTemplates.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-text/20 mb-4">
-              {tab === "my" ? "Вы ещё не опубликовали шаблоны" : "Ничего не найдено"}
+          <div className="text-center py-16 bg-white rounded-2xl border border-text/5">
+            <span className="text-4xl block mb-3">🏪</span>
+            <h3 className="text-base font-bold text-text mb-1">
+              {tab === "my" ? "Вы ещё не опубликовали шаблоны" : "Шаблоны не найдены"}
+            </h3>
+            <p className="text-xs text-text/40 mb-4">
+              {tab === "my" ? "Создайте первый шаблон и поделитесь с сообществом" : "Попробуйте изменить фильтры или поиск"}
             </p>
             {tab === "my" && (
-              <button
-                onClick={() => setShowPublish(true)}
-                className="text-sm font-semibold text-accent hover:text-accent/80 transition-colors"
-              >
-                Опубликовать первый шаблон
+              <button onClick={() => setShowPublish(true)} className="bg-accent text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors">
+                Опубликовать шаблон
               </button>
             )}
           </div>
@@ -328,6 +354,15 @@ export default function MarketplacePage() {
                   </span>
                 </div>
                 <p className="text-xs text-text/40 line-clamp-2 mb-3">{tpl.description}</p>
+
+                {tpl.variables && tpl.variables.length > 0 && (
+                  <div className="flex gap-1 flex-wrap mb-3">
+                    {tpl.variables.slice(0, 3).map(v => (
+                      <span key={v.name} className="text-[9px] bg-text/[0.04] text-text/30 px-1.5 py-0.5 rounded">{v.label || v.name}</span>
+                    ))}
+                    {tpl.variables.length > 3 && <span className="text-[9px] text-text/20">+{tpl.variables.length - 3}</span>}
+                  </div>
+                )}
 
                 {/* Author + stats */}
                 <div className="flex items-center gap-3 mb-3 text-[10px] text-text/30">
@@ -469,7 +504,7 @@ export default function MarketplacePage() {
             </div>
             <div className="px-6 pb-5 flex gap-2">
               <button onClick={copyResult} className="flex-1 py-2.5 rounded-xl text-sm font-bold bg-accent text-white hover:bg-accent/90 shadow-md shadow-accent/20">
-                Копировать
+                {copied ? "Скопировано!" : "Копировать"}
               </button>
               <button onClick={() => setResult(null)} className="px-5 py-2.5 rounded-xl text-sm font-semibold border border-text/10 text-text/50 hover:text-text/70">
                 Ещё раз
@@ -531,7 +566,7 @@ export default function MarketplacePage() {
                   <span className="font-normal text-text/30 ml-1">используйте {"{переменная}"} для подстановки</span>
                 </label>
                 <textarea
-                  value={pubContent} onChange={e => setPubContent(e.target.value)}
+                  value={pubContent} onChange={e => { setPubContent(e.target.value); autoExtractVars(e.target.value); }}
                   placeholder={"Напиши 5 идей для стартапа в нише {niche}.\nЦА: {audience}.\nБюджет: {budget}."}
                   rows={5}
                   className="w-full bg-text/[0.04] border border-text/[0.08] rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 placeholder:text-text/20 resize-none font-mono"
