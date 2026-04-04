@@ -178,50 +178,50 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         >
           <nav className={`flex-1 overflow-y-auto overscroll-contain ${isChat ? (sidebarHover ? "p-3 space-y-4" : "p-3 lg:p-1.5 space-y-4 lg:space-y-1") : "p-3 space-y-4"}`}>
 
-            {/* ═══ Chat mode: categories + navigation ═══ */}
+            {/* ═══ Chat mode collapsed: icons with hover labels ═══ */}
             {isChat && !sidebarHover && (
-              <div className="hidden lg:flex flex-col items-center space-y-1">
-                {/* AI Mode categories — gradient accent background for active */}
-                <div className="w-full space-y-0.5 pb-2">
-                  {CHAT_CATEGORIES.map((c) => (
-                    <button
-                      key={c.id}
-                      onClick={() => setChatCategory(c.id)}
-                      title={c.label}
-                      aria-label={c.label}
-                      className={`w-full flex items-center justify-center p-2.5 rounded-xl transition-all duration-200 ${
-                        chatCategory === c.id
-                          ? "bg-gradient-to-r from-accent/15 to-teal/10 text-accent shadow-sm shadow-accent/5 scale-105"
-                          : "text-text/30 hover:text-text/60 hover:bg-text/[0.06]"
-                      }`}
-                    >
-                      <span className="text-base">{c.icon}</span>
-                    </button>
-                  ))}
-                </div>
+              <div className="hidden lg:flex flex-col space-y-0.5">
+                {/* AI categories */}
+                {CHAT_CATEGORIES.map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => setChatCategory(c.id)}
+                    aria-label={c.label}
+                    className={`group relative w-full flex items-center justify-center p-2.5 rounded-xl transition-all duration-150 ${
+                      chatCategory === c.id
+                        ? "bg-accent/10 text-accent"
+                        : "text-text/25 hover:text-text/60 hover:bg-text/[0.05]"
+                    }`}
+                  >
+                    <span className="text-[15px]">{c.icon}</span>
+                    <span className="absolute left-full ml-2 px-2.5 py-1 rounded-lg bg-dark text-white text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-lg z-50">
+                      {c.label}
+                    </span>
+                  </button>
+                ))}
 
-                {/* Divider with dot */}
-                <div className="flex flex-col items-center gap-1 py-1">
-                  <div className="w-5 h-px bg-text/10" />
-                  <div className="w-1.5 h-1.5 rounded-full bg-text/10" />
-                  <div className="w-5 h-px bg-text/10" />
-                </div>
+                {/* Divider */}
+                <div className="mx-auto w-6 h-px bg-text/[0.08] my-1.5" />
 
-                {/* Tools — smaller, muted icons */}
-                <div className="w-full space-y-0.5 pt-1">
-                  {NAV_ITEMS.flatMap(g => g.items).filter(i => i.href !== "/dashboard/chat").slice(0, 5).map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      title={item.label}
-                      aria-label={item.label}
-                      onClick={() => setSidebarOpen(false)}
-                      className="w-full flex items-center justify-center p-2 rounded-lg text-text/20 hover:text-text/50 hover:bg-text/[0.04] transition-all"
-                    >
-                      <NavIcon d={item.icon} />
-                    </Link>
-                  ))}
-                </div>
+                {/* Tools */}
+                {NAV_ITEMS.flatMap(g => g.items).filter(i => i.href !== "/dashboard/chat").slice(0, 6).map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    aria-label={item.label}
+                    onClick={() => setSidebarOpen(false)}
+                    className={`group relative w-full flex items-center justify-center p-2 rounded-lg transition-all duration-150 ${
+                      isActive(item.href)
+                        ? "text-accent bg-accent/5"
+                        : "text-text/15 hover:text-text/40 hover:bg-text/[0.04]"
+                    }`}
+                  >
+                    <NavIcon d={item.icon} />
+                    <span className="absolute left-full ml-2 px-2.5 py-1 rounded-lg bg-dark text-white text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-lg z-50">
+                      {item.label}
+                    </span>
+                  </Link>
+                ))}
               </div>
             )}
 
