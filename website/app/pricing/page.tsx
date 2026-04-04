@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Pricing from "@/components/Pricing";
+import ModelComparison from "@/components/ModelComparison";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
 
@@ -82,6 +83,9 @@ export default function PricingPage() {
 
       {/* Pricing cards */}
       <Pricing />
+
+      {/* Model quality comparison */}
+      <ModelComparison />
 
       {/* Payment methods — between cards and comparison */}
       <div className="max-w-4xl mx-auto px-4 mt-12 mb-16">

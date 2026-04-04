@@ -1,4 +1,5 @@
 import Hero from "@/components/Hero";
+import PopularTasks from "@/components/PopularTasks";
 import PromoBanner from "@/components/PromoBanner";
 import ToolCards from "@/components/ToolCards";
 import ProductScreenshot from "@/components/ProductScreenshot";
@@ -30,6 +31,7 @@ export default function Home() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <ModelViewerScript />
       <Hero />
+      <PopularTasks />
       <PromoBanner />
       <ToolCards />
       <ProductScreenshot />
