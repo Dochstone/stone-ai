@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { SkeletonGrid } from "@/components/Skeleton";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
+import { getAuth, API_URL } from "@/lib/auth";
 
 interface Gen {
   id: string; type: string; model: string; prompt: string;
@@ -43,10 +42,6 @@ export default function GalleryPage() {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Gen | null>(null);
   const loaderRef = useRef<HTMLDivElement>(null);
-
-  const getAuth = () => {
-    try { const s = localStorage.getItem("stone_auth"); return s ? JSON.parse(s) : null; } catch { return null; }
-  };
 
   const fetchGens = useCallback(async (p: number, append: boolean = false) => {
     const auth = getAuth();

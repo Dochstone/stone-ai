@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/Skeleton";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
+import { getAuth, API_URL } from "@/lib/auth";
 
 interface Product { name: string; description: string; price: string }
 interface Project {
@@ -36,10 +35,6 @@ export default function ProjectsPage() {
   const [keywords, setKeywords] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
   const [saving, setSaving] = useState(false);
-
-  const getAuth = () => {
-    try { const s = localStorage.getItem("stone_auth"); return s ? JSON.parse(s) : null; } catch { return null; }
-  };
 
   const fetchProjects = async () => {
     const auth = getAuth();

@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { SkeletonAchievements } from "@/components/Skeleton";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
+import { getAuth, API_URL } from "@/lib/auth";
 
 interface Ach {
   slug: string; title: string; description: string; icon: string;
@@ -31,8 +30,6 @@ export default function AchievementsPage() {
   const [claiming, setClaiming] = useState<string | null>(null);
   const [popup, setPopup] = useState<{ icon: string; title: string; reward: number } | null>(null);
 
-  const getAuth = () => { try { return JSON.parse(localStorage.getItem("stone_auth") || ""); } catch { return null; } };
-
   const fetchAchs = () => {
     const auth = getAuth();
     if (!auth?.token) { setLoading(false); return; }
@@ -43,7 +40,7 @@ export default function AchievementsPage() {
         setTotal(data.total || 0);
         setCompleted(data.completed || 0);
       })
-      .catch(() => {})
+      .catch((e) => { console.error("Failed to load achievements:", e); })
       .finally(() => setLoading(false));
   };
 

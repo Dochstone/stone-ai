@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { SkeletonGrid } from "@/components/Skeleton";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
+import { getAuth, API_URL } from "@/lib/auth";
+import { CHAT_MODELS, CATEGORIES, CAT_COLORS } from "@/lib/models-config";
 
 interface Variable { name: string; label: string; placeholder: string }
 interface MarketplaceTemplate {
@@ -12,33 +12,6 @@ interface MarketplaceTemplate {
   likes: number; author_name: string | null; author_tg_id: number | null;
   default_model: string | null; cost_rub: number | null; created_at: string | null;
 }
-
-const CATEGORIES = [
-  { id: "all", label: "Все", icon: "📋" },
-  { id: "marketing", label: "Маркетинг", icon: "📊" },
-  { id: "smm", label: "SMM", icon: "📱" },
-  { id: "seo", label: "SEO", icon: "🔍" },
-  { id: "copywriting", label: "Копирайтинг", icon: "✍️" },
-  { id: "code", label: "Код", icon: "💻" },
-  { id: "business", label: "Бизнес", icon: "💼" },
-];
-
-const MODELS = [
-  { id: "gpt-4.1-mini", name: "GPT-4.1 Mini", speed: "Быстрый" },
-  { id: "gpt-4.1", name: "GPT-4.1", speed: "Точный" },
-  { id: "claude-sonnet-4", name: "Claude Sonnet 4", speed: "Креативный" },
-  { id: "deepseek-v3", name: "DeepSeek V3", speed: "Аналитический" },
-  { id: "gemini-2.5-flash", name: "Gemini 2.5 Flash", speed: "Быстрый" },
-];
-
-const CAT_COLORS: Record<string, string> = {
-  marketing: "bg-blue-500/10 text-blue-500 border-blue-500/20",
-  smm: "bg-pink-500/10 text-pink-500 border-pink-500/20",
-  seo: "bg-green-500/10 text-green-500 border-green-500/20",
-  copywriting: "bg-purple-500/10 text-purple-500 border-purple-500/20",
-  code: "bg-cyan-500/10 text-cyan-500 border-cyan-500/20",
-  business: "bg-amber-500/10 text-amber-500 border-amber-500/20",
-};
 
 type Tab = "popular" | "newest" | "my";
 
@@ -72,10 +45,6 @@ export default function MarketplacePage() {
   const [pubVars, setPubVars] = useState<Variable[]>([]);
   const [pubError, setPubError] = useState("");
   const [publishing, setPublishing] = useState(false);
-
-  const getAuth = () => {
-    try { const s = localStorage.getItem("stone_auth"); return s ? JSON.parse(s) : null; } catch { return null; }
-  };
 
   const fetchMarketplace = useCallback(async () => {
     setLoading(true);
@@ -489,7 +458,7 @@ export default function MarketplacePage() {
                 <label className="text-xs font-semibold text-text/60 mb-1 block">Модель AI</label>
                 <select value={modelId} onChange={e => setModelId(e.target.value)}
                   className="w-full bg-text/[0.04] border border-text/[0.08] rounded-xl px-3.5 py-2.5 text-sm focus:outline-none">
-                  {MODELS.map(m => <option key={m.id} value={m.id}>{m.name} — {m.speed}</option>)}
+                  {CHAT_MODELS.map(m => <option key={m.id} value={m.id}>{m.name} — {m.speed}</option>)}
                 </select>
               </div>
 

@@ -1,15 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { getAuth, API_URL } from "@/lib/auth";
+import { CHAT_MODELS } from "@/lib/models-config";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
-
-const MODELS = [
-  { id: "gpt-4.1-mini", name: "GPT-4.1 Mini — быстрый" },
-  { id: "gpt-4.1", name: "GPT-4.1 — точный" },
-  { id: "claude-sonnet-4", name: "Claude Sonnet 4 — креативный" },
-  { id: "deepseek-v3", name: "DeepSeek V3 — аналитический" },
-];
+// TODO: consolidate with CHAT_MODELS — this is a subset with combined name+speed labels
+const MODELS = CHAT_MODELS
+  .filter((m) => m.id !== "gemini-2.5-flash")
+  .map((m) => ({ id: m.id, name: `${m.name} — ${m.speed.toLowerCase()}` }));
 
 export default function SEOArticlePage() {
   const [topic, setTopic] = useState("");
@@ -20,8 +18,6 @@ export default function SEOArticlePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [cost, setCost] = useState<{ cost: number; balance: number } | null>(null);
-
-  const getAuth = () => { try { return JSON.parse(localStorage.getItem("stone_auth") || ""); } catch { return null; } };
 
   const generate = async () => {
     if (!topic.trim()) return;

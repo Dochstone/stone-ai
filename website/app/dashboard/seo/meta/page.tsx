@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
+import { getAuth, API_URL } from "@/lib/auth";
 
 export default function SEOMetaPage() {
   const [input, setInput] = useState("");
@@ -15,8 +14,6 @@ export default function SEOMetaPage() {
   const descMatch = result.match(/description[:\s]*["""«]?([^"""»\n]{30,160})/i);
   const previewTitle = titleMatch?.[1]?.trim() || "";
   const previewDesc = descMatch?.[1]?.trim() || "";
-
-  const getAuth = () => { try { return JSON.parse(localStorage.getItem("stone_auth") || ""); } catch { return null; } };
 
   const generate = async () => {
     if (!input.trim()) return;

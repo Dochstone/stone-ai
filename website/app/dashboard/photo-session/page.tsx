@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { ImageUploader } from "@/components/photo-session/ImageUploader";
 import { BeforeAfterSlider } from "@/components/photo-session/BeforeAfterSlider";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
+import { getAuth, API_URL } from "@/lib/auth";
+import { IMAGE_MODELS } from "@/lib/models-config";
 
 type Tab = "background" | "model" | "marketplace";
 
@@ -29,12 +29,10 @@ const TABS: { id: Tab; label: string; price: number }[] = [
   { id: "marketplace", label: "Маркетплейс", price: 20 },
 ];
 
-const MODELS = [
-  { id: "gpt-image-1", label: "GPT Image (рекомендуется)" },
-  { id: "nano-banana", label: "Nano Banana" },
-  { id: "nano-banana-pro", label: "Nano Banana Pro" },
-  { id: "flux-schnell", label: "Flux Schnell" },
-];
+// Derived from IMAGE_MODELS, with "label" key for local select component and filtered subset
+const MODELS = IMAGE_MODELS
+  .filter((m) => m.id !== "kolors-v3")
+  .map((m) => ({ id: m.id, label: m.name }));
 
 const SCENES = ["Студия", "Улица", "Кафе", "Офис", "На природе"];
 const POSES = ["Стоя", "Сидя", "В движении", "Крупный план"];
@@ -46,15 +44,6 @@ const MARKETPLACES: MarketplaceOption[] = [
   { id: "avito", name: "Avito", width: 1280, height: 960, icon: "🟩" },
   { id: "universal", name: "Универсальный", width: 1200, height: 1200, icon: "⬜" },
 ];
-
-function getAuth() {
-  try {
-    const s = localStorage.getItem("stone_auth");
-    return s ? JSON.parse(s) : null;
-  } catch {
-    return null;
-  }
-}
 
 export default function PhotoSessionPage() {
   const [tab, setTab] = useState<Tab>("background");
@@ -88,7 +77,7 @@ export default function PhotoSessionPage() {
         if (Array.isArray(data)) setPresets(data);
         else if (data.presets) setPresets(data.presets);
       })
-      .catch(() => {});
+      .catch((e) => { console.error("Failed to load presets:", e); });
   }, []);
 
   const clearImage = () => {

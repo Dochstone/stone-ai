@@ -3,16 +3,10 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import Leaderboard from "@/components/games/Leaderboard";
+import { getAuth } from "@/lib/auth";
 
 const SnakeGame = dynamic(() => import("@/components/games/SnakeGame"), { ssr: false });
 const Game2048 = dynamic(() => import("@/components/games/Game2048"), { ssr: false });
-
-function getAuth() {
-  try {
-    const s = localStorage.getItem("stone_auth");
-    return s ? JSON.parse(s) : null;
-  } catch { return null; }
-}
 
 export default function GamesPage() {
   const [activeGame, setActiveGame] = useState<"none" | "snake" | "2048">("none");

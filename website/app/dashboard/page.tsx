@@ -3,10 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Skeleton } from "@/components/Skeleton";
-
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  "https://stone-ai-production.up.railway.app";
+import { getAuth, API_URL } from "@/lib/auth";
 
 interface UserProfile {
   balance_usd: number;
@@ -70,15 +67,6 @@ const QUICK_LINKS = [
   },
 ];
 
-function getAuth() {
-  try {
-    const s = localStorage.getItem("stone_auth");
-    return s ? JSON.parse(s) : null;
-  } catch {
-    return null;
-  }
-}
-
 function formatDate(date: Date): string {
   return date.toLocaleDateString("ru-RU", {
     day: "numeric",
@@ -127,7 +115,7 @@ export default function DashboardPage() {
         return res.json();
       })
       .then((data) => setProfile(data))
-      .catch(() => {})
+      .catch((e) => { console.error("Failed to load profile:", e); })
       .finally(() => setLoadingProfile(false));
 
     fetch(`${API_URL}/api/generations/?limit=4`, { headers })
@@ -139,7 +127,7 @@ export default function DashboardPage() {
         const items = data.generations ?? data.items ?? data.results ?? [];
         setRecentGens(Array.isArray(items) ? items.slice(0, 4) : []);
       })
-      .catch(() => {})
+      .catch((e) => { console.error("Failed to load recent generations:", e); })
       .finally(() => setLoadingGens(false));
   }, []);
 

@@ -4,8 +4,8 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import SlidePreview from "@/components/presentations/SlidePreview";
 import StylePicker from "@/components/presentations/StylePicker";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
+import { getAuth, API_URL } from "@/lib/auth";
+import { CHAT_MODELS, IMAGE_MODELS } from "@/lib/models-config";
 
 interface SlideData {
   title: string;
@@ -24,36 +24,12 @@ interface HistoryItem {
   slides: SlideData[];
 }
 
-const MODELS = [
-  { id: "gpt-4.1-mini", name: "GPT-4.1 Mini" },
-  { id: "gpt-4.1", name: "GPT-4.1" },
-  { id: "claude-sonnet-4", name: "Claude Sonnet 4" },
-  { id: "deepseek-v3", name: "DeepSeek V3" },
-  { id: "gemini-2.5-flash", name: "Gemini 2.5 Flash" },
-];
-
-const IMAGE_MODELS = [
-  { id: "gpt-image-1", name: "GPT Image (рекомендуется)" },
-  { id: "nano-banana", name: "Nano Banana (Gemini)" },
-  { id: "nano-banana-pro", name: "Nano Banana Pro" },
-  { id: "kolors-v3", name: "KOLORS V3 (Kling)" },
-  { id: "flux-schnell", name: "Flux Schnell" },
-];
 
 const DETAIL_LEVELS = [
   { id: "short", label: "Кратко" },
   { id: "medium", label: "Средне" },
   { id: "detailed", label: "Подробно" },
 ];
-
-function getAuth() {
-  try {
-    const s = localStorage.getItem("stone_auth");
-    return s ? JSON.parse(s) : null;
-  } catch {
-    return null;
-  }
-}
 
 export default function PresentationsPage() {
   const [auth, setAuth] = useState<{ token: string; email: string } | null>(null);
@@ -511,7 +487,7 @@ export default function PresentationsPage() {
                 onChange={(e) => setModelId(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border border-text/10 bg-bg text-text focus:outline-none focus:border-accent/50 focus:ring-2 focus:ring-accent/20 transition-all"
               >
-                {MODELS.map((m) => (
+                {CHAT_MODELS.map((m) => (
                   <option key={m.id} value={m.id}>{m.name}</option>
                 ))}
               </select>
