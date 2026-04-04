@@ -1694,7 +1694,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
             </div>
           </div>
         )}
-        {modelPickerOpen && <div className="fixed inset-0 z-[44]" onClick={() => { setModelPickerOpen(false); setModelSearch(""); }} />}
+        {modelPickerOpen && <div className="fixed inset-0 z-[44] bg-black/30 backdrop-blur-sm" onClick={() => { setModelPickerOpen(false); setModelSearch(""); }} />}
 
         {/* Category tabs moved to sidebar */}
 
@@ -1937,7 +1937,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         )}
 
         {/* Input area — pinned bottom */}
-        <div className="border-t border-text/[0.06] bg-bg px-3 sm:px-4 py-2 sm:py-2.5 shrink-0 chat-input-safe shadow-[0_-4px_16px_rgba(0,0,0,0.04)]">
+        <div className="border-t border-text/[0.06] bg-bg px-3 sm:px-4 py-1.5 sm:py-2.5 shrink-0 chat-input-safe shadow-[0_-4px_16px_rgba(0,0,0,0.04)]">
           <div className="max-w-3xl mx-auto">
             {pendingFile && (
               <div className="flex items-center gap-2 mb-2.5 px-3 py-2 bg-bg rounded-xl">
@@ -2012,7 +2012,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                 onChange={handleInputChange}
                 onKeyDown={handleKey}
                 onFocus={() => { setTimeout(() => textareaRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" }), 300); }}
-                placeholder={pendingFile ? "Добавьте вопрос к файлу..." : modelCatFilter === "health" ? "Опишите симптомы или загрузите фото..." : isVideoModel ? "Опишите видео..." : is3DModel ? "Опишите 3D-модель или загрузите фото..." : "Написать сообщение..."}
+                placeholder={pendingFile ? "Вопрос к файлу..." : modelCatFilter === "health" ? "Опишите симптомы..." : isVideoModel ? "Опишите видео..." : is3DModel ? "Опишите 3D..." : "Сообщение..."}
                 rows={1}
                 className="flex-1 bg-transparent resize-none focus:outline-none min-w-0 leading-snug placeholder:text-text/20"
                 style={{ fontSize: 16, padding: "10px 16px", maxHeight: 80, minHeight: 42 }}

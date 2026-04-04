@@ -120,28 +120,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex items-center justify-between px-4 h-12">
           {isChat ? (
             <>
-              <Link
-                href="/dashboard"
-                className="text-sm font-semibold text-text/50 flex items-center gap-1 hover:text-accent transition-colors"
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                aria-label={sidebarOpen ? "Закрыть меню" : "Открыть меню"}
+                className="text-text/40 hover:text-text/70 transition-colors"
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                </svg>
-                Панель
-              </Link>
-              <span className="text-sm font-bold text-text">AI Чат</span>
-              <div className="flex items-center gap-1">
-                <ThemeToggle />
-                <button
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  aria-label={sidebarOpen ? "Закрыть меню" : "Открыть меню"}
-                  className="text-text/40 hover:text-text/70 transition-colors"
-                >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
-              </div>
+              <span className="text-sm font-bold text-text">AI Чат</span>
+              <ThemeToggle />
             </>
           ) : (
             <>
@@ -241,15 +230,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
             {/* Chat categories — full labels for mobile or hover */}
             {isChat && (sidebarHover || true) && (
-              <div className={`${!sidebarHover ? "lg:hidden" : ""} mb-3`}>
-                <div className="text-[9px] font-bold text-accent/50 uppercase tracking-[2px] px-3 mb-2">Режим AI</div>
-                <div className="space-y-0.5">
+              <div className={`${!sidebarHover ? "lg:hidden" : ""} mb-2`}>
+                <div className="text-[9px] font-bold text-accent/50 uppercase tracking-[2px] px-3 mb-1.5">Режим AI</div>
+                <div className="space-y-px">
                   {CHAT_CATEGORIES.map((c) => (
                     <button
                       key={c.id}
                       onClick={() => { setChatCategory(c.id); setSidebarOpen(false); }}
                       aria-label={c.label}
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-medium transition-all ${
                         chatCategory === c.id
                           ? "bg-gradient-to-r from-accent/10 to-teal/5 text-accent font-semibold border border-accent/10"
                           : "text-text/40 hover:text-text/70 hover:bg-text/[0.04]"
@@ -263,7 +252,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </button>
                   ))}
                 </div>
-                <div className="flex items-center gap-2 my-3 px-3">
+                <div className="flex items-center gap-2 my-2 px-3">
                   <div className="flex-1 h-px bg-text/[0.06]" />
                   <span className="text-[8px] text-text/20 font-bold uppercase tracking-widest">Инструменты</span>
                   <div className="flex-1 h-px bg-text/[0.06]" />
@@ -289,7 +278,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                           href={item.href}
                           onClick={() => { setSidebarOpen(false); setSidebarHover(false); }}
                           className={`
-                            flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+                            flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-medium
                             transition-all duration-150
                             ${active
                               ? "bg-accent/10 text-accent font-semibold"
@@ -326,7 +315,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             href={item.href}
                             onClick={() => setSidebarOpen(false)}
                             className={`
-                              flex lg:hidden items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+                              flex lg:hidden items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-medium
                               transition-all duration-150
                               ${active
                                 ? "bg-accent/10 text-accent font-semibold"
@@ -345,7 +334,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         href={item.href}
                         onClick={() => setSidebarOpen(false)}
                         className={`
-                          flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+                          flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-medium
                           transition-all duration-150
                           ${active
                             ? "bg-accent/10 text-accent font-semibold"
