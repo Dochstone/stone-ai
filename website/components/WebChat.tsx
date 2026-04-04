@@ -266,6 +266,7 @@ function Sidebar({
   onLoadSession,
   onNewChat,
   onDeleteSession,
+  onDeleteAll,
   onRenameSession,
   onShareSession,
   plan,
@@ -280,6 +281,7 @@ function Sidebar({
   onLoadSession: (id: number) => void;
   onNewChat: () => void;
   onDeleteSession: (id: number) => void;
+  onDeleteAll: () => void;
   onRenameSession: (id: number, title: string) => void;
   onShareSession: (id: number) => void;
   plan?: string;
@@ -489,6 +491,21 @@ function Sidebar({
             </div>
           )}
         </div>
+
+        {/* Delete all chats */}
+        {sessions.length > 1 && (
+          <div className="px-3 py-2 shrink-0 border-t border-text/[0.06]">
+            <button
+              onClick={onDeleteAll}
+              className="w-full flex items-center justify-center gap-1.5 text-[11px] text-text/25 hover:text-red-400 py-1.5 rounded-lg hover:bg-red-500/5 transition-colors"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Удалить все чаты
+            </button>
+          </div>
+        )}
 
         {/* Upgrade CTA — only for free/mini */}
         {plan !== "max" && plan !== "max-pro" && (
@@ -839,6 +856,20 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
       if (activeSessionId === sessionId) newChat();
     } catch {}
   }, [auth, activeSessionId, newChat]);
+
+  const deleteAllSessions = useCallback(async () => {
+    if (!auth) return;
+    if (!confirm("Удалить все чаты? Это действие нельзя отменить.")) return;
+    try {
+      await fetch(`${API_URL}/api/chats`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${auth.token}` },
+      });
+      setSessions([]);
+      try { sessionStorage.removeItem("stone_sessions"); } catch {}
+      newChat();
+    } catch {}
+  }, [auth, newChat]);
 
   const shareSession = useCallback(async (sessionId: number) => {
     if (!auth) return;
@@ -1462,6 +1493,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         onLoadSession={loadSession}
         onNewChat={newChat}
         onDeleteSession={deleteSession}
+        onDeleteAll={deleteAllSessions}
         onRenameSession={renameSession}
         onShareSession={shareSession}
         plan={limits?.plan}

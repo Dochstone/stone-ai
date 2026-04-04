@@ -260,6 +260,24 @@ async def delete_session(
     return {"status": "ok"}
 
 
+@router.delete("")
+async def delete_all_sessions(
+    tg_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete all chat sessions and messages for current user."""
+    tg_id = tg_user["id"]
+    # Get all session IDs
+    result = await db.execute(
+        select(ChatSession.id).where(ChatSession.user_tg_id == tg_id)
+    )
+    session_ids = [r for r in result.scalars().all()]
+    if session_ids:
+        await db.execute(delete(ChatMessage).where(ChatMessage.session_id.in_(session_ids)))
+        await db.execute(delete(ChatSession).where(ChatSession.user_tg_id == tg_id))
+    return {"status": "ok", "deleted": len(session_ids)}
+
+
 @router.post("/{session_id}/share")
 async def share_session(
     session_id: int,
