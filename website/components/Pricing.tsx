@@ -291,7 +291,9 @@ export default function Pricing() {
                   ? "bg-gradient-to-br from-[#1C1C1E] to-[#2C2C2E] text-white border-2 border-[#F43F5E]/30 shadow-xl shadow-[#F43F5E]/10 hover:shadow-2xl hover:shadow-[#F43F5E]/20 hover:border-[#F43F5E]/50"
                   : plan.accent
                   ? "bg-bg border-2 border-[#A855F7] shadow-lg shadow-[#A855F7]/5 hover:shadow-2xl hover:shadow-[#A855F7]/15 hover:border-[#A855F7]/80"
-                  : "bg-bg border border-text/5 hover:border-text/15 hover:shadow-lg"
+                  : plan.id === "mini"
+                  ? "bg-bg border-2 border-[#22D3EE]/30 shadow-md hover:shadow-xl hover:shadow-[#22D3EE]/10 hover:border-[#22D3EE]/60"
+                  : "bg-bg border-2 border-[#14B8A6]/20 shadow-md hover:shadow-xl hover:shadow-[#14B8A6]/10 hover:border-[#14B8A6]/50"
               }`}
               style={plan.accent ? {
                 animation: "pricingGlow 3s ease-in-out infinite",
@@ -338,7 +340,7 @@ export default function Pricing() {
               <ul className="space-y-2.5 text-sm mb-4 flex-1">
                 {plan.features.map((f: string) => (
                   <li key={f} className="flex items-start gap-2.5">
-                    <svg className={`w-4 h-4 mt-0.5 shrink-0 transition-transform duration-200 group-hover:scale-110 ${plan.premium ? "text-[#F43F5E]" : plan.accent ? "text-[#A855F7]" : "text-teal"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <svg className={`w-4 h-4 mt-0.5 shrink-0 transition-transform duration-200 group-hover:scale-110 ${plan.premium ? "text-[#F43F5E]" : plan.accent ? "text-[#A855F7]" : plan.id === "mini" ? "text-[#22D3EE]" : "text-[#14B8A6]"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                     </svg>
                     <span className={`text-[13px] ${plan.premium ? "text-white/70" : "text-text/70"}`}>{f}</span>
@@ -360,7 +362,9 @@ export default function Pricing() {
                     ? "text-white shadow-md shadow-[#F43F5E]/20"
                     : plan.accent
                     ? "text-white shadow-md shadow-[#A855F7]/20"
-                    : `border-2 border-text/15 text-text hover:border-[${plan.color}] hover:text-[${plan.color}]`
+                    : plan.id === "mini"
+                    ? "text-white shadow-md shadow-[#22D3EE]/20"
+                    : "text-white shadow-md shadow-[#14B8A6]/20"
                 }`}
                 style={plan.premium ? {
                   backgroundImage: "linear-gradient(90deg, #F43F5E, #FB7185, #F43F5E)",
@@ -370,8 +374,15 @@ export default function Pricing() {
                   backgroundImage: "linear-gradient(90deg, #A855F7, #C084FC, #A855F7)",
                   backgroundSize: "200% 100%",
                   animation: "pricingShimmer 3s ease-in-out infinite",
-                  border: "none",
-                } : undefined}
+                } : plan.id === "mini" ? {
+                  backgroundImage: "linear-gradient(90deg, #22D3EE, #67E8F9, #22D3EE)",
+                  backgroundSize: "200% 100%",
+                  animation: "pricingShimmer 4s ease-in-out infinite",
+                } : {
+                  backgroundImage: "linear-gradient(90deg, #14B8A6, #2DD4BF, #14B8A6)",
+                  backgroundSize: "200% 100%",
+                  animation: "pricingShimmer 4s ease-in-out infinite",
+                }}
               >
                 {plan.cta}
               </button>
@@ -467,13 +478,15 @@ export default function Pricing() {
                     className="w-full h-full object-cover"
                     style={{ objectPosition: "center 25%", animation: "pricingStagger 0.5s ease both 0.05s" }}
                   />
+                  {/* Darken overlay for contrast */}
+                  <div className="absolute inset-0 bg-black/25" />
                   {/* Desktop: side gradient blend */}
                   <div className="hidden sm:block absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-bg" />
                   {/* Mobile: bottom gradient only — keeps image visible, text readable */}
                   <div className="sm:hidden absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-bg via-bg/80 to-transparent" />
                   {/* Color tint matching plan */}
                   <div
-                    className="absolute inset-0 mix-blend-soft-light opacity-20"
+                    className="absolute inset-0 mix-blend-soft-light opacity-30"
                     style={{ background: modal.color }}
                   />
 
