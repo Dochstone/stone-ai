@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Pricing from "@/components/Pricing";
 import ModelComparison from "@/components/ModelComparison";
+import ModelsTable from "@/components/ModelsTable";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
 
@@ -193,6 +194,9 @@ export default function PricingPage() {
           </table>
         </div>
       </div>
+
+      {/* Models table */}
+      <ModelsTable />
 
       {/* FAQ */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
