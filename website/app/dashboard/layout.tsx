@@ -176,46 +176,79 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         >
           <nav className={`flex-1 overflow-y-auto overscroll-contain ${isChat ? (sidebarHover ? "p-3 space-y-4" : "p-3 lg:p-1.5 space-y-4 lg:space-y-1") : "p-3 space-y-4"}`}>
 
-            {/* Chat categories — shown in collapsed sidebar when on chat page */}
+            {/* ═══ Chat mode: categories + navigation ═══ */}
             {isChat && !sidebarHover && (
-              <div className="hidden lg:block space-y-1">
-                {CHAT_CATEGORIES.map((c) => (
-                  <button
-                    key={c.id}
-                    onClick={() => setChatCategory(c.id)}
-                    title={c.label}
-                    className={`w-full flex items-center justify-center p-2 rounded-lg transition-all duration-150 ${
-                      chatCategory === c.id
-                        ? "bg-accent/10 text-accent"
-                        : "text-text/40 hover:text-text/70 hover:bg-text/[0.04]"
-                    }`}
-                  >
-                    <span className="text-sm">{c.icon}</span>
-                  </button>
-                ))}
-                <div className="border-t border-text/5 my-2" />
+              <div className="hidden lg:flex flex-col items-center space-y-1">
+                {/* AI Mode categories — gradient accent background for active */}
+                <div className="w-full space-y-0.5 pb-2">
+                  {CHAT_CATEGORIES.map((c) => (
+                    <button
+                      key={c.id}
+                      onClick={() => setChatCategory(c.id)}
+                      title={c.label}
+                      className={`w-full flex items-center justify-center p-2.5 rounded-xl transition-all duration-200 ${
+                        chatCategory === c.id
+                          ? "bg-gradient-to-r from-accent/15 to-teal/10 text-accent shadow-sm shadow-accent/5 scale-105"
+                          : "text-text/30 hover:text-text/60 hover:bg-text/[0.06]"
+                      }`}
+                    >
+                      <span className="text-base">{c.icon}</span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Divider with dot */}
+                <div className="flex flex-col items-center gap-1 py-1">
+                  <div className="w-5 h-px bg-text/10" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-text/10" />
+                  <div className="w-5 h-px bg-text/10" />
+                </div>
+
+                {/* Tools — smaller, muted icons */}
+                <div className="w-full space-y-0.5 pt-1">
+                  {NAV_ITEMS.flatMap(g => g.items).filter(i => i.href !== "/dashboard/chat").slice(0, 5).map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      title={item.label}
+                      onClick={() => setSidebarOpen(false)}
+                      className="w-full flex items-center justify-center p-2 rounded-lg text-text/20 hover:text-text/50 hover:bg-text/[0.04] transition-all"
+                    >
+                      <NavIcon d={item.icon} />
+                    </Link>
+                  ))}
+                </div>
               </div>
             )}
 
             {/* Chat categories — full labels for mobile or hover */}
             {isChat && (sidebarHover || true) && (
-              <div className={`${!sidebarHover ? "lg:hidden" : ""} space-y-0.5 mb-3`}>
-                <div className="text-[10px] font-bold text-text/30 uppercase tracking-[1.5px] px-3 mb-2">Режим AI</div>
-                {CHAT_CATEGORIES.map((c) => (
-                  <button
-                    key={c.id}
-                    onClick={() => { setChatCategory(c.id); setSidebarOpen(false); }}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
-                      chatCategory === c.id
-                        ? "bg-accent/10 text-accent font-semibold"
-                        : "text-text/40 hover:text-text/70 hover:bg-text/[0.04]"
-                    }`}
-                  >
-                    <span>{c.icon}</span>
-                    <span>{c.label}</span>
-                  </button>
-                ))}
-                <div className="border-t border-text/5 my-2" />
+              <div className={`${!sidebarHover ? "lg:hidden" : ""} mb-3`}>
+                <div className="text-[9px] font-bold text-accent/50 uppercase tracking-[2px] px-3 mb-2">Режим AI</div>
+                <div className="space-y-0.5">
+                  {CHAT_CATEGORIES.map((c) => (
+                    <button
+                      key={c.id}
+                      onClick={() => { setChatCategory(c.id); setSidebarOpen(false); }}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                        chatCategory === c.id
+                          ? "bg-gradient-to-r from-accent/10 to-teal/5 text-accent font-semibold border border-accent/10"
+                          : "text-text/40 hover:text-text/70 hover:bg-text/[0.04]"
+                      }`}
+                    >
+                      <span className="text-base">{c.icon}</span>
+                      <span>{c.label}</span>
+                      {chatCategory === c.id && (
+                        <div className="ml-auto w-1.5 h-1.5 rounded-full bg-accent" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex items-center gap-2 my-3 px-3">
+                  <div className="flex-1 h-px bg-text/[0.06]" />
+                  <span className="text-[8px] text-text/20 font-bold uppercase tracking-widest">Инструменты</span>
+                  <div className="flex-1 h-px bg-text/[0.06]" />
+                </div>
               </div>
             )}
 
@@ -228,7 +261,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   </div>
                 )}
                 <div className="space-y-0.5">
-                  {group.items.map((item) => {
+                  {group.items.filter(item => !(isChat && item.href === "/dashboard/chat")).map((item) => {
                     const active = isActive(item.href);
                     return isChat ? (
                       sidebarHover ? (
