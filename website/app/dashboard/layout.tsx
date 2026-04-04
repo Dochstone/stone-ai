@@ -158,14 +158,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             ${isChat ? (sidebarHover ? "w-64 lg:w-64" : "w-64 lg:w-12") : "w-64"} shrink-0
             bg-bg ${isChat && sidebarHover ? "lg:shadow-xl lg:shadow-black/10" : "lg:bg-transparent"}
             border-r border-text/5
-            overflow-y-auto overscroll-contain
+            flex flex-col
             transition-all duration-200 ease-out
             ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
           `}
           onMouseEnter={() => { if (isChat) setSidebarHover(true); }}
           onMouseLeave={() => { if (isChat) setSidebarHover(false); }}
         >
-          <nav className={`${isChat ? (sidebarHover ? "p-4 space-y-6" : "p-4 lg:p-1.5 space-y-6 lg:space-y-1") : "p-4 space-y-6"}`}>
+          <nav className={`flex-1 overflow-y-auto overscroll-contain ${isChat ? (sidebarHover ? "p-3 space-y-4" : "p-3 lg:p-1.5 space-y-4 lg:space-y-1") : "p-3 space-y-4"}`}>
             {/* User card */}
             {authEmail && (!isChat || sidebarHover) && (
               <Link
@@ -284,51 +284,31 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
             ))}
 
-            {/* Quick actions */}
-            {isChat && !sidebarHover ? (
-              <div className="border-t border-text/5 pt-2 hidden lg:block">
-                <Link
-                  href="/dashboard/chat"
-                  title="AI Чат"
-                  className="flex items-center justify-center p-2 rounded-lg text-accent hover:bg-accent/5 transition-colors"
-                >
-                  <svg className="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
-                </Link>
-                <Link
-                  href="/pricing"
-                  title="Тарифы"
-                  className="flex items-center justify-center p-2 rounded-lg text-text/40 hover:text-text/60 hover:bg-text/[0.04] transition-colors"
-                >
-                  <svg className="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                  </svg>
-                </Link>
-              </div>
-            ) : (
-              <div className="border-t border-text/5 pt-4">
-                <Link
-                  href="/dashboard/chat"
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-accent hover:bg-accent/5 transition-colors"
-                >
-                  <svg className="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
-                  Открыть AI-чат
-                </Link>
-                <Link
-                  href="/pricing"
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-text/40 hover:text-text/60 hover:bg-text/[0.04] transition-colors"
-                >
-                  <svg className="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                  </svg>
-                  Тарифы
-                </Link>
-              </div>
-            )}
           </nav>
+
+          {/* Quick actions — sticky bottom */}
+          <div className={`shrink-0 border-t border-text/5 ${isChat && !sidebarHover ? "p-1.5 hidden lg:block" : "p-3"}`}>
+            <Link
+              href="/dashboard/chat"
+              onClick={() => setSidebarOpen(false)}
+              className={`flex items-center ${isChat && !sidebarHover ? "justify-center p-2 rounded-lg" : "gap-3 px-3 py-2 rounded-xl text-sm font-semibold"} text-accent hover:bg-accent/5 transition-colors`}
+            >
+              <svg className="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              {(!isChat || sidebarHover) && <span>AI Чат</span>}
+            </Link>
+            <Link
+              href="/pricing"
+              onClick={() => setSidebarOpen(false)}
+              className={`flex items-center ${isChat && !sidebarHover ? "justify-center p-2 rounded-lg" : "gap-3 px-3 py-2 rounded-xl text-sm font-medium"} text-text/40 hover:text-text/60 hover:bg-text/[0.04] transition-colors`}
+            >
+              <svg className="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+              </svg>
+              {(!isChat || sidebarHover) && <span>Тарифы</span>}
+            </Link>
+          </div>
         </aside>
 
         {/* Main content */}
