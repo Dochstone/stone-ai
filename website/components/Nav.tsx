@@ -8,12 +8,7 @@ import dynamic from "next/dynamic";
 
 const TonWalletBadge = dynamic(() => import("./TonWalletBadge"), { ssr: false });
 
-function getAvatarColor(email: string): string {
-  const colors = ["#C4623D", "#0E9A83", "#4285f4", "#7c3aed", "#ec4899", "#f59e0b", "#06b6d4", "#10a37f"];
-  let hash = 0;
-  for (let i = 0; i < email.length; i++) hash = email.charCodeAt(i) + ((hash << 5) - hash);
-  return colors[Math.abs(hash) % colors.length];
-}
+import { getAvatarColor, getSavedAvatar } from "@/lib/avatar";
 
 const tools = [
   { href: "/chat", label: "AI Чат" },
@@ -30,6 +25,7 @@ export default function Nav() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
   const [authEmail, setAuthEmail] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState<string | null>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -45,6 +41,10 @@ export default function Nav() {
         if (parsed.email) setAuthEmail(parsed.email);
       }
     } catch {}
+    setAvatar(getSavedAvatar());
+    const handler = () => setAvatar(getSavedAvatar());
+    window.addEventListener("avatar-changed", handler);
+    return () => window.removeEventListener("avatar-changed", handler);
   }, []);
 
   return (
@@ -139,12 +139,16 @@ export default function Nav() {
                 className="hidden md:flex items-center gap-2 hover:opacity-80 transition-opacity"
                 title="Личный кабинет"
               >
-                <div
-                  className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 ring-2 ring-text/[0.06]"
-                  style={{ backgroundColor: getAvatarColor(authEmail) }}
-                >
-                  <span className="text-[12px] font-bold text-white">{authEmail.slice(0, 2).toUpperCase()}</span>
-                </div>
+                {avatar ? (
+                  <img src={avatar} alt="" className="w-9 h-9 rounded-full object-cover shrink-0 ring-2 ring-text/[0.06]" />
+                ) : (
+                  <div
+                    className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 ring-2 ring-text/[0.06]"
+                    style={{ backgroundColor: getAvatarColor(authEmail) }}
+                  >
+                    <span className="text-[12px] font-bold text-white">{authEmail.slice(0, 2).toUpperCase()}</span>
+                  </div>
+                )}
               </a>
             </>
           ) : (
@@ -234,10 +238,14 @@ export default function Nav() {
                 </a>
                 <a href="/profile" onClick={() => setMenuOpen(false)}
                   className="flex items-center gap-3 py-2.5 px-2 min-h-[44px] text-text/70 hover:text-text font-medium">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
-                    style={{ backgroundColor: getAvatarColor(authEmail) }}>
-                    <span className="text-[11px] font-bold text-white">{authEmail.slice(0, 2).toUpperCase()}</span>
-                  </div>
+                  {avatar ? (
+                    <img src={avatar} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+                      style={{ backgroundColor: getAvatarColor(authEmail) }}>
+                      <span className="text-[11px] font-bold text-white">{authEmail.slice(0, 2).toUpperCase()}</span>
+                    </div>
+                  )}
                   Личный кабинет
                 </a>
                 <a href="/dashboard/chat" onClick={() => setMenuOpen(false)}

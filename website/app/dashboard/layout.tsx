@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { OnboardingTour } from "@/components/OnboardingTour";
 import ThemeToggle from "@/components/ThemeToggle";
+import { getAvatarColor as getAvatarColorFn, getSavedAvatar } from "@/lib/avatar";
 
 const WebChat = dynamic(() => import("@/components/WebChat"), {
   ssr: false,
@@ -73,6 +74,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [showTour, setShowTour] = useState(false);
   const [chatLoaded, setChatLoaded] = useState(false);
   const [chatCategory, setChatCategory] = useState("all");
+  const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const isChat = pathname === "/dashboard/chat";
 
   const CHAT_CATEGORIES = [
@@ -95,6 +97,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         }
       }
     } catch {}
+    setUserAvatar(getSavedAvatar());
+    const onAvatarChange = () => setUserAvatar(getSavedAvatar());
+    window.addEventListener("avatar-changed", onAvatarChange);
+    return () => window.removeEventListener("avatar-changed", onAvatarChange);
   }, []);
 
   useEffect(() => {
@@ -197,7 +203,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     className={`group relative w-full flex items-center justify-center p-2.5 rounded-xl transition-all duration-150 ${
                       chatCategory === c.id
                         ? "bg-accent/10 text-accent"
-                        : "text-text/25 hover:text-text/60 hover:bg-text/[0.05]"
+                        : "text-text/40 hover:text-text/60 hover:bg-text/[0.05]"
                     }`}
                   >
                     <span className="text-[15px]">{c.icon}</span>
@@ -220,7 +226,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     className={`group relative w-full flex items-center justify-center p-2 rounded-lg transition-all duration-150 ${
                       isActive(item.href)
                         ? "text-accent bg-accent/5"
-                        : "text-text/15 hover:text-text/40 hover:bg-text/[0.04]"
+                        : "text-text/30 hover:text-text/50 hover:bg-text/[0.05]"
                     }`}
                   >
                     <NavIcon d={item.icon} />
@@ -307,7 +313,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                               transition-all duration-150
                               ${active
                                 ? "bg-accent/10 text-accent"
-                                : "text-text/50 hover:text-text/80 hover:bg-text/[0.04]"
+                                : "text-text/35 hover:text-text/60 hover:bg-text/[0.05]"
                               }
                             `}
                           >
@@ -377,12 +383,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 aria-label="Профиль"
                 className={`flex items-center ${isChat && !sidebarHover ? "justify-center p-2 rounded-lg" : "gap-3 px-3 py-2 rounded-xl"} text-text/50 hover:text-text/80 hover:bg-text/[0.04] transition-colors`}
               >
-                <div
-                  className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: getAvatarColor(authEmail) }}
-                >
-                  <span className="text-[9px] font-bold text-white">{authEmail.slice(0, 2).toUpperCase()}</span>
-                </div>
+                {userAvatar ? (
+                  <img src={userAvatar} alt="" className="w-7 h-7 rounded-full object-cover shrink-0" />
+                ) : (
+                  <div
+                    className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: getAvatarColorFn(authEmail) }}
+                  >
+                    <span className="text-[9px] font-bold text-white">{authEmail.slice(0, 2).toUpperCase()}</span>
+                  </div>
+                )}
                 {(!isChat || sidebarHover) && (
                   <div className="min-w-0">
                     <div className="text-xs font-medium text-text/60 truncate">{authEmail}</div>
@@ -428,9 +438,3 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   );
 }
 
-function getAvatarColor(email: string): string {
-  const colors = ["#C4623D", "#0E9A83", "#4285f4", "#7c3aed", "#ec4899", "#f59e0b", "#06b6d4", "#10a37f"];
-  let hash = 0;
-  for (let i = 0; i < email.length; i++) hash = email.charCodeAt(i) + ((hash << 5) - hash);
-  return colors[Math.abs(hash) % colors.length];
-}

@@ -12,6 +12,7 @@ const WelcomeScreen = dynamic(() => import("@/components/chat/WelcomeScreen"), {
 const VoiceButton = dynamic(() => import("@/components/chat/VoiceButton"), { ssr: false });
 const MessageContent = dynamic(() => import("@/components/chat/MessageContent"), { ssr: false });
 import { VideoPlayer } from "@/components/chat/MessageContent";
+import { getSavedAvatar } from "@/lib/avatar";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
 
@@ -246,9 +247,9 @@ function ScrollToBottom({ containerRef }: { containerRef: React.RefObject<HTMLDi
   return (
     <button
       onClick={() => containerRef.current?.scrollTo({ top: containerRef.current.scrollHeight, behavior: "smooth" })}
-      className="absolute bottom-4 left-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-bg border border-text/10 shadow-lg flex items-center justify-center text-text/40 hover:text-text/70 transition-colors z-10"
+      className="absolute bottom-4 right-4 w-8 h-8 rounded-full bg-bg/80 backdrop-blur-sm border border-text/10 shadow-md flex items-center justify-center text-text/30 hover:text-text/60 hover:bg-bg transition-all z-10"
     >
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
       </svg>
     </button>
@@ -303,19 +304,19 @@ function Sidebar({
 
       {/* Sidebar panel */}
       <div
-        className={`webchat-sidebar fixed inset-y-0 left-0 z-40 bg-bg flex flex-col lg:relative lg:shrink-0 ${open ? "open" : "closed"}`}
+        className={`webchat-sidebar fixed inset-y-0 left-0 z-40 bg-bg lg:bg-text/[0.02] flex flex-col lg:relative lg:shrink-0 border-r border-text/[0.06] ${open ? "open" : "closed"}`}
       >
         {/* Top: New Chat + Collapse */}
         <div className="p-3 shrink-0">
           <div className="flex items-center gap-2">
             <button
               onClick={() => { onNewChat(); if (window.innerWidth < 1024) onToggle(); }}
-              className="flex-1 flex items-center gap-2 bg-accent hover:bg-accent/90 rounded-xl px-3.5 py-2 transition-colors shadow-sm"
+              className="flex-1 flex items-center gap-2 border border-accent/30 hover:bg-accent/10 rounded-xl px-3.5 py-2 transition-colors"
             >
-              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" d="M12 4v16m8-8H4" />
               </svg>
-              <span className="text-[13px] font-semibold text-white">Новый чат</span>
+              <span className="text-[13px] font-semibold text-accent">Новый чат</span>
             </button>
             {!embedded && (
               <a
@@ -393,65 +394,98 @@ function Sidebar({
               <p className="text-[11px] text-text/20">Здесь появятся ваши чаты</p>
             </div>
           ) : (
-            <div className="space-y-0.5">
-              {sessions.filter(s => !sidebarSearch || s.title?.toLowerCase().includes(sidebarSearch.toLowerCase())).map((s) => (
-                <div
-                  key={s.id}
-                  className={`group flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition-colors ${
-                    activeSessionId === s.id
-                      ? "bg-accent/10 shadow-sm"
-                      : "hover:bg-text/[0.04]"
-                  }`}
-                  onClick={() => { if (editingId !== s.id) { onLoadSession(s.id); if (window.innerWidth < 1024) onToggle(); } }}
-                  onDoubleClick={(e) => { e.stopPropagation(); setEditingId(s.id); setEditTitle(s.title || ""); }}
-                >
-                  <div className="flex-1 min-w-0">
-                    {editingId === s.id ? (
-                      <input
-                        autoFocus
-                        value={editTitle}
-                        onChange={(e) => setEditTitle(e.target.value)}
-                        onBlur={() => { if (editTitle.trim() && editTitle !== s.title) onRenameSession(s.id, editTitle.trim()); setEditingId(null); }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") { if (editTitle.trim() && editTitle !== s.title) onRenameSession(s.id, editTitle.trim()); setEditingId(null); }
-                          if (e.key === "Escape") setEditingId(null);
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                        className="w-full text-[13px] font-medium text-text bg-bg border-2 border-accent/30 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-accent/30"
-                      />
-                    ) : (
-                      <span className={`text-[13px] font-medium truncate block ${
-                        activeSessionId === s.id ? "text-text" : "text-text/70"
-                      }`}>
-                        {s.title}
-                      </span>
+            <div>
+              {(() => {
+                const filtered = sessions.filter(s => !sidebarSearch || s.title?.toLowerCase().includes(sidebarSearch.toLowerCase()));
+                const now = new Date();
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const yesterday = new Date(today.getTime() - 86400000);
+                const weekAgo = new Date(today.getTime() - 7 * 86400000);
+
+                const groups: { label: string; items: typeof filtered }[] = [];
+                const todayItems: typeof filtered = [];
+                const yesterdayItems: typeof filtered = [];
+                const weekItems: typeof filtered = [];
+                const olderItems: typeof filtered = [];
+
+                for (const s of filtered) {
+                  const d = s.updated_at ? new Date(s.updated_at) : null;
+                  if (!d || d >= today) todayItems.push(s);
+                  else if (d >= yesterday) yesterdayItems.push(s);
+                  else if (d >= weekAgo) weekItems.push(s);
+                  else olderItems.push(s);
+                }
+
+                if (todayItems.length) groups.push({ label: "Сегодня", items: todayItems });
+                if (yesterdayItems.length) groups.push({ label: "Вчера", items: yesterdayItems });
+                if (weekItems.length) groups.push({ label: "На этой неделе", items: weekItems });
+                if (olderItems.length) groups.push({ label: "Ранее", items: olderItems });
+
+                return groups.map((g) => (
+                  <div key={g.label} className="mb-2">
+                    {groups.length > 1 && (
+                      <div className="text-[9px] font-bold text-text/25 uppercase tracking-[1.5px] px-3 pt-3 pb-1">{g.label}</div>
                     )}
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className="text-[10px] text-text/25">{MODELS.find(m => m.id === s.model_id)?.name || s.model_id}</span>
-                      {s.updated_at && (
-                        <span className="text-[10px] text-text/15">{new Date(s.updated_at).toLocaleDateString("ru-RU")}</span>
-                      )}
+                    <div className="space-y-0.5">
+                      {g.items.map((s) => (
+                        <div
+                          key={s.id}
+                          className={`group flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition-all ${
+                            activeSessionId === s.id
+                              ? "bg-accent/10 border border-accent/15 shadow-sm"
+                              : "hover:bg-text/[0.06] border border-transparent"
+                          }`}
+                          onClick={() => { if (editingId !== s.id) { onLoadSession(s.id); if (window.innerWidth < 1024) onToggle(); } }}
+                          onDoubleClick={(e) => { e.stopPropagation(); setEditingId(s.id); setEditTitle(s.title || ""); }}
+                        >
+                          <div className="flex-1 min-w-0">
+                            {editingId === s.id ? (
+                              <input
+                                autoFocus
+                                value={editTitle}
+                                onChange={(e) => setEditTitle(e.target.value)}
+                                onBlur={() => { if (editTitle.trim() && editTitle !== s.title) onRenameSession(s.id, editTitle.trim()); setEditingId(null); }}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") { if (editTitle.trim() && editTitle !== s.title) onRenameSession(s.id, editTitle.trim()); setEditingId(null); }
+                                  if (e.key === "Escape") setEditingId(null);
+                                }}
+                                onClick={(e) => e.stopPropagation()}
+                                className="w-full text-[13px] font-medium text-text bg-bg border-2 border-accent/30 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-accent/30"
+                              />
+                            ) : (
+                              <span className={`text-[13px] font-medium truncate block ${
+                                activeSessionId === s.id ? "text-text" : "text-text/80"
+                              }`}>
+                                {s.title}
+                              </span>
+                            )}
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span className="text-[10px] text-text/35">{MODELS.find(m => m.id === s.model_id)?.name || s.model_id}</span>
+                            </div>
+                          </div>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onShareSession(s.id); }}
+                            className="text-text/10 hover:text-accent p-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                            title="Поделиться"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onDeleteSession(s.id); }}
+                            className="text-text/10 hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onShareSession(s.id); }}
-                    className="text-text/10 hover:text-accent p-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-                    title="Поделиться"
-                  >
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onDeleteSession(s.id); }}
-                    className="text-text/10 hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-                  >
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-                </div>
-              ))}
+                ));
+              })()}
             </div>
           )}
         </div>
@@ -475,6 +509,7 @@ function Sidebar({
 
 export default function WebChat({ initialModel, initialCategory, embedded }: { initialModel?: string; initialCategory?: string; embedded?: boolean } = {}) {
   const [auth, setAuth] = useState<AuthState | null>(null);
+  const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [selectedModel, setSelectedModel] = useState(() => {
     if (initialModel && MODELS.some(m => m.id === initialModel)) return initialModel;
@@ -590,6 +625,11 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
     if (!localStorage.getItem("stone_chat_onboarded")) {
       setShowOnboarding(true);
     }
+    // Avatar
+    setUserAvatar(getSavedAvatar());
+    const onAvatarChange = () => setUserAvatar(getSavedAvatar());
+    window.addEventListener("avatar-changed", onAvatarChange);
+    return () => window.removeEventListener("avatar-changed", onAvatarChange);
   }, []);
 
   // Fetch usage limits
@@ -1447,17 +1487,19 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         {/* Top bar — simplified when embedded */}
         <div className={`${embedded ? "h-10 lg:flex hidden" : "h-14 flex"} border-b border-text/[0.06] bg-bg/80 backdrop-blur-sm items-center justify-between px-3 sm:px-4 shrink-0`}>
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            {/* Sidebar toggle */}
-            <button onClick={toggleSidebar} className="text-text/30 hover:text-text/60 transition-colors shrink-0">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                {sidebarOpen
-                  ? <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  : <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                }
-              </svg>
-            </button>
+            {/* Sidebar toggle — only when NOT embedded */}
+            {!embedded && (
+              <button onClick={toggleSidebar} className="text-text/30 hover:text-text/60 transition-colors shrink-0">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  {sidebarOpen
+                    ? <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    : <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                  }
+                </svg>
+              </button>
+            )}
 
-            {/* Model dropdown with filters */}
+            {/* Model info */}
             <div className="flex items-center gap-1.5 min-w-0">
               <div
                 className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shrink-0"
@@ -1465,12 +1507,12 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
               >
                 {aiLetter}
               </div>
-              <span className="text-xs text-text/40 font-medium">AI Чат</span>
+              <span className="text-xs text-text/40 font-medium truncate">{model?.name || "AI Чат"}</span>
             </div>
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-            {auth && (
+            {auth && !embedded && (
               <ProjectSelector token={auth.token} onChange={setSelectedProjectId} />
             )}
             {auth && (
@@ -1510,16 +1552,20 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                 </a>
               );
             })()}
-            <a href="/" className="text-text/25 hover:text-accent transition-colors" title="На главную">
-              <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955a1.126 1.126 0 011.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-              </svg>
-            </a>
-            <a href="/profile" className="text-text/25 hover:text-accent transition-colors" title="Личный кабинет">
-              <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-              </svg>
-            </a>
+            {!embedded && (
+              <>
+                <a href="/" className="text-text/25 hover:text-accent transition-colors" title="На главную">
+                  <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955a1.126 1.126 0 011.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                  </svg>
+                </a>
+                <a href="/profile" className="text-text/25 hover:text-accent transition-colors" title="Личный кабинет">
+                  <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                  </svg>
+                </a>
+              </>
+            )}
           </div>
         </div>
 
@@ -1604,15 +1650,21 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                   {/* Avatar */}
                   <div className="shrink-0 mt-0.5">
                     {msg.role === "user" ? (
-                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-accent ring-2 ring-accent/20 flex items-center justify-center">
-                        <span className="text-[11px] sm:text-[12px] font-bold text-white">U</span>
-                      </div>
+                      userAvatar ? (
+                        <img src={userAvatar} alt="" className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover ring-2 ring-accent/20" />
+                      ) : (
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-accent ring-2 ring-accent/20 flex items-center justify-center">
+                          <span className="text-[11px] sm:text-[12px] font-bold text-white">
+                            {auth?.email ? auth.email.slice(0, 2).toUpperCase() : "U"}
+                          </span>
+                        </div>
+                      )
                     ) : (
                       <div
-                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-full ring-2 ring-white/10 flex items-center justify-center"
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-full ring-2 ring-text/[0.06] flex items-center justify-center bg-gradient-to-br from-white/20 to-transparent"
                         style={{ backgroundColor: aiColor }}
                       >
-                        <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
                         </svg>
                       </div>
@@ -1623,8 +1675,8 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                   <div className={`max-w-[85%] sm:max-w-[75%] min-w-0 ${msg.role === "user" ? "text-right" : ""}`}>
                     <div className={`${msg.role === "user" ? "inline-block" : "block"} text-left rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-[13px] sm:text-[14px] leading-relaxed break-words overflow-x-auto ${
                       msg.role === "user"
-                        ? "bg-accent text-white rounded-tr-md"
-                        : "bg-text/[0.06] text-text/85 rounded-tl-md"
+                        ? "bg-gradient-to-br from-accent/90 to-accent text-white rounded-tr-md shadow-sm"
+                        : "bg-text/[0.04] text-text/85 rounded-tl-md"
                     }`}>
                       {msg.file && (
                         <div className="mb-2">
@@ -1807,7 +1859,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         )}
 
         {/* Input area — pinned bottom */}
-        <div className="border-t border-text/[0.06] bg-bg px-3 sm:px-4 py-1.5 sm:py-2 shrink-0 chat-input-safe">
+        <div className="border-t border-text/[0.06] bg-bg px-3 sm:px-4 py-2 sm:py-2.5 shrink-0 chat-input-safe shadow-[0_-4px_16px_rgba(0,0,0,0.04)]">
           <div className="max-w-3xl mx-auto">
             {pendingFile && (
               <div className="flex items-center gap-2 mb-2.5 px-3 py-2 bg-bg rounded-xl">
@@ -1847,7 +1899,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
             )}
             <style>{`@keyframes waveRec { from { transform: scaleY(0.3); } to { transform: scaleY(1); } }`}</style>
 
-            <div className="flex items-center bg-bg border border-text/[0.08] rounded-xl focus-within:border-accent/30 focus-within:ring-2 focus-within:ring-accent/10 transition-all min-w-0" style={{ padding: "4px 8px", gap: 6 }}>
+            <div className="flex items-center bg-text/[0.03] border border-text/[0.10] rounded-2xl focus-within:border-accent/30 focus-within:ring-2 focus-within:ring-accent/10 focus-within:bg-bg transition-all min-w-0" style={{ padding: "4px 8px", gap: 6 }}>
               {/* File attach */}
               <input ref={fileInputRef} type="file" accept="image/*,.pdf" className="hidden"
                 onChange={(e) => { if (e.target.files?.[0]) handleFileSelect(e.target.files[0]); e.target.value = ""; }}

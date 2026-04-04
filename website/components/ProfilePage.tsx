@@ -75,17 +75,7 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
 
 // ─── Helpers ───
 
-function getInitials(email: string, name?: string | null): string {
-  if (name) return name.slice(0, 2).toUpperCase();
-  return email.slice(0, 2).toUpperCase();
-}
-
-function getAvatarColor(email: string): string {
-  const colors = ["#C4623D", "#0E9A83", "#4285f4", "#7c3aed", "#ec4899", "#f59e0b", "#06b6d4", "#10a37f"];
-  let hash = 0;
-  for (let i = 0; i < email.length; i++) hash = email.charCodeAt(i) + ((hash << 5) - hash);
-  return colors[Math.abs(hash) % colors.length];
-}
+import { getInitials, getAvatarColor, getSavedAvatar, saveAvatar, removeAvatar, processAvatarFile } from "@/lib/avatar";
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("ru-RU", { day: "numeric", month: "short", year: "numeric" });
@@ -142,6 +132,65 @@ function BarChart({ data }: { data: { label: string; value: number }[] }) {
 
 // ─── Tab: Overview ───
 
+function AvatarUpload({ email, name }: { email: string; name?: string | null }) {
+  const [avatar, setAvatar] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setAvatar(getSavedAvatar());
+    const handler = () => setAvatar(getSavedAvatar());
+    window.addEventListener("avatar-changed", handler);
+    return () => window.removeEventListener("avatar-changed", handler);
+  }, []);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const dataUrl = await processAvatarFile(file);
+      saveAvatar(dataUrl);
+      setAvatar(dataUrl);
+    } catch {}
+    e.target.value = "";
+  };
+
+  return (
+    <div className="relative group">
+      {avatar ? (
+        <img src={avatar} alt="Avatar" className="w-16 h-16 rounded-full object-cover shrink-0" />
+      ) : (
+        <div
+          className="w-16 h-16 rounded-full flex items-center justify-center shrink-0"
+          style={{ backgroundColor: getAvatarColor(email) }}
+        >
+          <span className="text-xl font-bold text-white">{getInitials(email, name)}</span>
+        </div>
+      )}
+      {/* Overlay on hover */}
+      <div
+        className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity"
+        onClick={() => fileRef.current?.click()}
+      >
+        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+        </svg>
+      </div>
+      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+      {avatar && (
+        <button
+          onClick={(e) => { e.stopPropagation(); removeAvatar(); setAvatar(null); }}
+          className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+          title="Удалить фото"
+        >
+          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
+    </div>
+  );
+}
+
 function OverviewTab({ profile, usage }: { profile: UserProfile; usage: UsageItem[] }) {
   // Favorite model
   const modelCounts: Record<string, number> = {};
@@ -173,12 +222,7 @@ function OverviewTab({ profile, usage }: { profile: UserProfile; usage: UsageIte
     <div className="space-y-6">
       {/* Profile card */}
       <div className="bg-white rounded-2xl border border-text/[0.06] p-6 flex items-center gap-5 hover:border-accent/15 transition-colors">
-        <div
-          className="w-16 h-16 rounded-full flex items-center justify-center shrink-0"
-          style={{ backgroundColor: getAvatarColor(profile.email) }}
-        >
-          <span className="text-xl font-bold text-white">{getInitials(profile.email, profile.first_name)}</span>
-        </div>
+        <AvatarUpload email={profile.email} name={profile.first_name} />
         <div className="min-w-0 flex-1">
           <h2 className="text-lg font-extrabold text-text truncate">
             {profile.first_name || profile.username || profile.email.split("@")[0]}
