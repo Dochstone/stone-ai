@@ -1422,8 +1422,8 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
   return (
     <div
-      className={embedded ? "h-full flex bg-bg overflow-hidden relative" : "h-dvh flex bg-bg overflow-hidden relative"}
-      style={embedded ? undefined : { height: "100dvh" }}
+      className={embedded ? "h-full flex bg-bg overflow-hidden relative" : "flex bg-bg overflow-hidden relative"}
+      style={embedded ? undefined : { height: "calc(100dvh - var(--kb-height, 0px))" }}
       onDragEnter={(e) => { e.preventDefault(); dragCounterRef.current++; setDragging(true); }}
       onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; }}
       onDragLeave={(e) => { e.preventDefault(); dragCounterRef.current--; if (dragCounterRef.current === 0) setDragging(false); }}
@@ -1549,7 +1549,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
       />
 
       {/* Main chat area */}
-      <div className="flex-1 flex flex-col min-w-0 h-full relative">
+      <div className="flex-1 flex flex-col min-w-0 min-h-0 h-full relative">
         {/* Top bar — simplified when embedded */}
         <div className={`${embedded ? "h-10 lg:flex hidden" : "h-14 flex"} border-b border-text/[0.06] bg-bg/80 backdrop-blur-sm items-center justify-between px-3 sm:px-4 shrink-0`}>
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -1709,7 +1709,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         {messages.length === 0 ? (
           <WelcomeScreen onSuggestion={handleSuggestionClick} activeTab={modelCatFilter} plan={limits?.plan} />
         ) : (
-          <div className="flex-1 overflow-y-auto relative" ref={messagesContainerRef}>
+          <div className="flex-1 overflow-y-auto relative min-h-0" ref={messagesContainerRef}>
             <div className="max-w-3xl mx-auto px-3 sm:px-4 py-6 space-y-5">
               {messages.map((msg, i) => (
                 <div key={i} className={`flex gap-2.5 sm:gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
@@ -1999,6 +1999,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                 value={input}
                 onChange={handleInputChange}
                 onKeyDown={handleKey}
+                onFocus={() => { setTimeout(() => textareaRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" }), 300); }}
                 placeholder={pendingFile ? "Добавьте вопрос к файлу..." : modelCatFilter === "health" ? "Опишите симптомы или загрузите фото..." : isVideoModel ? "Опишите видео..." : is3DModel ? "Опишите 3D-модель или загрузите фото..." : "Написать сообщение..."}
                 rows={1}
                 className="flex-1 bg-transparent resize-none focus:outline-none min-w-0 leading-snug placeholder:text-text/20"
