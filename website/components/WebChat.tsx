@@ -1608,7 +1608,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                 🔥{limits.streak.days}
               </span>
             )}
-            {(() => {
+            {!embedded && (() => {
               const p = limits?.plan || "free";
               const bg = p === "max-pro" ? "bg-gradient-to-r from-[#F43F5E] to-[#E11D48] text-white" : p === "max" ? "bg-[#A855F7] text-white" : p === "mini" ? "bg-[#22D3EE] text-white" : "bg-text/10 text-text/40";
               const label = p === "max-pro" ? "Elite" : p === "max" ? "Pro" : p === "mini" ? "Start" : "Free";
