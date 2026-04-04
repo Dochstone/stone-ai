@@ -366,6 +366,18 @@ function Sidebar({
               </svg>
               <span className="text-[13px] font-semibold text-accent">Новый чат</span>
             </button>
+            {embedded && (
+              <button
+                onClick={onToggle}
+                className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-text/[0.06] text-text/25 hover:text-text/50 transition-colors shrink-0"
+                aria-label="Свернуть историю"
+                title="Свернуть историю"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" d="M11 19l-7-7 7-7" />
+                </svg>
+              </button>
+            )}
             {!embedded && (
               <a
                 href="/dashboard"

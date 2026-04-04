@@ -190,7 +190,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           onMouseEnter={() => { if (isChat) setSidebarHover(true); }}
           onMouseLeave={() => { if (isChat) setSidebarHover(false); }}
         >
-          <nav className={`flex-1 overflow-y-auto overscroll-contain ${isChat ? (sidebarHover ? "p-3 space-y-4" : "p-3 lg:px-2 lg:py-1.5 space-y-4 lg:space-y-1") : "p-3 space-y-4"}`}>
+          <nav className={`flex-1 overflow-y-auto overscroll-contain ${isChat ? (sidebarHover ? "p-3 space-y-4" : "p-3 lg:px-1.5 lg:py-2 space-y-4 lg:space-y-0.5") : "p-3 space-y-4"}`}>
 
             {/* ═══ Chat mode collapsed: icons with hover labels ═══ */}
             {isChat && !sidebarHover && (
@@ -372,7 +372,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </nav>
 
           {/* Sticky bottom — Theme + Profile */}
-          <div className={`shrink-0 border-t border-text/5 ${isChat && !sidebarHover ? "px-2 py-1.5" : "p-3"}`}>
+          <div className={`shrink-0 border-t border-text/5 ${isChat && !sidebarHover ? "px-1.5 py-1.5" : "p-3"}`}>
             <div className={`${isChat && !sidebarHover ? "flex justify-center mb-0.5" : "flex items-center justify-between mb-2"}`}>
               {(!isChat || sidebarHover) && <span className="text-[9px] text-text/20 font-medium">Тема</span>}
               <ThemeToggle compact={isChat && !sidebarHover} />
