@@ -78,10 +78,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const isChat = pathname === "/dashboard/chat";
 
   const CHAT_CATEGORIES = [
-    { id: "all", icon: "💬", label: "Все чаты" },
-    { id: "free", icon: "✨", label: "Бесплатные" },
-    { id: "image", icon: "🎨", label: "Картинки" },
-    { id: "video", icon: "🎬", label: "Видео" },
+    { id: "all", label: "Все чаты", svg: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" },
+    { id: "free", label: "Бесплатные", svg: "M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" },
+    { id: "image", label: "Картинки", svg: "M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" },
+    { id: "video", label: "Видео", svg: "M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" },
   ];
 
   useEffect(() => {
@@ -180,7 +180,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             fixed lg:sticky top-12 lg:top-0 z-40 lg:z-0
             h-[calc(100dvh-48px)] lg:h-[100dvh]
             ${isChat ? (sidebarHover ? "w-64 lg:w-64" : "w-64 lg:w-12") : "w-64"} shrink-0
-            bg-bg ${isChat && sidebarHover ? "lg:shadow-xl lg:shadow-black/10" : "lg:bg-transparent"}
+            bg-bg ${isChat && sidebarHover ? "lg:shadow-xl lg:shadow-black/10" : ""}
             border-r border-text/5
             flex flex-col
             transition-all duration-200 ease-out
@@ -200,13 +200,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     key={c.id}
                     onClick={() => setChatCategory(c.id)}
                     aria-label={c.label}
-                    className={`group relative w-full flex items-center justify-center p-2.5 rounded-xl transition-all duration-150 ${
+                    className={`group relative w-full flex items-center justify-center p-2 rounded-lg transition-all duration-150 ${
                       chatCategory === c.id
                         ? "bg-accent/10 text-accent"
-                        : "text-text/40 hover:text-text/60 hover:bg-text/[0.05]"
+                        : "text-text/30 hover:text-text/50 hover:bg-text/[0.05]"
                     }`}
                   >
-                    <span className="text-[15px]">{c.icon}</span>
+                    <NavIcon d={c.svg} />
                     <span className="absolute left-full ml-2 px-2.5 py-1 rounded-lg bg-dark text-white text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-lg z-50">
                       {c.label}
                     </span>
@@ -217,7 +217,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <div className="mx-auto w-6 h-px bg-text/[0.08] my-1.5" />
 
                 {/* Tools */}
-                {NAV_ITEMS.flatMap(g => g.items).filter(i => i.href !== "/dashboard/chat").slice(0, 6).map((item) => (
+                {NAV_ITEMS.flatMap(g => g.items).filter(i => i.href !== "/dashboard/chat").map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
@@ -254,7 +254,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                           : "text-text/40 hover:text-text/70 hover:bg-text/[0.04]"
                       }`}
                     >
-                      <span className="text-base">{c.icon}</span>
+                      <NavIcon d={c.svg} />
                       <span>{c.label}</span>
                       {chatCategory === c.id && (
                         <div className="ml-auto w-1.5 h-1.5 rounded-full bg-accent" />
