@@ -318,6 +318,44 @@ async def migrate_marketplace(db: AsyncSession = Depends(get_db)):
     return {"ok": True, "message": "Marketplace migration complete"}
 
 
+@router.post("/prompts/seed-marketplace")
+async def seed_marketplace(db: AsyncSession = Depends(get_db)):
+    """Seed marketplace with starter templates. Idempotent."""
+    from sqlalchemy import text
+    import uuid as _uuid, json as _json
+
+    existing = await db.execute(text("SELECT COUNT(*) FROM prompt_templates WHERE is_public=true"))
+    count = existing.scalar()
+    if count and count >= 10:
+        return {"ok": True, "message": f"Already seeded ({count})", "count": count}
+
+    seeds = [
+        ("marketing", "Анализ ЦА", "Портрет целевой аудитории", "Проведи анализ ЦА для продукта: {product}. Ниша: {niche}.\n\nОпиши: демография, психография, боли, триггеры покупки, возражения.", [{"name": "product", "label": "Продукт", "placeholder": "Онлайн-курс"}, {"name": "niche", "label": "Ниша", "placeholder": "EdTech"}]),
+        ("marketing", "5 рекламных офферов", "Цепляющие офферы для рекламы", "Создай 5 офферов для: {product}.\nАудитория: {audience}.\nБоль: {pain}.\nКаждый до 150 символов с CTA.", [{"name": "product", "label": "Продукт", "placeholder": "CRM"}, {"name": "audience", "label": "Аудитория", "placeholder": "Бизнес"}, {"name": "pain", "label": "Боль", "placeholder": "Теряют заявки"}]),
+        ("marketing", "SWOT-анализ", "Сильные/слабые стороны бизнеса", "SWOT для {company}. Отрасль: {industry}. Конкуренты: {competitors}.\nПо 5-7 пунктов + 3 рекомендации.", [{"name": "company", "label": "Компания", "placeholder": "Магазин"}, {"name": "industry", "label": "Отрасль", "placeholder": "E-commerce"}, {"name": "competitors", "label": "Конкуренты", "placeholder": "WB, Ozon"}]),
+        ("smm", "Контент-план на месяц", "30 идей постов с типами и форматами", "Контент-план 30 дней для {platform}. Ниша: {niche}. {frequency} постов/нед.\nДля каждого: тема, тип, формат.", [{"name": "platform", "label": "Платформа", "placeholder": "Telegram"}, {"name": "niche", "label": "Ниша", "placeholder": "Фитнес"}, {"name": "frequency", "label": "Постов/нед", "placeholder": "5"}]),
+        ("smm", "Пост для Telegram", "Вовлекающий пост с CTA", "Пост для Telegram. Тема: {topic}. Тон: {tone}.\n300-600 символов, хук, польза, CTA, эмодзи, хештеги.", [{"name": "topic", "label": "Тема", "placeholder": "AI тренды"}, {"name": "tone", "label": "Тон", "placeholder": "экспертный"}]),
+        ("seo", "LSI семантическое ядро", "Ключи + LSI + FAQ для статьи", "Семантическое ядро для: {topic}.\nОсновной ключ, ВЧ(5), СЧ(10), НЧ(15), LSI(20), FAQ(10).", [{"name": "topic", "label": "Тема", "placeholder": "Как выбрать CRM"}]),
+        ("copywriting", "Текст для лендинга", "Продающий текст по AIDA", "Продающий текст. Продукт: {product}. ЦА: {audience}. Преимущество: {benefit}.\nЗаголовок 4U, проблема, решение, 5 выгод, CTA.", [{"name": "product", "label": "Продукт", "placeholder": "SaaS"}, {"name": "audience", "label": "ЦА", "placeholder": "Маркетологи"}, {"name": "benefit", "label": "Преимущество", "placeholder": "Экономит 10ч/нед"}]),
+        ("copywriting", "Welcome email-серия", "3 письма для новых подписчиков", "Welcome-серия 3 письма для {business}. ЦА: {audience}.\n1: приветствие+бонус. 2: ценность+кейс. 3: оффер+дедлайн.", [{"name": "business", "label": "Бизнес", "placeholder": "Онлайн-школа"}, {"name": "audience", "label": "ЦА", "placeholder": "Ученики"}]),
+        ("code", "Код-ревью", "Анализ кода с рекомендациями", "Код-ревью. Язык: {language}.\n{code}\nПроверь: баги, производительность, безопасность, читаемость + fix.", [{"name": "language", "label": "Язык", "placeholder": "Python"}, {"name": "code", "label": "Код", "placeholder": "Вставьте код"}]),
+        ("business", "Питч инвестору", "Презентация проекта за 1 мин", "Питч на 1 минуту. Проект: {project}. Рынок: {market}. Стадия: {stage}.\nПроблема, решение, рынок, модель, трекшн, команда, запрос.", [{"name": "project", "label": "Проект", "placeholder": "AI-платформа"}, {"name": "market", "label": "Рынок", "placeholder": "MarTech"}, {"name": "stage", "label": "Стадия", "placeholder": "MVP"}]),
+        ("business", "Скрипт холодного звонка", "Скрипт для первого контакта", "Скрипт звонка. Продукт: {product}. ЛПР: {lpr}. Цель: {goal}.\nПриветствие, квалификация, боль, презентация, 3 возражения, закрытие.", [{"name": "product", "label": "Продукт", "placeholder": "CRM"}, {"name": "lpr", "label": "ЛПР", "placeholder": "Директор"}, {"name": "goal", "label": "Цель", "placeholder": "Назначить демо"}]),
+        ("code", "REST API документация", "Swagger-style документация", "Документация REST API. Сервис: {service}. Эндпоинты: {endpoints}.\nДля каждого: метод, URL, параметры, тело, ответ, ошибки. Markdown.", [{"name": "service", "label": "Сервис", "placeholder": "Заказы"}, {"name": "endpoints", "label": "Эндпоинты", "placeholder": "GET /orders, POST /orders"}]),
+    ]
+
+    added = 0
+    for cat, title, desc, content, variables in seeds:
+        await db.execute(text(
+            "INSERT INTO prompt_templates (id, category, title, description, content, variables, usage_count, is_system, is_public, likes, author_name) "
+            "VALUES (:id, :cat, :title, :desc, :content, :vars, 0, false, true, 0, 'Stone AI')"
+        ), {"id": str(_uuid.uuid4()), "cat": cat, "title": title, "desc": desc, "content": content, "vars": _json.dumps(variables, ensure_ascii=False)})
+        added += 1
+
+    await db.commit()
+    return {"ok": True, "message": f"Seeded {added} marketplace templates", "count": added}
+
+
 # ─── Wizard: generate from template ───
 
 class DirectGenerateRequest(BaseModel):
