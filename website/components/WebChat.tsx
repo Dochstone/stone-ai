@@ -1662,7 +1662,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                   </button>
                 </div>
                 <input type="text" value={modelSearch} onChange={(e) => setModelSearch(e.target.value)}
-                  placeholder="Поиск модели..." autoFocus
+                  placeholder="Поиск модели..."
                   className="w-full bg-text/[0.03] border border-text/10 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-accent/30" />
               </div>
               {/* List */}

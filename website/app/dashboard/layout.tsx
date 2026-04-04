@@ -362,12 +362,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           </nav>
 
-          {/* Sticky bottom — Theme + Profile */}
+          {/* Sticky bottom — Theme (desktop only) + Profile */}
           <div className={`shrink-0 border-t border-text/5 ${collapsed ? "hidden lg:flex py-1.5 flex-col items-center gap-0.5" : "p-3"}`}>
-            <div className={`${collapsed ? "" : "flex items-center justify-between mb-2"}`}>
+            {/* Theme toggle — desktop only (mobile has it in top bar) */}
+            <div className={`${collapsed ? "" : "hidden lg:flex items-center justify-between mb-2"}`}>
               {!collapsed && <span className="text-[9px] text-text/20 font-medium">Тема</span>}
               <ThemeToggle compact={collapsed} />
             </div>
+            {/* Profile — always visible */}
             {authEmail ? (
               <Link
                 href="/profile"
