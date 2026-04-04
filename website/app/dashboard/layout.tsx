@@ -124,6 +124,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <span className="text-sm font-bold text-text">AI Чат</span>
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
+                aria-label={sidebarOpen ? "Закрыть меню" : "Открыть меню"}
                 className="text-text/40 hover:text-text/70 transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -135,6 +136,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <>
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
+                aria-label={sidebarOpen ? "Закрыть меню" : "Открыть меню"}
                 className="flex items-center gap-2 text-sm font-semibold text-text/70"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -154,7 +156,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Sidebar overlay (mobile) */}
         {sidebarOpen && (
           <div
-            className="lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+            className="lg:hidden fixed inset-0 z-[34] bg-black/50 backdrop-blur-sm"
             onClick={() => setSidebarOpen(false)}
           />
         )}
@@ -186,6 +188,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       key={c.id}
                       onClick={() => setChatCategory(c.id)}
                       title={c.label}
+                      aria-label={c.label}
                       className={`w-full flex items-center justify-center p-2.5 rounded-xl transition-all duration-200 ${
                         chatCategory === c.id
                           ? "bg-gradient-to-r from-accent/15 to-teal/10 text-accent shadow-sm shadow-accent/5 scale-105"
@@ -211,6 +214,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       key={item.href}
                       href={item.href}
                       title={item.label}
+                      aria-label={item.label}
                       onClick={() => setSidebarOpen(false)}
                       className="w-full flex items-center justify-center p-2 rounded-lg text-text/20 hover:text-text/50 hover:bg-text/[0.04] transition-all"
                     >
@@ -230,6 +234,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <button
                       key={c.id}
                       onClick={() => { setChatCategory(c.id); setSidebarOpen(false); }}
+                      aria-label={c.label}
                       className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                         chatCategory === c.id
                           ? "bg-gradient-to-r from-accent/10 to-teal/5 text-accent font-semibold border border-accent/10"
@@ -288,6 +293,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             key={item.href + "-lg"}
                             href={item.href}
                             title={item.label}
+                            aria-label={item.label}
                             onClick={() => setSidebarOpen(false)}
                             className={`
                               hidden lg:flex items-center justify-center p-2 rounded-lg
@@ -357,6 +363,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Link
                 href="/profile"
                 onClick={() => setSidebarOpen(false)}
+                aria-label="Профиль"
                 className={`flex items-center ${isChat && !sidebarHover ? "justify-center p-2 rounded-lg" : "gap-3 px-3 py-2 rounded-xl"} text-text/50 hover:text-text/80 hover:bg-text/[0.04] transition-colors`}
               >
                 <div
@@ -375,6 +382,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Link
                 href="/profile"
                 onClick={() => setSidebarOpen(false)}
+                aria-label="Профиль"
                 className={`flex items-center ${isChat && !sidebarHover ? "justify-center p-2 rounded-lg" : "gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold"} text-accent hover:bg-accent/5 transition-colors`}
               >
                 <svg className="w-[18px] h-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>

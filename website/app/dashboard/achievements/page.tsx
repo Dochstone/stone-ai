@@ -30,9 +30,12 @@ export default function AchievementsPage() {
   const [claiming, setClaiming] = useState<string | null>(null);
   const [popup, setPopup] = useState<{ icon: string; title: string; reward: number } | null>(null);
 
+  const [fetching, setFetching] = useState(false);
   const fetchAchs = () => {
+    if (fetching) return;
     const auth = getAuth();
     if (!auth?.token) { setLoading(false); return; }
+    setFetching(true);
     fetch(`${API_URL}/api/achievements/`, { headers: { Authorization: `Bearer ${auth.token}` } })
       .then(r => r.json())
       .then(data => {
@@ -41,7 +44,7 @@ export default function AchievementsPage() {
         setCompleted(data.completed || 0);
       })
       .catch((e) => { console.error("Failed to load achievements:", e); })
-      .finally(() => setLoading(false));
+      .finally(() => { setLoading(false); setFetching(false); });
   };
 
   useEffect(() => { fetchAchs(); }, []);
@@ -119,7 +122,7 @@ export default function AchievementsPage() {
               const canClaim = a.is_completed && !a.reward_claimed && a.reward_rub > 0;
               const claimed = a.is_completed && (a.reward_claimed || a.reward_rub === 0);
               return (
-                <div key={a.slug} className={`relative border rounded-2xl p-4 text-center transition-all flex flex-col ${
+                <div key={a.slug} role="group" aria-label={a.title} tabIndex={0} className={`relative border rounded-2xl p-4 text-center transition-all flex flex-col ${
                   canClaim
                     ? "bg-accent/5 border-accent/30 ring-2 ring-accent/20 ring-offset-1"
                     : a.is_completed

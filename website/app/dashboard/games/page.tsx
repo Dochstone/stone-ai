@@ -27,6 +27,7 @@ export default function GamesPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
               <button
                 onClick={() => setActiveGame("snake")}
+                aria-label="Змейка"
                 className="bg-white rounded-2xl border border-text/5 p-6 text-left hover:shadow-md hover:border-accent/20 transition-all group"
               >
                 <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform">
@@ -42,6 +43,7 @@ export default function GamesPage() {
 
               <button
                 onClick={() => setActiveGame("2048")}
+                aria-label="2048"
                 className="bg-white rounded-2xl border border-text/5 p-6 text-left hover:shadow-md hover:border-accent/20 transition-all group"
               >
                 <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform">

@@ -63,9 +63,11 @@ export default function MarketplacePage() {
     setLoading(false);
   }, [category, search, tab, page]);
 
+  const [myLoading, setMyLoading] = useState(false);
   const fetchMyTemplates = useCallback(async () => {
     const auth = getAuth();
     if (!auth?.token) { setMyTemplates([]); return; }
+    setMyLoading(true);
     try {
       const res = await fetch(`${API_URL}/api/prompts/marketplace/my`, {
         headers: { Authorization: `Bearer ${auth.token}` },
@@ -73,6 +75,7 @@ export default function MarketplacePage() {
       const data = await res.json();
       setMyTemplates(data.templates || []);
     } catch { setMyTemplates([]); }
+    finally { setMyLoading(false); }
   }, []);
 
   const fetchLiked = useCallback(async () => {
@@ -97,9 +100,12 @@ export default function MarketplacePage() {
 
   useEffect(() => { fetchLiked(); }, [fetchLiked]);
 
+  const [likingId, setLikingId] = useState<string | null>(null);
   const toggleLike = async (templateId: string) => {
+    if (likingId) return;
     const auth = getAuth();
     if (!auth?.token) { setError("Войдите для оценки шаблонов"); return; }
+    setLikingId(templateId);
     try {
       const res = await fetch(`${API_URL}/api/prompts/templates/${templateId}/like`, {
         method: "POST",
@@ -116,6 +122,7 @@ export default function MarketplacePage() {
         setMyTemplates(prev => prev.map(t => t.id === templateId ? { ...t, likes: data.likes } : t));
       }
     } catch { /* ignore */ }
+    finally { setLikingId(null); }
   };
 
   const openUseModal = (tpl: MarketplaceTemplate) => {
@@ -298,8 +305,8 @@ export default function MarketplacePage() {
         )}
 
         {/* Grid */}
-        {loading && tab !== "my" ? (
-          <SkeletonGrid cols={3} count={6} />
+        {(loading && tab !== "my") || (myLoading && tab === "my") ? (
+          <SkeletonGrid cols={3} count={3} />
         ) : displayTemplates.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-2xl border border-text/5">
             <span className="text-4xl block mb-3">🏪</span>
@@ -366,7 +373,8 @@ export default function MarketplacePage() {
                   </button>
                   <button
                     onClick={() => toggleLike(tpl.id)}
-                    className={`flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                    disabled={likingId === tpl.id}
+                    className={`flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-semibold border transition-all disabled:opacity-50 ${
                       likedIds.has(tpl.id)
                         ? "border-red-300 bg-red-50 text-red-500"
                         : "border-text/10 text-text/30 hover:text-red-400 hover:border-red-200"

@@ -65,15 +65,16 @@ export default function GalleryPage() {
   useEffect(() => {
     const el = loaderRef.current;
     if (!el) return;
+    let cancelled = false;
     const obs = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting && page < totalPages && !loading) {
+      if (e.isIntersecting && page < totalPages && !loading && !cancelled) {
         const next = page + 1;
         setPage(next);
         fetchGens(next, true);
       }
     }, { rootMargin: "200px" });
     obs.observe(el);
-    return () => obs.disconnect();
+    return () => { cancelled = true; obs.disconnect(); };
   }, [page, totalPages, loading, fetchGens]);
 
   const toggleFav = async (id: string) => {
@@ -135,7 +136,8 @@ export default function GalleryPage() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 animate-fadeIn">
             {gens.map(g => (
-              <div key={g.id} onClick={() => setSelected(g)}
+              <div key={g.id} onClick={() => setSelected(g)} onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelected(g); } }}
+                role="button" tabIndex={0} aria-label={g.prompt}
                 className="relative bg-bg border border-text/5 rounded-xl overflow-hidden cursor-pointer group hover:border-text/15 transition-all">
                 {/* Preview */}
                 <div className="aspect-square bg-text/[0.02] flex items-center justify-center overflow-hidden">
