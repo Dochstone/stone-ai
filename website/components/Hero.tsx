@@ -280,7 +280,7 @@ function TrustMarquee() {
   );
 
   return (
-    <div className="mt-20 overflow-hidden">
+    <div className="mt-20 overflow-hidden relative z-20 bg-bg py-6">
       <p className="text-center text-[10px] text-text/25 font-semibold uppercase tracking-[0.2em] mb-6">
         Работаем с лучшими AI-провайдерами
       </p>
