@@ -226,7 +226,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           onMouseEnter={() => { if (isChat) setSidebarHover(true); }}
           onMouseLeave={() => { if (isChat) setSidebarHover(false); }}
         >
-          <nav className={`flex-1 overflow-y-auto overscroll-contain ${isChat ? (sidebarHover ? "p-3 space-y-3" : "p-2 lg:p-0 lg:pt-2 space-y-2 lg:space-y-0") : "p-2 space-y-2"}`}>
+          <nav className={`flex-1 overflow-y-auto overscroll-contain ${isChat ? (sidebarHover ? "p-2 space-y-2" : "p-0 lg:p-0 lg:pt-2 space-y-0 lg:space-y-0") : "p-0 space-y-0"}`}>
 
             {/* ═══ Chat mode collapsed: icons with hover labels ═══ */}
             {isChat && !sidebarHover && (
@@ -277,8 +277,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
             {/* Chat categories — full labels for mobile or hover */}
             {isChat && (sidebarHover || true) && (
-              <div className={`${!sidebarHover ? "lg:hidden" : ""} mb-2`}>
-                <div className="text-[9px] font-bold text-accent/50 uppercase tracking-[2px] px-3 mb-1.5">Режим AI</div>
+              <div className={`${!sidebarHover ? "lg:hidden" : ""}`}>
+                <div className="text-[9px] font-bold text-accent/50 uppercase tracking-[2px] px-3 pt-2 mb-1">Режим AI</div>
                 <div className="space-y-px">
                   {CHAT_CATEGORIES.map((c) => (
                     <button
@@ -299,9 +299,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </button>
                   ))}
                 </div>
-                <div className="flex items-center gap-2 my-2 px-3">
+                <div className="flex items-center gap-2 my-1 px-3">
                   <div className="flex-1 h-px bg-text/[0.06]" />
-                  <span className="text-[8px] text-text/20 font-bold uppercase tracking-widest">Инструменты</span>
+                  <span className="text-[8px] text-text/15 font-bold uppercase tracking-widest">Инструменты</span>
                   <div className="flex-1 h-px bg-text/[0.06]" />
                 </div>
               </div>
@@ -311,7 +311,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {NAV_ITEMS.map((group) => (
               <div key={group.group}>
                 {(!isChat || sidebarHover) && (
-                  <div className={`text-[9px] font-bold text-text/25 uppercase tracking-[1.5px] px-3 mb-1 ${isChat && !sidebarHover ? "lg:hidden" : ""}`}>
+                  <div className={`text-[9px] font-bold text-text/20 uppercase tracking-[1.5px] px-3 pt-1 mb-0.5 ${isChat && !sidebarHover ? "lg:hidden" : ""}`}>
                     {group.group}
                   </div>
                 )}
