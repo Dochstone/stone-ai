@@ -47,24 +47,28 @@ export default function BotsPage() {
     if (!auth || !form.name.trim() || !form.system_prompt.trim()) return;
     setLoading(true);
     try {
-      if (editing) {
-        await fetch(`${API_URL}/api/bots/${editing.id}`, {
-          method: "PATCH",
-          headers: { Authorization: `Bearer ${auth.token}`, "Content-Type": "application/json" },
-          body: JSON.stringify(form),
-        });
-      } else {
-        await fetch(`${API_URL}/api/bots`, {
-          method: "POST",
-          headers: { Authorization: `Bearer ${auth.token}`, "Content-Type": "application/json" },
-          body: JSON.stringify(form),
-        });
+      const res = editing
+        ? await fetch(`${API_URL}/api/bots/${editing.id}`, {
+            method: "PATCH",
+            headers: { Authorization: `Bearer ${auth.token}`, "Content-Type": "application/json" },
+            body: JSON.stringify(form),
+          })
+        : await fetch(`${API_URL}/api/bots`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${auth.token}`, "Content-Type": "application/json" },
+            body: JSON.stringify(form),
+          });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: "Ошибка" }));
+        alert(typeof err.detail === "string" ? err.detail : "Ошибка сохранения");
+        setLoading(false);
+        return;
       }
       setEditing(null);
       setCreating(false);
       setForm({ name: "", description: "", system_prompt: "", model_id: "gpt-4o-mini", avatar_emoji: "🤖", is_public: false });
       fetchBots();
-    } catch {}
+    } catch { alert("Ошибка сети"); }
     setLoading(false);
   };
 

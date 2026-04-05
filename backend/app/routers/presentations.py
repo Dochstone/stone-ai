@@ -663,6 +663,8 @@ async def export_pptx(
         raise HTTPException(404, "Презентация не найдена")
 
     slides = json.loads(gen.result_text) if gen.result_text else []
+    if not slides:
+        raise HTTPException(400, "Презентация пустая — нет слайдов")
     meta = gen.metadata_ or {}
     style = meta.get("style", "modern")
     pptx_title = gen.prompt or "Presentation"
@@ -673,10 +675,10 @@ async def export_pptx(
         logger.error(f"PPTX build error: {e}")
         raise HTTPException(500, "Ошибка генерации PPTX")
 
-    filename = re.sub(r'[^\w\s-]', '', pptx_title)[:50].strip() or "presentation"
+    filename = re.sub(r'[^\w\s-]', '', pptx_title)[:50].strip().replace('"', '') or "presentation"
 
     return StreamingResponse(
         io.BytesIO(pptx_bytes),
         media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
-        headers={"Content-Disposition": f'attachment; filename="{filename}.pptx"'},
+        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{filename}.pptx"},
     )

@@ -15,6 +15,7 @@ from app.database import get_db, async_session
 from app.middleware.auth import get_current_user
 from app.models.agent_task import AgentTask
 from app.models.user import User
+from app.services.ai_router import get_openrouter_model
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/agent", tags=["agent"])
@@ -68,7 +69,7 @@ async def run_agent_task(task_id: int, instruction: str, model_id: str, max_step
                     "https://openrouter.ai/api/v1/chat/completions",
                     headers={"Authorization": f"Bearer {openrouter_key}"},
                     json={
-                        "model": f"openai/{model_id}" if not "/" in model_id else model_id,
+                        "model": get_openrouter_model(model_id),
                         "messages": messages,
                         "max_tokens": 2000,
                         "temperature": 0.3,
@@ -155,6 +156,13 @@ async def run_agent(
 ):
     """Start an agent task."""
     tg_id = tg_user["id"]
+
+    # Check balance
+    user_result = await db.execute(select(User).where(User.telegram_id == tg_id))
+    user = user_result.scalar_one_or_none()
+    min_cost = body.max_steps * COST_PER_STEP_USD
+    if user and (user.balance_usd or 0) < min_cost:
+        raise HTTPException(402, f"Недостаточно средств. Нужно ~{int(min_cost * 95)}₽")
 
     # Check active tasks limit
     active = await db.scalar(

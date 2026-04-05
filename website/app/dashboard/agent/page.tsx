@@ -44,23 +44,29 @@ export default function AgentPage() {
   useEffect(() => { fetchTasks(); }, []);
 
   const pollTask = (taskId: number) => {
-    if (pollRef.current) clearInterval(pollRef.current);
-    pollRef.current = setInterval(async () => {
+    if (pollRef.current) clearTimeout(pollRef.current);
+    let delay = 1500;
+    const poll = async () => {
       if (!auth) return;
-      const res = await fetch(`${API_URL}/api/agent/tasks/${taskId}`, { headers: { Authorization: `Bearer ${auth.token}` } });
-      if (res.ok) {
-        const task = await res.json();
-        setActiveTask(task);
-        if (task.status !== "running") {
-          if (pollRef.current) clearInterval(pollRef.current);
-          setRunning(false);
-          fetchTasks();
+      try {
+        const res = await fetch(`${API_URL}/api/agent/tasks/${taskId}`, { headers: { Authorization: `Bearer ${auth.token}` } });
+        if (res.ok) {
+          const task = await res.json();
+          setActiveTask(task);
+          if (task.status !== "running") {
+            setRunning(false);
+            fetchTasks();
+            return;
+          }
         }
-      }
-    }, 2000);
+      } catch {}
+      delay = Math.min(delay * 1.3, 8000); // exponential backoff up to 8s
+      pollRef.current = setTimeout(poll, delay);
+    };
+    pollRef.current = setTimeout(poll, delay);
   };
 
-  useEffect(() => { return () => { if (pollRef.current) clearInterval(pollRef.current); }; }, []);
+  useEffect(() => { return () => { if (pollRef.current) clearTimeout(pollRef.current); }; }, []);
 
   const runAgent = async () => {
     if (!auth || !instruction.trim() || running) return;
