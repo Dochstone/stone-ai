@@ -323,7 +323,7 @@ export default function CampaignsPage() {
               </div>
             ) : (
               <div className="text-center py-16">
-                <div className="text-5xl mb-3 opacity-15">📊</div>
+                <img src="/mascots/stone-mascot-idle.png" alt="Stone" width="90" height="90" className="mx-auto mb-3" />
                 <p className="text-text/25 text-sm">Введите нишу и создайте первую кампанию</p>
               </div>
             )}

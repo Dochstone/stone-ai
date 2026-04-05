@@ -2,6 +2,9 @@ import Image from "next/image";
 
 type Variant = "idle" | "loading" | "success" | "error" | "chat" | "image" | "video" | "bot" | "campaign" | "game";
 
+// PNG variants (AI-generated Pixar style)
+const PNG_VARIANTS = new Set(["idle", "loading", "success", "error", "chat"]);
+
 interface StoneProps {
   variant?: Variant;
   size?: number;
@@ -10,9 +13,11 @@ interface StoneProps {
 }
 
 export default function Stone({ variant = "idle", size = 64, className = "", alt }: StoneProps) {
+  const ext = PNG_VARIANTS.has(variant) ? "png" : "svg";
+  const src = PNG_VARIANTS.has(variant) ? `/mascots/stone-mascot-${variant}.${ext}` : `/mascots/stone-${variant}.${ext}`;
   return (
     <Image
-      src={`/mascots/stone-${variant}.svg`}
+      src={src}
       alt={alt || `Stone AI — ${variant}`}
       width={size}
       height={size}

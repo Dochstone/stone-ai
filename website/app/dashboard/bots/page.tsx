@@ -197,7 +197,7 @@ export default function BotsPage() {
         {tab === "my" ? (
           bots.length === 0 && !creating ? (
             <div className="text-center py-16">
-              <div className="text-5xl mb-3 opacity-20">🤖</div>
+              <img src="/mascots/stone-mascot-chat.png" alt="Stone" width="90" height="90" className="mx-auto mb-3" />
               <p className="text-text/30 text-sm">У вас пока нет ботов</p>
               <button onClick={() => setCreating(true)} className="mt-3 text-accent text-sm font-bold hover:underline">Создать первого бота</button>
             </div>
