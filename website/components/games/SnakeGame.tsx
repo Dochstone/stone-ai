@@ -34,6 +34,7 @@ export default function SnakeGame({ token, onClose, compact, onShowLeaderboard }
   const [score, setScore] = useState(0);
   const [best, setBest] = useState(0);
   const [gameState, setGameState] = useState<State>("ready");
+  const [paused, setPaused] = useState(false);
   const [newRecord, setNewRecord] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
 
@@ -245,14 +246,17 @@ export default function SnakeGame({ token, onClose, compact, onShowLeaderboard }
     intervalRef.current = setInterval(tick, BASE_SPEED);
   }, [tick, draw, spawnFood, playSound]);
 
-  // Speed up as score increases
+  // Speed up as score increases + pause support
   useEffect(() => {
-    if (gameState !== "playing") return;
+    if (gameState !== "playing" || paused) {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      return;
+    }
     if (intervalRef.current) clearInterval(intervalRef.current);
     const speed = getSpeed(scoreRef.current);
     intervalRef.current = setInterval(tick, speed);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [score, gameState, tick]);
+  }, [score, gameState, paused, tick]);
 
   // Keyboard controls
   useEffect(() => {
@@ -264,6 +268,7 @@ export default function SnakeGame({ token, onClose, compact, onShowLeaderboard }
       if ((e.key === "ArrowRight" || e.key === "d") && d !== "left") nextDirRef.current = "right";
       if (e.key === " " && gameState === "ready") startGame();
       if (e.key === " " && gameState === "over") startGame();
+      if ((e.key === "Escape" || e.key === "p") && gameState === "playing") setPaused(p => !p);
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
@@ -307,6 +312,11 @@ export default function SnakeGame({ token, onClose, compact, onShowLeaderboard }
             {isMuted ? "\uD83D\uDD07" : "\uD83D\uDD0A"}
           </button>
           {gameState === "playing" && (
+            <button onClick={() => setPaused(p => !p)} className="text-sm text-text/50 hover:text-text/80 transition-colors" title={paused ? "Продолжить (P)" : "Пауза (P)"}>
+              {paused ? "▶️" : "⏸️"}
+            </button>
+          )}
+          {gameState === "playing" && !paused && (
             <span className="text-[10px] text-emerald-400/70 font-mono">{speedLabel}</span>
           )}
         </div>
@@ -330,6 +340,16 @@ export default function SnakeGame({ token, onClose, compact, onShowLeaderboard }
       <div className="w-full flex justify-center">
       <div className="relative" style={{ maxWidth: SIZE, width: "100%" }} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
         <canvas ref={canvasRef} width={SIZE} height={SIZE} className="rounded-xl border border-text/10 w-full h-auto" style={{ touchAction: "none" }} />
+
+        {paused && gameState === "playing" && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 rounded-xl" onClick={() => setPaused(false)}>
+            <span className="text-3xl mb-2">⏸️</span>
+            <p className="text-white font-bold text-lg mb-3">ПАУЗА</p>
+            <button onClick={() => setPaused(false)} className="bg-accent text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-accent/90">
+              Продолжить
+            </button>
+          </div>
+        )}
 
         {gameState === "ready" && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 rounded-xl">

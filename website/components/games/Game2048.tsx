@@ -149,6 +149,7 @@ export default function Game2048({ token, compact, onClose, onShowLeaderboard }:
   const [newTileIdx, setNewTileIdx] = useState(-1);
   const [isNewRecord, setIsNewRecord] = useState(false);
   const [muted, setMuted] = useState(false);
+  const [paused, setPaused] = useState(false);
 
   const boardRef = useRef(board);
   const scoreRef = useRef(score);
@@ -266,7 +267,7 @@ export default function Game2048({ token, compact, onClose, onShowLeaderboard }:
 
   const handleMove = useCallback(
     (dir: "left" | "right" | "up" | "down") => {
-      if (gameStateRef.current !== "playing") return;
+      if (gameStateRef.current !== "playing" || paused) return;
 
       const current = boardRef.current;
       const moveFn = { left: moveLeft, right: moveRight, up: moveUp, down: moveDown }[dir];
@@ -330,6 +331,7 @@ export default function Game2048({ token, compact, onClose, onShowLeaderboard }:
         d: "right",
         D: "right",
       };
+      if (e.key === "Escape" || e.key === "p") { setPaused(p => !p); return; }
       const dir = map[e.key];
       if (dir) {
         e.preventDefault();
@@ -398,8 +400,22 @@ export default function Game2048({ token, compact, onClose, onShowLeaderboard }:
           >
             {muted ? "\uD83D\uDD07" : "\uD83D\uDD0A"}
           </button>
+          {gameState === "playing" && (
+            <button onClick={() => setPaused(p => !p)} className="text-lg opacity-50 hover:opacity-80 transition-opacity" title={paused ? "Продолжить (P)" : "Пауза (P)"}>
+              {paused ? "▶️" : "⏸️"}
+            </button>
+          )}
         </div>
       </div>
+
+      {/* Pause overlay */}
+      {paused && gameState === "playing" && (
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/40 rounded-2xl" onClick={() => setPaused(false)}>
+          <span className="text-3xl mb-2">⏸️</span>
+          <p className="text-white font-bold text-lg mb-3">ПАУЗА</p>
+          <button onClick={() => setPaused(false)} className="bg-accent text-white px-6 py-2.5 rounded-xl font-bold text-sm">Продолжить</button>
+        </div>
+      )}
 
       {/* Grid */}
       <div

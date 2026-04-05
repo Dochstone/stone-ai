@@ -41,6 +41,8 @@ export default function GalleryPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Gen | null>(null);
+  const [bulkMode, setBulkMode] = useState(false);
+  const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
   const loaderRef = useRef<HTMLDivElement>(null);
 
   const fetchGens = useCallback(async (p: number, append: boolean = false) => {
@@ -97,6 +99,44 @@ export default function GalleryPage() {
     setSelected(null);
   };
 
+  const bulkDelete = async () => {
+    if (bulkSelected.size === 0) return;
+    if (!confirm(`Удалить ${bulkSelected.size} генераций?`)) return;
+    const auth = getAuth();
+    if (!auth?.token) return;
+    await Promise.all(
+      Array.from(bulkSelected).map(id =>
+        fetch(`${API_URL}/api/generations/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${auth.token}` } })
+      )
+    );
+    setGens(prev => prev.filter(g => !bulkSelected.has(g.id)));
+    setBulkSelected(new Set());
+    setBulkMode(false);
+  };
+
+  const bulkDownload = async () => {
+    const items = gens.filter(g => bulkSelected.has(g.id) && g.result_url);
+    for (const g of items) {
+      try {
+        const res = await fetch(g.result_url!);
+        const blob = await res.blob();
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `stoneai-${g.id.slice(0, 8)}.${g.type === "video" ? "mp4" : "png"}`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      } catch {}
+    }
+  };
+
+  const toggleBulkItem = (id: string) => {
+    setBulkSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
   return (
     <div className="pb-20">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
@@ -121,7 +161,28 @@ export default function GalleryPage() {
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ml-2 ${favOnly ? "bg-red-500/10 text-red-500" : "bg-text/[0.04] text-text/30"}`}>
             {favOnly ? "❤️ Избранное" : "♡ Избранное"}
           </button>
+          <button onClick={() => { setBulkMode(!bulkMode); setBulkSelected(new Set()); }}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ml-auto ${bulkMode ? "bg-accent text-white" : "bg-text/[0.04] text-text/40 hover:text-text/60"}`}>
+            {bulkMode ? "Отмена" : "Выбрать"}
+          </button>
         </div>
+
+        {/* Bulk actions bar */}
+        {bulkMode && bulkSelected.size > 0 && (
+          <div className="flex items-center gap-3 mb-4 p-3 bg-accent/5 border border-accent/15 rounded-xl">
+            <span className="text-xs font-semibold text-text/60">Выбрано: {bulkSelected.size}</span>
+            <button onClick={() => setBulkSelected(new Set(gens.map(g => g.id)))} className="text-xs text-accent font-semibold hover:underline">Все</button>
+            <div className="flex-1" />
+            <button onClick={bulkDownload} className="flex items-center gap-1.5 text-xs font-semibold text-accent bg-accent/10 hover:bg-accent/20 px-3 py-1.5 rounded-lg transition-colors">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V3" /></svg>
+              Скачать
+            </button>
+            <button onClick={bulkDelete} className="flex items-center gap-1.5 text-xs font-semibold text-red-500 bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 rounded-lg transition-colors">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+              Удалить
+            </button>
+          </div>
+        )}
 
         {/* Grid */}
         {gens.length === 0 && loading ? (
@@ -136,9 +197,14 @@ export default function GalleryPage() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 animate-fadeIn">
             {gens.map(g => (
-              <div key={g.id} onClick={() => setSelected(g)} onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelected(g); } }}
+              <div key={g.id} onClick={() => bulkMode ? toggleBulkItem(g.id) : setSelected(g)} onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); bulkMode ? toggleBulkItem(g.id) : setSelected(g); } }}
                 role="button" tabIndex={0} aria-label={g.prompt}
-                className="relative bg-bg border border-text/5 rounded-xl overflow-hidden cursor-pointer group hover:border-text/15 transition-all">
+                className={`relative bg-bg border rounded-xl overflow-hidden cursor-pointer group hover:border-text/15 transition-all ${bulkMode && bulkSelected.has(g.id) ? "border-accent ring-2 ring-accent/20" : "border-text/5"}`}>
+                {bulkMode && (
+                  <div className={`absolute top-2 left-2 z-10 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors ${bulkSelected.has(g.id) ? "bg-accent border-accent" : "bg-bg/80 border-text/20 backdrop-blur-sm"}`}>
+                    {bulkSelected.has(g.id) && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+                  </div>
+                )}
                 {/* Preview */}
                 <div className="aspect-square bg-text/[0.02] flex items-center justify-center overflow-hidden">
                   {g.type === "image" && g.result_url ? (

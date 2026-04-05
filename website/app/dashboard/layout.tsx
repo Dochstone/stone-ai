@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import { OnboardingTour } from "@/components/OnboardingTour";
 import ThemeToggle from "@/components/ThemeToggle";
 import { getAvatarColor as getAvatarColorFn, getSavedAvatar } from "@/lib/avatar";
+import AchievementToast from "@/components/AchievementToast";
 
 const WebChat = dynamic(() => import("@/components/WebChat"), {
   ssr: false,
@@ -111,6 +112,37 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     if (isChat && !chatLoaded) setChatLoaded(true);
   }, [isChat, chatLoaded]);
+
+  // Check for new achievements
+  useEffect(() => {
+    if (!authEmail) return;
+    const checkAchievements = async () => {
+      try {
+        const auth = JSON.parse(localStorage.getItem("stone_auth") || "{}");
+        if (!auth.token) return;
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app"}/api/achievements`, {
+          headers: { Authorization: `Bearer ${auth.token}` },
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        const completed = (data.achievements || []).filter((a: { is_completed: boolean }) => a.is_completed).map((a: { slug: string }) => a.slug);
+        const prev = JSON.parse(localStorage.getItem("stone_achievements_seen") || "[]");
+        const newOnes = completed.filter((s: string) => !prev.includes(s));
+        if (newOnes.length > 0) {
+          localStorage.setItem("stone_achievements_seen", JSON.stringify(completed));
+          const { triggerAchievementToast } = await import("@/components/AchievementToast");
+          for (const slug of newOnes) {
+            const ach = (data.achievements || []).find((a: { slug: string }) => a.slug === slug);
+            if (ach) triggerAchievementToast({ title: ach.title, icon: ach.icon, reward_rub: ach.reward_rub });
+          }
+        } else if (prev.length === 0 && completed.length > 0) {
+          localStorage.setItem("stone_achievements_seen", JSON.stringify(completed));
+        }
+      } catch {}
+    };
+    const t = setTimeout(checkAchievements, 3000);
+    return () => clearTimeout(t);
+  }, [authEmail]);
 
   // Lock body scroll on mobile when in chat
   useEffect(() => {
@@ -440,6 +472,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           }}
         />
       )}
+      <AchievementToast />
     </div>
   );
 }
