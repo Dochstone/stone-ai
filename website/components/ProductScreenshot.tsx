@@ -1,114 +1,120 @@
 export default function ProductScreenshot() {
   return (
-    <section className="py-20 md:py-28">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Mockup frame */}
-        <div
-          className="rounded-2xl overflow-hidden border border-text/[0.08] bg-white"
-          style={{ boxShadow: "0 24px 80px rgba(0,0,0,0.08)" }}
-        >
-          <div className="flex h-[400px] sm:h-[480px]">
-            {/* Sidebar */}
-            <div className="w-[200px] sm:w-[240px] bg-[#F5F4F0] border-r border-text/[0.06] flex-col hidden sm:flex">
-              {/* New chat btn */}
-              <div className="p-3">
-                <div className="flex items-center gap-2 bg-white rounded-xl px-3 py-2.5 border border-text/[0.06]">
-                  <svg className="w-3.5 h-3.5 text-text/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" d="M12 4v16m8-8H4" />
+    <section className="py-16 md:py-24">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <h2 className="text-2xl md:text-3xl font-extrabold text-text mb-3">Всё в одном интерфейсе</h2>
+          <p className="text-text/50 max-w-lg mx-auto">Панель инструментов и AI-чат — без переключений между сервисами</p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Mockup 1 — Dashboard Panel */}
+          <div className="rounded-2xl overflow-hidden border border-text/[0.08] bg-bg" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.06)" }}>
+            <div className="h-8 bg-text/[0.03] border-b border-text/[0.06] flex items-center px-3 gap-1.5">
+              <div className="w-2.5 h-2.5 rounded-full bg-red-400/60" />
+              <div className="w-2.5 h-2.5 rounded-full bg-amber-400/60" />
+              <div className="w-2.5 h-2.5 rounded-full bg-green-400/60" />
+              <span className="text-[9px] text-text/25 ml-2">stoneai.ru/dashboard</span>
+            </div>
+            <div className="p-5">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-9 h-9 rounded-xl bg-accent/10 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zm10.5 0A2.25 2.25 0 0116.5 3.75h2.25A2.25 2.25 0 0121 6v2.25a2.25 2.25 0 01-2.25 2.25H16.5a2.25 2.25 0 01-2.25-2.25V6z" />
                   </svg>
-                  <span className="text-[12px] font-semibold text-text/60">Новый чат</span>
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-text">Панель инструментов</h3>
+                  <p className="text-[10px] text-text/35">12 AI-инструментов в одном месте</p>
                 </div>
               </div>
-              {/* Chat items */}
-              <div className="flex-1 px-2 space-y-0.5">
-                <div className="bg-white rounded-lg px-3 py-2 shadow-sm">
-                  <div className="text-[11px] font-medium text-text truncate">Код на Python</div>
-                  <div className="text-[9px] text-text/25 mt-0.5">GPT-4o mini</div>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { icon: "💬", name: "AI Чат", badge: null },
+                  { icon: "📝", name: "Шаблоны", badge: "50+" },
+                  { icon: "🤖", name: "Мои боты", badge: "NEW" },
+                  { icon: "🎨", name: "Галерея", badge: null },
+                  { icon: "📊", name: "Презентации", badge: null },
+                  { icon: "📷", name: "Фотосессия", badge: null },
+                  { icon: "🔍", name: "SEO", badge: null },
+                  { icon: "🧠", name: "AI-Агент", badge: "NEW" },
+                  { icon: "🏆", name: "Достижения", badge: null },
+                ].map((t) => (
+                  <div key={t.name} className="bg-text/[0.03] rounded-xl p-3 text-center hover:bg-accent/5 transition-colors">
+                    <span className="text-lg block mb-1">{t.icon}</span>
+                    <span className="text-[10px] font-semibold text-text/60 block">{t.name}</span>
+                    {t.badge && (
+                      <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded mt-1 inline-block ${t.badge === "NEW" ? "bg-accent/10 text-accent" : "bg-text/[0.06] text-text/30"}`}>{t.badge}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Mockup 2 — AI Chat */}
+          <div className="rounded-2xl overflow-hidden border border-text/[0.08] bg-bg" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.06)" }}>
+            <div className="h-8 bg-text/[0.03] border-b border-text/[0.06] flex items-center px-3 gap-1.5">
+              <div className="w-2.5 h-2.5 rounded-full bg-red-400/60" />
+              <div className="w-2.5 h-2.5 rounded-full bg-amber-400/60" />
+              <div className="w-2.5 h-2.5 rounded-full bg-green-400/60" />
+              <span className="text-[9px] text-text/25 ml-2">stoneai.ru/dashboard/chat</span>
+            </div>
+            {/* Top bar */}
+            <div className="h-10 border-b border-text/[0.06] flex items-center justify-between px-4">
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-md bg-[#10a37f] flex items-center justify-center">
+                  <span className="text-[8px] font-bold text-white">G</span>
                 </div>
-                <div className="px-3 py-2 rounded-lg hover:bg-white/50">
-                  <div className="text-[11px] font-medium text-text/60 truncate">Анализ отчёта Q4</div>
-                  <div className="text-[9px] text-text/20 mt-0.5">Claude Opus 4</div>
+                <span className="text-[11px] font-bold text-text">GPT-4o mini</span>
+                <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-teal/10 text-teal">FREE</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold text-text/30">552</span>
+                <span className="text-[8px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-[#F43F5E] to-[#E11D48] text-white">Elite</span>
+              </div>
+            </div>
+            {/* Messages */}
+            <div className="px-4 py-4 space-y-3" style={{ minHeight: 260 }}>
+              {/* User */}
+              <div className="flex gap-2 flex-row-reverse">
+                <div className="w-6 h-6 rounded-full bg-accent ring-1 ring-accent/20 flex items-center justify-center shrink-0">
+                  <span className="text-[8px] font-bold text-white">DO</span>
                 </div>
-                <div className="px-3 py-2 rounded-lg hover:bg-white/50">
-                  <div className="text-[11px] font-medium text-text/60 truncate">Логотип для стартапа</div>
-                  <div className="text-[9px] text-text/20 mt-0.5">Flux Schnell</div>
+                <div className="bg-gradient-to-br from-accent/90 to-accent text-white rounded-2xl rounded-tr-sm px-3 py-2 text-[11px] max-w-[75%] shadow-sm">
+                  Сравни Claude Sonnet 4 и GPT-5.1 для рефакторинга кода
                 </div>
               </div>
-              {/* Model selector */}
-              <div className="p-3 border-t border-text/[0.06]">
-                <div className="text-[9px] font-semibold text-text/25 uppercase tracking-wider mb-1">Модель</div>
-                <div className="bg-white border border-text/[0.06] rounded-lg px-3 py-2 text-[11px] font-medium text-text">
-                  GPT-4o mini — OpenAI
+              {/* AI */}
+              <div className="flex gap-2">
+                <div className="w-6 h-6 rounded-full bg-[#10a37f] ring-1 ring-text/[0.06] flex items-center justify-center shrink-0">
+                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                  </svg>
+                </div>
+                <div className="bg-text/[0.04] text-text/80 rounded-2xl rounded-tl-sm px-3 py-2.5 text-[11px] max-w-[80%] leading-relaxed">
+                  <p className="font-semibold mb-1.5">Отличный вопрос! Вот ключевые различия:</p>
+                  <p className="mb-1"><span className="font-semibold text-[#d97706]">Claude Sonnet 4</span> — лучше для архитектурного рефакторинга, следует SOLID, чище типизация</p>
+                  <p><span className="font-semibold text-[#10a37f]">GPT-5.1</span> — быстрее находит баги, лучше для дебага и быстрых фиксов</p>
+                  <div className="flex items-center gap-2 mt-2 text-[9px] text-text/25">
+                    <span>245 tok</span>
+                    <span>·</span>
+                    <span>0.3₽</span>
+                  </div>
                 </div>
               </div>
             </div>
-
-            {/* Chat area */}
-            <div className="flex-1 flex flex-col min-w-0">
-              {/* Top bar */}
-              <div className="h-11 border-b border-text/[0.06] flex items-center justify-between px-4 shrink-0">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded bg-[#10a37f] flex items-center justify-center">
-                    <span className="text-[8px] font-bold text-white">G</span>
-                  </div>
-                  <span className="text-[12px] font-bold text-text">GPT-4o mini</span>
-                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-teal-light text-teal">FREE</span>
-                </div>
-                <span className="text-[11px] font-bold text-accent">$12.50</span>
-              </div>
-
-              {/* Messages */}
-              <div className="flex-1 overflow-hidden px-4 sm:px-6 py-4 space-y-4">
-                {/* User */}
-                <div className="flex gap-2 flex-row-reverse">
-                  <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center shrink-0">
-                    <span className="text-[9px] font-bold text-white">U</span>
-                  </div>
-                  <div className="bg-accent text-white rounded-2xl rounded-tr-sm px-3 py-2 text-[11px] max-w-[70%]">
-                    Напиши функцию быстрой сортировки на Python
-                  </div>
-                </div>
-                {/* AI */}
-                <div className="flex gap-2">
-                  <div className="w-6 h-6 rounded-full bg-[#10a37f] flex items-center justify-center shrink-0">
-                    <span className="text-[9px] font-bold text-white">G</span>
-                  </div>
-                  <div className="bg-[#F0EFEB] text-text/80 rounded-2xl rounded-tl-sm px-3 py-2 text-[11px] max-w-[75%]">
-                    <p className="mb-1.5">Вот реализация quicksort:</p>
-                    <div className="bg-[#1C1C1E] rounded-lg p-2.5 text-[10px] font-mono text-white/80 leading-relaxed">
-                      <span className="text-purple-400">def</span> <span className="text-blue-400">quicksort</span>(arr):<br/>
-                      &nbsp;&nbsp;<span className="text-purple-400">if</span> <span className="text-blue-400">len</span>(arr) {"<="} <span className="text-amber-300">1</span>:<br/>
-                      &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-purple-400">return</span> arr<br/>
-                      &nbsp;&nbsp;pivot = arr[<span className="text-amber-300">0</span>]<br/>
-                      &nbsp;&nbsp;<span className="text-purple-400">return</span> quicksort([x ...])
-                    </div>
-                    <div className="mt-1.5 text-[9px] text-text/30">128 tok · $0.0003</div>
-                  </div>
-                </div>
-                {/* User */}
-                <div className="flex gap-2 flex-row-reverse">
-                  <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center shrink-0">
-                    <span className="text-[9px] font-bold text-white">U</span>
-                  </div>
-                  <div className="bg-accent text-white rounded-2xl rounded-tr-sm px-3 py-2 text-[11px] max-w-[70%]">
-                    Теперь добавь type hints
-                  </div>
-                </div>
-              </div>
-
-              {/* Input */}
-              <div className="border-t border-text/[0.06] px-4 sm:px-6 py-2.5 shrink-0">
-                <div className="flex items-center gap-2 bg-bg border border-text/[0.06] rounded-xl px-3 py-2">
-                  <svg className="w-4 h-4 text-text/20 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
-                  </svg>
-                  <span className="flex-1 text-[11px] text-text/20">Написать сообщение...</span>
-                  <div className="w-6 h-6 rounded-lg bg-accent/30 flex items-center justify-center">
-                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
-                    </svg>
-                  </div>
-                </div>
+            {/* Input */}
+            <div className="border-t border-text/[0.06] px-4 py-2">
+              <div className="flex items-center gap-2 bg-text/[0.03] border border-text/[0.08] rounded-2xl px-3 py-2">
+                <svg className="w-4 h-4 text-text/15 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32" />
+                </svg>
+                <span className="text-[10px] text-text/60 font-medium">GPT-4o mini</span>
+                <span className="flex-1 text-[11px] text-text/20">Сообщение...</span>
+                <svg className="w-4 h-4 text-text/15 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+                </svg>
               </div>
             </div>
           </div>

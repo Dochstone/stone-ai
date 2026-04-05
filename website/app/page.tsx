@@ -7,7 +7,7 @@ import DemoShowcase from "@/components/DemoShowcase";
 import HowItWorks from "@/components/HowItWorks";
 import ModelGrid from "@/components/ModelGrid";
 
-import FeaturesTable from "@/components/FeaturesTable";
+// FeaturesTable removed — pricing section covers this
 import Pricing from "@/components/Pricing";
 import Reviews from "@/components/Reviews";
 import FAQ from "@/components/FAQ";
@@ -38,7 +38,6 @@ export default function Home() {
       <DemoShowcase />
       <HowItWorks />
       <ModelGrid />
-      <FeaturesTable />
       <Pricing />
       <Reviews />
       <FAQ />
