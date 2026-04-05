@@ -1,12 +1,12 @@
 const features = [
   { name: "AI модели", free: "5 моделей", paid: "65+ моделей" },
   { name: "Запросы в день", free: "15", paid: "До 10 000/мес" },
-  { name: "GPT-5, Claude Opus", free: "---", paid: "check" },
+  { name: "GPT-5.1, Claude Opus 4", free: "---", paid: "check" },
   { name: "Генерация картинок", free: "---", paid: "check" },
   { name: "AI Поиск (Perplexity)", free: "---", paid: "check" },
   { name: "Глубокий анализ (o3, R1)", free: "---", paid: "check" },
   { name: "Стоимость", free: "Бесплатно", paid: "От 390₽/мес" },
-  { name: "Оплата", free: "—", paid: "Stars, крипто, TON" },
+  { name: "Оплата", free: "—", paid: "Карта РФ, СБП, крипто" },
 ];
 
 function Cell({ value }: { value: string }) {

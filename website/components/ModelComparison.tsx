@@ -34,7 +34,7 @@ export default function ModelComparison() {
         {/* Free */}
         <div className="bg-white rounded-2xl border border-text/5 p-6">
           <h3 className="font-bold text-text mb-1">Бесплатные модели</h3>
-          <p className="text-[11px] text-text/35 mb-5">GPT-4o mini, Gemini Flash, Claude Haiku</p>
+          <p className="text-[11px] text-text/35 mb-5">GPT-4o mini, Gemini 2.0 Flash, Claude Haiku 4.5</p>
           {METRICS.map(m => (
             <div key={m.label} className="mb-3.5">
               <div className="flex justify-between text-xs mb-1.5">
@@ -57,7 +57,7 @@ export default function ModelComparison() {
             Рекомендуем
           </div>
           <h3 className="font-bold text-text mb-1">Премиум модели</h3>
-          <p className="text-[11px] text-text/35 mb-5">GPT-5, Claude Opus, DeepSeek R1</p>
+          <p className="text-[11px] text-text/35 mb-5">GPT-5.1, Claude Opus 4, DeepSeek R1</p>
           {METRICS.map(m => (
             <div key={m.label} className="mb-3.5">
               <div className="flex justify-between text-xs mb-1.5">

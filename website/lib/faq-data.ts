@@ -25,7 +25,7 @@ export const homeFaqData = [
   },
   {
     q: "Какие модели доступны бесплатно?",
-    a: "Бесплатно доступны 7 моделей: GPT-4o mini, Claude Haiku 4.5, Gemini 2.0 Flash, Llama 4 Maverick, Mistral Large и другие. 15 запросов в день + 2 картинки. Инструменты панели доступны с баланса.",
+    a: "Бесплатно доступны 5 моделей: GPT-4o mini, Claude Haiku 4.5, Gemini 2.0 Flash, Llama 4 Maverick, Mistral Large. 15 запросов в день + 2 картинки. Конструктор ботов и AI-агент также доступны. Инструменты панели работают с баланса.",
   },
   {
     q: "Чем Stone AI отличается от ChatGPT Plus?",

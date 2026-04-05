@@ -72,8 +72,8 @@ function VideoCycler({ sources, poster }: { sources: string[]; poster?: string }
 /* ── Floating model cards around the mockup ── */
 const floatingModels = [
   { name: "GPT-5.1", color: "#10a37f", x: "-12%", y: "10%", delay: "0s" },
-  { name: "Claude Opus", color: "#C4623D", x: "85%", y: "5%", delay: "1.2s" },
-  { name: "Gemini Pro", color: "#4285f4", x: "90%", y: "55%", delay: "0.6s" },
+  { name: "Claude Sonnet 4", color: "#C4623D", x: "85%", y: "5%", delay: "1.2s" },
+  { name: "Gemini 2.5", color: "#4285f4", x: "90%", y: "55%", delay: "0.6s" },
   { name: "Grok 3", color: "#1d9bf0", x: "-8%", y: "60%", delay: "1.8s" },
   { name: "DeepSeek R1", color: "#6366f1", x: "40%", y: "-8%", delay: "2.4s" },
 ];
@@ -194,7 +194,7 @@ function ChatMockup() {
           {/* Model selector bar */}
           <div className="px-4 py-3 bg-[#2C2C2E] border-t border-white/[0.06] flex items-center gap-2">
             <div className="flex gap-1.5 overflow-hidden">
-              {["GPT-5.1", "Claude Opus", "Gemini Pro", "DeepSeek R1", "Grok 3"].map((name, i) => (
+              {["GPT-5.1", "Claude Sonnet 4", "Gemini 2.5", "DeepSeek R1", "Grok 3"].map((name, i) => (
                 <span
                   key={name}
                   className={`shrink-0 px-3 py-1 rounded-lg text-[11px] font-medium ${
@@ -332,7 +332,7 @@ export default function Hero() {
           </h1>
 
           <p className="mt-6 text-lg md:text-xl text-text/60 max-w-2xl mx-auto leading-relaxed">
-            GPT-5, Claude, Gemini, Midjourney, Sora и ещё 60+ нейросетей.
+            GPT-5.1, Claude Sonnet 4, Gemini 2.5, Sora и ещё 65+ нейросетей.
             <br className="hidden sm:block" />
             Тексты, картинки, видео, SEO-статьи, шаблоны — всё в одном окне.
           </p>
