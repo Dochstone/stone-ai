@@ -7,6 +7,7 @@ import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 // WelcomeBonusBanner moved inside Nav to fix z-index overlap
 import WebVitals from "@/components/WebVitals";
 import TonProvider from "@/components/TonProvider";
+import PageTracker from "@/components/PageTracker";
 
 const manrope = Manrope({
   subsets: ["latin", "cyrillic"],
@@ -242,6 +243,7 @@ export default function RootLayout({
         </TonProvider>
         <ScrollToTop />
         <PWAInstallPrompt />
+        <PageTracker />
       </body>
     </html>
   );

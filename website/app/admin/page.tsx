@@ -146,6 +146,7 @@ const TABS = [
   { id: "transactions" as const, label: "Платежи", icon: "M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" },
   { id: "promos" as const, label: "Промокоды", icon: "M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z M6 6h.008v.008H6V6z" },
   { id: "referrals" as const, label: "Рефералы", icon: "M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" },
+  { id: "analytics" as const, label: "Аналитика", icon: "M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z M15 12a3 3 0 11-6 0 3 3 0 016 0z" },
 ];
 
 export default function AdminPage() {
@@ -154,7 +155,7 @@ export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [authed, setAuthed] = useState(false);
-  const [tab, setTab] = useState<"stats" | "users" | "transactions" | "promos" | "referrals">("stats");
+  const [tab, setTab] = useState<"stats" | "users" | "transactions" | "promos" | "referrals" | "analytics">("stats");
 
   const [stats, setStats] = useState<Stats | null>(null);
   const [users, setUsers] = useState<UserRow[]>([]);
@@ -162,6 +163,10 @@ export default function AdminPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [promos, setPromos] = useState<any[]>([]);
   const [referrals, setReferrals] = useState<{ referrers: any[]; total_referred_users: number }>({ referrers: [], total_referred_users: 0 });
+  const [analytics, setAnalytics] = useState<any>(null);
+  const [analyticsDays, setAnalyticsDays] = useState(7);
+  const [analyticsSortBy, setAnalyticsSortBy] = useState("views");
+  const [analyticsSortOrder, setAnalyticsSortOrder] = useState("desc");
   const [loading, setLoading] = useState(false);
   const [userSearch, setUserSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -225,10 +230,14 @@ export default function AdminPage() {
       fetchData("promos").then((d) => { if (d) setPromos(d.promos); setLoading(false); });
     } else if (tab === "referrals") {
       fetchData("referrals").then((d) => { if (d) setReferrals(d); setLoading(false); });
+    } else if (tab === "analytics") {
+      fetch(`${API_URL}/api/analytics/stats?days=${analyticsDays}&sort_by=${analyticsSortBy}&order=${analyticsSortOrder}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }).then(r => r.ok ? r.json() : null).then(d => { if (d) setAnalytics(d); setLoading(false); }).catch(() => setLoading(false));
     } else {
       fetchData("transactions?limit=50").then((d) => { if (d) setTransactions(d.transactions); setLoading(false); });
     }
-  }, [authed, token, tab, fetchData, debouncedSearch, userTier, userDateFrom, userDateTo]);
+  }, [authed, token, tab, fetchData, debouncedSearch, userTier, userDateFrom, userDateTo, analyticsDays, analyticsSortBy, analyticsSortOrder]);
 
   useEffect(() => { loadTab(); }, [loadTab]);
 
@@ -675,6 +684,121 @@ export default function AdminPage() {
                 </table>
               </div>
             </div>
+          </div>
+        )}
+        {/* Analytics tab */}
+        {tab === "analytics" && (
+          <div>
+            <div className="flex flex-wrap items-center gap-3 mb-6">
+              <select value={analyticsDays} onChange={e => setAnalyticsDays(Number(e.target.value))} className="bg-bg border border-text/10 rounded-lg px-3 py-2 text-sm">
+                <option value={1}>Сегодня</option>
+                <option value={7}>7 дней</option>
+                <option value={30}>30 дней</option>
+                <option value={90}>90 дней</option>
+              </select>
+              <select value={analyticsSortBy} onChange={e => setAnalyticsSortBy(e.target.value)} className="bg-bg border border-text/10 rounded-lg px-3 py-2 text-sm">
+                <option value="views">По просмотрам</option>
+                <option value="unique">По уникальным</option>
+                <option value="avg_duration">По времени</option>
+                <option value="path">По пути</option>
+              </select>
+              <select value={analyticsSortOrder} onChange={e => setAnalyticsSortOrder(e.target.value)} className="bg-bg border border-text/10 rounded-lg px-3 py-2 text-sm">
+                <option value="desc">Убывание</option>
+                <option value="asc">Возрастание</option>
+              </select>
+              <button onClick={loadTab} className="bg-accent text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-accent/90">Обновить</button>
+            </div>
+
+            {analytics && (
+              <>
+                {/* Summary cards */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                  <div className="bg-white rounded-xl border border-text/5 p-4">
+                    <div className="text-[10px] text-text/30 uppercase font-bold tracking-wider">Просмотры</div>
+                    <div className="text-2xl font-extrabold text-text mt-1">{analytics.total_views.toLocaleString()}</div>
+                  </div>
+                  <div className="bg-white rounded-xl border border-text/5 p-4">
+                    <div className="text-[10px] text-text/30 uppercase font-bold tracking-wider">Уникальные</div>
+                    <div className="text-2xl font-extrabold text-accent mt-1">{analytics.unique_visitors.toLocaleString()}</div>
+                  </div>
+                  <div className="bg-white rounded-xl border border-text/5 p-4">
+                    <div className="text-[10px] text-text/30 uppercase font-bold tracking-wider">Ср. время</div>
+                    <div className="text-2xl font-extrabold text-text mt-1">{analytics.avg_duration_sec > 60 ? `${Math.round(analytics.avg_duration_sec / 60)} мин` : `${Math.round(analytics.avg_duration_sec)} сек`}</div>
+                  </div>
+                  <div className="bg-white rounded-xl border border-text/5 p-4">
+                    <div className="text-[10px] text-text/30 uppercase font-bold tracking-wider">Мобильные</div>
+                    <div className="text-2xl font-extrabold text-text mt-1">{analytics.mobile_percent}%</div>
+                  </div>
+                </div>
+
+                {/* Daily chart */}
+                {analytics.daily.length > 0 && (
+                  <div className="bg-white rounded-xl border border-text/5 p-5 mb-6">
+                    <h3 className="text-sm font-bold text-text mb-4">Просмотры по дням</h3>
+                    <div className="flex items-end gap-1 h-32">
+                      {analytics.daily.map((d: { date: string; views: number; unique: number }, i: number) => {
+                        const max = Math.max(...analytics.daily.map((x: { views: number }) => x.views), 1);
+                        return (
+                          <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                            <span className="text-[8px] text-text/25">{d.views}</span>
+                            <div className="w-full bg-accent/10 rounded-t-sm relative" style={{ height: `${(d.views / max) * 100}%`, minHeight: d.views > 0 ? 4 : 0 }}>
+                              <div className="absolute inset-0 bg-accent rounded-t-sm" style={{ height: `${(d.unique / Math.max(d.views, 1)) * 100}%` }} />
+                            </div>
+                            <span className="text-[8px] text-text/20">{d.date.slice(5)}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="flex items-center gap-4 mt-3 text-[10px] text-text/30">
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 bg-accent rounded-sm" /> Уникальные</span>
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 bg-accent/20 rounded-sm" /> Просмотры</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Top pages table */}
+                <div className="bg-white rounded-xl border border-text/5 p-5 mb-6">
+                  <h3 className="text-sm font-bold text-text mb-4">Страницы</h3>
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-left text-text/30 text-[10px] uppercase tracking-wider border-b border-text/5">
+                        <th className="pb-2">Путь</th>
+                        <th className="pb-2 text-right">Просмотры</th>
+                        <th className="pb-2 text-right">Уникальные</th>
+                        <th className="pb-2 text-right">Ср. время</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {analytics.pages.map((p: { path: string; views: number; unique: number; avg_duration: number }, i: number) => (
+                        <tr key={i} className="border-b border-text/[0.03] hover:bg-text/[0.02]">
+                          <td className="py-2 text-text/70 truncate max-w-[200px]">{p.path}</td>
+                          <td className="py-2 text-right font-semibold">{p.views}</td>
+                          <td className="py-2 text-right text-text/50">{p.unique}</td>
+                          <td className="py-2 text-right text-text/40">{p.avg_duration > 60 ? `${Math.round(p.avg_duration / 60)}м` : `${Math.round(p.avg_duration)}с`}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Top referrers */}
+                {analytics.referrers.length > 0 && (
+                  <div className="bg-white rounded-xl border border-text/5 p-5">
+                    <h3 className="text-sm font-bold text-text mb-4">Источники трафика</h3>
+                    <div className="space-y-2">
+                      {analytics.referrers.map((r: { referrer: string; views: number }, i: number) => (
+                        <div key={i} className="flex items-center justify-between text-sm">
+                          <span className="text-text/60 truncate max-w-[300px]">{r.referrer}</span>
+                          <span className="font-semibold text-text/80">{r.views}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {loading && <div className="text-center py-10 text-text/30">Загрузка...</div>}
           </div>
         )}
       </div>
