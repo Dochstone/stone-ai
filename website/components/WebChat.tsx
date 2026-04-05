@@ -631,6 +631,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
   const [onboardingStep, setOnboardingStep] = useState(0);
   const [upsellModal, setUpsellModal] = useState<{ type: "limit" | "locked"; model?: string; tier?: string } | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [activeBotConfig, setActiveBotConfig] = useState<{ id: number; name: string; system_prompt: string; model_id: string; avatar_emoji: string } | null>(null);
   const [overlayMinimized, setOverlayMinimized] = useState(false);
 
   // Persist chat state to sessionStorage (survives F5)
@@ -758,8 +759,18 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streaming]);
 
-  // Mobile keyboard: keep input visible
-  // Keyboard height detection removed — 100dvh handles it on modern iOS/Android
+  // Load bot config from sessionStorage (set by /dashboard/bots page)
+  useEffect(() => {
+    try {
+      const botJson = sessionStorage.getItem("stone_bot_config");
+      if (botJson) {
+        const bot = JSON.parse(botJson);
+        setActiveBotConfig(bot);
+        setSelectedModel(bot.model_id);
+        sessionStorage.removeItem("stone_bot_config");
+      }
+    } catch {}
+  }, []);
 
   // Load model-viewer script for 3D (once)
   useEffect(() => {
@@ -1285,7 +1296,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
           model_id: isGuest ? "gpt-4.1-mini" : selectedModel,
           messages: apiMessages,
           ...(selectedProjectId && !isGuest ? { project_id: selectedProjectId } : {}),
-          ...(modelCatFilter === "health" ? { system_prompt: "Ты — AI-ассистент по общим вопросам здоровья. Ты НЕ врач и НЕ ставишь диагнозы. Анализируй фото и описания симптомов, предлагай возможные причины (2-3 варианта), рекомендуй к какому специалисту обратиться. Заверши: \"Для точного диагноза обратитесь к врачу.\" Отвечай на русском." } : {}),
+          ...(activeBotConfig?.system_prompt ? { system_prompt: activeBotConfig.system_prompt } : modelCatFilter === "health" ? { system_prompt: "Ты — AI-ассистент по общим вопросам здоровья. Ты НЕ врач и НЕ ставишь диагнозы. Анализируй фото и описания симптомов, предлагай возможные причины (2-3 варианта), рекомендуй к какому специалисту обратиться. Заверши: \"Для точного диагноза обратитесь к врачу.\" Отвечай на русском." } : {}),
         }),
         signal: abort.signal,
       });
