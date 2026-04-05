@@ -195,6 +195,37 @@ export default function CampaignsPage() {
                       ))}
                     </div>
 
+                    {/* Keywords with Wordstat data */}
+                    {active.result.keywords?.length > 0 && (
+                      <div>
+                        <h4 className="text-xs font-bold text-text/50 uppercase mb-2">Ключевые слова (Wordstat)</h4>
+                        <div className="max-h-[300px] overflow-y-auto rounded-xl border border-text/5">
+                          <table className="w-full text-[11px]">
+                            <thead className="bg-text/[0.03] sticky top-0">
+                              <tr className="text-left text-text/30">
+                                <th className="px-3 py-2">Ключ</th>
+                                <th className="px-2 py-2 text-right">Частотность</th>
+                                <th className="px-2 py-2 text-right">CPC ₽</th>
+                                <th className="px-2 py-2">Конкуренция</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {active.result.keywords.slice(0, 50).map((k: any, i: number) => (
+                                <tr key={i} className="border-t border-text/[0.03] hover:bg-text/[0.02]">
+                                  <td className="px-3 py-1.5 text-text/70">{k.keyword}</td>
+                                  <td className="px-2 py-1.5 text-right font-mono text-text/50">{k.wordstat_frequency?.toLocaleString() || "—"}</td>
+                                  <td className="px-2 py-1.5 text-right font-mono text-text/50">{k.estimated_cpc || "—"}</td>
+                                  <td className="px-2 py-1.5">
+                                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${k.competition === "high" ? "bg-red-500/10 text-red-500" : k.competition === "medium" ? "bg-amber-500/10 text-amber-500" : "bg-teal/10 text-teal"}`}>{k.competition || "—"}</span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Keyword groups */}
                     <div>
                       <h4 className="text-xs font-bold text-text/50 uppercase mb-2">Группы ключевых слов</h4>

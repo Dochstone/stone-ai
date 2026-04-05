@@ -131,14 +131,26 @@ async def run_campaign_pipeline(campaign_id: int, niche: str, url: str | None, b
             if c: c.step = 2; c.result = result; await db.commit()
 
         keywords_raw = await _ai_call(
-            f"Сгенерируй 50-80 ключевых слов для рекламы в Яндекс Директ.\n\nНиша: {niche}\nЦА: {result['niche_analysis'].get('target_audience', niche)}\nРегион: {region}\n\nОтвети JSON массивом: [{{\"keyword\": \"ключ\", \"intent\": \"commercial|informational|navigational\", \"estimated_cpc\": число_рублей}}]",
-            system="Ты SEO/PPC специалист. Генерируй релевантные коммерческие ключевые слова на русском. Отвечай только JSON."
+            f"""Сгенерируй 50-80 ключевых слов для рекламы в Яндекс Директ.
+
+Ниша: {niche}
+ЦА: {result['niche_analysis'].get('target_audience', niche)}
+Регион: {region}
+
+Для каждого ключа оцени:
+- wordstat_frequency: примерная месячная частотность в Яндекс Wordstat (число показов)
+- estimated_cpc: примерная цена клика в рублях
+- competition: low/medium/high
+- intent: commercial/informational/navigational
+
+Ответи JSON массивом: [{{"keyword": "ключ", "wordstat_frequency": 1500, "estimated_cpc": 30, "competition": "medium", "intent": "commercial"}}]""",
+            system="Ты SEO/PPC специалист с опытом работы с Яндекс Wordstat и Директ. Оценивай частотность реалистично для русскоязычного рынка. Отвечай только JSON."
         )
         try:
             result["keywords"] = json.loads(keywords_raw.strip().strip("```json").strip("```"))
         except Exception as parse_err:
             logger.warning(f"JSON parse fallback: {parse_err}")
-            result["keywords"] = [{"keyword": k.strip(), "intent": "commercial", "estimated_cpc": 30} for k in keywords_raw.split("\n") if k.strip()]
+            result["keywords"] = [{"keyword": k.strip(), "intent": "commercial", "estimated_cpc": 30, "wordstat_frequency": 0, "competition": "medium"} for k in keywords_raw.split("\n") if k.strip()]
 
         # Step 3: Clustering
         async with async_session() as db:
@@ -357,10 +369,13 @@ async def export_campaign_xlsx(
         # Sheet 1: Keywords
         ws_kw = wb.active
         ws_kw.title = "Ключевые слова"
-        ws_kw.append(["Группа", "Ключевое слово", "Тип", "Прим. CPC"])
+        ws_kw.append(["Группа", "Ключевое слово", "Частотность (Wordstat)", "CPC (₽)", "Конкуренция", "Intent"])
+        # Map keywords to their data
+        kw_data = {k.get("keyword", ""): k for k in c.result.get("keywords", []) if isinstance(k, dict)}
         for group in c.result.get("keyword_groups", []):
             for kw in group.get("keywords", []):
-                ws_kw.append([group["group_name"], kw, "commercial", ""])
+                data = kw_data.get(kw, {})
+                ws_kw.append([group["group_name"], kw, data.get("wordstat_frequency", ""), data.get("estimated_cpc", ""), data.get("competition", ""), data.get("intent", "")])
 
         # Sheet 2: Negative keywords
         ws_neg = wb.create_sheet("Минус-слова")

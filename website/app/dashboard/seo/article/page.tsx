@@ -114,6 +114,23 @@ export default function SEOArticlePage() {
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement("a"); a.href = url; a.download = "article.md"; a.click();
                   }} className="text-xs text-text/40 font-semibold hover:text-text/60">Скачать .md</button>
+                  <button onClick={() => {
+                    const wpUrl = prompt("URL WordPress сайта (https://example.com):");
+                    if (!wpUrl) return;
+                    const wpUser = prompt("WordPress логин:");
+                    if (!wpUser) return;
+                    const wpPass = prompt("Application Password:");
+                    if (!wpPass) return;
+                    const auth = (() => { try { return JSON.parse(localStorage.getItem("stone_auth") || "{}"); } catch { return {}; } })();
+                    fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app"}/api/wordpress/publish`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json", ...(auth.token ? { Authorization: `Bearer ${auth.token}` } : {}) },
+                      body: JSON.stringify({ site_url: wpUrl, username: wpUser, app_password: wpPass, title: topic || "SEO статья", content: result.replace(/\n/g, "<br>"), status: "draft" }),
+                    }).then(r => r.json()).then(d => {
+                      if (d.ok) alert(`Опубликовано! ${d.url}`);
+                      else alert(d.detail || "Ошибка публикации");
+                    }).catch(() => alert("Ошибка сети"));
+                  }} className="text-xs text-accent font-semibold hover:text-accent/70">WordPress →</button>
                 </div>
                 <div className="text-sm text-text/80 whitespace-pre-wrap leading-relaxed">{result}</div>
               </>
