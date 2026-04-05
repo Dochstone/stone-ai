@@ -331,7 +331,9 @@ export default function Hero() {
             </span>
           </h1>
 
-          <p className="mt-6 text-lg md:text-xl text-text/60 max-w-2xl mx-auto leading-relaxed">
+          <img src="/mascots/stone-mascot-idle.png" alt="Stone AI" width="80" height="80" className="mx-auto mt-6 mb-2" />
+
+          <p className="text-lg md:text-xl text-text/60 max-w-2xl mx-auto leading-relaxed">
             GPT-5.1, Claude Sonnet 4, Gemini 2.5, Sora и ещё 65+ нейросетей.
             <br className="hidden sm:block" />
             Тексты, картинки, видео, SEO-статьи, шаблоны — всё в одном окне.
