@@ -135,8 +135,8 @@ export default function SEOArticlePage() {
                 <div className="text-sm text-text/80 whitespace-pre-wrap leading-relaxed">{result}</div>
               </>
             ) : (
-              <div className="flex items-center justify-center h-full text-text/15 text-sm">
-                {loading ? "Генерация статьи..." : "Результат появится здесь"}
+              <div className="flex flex-col items-center justify-center h-full text-text/15 text-sm">
+                {loading ? <><img src="/mascots/stone-mascot-loading.png" alt="" width="64" height="64" className="mb-2 opacity-60" />Генерация статьи...</> : <><img src="/mascots/stone-mascot-idle.png" alt="" width="64" height="64" className="mb-2 opacity-40" />Результат появится здесь</>}
               </div>
             )}
           </div>

@@ -309,7 +309,7 @@ export default function MarketplacePage() {
           <SkeletonGrid cols={3} count={3} />
         ) : displayTemplates.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-2xl border border-text/5">
-            <span className="text-4xl block mb-3">🏪</span>
+            <img src="/mascots/stone-mascot-idle.png" alt="Stone" width="90" height="90" className="mx-auto mb-3" />
             <h3 className="text-base font-bold text-text mb-1">
               {tab === "my" ? "Вы ещё не опубликовали шаблоны" : "Шаблоны не найдены"}
             </h3>

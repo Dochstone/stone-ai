@@ -450,7 +450,7 @@ function Sidebar({
         <div className="flex-1 overflow-y-auto px-2">
           {sessions.length === 0 ? (
             <div className="px-3 py-8 text-center">
-              <div className="text-3xl mb-2 opacity-20">💬</div>
+              <img src="/mascots/stone-mascot-chat.png" alt="Stone" width="64" height="64" className="mx-auto mb-2 opacity-60" />
               <p className="text-[11px] text-text/20">Здесь появятся ваши чаты</p>
             </div>
           ) : (
