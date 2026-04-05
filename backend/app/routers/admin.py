@@ -539,3 +539,50 @@ async def web_admin_referrals(
         "referrers": data,
         "total_referred_users": total_referred,
     }
+
+
+class NewsletterRequest(BaseModel):
+    subject: str
+    content_html: str
+    test_email: str | None = None  # if set, send only to this email
+
+
+@router.post("/newsletter")
+async def send_newsletter_admin(
+    body: NewsletterRequest,
+    _admin: dict = Depends(require_web_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Send newsletter to all users with email (or test to single email)."""
+    from app.services.email_service import send_newsletter
+    import asyncio
+
+    if body.test_email:
+        send_newsletter(body.test_email, body.subject, body.content_html)
+        return {"status": "ok", "sent": 1, "test": True}
+
+    # Get all users with email
+    result = await db.execute(
+        select(User.email).where(
+            User.email.isnot(None),
+            User.email != "",
+        )
+    )
+    emails = [r for r in result.scalars().all() if r and "@" in r]
+
+    # Send in background with small delays to avoid spam throttling
+    import threading
+
+    def send_batch():
+        for i, email in enumerate(emails):
+            try:
+                send_newsletter(email, body.subject, body.content_html)
+            except Exception:
+                pass
+            if i % 10 == 9:
+                import time
+                time.sleep(1)  # 1s pause every 10 emails
+
+    threading.Thread(target=send_batch, daemon=True).start()
+
+    return {"status": "ok", "queued": len(emails)}

@@ -128,3 +128,28 @@ def send_subscription_activated(to_email: str, tier: str, price_rub: float):
     </div>
     """
     send_email_background(to_email, f"Подписка {tier_label} активирована — Stone AI", html)
+
+
+def send_newsletter(to_email: str, subject: str, content_html: str):
+    """Send newsletter email with unsubscribe link."""
+    html = f"""
+    <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:24px">
+        <a href="https://stoneai.ru" style="text-decoration:none">
+            <h2 style="color:#C4623D;margin-bottom:20px">Stone AI</h2>
+        </a>
+        <div style="font-size:14px;color:#333;line-height:1.7">
+            {content_html}
+        </div>
+        <div style="margin-top:32px;padding-top:20px;border-top:1px solid #eee">
+            <a href="https://stoneai.ru/dashboard/chat" style="display:inline-block;background:#C4623D;color:white;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:bold;font-size:14px">
+                Открыть Stone AI
+            </a>
+        </div>
+        <p style="color:#bbb;font-size:11px;margin-top:24px;text-align:center">
+            Stone AI — 65+ нейросетей в одном окне<br>
+            <a href="https://stoneai.ru" style="color:#C4623D">stoneai.ru</a> ·
+            <a href="https://stoneai.ru/profile?unsubscribe=1" style="color:#bbb">Отписаться</a>
+        </p>
+    </div>
+    """
+    send_email_background(to_email, subject, html)
