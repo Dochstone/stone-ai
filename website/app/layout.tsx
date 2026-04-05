@@ -98,7 +98,7 @@ export const metadata: Metadata = {
     google: "PpzANTmpi-gEDEFk0SFPtyDzyTJ93D640gChtmgw10o",
   },
   other: {
-    "theme-color": "#0C0C10",
+    "theme-color": "#FAF9F5",
   },
 };
 

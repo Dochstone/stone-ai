@@ -11,13 +11,21 @@ export default function ThemeToggle({ compact }: { compact?: boolean } = {}) {
     const isDark = saved === "dark" || (!saved && prefersDark);
     setDark(isDark);
     document.documentElement.classList.toggle("dark", isDark);
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", isDark ? "#1a1a1e" : "#FAF9F5");
   }, []);
+
+  const updateThemeColor = (isDark: boolean) => {
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", isDark ? "#1a1a1e" : "#FAF9F5");
+  };
 
   const toggle = () => {
     const next = !dark;
     setDark(next);
     document.documentElement.classList.toggle("dark", next);
     localStorage.setItem("theme", next ? "dark" : "light");
+    updateThemeColor(next);
   };
 
   // Compact mode — small icon button (for collapsed sidebar)
