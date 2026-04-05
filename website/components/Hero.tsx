@@ -125,7 +125,7 @@ function ChatMockup() {
       {floatingModels.map((m) => (
         <div
           key={m.name}
-          className="absolute hidden lg:flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-xl px-3 py-2 shadow-lg border border-text/[0.06] animate-float z-10"
+          className="absolute hidden lg:flex items-center gap-2 bg-bg/90 backdrop-blur-sm rounded-xl px-3 py-2 shadow-lg border border-text/[0.08] animate-float z-10"
           style={{
             left: m.x, top: m.y,
             animationDelay: m.delay,
@@ -185,7 +185,7 @@ function ChatMockup() {
                   <span className="text-white/40"> Vue проще в освоении, но при масштабировании React выигрывает за счёт TypeScript-интеграции и Next.js...</span>
                 </p>
                 <div className="flex items-center gap-3 mt-2.5 pt-2 border-t border-white/[0.06]">
-                  <span className="text-[10px] text-white/25">GPT-5.1 · 847 tok · $0.02</span>
+                  <span className="text-[10px] text-white/25">GPT-5.1 · 847 tok · 2₽</span>
                 </div>
               </div>
             </div>
@@ -215,7 +215,7 @@ function ChatMockup() {
 function ProviderLogo({ children, color }: { children: React.ReactNode; color?: string }) {
   return (
     <span
-      className="shrink-0 mx-5 md:mx-8 inline-flex items-center gap-2 opacity-70 hover:opacity-100 transition-opacity duration-300 select-none cursor-default"
+      className="shrink-0 mx-5 md:mx-8 inline-flex items-center gap-2 opacity-90 hover:opacity-100 transition-opacity duration-300 select-none cursor-default"
       style={{ height: 40, color }}
     >
       {children}
@@ -228,8 +228,8 @@ function TrustMarquee() {
     <>
       {/* OpenAI */}
       <ProviderLogo>
-        <svg className="h-7 shrink-0 text-text/70" viewBox="0 0 24 24" fill="currentColor"><path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494zM3.6 18.304a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.759a.771.771 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.033.062L9.74 19.95a4.5 4.5 0 0 1-6.14-1.646zM2.34 7.896a4.485 4.485 0 0 1 2.366-1.973V11.6a.766.766 0 0 0 .388.676l5.815 3.355-2.02 1.168a.076.076 0 0 1-.071 0l-4.83-2.786A4.504 4.504 0 0 1 2.34 7.872zm16.597 3.855l-5.833-3.387L15.119 7.2a.076.076 0 0 1 .071 0l4.83 2.791a4.494 4.494 0 0 1-.676 8.105v-5.678a.79.79 0 0 0-.407-.667zm2.01-3.023l-.141-.085-4.774-2.782a.776.776 0 0 0-.785 0L9.409 9.23V6.897a.066.066 0 0 1 .028-.061l4.83-2.787a4.5 4.5 0 0 1 6.68 4.66zm-12.64 4.135l-2.02-1.164a.08.08 0 0 1-.038-.057V6.075a4.5 4.5 0 0 1 7.375-3.453l-.142.08L8.704 5.46a.795.795 0 0 0-.393.681zm1.097-2.365l2.602-1.5 2.607 1.5v2.999l-2.597 1.5-2.607-1.5z"/></svg>
-        <span className="text-lg font-bold text-text/70">OpenAI</span>
+        <svg className="h-7 shrink-0 text-text" viewBox="0 0 24 24" fill="currentColor"><path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494zM3.6 18.304a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.759a.771.771 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.033.062L9.74 19.95a4.5 4.5 0 0 1-6.14-1.646zM2.34 7.896a4.485 4.485 0 0 1 2.366-1.973V11.6a.766.766 0 0 0 .388.676l5.815 3.355-2.02 1.168a.076.076 0 0 1-.071 0l-4.83-2.786A4.504 4.504 0 0 1 2.34 7.872zm16.597 3.855l-5.833-3.387L15.119 7.2a.076.076 0 0 1 .071 0l4.83 2.791a4.494 4.494 0 0 1-.676 8.105v-5.678a.79.79 0 0 0-.407-.667zm2.01-3.023l-.141-.085-4.774-2.782a.776.776 0 0 0-.785 0L9.409 9.23V6.897a.066.066 0 0 1 .028-.061l4.83-2.787a4.5 4.5 0 0 1 6.68 4.66zm-12.64 4.135l-2.02-1.164a.08.08 0 0 1-.038-.057V6.075a4.5 4.5 0 0 1 7.375-3.453l-.142.08L8.704 5.46a.795.795 0 0 0-.393.681zm1.097-2.365l2.602-1.5 2.607 1.5v2.999l-2.597 1.5-2.607-1.5z"/></svg>
+        <span className="text-lg font-bold text-text">OpenAI</span>
       </ProviderLogo>
       {/* Anthropic */}
       <ProviderLogo>
@@ -243,8 +243,8 @@ function TrustMarquee() {
       </ProviderLogo>
       {/* xAI */}
       <ProviderLogo>
-        <svg className="h-5 shrink-0 text-text/70" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3l7.5 9L3 21h2.5l6-7.2L17.5 21H21l-7.5-9L21 3h-2.5l-6 7.2L6.5 3H3z"/></svg>
-        <span className="text-lg font-extrabold italic text-text/70">xAI</span>
+        <svg className="h-5 shrink-0 text-text" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3l7.5 9L3 21h2.5l6-7.2L17.5 21H21l-7.5-9L21 3h-2.5l-6 7.2L6.5 3H3z"/></svg>
+        <span className="text-lg font-extrabold italic text-text">xAI</span>
       </ProviderLogo>
       {/* DeepSeek */}
       <ProviderLogo>

@@ -9,7 +9,7 @@ export default function ProductScreenshot() {
 
         <div className="grid md:grid-cols-2 gap-6">
           {/* Mockup 1 — Dashboard Panel */}
-          <div className="rounded-2xl overflow-hidden border border-text/[0.08] bg-bg" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.06)" }}>
+          <div className="group rounded-2xl overflow-hidden border border-text/[0.08] bg-bg hover:border-accent/20 transition-all duration-300 hover:-translate-y-1" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.06)" }}>
             <div className="h-8 bg-text/[0.03] border-b border-text/[0.06] flex items-center px-3 gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full bg-red-400/60" />
               <div className="w-2.5 h-2.5 rounded-full bg-amber-400/60" />
@@ -53,7 +53,7 @@ export default function ProductScreenshot() {
           </div>
 
           {/* Mockup 2 — AI Chat */}
-          <div className="rounded-2xl overflow-hidden border border-text/[0.08] bg-bg" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.06)" }}>
+          <div className="group rounded-2xl overflow-hidden border border-text/[0.08] bg-bg hover:border-accent/20 transition-all duration-300 hover:-translate-y-1" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.06)" }}>
             <div className="h-8 bg-text/[0.03] border-b border-text/[0.06] flex items-center px-3 gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full bg-red-400/60" />
               <div className="w-2.5 h-2.5 rounded-full bg-amber-400/60" />
