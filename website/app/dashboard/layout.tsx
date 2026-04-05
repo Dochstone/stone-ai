@@ -278,7 +278,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {/* Chat categories — full labels for mobile or hover */}
             {isChat && (sidebarHover || true) && (
               <div className={`${!sidebarHover ? "lg:hidden" : ""}`}>
-                <div className="px-3 pt-3 pb-2 mb-1 border-b border-text/[0.06]">
+                <div className="px-3 pb-2 mb-1 border-b border-text/[0.06]" style={{ paddingTop: "max(12px, env(safe-area-inset-top))" }}>
                   <span className="text-sm font-extrabold text-text">Stone AI</span>
                   <span className="text-[9px] text-accent font-bold ml-1.5">65+ моделей</span>
                 </div>
