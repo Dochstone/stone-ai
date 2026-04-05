@@ -323,6 +323,96 @@ async def list_campaigns(
     }
 
 
+IMPROVE_PRESETS = {
+    "ctr": {"label": "📈 Повысить CTR", "prompt": "Перепиши объявление с интригой и срочностью для максимального CTR. Добавь цифры и ограничение по времени."},
+    "cta": {"label": "🎯 Усилить CTA", "prompt": "Усиль призыв к действию. Сделай его конкретным и побуждающим немедленно кликнуть."},
+    "offer": {"label": "💪 Усилить оффер", "prompt": "Усиль выгоду и предложение. Добавь бонусы, гарантии, скидки."},
+    "numbers": {"label": "🔢 Добавить цифры", "prompt": "Добавь конкретные цифры, факты, статистику. Замени абстрактные слова на конкретные."},
+    "emotional": {"label": "❤️ Эмоциональный", "prompt": "Перепиши в эмоциональном стиле. Добавь теплоту, чувства, личное обращение."},
+    "formal": {"label": "👔 Деловой тон", "prompt": "Перепиши в строго деловом стиле. Серьёзность, доверие, экспертность."},
+    "keywords": {"label": "🔑 Вставить ключевики", "prompt": "Вставь ключевые слова группы в заголовок и текст для повышения релевантности."},
+    "shorten": {"label": "✂️ Сократить", "prompt": "Сократи текст до минимума. Убери всё лишнее, оставь только суть."},
+}
+
+IMPROVE_COST_USD = 0.032  # ~3 RUB
+
+
+class ImproveAdRequest(BaseModel):
+    campaign_id: int
+    ad_index: int
+    preset: str
+
+
+@router.post("/improve-ad")
+async def improve_ad(
+    body: ImproveAdRequest,
+    tg_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Improve a single ad using AI preset."""
+    tg_id = tg_user["id"]
+    preset = IMPROVE_PRESETS.get(body.preset)
+    if not preset:
+        raise HTTPException(400, "Неизвестный пресет")
+
+    # Get campaign
+    result = await db.execute(
+        select(Campaign).where(Campaign.id == body.campaign_id, Campaign.user_tg_id == tg_id)
+    )
+    c = result.scalar_one_or_none()
+    if not c or not c.result or not c.result.get("ads"):
+        raise HTTPException(404, "Кампания не найдена")
+
+    ads = c.result["ads"]
+    if body.ad_index < 0 or body.ad_index >= len(ads):
+        raise HTTPException(400, "Неверный индекс объявления")
+
+    # Check balance
+    user_result = await db.execute(select(User).where(User.telegram_id == tg_id))
+    user = user_result.scalar_one_or_none()
+    if user and float(user.balance_usd or 0) < IMPROVE_COST_USD:
+        raise HTTPException(402, "Недостаточно средств (~3₽)")
+
+    ad = ads[body.ad_index]
+    original = {"title1": ad.get("title1", ""), "title2": ad.get("title2", ""), "text": ad.get("text", "")}
+
+    try:
+        improved_raw = await _ai_call(
+            f"""{preset['prompt']}
+
+Текущее объявление:
+Заголовок 1: {ad.get('title1', '')}
+Заголовок 2: {ad.get('title2', '')}
+Текст: {ad.get('text', '')}
+Группа: {ad.get('group', '')}
+
+ВАЖНО: Заголовок 1 — максимум 35 символов. Заголовок 2 — максимум 30 символов. Текст — максимум 81 символ.
+
+Ответь JSON: {{"title1": "...", "title2": "...", "text": "..."}}""",
+            system="Ты копирайтер Яндекс Директ. Строго соблюдай лимиты символов. Отвечай только JSON."
+        )
+        improved = json.loads(improved_raw.strip().strip("```json").strip("```"))
+
+        # Update ad in campaign
+        ads[body.ad_index] = {**ad, **improved}
+        c.result = {**c.result, "ads": ads}
+
+        # Deduct cost
+        if user:
+            user.balance_usd = max(0, float(user.balance_usd or 0) - IMPROVE_COST_USD)
+        c.cost_usd = (c.cost_usd or 0) + IMPROVE_COST_USD
+
+        return {
+            "ok": True,
+            "original": original,
+            "improved": improved,
+            "cost_rub": round(IMPROVE_COST_USD * 95),
+        }
+    except Exception as e:
+        logger.error(f"Ad improve error: {e}")
+        raise HTTPException(502, "Ошибка улучшения")
+
+
 @router.get("/{campaign_id}")
 async def get_campaign(
     campaign_id: int,

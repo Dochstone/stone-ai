@@ -249,6 +249,45 @@ export default function CampaignsPage() {
                             <p className="text-sm font-bold text-[#1a0dab]">{ad.title1}</p>
                             <p className="text-xs text-[#1a0dab]/70">{ad.title2}</p>
                             <p className="text-xs text-text/60 mt-1">{ad.text}</p>
+                            <div className="flex flex-wrap gap-1 mt-2 pt-2 border-t border-text/[0.04]">
+                              {[
+                                { id: "ctr", icon: "📈" },
+                                { id: "cta", icon: "🎯" },
+                                { id: "offer", icon: "💪" },
+                                { id: "numbers", icon: "🔢" },
+                                { id: "emotional", icon: "❤️" },
+                                { id: "formal", icon: "👔" },
+                                { id: "keywords", icon: "🔑" },
+                                { id: "shorten", icon: "✂️" },
+                              ].map(p => (
+                                <button key={p.id} onClick={async (e) => {
+                                  e.stopPropagation();
+                                  if (!auth) return;
+                                  const btn = e.currentTarget;
+                                  btn.disabled = true;
+                                  btn.textContent = "...";
+                                  try {
+                                    const res = await fetch(`${API_URL}/api/campaigns/improve-ad`, {
+                                      method: "POST",
+                                      headers: { Authorization: `Bearer ${auth.token}`, "Content-Type": "application/json" },
+                                      body: JSON.stringify({ campaign_id: active.id, ad_index: i, preset: p.id }),
+                                    });
+                                    if (res.ok) {
+                                      const d = await res.json();
+                                      loadCampaign(active.id);
+                                    } else {
+                                      const err = await res.json().catch(() => ({ detail: "Ошибка" }));
+                                      alert(typeof err.detail === "string" ? err.detail : "Ошибка");
+                                    }
+                                  } catch {}
+                                  btn.disabled = false;
+                                  btn.textContent = p.icon;
+                                }}
+                                className="w-7 h-7 rounded-lg bg-text/[0.04] hover:bg-accent/10 text-[12px] flex items-center justify-center transition-colors"
+                                title={`Улучшить: ${p.id} (3₽)`}
+                                >{p.icon}</button>
+                              ))}
+                            </div>
                           </div>
                         ))}
                       </div>
