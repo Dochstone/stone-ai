@@ -47,7 +47,7 @@ export default function ThemeToggle({ compact }: { compact?: boolean } = {}) {
     <button
       onClick={toggle}
       className={`relative w-11 h-6 rounded-full transition-colors duration-300 shrink-0 ${
-        dark ? "bg-accent/30" : "bg-text/10"
+        dark ? "bg-accent/30" : "bg-text/20 border border-text/10"
       }`}
       title={dark ? "Светлая тема" : "Тёмная тема"}
       aria-label="Toggle theme"
