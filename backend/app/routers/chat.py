@@ -34,12 +34,12 @@ from app.routers.achievements import check_and_update
 logger = logging.getLogger(__name__)
 
 
-async def _save_generation(db, tg_id: int, gen_type: str, model: str, prompt: str, result_url: str | None = None, cost: float | None = None):
+async def _save_generation(db, tg_id: int, gen_type: str, model: str, prompt: str, result_url: str | None = None, result_text: str | None = None, cost: float | None = None):
     """Save a generation record to the gallery. Uses separate session to avoid breaking main transaction."""
     try:
         from app.database import async_session
         async with async_session() as gen_db:
-            gen = Generation(user_tg_id=tg_id, type=gen_type, model=model, prompt=prompt, result_url=result_url, cost=cost)
+            gen = Generation(user_tg_id=tg_id, type=gen_type, model=model, prompt=prompt, result_url=result_url, result_text=result_text, cost=cost)
             gen_db.add(gen)
             await gen_db.commit()
     except Exception as e:
@@ -447,7 +447,7 @@ async def generate_image(
                     return {"image_url": None, "text": content, "model": req.model_id}
 
                 await record_usage(db, tg_id, req.model_id, cost_usd=0)
-                await _save_generation(db, tg_id, "image", req.model_id, req.prompt)
+                await _save_generation(db, tg_id, "image", req.model_id, req.prompt, result_text=image_url)
                 await db.commit()
                 asyncio.create_task(check_and_update(tg_id, "images", db_user.monthly_images_used or 1 if db_user else 1))
 
@@ -495,7 +495,7 @@ async def generate_image(
                                 except Exception:
                                     pass
                             await record_usage(db, tg_id, req.model_id, cost_usd=0)
-                            await _save_generation(db, tg_id, "image", req.model_id, req.prompt, image_source_url)
+                            await _save_generation(db, tg_id, "image", req.model_id, req.prompt, result_url=image_source_url, result_text=image_url)
                             await db.commit()
                             asyncio.create_task(check_and_update(tg_id, "images", db_user.monthly_images_used or 1 if db_user else 1))
                             return {"image_url": image_url, "model": req.model_id}
@@ -567,7 +567,7 @@ async def generate_image(
 
         # Record usage
         await record_usage(db, tg_id, req.model_id, tokens_in=0, tokens_out=0, cost_usd=0)
-        await _save_generation(db, tg_id, "image", req.model_id, req.prompt)
+        await _save_generation(db, tg_id, "image", req.model_id, req.prompt, result_text=image_url)
         await db.commit()
 
         asyncio.create_task(check_and_update(tg_id, "images", db_user.monthly_images_used or 1 if db_user else 1))
