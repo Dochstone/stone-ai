@@ -110,6 +110,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     if (isChat && !chatLoaded) setChatLoaded(true);
   }, [isChat, chatLoaded]);
 
+  // Lock body scroll on mobile when in chat
+  useEffect(() => {
+    if (isChat) {
+      document.body.classList.add("chat-active");
+    } else {
+      document.body.classList.remove("chat-active");
+    }
+    return () => document.body.classList.remove("chat-active");
+  }, [isChat]);
+
   const isActive = (href: string) => {
     if (href === "/dashboard/seo") return pathname === "/dashboard/seo";
     return pathname === href || pathname.startsWith(href + "/");
@@ -412,7 +422,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Main content */}
         <main className="flex-1 min-w-0">
           {chatLoaded && (
-            <div className={`${isChat ? "block h-[calc(100svh-48px)] lg:h-dvh" : "hidden"}`}>
+            <div className={`${isChat ? "fixed inset-x-0 top-12 bottom-0 lg:relative lg:inset-auto lg:top-auto lg:bottom-auto lg:h-dvh" : "hidden"}`}>
               <WebChat embedded initialCategory={chatCategory} />
             </div>
           )}
