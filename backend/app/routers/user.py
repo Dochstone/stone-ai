@@ -370,3 +370,39 @@ async def get_referral_info(request: Request, db: AsyncSession = Depends(get_db)
         "referral_balance": round(float(user.referral_balance or 0), 2),
         "referral_percent": 10,  # 10% from each referral top-up
     }
+
+
+@router.delete("/user/me")
+async def delete_account(
+    tg_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete user account and all associated data."""
+    tg_id = tg_user["id"]
+
+    result = await db.execute(select(User).where(User.telegram_id == tg_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(404, "User not found")
+
+    # Delete all user data
+    from app.models.chat_session import ChatSession, ChatMessage
+    from app.models.agent_task import AgentTask
+    from app.models.custom_bot import CustomBot
+    from sqlalchemy import delete
+
+    # Chat sessions + messages
+    sessions = await db.execute(select(ChatSession.id).where(ChatSession.user_tg_id == tg_id))
+    session_ids = [r for r in sessions.scalars().all()]
+    if session_ids:
+        await db.execute(delete(ChatMessage).where(ChatMessage.session_id.in_(session_ids)))
+        await db.execute(delete(ChatSession).where(ChatSession.user_tg_id == tg_id))
+
+    # Bots, agent tasks
+    await db.execute(delete(CustomBot).where(CustomBot.user_tg_id == tg_id))
+    await db.execute(delete(AgentTask).where(AgentTask.user_tg_id == tg_id))
+
+    # User
+    await db.delete(user)
+
+    return {"status": "ok", "message": "Аккаунт удалён"}
