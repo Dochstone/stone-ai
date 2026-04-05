@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
 
 interface Message { role: "user" | "assistant"; content: string }
 
-export default function WidgetPage() {
+function WidgetInner() {
   const params = useSearchParams();
   const botId = params.get("bot");
   const [botConfig, setBotConfig] = useState<{ name: string; avatar_emoji: string; model_id: string } | null>(null);
@@ -121,4 +121,8 @@ export default function WidgetPage() {
       </div>
     </div>
   );
+}
+
+export default function WidgetPage() {
+  return <Suspense fallback={<div className="p-4 text-center"><div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" /></div>}><WidgetInner /></Suspense>;
 }
