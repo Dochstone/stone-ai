@@ -212,6 +212,10 @@ export default function BotsPage() {
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-[10px] text-text/25">{MODELS.find(m => m.id === bot.model_id)?.name || bot.model_id}</span>
                       {bot.is_public && <span className="text-[10px] bg-teal/10 text-teal px-1.5 py-0.5 rounded font-medium">Публичный</span>}
+                      {bot.is_public && (
+                        <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(`<script src="https://stoneai.ru/widget.js" data-bot-id="${bot.id}"><\/script>`); alert("Код виджета скопирован!"); }}
+                          className="text-[10px] text-accent hover:underline cursor-pointer">Виджет</button>
+                      )}
                       <span className="text-[10px] text-text/20">{bot.usage_count} исп.</span>
                     </div>
                   </div>

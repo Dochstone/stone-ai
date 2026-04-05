@@ -258,3 +258,23 @@ async def use_bot(
         "avatar_emoji": bot.avatar_emoji,
         "has_knowledge_base": has_kb > 0,
     }
+
+
+@router.get("/widget/{bot_id}")
+async def get_widget_config(
+    bot_id: int,
+    db: AsyncSession = Depends(get_db),
+):
+    """Public endpoint — get bot config for embeddable widget. No auth needed."""
+    result = await db.execute(select(CustomBot).where(CustomBot.id == bot_id, CustomBot.is_public == True))
+    bot = result.scalar_one_or_none()
+    if not bot:
+        raise HTTPException(404, "Бот не найден или не публичный")
+
+    return {
+        "id": bot.id,
+        "name": bot.name,
+        "description": bot.description,
+        "avatar_emoji": bot.avatar_emoji,
+        "model_id": bot.model_id,
+    }
