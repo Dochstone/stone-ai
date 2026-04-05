@@ -40,6 +40,13 @@ async def upload_document(
     if doc_count >= 10:
         raise HTTPException(400, "Максимум 10 документов на бота")
 
+    # Duplicate check
+    existing = await db.execute(
+        select(KnowledgeDoc).where(KnowledgeDoc.bot_id == bot_id, KnowledgeDoc.filename == (file.filename or "document")[:255])
+    )
+    if existing.scalar_one_or_none():
+        raise HTTPException(400, f"Документ '{file.filename}' уже загружен. Удалите старый перед повторной загрузкой.")
+
     # Read file
     content = await file.read()
     filename = file.filename or "document"

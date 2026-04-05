@@ -120,7 +120,8 @@ async def run_campaign_pipeline(campaign_id: int, niche: str, url: str | None, b
         )
         try:
             result["niche_analysis"] = json.loads(analysis.strip().strip("```json").strip("```"))
-        except:
+        except Exception as parse_err:
+            logger.warning(f"JSON parse fallback: {parse_err}")
             result["niche_analysis"] = {"raw": analysis}
 
         # Step 2: Keywords
@@ -135,7 +136,8 @@ async def run_campaign_pipeline(campaign_id: int, niche: str, url: str | None, b
         )
         try:
             result["keywords"] = json.loads(keywords_raw.strip().strip("```json").strip("```"))
-        except:
+        except Exception as parse_err:
+            logger.warning(f"JSON parse fallback: {parse_err}")
             result["keywords"] = [{"keyword": k.strip(), "intent": "commercial", "estimated_cpc": 30} for k in keywords_raw.split("\n") if k.strip()]
 
         # Step 3: Clustering
@@ -151,7 +153,8 @@ async def run_campaign_pipeline(campaign_id: int, niche: str, url: str | None, b
         )
         try:
             result["keyword_groups"] = json.loads(groups_raw.strip().strip("```json").strip("```"))
-        except:
+        except Exception as parse_err:
+            logger.warning(f"JSON parse fallback: {parse_err}")
             result["keyword_groups"] = [{"group_name": "Основная", "keywords": kw_list}]
 
         # Step 4: Negative keywords
@@ -166,7 +169,8 @@ async def run_campaign_pipeline(campaign_id: int, niche: str, url: str | None, b
         )
         try:
             result["negative_keywords"] = json.loads(neg_raw.strip().strip("```json").strip("```"))
-        except:
+        except Exception as parse_err:
+            logger.warning(f"JSON parse fallback: {parse_err}")
             result["negative_keywords"] = [w.strip().strip('"').strip("- ") for w in neg_raw.split("\n") if w.strip()]
 
         # Step 5: Ads
@@ -185,7 +189,8 @@ async def run_campaign_pipeline(campaign_id: int, niche: str, url: str | None, b
                 ad = json.loads(ad_raw.strip().strip("```json").strip("```"))
                 ad["group"] = group["group_name"]
                 ads.append(ad)
-            except:
+            except Exception as parse_err:
+            logger.warning(f"JSON parse fallback: {parse_err}")
                 ads.append({"group": group["group_name"], "title1": niche[:35], "title2": "Закажите сейчас", "text": f"{niche}. Доставка. Гарантия.", "raw": ad_raw})
         result["ads"] = ads
 
@@ -201,7 +206,8 @@ async def run_campaign_pipeline(campaign_id: int, niche: str, url: str | None, b
         )
         try:
             result["recommendations"] = json.loads(recs_raw.strip().strip("```json").strip("```"))
-        except:
+        except Exception as parse_err:
+            logger.warning(f"JSON parse fallback: {parse_err}")
             result["recommendations"] = [{"title": "Оптимизация", "description": recs_raw, "priority": "medium"}]
 
         # Step 7: Summary

@@ -126,8 +126,25 @@ async def lifespan(app: FastAPI):
                     if stuck:
                         await db.commit()
                         logger.info(f"Agent cleanup: {len(stuck)} stuck tasks marked failed")
+
+                    # Also cleanup stuck campaigns
+                    from app.models.campaign import Campaign
+                    camp_result = await db.execute(
+                        select(Campaign).where(
+                            Campaign.status == "running",
+                            Campaign.created_at < cutoff,
+                        )
+                    )
+                    stuck_camps = camp_result.scalars().all()
+                    for c in stuck_camps:
+                        c.status = "failed"
+                        c.result = {**(c.result or {}), "error": "Превышено время выполнения (10 мин)"}
+                        c.completed_at = datetime.utcnow()
+                    if stuck_camps:
+                        await db.commit()
+                        logger.info(f"Campaign cleanup: {len(stuck_camps)} stuck campaigns marked failed")
             except Exception as e:
-                logger.error(f"Agent cleanup error: {e}")
+                logger.error(f"Cleanup error: {e}")
 
     cleanup_task = asyncio.create_task(agent_cleanup_loop())
 

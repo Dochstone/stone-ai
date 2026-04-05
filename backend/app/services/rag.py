@@ -71,15 +71,16 @@ def cosine_similarity(a: list[float], b: list[float]) -> float:
     return dot / (norm_a * norm_b)
 
 
-def search_chunks(query_embedding: list[float], chunks: list[dict], top_k: int = 5) -> list[dict]:
-    """Search chunks by cosine similarity. Each chunk: {content, embedding}."""
+def search_chunks(query_embedding: list[float], chunks: list[dict], top_k: int = 5, min_score: float = 0.3) -> list[dict]:
+    """Search chunks by cosine similarity. Each chunk: {content, embedding}. Filters below min_score."""
     scored = []
     for chunk in chunks:
         emb = chunk.get("embedding")
         if not emb:
             continue
         score = cosine_similarity(query_embedding, emb)
-        scored.append({**chunk, "score": score})
+        if score >= min_score:
+            scored.append({**chunk, "score": score})
 
     scored.sort(key=lambda x: x["score"], reverse=True)
     return scored[:top_k]
