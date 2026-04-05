@@ -8,10 +8,22 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.middleware.auth import get_current_user
+from app.middleware.rate_limit import bot_create_limiter
 from app.models.custom_bot import CustomBot
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/bots", tags=["bots"])
+
+ALLOWED_EMOJI = {"🤖", "💬", "🧠", "📚", "✍️", "🎯", "🔬", "💡", "🎓", "🛠️", "📊", "🌐", "🎨", "🎵", "📝", "🔍", "💼", "🏥", "🎮", "🍳"}
+ALLOWED_MODELS = {
+    "gpt-4o-mini", "gpt-4.1-mini", "gpt-5.1", "gpt-5.4",
+    "claude-haiku-4.5", "claude-sonnet-4", "claude-sonnet-4.5",
+    "gemini-2.0-flash", "gemini-2.5-flash",
+    "deepseek-v3", "deepseek-v3.2", "deepseek-r1",
+    "llama-4-maverick", "mistral-large-25", "mistral-small",
+    "grok-3-mini", "command-r7", "qwen-turbo",
+    "perplexity-sonar", "devstral",
+}
 
 
 class CreateBotRequest(BaseModel):
@@ -110,11 +122,12 @@ async def get_bot(
         raise HTTPException(404, "Бот не найден")
     if bot.user_tg_id != tg_user["id"] and not bot.is_public:
         raise HTTPException(403, "Нет доступа")
+    is_owner = bot.user_tg_id == tg_user["id"]
     return {
         "id": bot.id,
         "name": bot.name,
         "description": bot.description,
-        "system_prompt": bot.system_prompt,
+        "system_prompt": bot.system_prompt if is_owner else bot.system_prompt[:100] + "...",
         "model_id": bot.model_id,
         "avatar_emoji": bot.avatar_emoji,
         "is_public": bot.is_public,
@@ -130,6 +143,11 @@ async def create_bot(
     db: AsyncSession = Depends(get_db),
 ):
     """Create a new custom bot."""
+    bot_create_limiter.check(str(tg_user["id"]))
+    if body.avatar_emoji not in ALLOWED_EMOJI:
+        body.avatar_emoji = "🤖"
+    if body.model_id not in ALLOWED_MODELS:
+        raise HTTPException(400, "Неизвестная модель")
     # Limit: max 20 bots per user
     count = await db.scalar(
         select(func.count()).select_from(CustomBot).where(CustomBot.user_tg_id == tg_user["id"])
@@ -159,6 +177,10 @@ async def update_bot(
     db: AsyncSession = Depends(get_db),
 ):
     """Update a custom bot."""
+    if body.avatar_emoji is not None and body.avatar_emoji not in ALLOWED_EMOJI:
+        body.avatar_emoji = "🤖"
+    if body.model_id is not None and body.model_id not in ALLOWED_MODELS:
+        raise HTTPException(400, "Неизвестная модель")
     result = await db.execute(
         select(CustomBot).where(
             CustomBot.id == bot_id,

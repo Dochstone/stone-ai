@@ -193,6 +193,22 @@ export default function AgentPage() {
                   )}
                 </div>
 
+                {/* Error detail */}
+                {activeTask.status === "failed" && activeTask.result && (
+                  <div className="mt-3 p-3 bg-red-500/5 border border-red-500/10 rounded-xl">
+                    <p className="text-[11px] font-semibold text-red-500 mb-1">Причина ошибки:</p>
+                    <p className="text-xs text-text/50">{activeTask.result}</p>
+                  </div>
+                )}
+
+                {/* Final result for completed */}
+                {activeTask.status === "completed" && activeTask.result && activeTask.steps.length > 1 && (
+                  <div className="mt-3 p-3 bg-teal/5 border border-teal/10 rounded-xl">
+                    <p className="text-[11px] font-semibold text-teal mb-1">Итог:</p>
+                    <p className="text-xs text-text/60 whitespace-pre-wrap">{activeTask.result}</p>
+                  </div>
+                )}
+
                 {activeTask.total_cost_usd > 0 && (
                   <p className="text-[10px] text-text/20 mt-4 pt-3 border-t border-text/5">
                     {activeTask.total_steps} шагов · {Math.round(activeTask.total_cost_usd * 95)}₽

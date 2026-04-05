@@ -16,6 +16,7 @@ from app.middleware.auth import get_current_user
 from app.models.agent_task import AgentTask
 from app.models.user import User
 from app.services.ai_router import get_openrouter_model
+from app.middleware.rate_limit import agent_run_limiter
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/agent", tags=["agent"])
@@ -156,6 +157,7 @@ async def run_agent(
 ):
     """Start an agent task."""
     tg_id = tg_user["id"]
+    agent_run_limiter.check(str(tg_id))
 
     # Check balance
     user_result = await db.execute(select(User).where(User.telegram_id == tg_id))
