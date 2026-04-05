@@ -190,11 +190,12 @@ app.include_router(games.router)
 app.include_router(achievements.router)
 app.include_router(presentations.router)
 app.include_router(photo_session.router)
-from app.routers import bots, agent, analytics, knowledge
+from app.routers import bots, agent, analytics, knowledge, campaigns
 app.include_router(bots.router)
 app.include_router(agent.router)
 app.include_router(analytics.router)
 app.include_router(knowledge.router)
+app.include_router(campaigns.router)
 
 
 @app.get("/")
