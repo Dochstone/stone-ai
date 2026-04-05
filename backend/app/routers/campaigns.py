@@ -202,7 +202,7 @@ async def run_campaign_pipeline(campaign_id: int, niche: str, url: str | None, b
                 ad["group"] = group["group_name"]
                 ads.append(ad)
             except Exception as parse_err:
-            logger.warning(f"JSON parse fallback: {parse_err}")
+                logger.warning(f"JSON parse fallback: {parse_err}")
                 ads.append({"group": group["group_name"], "title1": niche[:35], "title2": "Закажите сейчас", "text": f"{niche}. Доставка. Гарантия.", "raw": ad_raw})
         result["ads"] = ads
 
