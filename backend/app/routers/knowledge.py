@@ -70,6 +70,12 @@ async def upload_document(
 
     # Get embeddings
     embeddings = await get_embeddings(chunks)
+    if not embeddings or not any(e for e in embeddings):
+        raise HTTPException(503, "Не удалось создать embeddings. Попробуйте позже.")
+
+    # File size check
+    if len(content) > 10 * 1024 * 1024:
+        raise HTTPException(400, "Файл слишком большой (макс 10 МБ)")
 
     # Save doc
     doc = KnowledgeDoc(

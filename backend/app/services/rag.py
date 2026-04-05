@@ -43,8 +43,7 @@ async def get_embeddings(texts: list[str]) -> list[list[float]]:
     """Get embeddings from OpenAI API."""
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
-        logger.error("OPENAI_API_KEY not set for embeddings")
-        return [[] for _ in texts]
+        raise Exception("OPENAI_API_KEY not set for embeddings")
 
     async with httpx.AsyncClient(timeout=30) as client:
         resp = await client.post(
@@ -54,7 +53,7 @@ async def get_embeddings(texts: list[str]) -> list[list[float]]:
         )
         if resp.status_code != 200:
             logger.error(f"Embedding API error {resp.status_code}: {resp.text[:200]}")
-            return [[] for _ in texts]
+            raise Exception(f"Embedding API error: {resp.status_code}")
 
         data = resp.json()
         return [item["embedding"] for item in data["data"]]

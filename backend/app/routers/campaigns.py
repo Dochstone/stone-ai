@@ -78,6 +78,17 @@ async def run_campaign_pipeline(campaign_id: int, niche: str, url: str | None, b
     }
 
     try:
+        # Pre-check balance
+        async with async_session() as db:
+            u = await db.execute(select(User).where(User.telegram_id == user_tg_id))
+            user = u.scalar_one_or_none()
+            if user and float(user.balance_usd or 0) < COST_USD:
+                r = await db.execute(select(Campaign).where(Campaign.id == campaign_id))
+                c = r.scalar_one_or_none()
+                if c: c.status = "failed"; c.result = {"error": "Недостаточно средств"}
+                await db.commit()
+                return
+
         # Step 1: Niche analysis
         async with async_session() as db:
             r = await db.execute(select(Campaign).where(Campaign.id == campaign_id))
