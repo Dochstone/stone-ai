@@ -269,7 +269,7 @@ export default function GalleryPage() {
               <div className="flex items-center gap-2 mb-3 flex-wrap">
                 <span className="text-xs font-bold bg-text/[0.04] text-text/50 px-2 py-0.5 rounded">{selected.model}</span>
                 <span className="text-xs text-text/25">{selected.type}</span>
-                {selected.cost && <span className="text-xs text-text/25">${selected.cost.toFixed(4)}</span>}
+                {selected.cost ? <span className="text-xs text-text/25">{Math.round(selected.cost * 95)}₽</span> : null}
                 <span className="text-xs text-text/25 ml-auto">{timeAgo(selected.created_at)}</span>
               </div>
               <p className="text-sm text-text/60 mb-4">{selected.prompt}</p>
@@ -282,9 +282,9 @@ export default function GalleryPage() {
                 <button onClick={() => toggleFav(selected.id)} className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors ${selected.is_favorite ? "bg-red-500/10 text-red-500" : "bg-text/5 text-text/60 hover:bg-text/10"}`}>
                   {selected.is_favorite ? "❤️ В избранном" : "♡ В избранное"}
                 </button>
-                <a href={`/webchat?prompt=${encodeURIComponent(selected.prompt)}`} className="px-4 py-2 rounded-xl text-xs font-bold bg-text/5 text-text/60 hover:bg-text/10 transition-colors">
+                <button onClick={() => { sessionStorage.setItem("stone_chat_prefill", selected.prompt); window.location.href = "/dashboard/chat"; }} className="px-4 py-2 rounded-xl text-xs font-bold bg-text/5 text-text/60 hover:bg-text/10 transition-colors">
                   🔄 Повторить
-                </a>
+                </button>
                 <button onClick={() => deleteGen(selected.id)} className="px-4 py-2 rounded-xl text-xs font-bold text-red-500 bg-red-500/5 hover:bg-red-500/10 transition-colors ml-auto">
                   Удалить
                 </button>
