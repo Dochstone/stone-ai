@@ -216,6 +216,23 @@ export default function BotsPage() {
                         <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(`<script src="https://stoneai.ru/widget.js" data-bot-id="${bot.id}"><\/script>`); alert("Код виджета скопирован!"); }}
                           className="text-[10px] text-accent hover:underline cursor-pointer">Виджет</button>
                       )}
+                      <button onClick={async (e) => {
+                        e.stopPropagation();
+                        const token = prompt("Вставьте токен от @BotFather:");
+                        if (!token || !auth) return;
+                        const res = await fetch(`${API_URL}/api/telegram-bots/connect`, {
+                          method: "POST",
+                          headers: { Authorization: `Bearer ${auth.token}`, "Content-Type": "application/json" },
+                          body: JSON.stringify({ bot_id: bot.id, bot_token: token }),
+                        });
+                        if (res.ok) {
+                          const d = await res.json();
+                          alert(`Telegram-бот @${d.username} подключён!`);
+                        } else {
+                          const err = await res.json().catch(() => ({ detail: "Ошибка" }));
+                          alert(typeof err.detail === "string" ? err.detail : "Ошибка подключения");
+                        }
+                      }} className="text-[10px] text-[#2AABEE] hover:underline cursor-pointer">Telegram</button>
                       <span className="text-[10px] text-text/20">{bot.usage_count} исп.</span>
                     </div>
                   </div>
