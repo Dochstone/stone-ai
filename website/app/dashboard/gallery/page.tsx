@@ -217,10 +217,22 @@ export default function GalleryPage() {
                 <div className="aspect-square bg-text/[0.02] flex items-center justify-center overflow-hidden">
                   {g.type === "image" && (g.result_url || g.result_text?.startsWith("data:image")) ? (
                     <img src={g.result_url || g.result_text || ""} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" decoding="async" sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" />
+                  ) : g.type === "video" && g.result_url ? (
+                    <div className="relative w-full h-full">
+                      <video src={g.result_url} className="w-full h-full object-cover" muted preload="metadata"
+                        onLoadedData={(e) => { (e.target as HTMLVideoElement).currentTime = 0.5; }} />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                        <div className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center">
+                          <svg className="w-4 h-4 text-text ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                      </div>
+                    </div>
                   ) : g.type === "video" ? (
                     <div className="flex flex-col items-center gap-1 text-text/20"><span className="text-3xl">🎬</span><span className="text-[10px]">{g.model}</span></div>
                   ) : g.type === "audio" ? (
                     <div className="flex flex-col items-center gap-1 text-text/20"><span className="text-3xl">🎵</span><span className="text-[10px]">{g.model}</span></div>
+                  ) : g.type === "3d" && g.result_url ? (
+                    <div className="w-full h-full bg-text/[0.03]" dangerouslySetInnerHTML={{ __html: `<model-viewer src="${g.result_url}" auto-rotate camera-controls style="width:100%;height:100%" shadow-intensity="0.5"></model-viewer>` }} />
                   ) : g.type === "3d" ? (
                     <div className="flex flex-col items-center gap-1 text-text/20"><span className="text-3xl">🧊</span><span className="text-[10px]">{g.model}</span></div>
                   ) : g.type === "presentation" ? (
