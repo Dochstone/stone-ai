@@ -153,7 +153,7 @@ export default function ProjectsPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-xl sm:text-2xl font-extrabold text-text">Мои проекты</h1>
-            <p className="text-sm text-text/40 mt-1">{projects.length} из {limit} · тариф {plan}</p>
+            <p className="text-sm text-text/40 mt-1">{projects.length} из {limit >= 999 ? "∞" : limit} · тариф {plan === "max-pro" ? "Elite" : plan === "max" ? "Pro" : plan === "mini" ? "Start" : "Free"}</p>
           </div>
           <button
             onClick={openCreate}
@@ -166,7 +166,7 @@ export default function ProjectsPage() {
 
         {projects.length === 0 ? (
           <div className="text-center py-20 bg-text/[0.02] border border-text/5 rounded-2xl">
-            <span className="text-5xl block mb-4">📁</span>
+            <img src="/mascots/stone-mascot-idle.png" alt="Stone" width="100" height="100" className="mx-auto mb-4" />
             <h3 className="text-lg font-bold text-text mb-2">Добавьте свой первый бизнес</h3>
             <p className="text-sm text-text/40 mb-6 max-w-md mx-auto">AI будет учитывать контекст вашего бренда, аудиторию и тон голоса во всех ответах</p>
             <button onClick={openCreate} className="bg-accent text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-accent/90">
