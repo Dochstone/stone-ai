@@ -17,16 +17,22 @@ const allImages = [
 
 function ImageCarousel({ images, interval = 3000 }: { images: string[]; interval?: number }) {
   const [idx, setIdx] = useState(0);
+  const [prevIdx, setPrevIdx] = useState(-1);
   useEffect(() => {
-    const t = setInterval(() => setIdx((i) => (i + 1) % images.length), interval);
+    const t = setInterval(() => {
+      setPrevIdx(idx);
+      setIdx((i) => (i + 1) % images.length);
+    }, interval);
     return () => clearInterval(t);
-  }, [images.length, interval]);
+  }, [images.length, interval, idx]);
   return (
     <div className="relative w-full h-full overflow-hidden">
-      {images.map((src, i) => (
-        <Image key={src} src={src} alt="AI-сгенерированное изображение" fill sizes="(max-width: 640px) 100vw, 33vw"
-          className="object-cover" style={{ opacity: i === idx ? 1 : 0, transition: "opacity 1s ease-in-out" }} />
-      ))}
+      {prevIdx >= 0 && (
+        <Image key={images[prevIdx]} src={images[prevIdx]} alt="" fill sizes="(max-width: 640px) 100vw, 33vw"
+          className="object-cover" style={{ opacity: 0, transition: "opacity 1s ease-in-out" }} />
+      )}
+      <Image key={images[idx]} src={images[idx]} alt="AI-сгенерированное изображение" fill sizes="(max-width: 640px) 100vw, 33vw"
+        className="object-cover" style={{ opacity: 1, transition: "opacity 1s ease-in-out" }} priority={idx === 0} />
     </div>
   );
 }
@@ -93,7 +99,7 @@ function VideoCarousel() {
 }
 
 // ── Typing animation hook ──
-function useTyping(texts: string[], charDelay = 40, pauseDelay = 2000) {
+function useTyping(texts: string[], charDelay = 80, pauseDelay = 2500) {
   const [display, setDisplay] = useState("");
   const [textIdx, setTextIdx] = useState(0);
   const [charIdx, setCharIdx] = useState(0);
@@ -312,9 +318,19 @@ function AudioCard() {
     }
   };
 
-  // Idle animation loop
+  // Idle animation loop — only when visible
+  const [visible, setVisible] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (playing) return;
+    const el = cardRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), { rootMargin: "100px" });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (playing || !visible) return;
     let running = true;
     const tick = () => {
       if (!running) return;
@@ -323,7 +339,7 @@ function AudioCard() {
     };
     tick();
     return () => { running = false; cancelAnimationFrame(animRef.current); };
-  }, [playing]);
+  }, [playing, visible]);
 
   const handlePlay = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -378,6 +394,7 @@ function AudioCard() {
 
   return (
     <div
+      ref={cardRef}
       className="bg-gradient-to-br from-indigo-600 via-blue-700 to-violet-800 rounded-2xl p-6 group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[220px] cursor-pointer"
       onClick={handlePlay}
     >

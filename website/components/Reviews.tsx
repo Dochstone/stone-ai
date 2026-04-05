@@ -62,6 +62,7 @@ export default function Reviews() {
                   alt={r.name}
                   width={44}
                   height={44}
+                  loading="lazy"
                   className="w-11 h-11 rounded-full object-cover shadow-md ring-2 ring-white"
                 />
                 <div>
