@@ -18,12 +18,14 @@
 
 html {
   scroll-behavior: smooth;
+  overscroll-behavior: none;
 }
 
 body {
   @apply bg-bg text-text font-sans antialiased;
   overflow-x: hidden;
   -webkit-text-size-adjust: 100%;
+  overscroll-behavior: none;
 }
 
 /* ── Scrollbars — thin, auto-hide ── */

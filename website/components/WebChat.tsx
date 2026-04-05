@@ -1425,7 +1425,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
   return (
     <div
-      className={embedded ? "h-full flex bg-bg overflow-hidden relative" : "h-dvh flex bg-bg overflow-hidden relative"}
+      className={embedded ? "h-full flex bg-bg overflow-hidden relative overscroll-none" : "h-dvh flex bg-bg overflow-hidden relative overscroll-none"}
       onDragEnter={(e) => { e.preventDefault(); dragCounterRef.current++; setDragging(true); }}
       onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; }}
       onDragLeave={(e) => { e.preventDefault(); dragCounterRef.current--; if (dragCounterRef.current === 0) setDragging(false); }}
@@ -1722,7 +1722,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         {messages.length === 0 ? (
           <WelcomeScreen onSuggestion={handleSuggestionClick} activeTab={modelCatFilter} plan={limits?.plan} />
         ) : (
-          <div className="flex-1 overflow-y-auto relative min-h-0" ref={messagesContainerRef}>
+          <div className="flex-1 overflow-y-auto relative min-h-0 overscroll-contain" ref={messagesContainerRef}>
             <div className="max-w-3xl mx-auto px-3 sm:px-4 py-6 space-y-5">
               {messages.map((msg, i) => (
                 <div key={i} className={`flex gap-2.5 sm:gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
