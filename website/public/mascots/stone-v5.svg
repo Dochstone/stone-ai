@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <radialGradient id="bg5" cx="50%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#585060"/>
+      <stop offset="100%" stop-color="#201828"/>
+    </radialGradient>
+    <radialGradient id="aura5" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#C4623D" stop-opacity="0"/>
+      <stop offset="60%" stop-color="#C4623D" stop-opacity="0.15"/>
+      <stop offset="80%" stop-color="#C4623D" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#C4623D" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="f5"><feGaussianBlur stdDeviation="3"/></filter>
+    <filter id="f5g"><feGaussianBlur stdDeviation="8"/></filter>
+  </defs>
+  <!-- Вариант 5: Камень-голем — крупный, с "руками", дружелюбный -->
+  <ellipse cx="100" cy="178" rx="60" ry="10" fill="#000" opacity="0.1"/>
+  <!-- Аура -->
+  <circle cx="100" cy="95" r="80" fill="url(#aura5)">
+    <animate attributeName="r" values="78;85;78" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  <!-- Тело — массивный валун -->
+  <path d="M42 115 Q28 88 38 60 Q48 35 75 26 Q100 18 125 26 Q152 35 162 60 Q172 88 158 115 Q150 140 130 152 Q110 162 90 158 Q62 148 48 132 Z" fill="url(#bg5)" stroke="#444" stroke-width="0.5"/>
+  <!-- "Руки" — маленькие камни по бокам -->
+  <ellipse cx="35" cy="110" rx="12" ry="8" fill="#383040" stroke="#444" stroke-width="0.5" transform="rotate(-15 35 110)"/>
+  <ellipse cx="165" cy="108" rx="12" ry="8" fill="#383040" stroke="#444" stroke-width="0.5" transform="rotate(15 165 108)"/>
+  <!-- Трещины-вены (сеть) -->
+  <g filter="url(#f5)" opacity="0.5">
+    <path d="M65 55 L80 75 L70 100 L80 130" stroke="#C4623D" stroke-width="2" fill="none" stroke-linecap="round">
+      <animate attributeName="opacity" values="0.3;0.6;0.3" dur="4s" repeatCount="indefinite"/>
+    </path>
+    <path d="M80 75 L100 80 L120 70" stroke="#D4724D" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <path d="M100 80 L105 100 L115 120" stroke="#C4623D" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <path d="M120 70 L135 55" stroke="#D4724D" stroke-width="1" fill="none" stroke-linecap="round"/>
+    <path d="M105 100 L130 110" stroke="#C4623D" stroke-width="1" fill="none" stroke-linecap="round"/>
+    <path d="M70 100 L55 105" stroke="#D4724D" stroke-width="1" fill="none" stroke-linecap="round"/>
+  </g>
+  <!-- Большие добрые глаза -->
+  <g filter="url(#f5)">
+    <circle cx="78" cy="75" r="8" fill="#3a3240"/>
+    <circle cx="78" cy="75" r="6" fill="#F0A070"/>
+    <circle cx="78" cy="75" r="3" fill="#FFD4A0"/>
+    <circle cx="80" cy="73" r="1.5" fill="white" opacity="0.7"/>
+    <circle cx="122" cy="75" r="8" fill="#3a3240"/>
+    <circle cx="122" cy="75" r="6" fill="#F0A070"/>
+    <circle cx="122" cy="75" r="3" fill="#FFD4A0"/>
+    <circle cx="124" cy="73" r="1.5" fill="white" opacity="0.7"/>
+  </g>
+  <!-- Улыбка -->
+  <path d="M85 100 Q100 112 115 100" stroke="#C4623D" stroke-width="2" fill="none" stroke-linecap="round" filter="url(#f5)" opacity="0.4"/>
+  <!-- Свечение из трещин в "руках" -->
+  <line x1="30" y1="108" x2="38" y2="112" stroke="#C4623D" stroke-width="1" opacity="0.3" filter="url(#f5)"/>
+  <line x1="162" y1="106" x2="168" y2="110" stroke="#C4623D" stroke-width="1" opacity="0.3" filter="url(#f5)"/>
+</svg>

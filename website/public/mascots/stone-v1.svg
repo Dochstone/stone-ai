@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <radialGradient id="bg1" cx="50%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#5a5a62"/>
+      <stop offset="100%" stop-color="#1e1e26"/>
+    </radialGradient>
+    <radialGradient id="glow1" cx="50%" cy="50%" r="35%">
+      <stop offset="0%" stop-color="#C4623D" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#C4623D" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="f1"><feGaussianBlur stdDeviation="3"/></filter>
+  </defs>
+  <!-- Вариант 1: Круглая галька — гладкая, тёплая, простая -->
+  <ellipse cx="100" cy="178" rx="50" ry="10" fill="#000" opacity="0.12"/>
+  <ellipse cx="100" cy="100" rx="65" ry="55" fill="url(#bg1)"/>
+  <ellipse cx="100" cy="95" rx="30" ry="25" fill="url(#glow1)" opacity="0.8">
+    <animate attributeName="opacity" values="0.6;0.9;0.6" dur="3s" repeatCount="indefinite"/>
+  </ellipse>
+  <!-- Одна главная трещина -->
+  <path d="M70 70 Q85 95 75 130" stroke="#C4623D" stroke-width="2.5" fill="none" stroke-linecap="round" filter="url(#f1)" opacity="0.7"/>
+  <path d="M115 60 Q120 90 130 120" stroke="#D4724D" stroke-width="1.5" fill="none" stroke-linecap="round" filter="url(#f1)" opacity="0.5"/>
+  <!-- Глаза — простые тёплые точки -->
+  <circle cx="80" cy="88" r="6" fill="#F0A070" filter="url(#f1)"/>
+  <circle cx="80" cy="88" r="3" fill="#FFD4A0"/>
+  <circle cx="120" cy="88" r="6" fill="#F0A070" filter="url(#f1)"/>
+  <circle cx="120" cy="88" r="3" fill="#FFD4A0"/>
+  <!-- Блик -->
+  <ellipse cx="78" cy="68" rx="18" ry="8" fill="white" opacity="0.07" transform="rotate(-20 78 68)"/>
+</svg>
