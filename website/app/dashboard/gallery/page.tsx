@@ -226,7 +226,7 @@ export default function GalleryPage() {
                   ) : g.type === "presentation" ? (
                     <div className="flex flex-col items-center gap-1 text-text/20 p-3"><span className="text-3xl">📊</span><p className="text-[10px] text-center truncate w-full">{g.prompt}</p></div>
                   ) : (
-                    <p className="text-xs text-text/30 p-3 line-clamp-6">{g.result_text?.startsWith("[{") ? g.prompt : (g.result_text || g.prompt)}
+                    <p className="text-xs text-text/30 p-3 line-clamp-6">{g.result_text?.startsWith("[{") ? g.prompt : (g.result_text || g.prompt)}</p>
                   )}
                 </div>
                 {/* Info */}
