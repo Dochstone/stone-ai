@@ -43,29 +43,47 @@ function WidgetInner() {
         }),
       });
 
-      if (res.ok && res.body) {
+      if (!res.ok) {
+        setMessages(prev => [...prev, { role: "assistant", content: "Извините, произошла ошибка. Попробуйте позже." }]);
+        setStreaming(false);
+        return;
+      }
+
+      if (res.body) {
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
         let full = "";
         setMessages(prev => [...prev, { role: "assistant", content: "" }]);
 
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value);
-          for (const line of chunk.split("\n")) {
-            if (line.startsWith("data: ") && line !== "data: [DONE]") {
-              try {
-                const data = JSON.parse(line.slice(6));
-                const delta = data.choices?.[0]?.delta?.content || "";
-                full += delta;
-                setMessages(prev => [...prev.slice(0, -1), { role: "assistant", content: full }]);
-              } catch {}
+        const timeout = setTimeout(() => { reader.cancel(); }, 60000);
+
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value);
+            for (const line of chunk.split("\n")) {
+              if (line.startsWith("data: ") && line !== "data: [DONE]") {
+                try {
+                  const data = JSON.parse(line.slice(6));
+                  const delta = data.choices?.[0]?.delta?.content || "";
+                  full += delta;
+                  setMessages(prev => [...prev.slice(0, -1), { role: "assistant", content: full }]);
+                } catch {}
+              }
             }
           }
+        } finally {
+          clearTimeout(timeout);
+        }
+
+        if (!full) {
+          setMessages(prev => [...prev.slice(0, -1), { role: "assistant", content: "Не удалось получить ответ. Попробуйте снова." }]);
         }
       }
-    } catch {}
+    } catch {
+      setMessages(prev => [...prev, { role: "assistant", content: "Ошибка соединения." }]);
+    }
     setStreaming(false);
   };
 

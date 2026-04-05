@@ -17,22 +17,14 @@ const allImages = [
 
 function ImageCarousel({ images, interval = 3000 }: { images: string[]; interval?: number }) {
   const [idx, setIdx] = useState(0);
-  const [prevIdx, setPrevIdx] = useState(-1);
   useEffect(() => {
-    const t = setInterval(() => {
-      setPrevIdx(idx);
-      setIdx((i) => (i + 1) % images.length);
-    }, interval);
+    const t = setInterval(() => setIdx((i) => (i + 1) % images.length), interval);
     return () => clearInterval(t);
-  }, [images.length, interval, idx]);
+  }, [images.length, interval]);
   return (
     <div className="relative w-full h-full overflow-hidden">
-      {prevIdx >= 0 && (
-        <Image key={images[prevIdx]} src={images[prevIdx]} alt="" fill sizes="(max-width: 640px) 100vw, 33vw"
-          className="object-cover" style={{ opacity: 0, transition: "opacity 1s ease-in-out" }} />
-      )}
       <Image key={images[idx]} src={images[idx]} alt="AI-сгенерированное изображение" fill sizes="(max-width: 640px) 100vw, 33vw"
-        className="object-cover" style={{ opacity: 1, transition: "opacity 1s ease-in-out" }} priority={idx === 0} />
+        className="object-cover" priority={idx === 0} />
     </div>
   );
 }

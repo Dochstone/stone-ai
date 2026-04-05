@@ -51,6 +51,12 @@ export default function ABTestPage() {
         }),
       });
 
+      if (!res.ok) {
+        alert("Ошибка генерации. Попробуйте позже.");
+        setLoading(false);
+        return;
+      }
+
       if (res.ok) {
         const reader = res.body?.getReader();
         const decoder = new TextDecoder();
