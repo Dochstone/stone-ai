@@ -115,16 +115,24 @@ export default function GalleryPage() {
   };
 
   const bulkDownload = async () => {
-    const items = gens.filter(g => bulkSelected.has(g.id) && g.result_url);
+    const items = gens.filter(g => bulkSelected.has(g.id) && (g.result_url || g.result_text?.startsWith("data:")));
     for (const g of items) {
       try {
-        const res = await fetch(g.result_url!);
-        const blob = await res.blob();
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = `stoneai-${g.id.slice(0, 8)}.${g.type === "video" ? "mp4" : "png"}`;
-        a.click();
-        URL.revokeObjectURL(a.href);
+        const src = g.result_url || g.result_text || "";
+        if (src.startsWith("data:")) {
+          const a = document.createElement("a");
+          a.href = src;
+          a.download = `stoneai-${g.id.slice(0, 8)}.png`;
+          a.click();
+        } else {
+          const res = await fetch(src);
+          const blob = await res.blob();
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = `stoneai-${g.id.slice(0, 8)}.${g.type === "video" ? "mp4" : "png"}`;
+          a.click();
+          URL.revokeObjectURL(a.href);
+        }
       } catch {}
     }
   };
@@ -207,16 +215,18 @@ export default function GalleryPage() {
                 )}
                 {/* Preview */}
                 <div className="aspect-square bg-text/[0.02] flex items-center justify-center overflow-hidden">
-                  {g.type === "image" && g.result_url ? (
-                    <img src={g.result_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" decoding="async" sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" />
+                  {g.type === "image" && (g.result_url || g.result_text?.startsWith("data:image")) ? (
+                    <img src={g.result_url || g.result_text || ""} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" decoding="async" sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" />
                   ) : g.type === "video" ? (
                     <div className="flex flex-col items-center gap-1 text-text/20"><span className="text-3xl">🎬</span><span className="text-[10px]">{g.model}</span></div>
                   ) : g.type === "audio" ? (
                     <div className="flex flex-col items-center gap-1 text-text/20"><span className="text-3xl">🎵</span><span className="text-[10px]">{g.model}</span></div>
                   ) : g.type === "3d" ? (
                     <div className="flex flex-col items-center gap-1 text-text/20"><span className="text-3xl">🧊</span><span className="text-[10px]">{g.model}</span></div>
+                  ) : g.type === "presentation" ? (
+                    <div className="flex flex-col items-center gap-1 text-text/20 p-3"><span className="text-3xl">📊</span><p className="text-[10px] text-center truncate w-full">{g.prompt}</p></div>
                   ) : (
-                    <p className="text-xs text-text/30 p-3 line-clamp-6">{g.result_text || g.prompt}</p>
+                    <p className="text-xs text-text/30 p-3 line-clamp-6">{g.result_text?.startsWith("[{") ? g.prompt : (g.result_text || g.prompt)}
                   )}
                 </div>
                 {/* Info */}
@@ -251,8 +261,8 @@ export default function GalleryPage() {
           <div className="bg-bg rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
             {/* Preview */}
             <div className="relative">
-              {selected.type === "image" && selected.result_url ? (
-                <img src={selected.result_url} alt="" className="w-full max-h-[50vh] object-contain bg-black/10" decoding="async" />
+              {selected.type === "image" && (selected.result_url || selected.result_text?.startsWith("data:image")) ? (
+                <img src={selected.result_url || selected.result_text || ""} alt="" className="w-full max-h-[50vh] object-contain bg-black/10" decoding="async" />
               ) : selected.type === "video" && selected.result_url ? (
                 <video src={selected.result_url} controls className="w-full max-h-[50vh]" />
               ) : selected.type === "audio" && selected.result_url ? (
