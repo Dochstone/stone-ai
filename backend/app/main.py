@@ -160,8 +160,9 @@ app.include_router(games.router)
 app.include_router(achievements.router)
 app.include_router(presentations.router)
 app.include_router(photo_session.router)
-from app.routers import bots
+from app.routers import bots, agent
 app.include_router(bots.router)
+app.include_router(agent.router)
 
 
 @app.get("/")
