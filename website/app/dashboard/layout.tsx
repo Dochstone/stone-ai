@@ -226,7 +226,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           onMouseEnter={() => { if (isChat) setSidebarHover(true); }}
           onMouseLeave={() => { if (isChat) setSidebarHover(false); }}
         >
-          <nav className={`flex-1 overflow-y-auto overscroll-contain ${isChat ? (sidebarHover ? "p-3 space-y-4" : "p-3 lg:p-0 lg:pt-2 space-y-4 lg:space-y-0") : "p-3 space-y-4"}`}>
+          <nav className={`flex-1 overflow-y-auto overscroll-contain ${isChat ? (sidebarHover ? "p-3 space-y-3" : "p-2 lg:p-0 lg:pt-2 space-y-2 lg:space-y-0") : "p-2 space-y-2"}`}>
 
             {/* ═══ Chat mode collapsed: icons with hover labels ═══ */}
             {isChat && !sidebarHover && (
@@ -311,7 +311,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {NAV_ITEMS.map((group) => (
               <div key={group.group}>
                 {(!isChat || sidebarHover) && (
-                  <div className={`text-[10px] font-bold text-text/30 uppercase tracking-[1.5px] px-3 mb-2 ${isChat && !sidebarHover ? "lg:hidden" : ""}`}>
+                  <div className={`text-[9px] font-bold text-text/25 uppercase tracking-[1.5px] px-3 mb-1 ${isChat && !sidebarHover ? "lg:hidden" : ""}`}>
                     {group.group}
                   </div>
                 )}
