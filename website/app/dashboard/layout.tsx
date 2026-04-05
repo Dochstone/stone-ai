@@ -281,6 +281,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {isChat && (sidebarHover || true) && (
               <div className={`${!sidebarHover ? "lg:hidden" : ""}`}>
                 <div className="px-3 pb-2 mb-1 border-b border-text/[0.06]" style={{ paddingTop: "max(12px, env(safe-area-inset-top))" }}>
+                  <img src="/mascots/stone-mascot-idle.png" alt="" width="24" height="24" className="inline-block mr-1.5" />
                   <span className="text-sm font-extrabold text-text">Stone AI</span>
                   <span className="text-[9px] text-accent font-bold ml-1.5">65+ моделей</span>
                 </div>

@@ -25,7 +25,7 @@ export default function GenerationOverlay({ isVisible, estimatedTime, onMinimize
       <div className="bg-[#12121a] rounded-2xl shadow-2xl border border-white/[0.08] w-full max-w-[420px] overflow-hidden">
         {view === "main" && (
           <div className="p-6 text-center">
-            <div className="w-12 h-12 mx-auto mb-4 rounded-full border-2 border-blue-500/30 border-t-blue-500 animate-spin" />
+            <img src="/mascots/stone-mascot-loading.png" alt="" width="72" height="72" className="mx-auto mb-4 animate-bounce" style={{ animationDuration: "2s" }} />
             <h3 className="text-base font-bold text-white mb-1">Генерация {typeLabel}...</h3>
             <p className="text-xs text-gray-400 mb-6">{estimatedTime || "~30 секунд"}</p>
 
