@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 200" width="220" height="200">
+  <defs>
+    <radialGradient id="bodyGradC" cx="50%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#4a4a52"/>
+      <stop offset="60%" stop-color="#2c2c34"/>
+      <stop offset="100%" stop-color="#1a1a22"/>
+    </radialGradient>
+    <radialGradient id="tealGlow" cx="50%" cy="50%" r="40%">
+      <stop offset="0%" stop-color="#0E9A83" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#0E9A83" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glowC"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <ellipse cx="90" cy="175" rx="55" ry="12" fill="#000" opacity="0.12"/>
+  <path d="M35 110 Q20 85 35 60 Q45 35 70 28 Q90 22 110 28 Q135 35 145 60 Q160 85 145 110 Q138 135 120 148 Q100 158 80 155 Q55 148 40 135 Z" fill="url(#bodyGradC)" stroke="#555" stroke-width="0.5"/>
+  <ellipse cx="90" cy="90" rx="35" ry="30" fill="url(#tealGlow)" opacity="0.7"/>
+  <!-- Teal cracks -->
+  <g filter="url(#glowC)" opacity="0.7">
+    <path d="M65 75 L75 95 L68 120" stroke="#0E9A83" stroke-width="2" fill="none" stroke-linecap="round">
+      <animate attributeName="opacity" values="0.5;0.8;0.5" dur="3s" repeatCount="indefinite"/>
+    </path>
+    <path d="M100 65 L105 90 L115 110" stroke="#14B8A6" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  </g>
+  <!-- Friendly eyes -->
+  <g filter="url(#glowC)">
+    <circle cx="72" cy="78" r="5" fill="#14B8A6"/>
+    <circle cx="72" cy="78" r="2.5" fill="#A7F3D0"/>
+    <circle cx="108" cy="78" r="5" fill="#14B8A6"/>
+    <circle cx="108" cy="78" r="2.5" fill="#A7F3D0"/>
+  </g>
+  <!-- Small smile -->
+  <path d="M80 98 Q90 105 100 98" stroke="#14B8A6" stroke-width="1.5" fill="none" stroke-linecap="round" filter="url(#glowC)" opacity="0.5"/>
+  <!-- Speech bubble -->
+  <g transform="translate(150 30)">
+    <rect x="0" y="0" width="55" height="38" rx="12" fill="white" opacity="0.95"/>
+    <polygon points="0,25 -8,35 8,30" fill="white" opacity="0.95"/>
+    <!-- Typing dots -->
+    <circle cx="15" cy="19" r="3" fill="#0E9A83" opacity="0.6">
+      <animate attributeName="opacity" values="0.3;0.8;0.3" dur="1.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="27" cy="19" r="3" fill="#0E9A83" opacity="0.6">
+      <animate attributeName="opacity" values="0.3;0.8;0.3" dur="1.2s" repeatCount="indefinite" begin="0.2s"/>
+    </circle>
+    <circle cx="39" cy="19" r="3" fill="#0E9A83" opacity="0.6">
+      <animate attributeName="opacity" values="0.3;0.8;0.3" dur="1.2s" repeatCount="indefinite" begin="0.4s"/>
+    </circle>
+  </g>
+</svg>

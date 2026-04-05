@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <radialGradient id="bodyGradL" cx="50%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#4a4a52"/>
+      <stop offset="60%" stop-color="#2c2c34"/>
+      <stop offset="100%" stop-color="#1a1a22"/>
+    </radialGradient>
+    <radialGradient id="pulseGlow" cx="50%" cy="50%" r="45%">
+      <stop offset="0%" stop-color="#C4623D" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#D4724D" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#C4623D" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glowL"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <ellipse cx="100" cy="175" rx="55" ry="12" fill="#000" opacity="0.15"/>
+  <!-- Body with slight bounce -->
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="0,0;0,-4;0,0" dur="1.5s" repeatCount="indefinite"/>
+    <path d="M45 110 Q30 85 45 60 Q55 35 80 28 Q100 22 120 28 Q145 35 155 60 Q170 85 155 110 Q148 135 130 148 Q110 158 90 155 Q65 148 50 135 Z" fill="url(#bodyGradL)" stroke="#555" stroke-width="0.5"/>
+    <!-- Intense pulse glow -->
+    <ellipse cx="100" cy="90" rx="40" ry="35" fill="url(#pulseGlow)">
+      <animate attributeName="opacity" values="0.4;1;0.4" dur="1.2s" repeatCount="indefinite"/>
+    </ellipse>
+    <!-- Bright cracks -->
+    <g filter="url(#glowL)">
+      <path d="M75 75 L85 95 L78 120" stroke="#FF8855" stroke-width="2.5" fill="none" stroke-linecap="round">
+        <animate attributeName="stroke" values="#C4623D;#FF8855;#C4623D" dur="1.2s" repeatCount="indefinite"/>
+      </path>
+      <path d="M110 65 L115 90 L125 110 L118 130" stroke="#FF8855" stroke-width="2" fill="none" stroke-linecap="round">
+        <animate attributeName="stroke" values="#D4724D;#FFAA77;#D4724D" dur="1s" repeatCount="indefinite"/>
+      </path>
+      <path d="M90 100 L105 105" stroke="#FF9966" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    </g>
+    <!-- Eyes (focused, slightly squinting) -->
+    <g filter="url(#glowL)">
+      <ellipse cx="82" cy="78" rx="5" ry="4" fill="#FFB070">
+        <animate attributeName="ry" values="4;3;4" dur="1.5s" repeatCount="indefinite"/>
+      </ellipse>
+      <circle cx="82" cy="78" r="2" fill="#FFD4A0"/>
+      <ellipse cx="118" cy="78" rx="5" ry="4" fill="#FFB070">
+        <animate attributeName="ry" values="4;3;4" dur="1.5s" repeatCount="indefinite"/>
+      </ellipse>
+      <circle cx="118" cy="78" r="2" fill="#FFD4A0"/>
+    </g>
+    <!-- Spinning particles -->
+    <g>
+      <animateTransform attributeName="transform" type="rotate" values="0 100 90;360 100 90" dur="3s" repeatCount="indefinite"/>
+      <circle cx="55" cy="55" r="2" fill="#C4623D" opacity="0.6"/>
+      <circle cx="145" cy="55" r="1.5" fill="#D4724D" opacity="0.5"/>
+      <circle cx="60" cy="125" r="1.5" fill="#FF8855" opacity="0.4"/>
+      <circle cx="140" cy="125" r="2" fill="#C4623D" opacity="0.5"/>
+    </g>
+  </g>
+</svg>

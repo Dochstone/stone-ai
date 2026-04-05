@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <radialGradient id="bodyGrad" cx="50%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#4a4a52"/>
+      <stop offset="60%" stop-color="#2c2c34"/>
+      <stop offset="100%" stop-color="#1a1a22"/>
+    </radialGradient>
+    <radialGradient id="innerGlow" cx="50%" cy="50%" r="40%">
+      <stop offset="0%" stop-color="#C4623D" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#C4623D" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <!-- Shadow -->
+  <ellipse cx="100" cy="175" rx="55" ry="12" fill="#000" opacity="0.15"/>
+  <!-- Body -->
+  <path d="M45 110 Q30 85 45 60 Q55 35 80 28 Q100 22 120 28 Q145 35 155 60 Q170 85 155 110 Q148 135 130 148 Q110 158 90 155 Q65 148 50 135 Z" fill="url(#bodyGrad)" stroke="#555" stroke-width="0.5"/>
+  <!-- Inner glow through cracks -->
+  <ellipse cx="100" cy="90" rx="35" ry="30" fill="url(#innerGlow)" opacity="0.8">
+    <animate attributeName="opacity" values="0.6;0.9;0.6" dur="3s" repeatCount="indefinite"/>
+  </ellipse>
+  <!-- Crack lines (glowing) -->
+  <g filter="url(#glow)" opacity="0.7">
+    <path d="M75 75 L85 95 L78 120" stroke="#C4623D" stroke-width="2" fill="none" stroke-linecap="round">
+      <animate attributeName="opacity" values="0.5;0.8;0.5" dur="4s" repeatCount="indefinite"/>
+    </path>
+    <path d="M110 65 L115 90 L125 110 L118 130" stroke="#C4623D" stroke-width="1.5" fill="none" stroke-linecap="round">
+      <animate attributeName="opacity" values="0.6;0.9;0.6" dur="3.5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M90 100 L105 105" stroke="#D4724D" stroke-width="1" fill="none" stroke-linecap="round">
+      <animate attributeName="opacity" values="0.4;0.7;0.4" dur="5s" repeatCount="indefinite"/>
+    </path>
+  </g>
+  <!-- Eyes -->
+  <g filter="url(#glow)">
+    <circle cx="82" cy="78" r="5" fill="#F0A070">
+      <animate attributeName="r" values="5;5.5;5" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="82" cy="78" r="2.5" fill="#FFD4A0"/>
+    <circle cx="118" cy="78" r="5" fill="#F0A070">
+      <animate attributeName="r" values="5;5.5;5" dur="3s" repeatCount="indefinite" begin="0.3s"/>
+    </circle>
+    <circle cx="118" cy="78" r="2.5" fill="#FFD4A0"/>
+  </g>
+  <!-- Subtle highlight -->
+  <ellipse cx="80" cy="50" rx="20" ry="10" fill="white" opacity="0.06" transform="rotate(-15 80 50)"/>
+  <!-- Floating particles -->
+  <circle cx="50" cy="55" r="1.5" fill="#C4623D" opacity="0.4">
+    <animate attributeName="cy" values="55;48;55" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.2;0.5;0.2" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="150" cy="65" r="1" fill="#D4724D" opacity="0.3">
+    <animate attributeName="cy" values="65;58;65" dur="5s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.1;0.4;0.1" dur="5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="130" cy="45" r="1.5" fill="#C4623D" opacity="0.3">
+    <animate attributeName="cy" values="45;38;45" dur="3.5s" repeatCount="indefinite"/>
+  </circle>
+</svg>
