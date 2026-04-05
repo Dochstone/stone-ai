@@ -1500,7 +1500,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
           font-size: 0.85em;
         }
         @supports(padding-bottom: env(safe-area-inset-bottom)) {
-          .chat-input-safe { padding-bottom: env(safe-area-inset-bottom); }
+          .chat-input-safe { padding-bottom: calc(0.25rem + env(safe-area-inset-bottom)); }
         }
 
         /* Sidebar: mobile = slide overlay, desktop = width transition */
