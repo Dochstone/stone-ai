@@ -82,6 +82,7 @@ async def lifespan(app: FastAPI):
     # Start daily rollover background task
     import asyncio
     from datetime import datetime, timedelta, timezone as tz
+    from sqlalchemy import select
 
     async def daily_rollover_loop():
         MSK = tz(timedelta(hours=3))
@@ -102,10 +103,39 @@ async def lifespan(app: FastAPI):
 
     rollover_task = asyncio.create_task(daily_rollover_loop())
 
+    async def agent_cleanup_loop():
+        """Mark stuck agent tasks (running > 10 min) as failed."""
+        while True:
+            await asyncio.sleep(300)  # every 5 min
+            try:
+                from app.database import async_session
+                from app.models.agent_task import AgentTask
+                async with async_session() as db:
+                    cutoff = datetime.utcnow() - timedelta(minutes=10)
+                    result = await db.execute(
+                        select(AgentTask).where(
+                            AgentTask.status == "running",
+                            AgentTask.created_at < cutoff,
+                        )
+                    )
+                    stuck = result.scalars().all()
+                    for t in stuck:
+                        t.status = "failed"
+                        t.result = "Превышено время выполнения (10 мин)"
+                        t.completed_at = datetime.utcnow()
+                    if stuck:
+                        await db.commit()
+                        logger.info(f"Agent cleanup: {len(stuck)} stuck tasks marked failed")
+            except Exception as e:
+                logger.error(f"Agent cleanup error: {e}")
+
+    cleanup_task = asyncio.create_task(agent_cleanup_loop())
+
     yield
 
     # Shutdown
     rollover_task.cancel()
+    cleanup_task.cancel()
     if bot:
         await bot.session.close()
     logger.info("👋 Stone AI shut down")

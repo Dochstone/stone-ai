@@ -13,6 +13,11 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from pptx import Presentation as PptxPresentation
+from pptx.util import Inches, Pt
+from pptx.dml.color import RGBColor
+from pptx.enum.text import PP_ALIGN
+
 from app.config import get_settings
 from app.database import get_db
 from app.middleware.auth import get_current_user
@@ -502,8 +507,6 @@ async def export_html(
 
 def _hex_to_rgb(hex_color: str):
     """Convert hex color to pptx RGBColor."""
-    from pptx.util import Pt
-    from pptx.dml.color import RGBColor
     h = hex_color.lstrip("#")
     if len(h) != 6:
         return RGBColor(0, 0, 0)
@@ -518,13 +521,8 @@ def _extract_gradient_color(val: str) -> str:
 
 def build_pptx(slides: list[dict], style: str, title: str) -> bytes:
     """Build a PPTX file from slide data."""
-    from pptx import Presentation
-    from pptx.util import Inches, Pt, Emu
-    from pptx.dml.color import RGBColor
-    from pptx.enum.text import PP_ALIGN
-
     theme = THEMES.get(style, THEMES["modern"])
-    prs = Presentation()
+    prs = PptxPresentation()
     prs.slide_width = Inches(13.333)  # 16:9 widescreen
     prs.slide_height = Inches(7.5)
 

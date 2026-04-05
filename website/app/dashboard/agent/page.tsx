@@ -136,7 +136,7 @@ export default function AgentPage() {
                 className="bg-bg border border-text/10 rounded-lg px-2 py-1 text-sm">
                 {[3, 5, 7, 10].map(n => <option key={n} value={n}>{n}</option>)}
               </select>
-              <span className="text-[10px] text-text/25">~{(maxSteps * 0.5).toFixed(0)}₽</span>
+              <span className="text-[10px] text-text/25">~{Math.round(maxSteps * 0.005 * 95)}₽</span>
             </div>
             <button
               onClick={runAgent}

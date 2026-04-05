@@ -84,22 +84,32 @@ async def run_agent_task(task_id: int, instruction: str, model_id: str, max_step
                 content = data["choices"][0]["message"]["content"]
                 total_cost += COST_PER_STEP_USD
 
-                # Parse JSON from response
+                # Parse JSON from response with validation
                 try:
-                    # Try to extract JSON from response
                     json_match = content
                     if "```json" in content:
                         json_match = content.split("```json")[1].split("```")[0].strip()
                     elif "```" in content:
                         json_match = content.split("```")[1].split("```")[0].strip()
                     step_data = json.loads(json_match)
-                except (json.JSONDecodeError, IndexError):
-                    step_data = {"step": step_num, "action": "processing", "result": content, "done": step_num >= max_steps}
+                    # Validate required fields
+                    if not isinstance(step_data, dict):
+                        raise ValueError("Not a dict")
+                    step_data.setdefault("action", "processing")
+                    step_data.setdefault("result", content)
+                    step_data.setdefault("done", False)
+                    # Sanitize: truncate overly long results
+                    if isinstance(step_data.get("result"), str) and len(step_data["result"]) > 5000:
+                        step_data["result"] = step_data["result"][:5000] + "..."
+                    if isinstance(step_data.get("action"), str) and len(step_data["action"]) > 200:
+                        step_data["action"] = step_data["action"][:200]
+                except (json.JSONDecodeError, IndexError, ValueError):
+                    step_data = {"step": step_num, "action": "processing", "result": content[:5000], "done": step_num >= max_steps}
 
                 step_record = {
                     "step": step_num,
-                    "action": step_data.get("action", "processing"),
-                    "result": step_data.get("result", content),
+                    "action": str(step_data.get("action", "processing"))[:200],
+                    "result": str(step_data.get("result", content))[:5000],
                     "status": "completed",
                 }
                 steps.append(step_record)
