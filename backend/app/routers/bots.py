@@ -245,9 +245,16 @@ async def use_bot(
     bot.usage_count += 1
     await db.flush()
 
+    # Check if bot has knowledge base
+    from app.models.knowledge_base import KnowledgeChunk
+    has_kb = await db.scalar(
+        select(func.count()).select_from(KnowledgeChunk).where(KnowledgeChunk.bot_id == bot_id)
+    ) or 0
+
     return {
         "system_prompt": bot.system_prompt,
         "model_id": bot.model_id,
         "name": bot.name,
         "avatar_emoji": bot.avatar_emoji,
+        "has_knowledge_base": has_kb > 0,
     }

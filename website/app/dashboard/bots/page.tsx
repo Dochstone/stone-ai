@@ -217,6 +217,37 @@ export default function BotsPage() {
                   </div>
                   <div className="flex gap-1.5 shrink-0">
                     <button onClick={() => startChat(bot)} className="bg-accent text-white px-3 py-2 rounded-lg text-xs font-bold hover:bg-accent/90 transition-colors">Чат</button>
+                    <button
+                      onClick={async () => {
+                        const input = document.createElement("input");
+                        input.type = "file";
+                        input.accept = ".pdf,.txt,.md";
+                        input.onchange = async (e) => {
+                          const file = (e.target as HTMLInputElement).files?.[0];
+                          if (!file || !auth) return;
+                          const fd = new FormData();
+                          fd.append("bot_id", String(bot.id));
+                          fd.append("file", file);
+                          const res = await fetch(`${API_URL}/api/knowledge/upload`, {
+                            method: "POST",
+                            headers: { Authorization: `Bearer ${auth.token}` },
+                            body: fd,
+                          });
+                          if (res.ok) {
+                            const d = await res.json();
+                            alert(`Загружено: ${d.filename} (${d.chunks} частей)`);
+                          } else {
+                            const err = await res.json().catch(() => ({ detail: "Ошибка" }));
+                            alert(typeof err.detail === "string" ? err.detail : "Ошибка загрузки");
+                          }
+                        };
+                        input.click();
+                      }}
+                      className="text-text/25 hover:text-accent p-2 rounded-lg hover:bg-accent/5 transition-colors"
+                      title="Загрузить документ в базу знаний"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75 12l-3-3m0 0l-3 3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                    </button>
                     <button onClick={() => openEdit(bot)} className="text-text/25 hover:text-text/60 p-2 rounded-lg hover:bg-text/[0.04] transition-colors">
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                     </button>
