@@ -41,6 +41,18 @@ class TemplateLike(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+class TemplateRating(Base):
+    __tablename__ = "template_ratings"
+    __table_args__ = (UniqueConstraint("template_id", "user_tg_id", name="uq_template_rating"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    template_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    user_tg_id: Mapped[int] = mapped_column(BigInteger, nullable=False, index=True)
+    rating: Mapped[int] = mapped_column(Integer, nullable=False)  # 1-5
+    comment: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class SavedPrompt(Base):
     __tablename__ = "saved_prompts"
 

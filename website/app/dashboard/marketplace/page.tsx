@@ -385,6 +385,34 @@ export default function MarketplacePage() {
                     </svg>
                     {tpl.likes}
                   </button>
+                  {/* Star rating */}
+                  <div className="flex items-center gap-0.5 ml-1">
+                    {[1,2,3,4,5].map(star => (
+                      <button
+                        key={star}
+                        onClick={async () => {
+                          const auth = getAuth();
+                          if (!auth?.token) return;
+                          const res = await fetch(`${API_URL}/api/prompts/templates/${tpl.id}/rate`, {
+                            method: "POST",
+                            headers: { Authorization: `Bearer ${auth.token}`, "Content-Type": "application/json" },
+                            body: JSON.stringify({ rating: star }),
+                          });
+                          if (res.ok) {
+                            const d = await res.json();
+                            setTemplates(prev => prev.map(t => t.id === tpl.id ? { ...t, avg_rating: d.avg_rating, rating_count: d.rating_count } : t));
+                          }
+                        }}
+                        className="text-[12px] hover:scale-125 transition-transform"
+                        title={`${star} из 5`}
+                      >
+                        <span className={star <= ((tpl as any).avg_rating || 0) ? "text-amber-400" : "text-text/15"}>★</span>
+                      </button>
+                    ))}
+                    {(tpl as any).rating_count > 0 && (
+                      <span className="text-[9px] text-text/25 ml-0.5">{(tpl as any).avg_rating}</span>
+                    )}
+                  </div>
                   {tab === "my" && (
                     <button
                       onClick={() => deleteTemplate(tpl.id)}

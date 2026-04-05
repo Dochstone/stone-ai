@@ -418,3 +418,71 @@ async def marketplace_card(
         "cost_rub": round(COST_MARKETPLACE * 95, 2),
         "balance_usd": new_balance,
     }
+
+
+# ─── Batch Processing ───
+
+class BatchBackgroundRequest(BaseModel):
+    images: list[str] = Field(max_length=10)  # list of base64 data URLs
+    background_prompt: str
+    style: str | None = None
+    model_id: str | None = None
+
+
+@router.post("/batch")
+async def batch_process(
+    req: BatchBackgroundRequest,
+    tg_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Process multiple product photos with the same background. Max 10 images."""
+    tg_id = tg_user["id"]
+    user = await _find_user(db, tg_user)
+
+    total_cost = COST_BACKGROUND * len(req.images)
+    balance = float(user.balance_usd or 0)
+    has_sub = bool(user.subscription_tier and user.subscription_tier != "free")
+
+    if not has_sub and balance < total_cost:
+        raise HTTPException(402, f"Недостаточно средств. Нужно ~{int(total_cost * 95)}₽ для {len(req.images)} фото")
+
+    style_hint = STYLE_PRESETS.get(req.style, "") if req.style else ""
+    model_id_used = req.model_id or DEFAULT_IMAGE_MODEL
+    results = []
+    total_spent = 0.0
+
+    for i, image_data in enumerate(req.images):
+        prompt = (
+            f"Professional product photography. Place the product on a beautiful background: {req.background_prompt}. "
+            f"{style_hint} "
+            f"High resolution, sharp focus on the product, photorealistic, commercial quality."
+        ).strip()
+
+        try:
+            image_url = await _generate_image(prompt, model_id_used)
+
+            if not has_sub:
+                user.balance_usd = max(0, float(user.balance_usd or 0) - COST_BACKGROUND)
+            total_spent += COST_BACKGROUND
+
+            gen = Generation(
+                user_tg_id=tg_id, type="image", model=model_id_used,
+                prompt=f"[batch {i+1}/{len(req.images)}] {req.background_prompt}",
+                result_text=image_url, cost=COST_BACKGROUND,
+            )
+            db.add(gen)
+
+            results.append({"index": i, "status": "ok", "image_url": image_url, "id": gen.id})
+        except Exception as e:
+            logger.error(f"Batch item {i} failed: {e}")
+            results.append({"index": i, "status": "error", "error": str(e)[:200]})
+
+    await db.commit()
+
+    return {
+        "results": results,
+        "total_cost_rub": round(total_spent * 95, 2),
+        "balance_usd": float(user.balance_usd or 0),
+        "processed": sum(1 for r in results if r["status"] == "ok"),
+        "failed": sum(1 for r in results if r["status"] == "error"),
+    }

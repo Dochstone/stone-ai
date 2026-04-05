@@ -3,7 +3,7 @@
 import asyncio
 import logging
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -230,6 +230,71 @@ async def like_template(
 
     await db.commit()
     return {"ok": True, "liked": liked, "likes": tpl.likes}
+
+
+class RateRequest(BaseModel):
+    rating: int = Field(ge=1, le=5)
+    comment: str | None = Field(default=None, max_length=500)
+
+
+@router.post("/prompts/templates/{template_id}/rate")
+async def rate_template(
+    template_id: str,
+    body: RateRequest,
+    user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Rate a template 1-5 stars."""
+    tg_id = user["id"]
+    from app.models.prompt_template import TemplateRating
+
+    result = await db.execute(select(PromptTemplate).where(PromptTemplate.id == template_id))
+    tpl = result.scalar_one_or_none()
+    if not tpl:
+        raise HTTPException(404, "Шаблон не найден")
+
+    existing = await db.execute(
+        select(TemplateRating).where(TemplateRating.template_id == template_id, TemplateRating.user_tg_id == tg_id)
+    )
+    rating = existing.scalar_one_or_none()
+
+    if rating:
+        rating.rating = body.rating
+        rating.comment = body.comment
+    else:
+        db.add(TemplateRating(template_id=template_id, user_tg_id=tg_id, rating=body.rating, comment=body.comment))
+
+    # Calc average
+    avg_result = await db.execute(
+        select(func.avg(TemplateRating.rating), func.count()).select_from(TemplateRating).where(TemplateRating.template_id == template_id)
+    )
+    row = avg_result.one()
+    avg_rating = round(float(row[0] or 0), 1)
+    rating_count = int(row[1] or 0)
+
+    return {"ok": True, "avg_rating": avg_rating, "rating_count": rating_count, "your_rating": body.rating}
+
+
+@router.get("/prompts/templates/{template_id}/ratings")
+async def get_ratings(
+    template_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """Get ratings for a template."""
+    from app.models.prompt_template import TemplateRating
+    result = await db.execute(
+        select(TemplateRating).where(TemplateRating.template_id == template_id).order_by(TemplateRating.created_at.desc()).limit(20)
+    )
+    ratings = result.scalars().all()
+    avg_result = await db.execute(
+        select(func.avg(TemplateRating.rating), func.count()).select_from(TemplateRating).where(TemplateRating.template_id == template_id)
+    )
+    row = avg_result.one()
+    return {
+        "avg_rating": round(float(row[0] or 0), 1),
+        "rating_count": int(row[1] or 0),
+        "ratings": [{"rating": r.rating, "comment": r.comment, "created_at": r.created_at.isoformat() if r.created_at else None} for r in ratings],
+    }
 
 
 @router.delete("/prompts/marketplace/{template_id}")

@@ -8,7 +8,7 @@ import { getAuth, API_URL } from "@/lib/auth";
 import { IMAGE_MODELS } from "@/lib/models-config";
 import { logError } from "@/lib/error-logger";
 
-type Tab = "background" | "model" | "marketplace";
+type Tab = "background" | "model" | "marketplace" | "batch";
 
 interface Preset {
   id: string;
@@ -29,6 +29,7 @@ const TABS: { id: Tab; label: string; price: number }[] = [
   { id: "background", label: "Смена фона", price: 15 },
   { id: "model", label: "На модели", price: 40 },
   { id: "marketplace", label: "Маркетплейс", price: 20 },
+  { id: "batch", label: "Пакетная", price: 15 },
 ];
 
 // Derived from IMAGE_MODELS, with "label" key for local select component and filtered subset
@@ -49,6 +50,8 @@ const MARKETPLACES: MarketplaceOption[] = [
 
 export default function PhotoSessionPage() {
   const [tab, setTab] = useState<Tab>("background");
+  const [batchImages, setBatchImages] = useState<string[]>([]);
+  const [batchResults, setBatchResults] = useState<string[]>([]);
 
   // Shared state
   const [imageBase64, setImageBase64] = useState("");
@@ -398,8 +401,93 @@ export default function PhotoSessionPage() {
               </div>
             )}
 
+            {tab === "batch" && (
+              <div className="bg-white rounded-2xl border border-text/5 p-5 space-y-4">
+                <div>
+                  <label className="text-sm font-bold text-text block mb-2">Загрузите до 10 фото товаров</label>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const files = Array.from(e.target.files || []).slice(0, 10);
+                      const previews: string[] = [];
+                      for (const f of files) {
+                        const reader = new FileReader();
+                        const url = await new Promise<string>(r => { reader.onload = () => r(reader.result as string); reader.readAsDataURL(f); });
+                        previews.push(url);
+                      }
+                      setBatchImages(previews);
+                    }}
+                    className="w-full text-sm text-text/50 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-accent/10 file:text-accent hover:file:bg-accent/20"
+                  />
+                  {batchImages.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {batchImages.map((img, i) => (
+                        <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden border border-text/10">
+                          <img src={img} alt="" className="w-full h-full object-cover" />
+                          <button onClick={() => setBatchImages(prev => prev.filter((_, j) => j !== i))}
+                            className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/50 rounded-full text-white text-[8px] flex items-center justify-center">×</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <p className="text-[10px] text-text/25 mt-1">{batchImages.length}/10 фото · ~{batchImages.length * 15}₽</p>
+                </div>
+                <div>
+                  <label className="text-sm font-bold text-text block mb-2">Описание фона (одно для всех)</label>
+                  <input value={bgPrompt} onChange={e => setBgPrompt(e.target.value)}
+                    placeholder="Белый студийный фон с мягким освещением"
+                    className="w-full px-4 py-2.5 rounded-xl border border-text/10 bg-text/[0.02] text-sm text-text placeholder:text-text/30 focus:outline-none focus:border-accent" />
+                </div>
+                <button
+                  onClick={async () => {
+                    if (batchImages.length === 0 || !bgPrompt.trim()) return;
+                    setGenerating(true);
+                    try {
+                      const auth = getAuth();
+                      if (!auth?.token) return;
+                      const res = await fetch(`${API_URL}/api/photo-session/batch`, {
+                        method: "POST",
+                        headers: { Authorization: `Bearer ${auth.token}`, "Content-Type": "application/json" },
+                        body: JSON.stringify({ images: batchImages, background_prompt: bgPrompt }),
+                      });
+                      if (res.ok) {
+                        const data = await res.json();
+                        const okResults = data.results.filter((r: { status: string }) => r.status === "ok");
+                        if (okResults.length > 0) {
+                          setBatchResults(okResults.map((r: { image_url: string }) => r.image_url));
+                        }
+                        alert(`Готово: ${data.processed} из ${batchImages.length} обработано`);
+                      } else {
+                        const err = await res.json().catch(() => ({ detail: "Ошибка" }));
+                        alert(typeof err.detail === "string" ? err.detail : "Ошибка пакетной обработки");
+                      }
+                    } catch { alert("Ошибка сети"); }
+                    setGenerating(false);
+                  }}
+                  disabled={generating || batchImages.length === 0 || !bgPrompt.trim()}
+                  className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all ${batchImages.length > 0 && bgPrompt.trim() ? "bg-accent text-white hover:bg-accent/90" : "bg-text/10 text-text/30 cursor-not-allowed"}`}
+                >
+                  {generating ? "Обработка..." : `Обработать ${batchImages.length} фото (~${batchImages.length * 15}₽)`}
+                </button>
+                {batchResults.length > 0 && (
+                  <div>
+                    <p className="text-sm font-bold text-text mb-2">Результаты:</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {batchResults.map((url, i) => (
+                        <a key={i} href={url} download={`stoneai-batch-${i+1}.png`} className="block rounded-xl overflow-hidden border border-text/10 hover:border-accent/30 transition-colors">
+                          <img src={url} alt="" className="w-full aspect-square object-cover" />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Generate button */}
-            <button
+            {tab !== "batch" && <button
               onClick={generate}
               disabled={!canGenerate}
               className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all ${
@@ -419,7 +507,7 @@ export default function PhotoSessionPage() {
               ) : (
                 `Сгенерировать (${currentPrice}₽)`
               )}
-            </button>
+            </button>}
 
             {error && (
               <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4">
