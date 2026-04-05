@@ -759,16 +759,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
   }, [messages, streaming]);
 
   // Mobile keyboard: keep input visible
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.visualViewport) return;
-    const vv = window.visualViewport;
-    const onResize = () => {
-      const diff = window.innerHeight - vv.height;
-      document.documentElement.style.setProperty("--kb-height", `${diff}px`);
-    };
-    vv.addEventListener("resize", onResize);
-    return () => vv.removeEventListener("resize", onResize);
-  }, []);
+  // Keyboard height detection removed — 100dvh handles it on modern iOS/Android
 
   // Load model-viewer script for 3D (once)
   useEffect(() => {
@@ -1434,8 +1425,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
   return (
     <div
-      className={embedded ? "h-full flex bg-bg overflow-hidden relative" : "flex bg-bg overflow-hidden relative"}
-      style={embedded ? undefined : { height: "calc(100dvh - var(--kb-height, 0px))" }}
+      className={embedded ? "h-full flex bg-bg overflow-hidden relative" : "h-dvh flex bg-bg overflow-hidden relative"}
       onDragEnter={(e) => { e.preventDefault(); dragCounterRef.current++; setDragging(true); }}
       onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; }}
       onDragLeave={(e) => { e.preventDefault(); dragCounterRef.current--; if (dragCounterRef.current === 0) setDragging(false); }}
