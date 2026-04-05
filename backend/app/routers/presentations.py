@@ -1,5 +1,6 @@
-"""AI Presentations — generate slide decks via LLM, export to PDF."""
+"""AI Presentations — generate slide decks via LLM, export to PDF/PPTX."""
 
+import io
 import json
 import logging
 import re
@@ -7,7 +8,7 @@ import uuid
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import Response
+from fastapi.responses import Response, StreamingResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -495,3 +496,187 @@ async def export_html(
     html = render_presentation_html(slides, style, gen.prompt or "Presentation")
 
     return Response(content=html, media_type="text/html")
+
+
+# ─── PPTX Export ───
+
+def _hex_to_rgb(hex_color: str):
+    """Convert hex color to pptx RGBColor."""
+    from pptx.util import Pt
+    from pptx.dml.color import RGBColor
+    h = hex_color.lstrip("#")
+    if len(h) != 6:
+        return RGBColor(0, 0, 0)
+    return RGBColor(int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
+
+
+def _extract_gradient_color(val: str) -> str:
+    """Extract first hex color from gradient or plain value."""
+    match = re.search(r"#([0-9a-fA-F]{6})", val)
+    return f"#{match.group(1)}" if match else val
+
+
+def build_pptx(slides: list[dict], style: str, title: str) -> bytes:
+    """Build a PPTX file from slide data."""
+    from pptx import Presentation
+    from pptx.util import Inches, Pt, Emu
+    from pptx.dml.color import RGBColor
+    from pptx.enum.text import PP_ALIGN
+
+    theme = THEMES.get(style, THEMES["modern"])
+    prs = Presentation()
+    prs.slide_width = Inches(13.333)  # 16:9 widescreen
+    prs.slide_height = Inches(7.5)
+
+    accent_color = _hex_to_rgb(theme["accent"])
+    text_color = _hex_to_rgb(theme["text"])
+    heading_color = _hex_to_rgb(theme["heading"])
+    title_bg = _extract_gradient_color(theme.get("slide_bg_title", theme["accent"]))
+    title_text_color = _hex_to_rgb(theme.get("title_text", "#ffffff"))
+    bg_color = _hex_to_rgb(theme["bg"])
+    bullet_color = _hex_to_rgb(theme.get("bullet", theme["accent"]))
+
+    for slide_data in slides:
+        layout = slide_data.get("layout", "content")
+        slide_title = slide_data.get("title", "")
+        bullets = slide_data.get("bullets", [])
+        quote = slide_data.get("quote", "")
+        author = slide_data.get("author", "")
+
+        blank_layout = prs.slide_layouts[6]  # blank
+        slide = prs.slides.add_slide(blank_layout)
+
+        # Background
+        bg = slide.background
+        fill = bg.fill
+        fill.solid()
+        if layout in ("title", "section-header"):
+            fill.fore_color.rgb = _hex_to_rgb(title_bg)
+        else:
+            fill.fore_color.rgb = bg_color
+
+        if layout == "title":
+            # Title slide
+            txBox = slide.shapes.add_textbox(Inches(1), Inches(2), Inches(11.333), Inches(3))
+            tf = txBox.text_frame
+            tf.word_wrap = True
+            p = tf.paragraphs[0]
+            p.text = slide_title
+            p.font.size = Pt(44)
+            p.font.bold = True
+            p.font.color.rgb = title_text_color
+            p.alignment = PP_ALIGN.CENTER
+            # Subtitle from first bullet
+            if bullets:
+                p2 = tf.add_paragraph()
+                p2.text = bullets[0]
+                p2.font.size = Pt(20)
+                p2.font.color.rgb = RGBColor(255, 255, 255) if theme.get("title_text") == "#ffffff" else text_color
+                p2.alignment = PP_ALIGN.CENTER
+                p2.space_before = Pt(16)
+
+        elif layout == "section-header":
+            txBox = slide.shapes.add_textbox(Inches(1), Inches(2.5), Inches(11.333), Inches(2))
+            tf = txBox.text_frame
+            tf.word_wrap = True
+            p = tf.paragraphs[0]
+            p.text = slide_title
+            p.font.size = Pt(36)
+            p.font.bold = True
+            p.font.color.rgb = title_text_color
+            p.alignment = PP_ALIGN.CENTER
+
+        elif layout == "quote":
+            # Quote slide
+            txBox = slide.shapes.add_textbox(Inches(1.5), Inches(1.5), Inches(10.333), Inches(4))
+            tf = txBox.text_frame
+            tf.word_wrap = True
+            p = tf.paragraphs[0]
+            p.text = f'"{quote or slide_title}"'
+            p.font.size = Pt(28)
+            p.font.italic = True
+            p.font.color.rgb = accent_color
+            p.alignment = PP_ALIGN.CENTER
+            if author:
+                p2 = tf.add_paragraph()
+                p2.text = f"— {author}"
+                p2.font.size = Pt(18)
+                p2.font.color.rgb = text_color
+                p2.alignment = PP_ALIGN.CENTER
+                p2.space_before = Pt(24)
+
+        else:
+            # Content / two-column
+            # Title
+            txBox = slide.shapes.add_textbox(Inches(0.8), Inches(0.5), Inches(11.733), Inches(1))
+            tf = txBox.text_frame
+            tf.word_wrap = True
+            p = tf.paragraphs[0]
+            p.text = slide_title
+            p.font.size = Pt(30)
+            p.font.bold = True
+            p.font.color.rgb = heading_color
+
+            # Bullets
+            if bullets:
+                content_width = Inches(11.733) if layout != "two-column" else Inches(6)
+                txBox2 = slide.shapes.add_textbox(Inches(0.8), Inches(1.8), content_width, Inches(5))
+                tf2 = txBox2.text_frame
+                tf2.word_wrap = True
+                for i, b in enumerate(bullets):
+                    p = tf2.paragraphs[0] if i == 0 else tf2.add_paragraph()
+                    p.text = f"•  {b}"
+                    p.font.size = Pt(18)
+                    p.font.color.rgb = text_color
+                    p.space_before = Pt(8)
+                    p.space_after = Pt(4)
+
+    # Save to bytes
+    buf = io.BytesIO()
+    prs.save(buf)
+    buf.seek(0)
+    return buf.getvalue()
+
+
+class ExportPPTXRequest(BaseModel):
+    generation_id: str
+
+
+@router.post("/export/pptx")
+async def export_pptx(
+    req: ExportPPTXRequest,
+    tg_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Export presentation as PowerPoint PPTX file."""
+    tg_id = tg_user["id"]
+
+    result = await db.execute(
+        select(Generation).where(
+            Generation.id == req.generation_id,
+            Generation.type == "presentation",
+            Generation.user_tg_id == tg_id,
+        )
+    )
+    gen = result.scalar_one_or_none()
+    if not gen:
+        raise HTTPException(404, "Презентация не найдена")
+
+    slides = json.loads(gen.result_text) if gen.result_text else []
+    meta = gen.metadata_ or {}
+    style = meta.get("style", "modern")
+    pptx_title = gen.prompt or "Presentation"
+
+    try:
+        pptx_bytes = build_pptx(slides, style, pptx_title)
+    except Exception as e:
+        logger.error(f"PPTX build error: {e}")
+        raise HTTPException(500, "Ошибка генерации PPTX")
+
+    filename = re.sub(r'[^\w\s-]', '', pptx_title)[:50].strip() or "presentation"
+
+    return StreamingResponse(
+        io.BytesIO(pptx_bytes),
+        media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        headers={"Content-Disposition": f'attachment; filename="{filename}.pptx"'},
+    )

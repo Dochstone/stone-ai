@@ -28,6 +28,9 @@ google-auth==2.38.0
 # PDF
 pypdf==5.7.0
 
+# Presentations
+python-pptx==1.0.2
+
 # Utils
 orjson==3.10.14
 Pillow>=10.0
