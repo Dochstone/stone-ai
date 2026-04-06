@@ -170,6 +170,8 @@ async def _generate_image(prompt: str, model_id: str | None = None) -> str | Non
                     logger.error(f"OpenAI image error {resp.status_code}: {error_body}")
                     if "safety" in error_body.lower():
                         raise HTTPException(400, "Промпт отклонён системой безопасности.")
+                    if "billing" in error_body.lower() or "limit" in error_body.lower():
+                        raise HTTPException(503, "Сервис генерации временно недоступен. Попробуйте позже.")
                     raise RuntimeError(f"OpenAI error: {error_body[:200]}")
 
                 data = resp.json()

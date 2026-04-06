@@ -169,14 +169,14 @@ async def chat(
             raise HTTPException(
                 status_code=status,
                 detail={
-                    "error": check.get("error", check["reason"]),
-                    "message": check["reason"],
-                    "plan": check["plan"],
-                    "tier": check["tier"],
+                    "error": check.get("error", check.get("reason", "limit")),
+                    "message": check.get("reason", "Лимит исчерпан"),
+                    "plan": check.get("plan", "free"),
+                    "tier": check.get("tier", "free"),
                     "required_tier": check.get("required_tier"),
-                    "used_today": check["used_today"],
-                    "limit": check["limit"],
-                    "need_balance": check["billing"] == "per_token",
+                    "used_today": check.get("used_today", 0),
+                    "limit": check.get("limit", 0),
+                    "need_balance": check.get("billing") == "per_token",
                     "upgrade_url": "/pricing",
                 },
             )
