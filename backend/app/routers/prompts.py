@@ -510,10 +510,9 @@ async def wizard_generate(
 
     # Deduct balance
     if db_user and cost_usd > 0:
-        from sqlalchemy import update as sql_update
-        await db.execute(
-            sql_update(User).where(User.id == db_user.id).values(balance_usd=User.balance_usd - cost_usd)
-        )
+        current = float(db_user.balance_usd or 0)
+        db_user.balance_usd = round(max(0, current - cost_usd), 6)
+        await db.flush()
 
     # Increment usage
     tpl.usage_count += 1
@@ -587,8 +586,8 @@ async def direct_generate(
         raise HTTPException(502, "Ошибка генерации")
 
     if db_user and cost_usd > 0:
-        from sqlalchemy import update as sql_update
-        await db.execute(sql_update(User).where(User.id == db_user.id).values(balance_usd=User.balance_usd - cost_usd))
+        current = float(db_user.balance_usd or 0)
+        db_user.balance_usd = round(max(0, current - cost_usd), 6)
         await db.commit()
 
     new_balance = max(0, balance - cost_usd)
