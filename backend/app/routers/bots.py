@@ -17,7 +17,7 @@ router = APIRouter(prefix="/api/bots", tags=["bots"])
 ALLOWED_EMOJI = {"🤖", "💬", "🧠", "📚", "✍️", "🎯", "🔬", "💡", "🎓", "🛠️", "📊", "🌐", "🎨", "🎵", "📝", "🔍", "💼", "🏥", "🎮", "🍳"}
 ALLOWED_MODELS = {
     "gpt-4o-mini", "claude-haiku-4.5", "gemini-2.0-flash",
-    "llama-4-maverick", "mistral-large-25",
+    "deepseek-v3", "llama-4-maverick", "mistral-large-25",
 }
 
 

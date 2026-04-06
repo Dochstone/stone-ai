@@ -17,7 +17,7 @@ export interface AIModel {
 export const TELEGRAM_BOT_URL = "https://t.me/drifttt55bot";
 
 export const MODELS: AIModel[] = [
-  // TIER 1: FREE (5 models)
+  // TIER 1: FREE (7 models)
   { id: "gpt-4o-mini", name: "GPT-4o mini", company: "OpenAI", tier: "free", category: "chat", pricePerMillion: 2.5, context: "128K", description: "Быстрая и дешёвая модель OpenAI. Идеальна для простых задач, переводов и быстрых ответов.", strengths: ["Быстрая", "Бесплатная", "128K контекст"] },
   { id: "claude-haiku-4.5", name: "Claude Haiku 4.5", company: "Anthropic", tier: "free", category: "chat", pricePerMillion: 11.0, context: "200K", description: "Быстрый Claude для ежедневных задач. Хороший баланс цена/качество с 200К контекстом.", strengths: ["200K контекст", "Бесплатная", "Быстрая"] },
   { id: "gemini-2.0-flash", name: "Gemini 2.0 Flash", company: "Google", tier: "free", category: "chat", pricePerMillion: 1.4, context: "1M", description: "Самая дешёвая модель Google с контекстом 1 миллион токенов. Мгновенные ответы.", strengths: ["1M контекст", "Бесплатная", "Самая дешёвая"] },
@@ -26,7 +26,7 @@ export const MODELS: AIModel[] = [
 
   // TIER 2: MID (15 models)
   { id: "deepseek-r1", name: "DeepSeek R1", company: "DeepSeek", tier: "pro", category: "chat", pricePerMillion: 6.0, context: "164K", description: "Показывает ход мыслей. Конкурент o3 за 1/10 цены. Открытая архитектура, прозрачный reasoning.", strengths: ["Ход мыслей", "1/10 цены o3", "Open-source"] },
-  { id: "deepseek-v3", name: "DeepSeek V3", company: "DeepSeek", tier: "pro", category: "chat", pricePerMillion: 1.5, context: "128K", description: "Универсальная модель DeepSeek. Отличное соотношение цена/качество для повседневных задач.", strengths: ["Дешёвая", "Универсальная", "128K"] },
+  { id: "deepseek-v3", name: "DeepSeek V3", company: "DeepSeek", tier: "free", category: "chat", pricePerMillion: 1.5, context: "128K", description: "Универсальная модель DeepSeek. Отличное соотношение цена/качество для повседневных задач.", strengths: ["Дешёвая", "Универсальная", "128K", "Бесплатная"] },
   { id: "deepseek-v3.2", name: "DeepSeek V3.2", company: "DeepSeek", tier: "pro", category: "chat", pricePerMillion: 1.5, context: "128K", description: "Обновлённая версия V3. Улучшенный кодинг и следование инструкциям.", strengths: ["Кодинг", "Дешёвая", "Обновлённая"] },
   { id: "gpt-4.1-mini", name: "GPT-4.1 mini", company: "OpenAI", tier: "pro", category: "chat", pricePerMillion: 4.5, context: "1M", description: "Компактная модель OpenAI с контекстом 1M. Быстрее GPT-5, дешевле, хороша для кода.", strengths: ["1M контекст", "Кодинг", "Быстрая"] },
   { id: "gpt-4.1-nano", name: "GPT-4.1 nano", company: "OpenAI", tier: "pro", category: "chat", pricePerMillion: 1.4, context: "1M", description: "Самая маленькая модель OpenAI. Ультрабыстрая для простых задач с 1M контекстом.", strengths: ["Ультрабыстрая", "1M контекст", "Дешёвая"] },
@@ -60,7 +60,7 @@ export const MODELS: AIModel[] = [
 
   // TIER 4: IMAGE (6 models)
   { id: "nano-banana-pro", name: "Nano Banana Pro", company: "Google", tier: "pro", category: "image", pricePerMillion: 32.0, context: "65K", description: "Фотореалистичные изображения 4K от Google. Текст на картинках, редактирование фото, студийное качество.", strengths: ["Фотореализм 4K", "Текст на картинках", "Редактирование"] },
-  { id: "nano-banana", name: "Nano Banana", company: "Google", tier: "pro", category: "image", pricePerMillion: 1.68, context: "1M", description: "Быстрая генерация от Google. Дешёвая альтернатива для простых картинок.", strengths: ["Дешёвая", "Быстрая", "1M контекст"] },
+  { id: "nano-banana", name: "Nano Banana", company: "Google", tier: "free", category: "image", pricePerMillion: 1.68, context: "1M", description: "Бесплатная генерация картинок от Google. Быстрая альтернатива для простых изображений.", strengths: ["Бесплатная", "Быстрая", "1M контекст"] },
   { id: "gpt-5-image", name: "GPT-5 Image", company: "OpenAI", tier: "pro", category: "image", pricePerMillion: 30.0, context: "128K", description: "Генерация изображений от OpenAI. Высокая детализация и точное следование промту.", strengths: ["Детализация", "Точность", "OpenAI качество"] },
   { id: "gpt-5-image-mini", name: "GPT-5 Image Mini", company: "OpenAI", tier: "pro", category: "image", pricePerMillion: 6.72, context: "128K", description: "Бюджетная генерация от OpenAI. Хороша для быстрых набросков и концептов.", strengths: ["Дешёвая", "Быстрая", "Концепты"] },
   { id: "flux-schnell", name: "Flux Schnell", company: "BFL", tier: "pro", category: "image", pricePerMillion: 0.012, priceUnit: "/img", context: "", description: "Быстрый генератор от Black Forest Labs. Мгновенные результаты.", strengths: ["Мгновенная", "Дешёвая"] },

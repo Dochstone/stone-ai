@@ -142,8 +142,9 @@ CREDIT_COSTS = {
 # ─── Model access per tier ───
 
 FREE_MODELS = {
-    "gpt-4o-mini", "gemini-2.0-flash", "deepseek-v3",
-    "llama-4-maverick", "mistral-small", "qwen-turbo", "nano-banana",
+    "gpt-4o-mini", "claude-haiku-4.5", "gemini-2.0-flash",
+    "deepseek-v3", "llama-4-maverick", "mistral-large-25",
+    "nano-banana",
 }
 
 # Budget video models available on Mini
