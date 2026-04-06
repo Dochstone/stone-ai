@@ -7,6 +7,14 @@ load_dotenv()
 
 # ─── Global constants ───
 USD_TO_RUB = 95.0  # Exchange rate for all price conversions
+SUBSCRIBER_DISCOUNT = 0.20  # 20% discount for paid subscribers on tools
+
+
+def apply_discount(cost_usd: float, tier: str) -> float:
+    """Apply subscriber discount to tool cost. Returns discounted cost in USD."""
+    if tier in ("mini", "max", "max-pro"):
+        return round(cost_usd * (1 - SUBSCRIBER_DISCOUNT), 6)
+    return cost_usd
 
 
 class Settings:

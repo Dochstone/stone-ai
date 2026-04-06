@@ -479,8 +479,12 @@ async def wizard_generate(
     tier = (db_user.subscription_tier or "free") if db_user else "free"
     balance = float(db_user.balance_usd or 0) if db_user else 0
 
-    # Free users: 1 free wizard generation per day, then need balance
-    if tier == "free" and balance < cost_usd:
+    # Subscribers get 20% discount, everyone pays
+    from app.config import apply_discount
+    cost_usd = apply_discount(cost_usd, tier)
+    cost_rub = round(cost_usd * USD_TO_RUB, 2)
+
+    if balance < cost_usd:
         raise HTTPException(402, {
             "error": "insufficient_balance",
             "message": f"Недостаточно средств. Нужно ~{cost_rub:.0f}₽, баланс {balance * USD_TO_RUB:.0f}₽",
@@ -559,7 +563,11 @@ async def direct_generate(
     balance = float(db_user.balance_usd or 0) if db_user else 0
     tier = (db_user.subscription_tier or "free") if db_user else "free"
 
-    if tier == "free" and balance < cost_usd:
+    from app.config import apply_discount
+    cost_usd = apply_discount(cost_usd, tier)
+    actual_cost_rub = round(cost_usd * USD_TO_RUB, 2)
+
+    if balance < cost_usd:
         raise HTTPException(402, {
             "error": "insufficient_balance",
             "message": f"Недостаточно средств. Нужно ~{actual_cost_rub:.0f}₽",

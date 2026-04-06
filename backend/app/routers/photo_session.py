@@ -121,12 +121,15 @@ def _resolve_model(model_id: str | None) -> str:
 
 
 async def _check_and_deduct(db: AsyncSession, user: User, cost_usd: float) -> tuple[float, bool]:
-    """Check balance / subscription; deduct if needed. Returns (new_balance, has_subscription)."""
+    """Check balance and deduct. Subscribers get 20% discount. Returns (new_balance, is_subscriber)."""
+    from app.config import apply_discount
     balance = float(user.balance_usd or 0)
     tier = user.subscription_tier or "free"
-    has_sub = tier in ("mini", "max", "max-pro")
+    is_sub = tier in ("mini", "max", "max-pro")
 
-    if not has_sub and balance < cost_usd:
+    cost_usd = apply_discount(cost_usd, tier)
+
+    if balance < cost_usd:
         cost_rub = round(cost_usd * USD_TO_RUB, 0)
         raise HTTPException(402, {
             "error": "insufficient_balance",
@@ -135,20 +138,17 @@ async def _check_and_deduct(db: AsyncSession, user: User, cost_usd: float) -> tu
             "balance_usd": balance,
         })
 
-    new_balance = balance
-    if not has_sub:
-        user.balance_usd = round(balance - cost_usd, 6)
-        new_balance = float(user.balance_usd)
-        await db.flush()
+    user.balance_usd = round(balance - cost_usd, 6)
+    new_balance = float(user.balance_usd)
+    await db.flush()
 
-    return new_balance, has_sub
+    return new_balance, is_sub
 
 
 async def _refund(db: AsyncSession, user: User, new_balance: float, cost_usd: float, has_sub: bool):
     """Refund deducted balance on failure."""
-    if not has_sub:
-        user.balance_usd = round(new_balance + cost_usd, 6)
-        await db.flush()
+    user.balance_usd = round(new_balance + cost_usd, 6)
+    await db.flush()
 
 
 async def _generate_image(prompt: str, model_id: str | None = None) -> str | None:
@@ -442,11 +442,13 @@ async def batch_process(
     tg_id = tg_user["id"]
     user = await _find_user(db, tg_user)
 
-    total_cost = COST_BACKGROUND * len(req.images)
+    from app.config import apply_discount
+    tier = user.subscription_tier or "free"
+    per_image_cost = apply_discount(COST_BACKGROUND, tier)
+    total_cost = per_image_cost * len(req.images)
     balance = float(user.balance_usd or 0)
-    has_sub = bool(user.subscription_tier and user.subscription_tier != "free")
 
-    if not has_sub and balance < total_cost:
+    if balance < total_cost:
         raise HTTPException(402, f"Недостаточно средств. Нужно ~{int(total_cost * USD_TO_RUB)}₽ для {len(req.images)} фото")
 
     style_hint = STYLE_PRESETS.get(req.style, "") if req.style else ""
@@ -464,9 +466,8 @@ async def batch_process(
         try:
             image_url = await _generate_image(prompt, model_id_used)
 
-            if not has_sub:
-                user.balance_usd = max(0, float(user.balance_usd or 0) - COST_BACKGROUND)
-            total_spent += COST_BACKGROUND
+            user.balance_usd = max(0, float(user.balance_usd or 0) - per_image_cost)
+            total_spent += per_image_cost
 
             gen = Generation(
                 user_tg_id=tg_id, type="image", model=model_id_used,

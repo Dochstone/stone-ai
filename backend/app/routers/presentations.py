@@ -338,7 +338,6 @@ async def generate_presentation(
     user = await _find_user(db, tg_user)
     balance = float(user.balance_usd or 0)
     tier = user.subscription_tier or "free"
-    has_subscription = tier in ("mini", "max", "max-pro")
 
     # Expensive models cost 3x
     EXPENSIVE_MODELS = {"gpt-4.1", "claude-sonnet-4", "claude-sonnet-4.5", "deepseek-r1"}
@@ -346,7 +345,11 @@ async def generate_presentation(
     multiplier = 3 if model_id in EXPENSIVE_MODELS else 1
     actual_cost = COST_USD * multiplier
 
-    if not has_subscription and balance < actual_cost:
+    # Subscribers get 20% discount, everyone pays
+    from app.config import apply_discount
+    actual_cost = apply_discount(actual_cost, tier)
+
+    if balance < actual_cost:
         raise HTTPException(402, {
             "error": "insufficient_balance",
             "message": f"Недостаточно средств для генерации презентации (≈{round(actual_cost * USD_TO_RUB):.0f}₽)",
@@ -355,11 +358,9 @@ async def generate_presentation(
         })
 
     # Deduct balance upfront (refund on failure)
-    new_balance = balance
-    if not has_subscription:
-        user.balance_usd = round(balance - actual_cost, 6)
-        new_balance = float(user.balance_usd)
-        await db.flush()
+    user.balance_usd = round(balance - actual_cost, 6)
+    new_balance = float(user.balance_usd)
+    await db.flush()
     openrouter_model_id = get_openrouter_model(model_id)
 
     # Build prompt and call OpenRouter (non-streaming)
@@ -388,7 +389,6 @@ async def generate_presentation(
             data = resp.json()
     except Exception as exc:
         # Refund on failure
-        if not has_subscription:
             user.balance_usd = round(new_balance + actual_cost, 6)
             await db.flush()
         logger.error(f"Presentation generation failed: {exc}")
@@ -397,7 +397,6 @@ async def generate_presentation(
     # Extract content
     raw_content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
     if not raw_content:
-        if not has_subscription:
             user.balance_usd = round(new_balance + actual_cost, 6)
             await db.flush()
         raise HTTPException(502, "Модель вернула пустой ответ")
@@ -406,7 +405,6 @@ async def generate_presentation(
     try:
         slides = _parse_slides_json(raw_content)
     except (json.JSONDecodeError, ValueError) as exc:
-        if not has_subscription:
             user.balance_usd = round(new_balance + actual_cost, 6)
             await db.flush()
         logger.error(f"Failed to parse slides JSON: {exc}\nRaw: {raw_content[:500]}")
