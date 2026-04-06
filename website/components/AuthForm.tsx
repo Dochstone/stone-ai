@@ -37,6 +37,17 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
   const [tgSessionId, setTgSessionId] = useState("");
   const [tgPolling, setTgPolling] = useState(false);
 
+  // Restore TG polling after returning from Telegram app (iOS)
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem("stone_tg_session");
+      if (saved && !tgPolling) {
+        setTgSessionId(saved);
+        setTgPolling(true);
+      }
+    } catch {}
+  }, []);
+
   useEffect(() => {
     if (resendTimer <= 0) return;
     const t = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
@@ -53,6 +64,7 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
           const res = await fetch(`${API_URL}/api/auth/telegram-web-check?session=${tgSessionId}`);
           const data = await res.json();
           if (data.status === "ok" && data.token) {
+            try { sessionStorage.removeItem("stone_tg_session"); } catch {}
             handleAuthResponse(data, onAuth);
             setTgPolling(false);
             return;
@@ -79,20 +91,20 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
       const sid = data.session_id;
       setTgSessionId(sid);
       setTgPolling(true);
+      // Save session to survive page navigation on mobile
+      try { sessionStorage.setItem("stone_tg_session", sid); } catch {}
       const tgUrl = `https://t.me/drifttt55bot?start=web_${sid}`;
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      if (isMobile) {
-        // Mobile: open deep link in same context (don't use window.open — blocked on iOS)
-        // Create invisible link and click it — triggers app open without leaving page
-        const a = document.createElement("a");
-        a.href = tgUrl;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+      const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+      const isAndroid = /Android/i.test(navigator.userAgent);
+      if (isIOS) {
+        // iOS: window.location navigates to Telegram app, page stays in background
+        // When user returns, useEffect restores polling from sessionStorage
+        window.location.href = tgUrl;
+      } else if (isAndroid) {
+        // Android: intent works better than window.open
+        window.open(tgUrl, "_blank");
       } else {
-        // Desktop: open in new tab (sync to avoid popup blocker)
+        // Desktop: open in new tab
         const tgWindow = window.open("about:blank", "_blank");
         if (tgWindow) {
           tgWindow.location.href = tgUrl;
