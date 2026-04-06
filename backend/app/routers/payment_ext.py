@@ -22,8 +22,9 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/payment", tags=["payment"])
 
+from app.config import USD_TO_RUB
+
 MIN_TOP_UP_USD = 1.0
-USD_TO_RUB = 95.0  # approximate, can be fetched dynamically
 
 
 class TopUpRequest(BaseModel):

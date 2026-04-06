@@ -5,6 +5,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# ─── Global constants ───
+USD_TO_RUB = 95.0  # Exchange rate for all price conversions
+
 
 class Settings:
     """Application settings loaded from environment variables."""

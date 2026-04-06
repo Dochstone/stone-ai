@@ -56,7 +56,7 @@ export default function PhotoSessionPage() {
   // Shared state
   const [imageBase64, setImageBase64] = useState("");
   const [imagePreview, setImagePreview] = useState("");
-  const [selectedModel, setSelectedModel] = useState("gpt-image-1");
+  const [selectedModel, setSelectedModel] = useState("nano-banana");
   const [generating, setGenerating] = useState(false);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);

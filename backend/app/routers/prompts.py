@@ -1,5 +1,6 @@
 """Prompt library — curated templates + user saved prompts."""
 
+from app.config import USD_TO_RUB
 import asyncio
 import logging
 from fastapi import APIRouter, Depends, HTTPException
@@ -461,13 +462,13 @@ async def wizard_generate(
 
     # Check balance — cost in rubles, balance in USD
     cost_rub = tpl.cost_rub or 10.0
-    cost_usd = cost_rub / 95.0  # approximate rate
+    cost_usd = cost_rub / USD_TO_RUB.0  # approximate rate
 
     # Expensive models cost 3x
     EXPENSIVE_MODELS = {"gpt-4.1", "claude-sonnet-4", "claude-sonnet-4.5", "deepseek-r1"}
     if body.model_id in EXPENSIVE_MODELS:
         cost_rub *= 3
-        cost_usd = cost_rub / 95.0
+        cost_usd = cost_rub / USD_TO_RUB.0
 
     if db_id:
         u_result = await db.execute(select(User).where(User.id == db_id))
@@ -482,9 +483,9 @@ async def wizard_generate(
     if tier == "free" and balance < cost_usd:
         raise HTTPException(402, {
             "error": "insufficient_balance",
-            "message": f"Недостаточно средств. Нужно ~{cost_rub:.0f}₽, баланс {balance * 95:.0f}₽",
+            "message": f"Недостаточно средств. Нужно ~{cost_rub:.0f}₽, баланс {balance * USD_TO_RUB:.0f}₽",
             "cost_rub": cost_rub,
-            "balance_rub": round(balance * 95, 2),
+            "balance_rub": round(balance * USD_TO_RUB, 2),
         })
 
     # Generate via AI (non-streaming for templates)
@@ -528,7 +529,7 @@ async def wizard_generate(
         "model": body.model_id,
         "template": tpl.title,
         "cost_rub": cost_rub,
-        "balance_rub": round(new_balance * 95, 2),
+        "balance_rub": round(new_balance * USD_TO_RUB, 2),
     }
 
 
@@ -548,7 +549,7 @@ async def direct_generate(
     # Expensive models cost 3x
     EXPENSIVE_MODELS = {"gpt-4.1", "claude-sonnet-4", "claude-sonnet-4.5", "deepseek-r1"}
     actual_cost_rub = body.cost_rub * 3 if body.model_id in EXPENSIVE_MODELS else body.cost_rub
-    cost_usd = actual_cost_rub / 95.0
+    cost_usd = actual_cost_rub / USD_TO_RUB.0
 
     if db_id:
         u_result = await db.execute(select(User).where(User.id == db_id))
@@ -563,7 +564,7 @@ async def direct_generate(
         raise HTTPException(402, {
             "error": "insufficient_balance",
             "message": f"Недостаточно средств. Нужно ~{actual_cost_rub:.0f}₽",
-            "balance_rub": round(balance * 95, 2),
+            "balance_rub": round(balance * USD_TO_RUB, 2),
         })
 
     messages = [{"role": "user", "content": body.prompt}]
@@ -591,7 +592,7 @@ async def direct_generate(
         await db.commit()
 
     new_balance = max(0, balance - cost_usd)
-    return {"result": full_response, "model": body.model_id, "cost_rub": actual_cost_rub, "balance_rub": round(new_balance * 95, 2)}
+    return {"result": full_response, "model": body.model_id, "cost_rub": actual_cost_rub, "balance_rub": round(new_balance * USD_TO_RUB, 2)}
 
 
 # ─── Seed: 50 curated prompts ───

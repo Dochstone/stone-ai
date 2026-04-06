@@ -1,5 +1,6 @@
 """AI Photo Session — product background change, on-model photos, marketplace cards."""
 
+from app.config import USD_TO_RUB
 import base64
 import json
 import logging
@@ -22,13 +23,13 @@ from app.services.ai_router import get_openrouter_model
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/photo-session", tags=["photo-session"])
 
-# ─── Costs (USD, approx RUB / 95) ───
+# ─── Costs (USD, approx RUB / USD_TO_RUB) ───
 
 COST_BACKGROUND = 0.158    # ~15 RUB
 COST_ON_MODEL = 0.421      # ~40 RUB
 COST_MARKETPLACE = 0.21    # ~20 RUB
 
-DEFAULT_IMAGE_MODEL = "gpt-image-1"
+DEFAULT_IMAGE_MODEL = "nano-banana"
 
 OPENROUTER_IMAGE_MODELS = {"nano-banana", "nano-banana-pro", "gpt-image-1", "flux-schnell"}
 
@@ -126,7 +127,7 @@ async def _check_and_deduct(db: AsyncSession, user: User, cost_usd: float) -> tu
     has_sub = tier in ("mini", "max", "max-pro")
 
     if not has_sub and balance < cost_usd:
-        cost_rub = round(cost_usd * 95, 0)
+        cost_rub = round(cost_usd * USD_TO_RUB, 0)
         raise HTTPException(402, {
             "error": "insufficient_balance",
             "message": f"Недостаточно средств ({cost_rub:.0f}₽)",
@@ -293,7 +294,7 @@ async def change_background(
         "id": gen.id,
         "image_url": image_url,
         "model": model_id_used,
-        "cost_rub": round(COST_BACKGROUND * 95, 2),
+        "cost_rub": round(COST_BACKGROUND * USD_TO_RUB, 2),
         "balance_usd": new_balance,
     }
 
@@ -354,7 +355,7 @@ async def product_on_model(
         "id": gen.id,
         "image_url": image_url,
         "model": model_id_used,
-        "cost_rub": round(COST_ON_MODEL * 95, 2),
+        "cost_rub": round(COST_ON_MODEL * USD_TO_RUB, 2),
         "balance_usd": new_balance,
     }
 
@@ -417,7 +418,7 @@ async def marketplace_card(
         "id": gen.id,
         "image_url": image_url,
         "model": model_id_used,
-        "cost_rub": round(COST_MARKETPLACE * 95, 2),
+        "cost_rub": round(COST_MARKETPLACE * USD_TO_RUB, 2),
         "balance_usd": new_balance,
     }
 
@@ -446,7 +447,7 @@ async def batch_process(
     has_sub = bool(user.subscription_tier and user.subscription_tier != "free")
 
     if not has_sub and balance < total_cost:
-        raise HTTPException(402, f"Недостаточно средств. Нужно ~{int(total_cost * 95)}₽ для {len(req.images)} фото")
+        raise HTTPException(402, f"Недостаточно средств. Нужно ~{int(total_cost * USD_TO_RUB)}₽ для {len(req.images)} фото")
 
     style_hint = STYLE_PRESETS.get(req.style, "") if req.style else ""
     model_id_used = req.model_id or DEFAULT_IMAGE_MODEL
@@ -483,7 +484,7 @@ async def batch_process(
 
     return {
         "results": results,
-        "total_cost_rub": round(total_spent * 95, 2),
+        "total_cost_rub": round(total_spent * USD_TO_RUB, 2),
         "balance_usd": float(user.balance_usd or 0),
         "processed": sum(1 for r in results if r["status"] == "ok"),
         "failed": sum(1 for r in results if r["status"] == "error"),

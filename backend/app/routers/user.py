@@ -18,7 +18,7 @@ from app.services.limiter import (
     FREE_DAILY_LIMIT,
     REWARDED_BONUS,
 )
-from app.services.subscription import PLANS, CREDIT_COSTS, get_accessible_models
+from app.services.subscription import PLANS, get_accessible_models
 from app.services.token_billing import get_user_balance, TOKEN_PRICES
 from app.services.promo import apply_promo
 

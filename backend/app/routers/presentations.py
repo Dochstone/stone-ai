@@ -1,5 +1,6 @@
 """AI Presentations — generate slide decks via LLM, export to PDF/PPTX."""
 
+from app.config import USD_TO_RUB
 import io
 import json
 import logging
@@ -28,7 +29,7 @@ from app.services.ai_router import get_openrouter_model, DEFAULT_MODEL
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/presentations", tags=["presentations"])
 
-COST_USD = 0.421  # ~40 RUB / 95
+COST_USD = 0.421  # ~40 RUB / USD_TO_RUB
 
 
 # ─── Schemas ───
@@ -348,7 +349,7 @@ async def generate_presentation(
     if not has_subscription and balance < actual_cost:
         raise HTTPException(402, {
             "error": "insufficient_balance",
-            "message": f"Недостаточно средств для генерации презентации (≈{round(actual_cost * 95):.0f}₽)",
+            "message": f"Недостаточно средств для генерации презентации (≈{round(actual_cost * USD_TO_RUB):.0f}₽)",
             "required_usd": actual_cost,
             "balance_usd": balance,
         })
@@ -426,7 +427,7 @@ async def generate_presentation(
     await db.commit()
     await db.refresh(gen)
 
-    cost_rub = round(actual_cost * 95, 2)
+    cost_rub = round(actual_cost * USD_TO_RUB, 2)
 
     return {
         "id": gen.id,
@@ -469,7 +470,7 @@ async def get_presentation(
         "style": meta.get("style", "modern"),
         "model": gen.model,
         "generation_id": gen.id,
-        "cost_rub": round((gen.cost or 0) * 95, 2),
+        "cost_rub": round((gen.cost or 0) * USD_TO_RUB, 2),
         "created_at": gen.created_at.isoformat() if gen.created_at else None,
     }
 

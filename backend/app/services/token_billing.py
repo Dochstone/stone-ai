@@ -10,6 +10,7 @@ Balance stored in USD with 6 decimal places for micro-transactions.
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import USD_TO_RUB
 from app.models.user import User
 from app.services.ai_router import MODELS_REGISTRY
 
@@ -115,7 +116,7 @@ async def deduct_balance(db: AsyncSession, tg_id: int, amount: float) -> dict:
     if actual_deduct > 0:
         import asyncio
         from app.routers.achievements import check_and_update
-        total_spent_rub = int(round((float(user.total_deposited_usd or 0) - float(user.balance_usd or 0)) * 95))
+        total_spent_rub = int(round((float(user.total_deposited_usd or 0) - float(user.balance_usd or 0)) * USD_TO_RUB))
         asyncio.create_task(check_and_update(int(tg_id), "spent_rub", max(0, total_spent_rub)))
 
     return {

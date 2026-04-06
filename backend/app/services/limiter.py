@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import User, Subscription, Pass, Usage
 from app.services.ai_router import get_model_tier, get_model_category, MODELS_REGISTRY
-from app.services.subscription import FREE_MODELS, get_accessible_models, get_credit_cost, get_required_tier, get_plan, PLANS, CREDIT_COSTS
+from app.services.subscription import FREE_MODELS, get_accessible_models, get_required_tier, get_plan, PLANS
 
 # ─── Free plan constants ───
 

@@ -1,5 +1,6 @@
 """Ad Campaign Generator — 7-step pipeline for Yandex Direct campaigns."""
 
+from app.config import USD_TO_RUB
 import io
 import json
 import logging
@@ -22,7 +23,7 @@ from app.services.ai_router import get_openrouter_model
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/campaigns", tags=["campaigns"])
 
-COST_USD = 1.04  # ~99 RUB
+COST_USD = 0.31  # ~29 RUB
 
 
 class CreateCampaignRequest(BaseModel):
@@ -276,7 +277,7 @@ async def create_campaign(
     user = await db.execute(select(User).where(User.telegram_id == tg_id))
     u = user.scalar_one_or_none()
     if u and float(u.balance_usd or 0) < COST_USD:
-        raise HTTPException(402, f"Недостаточно средств. Нужно ~{int(COST_USD * 95)}₽")
+        raise HTTPException(402, f"Недостаточно средств. Нужно ~{int(COST_USD * USD_TO_RUB)}₽")
 
     # Limit active campaigns
     active = await db.scalar(
@@ -315,7 +316,7 @@ async def list_campaigns(
             {
                 "id": c.id, "name": c.name, "status": c.status, "step": c.step,
                 "total_keywords": c.total_keywords, "total_ads": c.total_ads,
-                "cost_rub": round(c.cost_usd * 95),
+                "cost_rub": round(c.cost_usd * USD_TO_RUB),
                 "created_at": c.created_at.isoformat() if c.created_at else None,
             }
             for c in campaigns
@@ -406,7 +407,7 @@ async def improve_ad(
             "ok": True,
             "original": original,
             "improved": improved,
-            "cost_rub": round(IMPROVE_COST_USD * 95),
+            "cost_rub": round(IMPROVE_COST_USD * USD_TO_RUB),
         }
     except Exception as e:
         logger.error(f"Ad improve error: {e}")
@@ -432,7 +433,7 @@ async def get_campaign(
         "status": c.status, "step": c.step,
         "result": c.result,
         "total_keywords": c.total_keywords, "total_ads": c.total_ads,
-        "cost_rub": round(c.cost_usd * 95),
+        "cost_rub": round(c.cost_usd * USD_TO_RUB),
         "created_at": c.created_at.isoformat() if c.created_at else None,
         "completed_at": c.completed_at.isoformat() if c.completed_at else None,
     }

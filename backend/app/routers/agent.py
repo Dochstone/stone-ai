@@ -1,5 +1,6 @@
 """AI Agent — autonomous multi-step task execution."""
 
+from app.config import USD_TO_RUB
 import json
 import logging
 import os
@@ -174,7 +175,7 @@ async def run_agent(
     user = user_result.scalar_one_or_none()
     min_cost = body.max_steps * COST_PER_STEP_USD
     if user and (user.balance_usd or 0) < min_cost:
-        raise HTTPException(402, f"Недостаточно средств. Нужно ~{int(min_cost * 95)}₽")
+        raise HTTPException(402, f"Недостаточно средств. Нужно ~{int(min_cost * USD_TO_RUB)}₽")
 
     # Check active tasks limit
     active = await db.scalar(
