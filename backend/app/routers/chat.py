@@ -403,24 +403,58 @@ async def generate_image(
 
                 data = resp.json()
                 message = data.get("choices", [{}])[0].get("message", {})
-                content = message.get("content", "")
+                raw_content = message.get("content")
+                content = ""
+                parts = []
 
-                logger.info(f"OpenRouter image response keys: {list(message.keys())}, content_len={len(content)}, content_start={content[:100] if content else 'empty'}")
+                # OpenRouter may return content as string, list (multimodal), or null
+                if isinstance(raw_content, list):
+                    # Multimodal: [{"type":"text","text":"..."}, {"type":"image_url","image_url":{"url":"data:..."}}]
+                    for item in raw_content:
+                        if isinstance(item, dict):
+                            if item.get("type") == "image_url":
+                                url = item.get("image_url", {}).get("url", "")
+                                if url:
+                                    parts.append({"inline_data": {"mime_type": "image/png", "data": url.split(",", 1)[-1] if url.startswith("data:") else ""}})
+                                    if not parts[-1]["inline_data"]["data"]:
+                                        parts[-1] = {"url": url}
+                            elif item.get("type") == "text":
+                                content += item.get("text", "")
+                            elif "inline_data" in item:
+                                parts.append(item)
+                elif isinstance(raw_content, str):
+                    content = raw_content
+                # else: None → content stays ""
 
-                # Check multiple response formats
-                parts = message.get("parts", [])
+                logger.info(f"OpenRouter image response keys: {list(message.keys())}, content_type={type(raw_content).__name__}, content_len={len(content)}, parts={len(parts)}")
+
+                # Also check message-level parts (Gemini native format)
+                msg_parts = message.get("parts", [])
+                if msg_parts:
+                    parts.extend(msg_parts)
 
                 # Try to find image in response — could be inline base64 or URL
                 image_url = None
 
-                # Check for inline_data in parts (Gemini format)
+                # Check for inline_data in parts (Gemini format) or image_url
                 for part in parts:
-                    if isinstance(part, dict) and "inline_data" in part:
-                        mime = part["inline_data"].get("mime_type", "image/png")
-                        b64 = part["inline_data"].get("data", "")
-                        if b64:
-                            image_url = f"data:{mime};base64,{b64}"
-                            break
+                    if isinstance(part, dict):
+                        if "inline_data" in part:
+                            mime = part["inline_data"].get("mime_type", "image/png")
+                            b64 = part["inline_data"].get("data", "")
+                            if b64:
+                                image_url = f"data:{mime};base64,{b64}"
+                                break
+                        elif "url" in part and part["url"].startswith("http"):
+                            # Direct URL — download and convert
+                            try:
+                                async with httpx.AsyncClient(timeout=30.0) as dl:
+                                    img_resp = await dl.get(part["url"])
+                                    if img_resp.status_code == 200:
+                                        image_url = f"data:image/png;base64,{base64.b64encode(img_resp.content).decode('ascii')}"
+                                        break
+                            except Exception:
+                                pass
 
                 # If not in parts, check content for markdown image or data URI
                 if not image_url and content:
