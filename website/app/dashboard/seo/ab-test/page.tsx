@@ -122,7 +122,7 @@ export default function ABTestPage() {
           />
           <button onClick={generate} disabled={loading || !topic.trim()}
             className="mt-3 bg-accent text-white px-6 py-3 rounded-xl text-sm font-bold hover:bg-accent/90 disabled:opacity-40 transition-colors">
-            {loading ? "Генерация 3 вариантов..." : "Сгенерировать варианты"}
+            {loading ? "Генерация 3 вариантов..." : "Сгенерировать варианты · бесплатно"}
           </button>
         </div>
 

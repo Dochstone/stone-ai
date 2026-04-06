@@ -25,7 +25,7 @@ MSK = timezone(timedelta(hours=3))
 
 DAILY_LIMITS = {
     "free":     {"fast": 15, "premium": 0,  "opus": 0,  "image": 2, "video": 0},
-    "mini":     {"fast": 20, "premium": 1,  "opus": 0,  "image": 5, "video": 1},
+    "mini":     {"fast": 50, "premium": 3,  "opus": 0,  "image": 8, "video": 2},
     "max":      {"fast": 70, "premium": 4,  "opus": 1,  "image": 15, "video": 3},
     "max-pro":  {"fast": 350, "premium": 18, "opus": 3, "image": 100, "video": 15},
 }
@@ -39,7 +39,7 @@ ROLLOVER_RATE = {
 
 ROLLOVER_CAP = {
     "free":    {"fast": 0,   "premium": 0, "opus": 0},
-    "mini":    {"fast": 10,  "premium": 1, "opus": 0},
+    "mini":    {"fast": 25,  "premium": 2, "opus": 0},
     "max":     {"fast": 35,  "premium": 4, "opus": 1},
     "max-pro": {"fast": 175, "premium": 9, "opus": 2},
 }
