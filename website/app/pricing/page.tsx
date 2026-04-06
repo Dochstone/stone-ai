@@ -60,7 +60,7 @@ export default function PricingPage() {
   }, []);
 
   return (
-    <div className="pb-20 min-h-screen">
+    <div className="pt-24 pb-20 min-h-screen">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingJsonLd) }} />
       <Breadcrumbs items={[{ label: "Тарифы" }]} />
 

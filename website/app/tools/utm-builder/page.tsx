@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 
 export default function UTMBuilderPage() {
   return (
-    <div className="min-h-screen pb-20">
+    <div className="pt-24 min-h-screen pb-20">
       <Breadcrumbs items={[{ label: "Инструменты", href: "/tools/utm-builder" }, { label: "UTM-генератор" }]} />
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-10">

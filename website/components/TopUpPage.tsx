@@ -148,7 +148,7 @@ export default function TopUpPage() {
   if (!auth) return <AuthFormComponent onAuth={setAuth} subtitle="Войдите, чтобы выбрать тариф или пополнить баланс" />;
 
   return (
-    <div className="min-h-screen bg-bg">
+    <div className="pt-24 min-h-screen bg-bg">
       {/* Header */}
       <div className="bg-white border-b border-text/5">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
