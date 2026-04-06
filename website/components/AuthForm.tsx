@@ -398,32 +398,31 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
               </form>
             </>
           )}
-        </div>
 
-        {tgPolling && (
-          <div className="text-center mt-4 bg-[#2AABEE]/10 rounded-xl px-4 py-3">
-            <p className="text-sm font-medium text-[#2AABEE]">Подтвердите вход в Telegram</p>
-            <p className="text-xs text-text/40 mt-1">
-              1. Откройте Telegram<br/>
-              2. Нажмите Start в боте<br/>
-              3. Страница обновится автоматически
-            </p>
-            <button
-              onClick={() => {
-                const w = window.open("about:blank", "_blank");
-                if (w) w.location.href = `https://t.me/drifttt55bot?start=web_${tgSessionId}`;
-                else window.location.href = `https://t.me/drifttt55bot?start=web_${tgSessionId}`;
-              }}
-              className="mt-2 text-xs text-[#2AABEE] hover:underline"
-            >
-              Открыть бота повторно
-            </button>
-          </div>
-        )}
+          {tgPolling && (
+            <div className="text-center mt-4 bg-[#2AABEE]/10 rounded-xl px-4 py-3">
+              <p className="text-sm font-medium text-[#2AABEE]">Подтвердите вход в Telegram</p>
+              <p className="text-xs text-text/40 mt-1">
+                1. Откройте Telegram<br/>
+                2. Нажмите Start в боте<br/>
+                3. Страница обновится автоматически
+              </p>
+              <button
+                onClick={() => {
+                  const w = window.open("about:blank", "_blank");
+                  if (w) w.location.href = `https://t.me/drifttt55bot?start=web_${tgSessionId}`;
+                  else window.location.href = `https://t.me/drifttt55bot?start=web_${tgSessionId}`;
+                }}
+                className="mt-2 text-xs text-[#2AABEE] hover:underline"
+              >
+                Открыть бота повторно
+              </button>
             </div>
-          </div>
-        </div>
-      </div>
+          )}
+            </div>{/* /p-6 */}
+          </div>{/* /flex-1 */}
+        </div>{/* /flex-row */}
+      </div>{/* /max-w card */}
     </div>
   );
 }
