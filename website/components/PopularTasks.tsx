@@ -1,18 +1,18 @@
 "use client";
 
 const POPULAR_TASKS = [
-  { label: "Рекламные объявления", href: "/dashboard/templates", emoji: "🎯" },
+  { label: "Рекламные кампании", href: "/dashboard/campaigns", emoji: "🎯" },
   { label: "SEO-статьи", href: "/dashboard/seo/article", emoji: "📝" },
-  { label: "Контент-планы", href: "/dashboard/templates", emoji: "📅" },
-  { label: "Генерация картинок", href: "/dashboard/chat", emoji: "🎨" },
-  { label: "AI Видео", href: "/dashboard/chat", emoji: "🎬" },
+  { label: "AI-шаблоны", href: "/dashboard/templates", emoji: "📅" },
+  { label: "Генерация картинок", href: "/dashboard/chat?tab=image", emoji: "🎨" },
+  { label: "AI Видео", href: "/dashboard/chat?tab=video", emoji: "🎬" },
   { label: "Презентации", href: "/dashboard/presentations", emoji: "📊" },
   { label: "Фотосессия товаров", href: "/dashboard/photo-session", emoji: "📸" },
-  { label: "AI Чат-бот", href: "/dashboard/chat", emoji: "🤖" },
-  { label: "Код и дебаг", href: "/dashboard/chat", emoji: "💻" },
+  { label: "AI Чат-бот", href: "/dashboard/bots", emoji: "🤖" },
+  { label: "AI-Агент", href: "/dashboard/agent", emoji: "🧠" },
   { label: "Маркетплейс шаблонов", href: "/dashboard/marketplace", emoji: "🏪" },
-  { label: "UTM-метки", href: "/tools/utm-builder", emoji: "🔗" },
-  { label: "Озвучка текста", href: "/dashboard/chat", emoji: "🔊" },
+  { label: "Анализ текста", href: "/dashboard/seo/analyze", emoji: "🔍" },
+  { label: "A/B тест", href: "/dashboard/seo/ab-test", emoji: "⚡" },
 ];
 
 export default function PopularTasks() {
