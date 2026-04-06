@@ -3,7 +3,7 @@ export default function ProductScreenshot() {
     <section className="py-16 md:py-24">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="text-2xl md:text-3xl font-extrabold text-text mb-3">Всё в одном интерфейсе</h2>
+          <h2 className="text-2xl md:text-3xl font-extrabold text-text mb-3">AI-студия нового поколения</h2>
           <p className="text-text/50 max-w-lg mx-auto">Панель инструментов и AI-чат — без переключений между сервисами</p>
         </div>
 
@@ -25,7 +25,7 @@ export default function ProductScreenshot() {
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-text">Панель инструментов</h3>
-                  <p className="text-[10px] text-text/35">12 AI-инструментов в одном месте</p>
+                  <p className="text-[10px] text-text/35">15 AI-инструментов</p>
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-2">

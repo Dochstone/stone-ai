@@ -7,11 +7,11 @@ import ToolCta from "@/components/ToolCta";
 import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "ИИ чат-бот — 65 нейросетей в одном окне",
+  title: "ИИ чат-бот — AI-студия нового поколения",
   description:
     "Чат с нейросетями GPT-5, Claude Opus, Gemini Pro, DeepSeek R1 прямо в Telegram. Оплата в рублях. 15 бесплатных запросов в день.",
   openGraph: {
-    title: "AI Чат — 65 моделей в одном окне",
+    title: "AI Чат — AI-студия нового поколения",
     description: "GPT-5, Claude Opus, Gemini Pro и другие AI-модели прямо в Telegram.",
   },
 };
@@ -77,7 +77,7 @@ export default function ChatPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
       <ToolPageHero breadcrumb="AI Чат"
-        badge="65+ нейросетей в одном окне"
+        badge="AI-студия нового поколения"
         title="ИИ чат-бот с лучшими"
         highlight="нейросетями мира"
         description="Чат-бот с GPT-5, Claude Opus, Gemini Pro, DeepSeek R1 и ещё 62 нейросетями. Сравнивайте ответы ИИ, выбирайте лучшую модель для каждой задачи."

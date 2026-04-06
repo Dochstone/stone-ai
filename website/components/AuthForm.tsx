@@ -238,7 +238,7 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
           <div className="flex-1 min-w-0">
             {/* Mobile header */}
             <div className="md:hidden bg-gradient-to-r from-accent to-accent/80 px-6 py-5 text-center">
-              <h2 className="text-lg font-extrabold text-white">{subtitle || "65+ нейросетей в одном окне"}</h2>
+              <h2 className="text-lg font-extrabold text-white">{subtitle || "AI-студия нового поколения"}</h2>
               <p className="text-white/70 text-xs mt-1">Регистрация за 10 секунд — <b className="text-white">100₽ бонус</b></p>
             </div>
 

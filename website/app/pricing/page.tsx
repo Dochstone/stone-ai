@@ -11,7 +11,7 @@ const pricingJsonLd = {
   "@context": "https://schema.org",
   "@type": "Product",
   name: "Stone AI",
-  description: "65+ нейросетей в одном окне. Подписка от 390₽/мес.",
+  description: "AI-студия нового поколения. Подписка от 390₽/мес.",
   offers: [
     { "@type": "Offer", name: "Free", price: "0", priceCurrency: "RUB", description: "15 запросов в день, 7 моделей" },
     { "@type": "Offer", name: "Start", price: "390", priceCurrency: "RUB", description: "500 запросов/мес, 20+ моделей" },
@@ -71,7 +71,7 @@ export default function PricingPage() {
             4 тарифа
           </div>
           <h1 className="text-3xl md:text-5xl font-extrabold mb-4">
-            Одна подписка —{" "}
+            AI-студия —{" "}
             <span className="bg-gradient-to-r from-accent to-teal bg-clip-text text-transparent">все нейросети</span>
           </h1>
           <p className="text-text/50 max-w-2xl mx-auto text-lg">

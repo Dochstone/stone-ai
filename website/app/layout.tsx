@@ -121,7 +121,7 @@ const jsonLdOrganization = {
     height: 630,
   },
   description:
-    "Платформа доступа к 65+ нейросетям через Telegram. GPT-5, Claude Opus, Gemini Pro и другие. Одна подписка вместо пяти.",
+    "Платформа доступа к 65+ нейросетям через Telegram. GPT-5, Claude Opus, Gemini Pro и другие. AI-студия для бизнеса.",
   sameAs: ["https://t.me/drifttt55bot", "https://t.me/StoneAIsupport"],
   contactPoint: {
     "@type": "ContactPoint",
@@ -140,7 +140,7 @@ const jsonLdWebSite = {
   inLanguage: "ru",
   publisher: { "@id": `${SITE_URL}/#organization` },
   description:
-    "65+ нейросетей в одном окне. Текст, картинки, видео и код. Бесплатный старт. Подписка от 390₽/мес.",
+    "AI-студия нового поколения. Текст, картинки, видео и код. Бесплатный старт. Подписка от 390₽/мес.",
   potentialAction: {
     "@type": "SearchAction",
     target: { "@type": "EntryPoint", urlTemplate: `${SITE_URL}/models?q={search_term_string}` },

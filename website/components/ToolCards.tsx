@@ -275,7 +275,7 @@ function ChatDemo() {
 
 // ── Audio Card with real Web Audio API equalizer ──
 const BAR_COUNT = 32;
-const DEMO_TEXT = "Привет! Я Stone AI. Пятьдесят нейросетей в одном месте.";
+const DEMO_TEXT = "Привет! Я Stone AI. AI-студия нового поколения. 65+ нейросетей, 15 инструментов.";
 
 function AudioCard() {
   const [playing, setPlaying] = useState(false);
@@ -432,7 +432,7 @@ export default function ToolCards() {
           Полный арсенал AI инструментов для любой задачи
         </h2>
         <p className="text-text/60 text-center mb-12 max-w-lg mx-auto">
-          Все инструменты AI в одном месте
+          AI-студия нового поколения
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-auto">

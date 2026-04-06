@@ -24,7 +24,7 @@ export default function DemoShowcase() {
           Что можно создать с Stone AI
         </h2>
         <p className="text-text/60 text-center mb-14 max-w-lg mx-auto">
-          Картинки, видео, 3D, аудио — всё в одном чате
+          Картинки, видео, 3D, аудио — всё в одной AI-студии
         </p>
 
         {/* Image gallery */}
