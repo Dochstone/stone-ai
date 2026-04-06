@@ -1055,7 +1055,7 @@ export default function ProfilePage() {
               className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[13px] font-semibold whitespace-nowrap transition-colors shrink-0 ${
                 tab === t.id
                   ? "bg-accent text-white shadow-sm"
-                  : "text-text/40 hover:text-text/60 hover:bg-white"
+                  : "text-text/40 hover:text-text/70 hover:bg-text/[0.06]"
               }`}
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
