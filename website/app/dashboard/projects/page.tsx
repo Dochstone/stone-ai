@@ -38,7 +38,7 @@ export default function ProjectsPage() {
 
   const fetchProjects = async () => {
     const auth = getAuth();
-    if (!auth?.token) return;
+    if (!auth?.token) { setLoading(false); return; }
     try {
       const res = await fetch(`${API_URL}/api/projects/`, { headers: { Authorization: `Bearer ${auth.token}` } });
       const data = await res.json();

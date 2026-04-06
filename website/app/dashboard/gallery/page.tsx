@@ -47,7 +47,7 @@ export default function GalleryPage() {
 
   const fetchGens = useCallback(async (p: number, append: boolean = false) => {
     const auth = getAuth();
-    if (!auth?.token) return;
+    if (!auth?.token) { setLoading(false); return; }
     setLoading(true);
     try {
       const params = new URLSearchParams({ page: String(p), limit: "20" });

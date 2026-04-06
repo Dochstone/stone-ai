@@ -52,7 +52,7 @@ export default function AchievementsPage() {
 
   const claimReward = async (slug: string) => {
     const auth = getAuth();
-    if (!auth?.token) return;
+    if (!auth?.token) { setLoading(false); return; }
     setClaiming(slug);
     try {
       const res = await fetch(`${API_URL}/api/achievements/${slug}/claim`, {
