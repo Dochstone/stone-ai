@@ -73,8 +73,6 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
 
   const telegramLogin = async () => {
     setError("");
-    // Open window synchronously (before await) to avoid popup blocker
-    const tgWindow = window.open("about:blank", "_blank");
     try {
       const res = await fetch(`${API_URL}/api/auth/telegram-web-start`, { method: "POST" });
       const data = await res.json();
@@ -82,14 +80,27 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
       setTgSessionId(sid);
       setTgPolling(true);
       const tgUrl = `https://t.me/drifttt55bot?start=web_${sid}`;
-      if (tgWindow) {
-        tgWindow.location.href = tgUrl;
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (isMobile) {
+        // Mobile: open deep link in same context (don't use window.open — blocked on iOS)
+        // Create invisible link and click it — triggers app open without leaving page
+        const a = document.createElement("a");
+        a.href = tgUrl;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
       } else {
-        // Fallback if popup was still blocked
-        window.location.href = tgUrl;
+        // Desktop: open in new tab (sync to avoid popup blocker)
+        const tgWindow = window.open("about:blank", "_blank");
+        if (tgWindow) {
+          tgWindow.location.href = tgUrl;
+        } else {
+          window.open(tgUrl, "_blank");
+        }
       }
     } catch {
-      if (tgWindow) tgWindow.close();
       setError("Не удалось начать авторизацию через Telegram");
     }
   };
@@ -407,16 +418,14 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
                 2. Нажмите Start в боте<br/>
                 3. Страница обновится автоматически
               </p>
-              <button
-                onClick={() => {
-                  const w = window.open("about:blank", "_blank");
-                  if (w) w.location.href = `https://t.me/drifttt55bot?start=web_${tgSessionId}`;
-                  else window.location.href = `https://t.me/drifttt55bot?start=web_${tgSessionId}`;
-                }}
-                className="mt-2 text-xs text-[#2AABEE] hover:underline"
+              <a
+                href={`https://t.me/drifttt55bot?start=web_${tgSessionId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-block text-xs text-[#2AABEE] hover:underline"
               >
                 Открыть бота повторно
-              </button>
+              </a>
             </div>
           )}
             </div>{/* /p-6 */}
