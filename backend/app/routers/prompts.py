@@ -462,13 +462,13 @@ async def wizard_generate(
 
     # Check balance — cost in rubles, balance in USD
     cost_rub = tpl.cost_rub or 10.0
-    cost_usd = cost_rub / USD_TO_RUB.0  # approximate rate
+    cost_usd = cost_rub / USD_TO_RUB  # approximate rate
 
     # Expensive models cost 3x
     EXPENSIVE_MODELS = {"gpt-4.1", "claude-sonnet-4", "claude-sonnet-4.5", "deepseek-r1"}
     if body.model_id in EXPENSIVE_MODELS:
         cost_rub *= 3
-        cost_usd = cost_rub / USD_TO_RUB.0
+        cost_usd = cost_rub / USD_TO_RUB
 
     if db_id:
         u_result = await db.execute(select(User).where(User.id == db_id))
@@ -549,7 +549,7 @@ async def direct_generate(
     # Expensive models cost 3x
     EXPENSIVE_MODELS = {"gpt-4.1", "claude-sonnet-4", "claude-sonnet-4.5", "deepseek-r1"}
     actual_cost_rub = body.cost_rub * 3 if body.model_id in EXPENSIVE_MODELS else body.cost_rub
-    cost_usd = actual_cost_rub / USD_TO_RUB.0
+    cost_usd = actual_cost_rub / USD_TO_RUB
 
     if db_id:
         u_result = await db.execute(select(User).where(User.id == db_id))
