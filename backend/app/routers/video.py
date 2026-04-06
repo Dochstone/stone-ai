@@ -75,18 +75,36 @@ async def generate_video(
     if not user:
         raise HTTPException(404, "Пользователь не найден")
 
-    # Everyone pays from balance
+    # Free users: 1 video total (lifetime trial), then need balance
+    tier = user.subscription_tier or "free"
     balance = float(user.balance_usd or 0)
 
-    if balance < price:
+    if tier == "free" and balance <= 0:
+        from app.config import FREE_TRIAL_VIDEOS
+        from app.models.generation import Generation
+        from sqlalchemy import func as sql_func
+        total_videos = await db.scalar(
+            select(sql_func.count()).select_from(Generation).where(
+                Generation.user_tg_id == tg_user["id"], Generation.type == "video"
+            )
+        ) or 0
+        if total_videos >= FREE_TRIAL_VIDEOS:
+            raise HTTPException(402, {
+                "error": "insufficient_balance",
+                "message": f"Бесплатный лимит {FREE_TRIAL_VIDEOS} видео исчерпан. Пополните баланс.",
+                "upgrade_url": "/topup",
+            })
+        # Trial video — don't deduct
+        new_balance = balance
+    elif balance < price:
         raise HTTPException(402, {
             "error": "insufficient_balance",
             "message": f"Недостаточно средств. Нужно ~{int(price * USD_TO_RUB)}₽",
             "upgrade_url": "/topup",
         })
-
-    user.balance_usd = round(balance - price, 6)
-    new_balance = float(user.balance_usd)
+    else:
+        user.balance_usd = round(balance - price, 6)
+        new_balance = float(user.balance_usd)
 
     # Create task
     task_id = str(uuid.uuid4())[:12]

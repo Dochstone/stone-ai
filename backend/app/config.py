@@ -9,6 +9,10 @@ load_dotenv()
 USD_TO_RUB = 95.0  # Exchange rate for all price conversions
 SUBSCRIBER_DISCOUNT = 0.0  # No discount for now
 
+# Free tier lifetime trial limits (total, not per day)
+FREE_TRIAL_IMAGES = 2
+FREE_TRIAL_VIDEOS = 1
+
 
 def apply_discount(cost_usd: float, tier: str) -> float:
     """Apply subscriber discount to tool cost. Returns discounted cost in USD."""

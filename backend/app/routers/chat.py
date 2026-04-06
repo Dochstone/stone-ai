@@ -348,12 +348,17 @@ async def generate_image(
     tier = db_user.subscription_tier or "free" if db_user else "free"
     balance = float(db_user.balance_usd or 0) if db_user else 0
 
-    # Free users: 2 images/day
+    # Free users: 2 images total (lifetime trial), then need balance
     if tier == "free" and balance <= 0:
-        from app.services.limiter import get_today_usage
-        img_today = await get_today_usage(db, tg_id, "image") if db_user else 0
-        if img_today >= 2:
-            raise HTTPException(429, "Лимит картинок исчерпан (2/день). Подписка от 390₽/мес.")
+        from app.config import FREE_TRIAL_IMAGES
+        from sqlalchemy import func as sql_func
+        total_images = await db.scalar(
+            select(sql_func.count()).select_from(Generation).where(
+                Generation.user_tg_id == tg_id, Generation.type == "image"
+            )
+        ) or 0
+        if total_images >= FREE_TRIAL_IMAGES:
+            raise HTTPException(429, f"Бесплатный лимит {FREE_TRIAL_IMAGES} картинок исчерпан. Пополните баланс для продолжения.")
 
     settings = get_settings()
 
