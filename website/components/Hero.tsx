@@ -319,6 +319,10 @@ export default function Hero() {
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
+          <div className="inline-block bg-accent/10 text-accent px-4 py-1.5 rounded-full text-sm font-semibold mb-6">
+            Попробуйте бесплатно
+          </div>
+
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tight">
             Stone AI —{" "}
             <span className="bg-gradient-to-r from-accent to-teal bg-clip-text text-transparent">
