@@ -168,7 +168,7 @@ export default function BotsPage() {
                   <label className="text-[10px] font-bold text-text/30 uppercase tracking-wider">Модель</label>
                   <select value={form.model_id} onChange={e => setForm(f => ({ ...f, model_id: e.target.value }))}
                     className="w-full mt-1 bg-bg border border-text/10 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent/30">
-                    {MODELS.filter(m => m.category === "chat" || m.category === "reason" || m.category === "code").map(m => (
+                    {MODELS.filter(m => (m.category === "chat" || m.category === "reason" || m.category === "code") && m.tier === "free").map(m => (
                       <option key={m.id} value={m.id}>{m.name} ({m.company})</option>
                     ))}
                   </select>

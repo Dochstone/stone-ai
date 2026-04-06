@@ -44,7 +44,8 @@ async def track_page_view(
         try:
             from app.middleware.web_auth import decode_jwt
             payload = decode_jwt(auth_header[7:])
-            user_tg_id = payload.get("tg_id") or payload.get("sub")
+            raw_id = payload.get("tg_id") or payload.get("sub")
+            user_tg_id = int(raw_id) if raw_id is not None else None
         except Exception:
             pass
 

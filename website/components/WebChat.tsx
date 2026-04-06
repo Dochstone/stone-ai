@@ -1247,7 +1247,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
     const isGuest = !auth;
     if (isGuest) {
       const gc = parseInt(localStorage.getItem("stone_guest_count") || "0");
-      if (gc >= 10) { setShowGuestLimit(true); return; }
+      if (gc >= 2) { setShowGuestLimit(true); return; }
     }
 
     if (!isGuest && (!input.trim() && !pendingFile)) return;
@@ -1314,7 +1314,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         method: "POST",
         headers,
         body: JSON.stringify({
-          model_id: isGuest ? "gpt-4.1-mini" : selectedModel,
+          model_id: isGuest ? "gpt-4o-mini" : selectedModel,
           messages: apiMessages,
           ...(selectedProjectId && !isGuest ? { project_id: selectedProjectId } : {}),
           ...(ragSystemPrompt ? { system_prompt: ragSystemPrompt } : modelCatFilter === "health" ? { system_prompt: "Ты — AI-ассистент по общим вопросам здоровья. Ты НЕ врач и НЕ ставишь диагнозы. Анализируй фото и описания симптомов, предлагай возможные причины (2-3 варианта), рекомендуй к какому специалисту обратиться. Заверши: \"Для точного диагноза обратитесь к врачу.\" Отвечай на русском." } : {}),
@@ -1894,8 +1894,8 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                             </button>
                           )}
                           {/* Voice */}
-                          {!msg.video && !msg.threed && (
-                            <VoiceButton text={msg.content} token={auth!.token} />
+                          {!msg.video && !msg.threed && auth?.token && (
+                            <VoiceButton text={msg.content} token={auth.token} />
                           )}
                         </div>
                       )}
@@ -2305,14 +2305,15 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center backdrop-blur-sm" onClick={() => setShowGuestLimit(false)}>
           <div className="bg-bg rounded-3xl w-full max-w-sm mx-4 shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
             <div className="bg-gradient-to-br from-accent to-accent/80 px-6 pt-7 pb-5 text-center">
-              <span className="text-4xl block mb-3">🔓</span>
-              <h3 className="text-xl font-extrabold text-white mb-1">10 запросов использовано</h3>
-              <p className="text-white/60 text-sm">Зарегистрируйтесь — это бесплатно + 100₽ на баланс</p>
+              <span className="text-4xl block mb-3">🎁</span>
+              <h3 className="text-xl font-extrabold text-white mb-1">Пройдите регистрацию</h3>
+              <p className="text-white/80 text-sm">Чтобы продолжить — зарегистрируйтесь и получите <span className="font-bold text-white">100₽ на баланс</span></p>
             </div>
             <div className="px-6 py-5">
               <div className="space-y-2.5 mb-5">
+                <div className="flex items-center gap-3 text-sm"><span className="text-accent text-xs">✓</span><span className="text-text/60"><b>100₽ бонус</b> на счёт сразу после регистрации</span></div>
                 <div className="flex items-center gap-3 text-sm"><span className="text-accent text-xs">✓</span><span className="text-text/60">15 бесплатных запросов каждый день</span></div>
-                <div className="flex items-center gap-3 text-sm"><span className="text-accent text-xs">✓</span><span className="text-text/60">7 моделей включая GPT-4o mini и Claude Haiku</span></div>
+                <div className="flex items-center gap-3 text-sm"><span className="text-accent text-xs">✓</span><span className="text-text/60">65+ нейросетей — текст, картинки, видео</span></div>
                 <div className="flex items-center gap-3 text-sm"><span className="text-accent text-xs">✓</span><span className="text-text/60">Сохранение истории чатов</span></div>
               </div>
               <AuthFormComponent onAuth={(a) => { setAuth(a); setShowGuestLimit(false); }} />

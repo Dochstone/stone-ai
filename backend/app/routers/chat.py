@@ -48,7 +48,7 @@ async def _save_generation(db, tg_id: int, gen_type: str, model: str, prompt: st
 router = APIRouter(prefix="/api", tags=["chat"])
 
 # ─── Guest (anonymous) rate limiting by IP ───
-GUEST_LIMIT = 10
+GUEST_LIMIT = 2
 _guest_usage: dict[str, int] = {}  # ip -> total requests
 
 
