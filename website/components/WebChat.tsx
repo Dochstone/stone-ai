@@ -1690,14 +1690,27 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                       <button key={m.id} onClick={() => {
                         if (lock) { setLockModal({ model: m.name, tier: lock.tier, price: lock.price }); setModelPickerOpen(false); return; }
                         setSelectedModel(m.id); setModelPickerOpen(false); setModelSearch("");
-                      }} className={`w-full flex items-center gap-3 px-3 py-3 sm:py-2 rounded-xl text-left transition-colors ${
+                      }} className={`w-full flex items-start gap-3 px-3 py-3 sm:py-2.5 rounded-xl text-left transition-colors ${
                         selectedModel === m.id ? "bg-accent/5 border border-accent/20" : "hover:bg-text/[0.03] active:bg-text/[0.06]"
                       } ${lock ? "opacity-50" : ""}`}>
                         <div className="flex-1 min-w-0">
                           <span className="text-[14px] sm:text-sm font-semibold truncate block">{lock ? "🔒 " : ""}{m.name}</span>
                           <span className="text-[11px] sm:text-[10px] text-text/30">{m.company} · {m.context}</span>
+                          {m.strengths && m.strengths.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {m.strengths.slice(0, 2).map((s: string, si: number) => (
+                                <span key={si} className="text-[9px] bg-text/[0.04] text-text/40 px-1.5 py-0.5 rounded">{s}</span>
+                              ))}
+                              {m.id === "veo-3" && (
+                                <span className="text-[9px] bg-teal/10 text-teal font-bold px-1.5 py-0.5 rounded">1 бесплатно</span>
+                              )}
+                              {m.id === "nano-banana" && (
+                                <span className="text-[9px] bg-teal/10 text-teal font-bold px-1.5 py-0.5 rounded">2 бесплатно</span>
+                              )}
+                            </div>
+                          )}
                         </div>
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 mt-0.5 ${
                           lock ? "bg-text/5 text-text/30"
                           : FREE_MODEL_IDS.has(m.id) ? "bg-teal-light text-teal"
                           : MINI_MODEL_IDS.has(m.id) ? "bg-blue-100 text-blue-600"
