@@ -1,6 +1,7 @@
-"""AI Agent — autonomous multi-step task execution."""
+"""AI Agent — autonomous multi-step task execution with chain-of-thought planning."""
 
 from app.config import USD_TO_RUB
+import asyncio
 import json
 import logging
 import os
@@ -31,17 +32,60 @@ class RunAgentRequest(BaseModel):
     max_steps: int = Field(default=5, ge=1, le=10)
 
 
-AGENT_SYSTEM = """You are an AI agent that breaks down tasks into steps and executes them.
+AGENT_SYSTEM = (
+    "You are an expert AI agent. Workflow:\n"
+    "STEP 0 — PLAN: Output {\"step\":0,\"action\":\"Planning\",\"result\":\"Plan:\\n1. ...\\n2. ...\",\"done\":false}\n"
+    "STEPS 1-N — EXECUTION: {\"step\":N,\"action\":\"<name>\",\"result\":\"<detailed result>\",\"done\":false}\n"
+    "FINAL STEP — SUMMARY: {\"step\":N,\"action\":\"Summary\",\"result\":\"<comprehensive summary>\",\"done\":true}\n"
+    "Rules: single valid JSON object per response, no markdown wrapping. "
+    "Be thorough with data/examples/specifics. Respond in the instruction's language."
+)
 
-For each step, respond with a JSON object:
-{"step": <number>, "action": "<what you're doing>", "result": "<detailed result>", "done": <true/false>}
 
-Rules:
-- Break the task into 2-7 logical steps
-- Each step should produce a concrete result
-- When the task is complete, set "done": true and include a comprehensive final result
-- Be thorough and provide useful, actionable output
-- Always respond in the same language as the instruction"""
+async def _call_openrouter(client: httpx.AsyncClient, key: str, model: str, messages: list) -> dict:
+    """Call OpenRouter API with one retry on transient errors."""
+    for attempt in range(2):
+        try:
+            resp = await client.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={"Authorization": f"Bearer {key}"},
+                json={"model": model, "messages": messages, "max_tokens": 4096, "temperature": 0.3},
+            )
+            if resp.status_code == 200:
+                return resp.json()
+            if attempt == 0 and resp.status_code >= 500:
+                await asyncio.sleep(2)
+                continue
+            return {"error": resp.status_code}
+        except httpx.TimeoutException:
+            if attempt == 0:
+                await asyncio.sleep(2)
+                continue
+            return {"error": "timeout"}
+    return {"error": "retry_exhausted"}
+
+
+def _parse_step(content: str, step_num: int, max_steps: int) -> dict:
+    """Extract step JSON from LLM response."""
+    try:
+        text = content
+        if "```json" in content:
+            text = content.split("```json")[1].split("```")[0].strip()
+        elif "```" in content:
+            text = content.split("```")[1].split("```")[0].strip()
+        data = json.loads(text)
+        if not isinstance(data, dict):
+            raise ValueError("Not a dict")
+        data.setdefault("action", "processing")
+        data.setdefault("result", content)
+        data.setdefault("done", False)
+        if isinstance(data.get("result"), str) and len(data["result"]) > 5000:
+            data["result"] = data["result"][:5000] + "..."
+        if isinstance(data.get("action"), str) and len(data["action"]) > 200:
+            data["action"] = data["action"][:200]
+        return data
+    except (json.JSONDecodeError, IndexError, ValueError):
+        return {"step": step_num, "action": "processing", "result": content[:5000], "done": step_num >= max_steps}
 
 
 async def run_agent_task(task_id: int, instruction: str, model_id: str, max_steps: int, user_tg_id: int):
@@ -63,86 +107,62 @@ async def run_agent_task(task_id: int, instruction: str, model_id: str, max_step
         {"role": "user", "content": instruction},
     ]
     total_cost = 0.0
+    or_model = get_openrouter_model(model_id)
+    # max_steps + 1 to account for step 0 (plan)
+    total_allowed = max_steps + 1
 
     async with httpx.AsyncClient(timeout=60) as client:
-        for step_num in range(1, max_steps + 1):
-            try:
-                resp = await client.post(
-                    "https://openrouter.ai/api/v1/chat/completions",
-                    headers={"Authorization": f"Bearer {openrouter_key}"},
-                    json={
-                        "model": get_openrouter_model(model_id),
-                        "messages": messages,
-                        "max_tokens": 2000,
-                        "temperature": 0.3,
-                    },
-                )
-                if resp.status_code != 200:
-                    steps.append({"step": step_num, "action": "error", "result": f"API error: {resp.status_code}", "status": "failed"})
-                    break
+        for step_num in range(total_allowed):
+            # Check if task was cancelled
+            async with async_session() as db:
+                res = await db.execute(select(AgentTask.status).where(AgentTask.id == task_id))
+                current_status = res.scalar_one_or_none()
+                if current_status == "cancelled":
+                    return
 
-                data = resp.json()
-                content = data["choices"][0]["message"]["content"]
-                total_cost += COST_PER_STEP_USD
+            data = await _call_openrouter(client, openrouter_key, or_model, messages)
 
-                # Parse JSON from response with validation
-                try:
-                    json_match = content
-                    if "```json" in content:
-                        json_match = content.split("```json")[1].split("```")[0].strip()
-                    elif "```" in content:
-                        json_match = content.split("```")[1].split("```")[0].strip()
-                    step_data = json.loads(json_match)
-                    # Validate required fields
-                    if not isinstance(step_data, dict):
-                        raise ValueError("Not a dict")
-                    step_data.setdefault("action", "processing")
-                    step_data.setdefault("result", content)
-                    step_data.setdefault("done", False)
-                    # Sanitize: truncate overly long results
-                    if isinstance(step_data.get("result"), str) and len(step_data["result"]) > 5000:
-                        step_data["result"] = step_data["result"][:5000] + "..."
-                    if isinstance(step_data.get("action"), str) and len(step_data["action"]) > 200:
-                        step_data["action"] = step_data["action"][:200]
-                except (json.JSONDecodeError, IndexError, ValueError):
-                    step_data = {"step": step_num, "action": "processing", "result": content[:5000], "done": step_num >= max_steps}
-
-                step_record = {
-                    "step": step_num,
-                    "action": str(step_data.get("action", "processing"))[:200],
-                    "result": str(step_data.get("result", content))[:5000],
-                    "status": "completed",
-                }
-                steps.append(step_record)
-
-                messages.append({"role": "assistant", "content": content})
-
-                # Update task in DB
-                async with async_session() as db:
-                    result = await db.execute(select(AgentTask).where(AgentTask.id == task_id))
-                    task = result.scalar_one_or_none()
-                    if task:
-                        task.steps = steps
-                        task.total_steps = step_num
-                        task.total_cost_usd = total_cost
-                        await db.commit()
-
-                if step_data.get("done"):
-                    break
-
-                # Add follow-up prompt for next step
-                messages.append({"role": "user", "content": "Continue to the next step."})
-
-            except Exception as e:
-                logger.error(f"Agent step {step_num} error: {e}")
-                steps.append({"step": step_num, "action": "error", "result": str(e), "status": "failed"})
+            if "error" in data:
+                steps.append({"step": step_num, "action": "error", "result": f"API error: {data['error']}", "status": "failed"})
                 break
+
+            content = data["choices"][0]["message"]["content"]
+            total_cost += COST_PER_STEP_USD
+            step_data = _parse_step(content, step_num, total_allowed - 1)
+
+            steps.append({
+                "step": step_num,
+                "action": str(step_data.get("action", "processing"))[:200],
+                "result": str(step_data.get("result", content))[:5000],
+                "status": "completed",
+            })
+            messages.append({"role": "assistant", "content": content})
+
+            # Update progress in DB
+            async with async_session() as db:
+                result = await db.execute(select(AgentTask).where(AgentTask.id == task_id))
+                task = result.scalar_one_or_none()
+                if task:
+                    task.steps = steps
+                    task.total_steps = len(steps)
+                    task.total_cost_usd = total_cost
+                    await db.commit()
+
+            if step_data.get("done"):
+                break
+
+            # Follow-up prompt with step reference
+            next_step = step_num + 1
+            messages.append({
+                "role": "user",
+                "content": f"Good. Now execute step {next_step} from your plan. Be thorough and provide actionable details.",
+            })
 
     # Final update
     async with async_session() as db:
         result = await db.execute(select(AgentTask).where(AgentTask.id == task_id))
         task = result.scalar_one_or_none()
-        if task:
+        if task and task.status != "cancelled":
             task.steps = steps
             task.total_steps = len(steps)
             task.total_cost_usd = total_cost
@@ -150,7 +170,6 @@ async def run_agent_task(task_id: int, instruction: str, model_id: str, max_step
             task.result = steps[-1].get("result", "") if steps else "No results"
             task.completed_at = datetime.utcnow()
 
-            # Deduct cost from user balance
             user = await db.execute(select(User).where(User.telegram_id == user_tg_id))
             u = user.scalar_one_or_none()
             if u:
@@ -170,14 +189,12 @@ async def run_agent(
     tg_id = tg_user["id"]
     agent_run_limiter.check(str(tg_id))
 
-    # Check balance
     user_result = await db.execute(select(User).where(User.telegram_id == tg_id))
     user = user_result.scalar_one_or_none()
     min_cost = body.max_steps * COST_PER_STEP_USD
     if user and float(user.balance_usd or 0) < min_cost:
         raise HTTPException(402, f"Недостаточно средств. Нужно ~{int(min_cost * USD_TO_RUB)}₽")
 
-    # Check active tasks limit
     active = await db.scalar(
         select(func.count()).select_from(AgentTask).where(
             AgentTask.user_tg_id == tg_id,
@@ -198,8 +215,28 @@ async def run_agent(
     await db.flush()
 
     background_tasks.add_task(run_agent_task, task.id, body.instruction, body.model_id, body.max_steps, tg_id)
-
     return {"id": task.id, "status": "running"}
+
+
+@router.post("/tasks/{task_id}/cancel")
+async def cancel_task(
+    task_id: int,
+    tg_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Cancel a running task."""
+    result = await db.execute(
+        select(AgentTask).where(AgentTask.id == task_id, AgentTask.user_tg_id == tg_user["id"])
+    )
+    task = result.scalar_one_or_none()
+    if not task:
+        raise HTTPException(404, "Задача не найдена")
+    if task.status != "running":
+        raise HTTPException(400, "Задача не выполняется")
+    task.status = "cancelled"
+    task.completed_at = datetime.utcnow()
+    await db.commit()
+    return {"status": "cancelled"}
 
 
 @router.get("/tasks")
@@ -239,10 +276,7 @@ async def get_task(
 ):
     """Get task details with steps."""
     result = await db.execute(
-        select(AgentTask).where(
-            AgentTask.id == task_id,
-            AgentTask.user_tg_id == tg_user["id"],
-        )
+        select(AgentTask).where(AgentTask.id == task_id, AgentTask.user_tg_id == tg_user["id"])
     )
     task = result.scalar_one_or_none()
     if not task:
