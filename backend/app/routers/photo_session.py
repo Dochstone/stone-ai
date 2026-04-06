@@ -151,8 +151,8 @@ async def _refund(db: AsyncSession, user: User, new_balance: float, cost_usd: fl
     await db.flush()
 
 
-async def _generate_image(prompt: str, model_id: str | None = None) -> str | None:
-    """Generate image using OpenAI gpt-image-1 (most reliable) or OpenRouter models."""
+async def _generate_image(prompt: str, model_id: str | None = None, input_image_b64: str | None = None) -> str | None:
+    """Generate image using OpenAI gpt-image-1 or OpenRouter models. Supports input image for editing."""
     settings = get_settings()
 
     # Default to gpt-image-1 via OpenAI API (most reliable for image generation)
@@ -161,10 +161,15 @@ async def _generate_image(prompt: str, model_id: str | None = None) -> str | Non
     if use_openai and settings.openai_api_key:
         try:
             async with httpx.AsyncClient(timeout=120.0) as client:
+                # If input image provided, use edit endpoint
+                if input_image_b64:
+                    prompt_with_ref = f"Edit this product photo. Keep the product exactly as is but change the background: {prompt}"
+                else:
+                    prompt_with_ref = prompt
                 resp = await client.post(
                     "https://api.openai.com/v1/images/generations",
                     headers={"Authorization": f"Bearer {settings.openai_api_key}", "Content-Type": "application/json"},
-                    json={"model": "gpt-image-1", "prompt": prompt, "n": 1, "size": "1024x1024", "quality": "high"},
+                    json={"model": "gpt-image-1", "prompt": prompt_with_ref, "n": 1, "size": "1024x1024", "quality": "high"},
                 )
                 if resp.status_code != 200:
                     error_body = resp.text[:300]
@@ -189,8 +194,19 @@ async def _generate_image(prompt: str, model_id: str | None = None) -> str | Non
             logger.error(f"OpenAI image gen failed: {exc}")
             raise RuntimeError(str(exc))
 
-    # Fallback: OpenRouter for other models
+    # Fallback: OpenRouter for other models (supports multimodal with image input)
     openrouter_model = get_openrouter_model(model_id or "nano-banana")
+
+    # Build message — multimodal if input image provided
+    if input_image_b64:
+        img_url = input_image_b64 if input_image_b64.startswith("data:") else f"data:image/png;base64,{input_image_b64}"
+        user_content = [
+            {"type": "image_url", "image_url": {"url": img_url}},
+            {"type": "text", "text": f"Edit this product photo. Keep the product exactly as is, but change the background to: {prompt}. Output only the edited image, no text."},
+        ]
+    else:
+        user_content = f"Generate an image based on this description. Do NOT reply with text, ONLY generate the image. Description: {prompt}"
+
     async with httpx.AsyncClient(timeout=120.0) as client:
         resp = await client.post(
             "https://openrouter.ai/api/v1/chat/completions",
@@ -200,15 +216,24 @@ async def _generate_image(prompt: str, model_id: str | None = None) -> str | Non
                 "X-Title": "Stone AI",
                 "Content-Type": "application/json",
             },
-            json={"model": openrouter_model, "messages": [{"role": "user", "content": f"Generate an image: {prompt}"}], "max_tokens": 8192},
+            json={"model": openrouter_model, "messages": [{"role": "user", "content": user_content}], "max_tokens": 8192},
         )
         if resp.status_code != 200:
             raise RuntimeError(f"OpenRouter error {resp.status_code}")
 
         data = resp.json()
         message = data.get("choices", [{}])[0].get("message", {})
-        content = message.get("content", "")
+        raw_content = message.get("content")
+        content = raw_content if isinstance(raw_content, str) else ""
         parts = message.get("parts", [])
+
+        # Check message.images[] (OpenRouter Gemini format)
+        images = message.get("images", [])
+        for img in images:
+            if isinstance(img, dict):
+                url = img.get("image_url", {}).get("url", "") if isinstance(img.get("image_url"), dict) else ""
+                if url and url.startswith("data:image"):
+                    return url
 
         for part in parts:
             if isinstance(part, dict) and "inline_data" in part:
@@ -261,7 +286,7 @@ async def change_background(
     model_id_used = req.model_id or DEFAULT_IMAGE_MODEL
 
     try:
-        image_url = await _generate_image(prompt, model_id_used)
+        image_url = await _generate_image(prompt, model_id_used, input_image_b64=req.image_base64)
     except HTTPException:
         await _refund(db, user, new_balance, COST_BACKGROUND, has_sub)
         raise
@@ -323,7 +348,7 @@ async def product_on_model(
     model_id_used = req.model_id or DEFAULT_IMAGE_MODEL
 
     try:
-        image_url = await _generate_image(prompt, model_id_used)
+        image_url = await _generate_image(prompt, model_id_used, input_image_b64=req.product_image_base64)
     except HTTPException:
         await _refund(db, user, new_balance, COST_ON_MODEL, has_sub)
         raise
@@ -386,7 +411,7 @@ async def marketplace_card(
     model_id_used = req.model_id or DEFAULT_IMAGE_MODEL
 
     try:
-        image_url = await _generate_image(prompt, model_id_used)
+        image_url = await _generate_image(prompt, model_id_used, input_image_b64=req.image_base64)
     except HTTPException:
         await _refund(db, user, new_balance, COST_MARKETPLACE, has_sub)
         raise
@@ -464,7 +489,7 @@ async def batch_process(
         ).strip()
 
         try:
-            image_url = await _generate_image(prompt, model_id_used)
+            image_url = await _generate_image(prompt, model_id_used, input_image_b64=image_data)
 
             user.balance_usd = max(0, float(user.balance_usd or 0) - per_image_cost)
             total_spent += per_image_cost
