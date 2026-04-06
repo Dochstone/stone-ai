@@ -25,6 +25,10 @@ from app.services.promo import apply_promo
 router = APIRouter(prefix="/api", tags=["user"])
 
 
+class UpdateProfileRequest(BaseModel):
+    first_name: str | None = None
+
+
 class SubscribeRequest(BaseModel):
     tier: str  # mini, max, max-pro
 
@@ -120,6 +124,31 @@ async def get_me(
             "total_tokens": user.total_tokens_used or 0,
         },
     }
+
+
+@router.patch("/user/profile")
+async def update_profile(
+    body: UpdateProfileRequest,
+    tg_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update user display name."""
+    db_id = tg_user.get("db_id")
+    tg_id = tg_user["id"]
+
+    if db_id:
+        result = await db.execute(select(User).where(User.id == db_id))
+    else:
+        result = await db.execute(select(User).where(User.telegram_id == tg_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(404, "Пользователь не найден")
+
+    if body.first_name is not None:
+        user.first_name = body.first_name[:100]
+
+    await db.commit()
+    return {"ok": True, "first_name": user.first_name}
 
 
 @router.get("/user/usage-history")

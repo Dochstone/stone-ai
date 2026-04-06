@@ -534,8 +534,30 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
         <div className="space-y-3">
           <div>
             <label className="text-[11px] font-semibold text-text/35 uppercase block mb-1">Отображаемое имя</label>
-            <input value={displayName} onChange={(e) => setDisplayName(e.target.value)}
-              className="w-full bg-bg border border-text/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent" />
+            <div className="flex gap-2">
+              <input value={displayName} onChange={(e) => setDisplayName(e.target.value)}
+                className="flex-1 bg-bg border border-text/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent" />
+              <button
+                onClick={async () => {
+                  setSaving(true);
+                  try {
+                    const res = await fetch(`${API_URL}/api/user/profile`, {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
+                      body: JSON.stringify({ first_name: displayName }),
+                    });
+                    if (res.ok) setMsg("Имя сохранено");
+                    else setMsg("Ошибка сохранения");
+                  } catch { setMsg("Ошибка сети"); }
+                  setSaving(false);
+                  setTimeout(() => setMsg(""), 2000);
+                }}
+                disabled={saving}
+                className="bg-accent text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-accent/90 transition-colors disabled:opacity-50 shrink-0"
+              >
+                Сохранить
+              </button>
+            </div>
           </div>
           <div>
             <label className="text-[11px] font-semibold text-text/35 uppercase block mb-1">Email</label>
