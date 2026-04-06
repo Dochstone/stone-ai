@@ -1751,15 +1751,6 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
           </div>
         )}
 
-        {/* Guest bonus banner */}
-        {!auth && (
-          <div className="bg-gradient-to-r from-accent to-accent/80 px-4 py-2 flex items-center justify-center gap-2 text-white text-xs font-medium">
-            <span>🎁</span>
-            <span>Зарегистрируйтесь и получите <b>100₽ на баланс</b></span>
-            <a href="/profile" className="bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full text-[10px] font-bold transition-colors">Регистрация</a>
-          </div>
-        )}
-
         {/* Messages area or Welcome screen */}
         <div style={{ display: compareMode ? "none" : "contents" }}>
         {messages.length === 0 ? (
