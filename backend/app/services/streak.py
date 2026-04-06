@@ -39,6 +39,11 @@ async def update_login_streak(db, user) -> dict:
 
     await db.flush()
 
+    # Update streak achievements
+    import asyncio
+    from app.routers.achievements import check_and_update
+    asyncio.create_task(check_and_update(user.telegram_id, "streak", user.login_streak))
+
     return {
         "streak": user.login_streak,
         "bonuses": {"fast": user.streak_bonus_fast, "images": user.streak_bonus_images, "video": user.streak_bonus_video},

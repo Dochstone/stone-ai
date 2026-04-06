@@ -159,14 +159,29 @@ async def check_and_update(tg_id: int, metric: str, value: int = 1) -> list[dict
             result = await db.execute(select(Achievement))
             all_achs = result.scalars().all()
 
+            # Check multiformat: needs separate query for all types used
+            if metric in ("images", "videos", "3d", "audio"):
+                from app.models.generation import Generation
+                types_result = await db.execute(
+                    select(Generation.type).where(Generation.user_tg_id == tg_id).distinct()
+                )
+                user_types = {r for r in types_result.scalars().all()}
+                required_types = {"image", "video", "3d", "audio"}
+                has_all = required_types.issubset(user_types)
+
             for ach in all_achs:
                 cond = ach.condition
-                if cond.get("type") == "event" and cond.get("metric") == metric:
-                    pass  # event-based
+
+                # Match achievement to metric
+                if cond.get("type") == "all_types":
+                    if metric not in ("images", "videos", "3d", "audio"):
+                        continue
+                elif cond.get("type") == "event" and cond.get("metric") == metric:
+                    pass
                 elif cond.get("type") == "count" and cond.get("metric") == metric:
-                    pass  # count-based
+                    pass
                 elif cond.get("type") == "streak" and metric == "streak":
-                    pass  # streak-based
+                    pass
                 else:
                     continue
 
@@ -190,12 +205,15 @@ async def check_and_update(tg_id: int, metric: str, value: int = 1) -> list[dict
                 target = cond.get("target", 1)
                 if cond.get("type") == "event":
                     ua.progress = 1
+                elif cond.get("type") == "all_types":
+                    ua.progress = len(user_types) if 'user_types' in dir() else 0
+                    target = len(required_types) if 'required_types' in dir() else 4
                 elif cond.get("type") == "streak":
                     ua.progress = value
                 else:
                     ua.progress = value
 
-                # Check completion (reward NOT auto-credited — user must claim)
+                # Check completion
                 if ua.progress >= target and not ua.is_completed:
                     ua.is_completed = True
                     ua.completed_at = datetime.utcnow()

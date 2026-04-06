@@ -111,6 +111,13 @@ async def deduct_balance(db: AsyncSession, tg_id: int, amount: float) -> dict:
 
     await db.flush()
 
+    # Track spending for achievements
+    if actual_deduct > 0:
+        import asyncio
+        from app.routers.achievements import check_and_update
+        total_spent_rub = round((float(user.total_deposited_usd or 0) - float(user.balance_usd or 0)) * 95)
+        asyncio.create_task(check_and_update(tg_id, "spent_rub", max(0, total_spent_rub)))
+
     return {
         "success": True,
         "new_balance": float(user.balance_usd),
