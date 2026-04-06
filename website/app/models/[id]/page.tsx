@@ -154,15 +154,6 @@ export default function ModelPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(bcItems)) }} />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Breadcrumbs */}
-        <nav className="flex items-center gap-1.5 text-sm text-text/40 mb-8">
-          <a href="/" className="hover:text-accent transition-colors">Главная</a>
-          <span>/</span>
-          <a href="/models" className="hover:text-accent transition-colors">Модели</a>
-          <span>/</span>
-          <span className="text-text/60 truncate">{model.name}</span>
-        </nav>
-
         {/* Hero */}
         <div className="mb-12">
           <div className="flex flex-wrap items-center gap-2 mb-4">

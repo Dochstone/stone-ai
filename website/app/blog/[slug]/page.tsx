@@ -64,15 +64,6 @@ export default function BlogPostPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(bcItems)) }} />
       <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Breadcrumbs */}
-        <nav className="flex items-center gap-1.5 text-sm text-text/40 mb-6">
-          <a href="/" className="hover:text-accent transition-colors">Главная</a>
-          <span>&rarr;</span>
-          <a href="/blog" className="hover:text-accent transition-colors">Блог</a>
-          <span>&rarr;</span>
-          <span className="text-text/60 truncate">{post.title}</span>
-        </nav>
-
         {/* Header */}
         <div className="mb-10">
           <a

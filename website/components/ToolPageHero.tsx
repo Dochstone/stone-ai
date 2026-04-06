@@ -10,17 +10,7 @@ export default function ToolPageHero({ badge, title, highlight, description, bre
   return (
     <section className="hero-gradient pt-28 pb-16 md:pt-36 md:pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        {breadcrumb && (
-          <nav aria-label="Навигация" className="mb-6 -mt-4">
-            <ol className="flex items-center justify-center gap-1.5 text-xs text-text/40">
-              <li><a href="/" className="hover:text-accent transition-colors">Главная</a></li>
-              <li className="flex items-center gap-1.5">
-                <span className="text-text/20">/</span>
-                <span className="text-text/60 font-medium">{breadcrumb}</span>
-              </li>
-            </ol>
-          </nav>
-        )}
+        {/* breadcrumb removed — navbar already provides navigation */}
         <div className="inline-block bg-accent/10 text-accent px-4 py-1.5 rounded-full text-sm font-semibold mb-6">
           {badge}
         </div>
