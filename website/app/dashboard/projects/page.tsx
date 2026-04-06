@@ -191,7 +191,8 @@ export default function ProjectsPage() {
             <div className="text-center">
               <button onClick={openCreate} className="bg-accent text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-accent/90">
                 Создать проект
-            </button>
+              </button>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fadeIn">
