@@ -457,7 +457,7 @@ export default function Pricing() {
               }}
             />
             {/* Inner content */}
-            <div className="bg-bg relative z-[1] sm:rounded-[22px] rounded-t-[22px] shadow-2xl overflow-hidden">
+            <div className="bg-bg relative z-[1] sm:rounded-[22px] rounded-t-[22px] shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
 
             {/* Drag handle (mobile) — overlays image */}
             <div className="absolute top-2 left-1/2 -translate-x-1/2 w-9 h-1 rounded-full bg-white/30 sm:hidden z-20" />
@@ -636,7 +636,7 @@ export default function Pricing() {
                       {/* Other methods for topup */}
                       <button
                         onClick={() => setPayExpanded(!payExpanded)}
-                        className="w-full flex items-center justify-center gap-1.5 py-2 mt-2 text-[11px] text-text/30 hover:text-text/50 transition-colors"
+                        className="w-full flex items-center justify-center gap-1.5 py-3 min-h-[44px] mt-2 text-sm text-text/40 hover:text-text/60 active:text-accent transition-colors"
                         style={{ animation: "pricingStagger 0.4s ease both 0.45s" }}
                       >
                         Другие способы оплаты
@@ -720,7 +720,7 @@ export default function Pricing() {
                   {/* Other methods toggle */}
                   <button
                     onClick={() => setPayExpanded(!payExpanded)}
-                    className="w-full flex items-center justify-center gap-1.5 py-2 mt-2 text-[11px] text-text/30 hover:text-text/50 transition-colors"
+                    className="w-full flex items-center justify-center gap-1.5 py-3 min-h-[44px] mt-2 text-sm text-text/40 hover:text-text/60 active:text-accent transition-colors"
                     style={{ animation: "pricingStagger 0.4s ease both 0.5s" }}
                   >
                     Другие способы оплаты
