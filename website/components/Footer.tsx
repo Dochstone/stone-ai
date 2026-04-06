@@ -38,7 +38,7 @@ export default function Footer() {
             </div>
             <p className="text-[9px] text-text/25 tracking-[0.12em] uppercase mb-2">Smart Technology Omniscient Neural Engine</p>
             <p className="text-text/50 text-sm leading-relaxed">
-              65+ нейросетей в одном окне.
+              AI-студия нового поколения.
             </p>
             <div className="mt-4 flex flex-col gap-2">
               <a

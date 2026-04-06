@@ -1,7 +1,7 @@
 {
-  "name": "Stone AI — 65+ нейросетей в одном окне",
+  "name": "Stone AI — AI-студия нового поколения",
   "short_name": "Stone AI",
-  "description": "STONE — Smart Technology Omniscient Neural Engine. 65+ нейросетей в одном окне. Текст, картинки, видео и код.",
+  "description": "AI-студия для бизнеса. 65+ моделей, 15 инструментов: чат, картинки, видео, реклама, SEO, презентации, боты и агенты.",
   "start_url": "/webchat",
   "display": "standalone",
   "background_color": "#0C0C10",

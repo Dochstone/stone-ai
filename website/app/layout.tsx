@@ -29,11 +29,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "65+ нейросетей в одном окне — текст, картинки, видео | Stone AI",
+    default: "AI-студия нового поколения — 65+ моделей, 15 инструментов | Stone AI",
     template: "%s | Stone AI",
   },
   description:
-    "GPT-5, Claude, Gemini и ещё 62 нейросети. Текст, картинки, видео, аудио, 3D и код. Оплата в рублях. STONE — Smart Technology Omniscient Neural Engine.",
+    "Stone AI — AI-студия нового поколения. 65+ моделей, 15 инструментов: чат, картинки, видео, реклама, SEO, презентации, боты и агенты. Создавай, продвигай, автоматизируй. Оплата в рублях.",
   keywords: [
     "AI чат",
     "ChatGPT альтернатива",
@@ -57,23 +57,23 @@ export const metadata: Metadata = {
     locale: "ru_RU",
     url: SITE_URL,
     siteName: "Stone AI",
-    title: "65+ нейросетей в одном окне — Stone AI",
+    title: "Stone AI — AI-студия нового поколения",
     description:
-      "STONE — Smart Technology Omniscient Neural Engine. 65+ нейросетей в одном окне. Текст, картинки, видео и код. Оплата в рублях.",
+      "65+ моделей, 15 инструментов: чат, картинки, видео, реклама, SEO, презентации, боты и агенты. Бесплатный старт + 100₽ на баланс.",
     images: [
       {
         url: OG_IMAGE,
         width: 1200,
         height: 630,
-        alt: "Stone AI — 65+ нейросетей в одном окне",
+        alt: "Stone AI — AI-студия нового поколения",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "65+ нейросетей в одном окне — Stone AI",
+    title: "Stone AI — AI-студия нового поколения",
     description:
-      "STONE — Smart Technology Omniscient Neural Engine. 65+ нейросетей в одном окне. Текст, картинки, видео и код. Оплата в рублях.",
+      "65+ моделей, 15 инструментов: чат, картинки, видео, реклама, SEO, презентации, боты и агенты. Бесплатный старт + 100₽ на баланс.",
     images: [OG_IMAGE],
   },
   robots: {

@@ -320,23 +320,23 @@ export default function Hero() {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <div className="inline-block bg-accent/10 text-accent px-4 py-1.5 rounded-full text-sm font-semibold mb-6">
-            Попробуйте бесплатно
+            AI-студия нового поколения
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tight">
-            Одна подписка вместо десяти
+            Создавай. Продвигай.
             <br />
             <span className="bg-gradient-to-r from-accent to-teal bg-clip-text text-transparent">
-              Все нейросети уже здесь
+              Автоматизируй.
             </span>
           </h1>
 
           <img src="/mascots/stone-mascot-idle.png" alt="Stone AI" width="80" height="80" className="mx-auto mt-6 mb-2" />
 
           <p className="text-lg md:text-xl text-text/60 max-w-2xl mx-auto leading-relaxed">
-            GPT-5.1, Claude Sonnet 4, Gemini 2.5, Sora и ещё 65+ нейросетей.
+            15 инструментов · 65+ нейросетей · Бесплатный старт + 100₽ на баланс
             <br className="hidden sm:block" />
-            Тексты, картинки, видео, SEO-статьи, шаблоны — всё в одном окне.
+            Чат, картинки, видео, реклама, SEO, презентации, боты и агенты.
           </p>
 
           {/* CTA buttons */}

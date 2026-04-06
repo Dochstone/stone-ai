@@ -2174,13 +2174,13 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                 15 БЕСПЛАТНЫХ ЗАПРОСОВ
               </div>
               <h2 className="text-2xl font-extrabold text-white mb-1.5">
-                65+ НЕЙРОСЕТЕЙ
+                AI-СТУДИЯ
               </h2>
               <h3 className="text-lg font-extrabold text-white/60 mb-3">
-                В ОДНОМ ЧАТЕ
+                НОВОГО ПОКОЛЕНИЯ
               </h3>
               <p className="text-white/35 text-xs mb-5">
-                GPT-5 · Claude Opus · Gemini · Sora 2 · DALL-E · Veo 3
+                65+ моделей · 15 инструментов · Чат, картинки, видео, реклама
               </p>
               <button onClick={() => { setShowOnboarding(false); localStorage.setItem("stone_chat_onboarded", "1"); }}
                 className="w-full bg-accent text-white py-3.5 rounded-xl font-bold text-sm hover:bg-accent/90 transition-all shadow-lg shadow-accent/25">
