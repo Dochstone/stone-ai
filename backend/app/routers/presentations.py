@@ -389,24 +389,24 @@ async def generate_presentation(
             data = resp.json()
     except Exception as exc:
         # Refund on failure
-            user.balance_usd = round(new_balance + actual_cost, 6)
-            await db.flush()
+        user.balance_usd = round(new_balance + actual_cost, 6)
+        await db.flush()
         logger.error(f"Presentation generation failed: {exc}")
         raise HTTPException(502, f"Ошибка генерации: {exc}")
 
     # Extract content
     raw_content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
     if not raw_content:
-            user.balance_usd = round(new_balance + actual_cost, 6)
-            await db.flush()
+        user.balance_usd = round(new_balance + actual_cost, 6)
+        await db.flush()
         raise HTTPException(502, "Модель вернула пустой ответ")
 
     # Parse slides JSON
     try:
         slides = _parse_slides_json(raw_content)
     except (json.JSONDecodeError, ValueError) as exc:
-            user.balance_usd = round(new_balance + actual_cost, 6)
-            await db.flush()
+        user.balance_usd = round(new_balance + actual_cost, 6)
+        await db.flush()
         logger.error(f"Failed to parse slides JSON: {exc}\nRaw: {raw_content[:500]}")
         raise HTTPException(502, "Не удалось разобрать ответ модели как JSON-презентацию")
 
