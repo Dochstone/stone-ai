@@ -437,6 +437,24 @@ async def generate_image(
                 # Try to find image in response — could be inline base64 or URL
                 image_url = None
 
+                # Check message.images[] (OpenRouter Gemini format)
+                images = message.get("images", [])
+                for img in images:
+                    if isinstance(img, dict):
+                        url = img.get("image_url", {}).get("url", "") if isinstance(img.get("image_url"), dict) else ""
+                        if url and url.startswith("data:image"):
+                            image_url = url
+                            break
+                        elif url and url.startswith("http"):
+                            try:
+                                async with httpx.AsyncClient(timeout=30.0) as dl:
+                                    img_resp = await dl.get(url)
+                                    if img_resp.status_code == 200:
+                                        image_url = f"data:image/png;base64,{base64.b64encode(img_resp.content).decode('ascii')}"
+                                        break
+                            except Exception:
+                                pass
+
                 # Check for inline_data in parts (Gemini format) or image_url
                 for part in parts:
                     if isinstance(part, dict):
