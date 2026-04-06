@@ -645,3 +645,68 @@ async def confirm_tg_web_session(session_id: str, tg_id: int, tg_user_data: dict
 
         await db.commit()
         return user
+
+
+# ── Telegram WebApp auto-login (initData) ──
+
+class TelegramWebAppRequest(BaseModel):
+    init_data: str
+
+
+@router.post("/telegram-webapp")
+async def telegram_webapp_login(
+    body: TelegramWebAppRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    """Auto-login via Telegram WebApp initData.
+
+    Used when site is opened inside Telegram In-App Browser from a bot.
+    Validates initData signature and creates/finds user.
+    """
+    settings = get_settings()
+    if not settings.bot_token:
+        raise HTTPException(503, "Bot token not configured")
+
+    try:
+        from app.middleware.auth import validate_init_data
+        tg_user = validate_init_data(body.init_data, settings.bot_token)
+    except ValueError as e:
+        raise HTTPException(401, f"Invalid initData: {e}")
+
+    tg_id = tg_user["id"]
+
+    result = await db.execute(select(User).where(User.telegram_id == tg_id))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        user = User(
+            telegram_id=tg_id,
+            username=tg_user.get("username"),
+            first_name=tg_user.get("first_name"),
+            language=tg_user.get("language_code", "ru"),
+            auth_provider="telegram",
+            balance_usd=1.0,
+        )
+        db.add(user)
+        await db.flush()
+        logger.info(f"New TG WebApp user: {tg_id}")
+
+    await update_login_streak(db, user)
+    token = create_jwt(user.id, user.email or "")
+    await db.commit()
+
+    return _set_cookie_response(
+        {
+            "token": token,
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "username": user.username,
+                "first_name": user.first_name,
+                "balance_usd": round(float(user.balance_usd or 0), 4),
+                "subscription_tier": user.subscription_tier or "free",
+                "telegram_id": user.telegram_id,
+            },
+        },
+        token,
+    )

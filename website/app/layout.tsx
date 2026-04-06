@@ -8,6 +8,7 @@ import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import WebVitals from "@/components/WebVitals";
 import TonProvider from "@/components/TonProvider";
 import PageTracker from "@/components/PageTracker";
+import TelegramWebApp from "@/components/TelegramWebApp";
 
 const manrope = Manrope({
   subsets: ["latin", "cyrillic"],
@@ -244,6 +245,7 @@ export default function RootLayout({
         <ScrollToTop />
         <PWAInstallPrompt />
         <PageTracker />
+        <TelegramWebApp />
       </body>
     </html>
   );
