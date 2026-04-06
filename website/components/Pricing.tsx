@@ -23,14 +23,14 @@ const plans = [
     cta: "Выбрать Start", icon: "⚡", color: "#22D3EE", img: "/plan-mini.jpg?v=2",
   },
   {
-    id: "max", name: "Pro", price: "890₽", oldPrice: "1 490₽", priceNum: 890, premium: false, period: "/мес", desc: "Все 65+ моделей",
+    id: "max", name: "Pro", price: "890₽", oldPrice: "1\u00A0490₽", priceNum: 890, premium: false, period: "/мес", desc: "Все 65+ моделей",
     badge: "Популярный", accent: true,
     features: ["Все 65+ моделей без ограничений", "2 000 запросов к быстрым моделям", "100 запросов к премиум (20 к Opus)", "50 картинок и 10 видео в месяц", "5 3D-моделей и 20 озвучек", "Голосовой ассистент"],
     locked: [],
     cta: "Выбрать Pro", icon: "🔥", color: "#A855F7", img: "/plan-max.jpg?v=2",
   },
   {
-    id: "max-pro", name: "Elite", price: "1 990₽", oldPrice: "2 990₽", priceNum: 1990, premium: true, period: "/мес", desc: "Максимум возможностей",
+    id: "max-pro", name: "Elite", price: "1\u00A0990₽", oldPrice: "2\u00A0990₽", priceNum: 1990, premium: true, period: "/мес", desc: "Максимум возможностей",
     badge: "Легенда", accent: false,
     features: ["Все 65+ моделей + доступ к API", "10 000 запросов к быстрым моделям", "500 запросов к премиум (80 к Opus)", "300 картинок и 50 видео в месяц", "30 3D-моделей и 100 озвучек", "Приоритетная скорость ответов", "Ранний доступ к новым моделям"],
     locked: [],
