@@ -83,12 +83,11 @@ async def generate_video(
         from app.config import FREE_TRIAL_VIDEOS
         from app.models.generation import Generation
         from sqlalchemy import func as sql_func
-        # Trial only with cheap models
-        TRIAL_VIDEO_MODELS = {"ltx-video", "wan-2", "hunyuan", "cogvideox", "stable-video"}
-        if req.model_id not in TRIAL_VIDEO_MODELS:
+        # Trial only with Veo 3
+        if req.model_id != "veo-3":
             raise HTTPException(402, {
                 "error": "insufficient_balance",
-                "message": f"Бесплатное видео доступно только в моделях LTX, Wan, Hunyuan. Для остальных пополните баланс.",
+                "message": "Бесплатное видео доступно только в модели Veo 3. Для остальных пополните баланс.",
                 "upgrade_url": "/topup",
             })
         total_videos = await db.scalar(
