@@ -13,6 +13,7 @@ const VoiceButton = dynamic(() => import("@/components/chat/VoiceButton"), { ssr
 const MessageContent = dynamic(() => import("@/components/chat/MessageContent"), { ssr: false });
 import { VideoPlayer } from "@/components/chat/MessageContent";
 import { getSavedAvatar } from "@/lib/avatar";
+import { OnboardingFlow } from "@/components/OnboardingFlow";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
 
@@ -689,8 +690,11 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
       setSidebarOpen(false);
     }
-    // Mini onboarding for chat (only for logged-in users)
-    if (!localStorage.getItem("stone_chat_onboarded") && localStorage.getItem("stone_auth")) {
+    // Onboarding — for both guests and logged-in users
+    const isAuthed = !!localStorage.getItem("stone_auth");
+    const guestDone = localStorage.getItem("stone_guest_onboarded");
+    const userDone = localStorage.getItem("stone_user_onboarded");
+    if ((isAuthed && !userDone) || (!isAuthed && !guestDone)) {
       setShowOnboarding(true);
     }
     // Avatar
@@ -2036,6 +2040,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
               {/* Model selector — compact */}
               <button
                 onClick={() => setModelPickerOpen(!modelPickerOpen)}
+                data-onboard="model-picker"
                 className="shrink-0 flex items-center gap-1 px-2 py-1.5 rounded-lg bg-text/[0.04] hover:bg-text/[0.08] text-[11px] font-semibold text-text/60 transition-colors max-w-[80px] sm:max-w-[120px]"
                 title={model?.name}
               >
@@ -2053,6 +2058,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                 onKeyDown={handleKey}
                 onFocus={() => { setTimeout(() => textareaRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" }), 300); }}
                 placeholder={pendingFile ? "Вопрос к файлу..." : modelCatFilter === "health" ? "Опишите симптомы..." : isVideoModel ? "Опишите видео..." : is3DModel ? "Опишите 3D..." : "Сообщение..."}
+                data-onboard="chat-input"
                 rows={1}
                 className="flex-1 bg-transparent resize-none focus:outline-none min-w-0 leading-snug placeholder:text-text/20"
                 style={{ fontSize: 16, padding: "10px 16px", maxHeight: 80, minHeight: 42 }}
@@ -2161,45 +2167,17 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
       </div>
       </div>{/* /compareMode hide */}
 
-      {/* Chat mini-onboarding */}
+      {/* Onboarding flow */}
       {showOnboarding && (
-        <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-md flex items-center justify-center px-4" onClick={() => { setShowOnboarding(false); localStorage.setItem("stone_chat_onboarded", "1"); }}>
-          <div className="bg-[#0C0C10] rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            {/* Hero image */}
-            <div className="relative">
-              <img src="/onboard-hero.png" alt="" className="w-full aspect-[4/3] object-cover object-top" />
-              <button onClick={() => { setShowOnboarding(false); localStorage.setItem("stone_chat_onboarded", "1"); }}
-                className="absolute top-3 right-3 w-7 h-7 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center text-white/60 hover:text-white transition-colors">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-              </button>
-            </div>
-
-            {/* Content */}
-            <div className="px-6 pt-5 pb-6 text-center">
-              <div className="inline-flex items-center gap-1.5 bg-accent/15 text-accent text-[10px] font-bold px-3 py-1 rounded-full mb-3">
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" /></svg>
-                15 БЕСПЛАТНЫХ ЗАПРОСОВ
-              </div>
-              <h2 className="text-2xl font-extrabold text-white mb-1.5">
-                AI-СТУДИЯ
-              </h2>
-              <h3 className="text-lg font-extrabold text-white/60 mb-3">
-                НОВОГО ПОКОЛЕНИЯ
-              </h3>
-              <p className="text-white/35 text-xs mb-5">
-                65+ моделей · 15 инструментов · Чат, картинки, видео, реклама
-              </p>
-              <button onClick={() => { setShowOnboarding(false); localStorage.setItem("stone_chat_onboarded", "1"); }}
-                className="w-full bg-accent text-white py-3.5 rounded-xl font-bold text-sm hover:bg-accent/90 transition-all shadow-lg shadow-accent/25">
-                Начать бесплатно
-              </button>
-              <a href="/pricing" onClick={() => { setShowOnboarding(false); localStorage.setItem("stone_chat_onboarded", "1"); }}
-                className="block text-white/25 text-xs font-medium hover:text-accent transition-colors mt-3">
-                Подписка от 390₽/мес →
-              </a>
-            </div>
-          </div>
-        </div>
+        <OnboardingFlow
+          mode={auth ? "user" : "guest"}
+          onComplete={() => {
+            setShowOnboarding(false);
+            localStorage.setItem("stone_chat_onboarded", "1");
+            if (auth) localStorage.setItem("stone_user_onboarded", "1");
+            else localStorage.setItem("stone_guest_onboarded", "1");
+          }}
+        />
       )}
 
       {/* Upsell Modal — unified for lock + limit */}
