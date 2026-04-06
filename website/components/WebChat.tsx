@@ -689,8 +689,8 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
       setSidebarOpen(false);
     }
-    // Mini onboarding for chat
-    if (!localStorage.getItem("stone_chat_onboarded")) {
+    // Mini onboarding for chat (only for logged-in users)
+    if (!localStorage.getItem("stone_chat_onboarded") && localStorage.getItem("stone_auth")) {
       setShowOnboarding(true);
     }
     // Avatar
@@ -2302,7 +2302,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
       {/* Guest limit — registration prompt */}
       {showGuestLimit && !auth && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center backdrop-blur-sm p-4" onClick={() => setShowGuestLimit(false)}>
+        <div className="fixed inset-0 bg-black/60 z-[70] flex items-center justify-center backdrop-blur-sm p-4" onClick={() => setShowGuestLimit(false)}>
           <div className="bg-bg rounded-2xl w-full max-w-[400px] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
             {/* Header */}
             <div className="relative bg-gradient-to-br from-accent via-accent/90 to-accent/70 px-6 pt-8 pb-6 text-center overflow-hidden">
