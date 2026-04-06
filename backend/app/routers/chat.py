@@ -379,6 +379,7 @@ async def generate_image(
             api_key = settings.openrouter_api_key
 
             async with httpx.AsyncClient(timeout=120.0) as client:
+                prompt_text = f"Generate an image based on this description. Do NOT reply with text, ONLY generate the image. Description: {req.prompt}"
                 resp = await client.post(
                     "https://openrouter.ai/api/v1/chat/completions",
                     headers={
@@ -389,7 +390,7 @@ async def generate_image(
                     },
                     json={
                         "model": openrouter_model,
-                        "messages": [{"role": "user", "content": f"Generate an image: {req.prompt}"}],
+                        "messages": [{"role": "user", "content": prompt_text}],
                         "max_tokens": 8192,
                     },
                 )
@@ -476,9 +477,8 @@ async def generate_image(
                             image_url = data_match.group(1)
 
                 if not image_url:
-                    # Model returned text instead of image — return as text response
-                    logger.warning(f"OpenRouter image model returned text: {content[:100]}")
-                    return {"image_url": None, "text": content, "model": req.model_id}
+                    logger.warning(f"OpenRouter image model returned text instead of image: {content[:200]}")
+                    raise HTTPException(400, "Не удалось сгенерировать изображение. Попробуйте описать картинку подробнее.")
 
                 await record_usage(db, tg_id, req.model_id, cost_usd=0)
                 await _save_generation(db, tg_id, "image", req.model_id, req.prompt, result_text=image_url)
