@@ -11,13 +11,14 @@ const TonWalletBadge = dynamic(() => import("./TonWalletBadge"), { ssr: false })
 import { getAvatarColor, getSavedAvatar } from "@/lib/avatar";
 
 const tools = [
-  { href: "/chat", label: "AI Чат" },
-  { href: "/images", label: "Генерация картинок" },
-  { href: "/video", label: "AI Видео" },
-  { href: "/audio", label: "AI Аудио" },
-  { href: "/documents", label: "Анализ документов" },
-  { href: "/search", label: "AI Поиск" },
-  { href: "/code", label: "Код-ассистент" },
+  { href: "/dashboard/chat", label: "AI Чат" },
+  { href: "/dashboard/templates", label: "AI-шаблоны" },
+  { href: "/dashboard/presentations", label: "Презентации" },
+  { href: "/dashboard/campaigns", label: "Рекламные кампании" },
+  { href: "/dashboard/photo-session", label: "Фотосессия товаров" },
+  { href: "/dashboard/seo/article", label: "SEO-инструменты" },
+  { href: "/dashboard/bots", label: "Конструктор ботов" },
+  { href: "/dashboard/agent", label: "AI-Агент" },
 ];
 
 export default function Nav() {
