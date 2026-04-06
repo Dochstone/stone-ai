@@ -1695,7 +1695,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                       } ${lock ? "opacity-50" : ""}`}>
                         <div className="flex-1 min-w-0">
                           <span className="text-[14px] sm:text-sm font-semibold truncate block">{lock ? "🔒 " : ""}{m.name}</span>
-                          <span className="text-[11px] sm:text-[10px] text-text/30">{m.company} · {m.context}</span>
+                          <span className="text-[11px] sm:text-[10px] text-text/30">{m.company} · {m.category === "image" ? "🎨 Фото" : m.category === "video" ? "🎬 Видео" : m.category === "search" ? "🔍 Поиск" : m.category === "reason" ? "🧠 Анализ" : m.category === "code" ? "💻 Код" : m.category === "3d" ? "🧊 3D" : "📝 Текст"}</span>
                           {m.strengths && m.strengths.length > 0 && (
                             <div className="flex flex-wrap gap-1 mt-1">
                               {m.strengths.slice(0, 2).map((s: string, si: number) => (
