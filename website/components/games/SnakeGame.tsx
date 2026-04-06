@@ -188,7 +188,8 @@ export default function SnakeGame({ token, onClose, compact, onShowLeaderboard }
     setGameState("over"); playSound("die");
     if (intervalRef.current) clearInterval(intervalRef.current);
     if (bonusTimerRef.current) clearTimeout(bonusTimerRef.current);
-    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    // Keep RAF running briefly for death particles, then stop
+    setTimeout(() => { if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current); }, 500);
     const s = scoreRef.current, b = parseInt(localStorage.getItem("snake_best") || "0");
     if (s > b) {
       localStorage.setItem("snake_best", String(s)); setBest(s); setNewRecord(true);
@@ -223,24 +224,26 @@ export default function SnakeGame({ token, onClose, compact, onShowLeaderboard }
       if (nl > levelRef.current) { levelRef.current = nl; setLevel(nl); setLevelFlash(true); setTimeout(() => setLevelFlash(false), 400); }
       spawnWalls(scoreRef.current);
     } else snake.pop();
-    snakeRef.current = snake; draw();
-  }, [draw, gameOver, spawnFood, spawnParticles, playSound, spawnWalls]);
+    snakeRef.current = snake;
+  }, [gameOver, spawnFood, spawnParticles, playSound, spawnWalls]);
+
+  // 60 FPS render loop — smooth drawing independent of game tick
+  const renderLoop = useCallback(() => {
+    draw();
+    animFrameRef.current = requestAnimationFrame(renderLoop);
+  }, [draw]);
 
   const startGame = useCallback(() => {
     if (!audioCtxRef.current) audioCtxRef.current = new AudioContext();
     snakeRef.current = [{ x: 10, y: 10 }]; dirRef.current = "right"; nextDirRef.current = "right";
     scoreRef.current = 0; levelRef.current = 1; particlesRef.current = []; wallsRef.current = []; bonusRef.current = null;
     setScore(0); setLevel(1); setNewRecord(false); setGameState("playing");
-    spawnFood(); draw(); playSound("start"); scheduleBonus();
+    spawnFood(); playSound("start"); scheduleBonus();
     if (intervalRef.current) clearInterval(intervalRef.current);
     intervalRef.current = setInterval(tick, BASE_SPEED);
-    const animate = () => {
-      if (bonusRef.current && Date.now() >= bonusRef.current.expiresAt) bonusRef.current = null;
-      animFrameRef.current = requestAnimationFrame(animate);
-    };
     if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
-    animFrameRef.current = requestAnimationFrame(animate);
-  }, [tick, draw, spawnFood, playSound, scheduleBonus]);
+    animFrameRef.current = requestAnimationFrame(renderLoop);
+  }, [tick, spawnFood, playSound, scheduleBonus, renderLoop]);
 
   useEffect(() => {
     if (gameState !== "playing" || paused) { if (intervalRef.current) clearInterval(intervalRef.current); return; }
