@@ -42,7 +42,7 @@ async def update_login_streak(db, user) -> dict:
     # Update streak achievements
     import asyncio
     from app.routers.achievements import check_and_update
-    asyncio.create_task(check_and_update(user.telegram_id, "streak", user.login_streak))
+    asyncio.create_task(check_and_update(int(user.telegram_id), "streak", int(user.login_streak or 0)))
 
     return {
         "streak": user.login_streak,

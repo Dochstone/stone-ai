@@ -152,6 +152,8 @@ async def seed_achievements(db: AsyncSession = Depends(get_db)):
 
 async def check_and_update(tg_id: int, metric: str, value: int = 1) -> list[dict]:
     """Check and update achievements for a metric. Returns list of newly completed achievements."""
+    tg_id = int(tg_id)
+    value = int(value)
     unlocked = []
     try:
         async with async_session() as db:
