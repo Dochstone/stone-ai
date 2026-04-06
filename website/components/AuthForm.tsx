@@ -73,14 +73,23 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
 
   const telegramLogin = async () => {
     setError("");
+    // Open window synchronously (before await) to avoid popup blocker
+    const tgWindow = window.open("about:blank", "_blank");
     try {
       const res = await fetch(`${API_URL}/api/auth/telegram-web-start`, { method: "POST" });
       const data = await res.json();
       const sid = data.session_id;
       setTgSessionId(sid);
       setTgPolling(true);
-      window.open(`https://t.me/drifttt55bot?start=web_${sid}`, "_blank");
+      const tgUrl = `https://t.me/drifttt55bot?start=web_${sid}`;
+      if (tgWindow) {
+        tgWindow.location.href = tgUrl;
+      } else {
+        // Fallback if popup was still blocked
+        window.location.href = tgUrl;
+      }
     } catch {
+      if (tgWindow) tgWindow.close();
       setError("Не удалось начать авторизацию через Telegram");
     }
   };
