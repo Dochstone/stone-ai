@@ -184,14 +184,42 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
   const btnClass = "w-full bg-accent text-white py-3 min-h-[44px] rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors disabled:opacity-50";
 
   return (
-    <div className="min-h-screen bg-bg flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <a href="/" className="text-2xl font-extrabold text-text">Stone AI</a>
-          <p className="mt-2 text-text/50 text-sm">{subtitle || "65+ нейросетей в одном окне"}</p>
-        </div>
+    <div className="min-h-screen bg-bg flex items-center justify-center px-4 pt-24 pb-12">
+      <div className="w-full max-w-[860px] bg-white rounded-2xl border border-text/5 shadow-xl overflow-hidden">
+        <div className="flex flex-col md:flex-row">
+          {/* Left — hero image */}
+          <div className="hidden md:block md:w-[340px] shrink-0 relative">
+            <img src="/onboard-hero.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+            <div className="absolute bottom-6 left-6 right-6">
+              <div className="inline-flex items-center gap-1.5 bg-accent/90 text-white text-[11px] font-bold px-3 py-1.5 rounded-full mb-3">
+                🎁 +100₽ на баланс
+              </div>
+              <h2 className="text-white text-xl font-extrabold leading-tight mb-1">65+ нейросетей</h2>
+              <p className="text-white/50 text-xs leading-relaxed">GPT-5 · Claude · Gemini · DeepSeek · Llama · Mistral</p>
+              <div className="flex gap-3 mt-3">
+                {[
+                  { icon: "⚡", text: "15 запросов/день" },
+                  { icon: "🎨", text: "Картинки" },
+                  { icon: "💾", text: "История" },
+                ].map((b, i) => (
+                  <div key={i} className="flex items-center gap-1.5 text-white/60 text-[10px]">
+                    <span>{b.icon}</span><span>{b.text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
 
-        <div className="bg-white rounded-2xl border border-text/5 p-8">
+          {/* Right — auth form */}
+          <div className="flex-1 min-w-0">
+            {/* Mobile header */}
+            <div className="md:hidden bg-gradient-to-r from-accent to-accent/80 px-6 py-5 text-center">
+              <h2 className="text-lg font-extrabold text-white">{subtitle || "65+ нейросетей в одном окне"}</h2>
+              <p className="text-white/70 text-xs mt-1">Регистрация за 10 секунд — <b className="text-white">100₽ бонус</b></p>
+            </div>
+
+            <div className="p-6 md:p-8">
 
           {/* Verify Email Screen */}
           {screen === "verify" && (
@@ -373,21 +401,28 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
         </div>
 
         {tgPolling && (
-          <div className="text-center mt-6 bg-[#2AABEE]/10 rounded-xl px-4 py-3">
+          <div className="text-center mt-4 bg-[#2AABEE]/10 rounded-xl px-4 py-3">
             <p className="text-sm font-medium text-[#2AABEE]">Подтвердите вход в Telegram</p>
             <p className="text-xs text-text/40 mt-1">
-              1. Откройте Telegram (нажмите &quot;Open in Telegram&quot;)<br/>
-              2. Нажмите Start / Запустить в боте<br/>
-              3. Эта страница обновится автоматически
+              1. Откройте Telegram<br/>
+              2. Нажмите Start в боте<br/>
+              3. Страница обновится автоматически
             </p>
             <button
-              onClick={() => window.open(`https://t.me/drifttt55bot?start=web_${tgSessionId}`, "_blank")}
+              onClick={() => {
+                const w = window.open("about:blank", "_blank");
+                if (w) w.location.href = `https://t.me/drifttt55bot?start=web_${tgSessionId}`;
+                else window.location.href = `https://t.me/drifttt55bot?start=web_${tgSessionId}`;
+              }}
               className="mt-2 text-xs text-[#2AABEE] hover:underline"
             >
               Открыть бота повторно
             </button>
           </div>
         )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
