@@ -179,7 +179,7 @@ export default function Pricing() {
 
   const openPlan = (plan: typeof plans[0]) => {
     const auth = getAuth();
-    if (!auth && plan.id !== "free") { window.location.href = "/dashboard/chat"; return; }
+    if (!auth && plan.id !== "free") { window.location.href = "/profile"; return; }
     setModal(plan);
     setTopupMode(plan.id === "free");
     setPayExpanded(false);
@@ -213,7 +213,7 @@ export default function Pricing() {
 
   const payTopup = async (amountRub: number) => {
     const auth = getAuth();
-    if (!auth) { window.location.href = "/dashboard/chat"; return; }
+    if (!auth) { window.location.href = "/profile"; return; }
     setLoading(true);
     setResult(null);
     try {
@@ -234,7 +234,7 @@ export default function Pricing() {
 
   const pay = async (tier: string, method: "platega" | "crypto" = "platega") => {
     const auth = getAuth();
-    if (!auth) { window.location.href = "/dashboard/chat"; return; }
+    if (!auth) { window.location.href = "/profile"; return; }
     setLoading(true);
     setResult(null);
     try {
@@ -632,6 +632,34 @@ export default function Pricing() {
                       <p className="text-[10px] text-text/25 text-center mt-1.5" style={{ animation: "pricingStagger 0.4s ease both 0.42s" }}>
                         Карта РФ · Мир · Visa · MC · СБП
                       </p>
+
+                      {/* Other methods for topup */}
+                      <button
+                        onClick={() => setPayExpanded(!payExpanded)}
+                        className="w-full flex items-center justify-center gap-1.5 py-2 mt-2 text-[11px] text-text/30 hover:text-text/50 transition-colors"
+                        style={{ animation: "pricingStagger 0.4s ease both 0.45s" }}
+                      >
+                        Другие способы оплаты
+                        <svg className={`w-3.5 h-3.5 transition-transform ${payExpanded ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+
+                      {payExpanded && (
+                        <div className="space-y-2 mt-1 animate-fadeIn">
+                          <a
+                            href="/topup"
+                            className="w-full flex items-center gap-3 p-3 rounded-xl border border-text/[0.06] hover:border-accent/20 hover:bg-accent/5 transition-all active:scale-[0.98]"
+                          >
+                            <span className="text-lg shrink-0">🪙</span>
+                            <div className="flex-1 text-left">
+                              <div className="text-xs font-bold text-text">Криптовалюта</div>
+                              <div className="text-[9px] text-text/35">USDT · BTC · ETH · SOL · TON</div>
+                            </div>
+                          </a>
+                        </div>
+                      )}
+
                       {result && (
                         <p className={`text-center text-xs font-medium mt-3 ${result.ok ? "text-teal" : "text-red-500"}`}>{result.message}</p>
                       )}
