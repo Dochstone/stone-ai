@@ -191,7 +191,25 @@ function AvatarUpload({ email, name }: { email: string; name?: string | null }) 
   );
 }
 
-function OverviewTab({ profile, usage }: { profile: UserProfile; usage: UsageItem[] }) {
+function LimitBar({ label, used, limit, emoji }: { label: string; used: number; limit: number; emoji: string }) {
+  const pct = limit > 0 ? Math.min(100, (used / limit) * 100) : 0;
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-xs text-text/50">{emoji} {label}</span>
+        <span className="text-xs font-bold text-text/70">{used}/{limit}</span>
+      </div>
+      <div className="w-full h-2 bg-text/[0.06] rounded-full overflow-hidden">
+        <div className="h-full rounded-full transition-all" style={{
+          width: `${pct}%`,
+          backgroundColor: pct >= 90 ? "#ef4444" : pct >= 60 ? "#eab308" : "#22c55e",
+        }} />
+      </div>
+    </div>
+  );
+}
+
+function OverviewTab({ profile, usage, limits }: { profile: UserProfile; usage: UsageItem[]; limits: any }) {
   // Favorite model
   const modelCounts: Record<string, number> = {};
   usage.forEach((u) => { modelCounts[u.model_id] = (modelCounts[u.model_id] || 0) + 1; });
@@ -255,6 +273,31 @@ function OverviewTab({ profile, usage }: { profile: UserProfile; usage: UsageIte
         <StatCard label="Баланс" value={`${Math.round(profile.balance_usd * 95)}\u2009\u20BD`} accent />
         <StatCard label="Любимая модель" value={favModel?.name || "—"} sub={favModel?.company} />
       </div>
+
+      {/* Daily limits */}
+      {limits && (
+        <div className="bg-white rounded-2xl border border-text/[0.06] p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-bold text-text">Использование сегодня</h3>
+            {limits.reset_at && (
+              <span className="text-[10px] text-text/30">Обновится в 00:00 МСК</span>
+            )}
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {limits.fast && <LimitBar label="Быстрые модели" used={limits.fast.used} limit={limits.fast.limit} emoji="⚡" />}
+            {limits.premium && limits.premium.limit > 0 && <LimitBar label="Премиум модели" used={limits.premium.used} limit={limits.premium.limit} emoji="🧠" />}
+            {limits.opus && limits.opus.limit > 0 && <LimitBar label="Opus модели" used={limits.opus.used} limit={limits.opus.limit} emoji="💎" />}
+            {limits.image && limits.image.limit > 0 && <LimitBar label="Картинки" used={limits.image.used} limit={limits.image.limit} emoji="🎨" />}
+            {limits.video && limits.video.limit > 0 && <LimitBar label="Видео" used={limits.video.used} limit={limits.video.limit} emoji="🎬" />}
+          </div>
+          {limits.streak && limits.streak.days > 0 && (
+            <div className="mt-3 pt-3 border-t border-text/[0.04] flex items-center gap-2">
+              <span className="text-amber-500">🔥</span>
+              <span className="text-xs text-text/50">Стрик: <b className="text-text/70">{limits.streak.days} дней подряд</b></span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Chart */}
       <BarChart data={days} />
@@ -944,6 +987,7 @@ export default function ProfilePage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [referralStats, setReferralStats] = useState<ReferralStats | null>(null);
   const [byok, setByok] = useState<ByokStatus | null>(null);
+  const [dailyLimits, setDailyLimits] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   // Load auth
@@ -962,12 +1006,13 @@ export default function ProfilePage() {
     const headers = { Authorization: `Bearer ${auth.token}` };
 
     try {
-      const [profileRes, usageRes, txRes, refRes, byokRes] = await Promise.allSettled([
+      const [profileRes, usageRes, txRes, refRes, byokRes, limitsRes] = await Promise.allSettled([
         fetch(`${API_URL}/api/user/me`, { headers }),
         fetch(`${API_URL}/api/user/usage-history?limit=100`, { headers }),
         fetch(`${API_URL}/api/user/transactions?limit=100`, { headers }),
         fetch(`${API_URL}/api/referral/stats`, { headers }),
         fetch(`${API_URL}/api/byok/status`, { headers }),
+        fetch(`${API_URL}/api/user/limits`, { headers }),
       ]);
 
       // If auth failed — clear token and show login form (don't redirect)
@@ -1012,6 +1057,10 @@ export default function ProfilePage() {
 
       if (byokRes.status === "fulfilled" && byokRes.value.ok) {
         setByok(await byokRes.value.json());
+      }
+
+      if (limitsRes.status === "fulfilled" && limitsRes.value.ok) {
+        setDailyLimits(await limitsRes.value.json());
       }
     } catch {}
     setLoading(false);
@@ -1098,7 +1147,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Tab content */}
-        {tab === "overview" && <OverviewTab profile={profile} usage={usage} />}
+        {tab === "overview" && <OverviewTab profile={profile} usage={usage} limits={dailyLimits} />}
         {tab === "balance" && <BalanceTab profile={profile} transactions={transactions} />}
         {tab === "history" && <HistoryTab usage={usage} />}
         {tab === "settings" && <SettingsTab profile={profile} auth={auth} />}

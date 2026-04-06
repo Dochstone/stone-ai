@@ -1626,22 +1626,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                 {compareMode ? "x2 AI" : "x2"}
               </button>
             )}
-            {limits && limits.text && limits.text.limit > 0 && (
-              <div className="hidden sm:flex items-center gap-1.5 text-[10px] text-text/40" title={`${limits.text.used}/${limits.text.limit} запросов`}>
-                <div className="w-16 h-1.5 bg-text/10 rounded-full overflow-hidden">
-                  <div className="h-full rounded-full transition-all" style={{
-                    width: `${Math.min(100, (limits.text.used / limits.text.limit) * 100)}%`,
-                    backgroundColor: limits.text.used >= limits.text.limit * 0.8 ? "#ef4444" : "#C4623D",
-                  }} />
-                </div>
-                <span>{limits.text.limit - limits.text.used}</span>
-              </div>
-            )}
-            {limits?.streak && limits.streak.days >= 2 && (
-              <span className="hidden sm:inline text-[10px] text-amber-500" title={`${limits.streak.days} дней подряд`}>
-                🔥{limits.streak.days}
-              </span>
-            )}
+            {/* Usage bar moved to /profile */}
             {(() => {
               const p = limits?.plan || "free";
               const bg = p === "max-pro" ? "bg-gradient-to-r from-[#F43F5E] to-[#E11D48] text-white" : p === "max" ? "bg-[#A855F7] text-white" : p === "mini" ? "bg-[#22D3EE] text-white" : "bg-text/10 text-text/40";
