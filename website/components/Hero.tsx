@@ -326,7 +326,7 @@ export default function Hero() {
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tight">
             Stone AI —{" "}
             <span className="bg-gradient-to-r from-accent to-teal bg-clip-text text-transparent">
-              AI-студия для бизнеса
+              AI-студия нового поколения
             </span>
           </h1>
 
