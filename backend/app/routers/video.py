@@ -14,7 +14,7 @@ import httpx
 
 from app.database import get_db
 from app.middleware.auth import get_current_user
-from app.config import get_settings
+from app.config import get_settings, USD_TO_RUB
 from app.models.user import User
 from app.models.video_task import VideoTask
 from app.services.video_router import (
@@ -75,23 +75,18 @@ async def generate_video(
     if not user:
         raise HTTPException(404, "Пользователь не найден")
 
-    # Check access: subscription OR balance
-    tier = user.subscription_tier or "free"
-    has_subscription = tier in ("mini", "max", "max-pro")
+    # Everyone pays from balance
     balance = float(user.balance_usd or 0)
 
-    if not has_subscription and balance < price:
+    if balance < price:
         raise HTTPException(402, {
-            "error": "need_subscription",
-            "message": f"Генерация видео доступна по подписке от 390₽/мес",
-            "upgrade_url": "/pricing",
+            "error": "insufficient_balance",
+            "message": f"Недостаточно средств. Нужно ~{int(price * USD_TO_RUB)}₽",
+            "upgrade_url": "/topup",
         })
 
-    # Deduct from balance only if no subscription
-    new_balance = balance
-    if not has_subscription and balance >= price:
-        user.balance_usd = round(balance - price, 6)
-        new_balance = float(user.balance_usd)
+    user.balance_usd = round(balance - price, 6)
+    new_balance = float(user.balance_usd)
 
     # Create task
     task_id = str(uuid.uuid4())[:12]

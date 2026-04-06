@@ -64,16 +64,14 @@ async def tts_generate(
     if not user:
         raise HTTPException(404, "Пользователь не найден")
 
-    # Check access: subscription OR balance
-    tier = user.subscription_tier or "free"
-    has_subscription = tier in ("max", "max-pro")
+    # Everyone pays from balance
     balance = float(user.balance_usd or 0)
 
-    if not has_subscription and balance < 0.01:
+    if balance < 0.01:
         raise HTTPException(402, {
-            "error": "need_subscription",
-            "message": "Аудио доступно по подписке Max от 890₽/мес",
-            "upgrade_url": "/pricing",
+            "error": "insufficient_balance",
+            "message": "Недостаточно средств для озвучки. Пополните баланс.",
+            "upgrade_url": "/topup",
         })
 
     # Generate

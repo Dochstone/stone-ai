@@ -154,7 +154,7 @@ async def run_agent_task(task_id: int, instruction: str, model_id: str, max_step
             user = await db.execute(select(User).where(User.telegram_id == user_tg_id))
             u = user.scalar_one_or_none()
             if u:
-                u.balance_usd = max(0, (u.balance_usd or 0) - total_cost)
+                u.balance_usd = round(max(0, float(u.balance_usd or 0) - total_cost), 6)
 
             await db.commit()
 
@@ -174,7 +174,7 @@ async def run_agent(
     user_result = await db.execute(select(User).where(User.telegram_id == tg_id))
     user = user_result.scalar_one_or_none()
     min_cost = body.max_steps * COST_PER_STEP_USD
-    if user and (user.balance_usd or 0) < min_cost:
+    if user and float(user.balance_usd or 0) < min_cost:
         raise HTTPException(402, f"Недостаточно средств. Нужно ~{int(min_cost * USD_TO_RUB)}₽")
 
     # Check active tasks limit
