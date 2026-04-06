@@ -324,18 +324,27 @@ export default function Hero() {
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tight">
-            Stone AI —{" "}
+            AI-студия{" "}
             <span className="bg-gradient-to-r from-accent to-teal bg-clip-text text-transparent">
-              AI-студия нового поколения
+              нового поколения
             </span>
           </h1>
 
-          <img src="/mascots/stone-mascot-idle.png" alt="Stone AI" width="80" height="80" className="mx-auto mt-6 mb-2" />
+          <p className="text-xl md:text-2xl font-bold text-text/80 mt-6 mb-2">
+            65+ нейросетей · 15 инструментов
+          </p>
 
-          <p className="text-lg md:text-xl text-text/60 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-sm md:text-base text-text/40 max-w-2xl mx-auto leading-relaxed">
+            Чат · Картинки · Видео · Реклама · SEO · Презентации · Боты · Агенты
+          </p>
+
+          <img src="/mascots/stone-mascot-idle.png" alt="Stone AI" width="80" height="80" className="mx-auto mt-5 mb-2" />
+
+          <p className="text-lg md:text-xl text-text/60 font-semibold">
             Создавай. Продвигай. Автоматизируй.
-            <br className="hidden sm:block" />
-            15 инструментов · 65+ нейросетей · Бесплатный старт + 100₽
+          </p>
+          <p className="text-sm text-text/35 mt-1">
+            Бесплатный старт + 100₽ на баланс
           </p>
 
           {/* CTA buttons */}
