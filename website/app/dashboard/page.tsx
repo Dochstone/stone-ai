@@ -168,11 +168,14 @@ export default function DashboardPage() {
     <div className="pb-20 animate-fadeIn">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
         {/* Welcome header */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-extrabold text-text mb-1">
-            {auth ? `Добро пожаловать, ${auth.email}` : "Добро пожаловать"}
-          </h1>
-          <p className="text-sm text-text/40">{formatDate(new Date())}</p>
+        <div className="mb-8 flex items-center gap-4">
+          <img src="/mascots/stone-mascot-idle.png" alt="" width="64" height="64" className="shrink-0" />
+          <div>
+            <h1 className="text-2xl font-extrabold text-text mb-1">
+              {auth ? `Добро пожаловать!` : "Добро пожаловать!"}
+            </h1>
+            <p className="text-sm text-text/40">{formatDate(new Date())} · AI-студия нового поколения</p>
+          </div>
         </div>
 
         {!auth && (
