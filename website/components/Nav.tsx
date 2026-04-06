@@ -54,7 +54,7 @@ export default function Nav() {
         menuOpen ? "bg-bg shadow-sm" : scrolled ? "bg-bg/90 backdrop-blur-md shadow-sm" : "bg-transparent"
       }`}
     >
-      <WelcomeBonusBanner />
+      {/* Bonus banner removed from nav — shown in WebChat for guests */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-14 md:h-16">
         <a href="/" className="flex items-center gap-2 shrink-0 min-w-0">
           <img src="/mascots/stone-mascot-idle.png" alt="" width="28" height="28" className="inline-block" />

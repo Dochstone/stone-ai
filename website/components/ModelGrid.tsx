@@ -59,7 +59,8 @@ export default function ModelGrid() {
   const [tab, setTab] = useState<"all" | ModelCategory>("all");
   const [expanded, setExpanded] = useState<string | null>(null);
 
-  const filtered = tab === "all" ? MODELS.slice(0, 16) : MODELS.filter((m) => m.category === tab);
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const filtered = tab === "all" ? MODELS.slice(0, isMobile ? 8 : 16) : MODELS.filter((m) => m.category === tab).slice(0, isMobile ? 6 : 20);
 
   return (
     <section id="models" className="py-20 md:py-28">
