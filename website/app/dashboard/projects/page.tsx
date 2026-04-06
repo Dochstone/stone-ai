@@ -165,12 +165,32 @@ export default function ProjectsPage() {
         </div>
 
         {projects.length === 0 ? (
-          <div className="text-center py-20 bg-text/[0.02] border border-text/5 rounded-2xl">
-            <img src="/mascots/stone-mascot-idle.png" alt="Stone" width="100" height="100" className="mx-auto mb-4" />
-            <h3 className="text-lg font-bold text-text mb-2">Добавьте свой первый бизнес</h3>
-            <p className="text-sm text-text/40 mb-6 max-w-md mx-auto">AI будет учитывать контекст вашего бренда, аудиторию и тон голоса во всех ответах</p>
-            <button onClick={openCreate} className="bg-accent text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-accent/90">
-              Создать проект
+          <div className="py-12 bg-text/[0.02] border border-text/5 rounded-2xl">
+            <div className="text-center px-6">
+              <img src="/mascots/stone-mascot-idle.png" alt="Stone" width="80" height="80" className="mx-auto mb-4" />
+              <h3 className="text-lg font-bold text-text mb-2">Настройте AI под ваш бизнес</h3>
+              <p className="text-sm text-text/40 mb-6 max-w-lg mx-auto">
+                Создайте проект — и AI будет знать ваш бренд, аудиторию и стиль общения.
+                Все ответы в чате автоматически учтут контекст.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 px-6 mb-6 max-w-lg mx-auto">
+              <div className="bg-white rounded-xl p-3 text-center border border-text/5">
+                <span className="text-xl block mb-1">🏪</span>
+                <span className="text-[11px] text-text/50">Название и описание компании</span>
+              </div>
+              <div className="bg-white rounded-xl p-3 text-center border border-text/5">
+                <span className="text-xl block mb-1">🎯</span>
+                <span className="text-[11px] text-text/50">Целевая аудитория и тон</span>
+              </div>
+              <div className="bg-white rounded-xl p-3 text-center border border-text/5">
+                <span className="text-xl block mb-1">💬</span>
+                <span className="text-[11px] text-text/50">AI отвечает от лица бренда</span>
+              </div>
+            </div>
+            <div className="text-center">
+              <button onClick={openCreate} className="bg-accent text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-accent/90">
+                Создать проект
             </button>
           </div>
         ) : (
