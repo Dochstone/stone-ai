@@ -1015,8 +1015,8 @@ export default function ProfilePage() {
   if (!auth) {
     return (
       <AuthForm
-        onAuth={(a: AuthFormState) => {
-          setAuth(a);
+        onAuth={() => {
+          window.location.reload();
         }}
         subtitle="Войдите для доступа к личному кабинету"
       />
