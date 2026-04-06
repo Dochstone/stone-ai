@@ -255,58 +255,6 @@ async def health():
     return {"status": "ok"}
 
 
-@app.get("/health/detailed")
-async def health_detailed():
-    """Detailed health check — API provider balances and DB connectivity."""
-    import httpx
-    settings = get_settings()
-    result = {"status": "ok", "providers": {}}
-
-    # Check OpenRouter balance
-    try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            resp = await client.get(
-                "https://openrouter.ai/api/v1/auth/key",
-                headers={"Authorization": f"Bearer {settings.openrouter_api_key}"},
-            )
-            if resp.status_code == 200:
-                data = resp.json().get("data", {})
-                balance = data.get("limit", 0) - data.get("usage", 0)
-                result["providers"]["openrouter"] = {
-                    "status": "ok" if balance > 2 else "low" if balance > 0 else "empty",
-                    "balance_usd": round(balance, 2),
-                }
-            else:
-                result["providers"]["openrouter"] = {"status": "error", "code": resp.status_code}
-    except Exception as e:
-        result["providers"]["openrouter"] = {"status": "unreachable", "error": str(e)[:100]}
-
-    # Check OpenAI (simple model list call)
-    if settings.openai_api_key:
-        try:
-            async with httpx.AsyncClient(timeout=5.0) as client:
-                resp = await client.get(
-                    "https://api.openai.com/v1/models",
-                    headers={"Authorization": f"Bearer {settings.openai_api_key}"},
-                )
-                result["providers"]["openai"] = {
-                    "status": "ok" if resp.status_code == 200 else "error",
-                    "code": resp.status_code,
-                }
-        except Exception as e:
-            result["providers"]["openai"] = {"status": "unreachable", "error": str(e)[:100]}
-
-    # Overall status
-    for p in result["providers"].values():
-        if p.get("status") in ("empty", "error", "unreachable"):
-            result["status"] = "degraded"
-            break
-        if p.get("status") == "low":
-            result["status"] = "warning"
-
-    return result
-
-
 # ─── Run with: uvicorn app.main:app --reload ───
 if __name__ == "__main__":
     import uvicorn
