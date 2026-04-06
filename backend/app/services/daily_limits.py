@@ -185,10 +185,7 @@ async def check_daily_limit(
     db: AsyncSession, tg_id: int, model_id: str, tier: str, balance: float = 0
 ) -> dict:
     """Check if user can make a request. Returns allow/deny with details."""
-    # Balance users bypass limits
-    if balance > 0:
-        return {"allowed": True, "billing": "per_token", "plan": tier}
-
+    # Chat always uses daily limits — balance is for dashboard tools only.
     category = get_model_category(model_id)
     limits = DAILY_LIMITS.get(tier, DAILY_LIMITS["free"])
 

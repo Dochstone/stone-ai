@@ -133,14 +133,13 @@ async def chat(
     db: AsyncSession = Depends(get_db),
 ):
     """
-    Stream chat completion with per-token billing.
+    Stream chat completion — free within daily limits.
 
     Flow:
-    1. Check limits (10+5 for lite, balance for premium)
-    2. Stream response → collect actual token usage
-    3. Calculate real cost from tokens
-    4. Deduct USD AFTER streaming (not before)
-    5. Send billing info as final SSE chunk
+    1. Check daily limits (fast/premium/opus quotas)
+    2. Stream response → collect token usage for analytics
+    3. Record usage (no balance deduction)
+    4. Send billing info as final SSE chunk
     """
     tg_id = tg_user["id"]
     db_id = tg_user.get("db_id")
@@ -176,7 +175,7 @@ async def chat(
                     "required_tier": check.get("required_tier"),
                     "used_today": check.get("used_today", 0),
                     "limit": check.get("limit", 0),
-                    "need_balance": check.get("billing") == "per_token",
+                    "need_balance": False,
                     "upgrade_url": "/pricing",
                 },
             )
@@ -206,8 +205,9 @@ async def chat(
             brand_ctx = build_project_context(proj)
             system_prompt = brand_ctx + "\n\n" + (system_prompt or "")
 
-    # Dynamic max_tokens based on billing mode
-    max_tokens = MAX_TOKENS_LITE if billing_mode == "free" else MAX_TOKENS_PREMIUM
+    # Dynamic max_tokens based on subscription tier
+    user_tier = (db_user.subscription_tier or "free") if db_user else "free"
+    max_tokens = MAX_TOKENS_PREMIUM if user_tier in ("max", "max-pro") else MAX_TOKENS_LITE
 
     # Stream response
     async def generate():
@@ -233,40 +233,27 @@ async def chat(
         tokens_in = usage_data.get("tokens_in", 0)
         tokens_out = usage_data.get("tokens_out", 0)
 
-        # Calculate real cost and deduct if per_token billing
+        # Chat is free (daily limits) — no balance deduction.
+        # Record usage for analytics only.
         real_cost = 0.0
-        new_balance = 0.0
 
         if not using_byok and not had_error:
-            if billing_mode == "per_token":
-                real_cost = calculate_cost(req.model_id, tokens_in, tokens_out)
-                if real_cost > 0:
-                    deduct_result = await deduct_balance(db, tg_id, real_cost)
-                    new_balance = deduct_result["new_balance"]
-                    real_cost = deduct_result["deducted"]
-                    logger.info(
-                        f"Per-token billing: user={tg_id}, model={req.model_id}, "
-                        f"tokens={tokens_in}+{tokens_out}, cost=${real_cost:.6f}, "
-                        f"balance=${new_balance:.6f}"
-                    )
-
-            # Record usage with cost
             await record_usage(
                 db, tg_id, req.model_id,
                 tokens_in=tokens_in,
                 tokens_out=tokens_out,
-                cost_usd=real_cost,
+                cost_usd=0.0,
             )
 
-            # Send billing info as final SSE chunk (before [DONE])
+            # Send billing info as final SSE chunk
+            balance = float(db_user.balance_usd or 0) if db_user else 0.0
             billing_data = {
                 "billing": {
                     "tokens_in": tokens_in,
                     "tokens_out": tokens_out,
-                    "cost_usd": real_cost,
-                    "balance_usd": new_balance,
-                    "model_price_per_m": get_weighted_price(req.model_id),
-                    "billing_mode": billing_mode,
+                    "cost_usd": 0.0,
+                    "balance_usd": balance,
+                    "billing_mode": "free",
                 }
             }
             yield f"data: {json.dumps(billing_data)}\n\n"
