@@ -238,8 +238,8 @@ export default function Pricing() {
     setLoading(true);
     setResult(null);
     try {
-      const prices: Record<string, number> = { mini: 4.1, max: 9.4, "max-pro": 21 };
-      const usdAmount = prices[tier] || 10;
+      const pricesRub: Record<string, number> = { mini: 390, max: 890, "max-pro": 1990 };
+      const usdAmount = (pricesRub[tier] || 950) / 95;
 
       if (method === "platega") {
         const res = await fetch(`${API_URL}/api/payment/platega/create-order`, {
