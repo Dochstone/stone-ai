@@ -40,7 +40,7 @@ ${text}
       const res = await fetch(`${API_URL}/api/generate/direct`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
-        body: JSON.stringify({ prompt, model_id: "gpt-4.1-mini", cost_rub: 10.0 }),
+        body: JSON.stringify({ prompt, model_id: "gpt-4o-mini", cost_rub: 10.0 }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.detail?.message || data.detail || "Ошибка"); }

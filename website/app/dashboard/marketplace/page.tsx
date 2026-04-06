@@ -30,7 +30,7 @@ export default function MarketplacePage() {
   // Use template modal
   const [selected, setSelected] = useState<MarketplaceTemplate | null>(null);
   const [fields, setFields] = useState<Record<string, string>>({});
-  const [modelId, setModelId] = useState("gpt-4.1-mini");
+  const [modelId, setModelId] = useState("gpt-4o-mini");
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<{ text: string; model: string; cost: number; balance: number } | null>(null);
   const [error, setError] = useState("");
@@ -128,7 +128,7 @@ export default function MarketplacePage() {
   const openUseModal = (tpl: MarketplaceTemplate) => {
     setSelected(tpl);
     setFields({});
-    setModelId(tpl.default_model || "gpt-4.1-mini");
+    setModelId(tpl.default_model || "gpt-4o-mini");
     setResult(null);
     setError("");
   };

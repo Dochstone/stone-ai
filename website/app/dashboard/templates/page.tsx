@@ -19,7 +19,7 @@ export default function TemplatesPage() {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Template | null>(null);
   const [fields, setFields] = useState<Record<string, string>>({});
-  const [modelId, setModelId] = useState("gpt-4.1-mini");
+  const [modelId, setModelId] = useState("gpt-4o-mini");
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<{ text: string; model: string; cost: number; balance: number } | null>(null);
   const [error, setError] = useState("");
@@ -42,7 +42,7 @@ export default function TemplatesPage() {
   const openWizard = (tpl: Template) => {
     setSelected(tpl);
     setFields({});
-    setModelId(tpl.default_model || "gpt-4.1-mini");
+    setModelId(tpl.default_model || "gpt-4o-mini");
     setResult(null);
     setError("");
   };

@@ -41,7 +41,7 @@ export default function PresentationsPage() {
   const [style, setStyle] = useState("modern");
   const [audience, setAudience] = useState("");
   const [detailLevel, setDetailLevel] = useState("medium");
-  const [modelId, setModelId] = useState("gpt-4.1-mini");
+  const [modelId, setModelId] = useState("gpt-4o-mini");
   const [language, setLanguage] = useState("ru");
 
   // Result

@@ -4,11 +4,12 @@
  */
 
 export const CHAT_MODELS = [
-  { id: "gpt-4.1-mini", name: "GPT-4.1 Mini", speed: "Быстрый" },
-  { id: "gpt-4.1", name: "GPT-4.1", speed: "Точный" },
-  { id: "claude-sonnet-4", name: "Claude Sonnet 4", speed: "Креативный" },
+  { id: "gpt-4o-mini", name: "GPT-4o mini", speed: "Быстрый" },
   { id: "deepseek-v3", name: "DeepSeek V3", speed: "Аналитический" },
-  { id: "gemini-2.5-flash", name: "Gemini 2.5 Flash", speed: "Быстрый" },
+  { id: "gemini-2.0-flash", name: "Gemini 2.0 Flash", speed: "Быстрый" },
+  { id: "claude-haiku-4.5", name: "Claude Haiku 4.5", speed: "Умный" },
+  { id: "gpt-4.1-mini", name: "GPT-4.1 Mini", speed: "Точный · PRO" },
+  { id: "claude-sonnet-4", name: "Claude Sonnet 4", speed: "Креативный · PRO" },
 ];
 
 export const IMAGE_MODELS = [

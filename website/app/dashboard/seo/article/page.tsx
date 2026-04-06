@@ -13,7 +13,7 @@ export default function SEOArticlePage() {
   const [topic, setTopic] = useState("");
   const [keywords, setKeywords] = useState("");
   const [length, setLength] = useState("5000");
-  const [model, setModel] = useState("gpt-4.1-mini");
+  const [model, setModel] = useState("gpt-4o-mini");
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
