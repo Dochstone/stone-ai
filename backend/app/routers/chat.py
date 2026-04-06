@@ -515,7 +515,6 @@ async def generate_image(
     if req.model_id in ("kolors-v2", "kolors-v3") and settings.kling_access_key:
         try:
             from app.services.kling_client import create_kling_image, check_kling_image_status
-            import asyncio
 
             kolors_model = "kolors-v3" if req.model_id == "kolors-v3" else "kolors-v2"
             result = await create_kling_image(
