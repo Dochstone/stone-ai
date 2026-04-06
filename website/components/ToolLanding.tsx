@@ -74,7 +74,7 @@ export default function ToolLanding({ badge, title, description, models, prompts
                   {f.q}
                   <svg className="w-4 h-4 text-text/30 shrink-0 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M19 9l-7 7-7-7" /></svg>
                 </summary>
-                <p className="px-5 pb-4 text-sm text-text/60 leading-relaxed">{f.a}</p>
+                <p className="px-5 pb-4 text-sm text-text/60 leading-relaxed" dangerouslySetInnerHTML={{ __html: f.a }} />
               </details>
             ))}
           </div>

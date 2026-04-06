@@ -38,9 +38,7 @@ export default function FAQ() {
                   openIndex === i ? "max-h-96 pb-5" : "max-h-0"
                 }`}
               >
-                <div className="px-5 text-sm text-text/60 leading-relaxed">
-                  {faq.a}
-                </div>
+                <div className="px-5 text-sm text-text/60 leading-relaxed" dangerouslySetInnerHTML={{ __html: faq.a }} />
               </div>
             </div>
           ))}

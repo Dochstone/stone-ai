@@ -31,7 +31,7 @@ export default function DashboardFAQPage() {
               </button>
               {openIdx === i && (
                 <div className="px-5 pb-4">
-                  <p className="text-sm text-text/60 leading-relaxed">{faq.a}</p>
+                  <p className="text-sm text-text/60 leading-relaxed" dangerouslySetInnerHTML={{ __html: faq.a }} />
                 </div>
               )}
             </div>
