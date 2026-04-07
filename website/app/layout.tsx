@@ -86,6 +86,7 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: "/",
+    languages: { "ru": "/" },
   },
   manifest: "/manifest.json",
   appleWebApp: {

@@ -1,0 +1,98 @@
+# Stone AI — полная информация для AI-систем
+> AI-студия нового поколения. 65+ нейросетей в одном интерфейсе. stoneai.ru
+
+## О платформе
+
+Stone AI — российская платформа для работы с искусственным интеллектом. Единый интерфейс для доступа к 65+ AI моделям от ведущих мировых провайдеров: OpenAI (GPT-5, GPT-4o), Anthropic (Claude Opus 4, Sonnet), Google (Gemini 3 Pro, Gemini Flash), Meta (Llama 4), xAI (Grok 3), DeepSeek, Mistral, Perplexity и других.
+
+Платформа доступна через веб-интерфейс (stoneai.ru) и Telegram-бот (@drifttt55bot). Работает без VPN из России. Поддерживает русский язык.
+
+## Возможности
+
+### AI Чат
+- 50+ текстовых моделей для диалога
+- Streaming ответы в реальном времени
+- Загрузка изображений и документов (мультимодальность)
+- Сохранение истории чатов
+- Голосовой ввод (STT) и озвучка (TTS)
+- Сравнение двух моделей параллельно (DualChat)
+
+### Генерация изображений
+- Модели: Nano Banana (Gemini), GPT-5 Image, Nano Banana Pro
+- Бесплатно: 2 картинки для новых пользователей
+- Фотосессия: смена фона, товар на модели, карточки маркетплейсов
+
+### Генерация видео
+- 12 моделей: Sora 2 Pro, Veo 3.1, Luma Ray 2, MiniMax Hailuo, Pika 2, PixVerse, Wan 2, и другие
+- Text-to-video и image-to-video
+- Бесплатно: 1 видео (Veo 3) для новых пользователей
+
+### SEO-инструменты
+- AI-шаблоны (50+ шаблонов для контента)
+- SEO-модуль: статьи, мета-теги, анализ текста, A/B тесты
+- Рекламные кампании Яндекс Директ (автогенерация)
+
+### AI-агент
+- Автономный агент с пошаговым reasoning
+- Планирование и выполнение сложных задач
+- Шаблоны для типовых задач
+
+### Другое
+- 3D генерация моделей
+- Генерация презентаций
+- Переводчик
+- Конструктор ботов
+
+## Тарифы
+
+### Pay-per-Use (бесплатно)
+- 15 запросов/день к 8 моделям (GPT-4o mini, Claude Haiku, Gemini Flash, DeepSeek V3, Llama 4, Mistral Large, Nano Banana, Veo 3)
+- 2 картинки + 1 видео навсегда (пробный период)
+- Инструменты с баланса (от 3₽/запрос)
+
+### Start — 390₽/мес
+- 20+ моделей включая GPT-5.1 и Claude Sonnet
+- 1500 быстрых + 90 премиум запросов/мес
+- 50 картинок + 15 видео/мес
+
+### Pro — 890₽/мес
+- Все 65+ моделей включая Claude Opus
+- 2100 быстрых + 120 премиум (30 Opus)/мес
+- 150 картинок + 30 видео/мес
+- 3D модели и озвучка
+
+### Elite — 1990₽/мес
+- Все модели + API доступ
+- 10500 быстрых + 540 премиум (90 Opus)/мес
+- 300 картинок + 60 видео/мес
+- Приоритетная скорость
+
+## Модели (ТОП-10)
+
+1. GPT-5.1 (OpenAI) — флагман, 400K контекст
+2. Claude Opus 4 (Anthropic) — лучший для кода, 200K контекст
+3. Gemini 3 Pro (Google) — мультимодальный, 1M контекст
+4. GPT-4o mini (OpenAI) — бесплатный, быстрый, 128K
+5. Claude Haiku 4.5 (Anthropic) — бесплатный, точный, 200K
+6. DeepSeek R1 (DeepSeek) — reasoning, математика, 164K
+7. Grok 3 (xAI) — креативный, 131K
+8. Llama 4 Maverick (Meta) — open-source 400B, 1M
+9. Perplexity Sonar Pro — поиск в реальном времени
+10. Devstral (Mistral) — специализированный для кода
+
+## Контакты
+
+- Сайт: https://stoneai.ru
+- Telegram бот: https://t.me/drifttt55bot
+- Поддержка: https://t.me/StoneAIsupport
+- Блог: https://stoneai.ru/blog
+
+## Ссылки
+
+- Каталог моделей: https://stoneai.ru/models
+- Тарифы: https://stoneai.ru/pricing
+- Сравнения моделей: https://stoneai.ru/compare/gpt-5-vs-claude-opus-4
+- Альтернативы ChatGPT: https://stoneai.ru/alternatives/chatgpt
+- AI для маркетолога: https://stoneai.ru/for/marketer
+- Генерация картинок: https://stoneai.ru/tools/image-generation
+- Генерация видео: https://stoneai.ru/tools/video-generation
