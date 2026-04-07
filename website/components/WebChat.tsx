@@ -1103,7 +1103,14 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({ detail: "Ошибка" }));
-        setMessages([...history, { role: "assistant", content: err?.detail?.message || err?.detail || err?.message || "Ошибка генерации 3D" }]);
+        const detail = err?.detail;
+        if (res.status === 429 || res.status === 403) {
+          setMessages(prev => prev.slice(0, -1));
+          setUpsellModal({ type: detail?.error === "model_locked" ? "locked" : "limit", model: model?.name, tier: detail?.required_tier });
+          setThreedGenerating(false);
+          return;
+        }
+        setMessages([...history, { role: "assistant", content: detail?.message || detail || err?.message || "Ошибка генерации 3D" }]);
         setThreedGenerating(false);
         return;
       }
@@ -1185,7 +1192,14 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({ detail: "Ошибка" }));
-        const errMsg = err?.detail?.message || err?.detail || err?.message || "Ошибка генерации видео";
+        const detail = err?.detail;
+        if (res.status === 429 || res.status === 403) {
+          setMessages(prev => prev.slice(0, -1));
+          setUpsellModal({ type: detail?.error === "model_locked" ? "locked" : "limit", model: model?.name, tier: detail?.required_tier });
+          setVideoGenerating(false);
+          return;
+        }
+        const errMsg = detail?.message || (typeof detail === "string" ? detail : null) || err?.message || "Ошибка генерации видео";
         setMessages([...history, { role: "assistant", content: typeof errMsg === "string" ? errMsg : "Ошибка генерации видео" }]);
         setVideoGenerating(false);
         return;
@@ -1279,7 +1293,15 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({ detail: "Ошибка" }));
-        const errMsg = err?.detail?.message || (typeof err.detail === "string" ? err.detail : null) || err?.message || "Ошибка генерации";
+        const detail = err?.detail;
+        if (res.status === 429 || (res.status === 403 && detail?.error === "model_locked")) {
+          setMessages(prev => prev.slice(0, -1));
+          setUpsellModal({ type: detail?.error === "model_locked" ? "locked" : "limit", model: model?.name, tier: detail?.required_tier });
+          setStreaming(false);
+          setImageGenerating(false);
+          return;
+        }
+        const errMsg = detail?.message || (typeof detail === "string" ? detail : null) || err?.message || "Ошибка генерации";
         setMessages([...history, { role: "assistant", content: errMsg }]);
         setStreaming(false);
         setImageGenerating(false);
