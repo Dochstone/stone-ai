@@ -493,7 +493,11 @@ async def wizard_generate(
         })
 
     # Generate via AI (non-streaming for templates)
-    lang_system = "Always respond in the same language as the user's message. Match the user's language exactly."
+    from app.services.safety import inject_safety, check_blocked
+    blocked = check_blocked(prompt)
+    if blocked:
+        raise HTTPException(400, blocked)
+    lang_system = inject_safety("Always respond in the same language as the user's message. Match the user's language exactly.")
     messages = [{"role": "user", "content": prompt}]
     full_response = ""
     async for chunk in stream_chat_response(body.model_id, messages, lang_system, max_tokens=4096):
@@ -575,7 +579,11 @@ async def direct_generate(
             "balance_rub": round(balance * USD_TO_RUB, 2),
         })
 
-    lang_system = "Always respond in the same language as the user's message. Match the user's language exactly."
+    from app.services.safety import inject_safety, check_blocked
+    blocked = check_blocked(body.prompt)
+    if blocked:
+        raise HTTPException(400, blocked)
+    lang_system = inject_safety("Always respond in the same language as the user's message. Match the user's language exactly.")
     messages = [{"role": "user", "content": body.prompt}]
     full_response = ""
     async for chunk in stream_chat_response(body.model_id, messages, lang_system, max_tokens=8192):

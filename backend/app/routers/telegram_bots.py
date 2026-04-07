@@ -187,7 +187,8 @@ async def telegram_webhook(token: str, request: Request):
                 json={
                     "model": get_openrouter_model(bot.model_id),
                     "messages": [
-                        {"role": "system", "content": bot.system_prompt or "You are a helpful assistant. Always respond in the same language as the user's message."},
+                        {"role": "system", "content": (bot.system_prompt or "You are a helpful assistant. Always respond in the same language as the user's message.")
+                         + "\n\nNever generate sexual, violent, illegal, or hateful content. Decline such requests politely."},
                         {"role": "user", "content": text},
                     ],
                     "max_tokens": 1000,

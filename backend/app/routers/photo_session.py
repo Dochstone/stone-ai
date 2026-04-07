@@ -153,6 +153,11 @@ async def _refund(db: AsyncSession, user: User, new_balance: float, cost_usd: fl
 
 async def _generate_image(prompt: str, model_id: str | None = None, input_image_b64: str | None = None) -> str | None:
     """Generate image using OpenAI gpt-image-1 or OpenRouter models. Supports input image for editing."""
+    from app.services.safety import check_blocked
+    blocked = check_blocked(prompt)
+    if blocked:
+        raise HTTPException(400, blocked)
+
     settings = get_settings()
 
     # Default to gpt-image-1 via OpenAI API (most reliable for image generation)

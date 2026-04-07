@@ -56,6 +56,11 @@ async def generate_video(
     Charges balance BEFORE generation. Returns task_id for polling.
     On failure, balance is refunded.
     """
+    from app.services.safety import check_blocked
+    blocked = check_blocked(req.prompt)
+    if blocked:
+        raise HTTPException(400, blocked)
+
     tg_id = tg_user["id"]
     db_id = tg_user.get("db_id")
 

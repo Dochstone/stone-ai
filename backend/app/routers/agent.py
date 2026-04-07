@@ -101,9 +101,21 @@ async def run_agent_task(task_id: int, instruction: str, model_id: str, max_step
                 await db.commit()
         return
 
+    from app.services.safety import inject_safety, check_blocked
+    blocked = check_blocked(instruction)
+    if blocked:
+        async with async_session() as db:
+            result = await db.execute(select(AgentTask).where(AgentTask.id == task_id))
+            task = result.scalar_one_or_none()
+            if task:
+                task.status = "failed"
+                task.result = blocked
+                await db.commit()
+        return
+
     steps = []
     messages = [
-        {"role": "system", "content": AGENT_SYSTEM},
+        {"role": "system", "content": inject_safety(AGENT_SYSTEM)},
         {"role": "user", "content": instruction},
     ]
     total_cost = 0.0

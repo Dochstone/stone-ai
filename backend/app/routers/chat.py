@@ -90,8 +90,15 @@ async def chat_guest(
     if len(req.messages) > 6:
         req.messages = req.messages[-6:]
 
+    from app.services.safety import inject_safety, check_blocked
+    blocked = check_blocked(req.messages[-1].get("content", "") if req.messages else "")
+    if blocked:
+        async def blocked_gen():
+            yield f'data: {{"content": "{blocked}"}}\n\n'
+            yield "data: [DONE]\n\n"
+        return StreamingResponse(blocked_gen(), media_type="text/event-stream")
     default_system = "Always respond in the same language as the user's message. Match the user's language exactly."
-    system_prompt = req.system_prompt if req.system_prompt else default_system
+    system_prompt = inject_safety(req.system_prompt if req.system_prompt else default_system)
     max_tokens = MAX_TOKENS_LITE
 
     async def generate():
@@ -193,8 +200,17 @@ async def chat(
 
     # System prompt — allowed for all users
     # Default: respond in the user's language (critical for multilingual models like Llama)
+    from app.services.safety import inject_safety, check_blocked
+    last_msg = req.messages[-1].get("content", "") if req.messages else ""
+    if isinstance(last_msg, str):
+        blocked = check_blocked(last_msg)
+        if blocked:
+            async def blocked_gen():
+                yield f'data: {{"content": "{blocked}"}}\n\n'
+                yield "data: [DONE]\n\n"
+            return StreamingResponse(blocked_gen(), media_type="text/event-stream")
     default_system = "Always respond in the same language as the user's message. Match the user's language exactly."
-    system_prompt = req.system_prompt if req.system_prompt else default_system
+    system_prompt = inject_safety(req.system_prompt if req.system_prompt else default_system)
 
     # Inject project context if project_id provided
     if req.project_id:
@@ -336,6 +352,11 @@ async def generate_image(
 ):
     """Generate image using OpenAI gpt-image-1 API."""
     import httpx
+    from app.services.safety import check_blocked
+
+    blocked = check_blocked(req.prompt)
+    if blocked:
+        raise HTTPException(400, blocked)
 
     tg_id = tg_user["id"]
     db_id = tg_user.get("db_id")
