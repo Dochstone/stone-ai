@@ -147,7 +147,7 @@ async def check_video_status(model_id: str, fal_request_id: str) -> dict:
                 headers=headers,
             )
 
-            if resp.status_code == 405 and fal_base != fal_model:
+            if resp.status_code not in (200, 202) and fal_base != fal_model:
                 # Retry with base model path (fal.ai quirk for versioned models)
                 resp = await client.get(
                     f"{FAL_QUEUE_URL}/{fal_base}/requests/{fal_request_id}/status",
@@ -161,8 +161,8 @@ async def check_video_status(model_id: str, fal_request_id: str) -> dict:
             status = data.get("status", "UNKNOWN")
             inference_time = data.get("metrics", {}).get("inference_time", 0)
 
-            # Detect empty generation (fal.ai bug — COMPLETED in <1s = nothing generated)
-            if status == "COMPLETED" and inference_time < 2:
+            # Detect empty generation (fal.ai bug — COMPLETED in <0.5s = nothing generated)
+            if status == "COMPLETED" and inference_time and inference_time < 0.5:
                 return {"status": "FAILED", "error": "Модель временно недоступна. Попробуйте другую."}
 
             if status == "COMPLETED":
@@ -178,7 +178,7 @@ async def check_video_status(model_id: str, fal_request_id: str) -> dict:
                     )
                 if result_resp.status_code == 200:
                     result = result_resp.json()
-                    video_url = result.get("video", {}).get("url") or result.get("output", {}).get("video", {}).get("url") or result.get("video_url")
+                    video_url = result.get("video", {}).get("url") or result.get("output", {}).get("video", {}).get("url") or result.get("video_url") or result.get("data", {}).get("video", {}).get("url")
                     if not video_url:
                         # Try to find URL anywhere in response
                         import re
