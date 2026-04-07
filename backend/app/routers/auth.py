@@ -533,16 +533,17 @@ async def telegram_link(
 
 # In-memory store: session_id -> {user_id, created_at} or "pending"
 _tg_web_sessions: dict[str, dict | str] = {}
-_TG_SESSION_TTL = 300  # 5 minutes
+_TG_SESSION_TTL = 600  # 10 minutes (mobile users need more time)
 
 
 def _cleanup_old_sessions():
     """Remove sessions older than TTL."""
     now = time.time()
     expired = [k for k, v in _tg_web_sessions.items()
-               if isinstance(v, dict) and now - v.get("created_at", 0) > _TG_SESSION_TTL
-               or isinstance(v, str) and isinstance(v, str)]
-    # Simple cleanup: just cap size
+               if isinstance(v, dict) and now - v.get("created_at", 0) > _TG_SESSION_TTL]
+    for k in expired:
+        _tg_web_sessions.pop(k, None)
+    # Safety cap
     if len(_tg_web_sessions) > 1000:
         _tg_web_sessions.clear()
 
@@ -610,11 +611,14 @@ async def telegram_web_check(
 
 
 async def confirm_tg_web_session(session_id: str, tg_id: int, tg_user_data: dict):
-    """Called by the bot handler when user presses /start web_{session_id}.
-
-    Creates or finds the user, confirms the session.
-    """
+    """Called by the bot handler when user presses /start web_{session_id}."""
     from app.database import async_session as get_session
+
+    if session_id not in _tg_web_sessions:
+        logger.warning(f"TG web session {session_id} not found (expired or server restarted)")
+        raise ValueError("Session not found or expired")
+
+    logger.info(f"TG web login confirmed: session={session_id}, tg_id={tg_id}")
 
     async with get_session() as db:
         # Find or create user by telegram_id
