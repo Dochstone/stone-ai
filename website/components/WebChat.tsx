@@ -31,7 +31,7 @@ const THREED_MODEL_IDS = new Set(["tripo-v2.5", "triposr"]);
 // Model access tiers for lock icons
 const FREE_MODEL_IDS = new Set([
   "gpt-4o-mini", "gemini-2.0-flash", "claude-haiku-4.5", "deepseek-v3",
-  "llama-4-maverick", "mistral-large-25", "nano-banana",
+  "llama-4-maverick", "mistral-large-25", "nano-banana", "veo-3",
 ]);
 const MINI_MODEL_IDS = new Set([
   "gpt-4o-mini", "gemini-2.0-flash", "deepseek-v3",
