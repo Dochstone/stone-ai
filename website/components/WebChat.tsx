@@ -809,7 +809,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
     if (!el) return;
     const onScroll = () => {
       const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
-      userScrolledUpRef.current = distFromBottom > 150;
+      userScrolledUpRef.current = distFromBottom > 80;
     };
     el.addEventListener("scroll", onScroll, { passive: true });
     return () => el.removeEventListener("scroll", onScroll);
@@ -1656,7 +1656,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
       {/* Main chat area */}
       <div className="flex-1 flex flex-col min-w-0 min-h-0 h-full relative">
         {/* Top bar — simplified when embedded */}
-        <div className={`${embedded ? "h-10" : "h-14"} flex border-b border-text/[0.06] bg-bg/80 backdrop-blur-sm items-center justify-between px-3 sm:px-4 shrink-0`}>
+        <div className={`${embedded ? "h-10 hidden lg:flex" : "h-14 flex"} border-b border-text/[0.06] bg-bg/80 backdrop-blur-sm items-center justify-between px-3 sm:px-4 shrink-0`}>
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             {/* Sidebar toggle */}
             {(!embedded || !sidebarOpen) && (

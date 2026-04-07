@@ -179,7 +179,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </svg>
               </button>
               <span className="text-sm font-bold text-text">AI Чат</span>
-              <ThemeToggle />
+              <div className="flex items-center gap-2">
+                <ThemeToggle />
+              </div>
             </>
           ) : (
             <>
