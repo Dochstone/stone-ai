@@ -283,8 +283,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {isChat && (sidebarOpen || sidebarHover || sidebarPinned) && (
               <div className={`${!(sidebarHover || sidebarPinned) ? "lg:hidden" : ""}`}>
                 <div className="px-3 pb-2 mb-1 border-b border-text/[0.06]" style={{ paddingTop: "max(12px, env(safe-area-inset-top))" }}>
-                  <img src="/mascots/stone-mascot-idle.png" alt="" width="24" height="24" className="inline-block mr-1.5" />
-                  <span className="text-sm font-extrabold text-text">Stone AI</span>
+                  <a href="/" className="inline-flex items-center gap-1.5 hover:opacity-80 transition-opacity">
+                    <img src="/mascots/stone-mascot-idle.png" alt="" width="24" height="24" />
+                    <span className="text-sm font-extrabold text-text">Stone AI</span>
+                  </a>
                   <span className="text-[9px] text-accent font-bold ml-1.5">65+ моделей</span>
                   {isChat && (
                     <button onClick={() => setSidebarPinned(p => !p)} title={sidebarPinned ? "Открепить" : "Закрепить"}
