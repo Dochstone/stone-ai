@@ -22,7 +22,7 @@ const IMAGE_MODEL_IDS = new Set([
 ]);
 
 const VIDEO_MODEL_IDS = new Set([
-  "sora-2", "veo-3", "luma-ray2", "luma-ray2-flash", "pika-2", "minimax", "pixverse-v5", "luma-dream", "stable-video", "wan-2", "hunyuan", "ltx-video", "cogvideox", "mochi",
+  "sora-2", "veo-3", "kling-v3", "kling-v2", "luma-ray2", "luma-ray2-flash", "pika-2", "minimax", "pixverse-v5", "luma-dream", "stable-video", "wan-2", "hunyuan", "ltx-video", "cogvideox", "mochi",
 ]);
 
 const THREED_MODEL_IDS = new Set(["tripo-v2.5", "triposr"]);

@@ -31,7 +31,7 @@ COST_MARKETPLACE = 0.21    # ~20 RUB
 
 DEFAULT_IMAGE_MODEL = "nano-banana"
 
-OPENROUTER_IMAGE_MODELS = {"nano-banana", "nano-banana-pro", "gpt-image-1", "flux-schnell"}
+OPENROUTER_IMAGE_MODELS = {"nano-banana", "nano-banana-pro", "gpt-image-1"}
 
 
 # ─── Schemas ───
