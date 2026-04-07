@@ -21,10 +21,10 @@ VIDEO_MODELS_REGISTRY = [
     {"id": "runway-gen3", "name": "Runway Gen-3 Alpha", "company": "Runway",   "fal_model": "fal-ai/runway-gen3/turbo/image-to-video", "duration": "5-10s", "cost": 0.25, "price": 0.85, "active": False},
     # Tier 2: Working models
     {"id": "kling-v2",    "name": "Kling v2 Master",   "company": "Kuaishou",  "fal_model": "direct-kling",                    "duration": "5-10s", "cost": 0.07, "price": 0.25, "active": False},  # Direct Kling API — disabled
-    {"id": "minimax",     "name": "MiniMax Hailuo",    "company": "MiniMax",   "fal_model": "fal-ai/minimax-hailuo-02",        "duration": "5-10s", "cost": 0.08, "price": 0.28, "active": True},
+    {"id": "minimax",     "name": "MiniMax Hailuo",    "company": "MiniMax",   "fal_model": "fal-ai/minimax-video",            "duration": "5-10s", "cost": 0.08, "price": 0.28, "active": True},
     {"id": "cogvideox",   "name": "CogVideoX 5B",     "company": "THUDM",     "fal_model": "fal-ai/cogvideox-5b",             "duration": "5s",    "cost": 0.06, "price": 0.20, "active": True},
     {"id": "mochi",       "name": "Mochi v1",          "company": "Genmo",     "fal_model": "fal-ai/mochi-v1",                 "duration": "5s",    "cost": 0.05, "price": 0.18, "active": True},
-    {"id": "pixverse-v5", "name": "PixVerse v5",       "company": "PixVerse",  "fal_model": "fal-ai/pixverse-v5",              "duration": "5-10s", "cost": 0.06, "price": 0.22, "active": True},
+    {"id": "pixverse-v5", "name": "PixVerse v4.5",     "company": "PixVerse",  "fal_model": "fal-ai/pixverse/v4.5",            "duration": "5-10s", "cost": 0.06, "price": 0.22, "active": True},
     {"id": "luma-dream",  "name": "Luma Dream Machine", "company": "Luma",    "fal_model": "fal-ai/luma-dream-machine",       "duration": "5s",    "cost": 0.10, "price": 0.35, "active": True},
     {"id": "pika-2",      "name": "Pika 2.0",          "company": "Pika",     "fal_model": "fal-ai/pika/v2",                  "duration": "3-5s",  "cost": 0.05, "price": 0.18, "active": True},
     # Tier 3: Budget
