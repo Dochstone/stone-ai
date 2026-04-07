@@ -1826,7 +1826,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                         </div>
                       )
                     ) : (() => {
-                      const msgModel = msg.modelId ? MODELS_MAP.get(msg.modelId) : model;
+                      const msgModel = msg.modelId ? MODELS_MAP.get(msg.modelId) : null;
                       const co = msgModel?.company || "";
                       const color = companyColors[co] || "#C4623D";
                       const logoFile = companyLogoFile[co];
@@ -1927,7 +1927,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                       {/* Model badge for AI messages */}
                       {msg.role === "assistant" && msg.content && !(streaming && i === messages.length - 1) && (
                         <div className="flex items-center gap-1.5 mt-1.5">
-                          <span className="text-[9px] text-text/20 bg-text/[0.03] px-1.5 py-0.5 rounded">{MODELS_MAP.get(msg.modelId || "")?.name || msg.modelId || model?.name}</span>
+                          <span className="text-[9px] text-text/20 bg-text/[0.03] px-1.5 py-0.5 rounded">{MODELS_MAP.get(msg.modelId || "")?.name || msg.modelId || "AI"}</span>
                         </div>
                       )}
 
