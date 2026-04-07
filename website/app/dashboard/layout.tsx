@@ -288,7 +288,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <button onClick={() => setSidebarPinned(p => !p)} title={sidebarPinned ? "Открепить" : "Закрепить"}
                       className={`ml-auto hidden lg:flex w-6 h-6 items-center justify-center rounded-md transition-colors ${sidebarPinned ? "text-accent bg-accent/10" : "text-text/20 hover:text-text/40"}`}>
                       <svg className="w-3.5 h-3.5" fill={sidebarPinned ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 4.5l-4 4L7 7 4 10l5.5 5.5L7 18h3l2.5-2.5L18 21l3-3-1.5-4 4-4-6.5-5.5z" />
                       </svg>
                     </button>
                   )}
