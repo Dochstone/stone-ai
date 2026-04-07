@@ -361,6 +361,20 @@ export default function PresentationsPage() {
           </div>
         )}
 
+        {/* How it works — first time hint */}
+        {slides.length === 0 && !loading && (
+          <div className="bg-gradient-to-r from-accent/5 to-teal/5 border border-accent/10 rounded-2xl p-5 flex items-start gap-4">
+            <img src="/mascots/stone-mascot-idle.png" alt="" width="56" height="56" className="shrink-0 mt-1" />
+            <div>
+              <h3 className="font-bold text-text text-sm mb-1">Как это работает</h3>
+              <p className="text-xs text-text/50 leading-relaxed">
+                Введите тему → выберите стиль и количество слайдов → AI создаст презентацию за 30 секунд.
+                Экспорт в <b>PPTX</b> (PowerPoint) и <b>PDF</b>. Стоимость от 40₽.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Form */}
         <div className="bg-white rounded-2xl border border-text/5 p-6 sm:p-8 space-y-6">
           {/* Topic */}

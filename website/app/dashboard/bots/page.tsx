@@ -196,10 +196,34 @@ export default function BotsPage() {
         {/* Bot list */}
         {tab === "my" ? (
           bots.length === 0 && !creating ? (
-            <div className="text-center py-16">
-              <img src="/mascots/stone-mascot-chat.png" alt="Stone" width="90" height="90" className="mx-auto mb-3" />
-              <p className="text-text/30 text-sm">У вас пока нет ботов</p>
-              <button onClick={() => setCreating(true)} className="mt-3 text-accent text-sm font-bold hover:underline">Создать первого бота</button>
+            <div className="py-12 bg-text/[0.02] border border-text/5 rounded-2xl">
+              <div className="text-center px-6">
+                <img src="/mascots/stone-mascot-chat.png" alt="Stone" width="72" height="72" className="mx-auto mb-3" />
+                <h3 className="text-lg font-bold text-text mb-2">Создайте своего AI-бота</h3>
+                <p className="text-sm text-text/40 mb-5 max-w-md mx-auto">
+                  Задайте инструкции, загрузите базу знаний (PDF/TXT) — бот будет отвечать по вашим данным.
+                  Подключите к Telegram или встройте на сайт.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 px-6 mb-5 max-w-lg mx-auto">
+                <div className="bg-white rounded-xl p-3 text-center border border-text/5">
+                  <span className="text-xl block mb-1">📄</span>
+                  <span className="text-[11px] text-text/50">База знаний из PDF</span>
+                </div>
+                <div className="bg-white rounded-xl p-3 text-center border border-text/5">
+                  <span className="text-xl block mb-1">🤖</span>
+                  <span className="text-[11px] text-text/50">Telegram-бот</span>
+                </div>
+                <div className="bg-white rounded-xl p-3 text-center border border-text/5">
+                  <span className="text-xl block mb-1">🌐</span>
+                  <span className="text-[11px] text-text/50">Виджет на сайт</span>
+                </div>
+              </div>
+              <div className="text-center">
+                <button onClick={() => setCreating(true)} className="bg-accent text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-accent/90">
+                  Создать первого бота
+                </button>
+              </div>
             </div>
           ) : (
             <div className="grid gap-3">

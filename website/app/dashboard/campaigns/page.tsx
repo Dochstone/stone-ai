@@ -108,6 +108,20 @@ export default function CampaignsPage() {
           <p className="text-sm text-text/40 mt-1">Яндекс Директ — ключи, объявления, минус-слова за 2 минуты</p>
         </div>
 
+        {/* First time hint */}
+        {campaigns.length === 0 && !running && (
+          <div className="bg-gradient-to-r from-accent/5 to-teal/5 border border-accent/10 rounded-2xl p-5 mb-6 flex items-start gap-4">
+            <img src="/mascots/stone-mascot-idle.png" alt="" width="56" height="56" className="shrink-0 mt-1 hidden sm:block" />
+            <div>
+              <h3 className="font-bold text-text text-sm mb-1">Как это работает</h3>
+              <p className="text-xs text-text/50 leading-relaxed">
+                Введите нишу → AI за 2 минуты создаст: 50+ ключевых слов с частотностью, объявления,
+                минус-слова и рекомендации. Экспорт в XLSX для загрузки в Яндекс Коммандер. Стоимость — 29₽.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Create form */}
         <div className="bg-white rounded-2xl border border-text/5 p-5 mb-6">
           <div className="grid sm:grid-cols-2 gap-4 mb-4">
