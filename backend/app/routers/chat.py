@@ -90,7 +90,8 @@ async def chat_guest(
     if len(req.messages) > 6:
         req.messages = req.messages[-6:]
 
-    system_prompt = req.system_prompt
+    default_system = "Always respond in the same language as the user's message. If the user writes in Russian, respond in Russian. If in English, respond in English."
+    system_prompt = req.system_prompt if req.system_prompt else default_system
     max_tokens = MAX_TOKENS_LITE
 
     async def generate():
@@ -191,7 +192,9 @@ async def chat(
         plan = "byok"
 
     # System prompt — allowed for all users
-    system_prompt = req.system_prompt if req.system_prompt else None
+    # Default: respond in the user's language (critical for multilingual models like Llama)
+    default_system = "Always respond in the same language as the user's message. If the user writes in Russian, respond in Russian. If in English, respond in English."
+    system_prompt = req.system_prompt if req.system_prompt else default_system
 
     # Inject project context if project_id provided
     if req.project_id:
