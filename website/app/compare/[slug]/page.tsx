@@ -23,25 +23,88 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-function ModelCard({ id }: { id: string }) {
+const companyGradient: Record<string, string> = {
+  OpenAI: "from-green-500/10 to-emerald-500/5",
+  Anthropic: "from-orange-500/10 to-amber-500/5",
+  Google: "from-blue-500/10 to-sky-500/5",
+  Meta: "from-sky-500/10 to-blue-500/5",
+  Mistral: "from-purple-500/10 to-violet-500/5",
+  DeepSeek: "from-cyan-500/10 to-teal-500/5",
+  xAI: "from-slate-500/10 to-gray-500/5",
+  Perplexity: "from-indigo-500/10 to-violet-500/5",
+};
+
+const companyBadge: Record<string, string> = {
+  OpenAI: "bg-green-100 text-green-700",
+  Anthropic: "bg-orange-100 text-orange-700",
+  Google: "bg-blue-100 text-blue-700",
+  Meta: "bg-sky-100 text-sky-700",
+  Mistral: "bg-purple-100 text-purple-700",
+  DeepSeek: "bg-cyan-100 text-cyan-700",
+  xAI: "bg-slate-100 text-slate-700",
+  Perplexity: "bg-indigo-100 text-indigo-700",
+};
+
+const companyLogo: Record<string, string> = {
+  OpenAI: "/logos/openai.svg",
+  Anthropic: "/logos/anthropic.svg",
+  Google: "/logos/google.svg",
+  Meta: "/logos/meta.svg",
+  Mistral: "/logos/mistral.svg",
+  DeepSeek: "/logos/deepseek.svg",
+  xAI: "/logos/xai.svg",
+  Perplexity: "/logos/perplexity.svg",
+};
+
+const catEmoji: Record<string, string> = { chat: "💬", image: "🎨", video: "📹", reason: "🧠", code: "💻", search: "🔍", "3d": "🧊" };
+const catLabel: Record<string, string> = { chat: "Чат", image: "Картинки", video: "Видео", reason: "Reasoning", code: "Код", search: "Поиск", "3d": "3D" };
+
+function ModelCard({ id, side }: { id: string; side: "left" | "right" }) {
   const m = MODELS.find((x) => x.id === id);
   if (!m) return null;
-  const catLabel: Record<string, string> = { chat: "Чат", image: "Картинки", video: "Видео", reason: "Reasoning", code: "Код", search: "Поиск", "3d": "3D" };
+  const grad = companyGradient[m.company] || "from-accent/10 to-teal/5";
+  const badge = companyBadge[m.company] || "bg-text/[0.06] text-text/50";
+  const logo = companyLogo[m.company];
   return (
-    <div className="bg-bg rounded-2xl border border-text/5 p-6">
-      <div className="text-[10px] text-text/30 font-semibold uppercase tracking-wider mb-1">{m.company}</div>
-      <h3 className="text-lg font-extrabold text-text mb-2">{m.name}</h3>
-      <p className="text-sm text-text/50 mb-4 leading-relaxed">{m.description}</p>
-      <div className="space-y-2 text-sm">
-        <div className="flex justify-between"><span className="text-text/30">Контекст</span><span className="font-bold text-text/70">{m.context || "—"}</span></div>
-        <div className="flex justify-between"><span className="text-text/30">Категория</span><span className="font-bold text-text/70">{catLabel[m.category] || m.category}</span></div>
-        <div className="flex justify-between"><span className="text-text/30">Цена</span><span className="font-bold text-text/70">{m.tier === "free" ? "Бесплатно" : `$${m.pricePerMillion}${m.priceUnit || "/1M"}`}</span></div>
-      </div>
-      {m.strengths && (
-        <div className="flex flex-wrap gap-1.5 mt-4">
-          {m.strengths.map((s) => <span key={s} className="text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full font-bold">{s}</span>)}
+    <div className={`relative rounded-2xl border border-text/5 overflow-hidden transition-all hover:border-text/10 hover:shadow-lg`}>
+      {/* Gradient header */}
+      <div className={`bg-gradient-to-br ${grad} px-6 pt-5 pb-4`}>
+        <div className="flex items-center justify-between mb-3">
+          <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${badge}`}>{m.company}</span>
+          {m.tier === "free" && <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-teal/15 text-teal">Бесплатно</span>}
         </div>
-      )}
+        <div className="flex items-center gap-3">
+          {logo && <img src={logo} alt="" className="w-8 h-8 rounded-lg opacity-80" />}
+          <h3 className="text-xl font-extrabold text-text">{m.name}</h3>
+        </div>
+      </div>
+      {/* Body */}
+      <div className="bg-bg px-6 py-5">
+        <p className="text-sm text-text/50 mb-4 leading-relaxed">{m.description}</p>
+        {/* Stats row */}
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          <div className="bg-text/[0.03] rounded-xl p-2.5 text-center">
+            <div className="text-[9px] text-text/30 font-semibold uppercase">Контекст</div>
+            <div className="text-sm font-extrabold text-text/80 mt-0.5">{m.context || "—"}</div>
+          </div>
+          <div className="bg-text/[0.03] rounded-xl p-2.5 text-center">
+            <div className="text-[9px] text-text/30 font-semibold uppercase">Тип</div>
+            <div className="text-sm font-extrabold text-text/80 mt-0.5">{catEmoji[m.category]} {catLabel[m.category]}</div>
+          </div>
+          <div className="bg-text/[0.03] rounded-xl p-2.5 text-center">
+            <div className="text-[9px] text-text/30 font-semibold uppercase">Цена</div>
+            <div className="text-sm font-extrabold text-text/80 mt-0.5">{m.tier === "free" ? "FREE" : `$${m.pricePerMillion}`}</div>
+          </div>
+        </div>
+        {/* Strengths */}
+        {m.strengths && (
+          <div className="flex flex-wrap gap-1.5">
+            {m.strengths.map((s) => (
+              <span key={s} className={`text-[10px] px-2.5 py-1 rounded-full font-bold ${side === "left" ? "bg-accent/10 text-accent" : "bg-teal/10 text-teal"}`}>{s}</span>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -81,10 +144,19 @@ export default function ComparePage({ params }: Props) {
         <h1 className="text-3xl md:text-5xl font-extrabold text-text mb-4 leading-tight">{comp.h1}</h1>
         <p className="text-lg text-text/50 mb-12 max-w-2xl">{comp.description}</p>
 
+        {/* VS badge */}
+        <div className="flex items-center justify-center mb-6">
+          <div className="h-px flex-1 bg-text/[0.06]" />
+          <div className="mx-4 w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
+            <span className="text-accent font-extrabold text-sm">VS</span>
+          </div>
+          <div className="h-px flex-1 bg-text/[0.06]" />
+        </div>
+
         {/* Cards */}
         <div className="grid md:grid-cols-2 gap-4 mb-14">
-          <ModelCard id={comp.model1} />
-          <ModelCard id={comp.model2} />
+          <ModelCard id={comp.model1} side="left" />
+          <ModelCard id={comp.model2} side="right" />
         </div>
 
         {/* Table */}
@@ -113,22 +185,36 @@ export default function ComparePage({ params }: Props) {
         <section className="mb-14">
           <h2 className="text-2xl font-extrabold text-text mb-6">Для каких задач подходят</h2>
           <div className="grid md:grid-cols-2 gap-4">
-            <div className="bg-bg rounded-2xl border border-text/5 p-6">
-              <h3 className="font-bold text-text mb-3">{m1?.name} лучше для:</h3>
-              <ul className="space-y-2">
+            <div className="bg-bg rounded-2xl border-2 border-accent/15 p-6 relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent to-accent/30" />
+              <h3 className="font-extrabold text-text mb-4 flex items-center gap-2">
+                {companyLogo[m1?.company || ""] && <img src={companyLogo[m1?.company || ""]} alt="" className="w-5 h-5 rounded opacity-70" />}
+                {m1?.name}
+              </h3>
+              <ul className="space-y-3">
                 {comp.useCases.model1.map((uc) => (
-                  <li key={uc} className="flex items-center gap-2.5 text-sm text-text/60">
-                    <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />{uc}
+                  <li key={uc} className="flex items-center gap-3 text-sm text-text/60">
+                    <span className="w-6 h-6 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+                      <svg className="w-3.5 h-3.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    </span>
+                    {uc}
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="bg-bg rounded-2xl border border-text/5 p-6">
-              <h3 className="font-bold text-text mb-3">{m2?.name} лучше для:</h3>
-              <ul className="space-y-2">
+            <div className="bg-bg rounded-2xl border-2 border-teal/15 p-6 relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal to-teal/30" />
+              <h3 className="font-extrabold text-text mb-4 flex items-center gap-2">
+                {companyLogo[m2?.company || ""] && <img src={companyLogo[m2?.company || ""]} alt="" className="w-5 h-5 rounded opacity-70" />}
+                {m2?.name}
+              </h3>
+              <ul className="space-y-3">
                 {comp.useCases.model2.map((uc) => (
-                  <li key={uc} className="flex items-center gap-2.5 text-sm text-text/60">
-                    <span className="w-1.5 h-1.5 rounded-full bg-teal shrink-0" />{uc}
+                  <li key={uc} className="flex items-center gap-3 text-sm text-text/60">
+                    <span className="w-6 h-6 rounded-lg bg-teal/10 flex items-center justify-center shrink-0">
+                      <svg className="w-3.5 h-3.5 text-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    </span>
+                    {uc}
                   </li>
                 ))}
               </ul>
@@ -139,8 +225,17 @@ export default function ComparePage({ params }: Props) {
         {/* Verdict */}
         <section className="mb-14">
           <h2 className="text-2xl font-extrabold text-text mb-4">Вердикт</h2>
-          <div className="bg-gradient-to-r from-accent/5 to-teal/5 rounded-2xl p-6 border border-accent/10">
-            <p className="text-text/70 text-base leading-relaxed">{comp.verdict}</p>
+          <div className="bg-gradient-to-br from-accent/8 via-teal/5 to-accent/3 rounded-2xl p-8 border border-accent/10 relative overflow-hidden">
+            <div className="absolute top-4 right-4 text-5xl opacity-10 select-none">⚖️</div>
+            <p className="text-text/70 text-base leading-relaxed relative z-10">{comp.verdict}</p>
+            <div className="mt-5 flex gap-3 relative z-10">
+              <Link href="/dashboard/chat" className="text-xs font-bold text-accent hover:underline flex items-center gap-1">
+                Попробовать оба <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+              </Link>
+              <Link href="/pricing" className="text-xs font-bold text-text/30 hover:text-text/50 flex items-center gap-1">
+                Тарифы
+              </Link>
+            </div>
           </div>
         </section>
 
