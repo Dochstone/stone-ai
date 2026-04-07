@@ -625,6 +625,19 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
       const savedSession = tabSessionRef.current[initialCategory] ?? null;
       setActiveSessionId(savedSession);
       setMessages(savedMessages);
+      // Auto-select a model matching the category
+      const catMap: Record<string, string[]> = { free: [], image: ["image"], video: ["video"], "3d": ["3d"] };
+      const cats = catMap[initialCategory];
+      if (cats) {
+        if (initialCategory === "free") {
+          const freeModel = MODELS.find(m => FREE_MODEL_IDS.has(m.id) && m.category === "chat");
+          if (freeModel) setSelectedModel(freeModel.id);
+        } else {
+          const match = MODELS.find(m => cats.includes(m.category) && FREE_MODEL_IDS.has(m.id))
+            || MODELS.find(m => cats.includes(m.category));
+          if (match) setSelectedModel(match.id);
+        }
+      }
     }
   }, [initialCategory]);
 
