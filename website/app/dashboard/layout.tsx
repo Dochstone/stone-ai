@@ -278,7 +278,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             )}
 
             {/* Chat categories — full labels for mobile or hover */}
-            {isChat && (sidebarHover || true) && (
+            {isChat && (sidebarOpen || sidebarHover) && (
               <div className={`${!sidebarHover ? "lg:hidden" : ""}`}>
                 <div className="px-3 pb-2 mb-1 border-b border-text/[0.06]" style={{ paddingTop: "max(12px, env(safe-area-inset-top))" }}>
                   <img src="/mascots/stone-mascot-idle.png" alt="" width="24" height="24" className="inline-block mr-1.5" />
@@ -317,8 +317,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {/* Nav groups */}
             {NAV_ITEMS.map((group) => (
               <div key={group.group}>
-                {(!isChat || sidebarHover) && (
-                  <div className={`text-[9px] font-bold text-text/20 uppercase tracking-[1.5px] px-3 pt-1 mb-0.5 ${isChat && !sidebarHover ? "lg:hidden" : ""}`}>
+                {(!isChat || sidebarHover || sidebarOpen) && (
+                  <div className={`text-[9px] font-bold text-text/20 uppercase tracking-[1.5px] px-3 pt-2 mb-0.5 ${isChat && !sidebarHover && !sidebarOpen ? "lg:hidden" : ""}`}>
                     {group.group}
                   </div>
                 )}
@@ -342,6 +342,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         >
                           <NavIcon d={item.icon} />
                           <span className="truncate">{item.label}</span>
+                          {item.badge && (
+                            <span className={`ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-md ${active ? "bg-accent/20 text-accent" : "bg-text/[0.06] text-text/30"}`}>{item.badge}</span>
+                          )}
                         </Link>
                       ) : (
                         <>
@@ -379,6 +382,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                           >
                             <NavIcon d={item.icon} />
                             <span className="truncate">{item.label}</span>
+                            {item.badge && (
+                              <span className={`ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-md ${active ? "bg-accent/20 text-accent" : "bg-text/[0.06] text-text/30"}`}>{item.badge}</span>
+                            )}
                           </Link>
                         </>
                       )
