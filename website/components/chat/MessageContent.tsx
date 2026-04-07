@@ -78,15 +78,18 @@ function renderMarkdown(text: string): string {
 
 // ─── Sub-components ───
 
-function getVideoUrl(url: string, taskId?: string, token?: string): string {
+function getVideoUrl(url: string, directUrl?: string, taskId?: string, token?: string): string {
+  // Prefer direct fal.ai URL (no auth needed, works long-term)
+  if (directUrl && (directUrl.includes("fal.media") || directUrl.includes("fal.run"))) return directUrl;
   if (url.includes("fal.media") || url.includes("fal.run")) return url;
+  // Fallback to proxy (requires valid token)
   if (taskId && token) return `${API_URL}/api/video/stream/${taskId}?token=${token}`;
-  return url;
+  return directUrl || url;
 }
 
-function VideoPlayer({ url, taskId, token, thumbnailUrl }: { url: string; taskId?: string; token?: string; thumbnailUrl?: string }) {
+function VideoPlayer({ url, directUrl, taskId, token, thumbnailUrl }: { url: string; directUrl?: string; taskId?: string; token?: string; thumbnailUrl?: string }) {
   const [thumbLoaded, setThumbLoaded] = useState(false);
-  const videoUrl = getVideoUrl(url, taskId, token);
+  const videoUrl = getVideoUrl(url, directUrl, taskId, token);
 
   const openVideo = () => {
     window.open(videoUrl, "_blank");

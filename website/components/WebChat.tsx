@@ -1891,8 +1891,8 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                       {/* Video player */}
                       {msg.video && (
                         <div className="mb-2">
-                          <VideoPlayer url={msg.video.url} taskId={msg.video.taskId} token={auth?.token} thumbnailUrl={msg.video.thumbnailUrl} />
-                          {(() => { const vUrl = getVideoUrl(msg.video.url, msg.video.taskId, auth?.token); return (
+                          <VideoPlayer url={msg.video.url} directUrl={msg.video.directUrl} taskId={msg.video.taskId} token={auth?.token} thumbnailUrl={msg.video.thumbnailUrl} />
+                          {(() => { const vUrl = getVideoUrl(msg.video.url, msg.video.directUrl, msg.video.taskId, auth?.token); return (
                           <div className="flex items-center gap-3 mt-2">
                             <a
                               href={vUrl}

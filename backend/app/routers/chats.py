@@ -1,5 +1,6 @@
 """Chat history — persistent sessions and messages."""
 
+import asyncio
 import logging
 import secrets
 from datetime import datetime
@@ -175,38 +176,49 @@ async def save_message(
         select(func.count()).select_from(ChatMessage).where(ChatMessage.session_id == session_id)
     )
     if body.role == "assistant" and msg_count <= 2 and session.title != "Новый чат":
-        # We have user+assistant (2 msgs), title is still raw user text — generate smart one
-        try:
-            import httpx
-            import os
-            user_msg = session.title  # first user message (set above)
-            openrouter_key = os.getenv("OPENROUTER_API_KEY")
-            if openrouter_key and len(user_msg) > 5:
-                async with httpx.AsyncClient(timeout=10) as client:
-                    resp = await client.post(
-                        "https://openrouter.ai/api/v1/chat/completions",
-                        headers={"Authorization": f"Bearer {openrouter_key}"},
-                        json={
-                            "model": "openai/gpt-4o-mini",
-                            "messages": [
-                                {"role": "system", "content": "Generate a short chat title (2-5 words, Russian) for this conversation. Reply with ONLY the title, nothing else."},
-                                {"role": "user", "content": user_msg[:200]},
-                            ],
-                            "max_tokens": 20,
-                        },
-                    )
-                    if resp.status_code == 200:
-                        data = resp.json()
-                        title = data["choices"][0]["message"]["content"].strip().strip('"').strip("*").strip("_").strip("`")
-                        if 1 < len(title) < 80:
-                            session.title = title
-        except Exception as e:
-            logger.warning(f"Auto-title failed: {e}")
+        # Generate smart title in background (don't block response)
+        asyncio.create_task(_generate_title(session.id, session.title))
 
     session.updated_at = datetime.utcnow()
     await db.flush()
 
     return {"id": msg.id, "session_title": session.title}
+
+
+async def _generate_title(session_id: int, user_msg: str):
+    """Background task: generate smart chat title via AI."""
+    import httpx
+    import os
+    from app.database import async_session
+    try:
+        openrouter_key = os.getenv("OPENROUTER_API_KEY")
+        if not openrouter_key or len(user_msg) <= 5:
+            return
+        async with httpx.AsyncClient(timeout=10) as client:
+            resp = await client.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={"Authorization": f"Bearer {openrouter_key}"},
+                json={
+                    "model": "openai/gpt-4o-mini",
+                    "messages": [
+                        {"role": "system", "content": "Generate a short chat title (2-5 words, Russian) for this conversation. Reply with ONLY the title, nothing else."},
+                        {"role": "user", "content": user_msg[:200]},
+                    ],
+                    "max_tokens": 20,
+                },
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                title = data["choices"][0]["message"]["content"].strip().strip('"').strip("*").strip("_").strip("`")
+                if 1 < len(title) < 80:
+                    async with async_session() as db:
+                        result = await db.execute(select(ChatSession).where(ChatSession.id == session_id))
+                        s = result.scalar_one_or_none()
+                        if s:
+                            s.title = title
+                            await db.commit()
+    except Exception as e:
+        logger.warning(f"Auto-title failed: {e}")
 
 
 class RenameSessionRequest(BaseModel):
