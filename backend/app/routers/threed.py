@@ -71,22 +71,21 @@ async def generate_threed(
     if not user:
         raise HTTPException(404, "Пользователь не найден")
 
-    # Subscribers: included in plan. Free users: need balance.
+    # Use daily limits system (same as chat)
+    from app.services.daily_limits import check_daily_limit, increment_usage
     tier = user.subscription_tier or "free"
     balance = float(user.balance_usd or 0)
 
-    if tier in ("mini", "max", "max-pro"):
-        new_balance = balance  # subscription covers it
-    elif balance >= price:
-        user.balance_usd = round(balance - price, 6)
-        new_balance = float(user.balance_usd)
-    else:
-        from app.config import USD_TO_RUB
-        raise HTTPException(402, {
-            "error": "insufficient_balance",
-            "message": f"Недостаточно средств. Нужно ~{int(price * USD_TO_RUB)}₽. Оформите подписку.",
-            "upgrade_url": "/pricing",
-        })
+    # 3D uses image limits
+    check = await check_daily_limit(db, tg_id, req.model_id, tier, balance)
+    if not check.get("allowed"):
+        raise HTTPException(
+            429 if check.get("error") == "daily_limit_exceeded" else 403,
+            check,
+        )
+
+    new_balance = balance
+    await increment_usage(db, tg_id, req.model_id, tier)
 
     task_id = str(uuid.uuid4())[:12]
     task = ThreeDTask(

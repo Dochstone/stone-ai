@@ -80,46 +80,21 @@ async def generate_video(
     if not user:
         raise HTTPException(404, "Пользователь не найден")
 
-    # Billing logic:
-    # - Subscribers (mini/max/max-pro): video included in subscription, no balance needed
-    # - Free users: 1 trial video (Veo 3 only), then need subscription
+    # Use daily limits system (same as chat)
+    from app.services.daily_limits import check_daily_limit, increment_usage
     tier = user.subscription_tier or "free"
     balance = float(user.balance_usd or 0)
-    actual_price = price
+    actual_price = 0  # video uses daily limits, not balance
 
-    if tier in ("mini", "max", "max-pro"):
-        # Subscriber — video included, don't deduct balance
-        new_balance = balance
-    elif tier == "free" and balance > 0 and balance >= price:
-        # Free user with balance — deduct
-        user.balance_usd = round(balance - price, 6)
-        new_balance = float(user.balance_usd)
-    elif tier == "free":
-        # Free user without balance — check trial
-        from app.config import FREE_TRIAL_VIDEOS
-        from app.models.generation import Generation
-        from sqlalchemy import func as sql_func
-        if req.model_id != "veo-3":
-            raise HTTPException(402, {
-                "error": "insufficient_balance",
-                "message": "Бесплатное видео доступно только в модели Veo 3. Оформите подписку для доступа ко всем моделям.",
-                "upgrade_url": "/pricing",
-            })
-        total_videos = await db.scalar(
-            select(sql_func.count()).select_from(Generation).where(
-                Generation.user_tg_id == tg_user["id"], Generation.type == "video"
-            )
-        ) or 0
-        if total_videos >= FREE_TRIAL_VIDEOS:
-            raise HTTPException(402, {
-                "error": "insufficient_balance",
-                "message": f"Бесплатный лимит {FREE_TRIAL_VIDEOS} видео исчерпан. Оформите подписку.",
-                "upgrade_url": "/pricing",
-            })
-        new_balance = balance
-        actual_price = 0
-    else:
-        new_balance = balance
+    check = await check_daily_limit(db, tg_id, req.model_id, tier, balance)
+    if not check.get("allowed"):
+        raise HTTPException(
+            429 if check.get("error") == "daily_limit_exceeded" else 403,
+            check,
+        )
+
+    new_balance = balance
+    await increment_usage(db, tg_id, req.model_id, tier)
 
     # Create task
     task_id = str(uuid.uuid4())[:12]
@@ -150,7 +125,6 @@ async def generate_video(
             source_image_url=req.source_image_url,
         )
         if "error" in kling_result:
-            user.balance_usd = round(new_balance + price, 6)
             task.status = "failed"
             task.error_message = kling_result["error"]
             await db.commit()
@@ -163,7 +137,6 @@ async def generate_video(
             req.model_id, req.prompt, req.source_image_url
         )
         if "error" in fal_result:
-            user.balance_usd = round(new_balance + price, 6)
             task.status = "failed"
             task.error_message = fal_result["error"]
             await db.commit()
@@ -213,15 +186,8 @@ async def video_status(
 
     # Server-side timeout: 5 minutes since creation
     if task.created_at and (datetime.utcnow() - task.created_at).total_seconds() > 300:
-        # Refund
-        user_result = await db.execute(
-            select(User).where(User.telegram_id == tg_id).with_for_update()
-        )
-        user = user_result.scalar_one_or_none()
-        if user and task.cost_usd:
-            user.balance_usd = round(float(user.balance_usd or 0) + task.cost_usd, 6)
         task.status = "failed"
-        task.error_message = "Таймаут генерации (5 мин). Средства возвращены."
+        task.error_message = "Таймаут генерации (5 мин). Попробуйте ещё раз."
         await db.commit()
         return {
             "task_id": task.task_id,
@@ -289,14 +255,6 @@ async def video_status(
         }
 
     if status == "FAILED":
-        # Refund
-        user_result = await db.execute(
-            select(User).where(User.telegram_id == tg_id).with_for_update()
-        )
-        user = user_result.scalar_one_or_none()
-        if user:
-            user.balance_usd = round(float(user.balance_usd or 0) + task.cost_usd, 6)
-
         task.status = "failed"
         task.error_message = fal_status.get("error", "Generation failed")
         await db.commit()
