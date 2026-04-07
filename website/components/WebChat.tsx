@@ -1984,9 +1984,11 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                         </div>
                       )}
 
-                      <div className={streaming && i === messages.length - 1 && msg.role === "assistant" && msg.content ? "streaming-cursor" : ""}>
-                        <MessageContent content={msg.content} role={msg.role} selectedModel={selectedModel} />
-                      </div>
+                      {!msg.content?.startsWith("⏳") && (
+                        <div className={streaming && i === messages.length - 1 && msg.role === "assistant" && msg.content ? "streaming-cursor" : ""}>
+                          <MessageContent content={msg.content} role={msg.role} selectedModel={selectedModel} />
+                        </div>
+                      )}
 
                       {/* Model badge for AI messages */}
                       {msg.role === "assistant" && msg.content && !(streaming && i === messages.length - 1) && (
@@ -1995,8 +1997,8 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                         </div>
                       )}
 
-                      {/* Action buttons for AI messages — hide for image/video/3D */}
-                      {msg.role === "assistant" && msg.content && !msg.video && !msg.threed && !msg.content.match(/^data:image\//) && !(msg.content.match(/\.(png|jpg|jpeg|webp|gif)(\?|$)/i) && msg.content.startsWith("http")) && (
+                      {/* Action buttons for AI messages — hide for image/video/3D/generating */}
+                      {msg.role === "assistant" && msg.content && !msg.content.startsWith("⏳") && !msg.video && !msg.threed && !msg.content.match(/^data:image\//) && !(msg.content.match(/\.(png|jpg|jpeg|webp|gif)(\?|$)/i) && msg.content.startsWith("http")) && (
                         <div className="flex items-center gap-1 mt-2">
                           {/* Copy */}
                           <button
