@@ -424,31 +424,10 @@ export default function Pricing() {
           <div
             className="w-full sm:max-w-[750px] sm:rounded-3xl rounded-t-3xl relative overflow-hidden p-[2px]"
             onClick={(e) => e.stopPropagation()}
-            onTouchStart={(e) => {
-              // Don't start swipe on interactive elements
-              const tag = (e.target as HTMLElement).closest("button, a, input, select");
-              if (tag) return;
-              swipeStartRef.current = e.touches[0].clientY;
-              setSwiping(true);
-            }}
-            onTouchMove={(e) => {
-              if (swipeStartRef.current === null) return;
-              const dy = e.touches[0].clientY - swipeStartRef.current;
-              if (dy > 0) setSwipeY(dy);
-            }}
-            onTouchEnd={() => {
-              if (swipeY > 120) closeModal();
-              setSwipeY(0);
-              setSwiping(false);
-              swipeStartRef.current = null;
-            }}
             style={{
-              animation: !swiping ? (closing
+              animation: closing
                 ? "pricingModalOut 0.3s ease forwards"
-                : "pricingModalIn 0.5s cubic-bezier(0.16, 1, 0.3, 1)") : "none",
-              transform: swipeY > 0 ? `translateY(${swipeY}px)` : undefined,
-              transition: swiping ? "none" : "transform 0.3s ease",
-              opacity: swipeY > 0 ? Math.max(0.3, 1 - swipeY / 400) : undefined,
+                : "pricingModalIn 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
             }}
           >
             {/* Spinning gradient border */}
@@ -460,7 +439,7 @@ export default function Pricing() {
               }}
             />
             {/* Inner content */}
-            <div className="bg-bg relative z-[1] sm:rounded-[22px] rounded-t-[22px] shadow-2xl overflow-hidden sm:max-h-[90vh] h-[95vh] sm:h-auto overflow-y-auto flex flex-col">
+            <div className="bg-bg relative z-[1] sm:rounded-[22px] rounded-t-[22px] shadow-2xl overflow-hidden sm:max-h-[90vh] overflow-y-auto">
 
             {/* Drag handle (mobile) — overlays image */}
             <div className="absolute top-2 left-1/2 -translate-x-1/2 w-9 h-1 rounded-full bg-white/30 sm:hidden z-20" />
@@ -473,11 +452,11 @@ export default function Pricing() {
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
 
-            <div className="flex flex-col sm:flex-row h-full">
+            <div className="flex flex-col sm:flex-row">
 
               {/* ─── Left: Girl image ─── */}
               {modal.img && (
-                <div className="relative sm:w-[280px] min-h-[200px] flex-1 sm:flex-none sm:h-auto shrink-0 overflow-hidden">
+                <div className="relative sm:w-[280px] h-[220px] sm:h-auto shrink-0 overflow-hidden">
                   <img
                     src={modal.img}
                     alt=""
