@@ -239,20 +239,22 @@ function ScrollToBottom({ containerRef }: { containerRef: React.RefObject<HTMLDi
       const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
       setShow(distFromBottom > 200);
     };
-    el.addEventListener("scroll", onScroll);
+    el.addEventListener("scroll", onScroll, { passive: true });
     return () => el.removeEventListener("scroll", onScroll);
   }, [containerRef]);
-
-  if (!show) return null;
 
   return (
     <button
       onClick={() => containerRef.current?.scrollTo({ top: containerRef.current.scrollHeight, behavior: "smooth" })}
-      className="absolute bottom-4 right-4 w-8 h-8 rounded-full bg-bg/80 backdrop-blur-sm border border-text/10 shadow-md flex items-center justify-center text-text/30 hover:text-text/60 hover:bg-bg transition-all z-10"
+      aria-label="К последнему сообщению"
+      className={`absolute bottom-4 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-6 z-10 min-w-[44px] min-h-[44px] px-4 py-2 rounded-full bg-accent text-white shadow-lg shadow-accent/20 flex items-center justify-center gap-1.5 hover:bg-accent/90 hover:scale-105 active:scale-95 transition-all duration-200 ${
+        show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
+      }`}
     >
-      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
       </svg>
+      <span className="text-xs font-semibold hidden sm:inline">Вниз</span>
     </button>
   );
 }
