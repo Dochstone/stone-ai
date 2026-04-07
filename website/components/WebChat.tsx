@@ -783,9 +783,23 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
       .catch(() => {});
   }, [auth?.token]); // only on mount
 
-  // Auto-scroll
+  // Auto-scroll — only if user is near bottom (not reading history)
+  const userScrolledUpRef = useRef(false);
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = messagesContainerRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+      userScrolledUpRef.current = distFromBottom > 150;
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    if (!userScrolledUpRef.current) {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages, streaming]);
 
   // Load bot config from sessionStorage (set by /dashboard/bots page)
