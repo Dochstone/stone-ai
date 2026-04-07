@@ -1103,7 +1103,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({ detail: "Ошибка" }));
-        setMessages([...history, { role: "assistant", content: typeof err.detail === "string" ? err.detail : "Ошибка генерации 3D" }]);
+        setMessages([...history, { role: "assistant", content: err?.detail?.message || err?.detail || err?.message || "Ошибка генерации 3D" }]);
         setThreedGenerating(false);
         return;
       }
@@ -1185,7 +1185,8 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({ detail: "Ошибка" }));
-        setMessages([...history, { role: "assistant", content: typeof err.detail === "string" ? err.detail : "Ошибка генерации видео" }]);
+        const errMsg = err?.detail?.message || err?.detail || err?.message || "Ошибка генерации видео";
+        setMessages([...history, { role: "assistant", content: typeof errMsg === "string" ? errMsg : "Ошибка генерации видео" }]);
         setVideoGenerating(false);
         return;
       }
@@ -1278,7 +1279,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({ detail: "Ошибка" }));
-        const errMsg = typeof err.detail === "string" ? err.detail : "Ошибка генерации";
+        const errMsg = err?.detail?.message || (typeof err.detail === "string" ? err.detail : null) || err?.message || "Ошибка генерации";
         setMessages([...history, { role: "assistant", content: errMsg }]);
         setStreaming(false);
         setImageGenerating(false);

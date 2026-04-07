@@ -80,9 +80,12 @@ async def generate_video(
     if not user:
         raise HTTPException(404, "Пользователь не найден")
 
-    # Free users: 1 video total (lifetime trial), then need balance
+    # Billing: apply subscriber discount, check balance
     tier = user.subscription_tier or "free"
     balance = float(user.balance_usd or 0)
+
+    from app.config import apply_discount
+    actual_price = apply_discount(price, tier)
 
     if tier == "free" and balance <= 0:
         from app.config import FREE_TRIAL_VIDEOS
@@ -108,14 +111,14 @@ async def generate_video(
             })
         # Trial video — don't deduct
         new_balance = balance
-    elif balance < price:
+    elif balance < actual_price:
         raise HTTPException(402, {
             "error": "insufficient_balance",
-            "message": f"Недостаточно средств. Нужно ~{int(price * USD_TO_RUB)}₽",
+            "message": f"Недостаточно средств. Нужно ~{int(actual_price * USD_TO_RUB)}₽, баланс ~{int(balance * USD_TO_RUB)}₽",
             "upgrade_url": "/topup",
         })
     else:
-        user.balance_usd = round(balance - price, 6)
+        user.balance_usd = round(balance - actual_price, 6)
         new_balance = float(user.balance_usd)
 
     # Create task
@@ -127,7 +130,7 @@ async def generate_video(
         prompt=req.prompt,
         source_image_url=req.source_image_url,
         status="pending",
-        cost_usd=price,
+        cost_usd=actual_price,
     )
     db.add(task)
     await db.flush()
