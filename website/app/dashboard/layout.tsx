@@ -83,6 +83,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [chatCategory, setChatCategory] = useState("all");
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const isChat = pathname === "/dashboard/chat";
+
+  // Dispatch model selection event when ?model= is in URL
+  useEffect(() => {
+    if (!isChat) return;
+    try {
+      const modelParam = new URLSearchParams(window.location.search).get("model");
+      if (modelParam) {
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent("select-model", { detail: modelParam }));
+          // Clean URL
+          window.history.replaceState({}, "", "/dashboard/chat");
+        }, 300);
+      }
+    } catch {}
+  }, [isChat, pathname]);
+
   const [sidebarPinned, setSidebarPinned] = useState(false);
   const collapsed = isChat && !sidebarHover && !sidebarPinned && !sidebarOpen;
   const expanded = !collapsed;
