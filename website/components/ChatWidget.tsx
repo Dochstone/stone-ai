@@ -136,7 +136,7 @@ export default function ChatWidget({ modelId, placeholder }: { modelId?: string;
                 ? "bg-accent text-white rounded-br-sm"
                 : "bg-text/[0.04] text-text/70 rounded-bl-sm"
             }`}>
-              {m.role === "assistant" && m.content.includes("[Зарегистрируйтесь]") ? (
+              {m.role === "assistant" && m.content === "REGISTER_CTA" ? (
                 <span>Бесплатные запросы закончились. <a href="/profile" className="text-accent font-bold hover:underline">Зарегистрируйтесь</a> — 15 запросов/день бесплатно.</span>
               ) : (
                 <span className={streaming && i === messages.length - 1 && m.role === "assistant" ? "streaming-cursor" : ""}>{m.content}</span>
