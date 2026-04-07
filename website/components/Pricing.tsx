@@ -545,20 +545,15 @@ export default function Pricing() {
                   </div>
                 </div>
 
-                {/* Features */}
-                <div className="px-6 pt-3 sm:pt-1 pb-2">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
-                    {modal.features.slice(0, 6).map((f: string, i: number) => (
-                      <div
-                        key={i}
-                        className="flex items-center gap-2 py-1"
-                        style={{ animation: `pricingStagger 0.35s ease both ${0.2 + i * 0.04}s` }}
-                      >
-                        <span className="w-[18px] h-[18px] rounded-full flex items-center justify-center shrink-0 text-[9px]"
-                          style={{ background: `${modal.color}15`, color: modal.color }}>
-                          ✓
-                        </span>
-                        <span className="text-[12px] text-text/60">{f}</span>
+                {/* Features — compact on mobile */}
+                <div className="px-6 pt-2 sm:pt-1 pb-1">
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+                    {modal.features.slice(0, 4).map((f: string, i: number) => (
+                      <div key={i} className="flex items-center gap-1.5 py-0.5"
+                        style={{ animation: `pricingStagger 0.35s ease both ${0.2 + i * 0.04}s` }}>
+                        <span className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 text-[8px]"
+                          style={{ background: `${modal.color}15`, color: modal.color }}>✓</span>
+                        <span className="text-[11px] text-text/60 leading-tight">{f}</span>
                       </div>
                     ))}
                   </div>
@@ -570,7 +565,7 @@ export default function Pricing() {
                   {modal.id === "free" ? (
                     /* ═══ Pay-per-Use: top-up with promo + payment methods ═══ */
                     <div>
-                      <p className="text-xs text-text/40 mb-4" style={{ animation: "pricingStagger 0.4s ease both 0.3s" }}>Платите только за инструменты: шаблоны, презентации, фотосессия, SEO. Без ежемесячной подписки.</p>
+                      <p className="text-[11px] text-text/40 mb-3 hidden sm:block" style={{ animation: "pricingStagger 0.4s ease both 0.3s" }}>Платите только за инструменты. Без подписки.</p>
                       <div className="flex gap-2 mb-3" style={{ animation: "pricingStagger 0.4s ease both 0.33s" }}>
                         {[100, 300, 500, 1000].map((amt) => (
                           <button
