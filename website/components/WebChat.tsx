@@ -86,6 +86,7 @@ interface FileAttachment {
 interface Message {
   role: "user" | "assistant";
   content: string;
+  modelId?: string;
   file?: FileAttachment;
   video?: { url: string; directUrl?: string; taskId?: string; thumbnailUrl?: string; cost_usd?: number };
   threed?: { url: string; cost_usd?: number };
@@ -1356,7 +1357,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
       let assistantContent = "";
       let billing: Message["billing"] | undefined;
 
-      setMessages([...history, { role: "assistant", content: "" }]);
+      setMessages([...history, { role: "assistant", content: "", modelId: isGuest ? "gpt-4o-mini" : selectedModel }]);
 
       while (true) {
         const { done, value } = await reader.read();
@@ -1396,14 +1397,14 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
               } else {
                 assistantContent = "Ошибка генерации. Попробуйте ещё раз.";
               }
-              setMessages([...history, { role: "assistant", content: assistantContent }]);
+              setMessages([...history, { role: "assistant", content: assistantContent, modelId: isGuest ? "gpt-4o-mini" : selectedModel }]);
               continue;
             }
 
             const content = data.content || data.choices?.[0]?.delta?.content;
             if (content) {
               assistantContent += content;
-              setMessages([...history, { role: "assistant", content: assistantContent, billing }]);
+              setMessages([...history, { role: "assistant", content: assistantContent, billing, modelId: isGuest ? "gpt-4o-mini" : selectedModel }]);
             }
           } catch {}
         }
@@ -1867,9 +1868,9 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                       </div>
 
                       {/* Model badge for AI messages */}
-                      {msg.role === "assistant" && msg.content && !streaming && (
+                      {msg.role === "assistant" && msg.content && !(streaming && i === messages.length - 1) && (
                         <div className="flex items-center gap-1.5 mt-1.5">
-                          <span className="text-[9px] text-text/20 bg-text/[0.03] px-1.5 py-0.5 rounded">{model?.name || selectedModel}</span>
+                          <span className="text-[9px] text-text/20 bg-text/[0.03] px-1.5 py-0.5 rounded">{MODELS.find(m => m.id === msg.modelId)?.name || msg.modelId || model?.name}</span>
                         </div>
                       )}
 
