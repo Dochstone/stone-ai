@@ -336,9 +336,35 @@ async def stream_video(
     if not task or not task.video_url:
         raise HTTPException(404, "Video not found")
 
+    # Try to refresh expired fal.ai URL
+    video_url = task.video_url
+    async with httpx.AsyncClient(timeout=10.0) as check_client:
+        try:
+            head = await check_client.head(video_url)
+            if head.status_code in (403, 404, 410):
+                # URL expired — try to re-fetch from fal.ai
+                logger.info(f"Video URL expired for {task_id}, re-fetching from fal.ai")
+                from app.services.video_router import check_video_status
+                fresh = await check_video_status(task.model_id, task.fal_request_id)
+                if fresh.get("video_url"):
+                    video_url = fresh["video_url"]
+                    task.video_url = video_url
+                    await db.commit()
+                    logger.info(f"Refreshed video URL for {task_id}")
+                else:
+                    raise HTTPException(410, "Видео больше недоступно. Сгенерируйте заново.")
+        except httpx.TimeoutException:
+            pass  # proceed with original URL
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.warning(f"Video URL check failed: {e}")
+
     async def proxy_stream():
         async with httpx.AsyncClient(timeout=120.0) as client:
-            async with client.stream("GET", task.video_url) as resp:
+            async with client.stream("GET", video_url) as resp:
+                if resp.status_code != 200:
+                    return
                 async for chunk in resp.aiter_bytes(chunk_size=65536):
                     yield chunk
 

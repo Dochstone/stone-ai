@@ -79,12 +79,11 @@ function renderMarkdown(text: string): string {
 // ─── Sub-components ───
 
 function getVideoUrl(url: string, directUrl?: string, taskId?: string, token?: string): string {
-  // Prefer direct fal.ai URL (no auth needed, works long-term)
-  if (directUrl && (directUrl.includes("fal.media") || directUrl.includes("fal.run"))) return directUrl;
-  if (url.includes("fal.media") || url.includes("fal.run")) return url;
-  // Fallback to proxy (requires valid token)
+  // Always use proxy — fal.ai direct URLs expire after ~24h
   if (taskId && token) return `${API_URL}/api/video/stream/${taskId}?token=${token}`;
-  return directUrl || url;
+  // Fallback to direct URL if no proxy available
+  if (directUrl) return directUrl;
+  return url;
 }
 
 function VideoPlayer({ url, directUrl, taskId, token, thumbnailUrl }: { url: string; directUrl?: string; taskId?: string; token?: string; thumbnailUrl?: string }) {
