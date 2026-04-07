@@ -1,0 +1,28 @@
+# Stone AI
+> AI-студия нового поколения. 65+ нейросетей в одном интерфейсе.
+
+Stone AI — российская платформа для работы с искусственным интеллектом. Доступ к 65+ AI моделям от OpenAI, Anthropic, Google, Meta, xAI, DeepSeek и других провайдеров через единый интерфейс. Чат, генерация изображений, видео, 3D, SEO-инструменты, AI-агент, презентации.
+
+## Ссылки
+
+- [Главная](https://stoneai.ru/)
+- [Каталог моделей](https://stoneai.ru/models)
+- [Тарифы](https://stoneai.ru/pricing)
+- [Блог](https://stoneai.ru/blog)
+- [Документация](https://stoneai.ru/docs)
+- [AI Чат](https://stoneai.ru/chat)
+- [Генерация изображений](https://stoneai.ru/images)
+- [Генерация видео](https://stoneai.ru/video)
+
+## Тарифы
+
+- Pay-per-Use: бесплатно, 15 запросов/день к 8 моделям
+- Start: 390 руб/мес, 20+ моделей, 50 картинок, 15 видео
+- Pro: 890 руб/мес, 65+ моделей, 150 картинок, 30 видео
+- Elite: 1990 руб/мес, все модели + API, 300 картинок, 60 видео
+
+## Контакты
+
+- Сайт: https://stoneai.ru
+- Telegram: https://t.me/drifttt55bot
+- Поддержка: https://t.me/stoneai_support

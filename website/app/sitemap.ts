@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { POSTS } from "@/lib/blog";
 import { MODELS } from "@/lib/models";
+import { COMPARISONS, ALTERNATIVES, PROFESSIONS, TOOL_HUBS } from "@/lib/seo-data";
 
 import { SITE_URL } from "@/lib/constants";
 
@@ -46,5 +47,33 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
 
-  return [...staticPages, ...blogPages, ...modelPages];
+  const comparePages: MetadataRoute.Sitemap = COMPARISONS.map((c) => ({
+    url: `${SITE_URL}/compare/${c.slug}`,
+    lastModified: now,
+    changeFrequency: "monthly",
+    priority: 0.8,
+  }));
+
+  const alternativePages: MetadataRoute.Sitemap = ALTERNATIVES.map((a) => ({
+    url: `${SITE_URL}/alternatives/${a.slug}`,
+    lastModified: now,
+    changeFrequency: "monthly",
+    priority: 0.8,
+  }));
+
+  const professionPages: MetadataRoute.Sitemap = PROFESSIONS.map((p) => ({
+    url: `${SITE_URL}/for/${p.slug}`,
+    lastModified: now,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  }));
+
+  const toolHubPages: MetadataRoute.Sitemap = TOOL_HUBS.map((t) => ({
+    url: `${SITE_URL}/tools/${t.slug}`,
+    lastModified: now,
+    changeFrequency: "weekly",
+    priority: 0.8,
+  }));
+
+  return [...staticPages, ...blogPages, ...modelPages, ...comparePages, ...alternativePages, ...professionPages, ...toolHubPages];
 }
