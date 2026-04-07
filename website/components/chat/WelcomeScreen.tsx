@@ -108,15 +108,16 @@ export default function WelcomeScreen({ onSuggestion, activeTab, plan }: { onSug
             {/* Free models guide */}
             <div className="max-w-lg mx-auto text-left space-y-2">
               {[
-                { id: "gpt-4o-mini", name: "GPT-4o mini", icon: "🟢", desc: "Универсальная модель от OpenAI. Тексты, переводы, код, ответы на вопросы.", best: "Лучшая для большинства задач" },
-                { id: "gemini-2.0-flash", name: "Gemini Flash", icon: "⚡", desc: "Самая быстрая модель от Google. Ответ за доли секунды.", best: "Когда важна скорость" },
-                { id: "claude-haiku-4.5", name: "Claude Haiku", icon: "🟣", desc: "Аккуратная модель от Anthropic. Вежливые, структурированные ответы.", best: "Деловые письма, анализ" },
-                { id: "deepseek-v3", name: "DeepSeek V3", icon: "🔵", desc: "Мощная open-source модель. Отлично пишет код и решает задачи.", best: "Код и математика" },
-                { id: "llama-4-maverick", name: "Llama 4", icon: "🦙", desc: "Креативная модель от Meta. Хороша для мозговых штурмов и идей.", best: "Креатив и брейншторм" },
-                { id: "mistral-large-25", name: "Mistral Large", icon: "🌊", desc: "Европейская модель. Хорошо работает с русским и другими языками.", best: "Мультиязычные задачи" },
-                { id: "nano-banana", name: "Nano Banana", icon: "🎨", desc: "Генерация картинок из текста. Единственная бесплатная модель для изображений.", best: "Картинки бесплатно" },
+                { id: "gpt-4o-mini", name: "GPT-4o mini", icon: "🟢", desc: "Универсальная модель от OpenAI. Тексты, переводы, код, ответы на вопросы.", best: "Лучшая для большинства задач", prompt: "Привет! Расскажи что ты умеешь и чем можешь помочь" },
+                { id: "gemini-2.0-flash", name: "Gemini Flash", icon: "⚡", desc: "Самая быстрая модель от Google. Ответ за доли секунды.", best: "Когда важна скорость", prompt: "Быстро объясни что такое нейросети простыми словами" },
+                { id: "claude-haiku-4.5", name: "Claude Haiku", icon: "🟣", desc: "Аккуратная модель от Anthropic. Вежливые, структурированные ответы.", best: "Деловые письма, анализ", prompt: "Напиши деловое письмо клиенту с благодарностью за сотрудничество" },
+                { id: "deepseek-v3", name: "DeepSeek V3", icon: "🔵", desc: "Мощная open-source модель. Отлично пишет код и решает задачи.", best: "Код и математика", prompt: "Напиши функцию на Python для сортировки списка словарей по ключу" },
+                { id: "llama-4-maverick", name: "Llama 4", icon: "🦙", desc: "Креативная модель от Meta. Хороша для мозговых штурмов и идей.", best: "Креатив и брейншторм", prompt: "Придумай 5 креативных идей для Telegram-канала о путешествиях" },
+                { id: "mistral-large-25", name: "Mistral Large", icon: "🌊", desc: "Европейская модель. Хорошо работает с русским и другими языками.", best: "Мультиязычные задачи", prompt: "Переведи на английский сохранив стиль: Добро пожаловать в Stone AI — AI-студию нового поколения" },
+                { id: "nano-banana", name: "Nano Banana", icon: "🎨", desc: "Генерация картинок из текста. Бесплатная модель для изображений.", best: "2 бесплатно", prompt: "Нарисуй уютную кофейню в стиле Pixar с тёплым освещением" },
+                { id: "veo-3", name: "Veo 3", icon: "🎬", desc: "Генерация видео от Google. 4K, lip-sync, звуковой дизайн.", best: "1 бесплатно", prompt: "Создай 5-секундное видео: закат на океане, волны бьются о скалы" },
               ].map((m) => (
-                <button key={m.id} onClick={() => onSuggestion("", m.id)}
+                <button key={m.id} onClick={() => onSuggestion(m.prompt, m.id)}
                   className="w-full flex items-center gap-3 p-3 rounded-xl border border-text/[0.06] bg-bg hover:border-accent/30 hover:shadow-sm transition-all group">
                   <span className="text-2xl shrink-0">{m.icon}</span>
                   <div className="flex-1 min-w-0 text-left">

@@ -2063,7 +2063,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
               <button
                 onClick={() => setModelPickerOpen(!modelPickerOpen)}
                 data-onboard="model-picker"
-                className="shrink-0 flex items-center gap-1 px-2 py-1.5 rounded-lg bg-text/[0.04] hover:bg-text/[0.08] text-[11px] font-semibold text-text/60 transition-colors max-w-[80px] sm:max-w-[120px]"
+                className="shrink-0 flex items-center gap-1 px-2 py-1.5 rounded-lg bg-text/[0.04] hover:bg-text/[0.08] text-[11px] font-semibold text-text/60 transition-colors max-w-[120px] sm:max-w-[160px]"
                 title={model?.name}
               >
                 <span className="truncate">{model?.name?.split(" ").slice(0, 2).join(" ") || "Модель"}</span>
@@ -2083,7 +2083,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                 data-onboard="chat-input"
                 rows={1}
                 className="flex-1 bg-transparent resize-none focus:outline-none min-w-0 leading-snug placeholder:text-text/20"
-                style={{ fontSize: 16, padding: "10px 16px", maxHeight: 80, minHeight: 42 }}
+                style={{ fontSize: 16, padding: "10px 16px", maxHeight: 120, minHeight: 42 }}
               />
 
               {/* Send / Stop / Mic button */}
