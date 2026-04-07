@@ -28,6 +28,9 @@ const VIDEO_MODEL_IDS = new Set([
 
 const THREED_MODEL_IDS = new Set(["tripo-v2.5", "triposr"]);
 
+// O(1) model lookup
+const MODELS_MAP = new Map(MODELS.map(m => [m.id, m]));
+
 // Model access tiers for lock icons
 const FREE_MODEL_IDS = new Set([
   "gpt-4o-mini", "gemini-2.0-flash", "claude-haiku-4.5", "deepseek-v3",
@@ -523,7 +526,7 @@ function Sidebar({
                               </span>
                             )}
                             <div className="flex items-center gap-1.5 mt-0.5">
-                              <span className="text-[10px] text-text/35">{MODELS.find(m => m.id === s.model_id)?.name || s.model_id}</span>
+                              <span className="text-[10px] text-text/35">{MODELS_MAP.get(s.model_id)?.name || s.model_id}</span>
                             </div>
                           </div>
                           <button
@@ -585,6 +588,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
   });
   const [lockModal, setLockModal] = useState<{ model: string; tier: string; price: string } | null>(null);
   const [modelPickerOpen, setModelPickerOpen] = useState(false);
+  const [modelSearchRaw, setModelSearchRaw] = useState("");
   const [modelSearch, setModelSearch] = useState("");
   const [showTemplates, setShowTemplates] = useState(false);
   const [limits, setLimits] = useState<{ plan?: string; text?: { used: number; limit: number }; image?: { used: number; limit: number }; streak?: { days: number } } | null>(null);
@@ -650,6 +654,12 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
   const [activeBotConfig, setActiveBotConfig] = useState<{ id: number; name: string; system_prompt: string; model_id: string; avatar_emoji: string } | null>(null);
   const [overlayMinimized, setOverlayMinimized] = useState(false);
 
+  // Debounce model search (200ms)
+  useEffect(() => {
+    const t = setTimeout(() => setModelSearch(modelSearchRaw), 200);
+    return () => clearTimeout(t);
+  }, [modelSearchRaw]);
+
   // Persist chat state to sessionStorage (survives F5)
   useEffect(() => {
     try {
@@ -691,7 +701,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
     return () => { if (pollTimerRef.current) clearTimeout(pollTimerRef.current); };
   }, []);
 
-  const model = useMemo(() => MODELS.find((m) => m.id === selectedModel), [selectedModel]);
+  const model = useMemo(() => MODELS_MAP.get(selectedModel), [selectedModel]);
   const isVideoModel = VIDEO_MODEL_IDS.has(selectedModel);
   const is3DModel = THREED_MODEL_IDS.has(selectedModel);
 
@@ -1032,7 +1042,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
   const send3DMessage = useCallback(async () => {
     if (!auth || (!input.trim() && !pendingFile) || threedGenerating) return;
     const tdLock = getModelLockInfo(selectedModel, auth.balanceUsd || 0, limits?.plan);
-    if (tdLock) { setUpsellModal({ type: "locked", model: MODELS.find(m => m.id === selectedModel)?.name, tier: tdLock.tier }); return; }
+    if (tdLock) { setUpsellModal({ type: "locked", model: MODELS_MAP.get(selectedModel)?.name, tier: tdLock.tier }); return; }
 
     const prompt = input.trim() || undefined;
     const imageUrl = pendingFile?.file_type === "image" ? pendingFile.content : undefined;
@@ -1113,7 +1123,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
   const sendVideoMessage = useCallback(async () => {
     if (!auth || (!input.trim() && !pendingFile) || videoGenerating) return;
     const vidLock = getModelLockInfo(selectedModel, auth.balanceUsd || 0, limits?.plan);
-    if (vidLock) { setUpsellModal({ type: "locked", model: MODELS.find(m => m.id === selectedModel)?.name, tier: vidLock.tier }); return; }
+    if (vidLock) { setUpsellModal({ type: "locked", model: MODELS_MAP.get(selectedModel)?.name, tier: vidLock.tier }); return; }
 
     const prompt = input.trim();
     const imageUrl = pendingFile?.file_type === "image" ? pendingFile.content : undefined;
@@ -1208,7 +1218,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
   const sendImageMessage = useCallback(async () => {
     if (!auth || !input.trim() || streaming) return;
     const imgLock = getModelLockInfo(selectedModel, auth.balanceUsd || 0, limits?.plan);
-    if (imgLock) { setUpsellModal({ type: "locked", model: MODELS.find(m => m.id === selectedModel)?.name, tier: imgLock.tier }); return; }
+    if (imgLock) { setUpsellModal({ type: "locked", model: MODELS_MAP.get(selectedModel)?.name, tier: imgLock.tier }); return; }
     const prompt = input.trim();
     const userMsg: Message = { role: "user", content: prompt };
     const history = [...messages, userMsg];
@@ -1681,18 +1691,18 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         {/* Model Picker — mobile: fullscreen sheet, desktop: bottom panel */}
         {modelPickerOpen && (
           <>
-            <div className="fixed inset-0 z-[44] bg-black/30 backdrop-blur-sm sm:hidden" onClick={() => { setModelPickerOpen(false); setModelSearch(""); }} />
-            <div className="hidden sm:block fixed inset-0 z-[44]" onClick={() => { setModelPickerOpen(false); setModelSearch(""); }} />
+            <div className="fixed inset-0 z-[44] bg-black/30 backdrop-blur-sm sm:hidden" onClick={() => { setModelPickerOpen(false); setModelSearchRaw(""); setModelSearch(""); }} />
+            <div className="hidden sm:block fixed inset-0 z-[44]" onClick={() => { setModelPickerOpen(false); setModelSearchRaw(""); setModelSearch(""); }} />
             <div className="fixed inset-x-0 bottom-0 top-12 z-[45] bg-bg flex flex-col rounded-t-2xl shadow-2xl sm:absolute sm:top-auto sm:bottom-16 sm:rounded-t-xl sm:max-h-[60vh] sm:shadow-lg border-t border-text/10">
               {/* Header */}
               <div className="p-3 border-b border-text/5 shrink-0">
                 <div className="flex items-center gap-2 mb-2 sm:hidden">
                   <span className="text-sm font-bold text-text flex-1">Выбор модели</span>
-                  <button onClick={() => { setModelPickerOpen(false); setModelSearch(""); }} className="text-text/30 hover:text-text/60 p-1">
+                  <button onClick={() => { setModelPickerOpen(false); setModelSearchRaw(""); setModelSearch(""); }} className="text-text/30 hover:text-text/60 p-1">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
                 </div>
-                <input type="text" value={modelSearch} onChange={(e) => setModelSearch(e.target.value)}
+                <input type="text" value={modelSearchRaw} onChange={(e) => setModelSearchRaw(e.target.value)}
                   placeholder="Поиск модели..."
                   className="w-full bg-text/[0.03] border border-text/10 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-accent/30" />
               </div>
@@ -1713,7 +1723,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                     return (
                       <button key={m.id} onClick={() => {
                         if (lock) { setLockModal({ model: m.name, tier: lock.tier, price: lock.price }); setModelPickerOpen(false); return; }
-                        setSelectedModel(m.id); setModelPickerOpen(false); setModelSearch("");
+                        setSelectedModel(m.id); setModelPickerOpen(false); setModelSearchRaw(""); setModelSearch("");
                       }} className={`w-full flex items-start gap-3 px-3 py-3 sm:py-2.5 rounded-xl text-left transition-colors ${
                         selectedModel === m.id ? "bg-accent/5 border border-accent/20" : "hover:bg-text/[0.03] active:bg-text/[0.06]"
                       } ${lock ? "opacity-50" : ""}`}>
@@ -1883,7 +1893,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                       {/* Model badge for AI messages */}
                       {msg.role === "assistant" && msg.content && !(streaming && i === messages.length - 1) && (
                         <div className="flex items-center gap-1.5 mt-1.5">
-                          <span className="text-[9px] text-text/20 bg-text/[0.03] px-1.5 py-0.5 rounded">{MODELS.find(m => m.id === msg.modelId)?.name || msg.modelId || model?.name}</span>
+                          <span className="text-[9px] text-text/20 bg-text/[0.03] px-1.5 py-0.5 rounded">{MODELS_MAP.get(msg.modelId || "")?.name || msg.modelId || model?.name}</span>
                         </div>
                       )}
 
