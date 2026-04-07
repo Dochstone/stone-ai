@@ -178,7 +178,7 @@ export default function ModelPage({ params }: Props) {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3">
-            <a href={`/webchat?model=${model.id}`}
+            <a href={`/dashboard/chat?model=${model.id}`}
               className="bg-accent text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25 text-center">
               Попробовать {isFree ? "бесплатно" : model.name}
             </a>
@@ -243,7 +243,7 @@ export default function ModelPage({ params }: Props) {
           <h2 className="text-2xl font-extrabold mb-5">Примеры запросов</h2>
           <div className="space-y-2">
             {prompts.map((p, i) => (
-              <a key={i} href={`/webchat?model=${model.id}`}
+              <a key={i} href={`/dashboard/chat?model=${model.id}`}
                 className="flex items-center gap-3 bg-bg rounded-xl border border-text/5 p-4 hover:border-accent/30 hover:shadow-sm transition-all group">
                 <span className="text-accent text-lg shrink-0">&#8594;</span>
                 <span className="text-text/70 text-sm group-hover:text-accent transition-colors">{p}</span>
@@ -280,7 +280,7 @@ export default function ModelPage({ params }: Props) {
               ? `${model.name} доступна бесплатно — 15 запросов каждый день без регистрации карты.`
               : `Начните с бесплатного плана, затем подключите подписку от 390₽/мес для полного доступа.`}
           </p>
-          <a href={`/webchat?model=${model.id}`}
+          <a href={`/dashboard/chat?model=${model.id}`}
             className="inline-block bg-accent text-white px-10 py-4 rounded-xl font-bold text-lg hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25">
             Открыть {model.name}
           </a>

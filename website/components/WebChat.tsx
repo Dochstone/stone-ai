@@ -592,6 +592,11 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
   const [loaded, setLoaded] = useState(false);
   const [selectedModel, setSelectedModel] = useState(() => {
     if (initialModel && MODELS.some(m => m.id === initialModel)) return initialModel;
+    // Check URL ?model= parameter
+    try {
+      const urlModel = new URLSearchParams(window.location.search).get("model");
+      if (urlModel && MODELS.some(m => m.id === urlModel)) return urlModel;
+    } catch {}
     try { return sessionStorage.getItem("stone_chat_model") || "gpt-4o-mini"; } catch { return "gpt-4o-mini"; }
   });
   const [lockModal, setLockModal] = useState<{ model: string; tier: string; price: string } | null>(null);
