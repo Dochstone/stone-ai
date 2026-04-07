@@ -179,7 +179,14 @@ async def stream_chat_response(
     truncated = []
     char_count = 0
     for msg in reversed(messages):
-        msg_len = len(msg.get("content", "") or "")
+        content = msg.get("content", "") or ""
+        if isinstance(content, str):
+            msg_len = len(content)
+        elif isinstance(content, list):
+            # Multimodal: estimate size of each part
+            msg_len = sum(len(str(p.get("text", ""))) + len(str(p.get("image_url", {}).get("url", ""))[:100]) for p in content if isinstance(p, dict))
+        else:
+            msg_len = 100
         if char_count + msg_len > max_input_chars and len(truncated) >= 2:
             break
         truncated.append(msg)

@@ -1271,7 +1271,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
     const abort = new AbortController();
     abortRef.current = abort;
 
-    const apiMessages = history.slice(isGuest ? -6 : -20).map((m) => {
+    const apiMessages = history.slice(isGuest ? -6 : -15).map((m) => {
       if (m.file) {
         if (m.file.file_type === "image") {
           return {
@@ -1390,7 +1390,12 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
             if (data.usage) continue;
 
             if (data.error) {
-              assistantContent = data.error;
+              const errStr = typeof data.error === "string" ? data.error : JSON.stringify(data.error);
+              if (errStr.includes("context length") || errStr.includes("maximum")) {
+                assistantContent = "Слишком длинный диалог. Начните новый чат для продолжения.";
+              } else {
+                assistantContent = "Ошибка генерации. Попробуйте ещё раз.";
+              }
               setMessages([...history, { role: "assistant", content: assistantContent }]);
               continue;
             }
