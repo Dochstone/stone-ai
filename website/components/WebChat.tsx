@@ -247,7 +247,7 @@ function ScrollToBottom({ containerRef }: { containerRef: React.RefObject<HTMLDi
     <button
       onClick={() => containerRef.current?.scrollTo({ top: containerRef.current.scrollHeight, behavior: "smooth" })}
       aria-label="К последнему сообщению"
-      className={`absolute bottom-3 right-3 z-10 w-9 h-9 rounded-full bg-bg/80 backdrop-blur-sm border border-text/10 shadow-md flex items-center justify-center text-text/40 hover:text-text/70 hover:bg-bg active:scale-90 transition-all duration-200 ${
+      className={`fixed bottom-20 right-4 sm:right-8 z-30 w-9 h-9 rounded-full bg-bg/80 backdrop-blur-sm border border-text/10 shadow-md flex items-center justify-center text-text/40 hover:text-text/70 hover:bg-bg active:scale-90 transition-all duration-200 ${
         show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3 pointer-events-none"
       }`}
     >
@@ -1947,10 +1947,11 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
               <div ref={bottomRef} />
             </div>
 
-            {/* Scroll to bottom */}
-            <ScrollToBottom containerRef={messagesContainerRef} />
           </div>
         )}
+
+        {/* Scroll to bottom — fixed to viewport, above input */}
+        <ScrollToBottom containerRef={messagesContainerRef} />
 
         {/* Templates panel */}
         {showTemplates && (
