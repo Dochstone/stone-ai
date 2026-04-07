@@ -77,7 +77,8 @@ VIDEO_MODELS = {
 FREE_PLAN_MODELS = {
     "gpt-4o-mini", "claude-haiku-4.5", "gemini-2.0-flash",
     "deepseek-v3", "llama-4-maverick", "mistral-large-25",
-    "nano-banana",
+    "nano-banana",  # 2 free images
+    "veo-3",        # 1 free video
 }
 
 
