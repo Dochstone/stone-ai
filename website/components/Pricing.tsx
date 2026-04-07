@@ -636,7 +636,7 @@ export default function Pricing() {
                       {/* Other methods for topup */}
                       <button
                         onClick={() => setPayExpanded(!payExpanded)}
-                        className="w-full flex items-center justify-center gap-1.5 py-3 min-h-[44px] mt-2 text-sm text-text/40 hover:text-text/60 active:text-accent transition-colors"
+                        className="w-full flex items-center justify-center gap-2 py-3 min-h-[48px] mt-3 text-sm font-medium text-text/50 bg-text/[0.03] border border-text/[0.08] rounded-xl hover:bg-text/[0.06] hover:border-text/15 active:scale-[0.98] transition-all"
                         style={{ animation: "pricingStagger 0.4s ease both 0.45s" }}
                       >
                         Другие способы оплаты
@@ -720,7 +720,7 @@ export default function Pricing() {
                   {/* Other methods toggle */}
                   <button
                     onClick={() => setPayExpanded(!payExpanded)}
-                    className="w-full flex items-center justify-center gap-1.5 py-3 min-h-[44px] mt-2 text-sm text-text/40 hover:text-text/60 active:text-accent transition-colors"
+                    className="w-full flex items-center justify-center gap-2 py-3 min-h-[48px] mt-3 text-sm font-medium text-text/50 bg-text/[0.03] border border-text/[0.08] rounded-xl hover:bg-text/[0.06] hover:border-text/15 active:scale-[0.98] transition-all"
                     style={{ animation: "pricingStagger 0.4s ease both 0.5s" }}
                   >
                     Другие способы оплаты
