@@ -55,11 +55,8 @@ async def lifespan(app: FastAPI):
     # Set webhook for Telegram bot
     if bot:
         port = os.environ.get("PORT", "8000")
-        railway_url = os.environ.get("RAILWAY_PUBLIC_DOMAIN", "")
-        if railway_url:
-            webhook_url = f"https://{railway_url}/webhook/{settings.bot_token}"
-        else:
-            webhook_url = f"https://stone-ai-production.up.railway.app/webhook/{settings.bot_token}"
+        webhook_domain = os.environ.get("RAILWAY_PUBLIC_DOMAIN", "") or os.environ.get("WEBHOOK_DOMAIN", "stoneai.ru")
+        webhook_url = f"https://{webhook_domain}/webhook/{settings.bot_token}"
         try:
             await bot.set_webhook(
                 url=webhook_url,
