@@ -265,7 +265,8 @@ async def rate_template(
     else:
         db.add(TemplateRating(template_id=template_id, user_tg_id=tg_id, rating=body.rating, comment=body.comment))
 
-    # Calc average
+    await db.flush()
+    # Calc average (after flush so new rating is included)
     avg_result = await db.execute(
         select(func.avg(TemplateRating.rating), func.count()).select_from(TemplateRating).where(TemplateRating.template_id == template_id)
     )

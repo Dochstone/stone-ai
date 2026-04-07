@@ -425,7 +425,8 @@ async def generate_image(
                     raise HTTPException(502, f"Ошибка генерации: {error_body[:200]}")
 
                 data = resp.json()
-                message = data.get("choices", [{}])[0].get("message", {})
+                choices = data.get("choices") or [{}]
+                message = choices[0].get("message", {}) if choices else {}
                 raw_content = message.get("content")
                 content = ""
                 parts = []

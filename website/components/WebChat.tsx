@@ -771,11 +771,15 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
           if (prev.some(m => m.content?.includes("Генерация видео"))) return prev;
           return [...prev, { role: "assistant", content: `Генерация видео... (возобновлено)` }];
         });
+        let resumeAttempts = 0;
         const poll = async () => {
+          resumeAttempts++;
+          if (resumeAttempts > 100) { setVideoGenerating(false); return; }
           try {
             const r = await fetch(`${API_URL}/api/video/status/${pending.task_id}`, {
               headers: { Authorization: `Bearer ${auth!.token}` },
             });
+            if (!r.ok) { pollTimerRef.current = setTimeout(poll, 5000); return; }
             const s = await r.json();
             if (s.status === "completed" && s.video_url) {
               setMessages(prev => prev.map(m =>
