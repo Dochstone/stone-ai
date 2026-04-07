@@ -398,6 +398,39 @@ async def web_admin_update_subscription(
     }
 
 
+class UpdateBalanceRequest(BaseModel):
+    balance_usd: float  # set exact balance
+    reason: str = ""
+
+
+@router.patch("/web/users/{user_id}/balance")
+async def web_admin_update_balance(
+    user_id: int,
+    body: UpdateBalanceRequest,
+    _admin: dict = Depends(require_web_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Admin: set user balance to exact value."""
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(404, "User not found")
+
+    old_balance = float(user.balance_usd or 0)
+    user.balance_usd = round(body.balance_usd, 6)
+    await db.commit()
+
+    return {
+        "status": "ok",
+        "user_id": user_id,
+        "email": user.email,
+        "username": user.username,
+        "old_balance_usd": round(old_balance, 4),
+        "new_balance_usd": round(body.balance_usd, 4),
+        "reason": body.reason,
+    }
+
+
 @router.get("/web/transactions")
 async def web_admin_transactions(
     _admin: dict = Depends(require_web_admin),
