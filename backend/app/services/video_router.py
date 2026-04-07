@@ -162,18 +162,23 @@ async def check_video_status(model_id: str, fal_request_id: str) -> dict:
             inference_time = data.get("metrics", {}).get("inference_time", 0)
 
             if status == "COMPLETED":
-                # Fetch the actual result — try full path first, then base
-                result_resp = await client.get(
-                    f"{FAL_QUEUE_URL}/{fal_model}/requests/{fal_request_id}",
-                    headers=headers,
-                )
-                if result_resp.status_code != 200 and fal_base != fal_model:
-                    result_resp = await client.get(
-                        f"{FAL_QUEUE_URL}/{fal_base}/requests/{fal_request_id}",
-                        headers=headers,
-                    )
-                if result_resp.status_code == 200:
-                    result = result_resp.json()
+                # Fetch the actual result — try full path, then base
+                result = None
+                for path in [fal_model, fal_base] if fal_base != fal_model else [fal_model]:
+                    try:
+                        result_resp = await client.get(
+                            f"{FAL_QUEUE_URL}/{path}/requests/{fal_request_id}",
+                            headers=headers,
+                        )
+                        if result_resp.status_code == 200 and result_resp.text.strip():
+                            result = result_resp.json()
+                            logger.info(f"fal.ai result via {path}: keys={list(result.keys())}")
+                            break
+                    except Exception as e:
+                        logger.warning(f"fal.ai result fetch error ({path}): {e}")
+
+                video_url = None
+                if result:
                     # Try every known response format
                     video_url = (
                         result.get("video", {}).get("url") if isinstance(result.get("video"), dict) else None
@@ -185,18 +190,25 @@ async def check_video_status(model_id: str, fal_request_id: str) -> dict:
                         result.get("video") if isinstance(result.get("video"), str) and result.get("video", "").startswith("http") else None
                     )
                     if not video_url:
-                        # Try to find any video URL in response
                         import re
                         urls = re.findall(r'https?://[^\s"\']+\.mp4[^\s"\']*', str(result))
                         if not urls:
-                            urls = re.findall(r'https?://[^\s"\']+(?:video|\.webm|\.mov)[^\s"\']*', str(result))
+                            urls = re.findall(r'https?://[^\s"\']+(?:video|\.webm|\.mov|fal\.media)[^\s"\']*', str(result))
                         if urls:
                             video_url = urls[0]
-                        logger.warning(f"fal.ai result for {model_id}: keys={list(result.keys())}, video_url={bool(video_url)}, response={str(result)[:500]}")
-                    return {
-                        "status": "COMPLETED",
-                        "video_url": video_url,
-                    }
+                    if not video_url:
+                        logger.error(f"fal.ai COMPLETED but no video_url for {model_id}: {str(result)[:1000]}")
+                else:
+                    logger.error(f"fal.ai COMPLETED but empty result for {model_id}, request_id={fal_request_id}")
+
+                if not video_url:
+                    # Don't mark as completed without URL — keep polling
+                    return {"status": "IN_PROGRESS"}
+
+                return {
+                    "status": "COMPLETED",
+                    "video_url": video_url,
+                }
 
             return {"status": status}
 
