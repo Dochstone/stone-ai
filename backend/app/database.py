@@ -76,6 +76,9 @@ async def migrate_users_table():
         ("monthly_3d_used", "INTEGER DEFAULT 0"),
         ("monthly_audio_used", "INTEGER DEFAULT 0"),
         ("opus_requests_used", "INTEGER DEFAULT 0"),
+        # Banning
+        ("is_banned", "BOOLEAN DEFAULT false"),
+        ("ban_reason", "VARCHAR(256)"),
     ]
 
     async with engine.begin() as conn:

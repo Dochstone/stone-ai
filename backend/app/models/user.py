@@ -64,6 +64,8 @@ class User(Base):
     weekly_video_used: Mapped[int] = mapped_column(Integer, server_default=text("0"))
 
     # ─── Anti-abuse ───
+    is_banned: Mapped[bool] = mapped_column(Boolean, server_default=text("false"))
+    ban_reason: Mapped[str | None] = mapped_column(String(256), nullable=True)
     last_ip: Mapped[str | None] = mapped_column(String(45), nullable=True)
     fingerprint: Mapped[str | None] = mapped_column(String(64), nullable=True)
 

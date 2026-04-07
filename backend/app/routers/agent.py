@@ -101,9 +101,10 @@ async def run_agent_task(task_id: int, instruction: str, model_id: str, max_step
                 await db.commit()
         return
 
-    from app.services.safety import inject_safety, check_blocked
+    from app.services.safety import inject_safety, check_blocked, log_violation
     blocked = check_blocked(instruction)
     if blocked:
+        await log_violation(user_tg_id, "agent", instruction, blocked)
         async with async_session() as db:
             result = await db.execute(select(AgentTask).where(AgentTask.id == task_id))
             task = result.scalar_one_or_none()

@@ -586,3 +586,110 @@ async def send_newsletter_admin(
     threading.Thread(target=send_batch, daemon=True).start()
 
     return {"status": "ok", "queued": len(emails)}
+
+
+# ─── Violations & Banning ───
+
+@router.get("/web/violations")
+async def web_admin_violations(
+    _admin: dict = Depends(require_web_admin),
+    db: AsyncSession = Depends(get_db),
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+):
+    """List content violations for admin review."""
+    from app.models.violation import Violation
+
+    total = await db.scalar(select(func.count()).select_from(Violation)) or 0
+
+    result = await db.execute(
+        select(Violation)
+        .order_by(Violation.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+    )
+    items = result.scalars().all()
+
+    return {
+        "violations": [
+            {
+                "id": v.id,
+                "user_tg_id": v.user_tg_id,
+                "username": v.username,
+                "email": v.email,
+                "module": v.module,
+                "prompt": v.prompt[:500],
+                "blocked_reason": v.blocked_reason,
+                "created_at": v.created_at.isoformat() if v.created_at else None,
+            }
+            for v in items
+        ],
+        "total": total,
+        "offset": offset,
+        "limit": limit,
+    }
+
+
+class BanRequest(BaseModel):
+    reason: str = "Нарушение правил использования"
+
+
+@router.post("/web/users/{user_id}/ban")
+async def web_admin_ban_user(
+    user_id: int,
+    body: BanRequest,
+    _admin: dict = Depends(require_web_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Ban a user by database ID."""
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(404, "User not found")
+
+    user.is_banned = True
+    user.ban_reason = body.reason[:256]
+    await db.commit()
+
+    return {
+        "status": "banned",
+        "user_id": user_id,
+        "username": user.username,
+        "email": user.email,
+        "reason": body.reason,
+    }
+
+
+@router.post("/web/users/{user_id}/unban")
+async def web_admin_unban_user(
+    user_id: int,
+    _admin: dict = Depends(require_web_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Unban a user by database ID."""
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(404, "User not found")
+
+    user.is_banned = False
+    user.ban_reason = None
+    await db.commit()
+
+    return {
+        "status": "unbanned",
+        "user_id": user_id,
+        "username": user.username,
+        "email": user.email,
+    }
+
+
+@router.get("/web/violations/count")
+async def web_admin_violations_count(
+    _admin: dict = Depends(require_web_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Quick count of new violations (for badge in admin panel)."""
+    from app.models.violation import Violation
+    total = await db.scalar(select(func.count()).select_from(Violation)) or 0
+    return {"count": total}

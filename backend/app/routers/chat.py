@@ -200,11 +200,16 @@ async def chat(
 
     # System prompt — allowed for all users
     # Default: respond in the user's language (critical for multilingual models like Llama)
-    from app.services.safety import inject_safety, check_blocked
+    from app.services.safety import inject_safety, check_blocked, log_violation, check_banned
+    if await check_banned(tg_id):
+        raise HTTPException(403, "Ваш аккаунт заблокирован за нарушение правил.")
     last_msg = req.messages[-1].get("content", "") if req.messages else ""
     if isinstance(last_msg, str):
         blocked = check_blocked(last_msg)
         if blocked:
+            asyncio.create_task(log_violation(tg_id, "chat", last_msg, blocked,
+                                             username=db_user.username if db_user else None,
+                                             email=db_user.email if db_user else None))
             async def blocked_gen():
                 yield f'data: {{"content": "{blocked}"}}\n\n'
                 yield "data: [DONE]\n\n"
@@ -352,13 +357,14 @@ async def generate_image(
 ):
     """Generate image using OpenAI gpt-image-1 API."""
     import httpx
-    from app.services.safety import check_blocked
-
-    blocked = check_blocked(req.prompt)
-    if blocked:
-        raise HTTPException(400, blocked)
+    from app.services.safety import check_blocked, log_violation
 
     tg_id = tg_user["id"]
+    blocked = check_blocked(req.prompt)
+    if blocked:
+        asyncio.create_task(log_violation(tg_id, "image", req.prompt, blocked))
+        raise HTTPException(400, blocked)
+
     db_id = tg_user.get("db_id")
     await get_or_create_user(db, tg_user)
 

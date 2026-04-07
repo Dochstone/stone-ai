@@ -1,5 +1,9 @@
 """Safety prompts and content moderation rules for all AI modules."""
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 # ─── Shared safety rules injected into system prompts ───
 
 SAFETY_RULES = (
@@ -48,6 +52,46 @@ def check_blocked(text: str) -> str | None:
         if kw in lower:
             return f"Запрос содержит запрещённый контент и не может быть обработан."
     return None
+
+
+async def log_violation(user_tg_id: int, module: str, prompt: str, reason: str,
+                        username: str | None = None, email: str | None = None):
+    """Log a content violation to the database for admin review."""
+    try:
+        from app.database import async_session
+        from app.models.violation import Violation
+
+        async with async_session() as db:
+            v = Violation(
+                user_tg_id=user_tg_id,
+                username=username,
+                email=email,
+                module=module,
+                prompt=prompt[:2000],  # truncate long prompts
+                blocked_reason=reason,
+            )
+            db.add(v)
+            await db.commit()
+        logger.warning(f"VIOLATION: user={user_tg_id} ({username}) module={module} reason={reason}")
+    except Exception as e:
+        logger.error(f"Failed to log violation: {e}")
+
+
+async def check_banned(user_tg_id: int) -> bool:
+    """Check if a user is banned."""
+    try:
+        from app.database import async_session
+        from app.models.user import User
+        from sqlalchemy import select
+
+        async with async_session() as db:
+            result = await db.execute(
+                select(User.is_banned).where(User.telegram_id == user_tg_id)
+            )
+            val = result.scalar_one_or_none()
+            return bool(val)
+    except Exception:
+        return False
 
 
 def inject_safety(system_prompt: str, mode: str = "text") -> str:
