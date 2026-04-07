@@ -111,19 +111,31 @@ interface ChatSessionItem {
 
 // ─── Company icon for AI avatar ───
 
-const companyIcons: Record<string, string> = {
-  OpenAI: "G", Anthropic: "A", Google: "G", Meta: "M", Mistral: "M",
-  DeepSeek: "D", xAI: "X", Perplexity: "P", Alibaba: "Q", MiniMax: "M",
-  Zhipu: "Z", Cohere: "C", Microsoft: "M", NVIDIA: "N", Gryphe: "G",
-  BFL: "F", Stability: "S", Moonshot: "K",
+// Company SVG logos (inline paths for zero network requests)
+const companyLogos: Record<string, string> = {
+  OpenAI: `<path d="M22.28 9.37a5.93 5.93 0 0 0-.51-4.87 6 6 0 0 0-6.47-2.87A5.93 5.93 0 0 0 10.84.03a6 6 0 0 0-5.73 3.97A5.93 5.93 0 0 0 1.15 7.1a6 6 0 0 0 .74 7.03 5.93 5.93 0 0 0 .51 4.87 6 6 0 0 0 6.47 2.87 5.93 5.93 0 0 0 4.46 1.6 6 6 0 0 0 5.73-3.97 5.93 5.93 0 0 0 3.96-3.1 6 6 0 0 0-.74-7.03zM13.3 21.56a4.46 4.46 0 0 1-2.86-.99l.14-.08 4.75-2.74a.77.77 0 0 0 .39-.67v-6.7l2 1.17a.07.07 0 0 1 .04.05v5.54a4.49 4.49 0 0 1-4.46 4.42zM3.6 17.62a4.44 4.44 0 0 1-.53-2.99l.14.08 4.75 2.74a.78.78 0 0 0 .78 0l5.8-3.35v2.33a.07.07 0 0 1-.03.06l-4.8 2.77a4.49 4.49 0 0 1-6.11-1.64zM2.34 7.89A4.44 4.44 0 0 1 4.67 5.9v5.62a.77.77 0 0 0 .39.67l5.8 3.35-2 1.16a.07.07 0 0 1-.07 0l-4.8-2.77A4.49 4.49 0 0 1 2.34 7.9zm17.42 4.06-5.8-3.35 2-1.16a.07.07 0 0 1 .07 0l4.8 2.77a4.49 4.49 0 0 1-.7 8.1v-5.62a.77.77 0 0 0-.37-.74zM21.74 9l-.14-.08-4.75-2.74a.78.78 0 0 0-.78 0l-5.8 3.35V7.2a.07.07 0 0 1 .03-.06l4.8-2.77a4.49 4.49 0 0 1 6.64 4.62zM8.35 13.35l-2.01-1.16a.07.07 0 0 1-.04-.05V6.6a4.49 4.49 0 0 1 7.32-3.43l-.14.08-4.75 2.74a.77.77 0 0 0-.39.67l.01 6.7zM9.36 11l2.58-1.49L14.52 11v2.98l-2.58 1.49-2.58-1.49V11z"/>`,
+  Anthropic: `<path d="M13.83 3h-3.18L4.5 21h3.4l1.47-4.42h5.26L16.1 21h3.4L13.83 3zm-3.5 10.76L12 8.2l1.67 5.56h-3.34z"/>`,
+  Google: `<path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>`,
+  Meta: `<path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.369-1.341-3.369-1.341-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.607.069-.607 1.004.07 1.532 1.032 1.532 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.026A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.295 2.747-1.026 2.747-1.026.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z"/>`,
+  Mistral: `<rect x="2" y="4" width="4" height="4" fill="#F7D046"/><rect x="9" y="4" width="6" height="4" fill="#F7D046"/><rect x="18" y="4" width="4" height="4" fill="#F7D046"/><rect x="2" y="10" width="20" height="4" fill="#FF7000"/><rect x="2" y="16" width="4" height="4" fill="#F7D046"/><rect x="9" y="16" width="6" height="4" fill="#F7D046"/><rect x="18" y="16" width="4" height="4" fill="#F7D046"/>`,
+  DeepSeek: `<circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>`,
+  xAI: `<path d="M4 4l8 8m0 0l8 8M12 12L20 4M12 12L4 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`,
+  Perplexity: `<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 3v18M3 12h18M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>`,
 };
 
 const companyColors: Record<string, string> = {
   OpenAI: "#10a37f", Anthropic: "#d97706", Google: "#4285f4", Meta: "#0668E1",
-  Mistral: "#7c3aed", DeepSeek: "#06b6d4", xAI: "#64748b", Perplexity: "#6366f1",
+  Mistral: "#1a1a1a", DeepSeek: "#06b6d4", xAI: "#64748b", Perplexity: "#6366f1",
   Alibaba: "#ff6a00", MiniMax: "#ec4899", Zhipu: "#0ea5e9", Cohere: "#39d353",
   Microsoft: "#00a4ef", NVIDIA: "#76b900", Gryphe: "#8b5cf6", BFL: "#f59e0b",
   Stability: "#a855f7", Moonshot: "#06b6d4",
+};
+
+// Fallback letter for companies without SVG logo
+const companyIcons: Record<string, string> = {
+  Alibaba: "Q", MiniMax: "M", Zhipu: "Z", Cohere: "C",
+  Microsoft: "M", NVIDIA: "N", Gryphe: "G", BFL: "F",
+  Stability: "S", Moonshot: "K",
 };
 
 // ─── Prompt Templates ───
@@ -1816,16 +1828,28 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                           </span>
                         </div>
                       )
-                    ) : (
-                      <div
-                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-full ring-2 ring-text/[0.06] flex items-center justify-center bg-gradient-to-br from-white/20 to-transparent"
-                        style={{ backgroundColor: aiColor }}
-                      >
-                        <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-                        </svg>
-                      </div>
-                    )}
+                    ) : (() => {
+                      const msgModel = msg.modelId ? MODELS_MAP.get(msg.modelId) : model;
+                      const co = msgModel?.company || "";
+                      const color = companyColors[co] || "#C4623D";
+                      const logo = companyLogos[co];
+                      const letter = companyIcons[co];
+                      return (
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full ring-2 ring-text/[0.06] flex items-center justify-center" style={{ backgroundColor: logo ? "transparent" : color }}>
+                          {logo ? (
+                            <svg className="w-5 h-5 sm:w-5.5 sm:h-5.5" viewBox="0 0 24 24" fill={co === "Google" ? "none" : "currentColor"} style={{ color }}>
+                              <g dangerouslySetInnerHTML={{ __html: logo }} />
+                            </svg>
+                          ) : letter ? (
+                            <span className="text-[11px] sm:text-[12px] font-bold text-white">{letter}</span>
+                          ) : (
+                            <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                            </svg>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   {/* Message bubble */}
