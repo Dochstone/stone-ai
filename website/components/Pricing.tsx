@@ -460,7 +460,7 @@ export default function Pricing() {
               }}
             />
             {/* Inner content */}
-            <div className="bg-bg relative z-[1] sm:rounded-[22px] rounded-t-[22px] shadow-2xl overflow-hidden sm:max-h-[90vh] max-h-[95vh] overflow-y-auto">
+            <div className="bg-bg relative z-[1] sm:rounded-[22px] rounded-t-[22px] shadow-2xl overflow-hidden sm:max-h-[90vh] h-[95vh] sm:h-auto overflow-y-auto flex flex-col">
 
             {/* Drag handle (mobile) — overlays image */}
             <div className="absolute top-2 left-1/2 -translate-x-1/2 w-9 h-1 rounded-full bg-white/30 sm:hidden z-20" />
@@ -473,11 +473,11 @@ export default function Pricing() {
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
 
-            <div className="flex flex-col sm:flex-row">
+            <div className="flex flex-col sm:flex-row h-full">
 
               {/* ─── Left: Girl image ─── */}
               {modal.img && (
-                <div className="relative sm:w-[280px] h-[300px] sm:h-auto shrink-0 overflow-hidden">
+                <div className="relative sm:w-[280px] min-h-[200px] flex-1 sm:flex-none sm:h-auto shrink-0 overflow-hidden">
                   <img
                     src={modal.img}
                     alt=""
