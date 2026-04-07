@@ -44,6 +44,7 @@ const MINI_MODEL_IDS = new Set([
 ]);
 
 function getModelLockInfo(modelId: string, balance: number, plan?: string): { locked: boolean; tier: string; price: string } | null {
+  if (!plan) return null; // plan not loaded yet — don't block
   if (plan === "max-pro" || plan === "max") return null; // full access
   if (plan === "mini" && MINI_MODEL_IDS.has(modelId)) return null;
   if (FREE_MODEL_IDS.has(modelId)) return null;
