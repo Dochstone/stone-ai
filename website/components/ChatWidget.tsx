@@ -91,9 +91,9 @@ export default function ChatWidget({ modelId, placeholder }: { modelId?: string;
       }
 
       if (isGuest) {
-        const newGc = gc + 1;
-        localStorage.setItem("stone_guest_count", String(newGc));
-        setGuestCount(newGc);
+        const currentGc = parseInt(localStorage.getItem("stone_guest_count") || "0") + 1;
+        localStorage.setItem("stone_guest_count", String(currentGc));
+        setGuestCount(currentGc);
       }
     } catch (e: unknown) {
       if (e instanceof DOMException && e.name === "AbortError") return;
