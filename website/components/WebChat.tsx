@@ -1544,8 +1544,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
   // Auto-send after suggestion card click — switches model first
   const pendingSend = useRef(false);
-  const handleSuggestionClick = useCallback((text: string, modelId: string) => {
-    setSelectedModel(modelId);
+  const handleSuggestionClick = useCallback((text: string, _modelId: string) => {
     setInput(text);
     pendingSend.current = true;
   }, []);
