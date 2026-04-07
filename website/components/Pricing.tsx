@@ -545,15 +545,15 @@ export default function Pricing() {
                   </div>
                 </div>
 
-                {/* Features — compact on mobile */}
+                {/* Features */}
                 <div className="px-6 pt-2 sm:pt-1 pb-1">
-                  <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-1">
                     {modal.features.slice(0, 4).map((f: string, i: number) => (
                       <div key={i} className="flex items-center gap-1.5 py-0.5"
                         style={{ animation: `pricingStagger 0.35s ease both ${0.2 + i * 0.04}s` }}>
                         <span className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 text-[8px]"
                           style={{ background: `${modal.color}15`, color: modal.color }}>✓</span>
-                        <span className="text-[11px] text-text/60 leading-tight">{f}</span>
+                        <span className="text-[12px] text-text/60 leading-tight">{f}</span>
                       </div>
                     ))}
                   </div>
