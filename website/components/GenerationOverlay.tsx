@@ -7,10 +7,11 @@ import Leaderboard from "./games/Leaderboard";
 const SnakeGame = dynamic(() => import("./games/SnakeGame"), { ssr: false });
 const Game2048 = dynamic(() => import("./games/Game2048"), { ssr: false });
 
-export default function GenerationOverlay({ isVisible, estimatedTime, onMinimize, token, type }: {
+export default function GenerationOverlay({ isVisible, estimatedTime, onMinimize, onClose, token, type }: {
   isVisible: boolean;
   estimatedTime?: string;
   onMinimize?: () => void;
+  onClose?: () => void;
   token?: string;
   type?: string;
 }) {
@@ -22,7 +23,19 @@ export default function GenerationOverlay({ isVisible, estimatedTime, onMinimize
 
   return (
     <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-[#12121a] rounded-2xl shadow-2xl border border-white/[0.08] w-full max-w-[420px] overflow-hidden">
+      <div className="bg-[#12121a] rounded-2xl shadow-2xl border border-white/[0.08] w-full max-w-[420px] overflow-hidden relative">
+        {/* Close button */}
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/15 text-gray-400 hover:text-white transition-colors"
+            aria-label="Закрыть"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
         {view === "main" && (
           <div className="p-6 text-center">
             <img src="/mascots/stone-mascot-loading.png" alt="" width="72" height="72" className="mx-auto mb-4 animate-bounce" style={{ animationDuration: "2s" }} />

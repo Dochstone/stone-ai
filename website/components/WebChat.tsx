@@ -2354,6 +2354,12 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
           estimatedTime={videoGenerating ? "~30-120 сек" : imageGenerating ? "~10-30 сек" : "~15-60 сек"}
           type={videoGenerating ? "video" : imageGenerating ? "image" : "3d"}
           onMinimize={() => setOverlayMinimized(true)}
+          onClose={() => {
+            setVideoGenerating(false);
+            setImageGenerating(false);
+            setThreedGenerating(false);
+            setOverlayMinimized(false);
+          }}
           token={auth?.token}
         />
       )}
