@@ -794,7 +794,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         setVideoGenerating(true); setOverlayMinimized(false);
         setMessages(prev => {
           if (prev.some(m => m.content?.includes("Генерация видео"))) return prev;
-          return [...prev, { role: "assistant", content: `Генерация видео... (возобновлено)` }];
+          return [...prev, { role: "assistant", content: `⏳ Генерация видео` }];
         });
         let resumeAttempts = 0;
         const poll = async () => {
@@ -1157,7 +1157,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         return;
       }
 
-      setMessages([...history, { role: "assistant", content: `Генерация 3D модели... (~${data.estimated_seconds || 60}с)` }]);
+      setMessages([...history, { role: "assistant", content: "⏳ Генерация 3D модели" }]);
 
       // Poll
       let attempts = 0;
@@ -1243,7 +1243,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
       }
 
       // Show processing message
-      setMessages([...history, { role: "assistant", content: `Генерация видео... (~${data.estimated_seconds || 60}с)` }]);
+      setMessages([...history, { role: "assistant", content: "⏳ Генерация видео" }]);
 
       // Poll for status
       let attempts = 0;
@@ -1932,6 +1932,25 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                               <span className="shrink-0 opacity-60">{(msg.file.size / 1024).toFixed(0)}KB</span>
                             </div>
                           )}
+                        </div>
+                      )}
+
+                      {/* Generating animation */}
+                      {msg.content?.startsWith("⏳") && !msg.video && (
+                        <div className="mb-2 rounded-2xl border border-accent/15 bg-gradient-to-r from-accent/5 to-teal/5 p-4 flex items-center gap-3" style={{ maxWidth: 340 }}>
+                          <div className="relative w-10 h-10 shrink-0">
+                            <div className="absolute inset-0 rounded-full border-2 border-accent/20 border-t-accent animate-spin" />
+                            <div className="absolute inset-2 rounded-full bg-accent/10 flex items-center justify-center">
+                              <span className="text-sm">{msg.content.includes("видео") ? "🎬" : msg.content.includes("3D") ? "🧊" : "✨"}</span>
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-sm font-bold text-text/80">{msg.content.replace("⏳ ", "")}</div>
+                            <div className="text-[11px] text-text/30 mt-0.5 flex items-center gap-1.5">
+                              <span className="inline-block w-1 h-1 rounded-full bg-accent animate-pulse" />
+                              AI создаёт контент, подождите немного
+                            </div>
+                          </div>
                         </div>
                       )}
 
