@@ -714,13 +714,23 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
   const isVideoModel = VIDEO_MODEL_IDS.has(selectedModel);
   const is3DModel = THREED_MODEL_IDS.has(selectedModel);
 
-  // Load auth from localStorage
+  // Load auth from localStorage + re-check on tab focus (after TG redirect)
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("stone_auth");
-      if (saved) setAuth(JSON.parse(saved));
-    } catch {}
+    const loadAuth = () => {
+      try {
+        const saved = localStorage.getItem("stone_auth");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.token) { setAuth(parsed); setShowGuestLimit(false); }
+        }
+      } catch {}
+    };
+    loadAuth();
     setLoaded(true);
+    const onFocus = () => loadAuth();
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) loadAuth(); });
+    return () => window.removeEventListener("focus", onFocus);
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
       setSidebarOpen(false);
     }
