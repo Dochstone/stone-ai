@@ -460,7 +460,7 @@ export default function Pricing() {
               }}
             />
             {/* Inner content */}
-            <div className="bg-bg relative z-[1] sm:rounded-[22px] rounded-t-[22px] shadow-2xl overflow-hidden sm:max-h-[90vh] max-h-[70vh] overflow-y-auto">
+            <div className="bg-bg relative z-[1] sm:rounded-[22px] rounded-t-[22px] shadow-2xl overflow-hidden sm:max-h-[90vh] max-h-[95vh] overflow-y-auto">
 
             {/* Drag handle (mobile) — overlays image */}
             <div className="absolute top-2 left-1/2 -translate-x-1/2 w-9 h-1 rounded-full bg-white/30 sm:hidden z-20" />
