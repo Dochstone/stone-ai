@@ -132,16 +132,19 @@ function VideoPlayer({ url, taskId, token, thumbnailUrl }: { url: string; taskId
   );
 }
 
-function ImageWithDownload({ url, caption }: { url: string; caption?: string }) {
+function ImageWithDownload({ url, caption, genId }: { url: string; caption?: string; genId?: number }) {
   const [copied, setCopied] = useState(false);
 
   const shareText = caption
     ? `${caption.slice(0, 100)} — создано в Stone AI`
     : "Создано нейросетью в Stone AI";
-  const shareUrl = "https://stoneai.ru/webchat?utm_source=share&utm_medium=image";
+  // If genId available, link to public image; otherwise link to site
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
+  const imagePublicUrl = genId ? `${API_URL}/api/generations/share/${genId}` : null;
+  const shareUrl = imagePublicUrl || "https://stoneai.ru/dashboard/chat";
 
   const shareVK = () => {
-    window.open(`https://vk.com/share.php?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(shareText)}`, "_blank", "width=600,height=400");
+    window.open(`https://vk.com/share.php?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(shareText)}&image=${encodeURIComponent(shareUrl)}`, "_blank", "width=600,height=400");
   };
   const shareTG = () => {
     window.open(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`, "_blank", "width=600,height=400");

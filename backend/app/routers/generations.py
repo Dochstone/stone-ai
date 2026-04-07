@@ -1,7 +1,9 @@
 """Generations gallery — list, favorite, delete user-generated content."""
 
+import base64
 import logging
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import Response
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -79,3 +81,30 @@ async def delete_generation(gen_id: str, user: dict = Depends(get_current_user),
     await db.delete(gen)
     await db.commit()
     return {"ok": True}
+
+
+@router.get("/share/{gen_id}")
+async def get_shared_image(gen_id: int, db: AsyncSession = Depends(get_db)):
+    """Public endpoint — serve generated image by ID (no auth required)."""
+    result = await db.execute(select(Generation).where(Generation.id == gen_id))
+    gen = result.scalar_one_or_none()
+    if not gen:
+        raise HTTPException(404, "Not found")
+
+    # Try result_text (base64 data URL) or result_url
+    data_url = gen.result_text or gen.result_url
+    if not data_url or not data_url.startswith("data:image"):
+        raise HTTPException(404, "No image data")
+
+    # Parse data:image/png;base64,XXXX
+    try:
+        header, b64data = data_url.split(",", 1)
+        mime = header.split(":")[1].split(";")[0]  # e.g. image/png
+        image_bytes = base64.b64decode(b64data)
+    except Exception:
+        raise HTTPException(500, "Invalid image data")
+
+    return Response(content=image_bytes, media_type=mime, headers={
+        "Cache-Control": "public, max-age=86400",
+        "Content-Disposition": f"inline; filename=stoneai-{gen_id}.png",
+    })
