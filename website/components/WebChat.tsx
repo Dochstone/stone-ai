@@ -1247,7 +1247,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
       // Poll for status
       let attempts = 0;
-      const maxAttempts = 100; // 3s * 100 = 5 minutes max
+      const maxAttempts = 160; // 3s * 160 = 8 minutes max
       const poll = async () => {
         attempts++;
         try {

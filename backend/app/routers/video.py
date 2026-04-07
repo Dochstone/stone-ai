@@ -184,10 +184,10 @@ async def video_status(
             "error": task.error_message,
         }
 
-    # Server-side timeout: 5 minutes since creation
-    if task.created_at and (datetime.utcnow() - task.created_at).total_seconds() > 300:
+    # Server-side timeout: 8 minutes since creation
+    if task.created_at and (datetime.utcnow() - task.created_at).total_seconds() > 480:
         task.status = "failed"
-        task.error_message = "Таймаут генерации (5 мин). Попробуйте ещё раз."
+        task.error_message = "Таймаут генерации (8 мин). Попробуйте другую модель."
         await db.commit()
         return {
             "task_id": task.task_id,
@@ -214,50 +214,21 @@ async def video_status(
     status = fal_status.get("status", "UNKNOWN")
 
     if status == "COMPLETED":
+        fal_video_url = fal_status.get("video_url")
         task.status = "completed"
-        task.video_url = fal_status.get("video_url")
+        task.video_url = fal_video_url
         task.completed_at = datetime.utcnow()
         await db.commit()
 
-        # Download video to local disk (permanent storage)
-        local_video_url = task.video_url
-        if task.video_url:
-            try:
-                import os
-                media_dir = "/var/www/stone-ai/media/videos"
-                os.makedirs(media_dir, exist_ok=True)
-                local_path = f"{media_dir}/{task.task_id}.mp4"
-                async with httpx.AsyncClient(timeout=120.0) as dl:
-                    resp = await dl.get(task.video_url)
-                    if resp.status_code == 200 and len(resp.content) > 1000:
-                        with open(local_path, "wb") as f:
-                            f.write(resp.content)
-                        local_video_url = f"https://stoneai.ru/media/videos/{task.task_id}.mp4"
-                        task.video_url = local_video_url
-                        await db.commit()
-                        logger.info(f"Video saved to disk: {local_path} ({len(resp.content)} bytes)")
-            except Exception as e:
-                logger.warning(f"Failed to save video to disk: {e}")
-
-        # Save to gallery
-        try:
-            from app.models.generation import Generation
-            from app.database import async_session
-            async with async_session() as gen_db:
-                gen = Generation(user_tg_id=tg_id, type="video", model=task.model_id, prompt=task.prompt or "", result_url=local_video_url, cost=float(task.cost_usd or 0))
-                gen_db.add(gen)
-                await gen_db.commit()
-        except Exception as e:
-            logger.warning(f"Failed to save video generation: {e}")
-
-        # Achievement: videos generated
+        # Download to disk + save to gallery in background (don't block response)
+        asyncio.create_task(_save_video_to_disk(task.task_id, fal_video_url, tg_id, task.model_id, task.prompt, task.cost_usd))
         asyncio.create_task(check_and_update(tg_id, "videos", 1))
 
         return {
             "task_id": task.task_id,
             "status": "completed",
-            "video_url": local_video_url,
-            "direct_url": local_video_url,
+            "video_url": fal_video_url or "",
+            "direct_url": fal_video_url or "",
         }
 
     if status == "FAILED":
@@ -462,3 +433,44 @@ async def video_thumbnail(
         logger.warning(f"Thumbnail generation failed: {e}")
 
     raise HTTPException(404, "Could not generate thumbnail")
+
+
+async def _save_video_to_disk(task_id: str, video_url: str | None, tg_id: int, model_id: str, prompt: str | None, cost_usd: float | None):
+    """Background: download video from fal.ai → save to /media/videos/ → update DB."""
+    if not video_url:
+        return
+    try:
+        import os
+        media_dir = "/var/www/stone-ai/media/videos"
+        os.makedirs(media_dir, exist_ok=True)
+        local_path = f"{media_dir}/{task_id}.mp4"
+
+        async with httpx.AsyncClient(timeout=120.0) as dl:
+            resp = await dl.get(video_url)
+            if resp.status_code == 200 and len(resp.content) > 1000:
+                with open(local_path, "wb") as f:
+                    f.write(resp.content)
+                local_url = f"https://stoneai.ru/media/videos/{task_id}.mp4"
+
+                # Update task URL in DB
+                from app.database import async_session
+                async with async_session() as db:
+                    from sqlalchemy import select as sel
+                    r = await db.execute(sel(VideoTask).where(VideoTask.task_id == task_id))
+                    task = r.scalar_one_or_none()
+                    if task:
+                        task.video_url = local_url
+                        await db.commit()
+
+                # Save to gallery
+                from app.models.generation import Generation
+                async with async_session() as db:
+                    gen = Generation(user_tg_id=tg_id, type="video", model=model_id, prompt=prompt or "", result_url=local_url, cost=float(cost_usd or 0))
+                    db.add(gen)
+                    await db.commit()
+
+                logger.info(f"Video saved: {local_path} ({len(resp.content)} bytes)")
+            else:
+                logger.warning(f"Video download failed: status={resp.status_code} size={len(resp.content)}")
+    except Exception as e:
+        logger.warning(f"_save_video_to_disk error: {e}")
