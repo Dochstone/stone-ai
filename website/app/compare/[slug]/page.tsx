@@ -23,26 +23,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-const companyGradient: Record<string, string> = {
-  OpenAI: "from-green-500/10 to-emerald-500/5",
-  Anthropic: "from-orange-500/10 to-amber-500/5",
-  Google: "from-blue-500/10 to-sky-500/5",
-  Meta: "from-sky-500/10 to-blue-500/5",
-  Mistral: "from-purple-500/10 to-violet-500/5",
-  DeepSeek: "from-cyan-500/10 to-teal-500/5",
-  xAI: "from-slate-500/10 to-gray-500/5",
-  Perplexity: "from-indigo-500/10 to-violet-500/5",
-};
-
-const companyBadge: Record<string, string> = {
-  OpenAI: "bg-green-100 text-green-700",
-  Anthropic: "bg-orange-100 text-orange-700",
-  Google: "bg-blue-100 text-blue-700",
-  Meta: "bg-sky-100 text-sky-700",
-  Mistral: "bg-purple-100 text-purple-700",
-  DeepSeek: "bg-cyan-100 text-cyan-700",
-  xAI: "bg-slate-100 text-slate-700",
-  Perplexity: "bg-indigo-100 text-indigo-700",
+const companyColor: Record<string, string> = {
+  OpenAI: "#22c55e",
+  Anthropic: "#f97316",
+  Google: "#3b82f6",
+  Meta: "#0ea5e9",
+  Mistral: "#a855f7",
+  DeepSeek: "#06b6d4",
+  xAI: "#64748b",
+  Perplexity: "#6366f1",
 };
 
 const companyLogo: Record<string, string> = {
@@ -62,19 +51,18 @@ const catLabel: Record<string, string> = { chat: "Чат", image: "Картин�
 function ModelCard({ id, side }: { id: string; side: "left" | "right" }) {
   const m = MODELS.find((x) => x.id === id);
   if (!m) return null;
-  const grad = companyGradient[m.company] || "from-accent/10 to-teal/5";
-  const badge = companyBadge[m.company] || "bg-text/[0.06] text-text/50";
+  const color = companyColor[m.company] || "#C4623D";
   const logo = companyLogo[m.company];
   return (
-    <div className={`relative rounded-2xl border border-text/5 overflow-hidden transition-all hover:border-text/10 hover:shadow-lg`}>
+    <div className="relative rounded-2xl border border-text/5 overflow-hidden transition-all hover:border-text/10 hover:shadow-lg">
       {/* Gradient header */}
-      <div className={`bg-gradient-to-br ${grad} px-6 pt-5 pb-4`}>
+      <div className="px-6 pt-5 pb-4" style={{ background: `linear-gradient(135deg, ${color}15, ${color}05)` }}>
         <div className="flex items-center justify-between mb-3">
-          <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${badge}`}>{m.company}</span>
+          <span className="text-[10px] font-bold px-2.5 py-1 rounded-full" style={{ background: `${color}18`, color }}>{m.company}</span>
           {m.tier === "free" && <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-teal/15 text-teal">Бесплатно</span>}
         </div>
         <div className="flex items-center gap-3">
-          {logo && <img src={logo} alt="" className="w-8 h-8 rounded-lg opacity-80" />}
+          {logo && <img src={logo} alt="" className="w-8 h-8 rounded-lg opacity-70 dark:invert" />}
           <h3 className="text-xl font-extrabold text-text">{m.name}</h3>
         </div>
       </div>
@@ -188,7 +176,7 @@ export default function ComparePage({ params }: Props) {
             <div className="bg-bg rounded-2xl border-2 border-accent/15 p-6 relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent to-accent/30" />
               <h3 className="font-extrabold text-text mb-4 flex items-center gap-2">
-                {companyLogo[m1?.company || ""] && <img src={companyLogo[m1?.company || ""]} alt="" className="w-5 h-5 rounded opacity-70" />}
+                {companyLogo[m1?.company || ""] && <img src={companyLogo[m1?.company || ""]} alt="" className="w-5 h-5 rounded opacity-70 dark:invert" />}
                 {m1?.name}
               </h3>
               <ul className="space-y-3">
@@ -205,7 +193,7 @@ export default function ComparePage({ params }: Props) {
             <div className="bg-bg rounded-2xl border-2 border-teal/15 p-6 relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal to-teal/30" />
               <h3 className="font-extrabold text-text mb-4 flex items-center gap-2">
-                {companyLogo[m2?.company || ""] && <img src={companyLogo[m2?.company || ""]} alt="" className="w-5 h-5 rounded opacity-70" />}
+                {companyLogo[m2?.company || ""] && <img src={companyLogo[m2?.company || ""]} alt="" className="w-5 h-5 rounded opacity-70 dark:invert" />}
                 {m2?.name}
               </h3>
               <ul className="space-y-3">
