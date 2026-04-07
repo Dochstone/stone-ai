@@ -22,11 +22,17 @@ export default function ChatWidget({ modelId, placeholder }: { modelId?: string;
     const prompt = text || input.trim();
     if (!prompt || streaming) return;
 
-    const gc = parseInt(localStorage.getItem("stone_guest_count") || "0");
-    if (gc >= 2) {
-      setMessages((prev) => [...prev, { role: "user", content: prompt }, { role: "assistant", content: "Бесплатные запросы закончились. [Зарегистрируйтесь](/profile) чтобы получить 15 запросов/день бесплатно." }]);
-      setInput("");
-      return;
+    const auth = JSON.parse(localStorage.getItem("stone_auth") || "{}");
+    const isGuest = !auth?.token;
+
+    // Guest limit — only for non-authenticated users
+    if (isGuest) {
+      const gc = parseInt(localStorage.getItem("stone_guest_count") || "0");
+      if (gc >= 2) {
+        setMessages((prev) => [...prev, { role: "user", content: prompt }, { role: "assistant", content: "REGISTER_CTA" }]);
+        setInput("");
+        return;
+      }
     }
 
     const userMsg = { role: "user", content: prompt };
@@ -39,8 +45,6 @@ export default function ChatWidget({ modelId, placeholder }: { modelId?: string;
     abortRef.current = ctrl;
 
     try {
-      const auth = JSON.parse(localStorage.getItem("stone_auth") || "{}");
-      const isGuest = !auth?.token;
       const url = isGuest ? `${API_URL}/api/chat/guest` : `${API_URL}/api/chat`;
       const headers: Record<string, string> = { "Content-Type": "application/json" };
       if (auth?.token) headers.Authorization = `Bearer ${auth.token}`;
