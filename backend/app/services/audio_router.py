@@ -111,7 +111,7 @@ async def speech_to_text(audio_bytes: bytes, filename: str = "audio.webm") -> di
     try:
         async with httpx.AsyncClient(timeout=60.0) as client:
             files = {"file": (filename, audio_bytes, "audio/webm")}
-            data = {"model": "whisper-1", "language": "ru"}
+            data = {"model": "whisper-1"}  # auto-detect language
 
             resp = await client.post(
                 OPENAI_STT_URL,

@@ -19,7 +19,6 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.
 
 const IMAGE_MODEL_IDS = new Set([
   "nano-banana-pro", "nano-banana", "gpt-5-image", "gpt-5-image-mini",
-  "flux-schnell", "stable-diffusion-xl",
 ]);
 
 const VIDEO_MODEL_IDS = new Set([
