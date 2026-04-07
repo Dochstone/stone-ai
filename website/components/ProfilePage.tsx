@@ -1031,7 +1031,7 @@ export default function ProfilePage() {
           email: u.email || auth.email,
           username: u.username || null,
           first_name: u.first_name || null,
-          telegram_id: u.telegram_id || null,
+          telegram_id: u.telegram_id || u.tg_id || null,
           balance_usd: u.balance_usd || 0,
           plan: u.plan || "free",
           auth_provider: u.auth_provider || "email",
@@ -1067,6 +1067,13 @@ export default function ProfilePage() {
   }, [auth]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Refresh when user returns from Telegram linking (tab focus)
+  useEffect(() => {
+    const onFocus = () => fetchData();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [fetchData]);
 
   const refreshByok = useCallback(async () => {
     if (!auth) return;
