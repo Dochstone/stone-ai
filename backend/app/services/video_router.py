@@ -38,7 +38,10 @@ VIDEO_MODEL_MAP = {m["id"]: m for m in VIDEO_MODELS_REGISTRY}
 
 
 def get_video_model(model_id: str) -> dict | None:
-    return VIDEO_MODEL_MAP.get(model_id)
+    m = VIDEO_MODEL_MAP.get(model_id)
+    if m and not m.get("active", True):
+        return None
+    return m
 
 
 def get_video_price(model_id: str) -> float:
