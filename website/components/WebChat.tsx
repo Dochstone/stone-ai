@@ -1036,7 +1036,11 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
   }, [auth, activeSessionId, selectedModel, fetchSessions]);
 
   const handleFileSelect = useCallback(async (file: File) => {
-    if (!auth) return;
+    if (!auth) { setShowGuestLimit(true); return; }
+    if (file.size > 10 * 1024 * 1024) {
+      setMessages(prev => [...prev, { role: "assistant", content: "Файл слишком большой (макс. 10 МБ). Попробуйте сжать изображение." }]);
+      return;
+    }
     setUploading(true);
     try {
       const form = new FormData();
