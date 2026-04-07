@@ -1937,20 +1937,39 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
                       {/* Generating animation */}
                       {msg.content?.startsWith("⏳") && !msg.video && (
-                        <div className="mb-2 rounded-2xl border border-accent/15 bg-gradient-to-r from-accent/5 to-teal/5 p-4 flex items-center gap-3" style={{ maxWidth: 340 }}>
-                          <div className="relative w-10 h-10 shrink-0">
-                            <div className="absolute inset-0 rounded-full border-2 border-accent/20 border-t-accent animate-spin" />
-                            <div className="absolute inset-2 rounded-full bg-accent/10 flex items-center justify-center">
-                              <span className="text-sm">{msg.content.includes("видео") ? "🎬" : msg.content.includes("3D") ? "🧊" : "✨"}</span>
+                        <div className="mb-2 rounded-2xl overflow-hidden relative" style={{ maxWidth: 360 }}>
+                          {/* Shimmer overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-accent/10 to-transparent" style={{ animation: "shimmer 2s ease-in-out infinite", backgroundSize: "200% 100%" }} />
+                          <div className="relative bg-gradient-to-br from-accent/8 via-text/[0.03] to-teal/8 border border-accent/10 rounded-2xl p-5">
+                            <div className="flex items-center gap-4">
+                              {/* Animated icon */}
+                              <div className="relative w-12 h-12 shrink-0">
+                                <div className="absolute inset-0 rounded-xl border-2 border-accent/20 border-t-accent animate-spin" style={{ animationDuration: "1.5s" }} />
+                                <div className="absolute inset-1.5 rounded-lg bg-accent/10 flex items-center justify-center">
+                                  <span className="text-xl">{msg.content.includes("видео") ? "🎬" : msg.content.includes("3D") ? "🧊" : "✨"}</span>
+                                </div>
+                              </div>
+                              <div className="flex-1">
+                                <div className="text-sm font-extrabold text-text/80">{msg.content.replace("⏳ ", "")}</div>
+                                <div className="flex items-center gap-1 mt-1.5">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-accent" style={{ animation: "bounce 1.4s infinite", animationDelay: "0s" }} />
+                                  <span className="w-1.5 h-1.5 rounded-full bg-accent" style={{ animation: "bounce 1.4s infinite", animationDelay: "0.2s" }} />
+                                  <span className="w-1.5 h-1.5 rounded-full bg-accent" style={{ animation: "bounce 1.4s infinite", animationDelay: "0.4s" }} />
+                                  <span className="text-[11px] text-text/30 ml-1.5">AI создаёт контент</span>
+                                </div>
+                              </div>
                             </div>
                           </div>
-                          <div>
-                            <div className="text-sm font-bold text-text/80">{msg.content.replace("⏳ ", "")}</div>
-                            <div className="text-[11px] text-text/30 mt-0.5 flex items-center gap-1.5">
-                              <span className="inline-block w-1 h-1 rounded-full bg-accent animate-pulse" />
-                              AI создаёт контент, подождите немного
-                            </div>
-                          </div>
+                          <style>{`
+                            @keyframes shimmer {
+                              0% { background-position: -200% center; }
+                              100% { background-position: 200% center; }
+                            }
+                            @keyframes bounce {
+                              0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+                              40% { transform: scale(1); opacity: 1; }
+                            }
+                          `}</style>
                         </div>
                       )}
 
