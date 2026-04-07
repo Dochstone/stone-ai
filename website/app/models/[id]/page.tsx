@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { MODELS } from "@/lib/models";
+import { COMPARISONS } from "@/lib/seo-data";
 import { SITE_URL } from "@/lib/constants";
 import { breadcrumbJsonLd } from "@/components/Breadcrumbs";
 
@@ -283,6 +285,25 @@ export default function ModelPage({ params }: Props) {
             Открыть {model.name}
           </a>
         </div>
+
+        {/* Comparisons */}
+        {(() => {
+          const comps = COMPARISONS.filter((c) => c.model1 === model.id || c.model2 === model.id);
+          if (!comps.length) return null;
+          return (
+            <div className="mt-14 mb-10">
+              <h2 className="font-bold text-xl mb-4">Сравнения с {model.name}</h2>
+              <div className="space-y-2">
+                {comps.map((c) => (
+                  <Link key={c.slug} href={`/compare/${c.slug}`} className="flex items-center gap-3 bg-bg rounded-xl border border-text/5 p-4 hover:border-accent/30 transition-all">
+                    <span className="text-accent">&#x2194;</span>
+                    <span className="text-sm font-medium text-text/70">{c.h1.replace(/ — .*/, "")}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Related models */}
         <div className="mt-14">
