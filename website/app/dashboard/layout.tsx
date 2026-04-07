@@ -98,8 +98,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       const saved = localStorage.getItem("stone_auth");
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed.email) {
-          setAuthEmail(parsed.email);
+        if (parsed.token) {
+          setAuthEmail(parsed.email || "Telegram");
           if (!localStorage.getItem("stone_onboarded_dashboard")) {
             setShowTour(true);
           }

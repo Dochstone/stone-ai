@@ -15,7 +15,7 @@ export interface AuthState {
 function handleAuthResponse(data: any, onAuth: (a: AuthState) => void) {
   const auth: AuthState = {
     token: data.token,
-    email: data.user.email,
+    email: data.user.email || data.user.first_name || data.user.username || "",
     balanceUsd: data.user.balance_usd || 0,
   };
   localStorage.setItem("stone_auth", JSON.stringify(auth));
