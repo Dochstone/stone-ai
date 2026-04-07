@@ -718,6 +718,32 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
   const isVideoModel = VIDEO_MODEL_IDS.has(selectedModel);
   const is3DModel = THREED_MODEL_IDS.has(selectedModel);
 
+  // Pick model from URL ?model= param (works on navigation, not just initial load)
+  useEffect(() => {
+    const checkUrlModel = () => {
+      try {
+        const urlModel = new URLSearchParams(window.location.search).get("model");
+        if (urlModel && MODELS_MAP.has(urlModel)) {
+          setSelectedModel(urlModel);
+          // Clean URL without reload
+          window.history.replaceState({}, "", window.location.pathname);
+        }
+      } catch {}
+    };
+    checkUrlModel();
+    // Also listen for popstate (back/forward navigation)
+    window.addEventListener("popstate", checkUrlModel);
+    // Next.js client navigation: watch for URL changes via interval (lightweight)
+    const iv = setInterval(() => {
+      const urlModel = new URLSearchParams(window.location.search).get("model");
+      if (urlModel && MODELS_MAP.has(urlModel)) {
+        setSelectedModel(urlModel);
+        window.history.replaceState({}, "", window.location.pathname);
+      }
+    }, 500);
+    return () => { window.removeEventListener("popstate", checkUrlModel); clearInterval(iv); };
+  }, []);
+
   // Load auth from localStorage + re-check on tab focus (after TG redirect)
   useEffect(() => {
     const loadAuth = () => {
