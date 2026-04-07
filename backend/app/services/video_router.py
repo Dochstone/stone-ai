@@ -174,14 +174,25 @@ async def check_video_status(model_id: str, fal_request_id: str) -> dict:
                     )
                 if result_resp.status_code == 200:
                     result = result_resp.json()
-                    video_url = result.get("video", {}).get("url") or result.get("output", {}).get("video", {}).get("url") or result.get("video_url") or result.get("data", {}).get("video", {}).get("url")
+                    # Try every known response format
+                    video_url = (
+                        result.get("video", {}).get("url") if isinstance(result.get("video"), dict) else None
+                    ) or (
+                        result.get("output", {}).get("video", {}).get("url") if isinstance(result.get("output"), dict) else None
+                    ) or result.get("video_url") or (
+                        result.get("data", {}).get("video", {}).get("url") if isinstance(result.get("data"), dict) else None
+                    ) or (
+                        result.get("video") if isinstance(result.get("video"), str) and result.get("video", "").startswith("http") else None
+                    )
                     if not video_url:
-                        # Try to find URL anywhere in response
+                        # Try to find any video URL in response
                         import re
-                        urls = re.findall(r'https?://[^\s"]+\.mp4[^\s"]*', str(result))
+                        urls = re.findall(r'https?://[^\s"\']+\.mp4[^\s"\']*', str(result))
+                        if not urls:
+                            urls = re.findall(r'https?://[^\s"\']+(?:video|\.webm|\.mov)[^\s"\']*', str(result))
                         if urls:
                             video_url = urls[0]
-                        logger.warning(f"fal.ai result keys: {list(result.keys())}, video_url found: {bool(video_url)}")
+                        logger.warning(f"fal.ai result for {model_id}: keys={list(result.keys())}, video_url={bool(video_url)}, response={str(result)[:500]}")
                     return {
                         "status": "COMPLETED",
                         "video_url": video_url,

@@ -221,29 +221,30 @@ async def video_status(
 
         # Download video to local disk (permanent storage)
         local_video_url = task.video_url
-        try:
-            import os
-            media_dir = "/var/www/stone-ai/media/videos"
-            os.makedirs(media_dir, exist_ok=True)
-            local_path = f"{media_dir}/{task.task_id}.mp4"
-            async with httpx.AsyncClient(timeout=120.0) as dl:
-                resp = await dl.get(task.video_url)
-                if resp.status_code == 200:
-                    with open(local_path, "wb") as f:
-                        f.write(resp.content)
-                    local_video_url = f"https://stoneai.ru/media/videos/{task.task_id}.mp4"
-                    task.video_url = local_video_url
-                    await db.commit()
-                    logger.info(f"Video saved to disk: {local_path} ({len(resp.content)} bytes)")
-        except Exception as e:
-            logger.warning(f"Failed to save video to disk: {e}")
+        if task.video_url:
+            try:
+                import os
+                media_dir = "/var/www/stone-ai/media/videos"
+                os.makedirs(media_dir, exist_ok=True)
+                local_path = f"{media_dir}/{task.task_id}.mp4"
+                async with httpx.AsyncClient(timeout=120.0) as dl:
+                    resp = await dl.get(task.video_url)
+                    if resp.status_code == 200 and len(resp.content) > 1000:
+                        with open(local_path, "wb") as f:
+                            f.write(resp.content)
+                        local_video_url = f"https://stoneai.ru/media/videos/{task.task_id}.mp4"
+                        task.video_url = local_video_url
+                        await db.commit()
+                        logger.info(f"Video saved to disk: {local_path} ({len(resp.content)} bytes)")
+            except Exception as e:
+                logger.warning(f"Failed to save video to disk: {e}")
 
         # Save to gallery
         try:
             from app.models.generation import Generation
             from app.database import async_session
             async with async_session() as gen_db:
-                gen = Generation(user_tg_id=tg_id, type="video", model=task.model_id, prompt=task.prompt or "", result_url=local_video_url, cost=float(task.cost or 0))
+                gen = Generation(user_tg_id=tg_id, type="video", model=task.model_id, prompt=task.prompt or "", result_url=local_video_url, cost=float(task.cost_usd or 0))
                 gen_db.add(gen)
                 await gen_db.commit()
         except Exception as e:
