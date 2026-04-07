@@ -336,7 +336,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   {group.items.filter(item => !(isChat && item.href === "/dashboard/chat")).map((item) => {
                     const active = isActive(item.href);
                     return isChat ? (
-                      (sidebarHover || sidebarPinned) ? (
+                      (sidebarHover || sidebarPinned || sidebarOpen) ? (
                         <Link
                           key={item.href}
                           href={item.href}
