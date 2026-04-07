@@ -41,8 +41,10 @@ const plans = [
 /* ═══ Keyframes ═══ */
 const KEYFRAMES = `
 @keyframes pricingModalIn {
-  0% { transform: translateY(40px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
+  0% { transform: translateY(100%) scale(0.95); opacity: 0; }
+  50% { transform: translateY(-2%) scale(1.01); opacity: 1; }
+  70% { transform: translateY(0.5%); }
+  100% { transform: translateY(0) scale(1); }
 }
 @keyframes pricingModalOut {
   0% { transform: translateY(0) scale(1); opacity: 1; }
@@ -418,17 +420,46 @@ export default function Pricing() {
             animation: closing ? "pricingBackdropOut 0.3s ease forwards" : "pricingBackdropIn 0.25s ease",
           }}
         >
-          {/* Modal card */}
+          {/* Outer wrapper for animated border */}
           <div
-            className="w-full sm:max-w-[750px] rounded-t-[22px] sm:rounded-[22px] bg-bg shadow-2xl overflow-hidden overflow-y-auto"
+            className="w-full sm:max-w-[750px] sm:rounded-3xl rounded-t-3xl relative overflow-hidden p-[2px]"
             onClick={(e) => e.stopPropagation()}
+            onTouchStart={(e) => {
+              const tag = (e.target as HTMLElement).closest("button, a, input, select");
+              if (tag) return;
+              swipeStartRef.current = e.touches[0].clientY;
+              setSwiping(true);
+            }}
+            onTouchMove={(e) => {
+              if (swipeStartRef.current === null) return;
+              const dy = e.touches[0].clientY - swipeStartRef.current;
+              if (dy > 0) setSwipeY(dy);
+            }}
+            onTouchEnd={() => {
+              if (swipeY > 120) closeModal();
+              setSwipeY(0);
+              setSwiping(false);
+              swipeStartRef.current = null;
+            }}
             style={{
-              maxHeight: "calc(100vh - 40px)",
-              animation: closing
+              animation: !swiping ? (closing
                 ? "pricingModalOut 0.3s ease forwards"
-                : "pricingModalIn 0.4s ease-out",
+                : "pricingModalIn 0.5s cubic-bezier(0.16, 1, 0.3, 1)") : "none",
+              transform: swipeY > 0 ? `translateY(${swipeY}px)` : undefined,
+              transition: swiping ? "none" : "transform 0.3s ease",
+              opacity: swipeY > 0 ? Math.max(0.3, 1 - swipeY / 400) : undefined,
             }}
           >
+            {/* Spinning gradient border */}
+            <div
+              className="absolute inset-[-50%] z-0"
+              style={{
+                background: `conic-gradient(from 0deg, ${modal.color}, ${modal.color}33, transparent, transparent, transparent, ${modal.color}33, ${modal.color})`,
+                animation: "pricingBorderSpin 4s linear infinite",
+              }}
+            />
+            {/* Inner content */}
+            <div className="bg-bg relative z-[1] sm:rounded-[22px] rounded-t-[22px] shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
 
             {/* Drag handle (mobile) — overlays image */}
             <div className="absolute top-2 left-1/2 -translate-x-1/2 w-9 h-1 rounded-full bg-white/30 sm:hidden z-20" />
@@ -445,7 +476,7 @@ export default function Pricing() {
 
               {/* ─── Left: Girl image ─── */}
               {modal.img && (
-                <div className="relative sm:w-[280px] h-[220px] sm:h-auto shrink-0 overflow-hidden">
+                <div className="relative sm:w-[280px] h-[300px] sm:h-auto shrink-0 overflow-hidden">
                   <img
                     src={modal.img}
                     alt=""
@@ -514,14 +545,19 @@ export default function Pricing() {
                 </div>
 
                 {/* Features */}
-                <div className="px-6 pt-2 sm:pt-1 pb-1">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-1">
-                    {modal.features.slice(0, 4).map((f: string, i: number) => (
-                      <div key={i} className="flex items-center gap-1.5 py-0.5"
-                        style={{ animation: `pricingStagger 0.35s ease both ${0.2 + i * 0.04}s` }}>
-                        <span className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 text-[8px]"
-                          style={{ background: `${modal.color}15`, color: modal.color }}>✓</span>
-                        <span className="text-[12px] text-text/60 leading-tight">{f}</span>
+                <div className="px-6 pt-3 sm:pt-1 pb-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
+                    {modal.features.slice(0, 6).map((f: string, i: number) => (
+                      <div
+                        key={i}
+                        className="flex items-center gap-2 py-1"
+                        style={{ animation: `pricingStagger 0.35s ease both ${0.2 + i * 0.04}s` }}
+                      >
+                        <span className="w-[18px] h-[18px] rounded-full flex items-center justify-center shrink-0 text-[9px]"
+                          style={{ background: `${modal.color}15`, color: modal.color }}>
+                          ✓
+                        </span>
+                        <span className="text-[12px] text-text/60">{f}</span>
                       </div>
                     ))}
                   </div>
@@ -533,7 +569,7 @@ export default function Pricing() {
                   {modal.id === "free" ? (
                     /* ═══ Pay-per-Use: top-up with promo + payment methods ═══ */
                     <div>
-                      <p className="text-[11px] text-text/40 mb-3 hidden sm:block" style={{ animation: "pricingStagger 0.4s ease both 0.3s" }}>Платите только за инструменты. Без подписки.</p>
+                      <p className="text-xs text-text/40 mb-4" style={{ animation: "pricingStagger 0.4s ease both 0.3s" }}>Платите только за инструменты: шаблоны, презентации, фотосессия, SEO. Без ежемесячной подписки.</p>
                       <div className="flex gap-2 mb-3" style={{ animation: "pricingStagger 0.4s ease both 0.33s" }}>
                         {[100, 300, 500, 1000].map((amt) => (
                           <button
@@ -736,7 +772,8 @@ export default function Pricing() {
                 </div>
               </div>
             </div>
-          </div>{/* /modal card */}
+          </div>{/* /inner content */}
+          </div>{/* /outer border wrapper */}
         </div>
       )}
 
