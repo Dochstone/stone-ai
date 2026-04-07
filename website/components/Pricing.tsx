@@ -41,10 +41,8 @@ const plans = [
 /* ═══ Keyframes ═══ */
 const KEYFRAMES = `
 @keyframes pricingModalIn {
-  0% { transform: translateY(100%) scale(0.95); opacity: 0; }
-  50% { transform: translateY(-2%) scale(1.01); opacity: 1; }
-  70% { transform: translateY(0.5%); }
-  100% { transform: translateY(0) scale(1); }
+  0% { transform: translateY(40px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
 }
 @keyframes pricingModalOut {
   0% { transform: translateY(0) scale(1); opacity: 1; }
@@ -420,26 +418,17 @@ export default function Pricing() {
             animation: closing ? "pricingBackdropOut 0.3s ease forwards" : "pricingBackdropIn 0.25s ease",
           }}
         >
-          {/* Outer wrapper for animated border */}
+          {/* Modal card */}
           <div
-            className="w-full sm:max-w-[750px] sm:rounded-3xl rounded-t-3xl relative p-[2px]"
+            className="w-full sm:max-w-[750px] rounded-t-[22px] sm:rounded-[22px] bg-bg shadow-2xl overflow-hidden overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
             style={{
+              maxHeight: "calc(100vh - 40px)",
               animation: closing
                 ? "pricingModalOut 0.3s ease forwards"
-                : "pricingModalIn 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
+                : "pricingModalIn 0.4s ease-out",
             }}
           >
-            {/* Spinning gradient border */}
-            <div
-              className="absolute inset-[-50%] z-0"
-              style={{
-                background: `conic-gradient(from 0deg, ${modal.color}, ${modal.color}33, transparent, transparent, transparent, ${modal.color}33, ${modal.color})`,
-                animation: "pricingBorderSpin 4s linear infinite",
-              }}
-            />
-            {/* Inner content */}
-            <div className="bg-bg relative z-[1] sm:rounded-[22px] rounded-t-[22px] shadow-2xl overflow-hidden max-h-[92vh] sm:max-h-[90vh] overflow-y-auto">
 
             {/* Drag handle (mobile) — overlays image */}
             <div className="absolute top-2 left-1/2 -translate-x-1/2 w-9 h-1 rounded-full bg-white/30 sm:hidden z-20" />
@@ -747,8 +736,7 @@ export default function Pricing() {
                 </div>
               </div>
             </div>
-          </div>{/* /inner content */}
-          </div>{/* /outer border wrapper */}
+          </div>{/* /modal card */}
         </div>
       )}
 
