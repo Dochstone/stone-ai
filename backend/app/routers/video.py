@@ -203,6 +203,24 @@ async def video_status(
             "error": task.error_message,
         }
 
+    # Server-side timeout: 5 minutes since creation
+    if task.created_at and (datetime.utcnow() - task.created_at).total_seconds() > 300:
+        # Refund
+        user_result = await db.execute(
+            select(User).where(User.telegram_id == tg_id).with_for_update()
+        )
+        user = user_result.scalar_one_or_none()
+        if user and task.cost_usd:
+            user.balance_usd = round(float(user.balance_usd or 0) + task.cost_usd, 6)
+        task.status = "failed"
+        task.error_message = "Таймаут генерации (5 мин). Средства возвращены."
+        await db.commit()
+        return {
+            "task_id": task.task_id,
+            "status": "failed",
+            "error": task.error_message,
+        }
+
     if not task.fal_request_id:
         return {"task_id": task.task_id, "status": task.status}
 
