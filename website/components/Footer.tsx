@@ -29,9 +29,9 @@ export default function Footer() {
         </div>
       )}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-6 sm:gap-8">
           {/* Brand */}
-          <div className="col-span-2 md:col-span-1">
+          <div className="col-span-2 sm:col-span-3 md:col-span-2">
             <div className="flex items-center gap-2 mb-1">
               <img src="/mascots/stone-mascot-idle.png" alt="" width="28" height="28" />
               <h3 className="text-lg font-extrabold">Stone AI</h3>
@@ -88,6 +88,33 @@ export default function Footer() {
                   Поддержка
                 </a>
               </li>
+            </ul>
+          </div>
+
+          {/* Comparisons & Alternatives */}
+          <div>
+            <h4 className="font-semibold mb-3 text-sm">Сравнения</h4>
+            <ul className="space-y-2 text-sm text-text/50">
+              <li><a href="/compare/gpt-5-vs-claude-opus-4" className="hover:text-text transition-colors">GPT-5 vs Claude Opus</a></li>
+              <li><a href="/compare/gpt-5-vs-gemini-3-pro" className="hover:text-text transition-colors">GPT-5 vs Gemini 3</a></li>
+              <li><a href="/compare/gpt-4o-mini-vs-claude-haiku" className="hover:text-text transition-colors">GPT-4o vs Haiku</a></li>
+              <li><a href="/compare/stone-ai-vs-chatgpt-plus" className="hover:text-text transition-colors">Stone AI vs ChatGPT</a></li>
+              <li><a href="/alternatives/chatgpt" className="hover:text-text transition-colors">Альтернативы ChatGPT</a></li>
+              <li><a href="/alternatives/midjourney" className="hover:text-text transition-colors">Альтернативы Midjourney</a></li>
+            </ul>
+          </div>
+
+          {/* AI for professions */}
+          <div>
+            <h4 className="font-semibold mb-3 text-sm">AI по задачам</h4>
+            <ul className="space-y-2 text-sm text-text/50">
+              <li><a href="/for/marketer" className="hover:text-text transition-colors">AI для маркетолога</a></li>
+              <li><a href="/for/developer" className="hover:text-text transition-colors">AI для программиста</a></li>
+              <li><a href="/for/copywriter" className="hover:text-text transition-colors">AI для копирайтера</a></li>
+              <li><a href="/for/designer" className="hover:text-text transition-colors">AI для дизайнера</a></li>
+              <li><a href="/for/student" className="hover:text-text transition-colors">AI для студента</a></li>
+              <li><a href="/tools/image-generation" className="hover:text-text transition-colors">Генерация картинок</a></li>
+              <li><a href="/tools/video-generation" className="hover:text-text transition-colors">Генерация видео</a></li>
             </ul>
           </div>
 
