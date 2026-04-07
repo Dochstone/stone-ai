@@ -219,25 +219,31 @@ async def video_status(
         task.completed_at = datetime.utcnow()
         await db.commit()
 
-        # Return proxy URL instead of direct fal.ai URL (CORS/expiry issues)
-        from app.middleware.web_auth import extract_jwt_from_request
-        jwt_token = extract_jwt_from_request(request) if request else None
-        if jwt_token:
-            proxy_url = f"https://stone-ai-production.up.railway.app/api/video/stream/{task.task_id}?token={jwt_token}"
-        else:
-            proxy_url = task.video_url
+        # Download video to local disk (permanent storage)
+        local_video_url = task.video_url
+        try:
+            import os
+            media_dir = "/var/www/stone-ai/media/videos"
+            os.makedirs(media_dir, exist_ok=True)
+            local_path = f"{media_dir}/{task.task_id}.mp4"
+            async with httpx.AsyncClient(timeout=120.0) as dl:
+                resp = await dl.get(task.video_url)
+                if resp.status_code == 200:
+                    with open(local_path, "wb") as f:
+                        f.write(resp.content)
+                    local_video_url = f"https://stoneai.ru/media/videos/{task.task_id}.mp4"
+                    task.video_url = local_video_url
+                    await db.commit()
+                    logger.info(f"Video saved to disk: {local_path} ({len(resp.content)} bytes)")
+        except Exception as e:
+            logger.warning(f"Failed to save video to disk: {e}")
 
-        # Generate thumbnail in background
-        thumbnail_url = None
-        if jwt_token:
-            thumbnail_url = f"https://stone-ai-production.up.railway.app/api/video/thumb/{task.task_id}?token={jwt_token}"
-
-        # Save to gallery (separate session to avoid breaking main tx)
+        # Save to gallery
         try:
             from app.models.generation import Generation
             from app.database import async_session
             async with async_session() as gen_db:
-                gen = Generation(user_tg_id=tg_id, type="video", model=task.model_id, prompt=task.prompt or "", result_url=task.video_url, cost=float(task.cost or 0))
+                gen = Generation(user_tg_id=tg_id, type="video", model=task.model_id, prompt=task.prompt or "", result_url=local_video_url, cost=float(task.cost or 0))
                 gen_db.add(gen)
                 await gen_db.commit()
         except Exception as e:
@@ -249,9 +255,8 @@ async def video_status(
         return {
             "task_id": task.task_id,
             "status": "completed",
-            "video_url": proxy_url,
-            "direct_url": task.video_url,
-            "thumbnail_url": thumbnail_url,
+            "video_url": local_video_url,
+            "direct_url": local_video_url,
         }
 
     if status == "FAILED":

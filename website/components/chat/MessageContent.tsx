@@ -79,62 +79,33 @@ function renderMarkdown(text: string): string {
 // ─── Sub-components ───
 
 function getVideoUrl(url: string, directUrl?: string, taskId?: string, token?: string): string {
-  // Always use proxy — fal.ai direct URLs expire after ~24h
+  // Prefer local media URL (permanent, on our server)
+  if (directUrl && directUrl.includes("stoneai.ru/media/")) return directUrl;
+  if (url.includes("stoneai.ru/media/")) return url;
+  // Fallback to proxy or direct
   if (taskId && token) return `${API_URL}/api/video/stream/${taskId}?token=${token}`;
-  // Fallback to direct URL if no proxy available
-  if (directUrl) return directUrl;
-  return url;
+  return directUrl || url;
 }
 
 function VideoPlayer({ url, directUrl, taskId, token, thumbnailUrl }: { url: string; directUrl?: string; taskId?: string; token?: string; thumbnailUrl?: string }) {
-  const [thumbLoaded, setThumbLoaded] = useState(false);
   const videoUrl = getVideoUrl(url, directUrl, taskId, token);
 
-  const openVideo = () => {
-    window.open(videoUrl, "_blank");
-  };
-
   return (
-    <div
-      onClick={openVideo}
-      className="relative rounded-2xl overflow-hidden cursor-pointer group"
-      style={{ maxWidth: 340 }}
-    >
-      {/* Thumbnail or gradient fallback */}
-      <div className="w-full aspect-video relative flex items-center justify-center">
-        {thumbnailUrl && (
-          <img
-            src={thumbnailUrl}
-            alt="Video preview"
-            className={`absolute inset-0 w-full h-full object-cover ${thumbLoaded ? "" : "hidden"}`}
-            onLoad={() => setThumbLoaded(true)}
-          />
-        )}
-        {!thumbLoaded && (
-          <div className="absolute inset-0 bg-gradient-to-br from-accent/20 via-purple-500/15 to-blue-500/20 flex items-center justify-center">
-            <div className="absolute inset-0 opacity-30">
-              <div className="absolute top-4 left-4 w-16 h-16 border border-white/20 rounded-xl rotate-12" />
-              <div className="absolute bottom-6 right-6 w-12 h-12 border border-white/15 rounded-lg -rotate-6" />
-            </div>
-          </div>
-        )}
-
-        {/* Play button */}
-        <div className="relative z-10 w-16 h-16 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-          <svg className="w-7 h-7 text-accent ml-1" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M8 5.14v14l11-7-11-7z" />
-          </svg>
-        </div>
-      </div>
-
-      {/* Bottom bar */}
-      <div className="bg-text/[0.06] px-4 py-2.5 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
-          </svg>
-          <span className="text-xs font-semibold text-text/60">Видео готово</span>
-        </div>
+    <div className="rounded-2xl overflow-hidden" style={{ maxWidth: 400 }}>
+      <video
+        src={videoUrl}
+        controls
+        playsInline
+        preload="metadata"
+        className="w-full rounded-t-2xl bg-black"
+        style={{ maxHeight: 300 }}
+      />
+      <div className="bg-text/[0.06] px-4 py-2 flex items-center justify-between">
+        <span className="text-[11px] font-semibold text-text/40">Видео готово</span>
+        <a href={videoUrl} download={`stone-ai-video.mp4`} className="text-[11px] font-bold text-accent hover:underline flex items-center gap-1">
+          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V3" /></svg>
+          Скачать
+        </a>
       </div>
     </div>
   );
