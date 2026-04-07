@@ -730,10 +730,10 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
     const onFocus = () => loadAuth();
     window.addEventListener("focus", onFocus);
     document.addEventListener("visibilitychange", () => { if (!document.hidden) loadAuth(); });
-    return () => window.removeEventListener("focus", onFocus);
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
       setSidebarOpen(false);
     }
+    return () => window.removeEventListener("focus", onFocus);
     // Onboarding — for both guests and logged-in users
     const isAuthed = !!localStorage.getItem("stone_auth");
     const guestDone = localStorage.getItem("stone_guest_onboarded");
