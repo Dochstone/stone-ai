@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { MODELS } from "@/lib/models";
 import { PROFESSIONS } from "@/lib/seo-data";
 import { SITE_URL } from "@/lib/constants";
 import Breadcrumbs from "@/components/Breadcrumbs";
+
+const ChatWidget = dynamic(() => import("@/components/ChatWidget"), { ssr: false });
 
 interface Props { params: { role: string } }
 
@@ -96,6 +99,12 @@ export default function ProfessionPage({ params }: Props) {
               </details>
             ))}
           </div>
+        </section>
+
+        {/* Try it */}
+        <section className="mb-14">
+          <h2 className="text-2xl font-extrabold text-text mb-4">Попробуйте AI для вашей задачи</h2>
+          <ChatWidget placeholder={`Задайте вопрос как ${prof.role.toLowerCase()}`} />
         </section>
 
         {/* CTA */}

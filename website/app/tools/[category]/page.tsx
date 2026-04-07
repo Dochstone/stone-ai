@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { MODELS } from "@/lib/models";
 import { TOOL_HUBS } from "@/lib/seo-data";
 import { SITE_URL } from "@/lib/constants";
 import Breadcrumbs from "@/components/Breadcrumbs";
+
+const ChatWidget = dynamic(() => import("@/components/ChatWidget"), { ssr: false });
 
 interface Props { params: { category: string } }
 
@@ -83,6 +86,12 @@ export default function ToolHubPage({ params }: Props) {
               </details>
             ))}
           </div>
+        </section>
+
+        {/* Try it */}
+        <section className="mb-14">
+          <h2 className="text-2xl font-extrabold text-text mb-4">Попробуйте прямо сейчас</h2>
+          <ChatWidget placeholder={`Попробуйте ${hub.category.toLowerCase()}`} />
         </section>
 
         {/* CTA */}

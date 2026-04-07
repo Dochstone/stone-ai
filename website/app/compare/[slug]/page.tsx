@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { MODELS } from "@/lib/models";
 import { COMPARISONS } from "@/lib/seo-data";
 import { SITE_URL } from "@/lib/constants";
 import Breadcrumbs from "@/components/Breadcrumbs";
+
+const ChatWidget = dynamic(() => import("@/components/ChatWidget"), { ssr: false });
 
 interface Props { params: { slug: string } }
 
@@ -243,12 +246,18 @@ export default function ComparePage({ params }: Props) {
           </div>
         </section>
 
+        {/* Try it */}
+        <section className="mb-14">
+          <h2 className="text-2xl font-extrabold text-text mb-4">Попробуйте прямо сейчас</h2>
+          <ChatWidget placeholder={`Спросите ${m1?.name || "AI"} или ${m2?.name || "AI"} что-нибудь`} />
+        </section>
+
         {/* CTA */}
         <section className="bg-dark text-white rounded-2xl p-8 sm:p-10 text-center">
-          <h2 className="text-xl font-extrabold mb-3">Попробуйте обе модели бесплатно</h2>
+          <h2 className="text-xl font-extrabold mb-3">65+ моделей в одном чате</h2>
           <p className="text-white/40 text-sm mb-6">15 бесплатных запросов в день. Без карты. Без VPN.</p>
           <Link href="/dashboard/chat" className="inline-flex items-center gap-2 bg-accent text-white font-bold px-8 py-4 rounded-xl hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25">
-            Попробовать бесплатно
+            Открыть полный чат
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
           </Link>
         </section>
