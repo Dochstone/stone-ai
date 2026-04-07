@@ -161,10 +161,6 @@ async def check_video_status(model_id: str, fal_request_id: str) -> dict:
             status = data.get("status", "UNKNOWN")
             inference_time = data.get("metrics", {}).get("inference_time", 0)
 
-            # Detect empty generation (fal.ai bug — COMPLETED in <0.5s = nothing generated)
-            if status == "COMPLETED" and inference_time and inference_time < 0.5:
-                return {"status": "FAILED", "error": "Модель временно недоступна. Попробуйте другую."}
-
             if status == "COMPLETED":
                 # Fetch the actual result — try full path first, then base
                 result_resp = await client.get(
