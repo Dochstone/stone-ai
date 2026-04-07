@@ -85,6 +85,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const isChat = pathname === "/dashboard/chat";
   const [sidebarPinned, setSidebarPinned] = useState(false);
   const collapsed = isChat && !sidebarHover && !sidebarPinned && !sidebarOpen;
+  const expanded = !collapsed;
 
   const CHAT_CATEGORIES = [
     { id: "all", label: "Все чаты", svg: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" },
@@ -220,7 +221,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           className={`
             fixed lg:sticky top-0 lg:top-0 z-40 lg:z-0
             h-dvh lg:h-[100dvh]
-            ${isChat ? ((sidebarHover || sidebarPinned) ? "w-64 lg:w-64" : "w-64 lg:w-14") : "w-64"} shrink-0
+            ${isChat && !expanded ? "w-64 lg:w-14" : "w-64"} shrink-0
             bg-bg ${isChat && sidebarHover && !sidebarPinned ? "lg:shadow-xl lg:shadow-black/10" : ""}
             border-r border-text/5
             flex flex-col
@@ -230,203 +231,96 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           onMouseEnter={() => { if (isChat && !sidebarPinned) setSidebarHover(true); }}
           onMouseLeave={() => { if (isChat && !sidebarPinned) setSidebarHover(false); }}
         >
-          <nav className={`flex-1 overflow-y-auto overscroll-contain ${isChat ? ((sidebarHover || sidebarPinned) ? "p-2 space-y-2" : "p-0 lg:p-0 lg:pt-2 space-y-0 lg:space-y-0") : "p-0 space-y-0"}`}>
+          <nav className={`flex-1 overflow-y-auto overscroll-contain ${expanded ? "p-2 space-y-1" : "p-0 lg:pt-2"}`}>
 
-            {/* ═══ Chat mode collapsed: icons with hover labels ═══ */}
-            {isChat && !sidebarHover && !sidebarPinned && (
+            {/* ═══ Collapsed: icon-only (desktop chat, not expanded) ═══ */}
+            {isChat && !expanded && (
               <div className="hidden lg:flex flex-col items-center gap-0.5 pl-2">
-                {/* AI categories */}
                 {CHAT_CATEGORIES.map((c) => (
-                  <button
-                    key={c.id}
-                    onClick={() => setChatCategory(c.id)}
-                    aria-label={c.label}
-                    className={`group relative w-9 h-9 flex items-center justify-center rounded-lg transition-all duration-150 ${
-                      chatCategory === c.id
-                        ? "bg-accent/10 text-accent"
-                        : "text-text/30 hover:text-text/50 hover:bg-text/[0.05]"
-                    }`}
-                  >
+                  <button key={c.id} onClick={() => setChatCategory(c.id)} aria-label={c.label}
+                    className={`group relative w-9 h-9 flex items-center justify-center rounded-lg transition-all ${chatCategory === c.id ? "bg-accent/10 text-accent" : "text-text/30 hover:text-text/50 hover:bg-text/[0.05]"}`}>
                     <NavIcon d={c.svg} size={20} />
-                    <span className="absolute left-full ml-2 px-2.5 py-1 rounded-lg bg-dark text-white text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-lg z-50">
-                      {c.label}
-                    </span>
+                    <span className="absolute left-full ml-2 px-2.5 py-1 rounded-lg bg-dark text-white text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-lg z-50">{c.label}</span>
                   </button>
                 ))}
-
-                {/* Divider */}
                 <div className="w-6 h-px bg-text/[0.08] my-1" />
-
-                {/* Tools */}
                 {NAV_ITEMS.flatMap(g => g.items).filter(i => i.href !== "/dashboard/chat").map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    aria-label={item.label}
-                    onClick={() => setSidebarOpen(false)}
-                    className={`group relative w-9 h-9 flex items-center justify-center rounded-lg transition-all duration-150 ${
-                      isActive(item.href)
-                        ? "text-accent bg-accent/5"
-                        : "text-text/30 hover:text-text/50 hover:bg-text/[0.05]"
-                    }`}
-                  >
+                  <Link key={item.href} href={item.href} aria-label={item.label} onClick={() => setSidebarOpen(false)}
+                    className={`group relative w-9 h-9 flex items-center justify-center rounded-lg transition-all ${isActive(item.href) ? "text-accent bg-accent/5" : "text-text/30 hover:text-text/50 hover:bg-text/[0.05]"}`}>
                     <NavIcon d={item.icon} size={20} />
-                    <span className="absolute left-full ml-2 px-2.5 py-1 rounded-lg bg-dark text-white text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-lg z-50">
-                      {item.label}
-                    </span>
+                    <span className="absolute left-full ml-2 px-2.5 py-1 rounded-lg bg-dark text-white text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-lg z-50">{item.label}</span>
                   </Link>
                 ))}
               </div>
             )}
 
-            {/* Chat categories — full labels for mobile or hover */}
-            {isChat && (sidebarOpen || sidebarHover || sidebarPinned) && (
-              <div className={`${!(sidebarHover || sidebarPinned) ? "lg:hidden" : ""}`}>
-                <div className="px-3 pb-2 mb-1 border-b border-text/[0.06]" style={{ paddingTop: "max(12px, env(safe-area-inset-top))" }}>
-                  <img src="/mascots/stone-mascot-idle.png" alt="" width="24" height="24" className="inline-block mr-1.5" />
-                  <span className="text-sm font-extrabold text-text">Stone AI</span>
-                  <span className="text-[9px] text-accent font-bold ml-1.5">65+ моделей</span>
-                  {isChat && (
-                    <button onClick={() => setSidebarPinned(p => !p)} title={sidebarPinned ? "Открепить" : "Закрепить"}
-                      className={`ml-auto hidden lg:flex w-6 h-6 items-center justify-center rounded-md transition-colors ${sidebarPinned ? "text-accent bg-accent/10" : "text-text/20 hover:text-text/40"}`}>
-                      <svg className="w-3.5 h-3.5" fill={sidebarPinned ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 4.5l-4 4L7 7 4 10l5.5 5.5L7 18h3l2.5-2.5L18 21l3-3-1.5-4 4-4-6.5-5.5z" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-                <div className="text-[9px] font-bold text-accent/50 uppercase tracking-[2px] px-3 pt-1.5 mb-1">Режим AI</div>
-                <div className="space-y-px">
-                  {CHAT_CATEGORIES.map((c) => (
-                    <button
-                      key={c.id}
-                      onClick={() => { setChatCategory(c.id); setSidebarOpen(false); }}
-                      aria-label={c.label}
-                      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-medium transition-all ${
-                        chatCategory === c.id
-                          ? "bg-gradient-to-r from-accent/10 to-teal/5 text-accent font-semibold border border-accent/10"
-                          : "text-text/40 hover:text-text/70 hover:bg-text/[0.04]"
-                      }`}
-                    >
-                      <NavIcon d={c.svg} />
-                      <span>{c.label}</span>
-                      {chatCategory === c.id && (
-                        <div className="ml-auto w-1.5 h-1.5 rounded-full bg-accent" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-                <div className="flex items-center gap-2 my-1 px-3">
-                  <div className="flex-1 h-px bg-text/[0.06]" />
-                  <span className="text-[8px] text-text/15 font-bold uppercase tracking-widest">Инструменты</span>
-                  <div className="flex-1 h-px bg-text/[0.06]" />
-                </div>
-              </div>
-            )}
-
-            {/* Nav groups */}
-            {NAV_ITEMS.map((group) => (
-              <div key={group.group}>
-                {(!isChat || sidebarHover || sidebarPinned || sidebarOpen) && (
-                  <div className={`text-[9px] font-bold text-text/20 uppercase tracking-[1.5px] px-3 pt-2 mb-0.5 ${isChat && !sidebarHover && !sidebarPinned && !sidebarOpen ? "lg:hidden" : ""}`}>
-                    {group.group}
+            {/* ═══ Expanded: full sidebar (always same render) ═══ */}
+            {expanded && (
+              <>
+                {/* Header */}
+                {isChat && (
+                  <div className="px-3 pb-2 mb-1 border-b border-text/[0.06] flex items-center" style={{ paddingTop: "max(8px, env(safe-area-inset-top))" }}>
+                    <a href="/" className="flex items-center gap-1.5">
+                      <img src="/mascots/stone-mascot-idle.png" alt="" width="24" height="24" />
+                      <span className="text-sm font-extrabold text-text">Stone AI</span>
+                    </a>
+                    <span className="text-[9px] text-accent font-bold ml-1.5">65+</span>
+                    {isChat && (
+                      <button onClick={() => setSidebarPinned(p => !p)} title={sidebarPinned ? "Открепить" : "Закрепить"}
+                        className={`ml-auto hidden lg:flex w-6 h-6 items-center justify-center rounded-md transition-colors ${sidebarPinned ? "text-accent bg-accent/10" : "text-text/20 hover:text-text/40"}`}>
+                        <svg className="w-3.5 h-3.5" fill={sidebarPinned ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 4.5l-4 4L7 7 4 10l5.5 5.5L7 18h3l2.5-2.5L18 21l3-3-1.5-4 4-4-6.5-5.5z" />
+                        </svg>
+                      </button>
+                    )}
                   </div>
                 )}
-                <div className="space-y-0.5">
-                  {group.items.filter(item => !(isChat && item.href === "/dashboard/chat")).map((item) => {
-                    const active = isActive(item.href);
-                    return isChat ? (
-                      (sidebarHover || sidebarPinned || sidebarOpen) ? (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          onClick={() => { setSidebarOpen(false); setSidebarHover(false); }}
-                          className={`
-                            flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-medium
-                            transition-all duration-150
-                            ${active
-                              ? "bg-accent/10 text-accent font-semibold"
-                              : "text-text/50 hover:text-text/80 hover:bg-text/[0.04]"
-                            }
-                          `}
-                        >
-                          <NavIcon d={item.icon} />
-                          <span className="truncate">{item.label}</span>
-                          {item.badge && (
-                            <span className={`ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-md ${active ? "bg-accent/20 text-accent" : "bg-text/[0.06] text-text/30"}`}>{item.badge}</span>
-                          )}
-                        </Link>
-                      ) : (
-                        <>
-                          {/* Desktop: icon only */}
-                          <Link
-                            key={item.href + "-lg"}
-                            href={item.href}
-                            title={item.label}
-                            aria-label={item.label}
-                            onClick={() => setSidebarOpen(false)}
-                            className={`
-                              hidden lg:flex items-center justify-center p-2 rounded-lg
-                              transition-all duration-150
-                              ${active
-                                ? "bg-accent/10 text-accent"
-                                : "text-text/35 hover:text-text/60 hover:bg-text/[0.05]"
-                              }
-                            `}
-                          >
-                            <NavIcon d={item.icon} />
-                          </Link>
-                          {/* Mobile: full with text */}
-                          <Link
-                            key={item.href + "-sm"}
-                            href={item.href}
-                            onClick={() => setSidebarOpen(false)}
-                            className={`
-                              flex lg:hidden items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-medium
-                              transition-all duration-150
-                              ${active
-                                ? "bg-accent/10 text-accent font-semibold"
-                                : "text-text/50 hover:text-text/80 hover:bg-text/[0.04]"
-                              }
-                            `}
-                          >
+
+                {/* Chat categories */}
+                {isChat && (
+                  <>
+                    <div className="text-[9px] font-bold text-accent/50 uppercase tracking-[2px] px-3 pt-1 mb-1">Режим AI</div>
+                    <div className="space-y-px mb-1">
+                      {CHAT_CATEGORIES.map((c) => (
+                        <button key={c.id} onClick={() => { setChatCategory(c.id); setSidebarOpen(false); }}
+                          className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-medium transition-all ${chatCategory === c.id ? "bg-gradient-to-r from-accent/10 to-teal/5 text-accent font-semibold border border-accent/10" : "text-text/40 hover:text-text/70 hover:bg-text/[0.04]"}`}>
+                          <NavIcon d={c.svg} />
+                          <span>{c.label}</span>
+                          {chatCategory === c.id && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-accent" />}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-2 my-1 px-3">
+                      <div className="flex-1 h-px bg-text/[0.06]" />
+                      <span className="text-[8px] text-text/15 font-bold uppercase tracking-widest">Инструменты</span>
+                      <div className="flex-1 h-px bg-text/[0.06]" />
+                    </div>
+                  </>
+                )}
+
+                {/* Nav groups — ONE render path for all states */}
+                {NAV_ITEMS.map((group) => (
+                  <div key={group.group}>
+                    <div className="text-[9px] font-bold text-text/20 uppercase tracking-[1.5px] px-3 pt-2 mb-0.5">{group.group}</div>
+                    <div className="space-y-0.5">
+                      {group.items.filter(item => !(isChat && item.href === "/dashboard/chat")).map((item) => {
+                        const active = isActive(item.href);
+                        return (
+                          <Link key={item.href} href={item.href}
+                            onClick={() => { setSidebarOpen(false); setSidebarHover(false); }}
+                            className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-medium transition-all ${active ? "bg-accent/10 text-accent font-semibold" : "text-text/50 hover:text-text/80 hover:bg-text/[0.04]"}`}>
                             <NavIcon d={item.icon} />
                             <span className="truncate">{item.label}</span>
-                            {item.badge && (
-                              <span className={`ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-md ${active ? "bg-accent/20 text-accent" : "bg-text/[0.06] text-text/30"}`}>{item.badge}</span>
-                            )}
+                            {item.badge && <span className={`ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-md ${active ? "bg-accent/20 text-accent" : "bg-text/[0.06] text-text/30"}`}>{item.badge}</span>}
                           </Link>
-                        </>
-                      )
-                    ) : (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={() => setSidebarOpen(false)}
-                        className={`
-                          flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-medium
-                          transition-all duration-150
-                          ${active
-                            ? "bg-accent/10 text-accent font-semibold"
-                            : "text-text/50 hover:text-text/80 hover:bg-text/[0.04]"
-                          }
-                        `}
-                      >
-                        <NavIcon d={item.icon} />
-                        <span className="truncate">{item.label}</span>
-                        {item.badge && (
-                          <span className={`ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-md ${
-                            active ? "bg-accent/20 text-accent" : "bg-text/[0.06] text-text/30"
-                          }`}>
-                            {item.badge}
-                          </span>
-                        )}
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+
 
           </nav>
 
