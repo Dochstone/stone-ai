@@ -163,7 +163,7 @@ async def _generate_image(prompt: str, model_id: str | None = None, input_image_
             async with httpx.AsyncClient(timeout=120.0) as client:
                 # If input image provided, use edit endpoint
                 if input_image_b64:
-                    prompt_with_ref = f"Edit this product photo. Keep the product exactly as is but change the background: {prompt}"
+                    prompt_with_ref = f"Edit this photo. Keep ALL foreground subjects and objects exactly as they are — do not remove, modify, or replace anything in the foreground (people, products, furniture, etc). ONLY replace the background with: {prompt}"
                 else:
                     prompt_with_ref = prompt
                 resp = await client.post(
@@ -202,7 +202,7 @@ async def _generate_image(prompt: str, model_id: str | None = None, input_image_
         img_url = input_image_b64 if input_image_b64.startswith("data:") else f"data:image/png;base64,{input_image_b64}"
         user_content = [
             {"type": "image_url", "image_url": {"url": img_url}},
-            {"type": "text", "text": f"Edit this product photo. Keep the product exactly as is, but change the background to: {prompt}. Output only the edited image, no text."},
+            {"type": "text", "text": f"Edit this photo. Keep ALL foreground subjects and objects exactly as they are — do not remove, modify, or replace anything in the foreground (people, products, furniture, animals, etc). ONLY replace the background with: {prompt}. Output only the edited image, no text."},
         ]
     else:
         user_content = f"Generate an image based on this description. Do NOT reply with text, ONLY generate the image. Description: {prompt}"
@@ -277,9 +277,11 @@ async def change_background(
     # Build prompt
     style_hint = STYLE_PRESETS.get(req.style, "") if req.style else ""
     prompt = (
-        f"Professional product photography. Place the product on a beautiful background: {req.background_prompt}. "
+        f"Edit this photo: keep ALL foreground subjects and objects exactly as they are "
+        f"(people, products, furniture, animals — do NOT remove or change anything in the foreground). "
+        f"ONLY replace the background with: {req.background_prompt}. "
         f"{style_hint} "
-        f"High resolution, sharp focus on the product, photorealistic, commercial quality, "
+        f"High resolution, sharp focus, photorealistic, commercial quality, "
         f"perfect lighting, clean composition."
     ).strip()
 
@@ -483,9 +485,11 @@ async def batch_process(
 
     for i, image_data in enumerate(req.images):
         prompt = (
-            f"Professional product photography. Place the product on a beautiful background: {req.background_prompt}. "
+            f"Edit this photo: keep ALL foreground subjects and objects exactly as they are "
+            f"(people, products, furniture, animals — do NOT remove or change anything in the foreground). "
+            f"ONLY replace the background with: {req.background_prompt}. "
             f"{style_hint} "
-            f"High resolution, sharp focus on the product, photorealistic, commercial quality."
+            f"High resolution, sharp focus, photorealistic, commercial quality."
         ).strip()
 
         try:
