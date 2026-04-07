@@ -3,14 +3,15 @@ const MAX_SIZE = 128; // px — resize to 128x128 for localStorage efficiency
 
 export function getAvatarColor(email: string): string {
   const colors = ["#C4623D", "#0E9A83", "#4285f4", "#7c3aed", "#ec4899", "#f59e0b", "#06b6d4", "#10a37f"];
+  const str = email || "user";
   let hash = 0;
-  for (let i = 0; i < email.length; i++) hash = email.charCodeAt(i) + ((hash << 5) - hash);
+  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
   return colors[Math.abs(hash) % colors.length];
 }
 
 export function getInitials(email: string, name?: string | null): string {
   if (name) return name.slice(0, 2).toUpperCase();
-  return email.slice(0, 2).toUpperCase();
+  return (email || "U").slice(0, 2).toUpperCase();
 }
 
 export function getSavedAvatar(): string | null {

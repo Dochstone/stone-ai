@@ -243,9 +243,9 @@ function OverviewTab({ profile, usage, limits }: { profile: UserProfile; usage: 
         <AvatarUpload email={profile.email} name={profile.first_name} />
         <div className="min-w-0 flex-1">
           <h2 className="text-lg font-extrabold text-text truncate">
-            {profile.first_name || profile.username || profile.email.split("@")[0]}
+            {profile.first_name || profile.username || (profile.email ? profile.email.split("@")[0] : "Пользователь")}
           </h2>
-          <p className="text-sm text-text/40">{profile.email}</p>
+          <p className="text-sm text-text/40">{profile.email || "Telegram-аккаунт"}</p>
           <div className="flex items-center gap-3 mt-1.5">
             <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-accent/10 text-accent">
               {authProviderLabel(profile.auth_provider)}
