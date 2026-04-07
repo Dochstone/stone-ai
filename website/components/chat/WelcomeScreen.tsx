@@ -82,8 +82,8 @@ const PROMPT_TEMPLATES: Record<string, { text: string; model: string }[]> = {
 const WELCOME_CONFIG: Record<string, { icon: string; bg: string; title: string; subtitle: string }> = {
   all: { icon: "💬", bg: "bg-accent", title: "Чем могу помочь?", subtitle: "Выберите шаблон или напишите свой запрос" },
   free: { icon: "✨", bg: "bg-teal", title: "Бесплатные модели", subtitle: "8 моделей без ограничений — 15 запросов в день" },
-  image: { icon: "🎨", bg: "bg-pink-500", title: "Генерация изображений", subtitle: "Опишите картинку — AI создаст её за секунды" },
-  video: { icon: "🎬", bg: "bg-red-500", title: "Генерация видео", subtitle: "Опишите сцену — AI создаст видео из текста" },
+  image: { icon: "🎨", bg: "bg-pink-500", title: "Генерация изображений", subtitle: "2 бесплатные картинки · Опишите — AI создаст за секунды" },
+  video: { icon: "🎬", bg: "bg-red-500", title: "Генерация видео", subtitle: "1 бесплатное видео через Veo 3 · Опишите сцену — AI создаст видео" },
   "3d": { icon: "🧊", bg: "bg-cyan-500", title: "Генерация 3D", subtitle: "Опишите объект или загрузите фото" },
   health: { icon: "🏥", bg: "bg-emerald-500", title: "AI Консультант", subtitle: "Загрузите фото или опишите симптомы" },
 };
