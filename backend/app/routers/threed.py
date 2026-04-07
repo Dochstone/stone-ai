@@ -71,19 +71,22 @@ async def generate_threed(
     if not user:
         raise HTTPException(404, "Пользователь не найден")
 
-    # Everyone pays from balance
+    # Subscribers: included in plan. Free users: need balance.
+    tier = user.subscription_tier or "free"
     balance = float(user.balance_usd or 0)
 
-    if balance < price:
+    if tier in ("mini", "max", "max-pro"):
+        new_balance = balance  # subscription covers it
+    elif balance >= price:
+        user.balance_usd = round(balance - price, 6)
+        new_balance = float(user.balance_usd)
+    else:
         from app.config import USD_TO_RUB
         raise HTTPException(402, {
             "error": "insufficient_balance",
-            "message": f"Недостаточно средств. Нужно ~{int(price * USD_TO_RUB)}₽",
-            "upgrade_url": "/topup",
+            "message": f"Недостаточно средств. Нужно ~{int(price * USD_TO_RUB)}₽. Оформите подписку.",
+            "upgrade_url": "/pricing",
         })
-
-    user.balance_usd = round(balance - price, 6)
-    new_balance = float(user.balance_usd)
 
     task_id = str(uuid.uuid4())[:12]
     task = ThreeDTask(

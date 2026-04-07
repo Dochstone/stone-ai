@@ -80,23 +80,30 @@ async def generate_video(
     if not user:
         raise HTTPException(404, "Пользователь не найден")
 
-    # Billing: apply subscriber discount, check balance
+    # Billing logic:
+    # - Subscribers (mini/max/max-pro): video included in subscription, no balance needed
+    # - Free users: 1 trial video (Veo 3 only), then need subscription
     tier = user.subscription_tier or "free"
     balance = float(user.balance_usd or 0)
+    actual_price = price
 
-    from app.config import apply_discount
-    actual_price = apply_discount(price, tier)
-
-    if tier == "free" and balance <= 0:
+    if tier in ("mini", "max", "max-pro"):
+        # Subscriber — video included, don't deduct balance
+        new_balance = balance
+    elif tier == "free" and balance > 0 and balance >= price:
+        # Free user with balance — deduct
+        user.balance_usd = round(balance - price, 6)
+        new_balance = float(user.balance_usd)
+    elif tier == "free":
+        # Free user without balance — check trial
         from app.config import FREE_TRIAL_VIDEOS
         from app.models.generation import Generation
         from sqlalchemy import func as sql_func
-        # Trial only with Veo 3
         if req.model_id != "veo-3":
             raise HTTPException(402, {
                 "error": "insufficient_balance",
-                "message": "Бесплатное видео доступно только в модели Veo 3. Для остальных пополните баланс.",
-                "upgrade_url": "/topup",
+                "message": "Бесплатное видео доступно только в модели Veo 3. Оформите подписку для доступа ко всем моделям.",
+                "upgrade_url": "/pricing",
             })
         total_videos = await db.scalar(
             select(sql_func.count()).select_from(Generation).where(
@@ -106,20 +113,13 @@ async def generate_video(
         if total_videos >= FREE_TRIAL_VIDEOS:
             raise HTTPException(402, {
                 "error": "insufficient_balance",
-                "message": f"Бесплатный лимит {FREE_TRIAL_VIDEOS} видео исчерпан. Пополните баланс.",
-                "upgrade_url": "/topup",
+                "message": f"Бесплатный лимит {FREE_TRIAL_VIDEOS} видео исчерпан. Оформите подписку.",
+                "upgrade_url": "/pricing",
             })
-        # Trial video — don't deduct
         new_balance = balance
-    elif balance < actual_price:
-        raise HTTPException(402, {
-            "error": "insufficient_balance",
-            "message": f"Недостаточно средств. Нужно ~{int(actual_price * USD_TO_RUB)}₽, баланс ~{int(balance * USD_TO_RUB)}₽",
-            "upgrade_url": "/topup",
-        })
+        actual_price = 0
     else:
-        user.balance_usd = round(balance - actual_price, 6)
-        new_balance = float(user.balance_usd)
+        new_balance = balance
 
     # Create task
     task_id = str(uuid.uuid4())[:12]
