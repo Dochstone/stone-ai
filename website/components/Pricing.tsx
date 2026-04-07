@@ -422,7 +422,7 @@ export default function Pricing() {
         >
           {/* Outer wrapper for animated border */}
           <div
-            className="w-full sm:max-w-[750px] sm:rounded-3xl rounded-t-3xl relative overflow-hidden p-[2px]"
+            className="w-full sm:max-w-[750px] sm:rounded-3xl rounded-t-3xl relative p-[2px]"
             onClick={(e) => e.stopPropagation()}
             style={{
               animation: closing
@@ -439,7 +439,7 @@ export default function Pricing() {
               }}
             />
             {/* Inner content */}
-            <div className="bg-bg relative z-[1] sm:rounded-[22px] rounded-t-[22px] shadow-2xl overflow-hidden sm:max-h-[90vh] overflow-y-auto">
+            <div className="bg-bg relative z-[1] sm:rounded-[22px] rounded-t-[22px] shadow-2xl overflow-hidden max-h-[92vh] sm:max-h-[90vh] overflow-y-auto">
 
             {/* Drag handle (mobile) — overlays image */}
             <div className="absolute top-2 left-1/2 -translate-x-1/2 w-9 h-1 rounded-full bg-white/30 sm:hidden z-20" />
