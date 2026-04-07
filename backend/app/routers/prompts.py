@@ -493,9 +493,10 @@ async def wizard_generate(
         })
 
     # Generate via AI (non-streaming for templates)
+    lang_system = "Always respond in the same language as the user's message. If the user writes in Russian, respond in Russian."
     messages = [{"role": "user", "content": prompt}]
     full_response = ""
-    async for chunk in stream_chat_response(body.model_id, messages, None, max_tokens=4096):
+    async for chunk in stream_chat_response(body.model_id, messages, lang_system, max_tokens=4096):
         if chunk.startswith("data: "):
             payload = chunk[6:].strip()
             if payload == "[DONE]":
@@ -574,9 +575,10 @@ async def direct_generate(
             "balance_rub": round(balance * USD_TO_RUB, 2),
         })
 
+    lang_system = "Always respond in the same language as the user's message. If the user writes in Russian, respond in Russian."
     messages = [{"role": "user", "content": body.prompt}]
     full_response = ""
-    async for chunk in stream_chat_response(body.model_id, messages, None, max_tokens=8192):
+    async for chunk in stream_chat_response(body.model_id, messages, lang_system, max_tokens=8192):
         if chunk.startswith("data: "):
             payload = chunk[6:].strip()
             if payload == "[DONE]":
