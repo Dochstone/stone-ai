@@ -100,15 +100,47 @@ function ModelCard({ id, side }: { id: string; side: "left" | "right" }) {
   );
 }
 
+function PlatformCard({ platform, side }: { platform: { name: string; desc: string; logo: string; stats: { label: string; value: string }[] }; side: "left" | "right" }) {
+  const isStone = platform.name === "Stone AI";
+  return (
+    <div className="relative rounded-2xl border border-text/5 overflow-hidden transition-all hover:border-text/10 hover:shadow-lg">
+      <div className="px-6 pt-5 pb-4" style={{ background: isStone ? "linear-gradient(135deg, #C4623D15, #0E9A8308)" : "linear-gradient(135deg, #64748b15, #64748b05)" }}>
+        <div className="flex items-center gap-3">
+          <img src={platform.logo} alt="" className={`w-10 h-10 rounded-xl ${platform.logo.endsWith(".svg") ? "opacity-70 dark:invert" : ""}`} />
+          <div>
+            <h3 className="text-xl font-extrabold text-text">{platform.name}</h3>
+            {isStone && <span className="text-[10px] font-bold text-accent">AI-студия</span>}
+          </div>
+        </div>
+      </div>
+      <div className="bg-bg px-6 py-5">
+        <p className="text-sm text-text/50 mb-4 leading-relaxed">{platform.desc}</p>
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          {platform.stats.map((s) => (
+            <div key={s.label} className="bg-text/[0.03] rounded-xl p-2.5 text-center">
+              <div className="text-[9px] text-text/30 font-semibold uppercase">{s.label}</div>
+              <div className="text-sm font-extrabold text-text/80 mt-0.5">{s.value}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ComparePage({ params }: Props) {
   const comp = COMPARISONS.find((c) => c.slug === params.slug);
   if (!comp) notFound();
 
   const m1 = MODELS.find((x) => x.id === comp.model1);
   const m2 = MODELS.find((x) => x.id === comp.model2);
+  const isPlatformCompare = !!comp.platform1;
+
+  const name1 = isPlatformCompare ? comp.platform1!.name : (m1?.name || comp.model1);
+  const name2 = isPlatformCompare ? comp.platform2!.name : (m2?.name || comp.model2);
 
   const faqItems = [
-    { q: `Какая модель лучше: ${m1?.name} или ${m2?.name}?`, a: comp.verdict },
+    { q: `Что лучше: ${name1} или ${name2}?`, a: comp.verdict },
     { q: "Можно ли попробовать обе модели бесплатно?", a: "Да, Stone AI даёт 15 бесплатных запросов в день к быстрым моделям. Зарегистрируйтесь и попробуйте обе модели." },
     { q: "Сколько стоит подписка?", a: "Подписка Start — 390₽/мес (20+ моделей). Pro — 890₽/мес (все 65+ моделей). Elite — 1990₽/мес (максимум)." },
   ];
@@ -146,8 +178,17 @@ export default function ComparePage({ params }: Props) {
 
         {/* Cards */}
         <div className="grid md:grid-cols-2 gap-4 mb-14">
-          <ModelCard id={comp.model1} side="left" />
-          <ModelCard id={comp.model2} side="right" />
+          {isPlatformCompare ? (
+            <>
+              <PlatformCard platform={comp.platform1!} side="left" />
+              <PlatformCard platform={comp.platform2!} side="right" />
+            </>
+          ) : (
+            <>
+              <ModelCard id={comp.model1} side="left" />
+              <ModelCard id={comp.model2} side="right" />
+            </>
+          )}
         </div>
 
         {/* Table */}
@@ -158,15 +199,27 @@ export default function ComparePage({ params }: Props) {
               <thead>
                 <tr className="border-b border-text/5">
                   <th className="text-left px-5 py-3 text-text/30 font-semibold text-xs uppercase tracking-wider">Параметр</th>
-                  <th className="text-center px-5 py-3 text-text font-bold">{m1?.name}</th>
-                  <th className="text-center px-5 py-3 text-text font-bold">{m2?.name}</th>
+                  <th className="text-center px-5 py-3 text-text font-bold">{name1}</th>
+                  <th className="text-center px-5 py-3 text-text font-bold">{name2}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-text/[0.04]">
-                <tr><td className="px-5 py-3 text-text/40">Компания</td><td className="px-5 py-3 text-center font-medium text-text/70">{m1?.company}</td><td className="px-5 py-3 text-center font-medium text-text/70">{m2?.company}</td></tr>
-                <tr><td className="px-5 py-3 text-text/40">Контекст</td><td className="px-5 py-3 text-center font-medium text-text/70">{m1?.context || "—"}</td><td className="px-5 py-3 text-center font-medium text-text/70">{m2?.context || "—"}</td></tr>
-                <tr><td className="px-5 py-3 text-text/40">Цена / 1M</td><td className="px-5 py-3 text-center font-medium text-text/70">${m1?.pricePerMillion}</td><td className="px-5 py-3 text-center font-medium text-text/70">${m2?.pricePerMillion}</td></tr>
-                <tr><td className="px-5 py-3 text-text/40">Доступ</td><td className="px-5 py-3 text-center font-medium text-text/70">{m1?.tier === "free" ? "Бесплатно" : "Подписка"}</td><td className="px-5 py-3 text-center font-medium text-text/70">{m2?.tier === "free" ? "Бесплатно" : "Подписка"}</td></tr>
+                {isPlatformCompare ? (
+                  <>
+                    {comp.platform1!.stats.map((s, i) => (
+                      <tr key={s.label}><td className="px-5 py-3 text-text/40">{s.label}</td><td className="px-5 py-3 text-center font-medium text-text/70">{s.value}</td><td className="px-5 py-3 text-center font-medium text-text/70">{comp.platform2!.stats[i]?.value || "—"}</td></tr>
+                    ))}
+                    <tr><td className="px-5 py-3 text-text/40">VPN из России</td><td className="px-5 py-3 text-center font-medium text-teal">Не нужен</td><td className="px-5 py-3 text-center font-medium text-accent">Нужен</td></tr>
+                    <tr><td className="px-5 py-3 text-text/40">Русский язык</td><td className="px-5 py-3 text-center font-medium text-teal">Полная поддержка</td><td className="px-5 py-3 text-center font-medium text-text/50">Частичная</td></tr>
+                  </>
+                ) : (
+                  <>
+                    <tr><td className="px-5 py-3 text-text/40">Компания</td><td className="px-5 py-3 text-center font-medium text-text/70">{m1?.company}</td><td className="px-5 py-3 text-center font-medium text-text/70">{m2?.company}</td></tr>
+                    <tr><td className="px-5 py-3 text-text/40">Контекст</td><td className="px-5 py-3 text-center font-medium text-text/70">{m1?.context || "—"}</td><td className="px-5 py-3 text-center font-medium text-text/70">{m2?.context || "—"}</td></tr>
+                    <tr><td className="px-5 py-3 text-text/40">Цена / 1M</td><td className="px-5 py-3 text-center font-medium text-text/70">${m1?.pricePerMillion}</td><td className="px-5 py-3 text-center font-medium text-text/70">${m2?.pricePerMillion}</td></tr>
+                    <tr><td className="px-5 py-3 text-text/40">Доступ</td><td className="px-5 py-3 text-center font-medium text-text/70">{m1?.tier === "free" ? "Бесплатно" : "Подписка"}</td><td className="px-5 py-3 text-center font-medium text-text/70">{m2?.tier === "free" ? "Бесплатно" : "Подписка"}</td></tr>
+                  </>
+                )}
               </tbody>
             </table>
           </div>
@@ -179,8 +232,10 @@ export default function ComparePage({ params }: Props) {
             <div className="bg-bg rounded-2xl border-2 border-accent/15 p-6 relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent to-accent/30" />
               <h3 className="font-extrabold text-text mb-4 flex items-center gap-2">
-                {companyLogo[m1?.company || ""] && <img src={companyLogo[m1?.company || ""]} alt="" className="w-5 h-5 rounded opacity-70 dark:invert" />}
-                {m1?.name}
+                {isPlatformCompare
+                  ? <img src={comp.platform1!.logo} alt="" className={`w-5 h-5 rounded ${comp.platform1!.logo.endsWith(".svg") ? "opacity-70 dark:invert" : ""}`} />
+                  : companyLogo[m1?.company || ""] && <img src={companyLogo[m1?.company || ""]} alt="" className="w-5 h-5 rounded opacity-70 dark:invert" />}
+                {name1}
               </h3>
               <ul className="space-y-3">
                 {comp.useCases.model1.map((uc) => (
@@ -196,8 +251,10 @@ export default function ComparePage({ params }: Props) {
             <div className="bg-bg rounded-2xl border-2 border-teal/15 p-6 relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal to-teal/30" />
               <h3 className="font-extrabold text-text mb-4 flex items-center gap-2">
-                {companyLogo[m2?.company || ""] && <img src={companyLogo[m2?.company || ""]} alt="" className="w-5 h-5 rounded opacity-70 dark:invert" />}
-                {m2?.name}
+                {isPlatformCompare
+                  ? <img src={comp.platform2!.logo} alt="" className={`w-5 h-5 rounded ${comp.platform2!.logo.endsWith(".svg") ? "opacity-70 dark:invert" : ""}`} />
+                  : companyLogo[m2?.company || ""] && <img src={companyLogo[m2?.company || ""]} alt="" className="w-5 h-5 rounded opacity-70 dark:invert" />}
+                {name2}
               </h3>
               <ul className="space-y-3">
                 {comp.useCases.model2.map((uc) => (

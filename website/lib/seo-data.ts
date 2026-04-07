@@ -14,6 +14,9 @@ export interface Comparison {
   h1: string;
   verdict: string;         // short verdict text
   useCases: { model1: string[]; model2: string[] }; // best for
+  // Platform comparisons (Stone AI vs ChatGPT etc.)
+  platform1?: { name: string; desc: string; logo: string; stats: { label: string; value: string }[] };
+  platform2?: { name: string; desc: string; logo: string; stats: { label: string; value: string }[] };
 }
 
 export const COMPARISONS: Comparison[] = [
@@ -92,6 +95,8 @@ export const COMPARISONS: Comparison[] = [
     h1: "Stone AI vs ChatGPT Plus — почему платить меньше за большее?",
     verdict: "Stone AI: 65+ моделей (GPT, Claude, Gemini, Llama и др.) от 390₽/мес. ChatGPT Plus: только модели OpenAI за $20/мес (~1900₽). Stone AI выгоднее в 5 раз, даёт доступ ко всем провайдерам, генерацию картинок, видео, SEO-инструменты — всё в одном.",
     useCases: { model1: ["65+ моделей от всех провайдеров", "От 390₽/мес (в 5 раз дешевле)", "Картинки, видео, 3D, SEO", "Работает без VPN из России", "Telegram-бот + веб-чат"], model2: ["Только модели OpenAI", "$20/мес (~1900₽)", "Нет генерации видео", "Нужен VPN из России", "Только веб-интерфейс"] },
+    platform1: { name: "Stone AI", desc: "AI-студия нового поколения. 65+ моделей от всех провайдеров в одном интерфейсе.", logo: "/mascots/stone-mascot-idle.png", stats: [{ label: "Моделей", value: "65+" }, { label: "Цена", value: "от 390₽" }, { label: "Инструменты", value: "15+" }] },
+    platform2: { name: "ChatGPT Plus", desc: "Подписка на модели OpenAI. Доступ к GPT-4o и DALL-E через веб-интерфейс.", logo: "/logos/openai.svg", stats: [{ label: "Моделей", value: "~5" }, { label: "Цена", value: "$20/мес" }, { label: "Инструменты", value: "3" }] },
   },
   {
     slug: "stone-ai-vs-perplexity",
@@ -101,6 +106,8 @@ export const COMPARISONS: Comparison[] = [
     h1: "Stone AI vs Perplexity — что лучше для работы?",
     verdict: "Perplexity — специализированный AI-поиск с цитированием. Stone AI — полная AI-студия: 65+ моделей для чата, картинки, видео, SEO-инструменты, агент. Perplexity Sonar доступен внутри Stone AI как одна из 65+ моделей. Stone AI универсальнее и дешевле.",
     useCases: { model1: ["65+ моделей + Perplexity Sonar", "Чат + картинки + видео + SEO", "От 390₽/мес за всё", "Без VPN из России"], model2: ["Только поиск в интернете", "Цитирование источников", "$20/мес за Pro", "Нет генерации контента"] },
+    platform1: { name: "Stone AI", desc: "AI-студия: чат, картинки, видео, SEO. 65+ моделей включая Perplexity Sonar.", logo: "/mascots/stone-mascot-idle.png", stats: [{ label: "Моделей", value: "65+" }, { label: "Цена", value: "от 390₽" }, { label: "Возможности", value: "Всё" }] },
+    platform2: { name: "Perplexity AI", desc: "AI-поиск с цитированием источников. Специализация на поиске в интернете.", logo: "/logos/perplexity.svg", stats: [{ label: "Фокус", value: "Поиск" }, { label: "Цена", value: "$20/мес" }, { label: "Генерация", value: "Нет" }] },
   },
   {
     slug: "gemini-2-5-flash-vs-gpt-4o-mini",
