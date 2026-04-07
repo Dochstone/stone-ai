@@ -1,7 +1,7 @@
 export const homeFaqData = [
   {
     q: "Как начать пользоваться Stone AI?",
-    a: 'Откройте <a href="/dashboard/chat" class="text-accent hover:underline font-semibold">AI-чат</a> или <a href="/dashboard" class="text-accent hover:underline font-semibold">панель инструментов</a>. 15 бесплатных запросов каждый день к 7 моделям — GPT-4o mini, Claude Haiku 4.5, Gemini 2.0 Flash, DeepSeek V3, Llama 4 Maverick, Mistral Large и Nano Banana. Регистрация не обязательна для чата. Для полного доступа к инструментам создайте аккаунт за 30 секунд через Google, Яндекс или email.',
+    a: 'Откройте <a href="/dashboard/chat" class="text-accent hover:underline font-semibold">AI-чат</a> или <a href="/dashboard" class="text-accent hover:underline font-semibold">панель инструментов</a>. 15 бесплатных запросов каждый день к 8 моделям — GPT-4o mini, Claude Haiku 4.5, Gemini 2.0 Flash, DeepSeek V3, Llama 4 Maverick, Mistral Large и Nano Banana и Veo 3 (1 бесплатное видео). Регистрация не обязательна для чата. Для полного доступа к инструментам создайте аккаунт за 30 секунд через Google, Яндекс или email.',
   },
   {
     q: "Что такое панель инструментов и какие инструменты доступны?",
@@ -17,7 +17,7 @@ export const homeFaqData = [
   },
   {
     q: "Какие модели доступны бесплатно?",
-    a: 'Бесплатно 7 моделей: GPT-4o mini (OpenAI), Claude Haiku 4.5 (Anthropic), Gemini 2.0 Flash (Google), DeepSeek V3, Llama 4 Maverick (Meta), Mistral Large и Nano Banana (генерация картинок). 15 чат-запросов в день — баланс не тратится. Плюс trial: 2 картинки и 1 видео (Veo 3) навсегда. Инструменты (шаблоны, презентации, SEO, кампании) — с баланса, бонус 100₽ при регистрации. Полный список 65+ моделей — на <a href="/models" class="text-accent hover:underline font-semibold">странице моделей</a>.',
+    a: 'Бесплатно 8 моделей: GPT-4o mini (OpenAI), Claude Haiku 4.5 (Anthropic), Gemini 2.0 Flash (Google), DeepSeek V3, Llama 4 Maverick (Meta), Mistral Large и Nano Banana (картинки) и Veo 3 (1 бесплатное видео). 15 чат-запросов в день — баланс не тратится. Плюс trial: 2 картинки и 1 видео (Veo 3) навсегда. Инструменты (шаблоны, презентации, SEO, кампании) — с баланса, бонус 100₽ при регистрации. Полный список 65+ моделей — на <a href="/models" class="text-accent hover:underline font-semibold">странице моделей</a>.',
   },
   {
     q: "Чем Stone AI отличается от ChatGPT Plus?",

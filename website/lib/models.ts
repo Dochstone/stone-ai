@@ -17,7 +17,7 @@ export interface AIModel {
 export const TELEGRAM_BOT_URL = "https://t.me/drifttt55bot";
 
 export const MODELS: AIModel[] = [
-  // TIER 1: FREE (7 models)
+  // TIER 1: FREE (8 models)
   { id: "gpt-4o-mini", name: "GPT-4o mini", company: "OpenAI", tier: "free", category: "chat", pricePerMillion: 2.5, context: "128K", description: "Быстрая и дешёвая модель OpenAI. Идеальна для простых задач, переводов и быстрых ответов.", strengths: ["Быстрая", "Бесплатная", "128K контекст"] },
   { id: "claude-haiku-4.5", name: "Claude Haiku 4.5", company: "Anthropic", tier: "free", category: "chat", pricePerMillion: 11.0, context: "200K", description: "Быстрый Claude для ежедневных задач. Хороший баланс цена/качество с 200К контекстом.", strengths: ["200K контекст", "Бесплатная", "Быстрая"] },
   { id: "gemini-2.0-flash", name: "Gemini 2.0 Flash", company: "Google", tier: "free", category: "chat", pricePerMillion: 1.4, context: "1M", description: "Самая дешёвая модель Google с контекстом 1 миллион токенов. Мгновенные ответы.", strengths: ["1M контекст", "Бесплатная", "Самая дешёвая"] },

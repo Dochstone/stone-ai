@@ -1866,6 +1866,13 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                         <MessageContent content={msg.content} role={msg.role} selectedModel={selectedModel} />
                       </div>
 
+                      {/* Model badge for AI messages */}
+                      {msg.role === "assistant" && msg.content && !streaming && (
+                        <div className="flex items-center gap-1.5 mt-1.5">
+                          <span className="text-[9px] text-text/20 bg-text/[0.03] px-1.5 py-0.5 rounded">{model?.name || selectedModel}</span>
+                        </div>
+                      )}
+
                       {/* Action buttons for AI messages — hide for image/video/3D */}
                       {msg.role === "assistant" && msg.content && !msg.video && !msg.threed && !msg.content.match(/^data:image\//) && !(msg.content.match(/\.(png|jpg|jpeg|webp|gif)(\?|$)/i) && msg.content.startsWith("http")) && (
                         <div className="flex items-center gap-1 mt-2">
@@ -1940,10 +1947,13 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                     </div>
                   </div>
                   <div className="bg-text/[0.06] rounded-2xl rounded-tl-md px-4 py-3">
-                    <div className="flex gap-1.5">
-                      <span className="w-2 h-2 bg-text/20 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                      <span className="w-2 h-2 bg-text/20 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                      <span className="w-2 h-2 bg-text/20 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                    <div className="flex items-center gap-2">
+                      <div className="flex gap-1">
+                        <span className="w-2 h-2 bg-accent/40 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                        <span className="w-2 h-2 bg-accent/40 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                        <span className="w-2 h-2 bg-accent/40 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                      </div>
+                      <span className="text-[11px] text-text/25 animate-pulse">{model?.name || "AI"} думает...</span>
                     </div>
                   </div>
                 </div>
@@ -2319,7 +2329,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                   <div className="grid grid-cols-2 gap-2 mb-5">
                     {[
                       { icon: "⚡", text: "15 запросов в день" },
-                      { icon: "🧠", text: "7 моделей бесплатно" },
+                      { icon: "🧠", text: "8 моделей бесплатно" },
                       { icon: "🎨", text: "Генерация картинок" },
                       { icon: "💾", text: "Сохранение истории" },
                     ].map((b, i) => (
