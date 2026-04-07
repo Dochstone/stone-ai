@@ -11,7 +11,7 @@ const GenerationOverlay = dynamic(() => import("@/components/GenerationOverlay")
 const WelcomeScreen = dynamic(() => import("@/components/chat/WelcomeScreen"), { ssr: false });
 const VoiceButton = dynamic(() => import("@/components/chat/VoiceButton"), { ssr: false });
 const MessageContent = dynamic(() => import("@/components/chat/MessageContent"), { ssr: false });
-import { VideoPlayer } from "@/components/chat/MessageContent";
+import { VideoPlayer, getVideoUrl } from "@/components/chat/MessageContent";
 import { getSavedAvatar } from "@/lib/avatar";
 import { OnboardingFlow } from "@/components/OnboardingFlow";
 
@@ -1888,9 +1888,10 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                       {msg.video && (
                         <div className="mb-2">
                           <VideoPlayer url={msg.video.url} taskId={msg.video.taskId} token={auth?.token} thumbnailUrl={msg.video.thumbnailUrl} />
+                          {(() => { const vUrl = getVideoUrl(msg.video.url, msg.video.taskId, auth?.token); return (
                           <div className="flex items-center gap-3 mt-2">
                             <a
-                              href={msg.video.directUrl || msg.video.url}
+                              href={vUrl}
                               download={`stone-ai-video-${Date.now()}.mp4`}
                               className="flex items-center gap-1.5 text-[11px] text-accent font-semibold hover:underline"
                             >
@@ -1899,7 +1900,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                               </svg>
                               Скачать
                             </a>
-                            <a href={msg.video.directUrl || msg.video.url} target="_blank" rel="noopener noreferrer"
+                            <a href={vUrl} target="_blank" rel="noopener noreferrer"
                               className="flex items-center gap-1.5 text-[11px] text-text/40 font-semibold hover:text-text/60">
                               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
@@ -1907,6 +1908,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                               Смотреть
                             </a>
                           </div>
+                          ); })()}
                         </div>
                       )}
 

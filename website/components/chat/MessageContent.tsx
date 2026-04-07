@@ -78,12 +78,18 @@ function renderMarkdown(text: string): string {
 
 // ─── Sub-components ───
 
+function getVideoUrl(url: string, taskId?: string, token?: string): string {
+  if (url.includes("fal.media") || url.includes("fal.run")) return url;
+  if (taskId && token) return `${API_URL}/api/video/stream/${taskId}?token=${token}`;
+  return url;
+}
+
 function VideoPlayer({ url, taskId, token, thumbnailUrl }: { url: string; taskId?: string; token?: string; thumbnailUrl?: string }) {
   const [thumbLoaded, setThumbLoaded] = useState(false);
+  const videoUrl = getVideoUrl(url, taskId, token);
 
   const openVideo = () => {
-    const directUrl = url.includes("fal.media") ? url : (taskId && token ? `${API_URL}/api/video/stream/${taskId}?token=${token}` : url);
-    window.open(directUrl, "_blank");
+    window.open(videoUrl, "_blank");
   };
 
   return (
@@ -267,4 +273,4 @@ export default function MessageContent({ content, role, selectedModel }: { conte
 }
 
 // Re-export sub-components that WebChat.tsx might still use directly
-export { VideoPlayer, ImageWithDownload, renderMarkdown, extractImageUrl, downloadImage, stripImageFromText, ThinkingBlock };
+export { VideoPlayer, getVideoUrl, ImageWithDownload, renderMarkdown, extractImageUrl, downloadImage, stripImageFromText, ThinkingBlock };

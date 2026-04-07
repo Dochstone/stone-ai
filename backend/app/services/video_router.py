@@ -166,14 +166,14 @@ async def check_video_status(model_id: str, fal_request_id: str) -> dict:
                 return {"status": "FAILED", "error": "Модель временно недоступна. Попробуйте другую."}
 
             if status == "COMPLETED":
-                # Fetch the actual result — try both paths
+                # Fetch the actual result — try full path first, then base
                 result_resp = await client.get(
-                    f"{FAL_QUEUE_URL}/{fal_base}/requests/{fal_request_id}",
+                    f"{FAL_QUEUE_URL}/{fal_model}/requests/{fal_request_id}",
                     headers=headers,
                 )
-                if result_resp.status_code != 200:
+                if result_resp.status_code != 200 and fal_base != fal_model:
                     result_resp = await client.get(
-                        f"{FAL_QUEUE_URL}/{fal_model}/requests/{fal_request_id}",
+                        f"{FAL_QUEUE_URL}/{fal_base}/requests/{fal_request_id}",
                         headers=headers,
                     )
                 if result_resp.status_code == 200:
