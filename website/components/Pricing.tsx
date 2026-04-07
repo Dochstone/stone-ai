@@ -425,6 +425,9 @@ export default function Pricing() {
             className="w-full sm:max-w-[750px] sm:rounded-3xl rounded-t-3xl relative overflow-hidden p-[2px]"
             onClick={(e) => e.stopPropagation()}
             onTouchStart={(e) => {
+              // Don't start swipe on interactive elements
+              const tag = (e.target as HTMLElement).closest("button, a, input, select");
+              if (tag) return;
               swipeStartRef.current = e.touches[0].clientY;
               setSwiping(true);
             }}
