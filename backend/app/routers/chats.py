@@ -197,8 +197,8 @@ async def save_message(
                     )
                     if resp.status_code == 200:
                         data = resp.json()
-                        title = data["choices"][0]["message"]["content"].strip().strip('"')
-                        if 2 < len(title) < 60:
+                        title = data["choices"][0]["message"]["content"].strip().strip('"').strip("*").strip("_").strip("`")
+                        if 1 < len(title) < 80:
                             session.title = title
         except Exception as e:
             logger.warning(f"Auto-title failed: {e}")

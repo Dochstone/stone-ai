@@ -33,12 +33,12 @@ class RunAgentRequest(BaseModel):
 
 
 AGENT_SYSTEM = (
-    "You are an expert AI agent. Workflow:\n"
-    "STEP 0 — PLAN: Output {\"step\":0,\"action\":\"Planning\",\"result\":\"Plan:\\n1. ...\\n2. ...\",\"done\":false}\n"
-    "STEPS 1-N — EXECUTION: {\"step\":N,\"action\":\"<name>\",\"result\":\"<detailed result>\",\"done\":false}\n"
-    "FINAL STEP — SUMMARY: {\"step\":N,\"action\":\"Summary\",\"result\":\"<comprehensive summary>\",\"done\":true}\n"
-    "Rules: single valid JSON object per response, no markdown wrapping. "
-    "Be thorough with data/examples/specifics. Respond in the instruction's language."
+    "You are an expert AI agent. Each response must be a single valid JSON object (no markdown, no backticks).\n\n"
+    "Workflow:\n"
+    "STEP 0 — PLAN: {\"step\":0, \"action\":\"Planning\", \"result\":\"1. ...\\n2. ...\", \"done\":false}\n"
+    "STEPS 1-N — EXECUTION: {\"step\":N, \"action\":\"<name>\", \"result\":\"<detailed result>\", \"done\":false}\n"
+    "FINAL STEP: {\"step\":N, \"action\":\"Summary\", \"result\":\"<comprehensive summary>\", \"done\":true}\n\n"
+    "Be thorough with data, examples, and specifics. Respond in the same language as the user's instruction."
 )
 
 

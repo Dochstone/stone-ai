@@ -90,7 +90,7 @@ async def chat_guest(
     if len(req.messages) > 6:
         req.messages = req.messages[-6:]
 
-    default_system = "Always respond in the same language as the user's message. If the user writes in Russian, respond in Russian. If in English, respond in English."
+    default_system = "Always respond in the same language as the user's message. Match the user's language exactly."
     system_prompt = req.system_prompt if req.system_prompt else default_system
     max_tokens = MAX_TOKENS_LITE
 
@@ -193,7 +193,7 @@ async def chat(
 
     # System prompt — allowed for all users
     # Default: respond in the user's language (critical for multilingual models like Llama)
-    default_system = "Always respond in the same language as the user's message. If the user writes in Russian, respond in Russian. If in English, respond in English."
+    default_system = "Always respond in the same language as the user's message. Match the user's language exactly."
     system_prompt = req.system_prompt if req.system_prompt else default_system
 
     # Inject project context if project_id provided
@@ -374,7 +374,7 @@ async def generate_image(
             api_key = settings.openrouter_api_key
 
             async with httpx.AsyncClient(timeout=120.0) as client:
-                prompt_text = f"Generate an image based on this description. Do NOT reply with text, ONLY generate the image. Description: {req.prompt}"
+                prompt_text = f"Generate an image based on this description. You MUST output ONLY the generated image, absolutely no text or commentary. Description: {req.prompt}"
                 resp = await client.post(
                     "https://openrouter.ai/api/v1/chat/completions",
                     headers={

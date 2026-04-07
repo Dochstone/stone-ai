@@ -121,7 +121,7 @@ Number of slides: {req.slides_count}
 Detail level: {detail_map[req.detail_level]}
 Language: {req.language}{audience_hint}
 
-Return ONLY a valid JSON array (no markdown, no explanation) of slides in this format:
+Return ONLY a valid JSON array. No markdown code blocks, no backticks, no explanation — pure JSON only. Format:
 [
   {{
     "title": "Slide title",
@@ -141,7 +141,7 @@ Available layouts: "title" (for the first/section slides), "content" (regular), 
 
 The first slide MUST use "title" layout.
 For "quote" layout, put the quote as the first bullet and attribution as the second.
-For "two-column" layout, put left-column bullets first, then add "---" as separator, then right-column bullets.
+For "two-column" layout, use "left" and "right" arrays instead of "bullets": {"left": ["Point 1", "Point 2"], "right": ["Point 3", "Point 4"]}.
 
 Make the content insightful, well-structured, and engaging. Each slide should have a clear purpose."""
 
@@ -216,13 +216,17 @@ def render_presentation_html(slides: list[dict], style: str, title: str) -> str:
             </div>"""
 
         elif layout == "two-column":
-            sep_idx = None
-            for i, b in enumerate(bullets):
-                if b.strip() == "---":
-                    sep_idx = i
-                    break
-            left = bullets[:sep_idx] if sep_idx is not None else bullets
-            right = bullets[sep_idx + 1:] if sep_idx is not None else []
+            # Prefer structured left/right arrays; fallback to "---" separator in bullets
+            left = slide.get("left", [])
+            right = slide.get("right", [])
+            if not left and not right:
+                sep_idx = None
+                for i, b in enumerate(bullets):
+                    if b.strip() in ("---", "--", "----"):
+                        sep_idx = i
+                        break
+                left = bullets[:sep_idx] if sep_idx is not None else bullets
+                right = bullets[sep_idx + 1:] if sep_idx is not None else []
             left_html = "".join(
                 f'<li style="color:{theme["text"]}; font-size:18px; margin:6px 0; line-height:1.4;">{_esc(b)}</li>' for b in left
             )

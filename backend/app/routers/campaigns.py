@@ -117,7 +117,7 @@ async def run_campaign_pipeline(campaign_id: int, niche: str, url: str | None, b
 
         analysis = await _ai_call(
             f"Проанализируй нишу для рекламной кампании в Яндекс Директ.\n\nНиша: {niche}\n{f'Сайт: {url}' if url else ''}\n{f'Контент сайта: {site_context[:1000]}' if site_context else ''}\nРегион: {region}\nБюджет: {budget}₽/мес\n\nОтвети JSON: {{\"target_audience\": \"описание ЦА\", \"usp\": \"УТП\", \"competitors\": [\"конкурент1\", \"конкурент2\"], \"tone\": \"тон рекламы\", \"pain_points\": [\"боль1\", \"боль2\"]}}",
-            system="Ты эксперт по контекстной рекламе Яндекс Директ. Отвечай только JSON."
+            system="Ты эксперт по контекстной рекламе Яндекс Директ. Отвечай ТОЛЬКО чистый JSON без markdown-обёртки."
         )
         try:
             result["niche_analysis"] = json.loads(analysis.strip().strip("```json").strip("```"))
@@ -145,7 +145,7 @@ async def run_campaign_pipeline(campaign_id: int, niche: str, url: str | None, b
 - intent: commercial/informational/navigational
 
 Ответи JSON массивом: [{{"keyword": "ключ", "wordstat_frequency": 1500, "estimated_cpc": 30, "competition": "medium", "intent": "commercial"}}]""",
-            system="Ты SEO/PPC специалист с опытом работы с Яндекс Wordstat и Директ. Оценивай частотность реалистично для русскоязычного рынка. Отвечай только JSON."
+            system="Ты SEO/PPC специалист с опытом работы с Яндекс Wordstat и Директ. Оценивай частотность реалистично для русскоязычного рынка. Отвечай ТОЛЬКО чистый JSON без markdown-обёртки."
         )
         try:
             result["keywords"] = json.loads(keywords_raw.strip().strip("```json").strip("```"))
@@ -162,7 +162,7 @@ async def run_campaign_pipeline(campaign_id: int, niche: str, url: str | None, b
         kw_list = [k.get("keyword", k) if isinstance(k, dict) else k for k in result["keywords"]][:80]
         groups_raw = await _ai_call(
             f"Сгруппируй ключевые слова в 5-10 рекламных групп для Яндекс Директ.\n\nКлючевые слова:\n{chr(10).join(kw_list)}\n\nОтвети JSON: [{{\"group_name\": \"название группы\", \"keywords\": [\"ключ1\", \"ключ2\"]}}]",
-            system="Группируй по смыслу и намерению. Отвечай только JSON."
+            system="Группируй по смыслу и намерению. Отвечай ТОЛЬКО чистый JSON без markdown-обёртки."
         )
         try:
             result["keyword_groups"] = json.loads(groups_raw.strip().strip("```json").strip("```"))
@@ -178,7 +178,7 @@ async def run_campaign_pipeline(campaign_id: int, niche: str, url: str | None, b
 
         neg_raw = await _ai_call(
             f"Сгенерируй 100-200 минус-слов для рекламной кампании Яндекс Директ.\n\nНиша: {niche}\nКлючевые слова: {', '.join(kw_list[:30])}\n\nОтвети JSON массивом строк: [\"минус1\", \"минус2\", ...]",
-            system="Генерируй минус-слова чтобы отсечь нерелевантный трафик. Отвечай только JSON."
+            system="Генерируй минус-слова чтобы отсечь нерелевантный трафик. Отвечай ТОЛЬКО чистый JSON без markdown-обёртки."
         )
         try:
             result["negative_keywords"] = json.loads(neg_raw.strip().strip("```json").strip("```"))
@@ -196,10 +196,17 @@ async def run_campaign_pipeline(campaign_id: int, niche: str, url: str | None, b
         for group in result["keyword_groups"][:8]:
             ad_raw = await _ai_call(
                 f"Создай рекламное объявление для Яндекс Директ.\n\nГруппа: {group['group_name']}\nКлючевые слова: {', '.join(group.get('keywords', [])[:10])}\nНиша: {niche}\nУТП: {result['niche_analysis'].get('usp', '')}\n\nОтвети JSON: {{\"title1\": \"заголовок до 35 символов\", \"title2\": \"доп заголовок до 30 символов\", \"text\": \"текст объявления до 81 символа\", \"sitelinks\": [{{\"title\": \"ссылка\", \"url\": \"/page\"}}]}}",
-                system="Ты копирайтер Яндекс Директ. Соблюдай лимиты символов. Отвечай только JSON."
+                system="Ты копирайтер Яндекс Директ. Соблюдай лимиты символов. Отвечай ТОЛЬКО чистый JSON без markdown-обёртки."
             )
             try:
                 ad = json.loads(ad_raw.strip().strip("```json").strip("```"))
+                # Enforce Yandex Direct character limits
+                if ad.get("title1") and len(ad["title1"]) > 35:
+                    ad["title1"] = ad["title1"][:35]
+                if ad.get("title2") and len(ad["title2"]) > 30:
+                    ad["title2"] = ad["title2"][:30]
+                if ad.get("text") and len(ad["text"]) > 81:
+                    ad["text"] = ad["text"][:81]
                 ad["group"] = group["group_name"]
                 ads.append(ad)
             except Exception as parse_err:
@@ -215,7 +222,7 @@ async def run_campaign_pipeline(campaign_id: int, niche: str, url: str | None, b
 
         recs_raw = await _ai_call(
             f"Дай 5-7 рекомендаций по оптимизации рекламной кампании.\n\nНиша: {niche}\nБюджет: {budget}₽/мес\nКлючей: {len(kw_list)}\nГрупп: {len(result['keyword_groups'])}\nМинус-слов: {len(result['negative_keywords'])}\n\nОтвети JSON: [{{\"title\": \"рекомендация\", \"description\": \"описание\", \"priority\": \"high|medium|low\"}}]",
-            system="Ты PPC-эксперт. Отвечай только JSON."
+            system="Ты PPC-эксперт. Отвечай ТОЛЬКО чистый JSON без markdown-обёртки."
         )
         try:
             result["recommendations"] = json.loads(recs_raw.strip().strip("```json").strip("```"))
@@ -390,9 +397,16 @@ async def improve_ad(
 ВАЖНО: Заголовок 1 — максимум 35 символов. Заголовок 2 — максимум 30 символов. Текст — максимум 81 символ.
 
 Ответь JSON: {{"title1": "...", "title2": "...", "text": "..."}}""",
-            system="Ты копирайтер Яндекс Директ. Строго соблюдай лимиты символов. Отвечай только JSON."
+            system="Ты копирайтер Яндекс Директ. Строго соблюдай лимиты символов. Отвечай ТОЛЬКО чистый JSON без markdown-обёртки."
         )
         improved = json.loads(improved_raw.strip().strip("```json").strip("```"))
+        # Enforce Yandex Direct character limits
+        if improved.get("title1") and len(improved["title1"]) > 35:
+            improved["title1"] = improved["title1"][:35]
+        if improved.get("title2") and len(improved["title2"]) > 30:
+            improved["title2"] = improved["title2"][:30]
+        if improved.get("text") and len(improved["text"]) > 81:
+            improved["text"] = improved["text"][:81]
 
         # Update ad in campaign
         ads[body.ad_index] = {**ad, **improved}
