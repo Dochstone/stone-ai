@@ -73,11 +73,12 @@ VIDEO_MODELS = {
     "cogvideox", "mochi",
 }
 
-# Models available on free plan (everything else is locked)
-FREE_PLAN_MODELS = (
-    FAST_MODELS
-    | {"nano-banana", "nano-banana-pro"}  # free image models
-)
+# Models available on free plan — only 7 models (everything else is locked)
+FREE_PLAN_MODELS = {
+    "gpt-4o-mini", "claude-haiku-4.5", "gemini-2.0-flash",
+    "deepseek-v3", "llama-4-maverick", "mistral-large-25",
+    "nano-banana",
+}
 
 
 def get_model_category(model_id: str) -> str:
