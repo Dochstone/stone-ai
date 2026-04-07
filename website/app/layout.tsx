@@ -246,7 +246,7 @@ export default function RootLayout({
         <TonProvider>
         <LayoutShell>{children}</LayoutShell>
         </TonProvider>
-        <ScrollToTop />
+        {/* ScrollToTop removed — scroll button only in chat */}
         <PWAInstallPrompt />
         <PageTracker />
         <TelegramWebApp />
