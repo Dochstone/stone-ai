@@ -25,11 +25,11 @@ interface MarketplaceOption {
   icon: string;
 }
 
-const TABS: { id: Tab; label: string; price: number }[] = [
-  { id: "background", label: "Смена фона", price: 15 },
-  { id: "model", label: "На модели", price: 40 },
-  { id: "marketplace", label: "Маркетплейс", price: 20 },
-  { id: "batch", label: "Пакетная", price: 15 },
+const TABS: { id: Tab; label: string; price: number; icon: string }[] = [
+  { id: "background", label: "Смена фона", price: 15, icon: "🖼️" },
+  { id: "model", label: "На модели", price: 40, icon: "👗" },
+  { id: "marketplace", label: "Маркетплейс", price: 20, icon: "🛒" },
+  { id: "batch", label: "Пакетная", price: 15, icon: "📦" },
 ];
 
 // Derived from IMAGE_MODELS, with "label" key for local select component and filtered subset
@@ -229,7 +229,7 @@ export default function PhotoSessionPage() {
                   : "bg-text/[0.04] text-text/50 hover:text-text/70"
               }`}
             >
-              {t.label} ({t.price}₽)
+              {t.icon} {t.label} ({t.price}₽)
             </button>
           ))}
         </div>
