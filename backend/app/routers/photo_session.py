@@ -31,7 +31,7 @@ COST_MARKETPLACE = 0.21    # ~20 RUB
 
 DEFAULT_IMAGE_MODEL = "nano-banana"  # Gemini handles background editing best
 
-OPENROUTER_IMAGE_MODELS = {"nano-banana", "nano-banana-pro", "gpt-image-1"}
+OPENROUTER_IMAGE_MODELS = {"nano-banana", "nano-banana-pro"}
 
 
 # ─── Schemas ───
@@ -189,28 +189,12 @@ async def _generate_image(prompt: str, model_id: str | None = None, input_image_
 
     settings = get_settings()
 
-    # For OpenAI models with input image — use rembg pipeline (GPT can't edit reliably)
-    use_openai = model_id in ("gpt-image-1", "gpt-5-image", "gpt-5-image-mini")
-    if input_image_b64 and use_openai:
-        try:
-            img_b64 = input_image_b64.split(",", 1)[-1] if "," in input_image_b64 else input_image_b64
-            img_bytes = base64.b64decode(img_b64)
-            logger.info("rembg pipeline: removing background...")
-            foreground = await _remove_background(img_bytes)
-            logger.info(f"rembg pipeline: generating background: {prompt[:80]}")
-            bg_url = await _generate_image(f"Background scene: {prompt}. No people, no objects. Just the environment.", model_id)
-            if not bg_url:
-                raise RuntimeError("Background generation failed")
-            logger.info("rembg pipeline: compositing...")
-            return await _composite_on_background(foreground, bg_url)
-        except HTTPException:
-            raise
-        except Exception as e:
-            logger.error(f"rembg pipeline failed: {e}")
-            pass
+    # Photo session only uses Gemini (OpenRouter) — GPT can't edit images
+    # Force to nano-banana if somehow GPT was selected
+    if model_id in ("gpt-image-1", "gpt-5-image", "gpt-5-image-mini"):
+        model_id = "nano-banana"
 
-    # Route: OpenRouter (Gemini) or OpenAI
-    use_openai = model_id in ("gpt-image-1", "gpt-5-image", "gpt-5-image-mini")
+    use_openai = False  # Never use OpenAI for photo session editing
 
     if use_openai and settings.openai_api_key:
         try:
