@@ -102,7 +102,7 @@ BACKGROUND_PRESETS = [
     {"id": "wood-table", "name": "Деревянный стол", "prompt": "warm wooden table surface, rustic cozy atmosphere, natural textures", "emoji": "🟤"},
     {"id": "beach-sunset", "name": "Пляж на закате", "prompt": "golden hour beach background, warm sunset glow, sand and ocean", "emoji": "🌅"},
     {"id": "dark-moody", "name": "Темный", "prompt": "dark moody background, dramatic side lighting, premium luxury feel", "emoji": "🌙"},
-    {"id": "pastel-pink", "name": "Пастельный", "prompt": "soft pastel pink background, gentle lighting, feminine aesthetic", "emoji": "🌸"},
+    {"id": "pastel-pink", "name": "Пастельный", "prompt": "soft pastel pink background, gentle lighting, feminine aesthetic", "emoji": "🎀"},
     {"id": "concrete", "name": "Бетон", "prompt": "industrial concrete background, urban loft style, raw textured surface", "emoji": "🏙"},
     {"id": "christmas", "name": "Новогодний", "prompt": "festive Christmas background, bokeh lights, red and gold decorations, holiday atmosphere", "emoji": "🎄"},
 ]
