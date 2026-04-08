@@ -1,6 +1,5 @@
-const CACHE_NAME = 'stone-ai-v4';
+const CACHE_NAME = 'stone-ai-v5';
 const STATIC_ASSETS = [
-  '/',
   '/offline.html',
   '/manifest.json',
   '/icon-192.png',
@@ -26,9 +25,10 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
+  // Never cache API calls or cross-origin
   if (url.pathname.startsWith('/api') || url.origin !== self.location.origin) return;
 
-  // Navigation requests — network first, fallback to offline page
+  // Navigation — network first, fallback to offline
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request).catch(() => caches.match('/offline.html'))
@@ -36,17 +36,34 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static assets — cache first, then network
-  event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request).then((response) => {
-        if (response.ok && url.pathname.match(/\.(js|css|woff2|png|jpg|webp|svg)$/)) {
+  // JS/CSS — network first (prevents stale code), cache as fallback
+  if (url.pathname.match(/\.(js|css)$/)) {
+    event.respondWith(
+      fetch(event.request).then((response) => {
+        if (response.ok) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         }
         return response;
-      });
-    })
-  );
+      }).catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Images/fonts — cache first (they don't change)
+  if (url.pathname.match(/\.(woff2|png|jpg|webp|svg|ico)$/)) {
+    event.respondWith(
+      caches.match(event.request).then((cached) => {
+        if (cached) return cached;
+        return fetch(event.request).then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        });
+      })
+    );
+    return;
+  }
 });
