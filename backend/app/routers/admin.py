@@ -452,7 +452,7 @@ async def web_admin_transactions(
         "transactions": [
             {
                 "id": t.id,
-                "user_id": t.user_id,
+                "user_id": t.user_tg_id,
                 "amount_usd": round(float(t.amount_usd or 0), 2),
                 "currency": t.currency,
                 "status": t.status,
