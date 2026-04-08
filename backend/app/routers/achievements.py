@@ -17,35 +17,35 @@ router = APIRouter(prefix="/api/achievements", tags=["achievements"])
 # ─── Achievement definitions ───
 ACHIEVEMENTS = [
     # Generation
-    {"slug": "first_image", "title": "Первая картинка", "description": "Сгенерируйте первое изображение", "icon": "🎨", "category": "generation", "condition": {"type": "count", "target": 1, "metric": "images"}, "reward_rub": 0},
-    {"slug": "images_10", "title": "Художник", "description": "Сгенерируйте 10 изображений", "icon": "🖼️", "category": "generation", "condition": {"type": "count", "target": 10, "metric": "images"}, "reward_rub": 0},
-    {"slug": "images_50", "title": "Галерея", "description": "Сгенерируйте 50 изображений", "icon": "🏛️", "category": "generation", "condition": {"type": "count", "target": 50, "metric": "images"}, "reward_rub": 0},
-    {"slug": "images_100", "title": "Мастер кисти", "description": "Сгенерируйте 100 изображений", "icon": "👨‍🎨", "category": "generation", "condition": {"type": "count", "target": 100, "metric": "images"}, "reward_rub": 0},
-    {"slug": "first_video", "title": "Первое видео", "description": "Сгенерируйте первое видео", "icon": "🎬", "category": "generation", "condition": {"type": "count", "target": 1, "metric": "videos"}, "reward_rub": 0},
-    {"slug": "videos_10", "title": "Режиссёр", "description": "Сгенерируйте 10 видео", "icon": "🎥", "category": "generation", "condition": {"type": "count", "target": 10, "metric": "videos"}, "reward_rub": 0},
-    {"slug": "first_3d", "title": "Первая 3D-модель", "description": "Сгенерируйте первую 3D-модель", "icon": "🧊", "category": "generation", "condition": {"type": "count", "target": 1, "metric": "3d"}, "reward_rub": 0},
-    {"slug": "first_audio", "title": "Первая озвучка", "description": "Используйте TTS впервые", "icon": "🔊", "category": "generation", "condition": {"type": "count", "target": 1, "metric": "audio"}, "reward_rub": 0},
-    {"slug": "multiformat", "title": "Мультиформатник", "description": "Используйте все типы генерации", "icon": "🌟", "category": "generation", "condition": {"type": "all_types"}, "reward_rub": 0},
-    {"slug": "models_5", "title": "Исследователь", "description": "Используйте 5 разных моделей", "icon": "🔬", "category": "generation", "condition": {"type": "count", "target": 5, "metric": "unique_models"}, "reward_rub": 0},
-    {"slug": "models_15", "title": "Полиглот AI", "description": "Используйте 15 разных моделей", "icon": "🗣️", "category": "generation", "condition": {"type": "count", "target": 15, "metric": "unique_models"}, "reward_rub": 0},
+    {"slug": "first_image", "title": "Первая картинка", "description": "Сгенерируйте первое изображение", "icon": "🎨", "category": "generation", "condition": {"type": "count", "target": 1, "metric": "images"}, "reward_rub": 5},
+    {"slug": "images_10", "title": "Художник", "description": "Сгенерируйте 10 изображений", "icon": "🖼️", "category": "generation", "condition": {"type": "count", "target": 10, "metric": "images"}, "reward_rub": 10},
+    {"slug": "images_50", "title": "Галерея", "description": "Сгенерируйте 50 изображений", "icon": "🏛️", "category": "generation", "condition": {"type": "count", "target": 50, "metric": "images"}, "reward_rub": 15},
+    {"slug": "images_100", "title": "Мастер кисти", "description": "Сгенерируйте 100 изображений", "icon": "👨‍🎨", "category": "generation", "condition": {"type": "count", "target": 100, "metric": "images"}, "reward_rub": 15},
+    {"slug": "first_video", "title": "Первое видео", "description": "Сгенерируйте первое видео", "icon": "🎬", "category": "generation", "condition": {"type": "count", "target": 1, "metric": "videos"}, "reward_rub": 5},
+    {"slug": "videos_10", "title": "Режиссёр", "description": "Сгенерируйте 10 видео", "icon": "🎥", "category": "generation", "condition": {"type": "count", "target": 10, "metric": "videos"}, "reward_rub": 15},
+    {"slug": "first_3d", "title": "Первая 3D-модель", "description": "Сгенерируйте первую 3D-модель", "icon": "🧊", "category": "generation", "condition": {"type": "count", "target": 1, "metric": "3d"}, "reward_rub": 5},
+    {"slug": "first_audio", "title": "Первая озвучка", "description": "Используйте TTS впервые", "icon": "🔊", "category": "generation", "condition": {"type": "count", "target": 1, "metric": "audio"}, "reward_rub": 5},
+    {"slug": "multiformat", "title": "Мультиформатник", "description": "Используйте все типы генерации", "icon": "🌟", "category": "generation", "condition": {"type": "all_types"}, "reward_rub": 15},
+    {"slug": "models_5", "title": "Исследователь", "description": "Используйте 5 разных моделей", "icon": "🔬", "category": "generation", "condition": {"type": "count", "target": 5, "metric": "unique_models"}, "reward_rub": 10},
+    {"slug": "models_15", "title": "Полиглот AI", "description": "Используйте 15 разных моделей", "icon": "🗣️", "category": "generation", "condition": {"type": "count", "target": 15, "metric": "unique_models"}, "reward_rub": 15},
     # Chat
-    {"slug": "chat_100", "title": "Собеседник", "description": "Отправьте 100 сообщений", "icon": "💬", "category": "generation", "condition": {"type": "count", "target": 100, "metric": "messages"}, "reward_rub": 0},
-    {"slug": "chat_500", "title": "Оратор", "description": "Отправьте 500 сообщений", "icon": "🎙️", "category": "generation", "condition": {"type": "count", "target": 500, "metric": "messages"}, "reward_rub": 0},
-    {"slug": "chat_1000", "title": "Философ", "description": "Отправьте 1000 сообщений", "icon": "🧠", "category": "generation", "condition": {"type": "count", "target": 1000, "metric": "messages"}, "reward_rub": 0},
+    {"slug": "chat_100", "title": "Собеседник", "description": "Отправьте 100 сообщений", "icon": "💬", "category": "generation", "condition": {"type": "count", "target": 100, "metric": "messages"}, "reward_rub": 5},
+    {"slug": "chat_500", "title": "Оратор", "description": "Отправьте 500 сообщений", "icon": "🎙️", "category": "generation", "condition": {"type": "count", "target": 500, "metric": "messages"}, "reward_rub": 10},
+    {"slug": "chat_1000", "title": "Философ", "description": "Отправьте 1000 сообщений", "icon": "🧠", "category": "generation", "condition": {"type": "count", "target": 1000, "metric": "messages"}, "reward_rub": 15},
     # Streak
-    {"slug": "streak_3", "title": "3 дня подряд", "description": "Заходите 3 дня подряд", "icon": "🔥", "category": "streak", "condition": {"type": "streak", "target": 3}, "reward_rub": 0},
-    {"slug": "streak_7", "title": "Неделя подряд", "description": "Заходите 7 дней подряд", "icon": "⚡", "category": "streak", "condition": {"type": "streak", "target": 7}, "reward_rub": 0},
-    {"slug": "streak_30", "title": "Месяц подряд", "description": "Заходите 30 дней подряд", "icon": "👑", "category": "streak", "condition": {"type": "streak", "target": 30}, "reward_rub": 0},
+    {"slug": "streak_3", "title": "3 дня подряд", "description": "Заходите 3 дня подряд", "icon": "🔥", "category": "streak", "condition": {"type": "streak", "target": 3}, "reward_rub": 5},
+    {"slug": "streak_7", "title": "Неделя подряд", "description": "Заходите 7 дней подряд", "icon": "⚡", "category": "streak", "condition": {"type": "streak", "target": 7}, "reward_rub": 10},
+    {"slug": "streak_30", "title": "Месяц подряд", "description": "Заходите 30 дней подряд", "icon": "👑", "category": "streak", "condition": {"type": "streak", "target": 30}, "reward_rub": 15},
     # Milestone
-    {"slug": "registered", "title": "Добро пожаловать", "description": "Зарегистрируйтесь в Stone AI", "icon": "🎉", "category": "milestone", "condition": {"type": "event", "metric": "registered"}, "reward_rub": 0},
-    {"slug": "first_project", "title": "Бизнесмен", "description": "Создайте первый проект", "icon": "📁", "category": "milestone", "condition": {"type": "event", "metric": "first_project"}, "reward_rub": 0},
-    {"slug": "first_template", "title": "Шаблонщик", "description": "Используйте первый AI-шаблон", "icon": "📝", "category": "milestone", "condition": {"type": "event", "metric": "first_template"}, "reward_rub": 0},
-    {"slug": "spent_100", "title": "Инвестор", "description": "Потратьте 100₽ на генерации", "icon": "💰", "category": "milestone", "condition": {"type": "count", "target": 100, "metric": "spent_rub"}, "reward_rub": 0},
-    {"slug": "spent_1000", "title": "Меценат", "description": "Потратьте 1000₽ на генерации", "icon": "💎", "category": "milestone", "condition": {"type": "count", "target": 1000, "metric": "spent_rub"}, "reward_rub": 0},
+    {"slug": "registered", "title": "Добро пожаловать", "description": "Зарегистрируйтесь в Stone AI", "icon": "🎉", "category": "milestone", "condition": {"type": "event", "metric": "registered"}, "reward_rub": 5},
+    {"slug": "first_project", "title": "Бизнесмен", "description": "Создайте первый проект", "icon": "📁", "category": "milestone", "condition": {"type": "event", "metric": "first_project"}, "reward_rub": 5},
+    {"slug": "first_template", "title": "Шаблонщик", "description": "Используйте первый AI-шаблон", "icon": "📝", "category": "milestone", "condition": {"type": "event", "metric": "first_template"}, "reward_rub": 5},
+    {"slug": "spent_100", "title": "Инвестор", "description": "Потратьте 100₽ на генерации", "icon": "💰", "category": "milestone", "condition": {"type": "count", "target": 100, "metric": "spent_rub"}, "reward_rub": 10},
+    {"slug": "spent_1000", "title": "Меценат", "description": "Потратьте 1000₽ на генерации", "icon": "💎", "category": "milestone", "condition": {"type": "count", "target": 1000, "metric": "spent_rub"}, "reward_rub": 15},
     # Social
-    {"slug": "first_referral", "title": "Амбассадор", "description": "Пригласите первого друга", "icon": "🤝", "category": "social", "condition": {"type": "count", "target": 1, "metric": "referrals"}, "reward_rub": 0},
-    {"slug": "referrals_5", "title": "Лидер мнений", "description": "Пригласите 5 друзей", "icon": "📣", "category": "social", "condition": {"type": "count", "target": 5, "metric": "referrals"}, "reward_rub": 0},
-    {"slug": "snake_50", "title": "Змеелов", "description": "Наберите 50 очков в змейке", "icon": "🐍", "category": "milestone", "condition": {"type": "count", "target": 50, "metric": "snake_score"}, "reward_rub": 0},
+    {"slug": "first_referral", "title": "Амбассадор", "description": "Пригласите первого друга", "icon": "🤝", "category": "social", "condition": {"type": "count", "target": 1, "metric": "referrals"}, "reward_rub": 10},
+    {"slug": "referrals_5", "title": "Лидер мнений", "description": "Пригласите 5 друзей", "icon": "📣", "category": "social", "condition": {"type": "count", "target": 5, "metric": "referrals"}, "reward_rub": 15},
+    {"slug": "snake_50", "title": "Змеелов", "description": "Наберите 50 очков в змейке", "icon": "🐍", "category": "milestone", "condition": {"type": "count", "target": 50, "metric": "snake_score"}, "reward_rub": 5},
 ]
 
 
@@ -161,15 +161,24 @@ async def check_and_update(tg_id: int, metric: str, value: int = 1) -> list[dict
             result = await db.execute(select(Achievement))
             all_achs = result.scalars().all()
 
-            # Check multiformat: needs separate query for all types used
+            # Check multiformat + unique models
+            from app.models.generation import Generation
+            user_types: set[str] = set()
+            required_types = {"image", "video", "3d", "audio"}
+            unique_model_count = 0
+
             if metric in ("images", "videos", "3d", "audio"):
-                from app.models.generation import Generation
                 types_result = await db.execute(
                     select(Generation.type).where(Generation.user_tg_id == tg_id).distinct()
                 )
                 user_types = {r for r in types_result.scalars().all()}
-                required_types = {"image", "video", "3d", "audio"}
-                has_all = required_types.issubset(user_types)
+
+            if metric in ("messages", "images", "videos", "unique_models"):
+                from app.models.usage import Usage
+                models_result = await db.execute(
+                    select(Usage.model_id).where(Usage.user_tg_id == tg_id).distinct()
+                )
+                unique_model_count = len(list(models_result.scalars().all()))
 
             for ach in all_achs:
                 cond = ach.condition
@@ -208,10 +217,12 @@ async def check_and_update(tg_id: int, metric: str, value: int = 1) -> list[dict
                 if cond.get("type") == "event":
                     ua.progress = 1
                 elif cond.get("type") == "all_types":
-                    ua.progress = len(user_types) if 'user_types' in dir() else 0
-                    target = len(required_types) if 'required_types' in dir() else 4
+                    ua.progress = len(user_types)
+                    target = len(required_types)
                 elif cond.get("type") == "streak":
                     ua.progress = value
+                elif cond.get("metric") == "unique_models":
+                    ua.progress = unique_model_count
                 else:
                     ua.progress = value
 

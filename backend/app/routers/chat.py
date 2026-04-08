@@ -287,6 +287,7 @@ async def chat(
             # Achievement: messages sent
             if db_user:
                 asyncio.create_task(check_and_update(tg_id, "messages", db_user.total_requests or 1))
+                asyncio.create_task(check_and_update(tg_id, "unique_models", 0))
 
     return StreamingResponse(
         generate(),

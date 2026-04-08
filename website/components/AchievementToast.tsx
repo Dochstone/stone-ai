@@ -43,7 +43,11 @@ export default function AchievementToast() {
         <div className="min-w-0">
           <p className="text-[10px] font-bold text-accent uppercase tracking-wider">Достижение!</p>
           <p className="text-sm font-bold text-text truncate">{current.title}</p>
-          <p className="text-[11px] text-teal font-semibold">+{current.reward_rub}₽ на баланс</p>
+          {current.reward_rub > 0 ? (
+            <p className="text-[11px] text-teal font-semibold">+{current.reward_rub}₽ на баланс</p>
+          ) : (
+            <p className="text-[11px] text-text/30 font-semibold">Разблокировано!</p>
+          )}
         </div>
       </div>
     </div>
