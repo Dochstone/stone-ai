@@ -557,6 +557,7 @@ async def telegram_web_start():
     _cleanup_old_sessions()
     session_id = uuid.uuid4().hex[:16]
     _tg_web_sessions[session_id] = {"status": "pending", "created_at": time.time()}
+    logger.info(f"TG web session CREATED: {session_id}, total active: {len(_tg_web_sessions)}")
     return {"session_id": session_id}
 
 
@@ -615,7 +616,7 @@ async def confirm_tg_web_session(session_id: str, tg_id: int, tg_user_data: dict
     from app.database import async_session as get_session
 
     if session_id not in _tg_web_sessions:
-        logger.warning(f"TG web session {session_id} not found (expired or server restarted)")
+        logger.warning(f"TG web session {session_id} NOT FOUND. Active sessions: {list(_tg_web_sessions.keys())[:5]}")
         raise ValueError("Session not found or expired")
 
     logger.info(f"TG web login confirmed: session={session_id}, tg_id={tg_id}")
