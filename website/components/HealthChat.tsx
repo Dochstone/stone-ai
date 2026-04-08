@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import AuthFormComponent, { type AuthState } from "@/components/AuthForm";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
 const HEALTH_SYSTEM_PROMPT = `Ты — AI-ассистент по общим вопросам здоровья. Ты НЕ врач и НЕ ставишь диагнозы.
 

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { getAuth } from "@/lib/auth";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 const STEPS = ["Анализ ниши", "Ключевые слова", "Группировка", "Минус-слова", "Объявления", "Оптимизация", "Готово"];
 
 interface CampaignItem { id: number; name: string; status: string; step: number; total_keywords: number; total_ads: number; cost_rub: number; created_at: string | null; }

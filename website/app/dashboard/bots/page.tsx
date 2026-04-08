@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { getAuth } from "@/lib/auth";
 import { MODELS } from "@/lib/models";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
 interface Bot {
   id: number;

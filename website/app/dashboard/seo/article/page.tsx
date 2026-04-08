@@ -122,7 +122,7 @@ export default function SEOArticlePage() {
                     const wpPass = prompt("Application Password:");
                     if (!wpPass) return;
                     const auth = (() => { try { return JSON.parse(localStorage.getItem("stone_auth") || "{}"); } catch { return {}; } })();
-                    fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app"}/api/wordpress/publish`, {
+                    fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru"}/api/wordpress/publish`, {
                       method: "POST",
                       headers: { "Content-Type": "application/json", ...(auth.token ? { Authorization: `Bearer ${auth.token}` } : {}) },
                       body: JSON.stringify({ site_url: wpUrl, username: wpUser, app_password: wpPass, title: topic || "SEO статья", content: result.replace(/\n/g, "<br>"), status: "draft" }),

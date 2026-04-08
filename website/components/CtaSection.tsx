@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
 export default function CtaSection() {
   const [hasPaidPlan, setHasPaidPlan] = useState(false);

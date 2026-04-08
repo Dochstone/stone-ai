@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { MODELS } from "@/lib/models";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
 // Models grouped for dual view
 const DUAL_MODELS = MODELS.filter(m => m.category === "chat" || m.category === "reason" || m.category === "code").map(m => ({

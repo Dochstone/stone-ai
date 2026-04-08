@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { getAuth } from "@/lib/auth";
 import { CHAT_MODELS } from "@/lib/models-config";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
 const AGENT_MODELS = CHAT_MODELS.filter(m =>
   ["gpt-4o-mini", "deepseek-v3", "claude-haiku-4.5", "gpt-4.1-mini"].includes(m.id)

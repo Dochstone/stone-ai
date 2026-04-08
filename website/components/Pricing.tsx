@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 
 const TonPayButton = dynamic(() => import("./TonPayButton"), { ssr: false });
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
 const plans = [
   {

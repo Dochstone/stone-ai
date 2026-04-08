@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ||
-  "https://stone-ai-production.up.railway.app";
+  "https://stoneai.ru";
 
 type Board = number[][];
 type GameState = "playing" | "won" | "over";

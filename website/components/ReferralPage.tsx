@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import AuthFormComponent, { type AuthState } from "@/components/AuthForm";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
 interface ReferralStats {
   referral_code: string;

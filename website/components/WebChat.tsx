@@ -15,7 +15,7 @@ import { VideoPlayer, getVideoUrl } from "@/components/chat/MessageContent";
 import { getSavedAvatar } from "@/lib/avatar";
 import { OnboardingFlow } from "@/components/OnboardingFlow";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
 const IMAGE_MODEL_IDS = new Set([
   "nano-banana-pro", "nano-banana", "gpt-5-image", "gpt-5-image-mini",

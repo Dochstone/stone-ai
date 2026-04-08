@@ -19,4 +19,4 @@ export function getAuth(): AuthState | null {
   }
 }
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";

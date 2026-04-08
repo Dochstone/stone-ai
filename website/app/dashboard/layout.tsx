@@ -140,7 +140,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       try {
         const auth = JSON.parse(localStorage.getItem("stone_auth") || "{}");
         if (!auth.token) return;
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app"}/api/achievements`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru"}/api/achievements`, {
           headers: { Authorization: `Bearer ${auth.token}` },
         });
         if (!res.ok) return;

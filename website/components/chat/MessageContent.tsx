@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
 const IMAGE_MODEL_IDS = new Set([
   "nano-banana-pro", "nano-banana", "gpt-5-image", "gpt-5-image-mini",
@@ -141,7 +141,7 @@ function ImageWithDownload({ url, caption, genId }: { url: string; caption?: str
     ? `${caption.slice(0, 100)} — создано в Stone AI`
     : "Создано нейросетью в Stone AI";
   // If genId available, link to public image; otherwise link to site
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
   const imagePublicUrl = genId ? `${API_URL}/api/generations/share/${genId}` : null;
   const shareUrl = imagePublicUrl || "https://stoneai.ru/dashboard/chat";
 

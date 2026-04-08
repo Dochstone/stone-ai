@@ -9,7 +9,7 @@ type Particle = { x: number; y: number; vx: number; vy: number; alpha: number; c
 type FruitType = "normal" | "gold" | "diamond";
 type BonusFruit = { pos: Pos; type: FruitType; expiresAt: number };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stone-ai-production.up.railway.app";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 const BASE_SPEED = 150, MIN_SPEED = 60, SPEED_STEP = 8;
 const getSpeed = (s: number) => Math.max(MIN_SPEED, BASE_SPEED - Math.floor(s / 5) * SPEED_STEP);
 const getLevel = (s: number) => s >= 50 ? 4 : s >= 25 ? 3 : s >= 10 ? 2 : 1;

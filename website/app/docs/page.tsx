@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "API документация Stone AI: авторизация, POST /api/chat, GET /api/models, биллинг, лимиты, коды ошибок.",
 };
 
-const BASE_URL = "https://stone-ai-production.up.railway.app";
+const BASE_URL = "https://stoneai.ru";
 
 const howToJsonLd = {
   "@context": "https://schema.org",
