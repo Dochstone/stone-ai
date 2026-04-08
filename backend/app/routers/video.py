@@ -94,7 +94,6 @@ async def generate_video(
         )
 
     new_balance = balance
-    await increment_usage(db, tg_id, req.model_id, tier)
 
     # Create task
     task_id = str(uuid.uuid4())[:12]
@@ -131,7 +130,6 @@ async def generate_video(
             raise HTTPException(502, f"Ошибка генерации: {kling_result['error']}")
         task.fal_request_id = f"kling:{kling_result['task_id']}"
         task.status = "processing"
-        await db.commit()
     else:
         fal_result = await submit_video_generation(
             req.model_id, req.prompt, req.source_image_url
@@ -143,7 +141,10 @@ async def generate_video(
             raise HTTPException(502, f"Ошибка генерации: {fal_result['error']}")
         task.fal_request_id = fal_result["request_id"]
         task.status = "processing"
-        await db.commit()
+
+    # Increment usage ONLY after successful submit (user doesn't lose generation on error)
+    await increment_usage(db, tg_id, req.model_id, tier)
+    await db.commit()
 
     return {
         "task_id": task_id,

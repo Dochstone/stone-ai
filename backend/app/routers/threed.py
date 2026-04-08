@@ -85,7 +85,6 @@ async def generate_threed(
         )
 
     new_balance = balance
-    await increment_usage(db, tg_id, req.model_id, tier)
 
     task_id = str(uuid.uuid4())[:12]
     task = ThreeDTask(
@@ -106,12 +105,14 @@ async def generate_threed(
     )
 
     if "error" in fal_result:
-        # Refund
-        user.balance_usd = round(new_balance + price, 6)
         task.status = "failed"
         task.error_message = fal_result["error"]
         await db.commit()
+        # No increment_usage — user doesn't lose generation on submit error
         raise HTTPException(502, f"Ошибка генерации: {fal_result['error']}")
+
+    # Increment usage ONLY after successful submit
+    await increment_usage(db, tg_id, req.model_id, tier)
 
     # Sync result (e.g. TripoSR returns immediately)
     if fal_result.get("request_id") == "__sync__" and fal_result.get("model_url"):
