@@ -479,7 +479,27 @@ export default function AdminPage() {
                             <option value="max-pro">Elite</option>
                           </select>
                         </td>
-                        <td className="py-3 px-4 text-right font-mono text-xs">${u.balance_usd.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-right">
+                          <button
+                            onClick={async () => {
+                              const rub = prompt(`Баланс ${u.email || u.username}\nСейчас: ${(u.balance_usd * 95).toFixed(0)}₽ ($${u.balance_usd.toFixed(2)})\n\nНовый баланс в рублях:`);
+                              if (!rub || isNaN(Number(rub))) return;
+                              const usd = Number(rub) / 95;
+                              const res = await fetch(`${API_URL}/api/admin/web/users/${u.id}/balance`, {
+                                method: "PATCH",
+                                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                                body: JSON.stringify({ balance_usd: usd, reason: "admin manual" }),
+                              });
+                              if (res.ok) {
+                                setUsers(prev => prev.map(x => x.id === u.id ? { ...x, balance_usd: usd } : x));
+                              }
+                            }}
+                            className="font-mono text-xs text-accent hover:underline cursor-pointer"
+                            title="Нажмите чтобы изменить баланс"
+                          >
+                            {(u.balance_usd * 95).toFixed(0)}₽
+                          </button>
+                        </td>
                         <td className="py-3 px-4 text-right font-mono text-xs">{u.total_requests.toLocaleString()}</td>
                         <td className="py-3 px-4 text-text/30 text-xs">{u.joined_at?.slice(0, 10) || "—"}</td>
                         <td className="py-3 px-4 text-text/30 text-xs">{u.last_active?.slice(0, 10) || "—"}</td>
