@@ -203,9 +203,10 @@ async def web_admin_stats(
     today = date.today()
     month_start = today.replace(day=1)
 
+    from app.models.daily_usage import DailyUsage
     total_users = await db.scalar(select(func.count(User.id))) or 0
     dau = await db.scalar(
-        select(func.count(func.distinct(Usage.user_tg_id))).where(func.date(Usage.created_at) == today)
+        select(func.count(func.distinct(DailyUsage.user_tg_id))).where(DailyUsage.date == today)
     ) or 0
     revenue_today = await db.scalar(
         select(func.coalesce(func.sum(Transaction.amount_usd), 0)).where(
@@ -218,10 +219,14 @@ async def web_admin_stats(
         )
     ) or 0
     requests_today = await db.scalar(
-        select(func.count(Usage.id)).where(func.date(Usage.created_at) == today)
+        select(func.coalesce(
+            func.sum(DailyUsage.fast_used + DailyUsage.premium_used + DailyUsage.image_used + DailyUsage.video_used), 0
+        )).where(DailyUsage.date == today)
     ) or 0
     requests_month = await db.scalar(
-        select(func.count(Usage.id)).where(func.date(Usage.created_at) >= month_start)
+        select(func.coalesce(
+            func.sum(DailyUsage.fast_used + DailyUsage.premium_used + DailyUsage.image_used + DailyUsage.video_used), 0
+        )).where(DailyUsage.date >= month_start)
     ) or 0
 
     top_models_q = await db.execute(
