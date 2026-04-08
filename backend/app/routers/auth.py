@@ -531,9 +531,11 @@ async def telegram_link(
 
 # ── Telegram Web Login (deep link flow) ──
 
-# In-memory store: session_id -> {user_id, created_at} or "pending"
+# DB-backed store for TG web sessions (survives restarts)
+_TG_SESSION_TTL = 600  # 10 minutes
+
+# In-memory cache (fast lookups, synced with DB)
 _tg_web_sessions: dict[str, dict | str] = {}
-_TG_SESSION_TTL = 600  # 10 minutes (mobile users need more time)
 
 
 def _cleanup_old_sessions():
@@ -554,10 +556,20 @@ async def telegram_web_start():
 
     Returns session_id that the website will use to poll for completion.
     """
-    _cleanup_old_sessions()
     session_id = uuid.uuid4().hex[:16]
+    # Save to DB (survives restarts)
+    try:
+        from app.database import async_session
+        from sqlalchemy import text
+        async with async_session() as db:
+            await db.execute(text("INSERT INTO tg_web_sessions (session_id, status) VALUES (:sid, 'pending')"), {"sid": session_id})
+            await db.execute(text("DELETE FROM tg_web_sessions WHERE created_at < NOW() - INTERVAL '10 minutes'"))
+            await db.commit()
+    except Exception as e:
+        logger.warning(f"DB session save failed: {e}")
+    # Also keep in memory for fast lookups
     _tg_web_sessions[session_id] = {"status": "pending", "created_at": time.time()}
-    logger.info(f"TG web session CREATED: {session_id}, total active: {len(_tg_web_sessions)}")
+    logger.info(f"TG web session CREATED: {session_id}")
     return {"session_id": session_id}
 
 
@@ -616,8 +628,22 @@ async def confirm_tg_web_session(session_id: str, tg_id: int, tg_user_data: dict
     from app.database import async_session as get_session
 
     if session_id not in _tg_web_sessions:
-        logger.warning(f"TG web session {session_id} NOT FOUND. Active sessions: {list(_tg_web_sessions.keys())[:5]}")
-        raise ValueError("Session not found or expired")
+        # Check DB (session may have been created before restart)
+        try:
+            from sqlalchemy import text
+            async with get_session() as db:
+                row = await db.execute(text("SELECT session_id FROM tg_web_sessions WHERE session_id = :sid AND created_at > NOW() - INTERVAL '10 minutes'"), {"sid": session_id})
+                if row.scalar_one_or_none():
+                    _tg_web_sessions[session_id] = {"status": "pending", "created_at": time.time()}
+                    logger.info(f"TG web session {session_id} restored from DB")
+                else:
+                    logger.warning(f"TG web session {session_id} NOT FOUND in memory or DB")
+                    raise ValueError("Session not found or expired")
+        except ValueError:
+            raise
+        except Exception as e:
+            logger.warning(f"DB session check failed: {e}")
+            raise ValueError("Session not found or expired")
 
     logger.info(f"TG web login confirmed: session={session_id}, tg_id={tg_id}")
 
