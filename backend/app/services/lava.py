@@ -75,7 +75,7 @@ async def create_invoice(
         "expire": 900,  # 15 minutes
     }
 
-    hook_url = f"https://stone-ai-production.up.railway.app/api/payment/lava/webhook"
+    hook_url = f"https://stoneai.ru/api/payment/lava/webhook"
     data["hookUrl"] = hook_url
 
     if success_url:

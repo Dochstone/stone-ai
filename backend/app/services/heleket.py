@@ -76,7 +76,7 @@ async def create_invoice(
         logger.error("Heleket credentials not configured")
         return None
 
-    callback = url_callback or "https://stone-ai-production.up.railway.app/api/payment/crypto/webhook"
+    callback = url_callback or "https://stoneai.ru/api/payment/crypto/webhook"
 
     data = {
         "amount": str(amount_usd),

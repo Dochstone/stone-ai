@@ -16,7 +16,7 @@ from app.models.custom_bot import CustomBot, TelegramBotLink
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/telegram-bots", tags=["telegram-bots"])
 
-RAILWAY_URL = os.getenv("RAILWAY_PUBLIC_DOMAIN", "stone-ai-production.up.railway.app").replace("https://", "").replace("http://", "").rstrip("/")
+RAILWAY_URL = os.getenv("RAILWAY_PUBLIC_DOMAIN", "stoneai.ru").replace("https://", "").replace("http://", "").rstrip("/")
 
 
 class ConnectRequest(BaseModel):
