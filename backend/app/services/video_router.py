@@ -28,7 +28,7 @@ VIDEO_MODELS_REGISTRY = [
     {"id": "luma-dream",  "name": "Luma Dream Machine", "company": "Luma",    "fal_model": "fal-ai/luma-dream-machine",       "duration": "5s",    "cost": 0.10, "price": 0.35, "active": True},
     {"id": "pika-2",      "name": "Pika 2.0",          "company": "Pika",     "fal_model": "fal-ai/pika/v2",                  "duration": "3-5s",  "cost": 0.05, "price": 0.18, "active": True},
     # Tier 3: Budget
-    {"id": "wan-2",       "name": "Wan 2.6",           "company": "Alibaba",   "fal_model": "fal-ai/wan/v2.6/text-to-video",   "duration": "5-10s", "cost": 0.05, "price": 0.15, "active": True},
+    {"id": "wan-2",       "name": "Wan 2.6",           "company": "Alibaba",   "fal_model": "fal-ai/wan/v2.6/text-to-video",   "duration": "5-10s", "cost": 0.05, "price": 0.15, "active": False},  # disabled — hangs on fal.ai
     {"id": "hunyuan",     "name": "Hunyuan Video",     "company": "Tencent",   "fal_model": "fal-ai/hunyuan-video",            "duration": "5s",    "cost": 0.06, "price": 0.18, "active": False},  # disabled — hangs on fal.ai
     {"id": "ltx-video",   "name": "LTX Video 2.3",    "company": "Lightricks", "fal_model": "fal-ai/ltx-2-19b",               "duration": "5s",    "cost": 0.04, "price": 0.12, "active": True},
     {"id": "stable-video", "name": "Stable Video",     "company": "Stability", "fal_model": "fal-ai/stable-video",             "duration": "4s",    "cost": 0.04, "price": 0.15, "active": True},
