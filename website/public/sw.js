@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stone-ai-v3';
+const CACHE_NAME = 'stone-ai-v4';
 const STATIC_ASSETS = [
   '/',
   '/offline.html',
