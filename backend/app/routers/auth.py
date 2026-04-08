@@ -200,6 +200,13 @@ async def verify_email(body: VerifyEmailRequest, request: Request, db: AsyncSess
     # Achievement: registered
     asyncio.create_task(check_and_update(user.telegram_id or user.id, "registered", 1))
 
+    # Welcome email
+    try:
+        from app.services.email_service import send_welcome
+        send_welcome(email, user.first_name or "")
+    except Exception:
+        pass
+
     return _user_response(user, token)
 
 
@@ -313,6 +320,13 @@ async def _get_or_create_oauth_user(
 
     # Achievement: registered
     asyncio.create_task(check_and_update(user.telegram_id or user.id, "registered", 1))
+
+    # Welcome email
+    try:
+        from app.services.email_service import send_welcome
+        send_welcome(email, user.first_name or "")
+    except Exception:
+        pass
 
     token = create_jwt(user.id, email)
     return user, token
