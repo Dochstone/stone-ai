@@ -16,6 +16,36 @@ from app.services.token_billing import add_balance
 from app.services import lava as lava_service
 from app.services import heleket as heleket_service
 from app.services import platega as platega_service
+import httpx
+
+
+async def notify_admin_payment(user_email: str, amount_rub: int, method: str):
+    """Send Telegram notification to admin about new payment."""
+    try:
+        from app.config import get_settings
+        settings = get_settings()
+        if not settings.bot_token:
+            return
+        import os
+        admin_ids = os.getenv("ADMIN_TG_IDS", "")
+        if not admin_ids:
+            return
+        text_msg = (
+            f"💰 <b>Новая оплата!</b>\n\n"
+            f"👤 {user_email}\n"
+            f"💵 {amount_rub}₽\n"
+            f"💳 {method}\n"
+        )
+        async with httpx.AsyncClient(timeout=5) as client:
+            for admin_id in admin_ids.split(","):
+                aid = admin_id.strip()
+                if aid:
+                    await client.post(
+                        f"https://api.telegram.org/bot{settings.bot_token}/sendMessage",
+                        json={"chat_id": aid, "text": text_msg, "parse_mode": "HTML"},
+                    )
+    except Exception as e:
+        logger.warning(f"Admin notification failed: {e}")
 from app.config import get_settings
 
 logger = logging.getLogger(__name__)
@@ -303,6 +333,15 @@ async def platega_webhook(request: Request, db: AsyncSession = Depends(get_db)):
 
     logger.info(f"Platega payment completed: user={user_tg_id}, usd={usd_amount}, balance=${new_balance:.6f}")
 
+    # Notify admin via Telegram
+    try:
+        user_row2 = await db.execute(text("SELECT email FROM users WHERE telegram_id = :tid OR id = :tid LIMIT 1"), {"tid": user_tg_id})
+        admin_email = user_row2.scalar() or str(user_tg_id)
+        import asyncio
+        asyncio.create_task(notify_admin_payment(admin_email, round(usd_amount * 95), "Platega (карта/СБП)"))
+    except Exception:
+        pass
+
     # Send email notification
     try:
         user_row = await db.execute(text("SELECT email FROM users WHERE telegram_id = :tid OR id = :tid LIMIT 1"), {"tid": user_tg_id})
@@ -490,6 +529,16 @@ async def heleket_webhook(request: Request, db: AsyncSession = Depends(get_db)):
     await credit_referrer(db, user_tg_id, usd_amount)
 
     await db.commit()
+
+    # Notify admin via Telegram
+    try:
+        user_row4 = await db.execute(text("SELECT email FROM users WHERE telegram_id = :tid OR id = :tid LIMIT 1"), {"tid": user_tg_id})
+        admin_email = user_row4.scalar() or str(user_tg_id)
+        import asyncio
+        method = f"Крипто ({product_type})" if product_type == "subscription" else "Heleket (крипто)"
+        asyncio.create_task(notify_admin_payment(admin_email, round(usd_amount * 95), method))
+    except Exception:
+        pass
 
     return {"ok": True}
 
