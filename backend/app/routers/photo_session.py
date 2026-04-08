@@ -96,13 +96,13 @@ PLATFORM_SPECS = {
 
 BACKGROUND_PRESETS = [
     {"id": "white-studio", "name": "Белая студия", "prompt": "pure white studio background, professional lighting, soft shadows", "emoji": "💡"},
-    {"id": "marble", "name": "Мрамор", "prompt": "elegant marble surface and background, luxury feel, soft reflections", "emoji": "✨"},
+    {"id": "marble", "name": "Мрамор", "prompt": "elegant marble surface and background, luxury feel, soft reflections", "emoji": "⚪"},
     {"id": "nature-green", "name": "Природа", "prompt": "lush green nature background, soft bokeh, natural daylight, organic setting", "emoji": "🌳"},
     {"id": "gradient-blue", "name": "Синий градиент", "prompt": "smooth blue gradient background, modern and clean, tech aesthetic", "emoji": "🌊"},
-    {"id": "wood-table", "name": "Деревянный стол", "prompt": "warm wooden table surface, rustic cozy atmosphere, natural textures", "emoji": "🟤"},
+    {"id": "wood-table", "name": "Деревянный стол", "prompt": "warm wooden table surface, rustic cozy atmosphere, natural textures", "emoji": "🟫"},
     {"id": "beach-sunset", "name": "Пляж на закате", "prompt": "golden hour beach background, warm sunset glow, sand and ocean", "emoji": "🌅"},
     {"id": "dark-moody", "name": "Темный", "prompt": "dark moody background, dramatic side lighting, premium luxury feel", "emoji": "🌙"},
-    {"id": "pastel-pink", "name": "Пастельный", "prompt": "soft pastel pink background, gentle lighting, feminine aesthetic", "emoji": "🎀"},
+    {"id": "pastel-pink", "name": "Пастельный", "prompt": "soft pastel pink background, gentle lighting, feminine aesthetic", "emoji": "🌷"},
     {"id": "concrete", "name": "Бетон", "prompt": "industrial concrete background, urban loft style, raw textured surface", "emoji": "🏙"},
     {"id": "christmas", "name": "Новогодний", "prompt": "festive Christmas background, bokeh lights, red and gold decorations, holiday atmosphere", "emoji": "🎄"},
 ]
