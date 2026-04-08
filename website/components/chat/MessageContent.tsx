@@ -87,7 +87,7 @@ function getVideoUrl(url: string, directUrl?: string, taskId?: string, token?: s
   return directUrl || url;
 }
 
-function VideoPlayer({ url, directUrl, taskId, token, thumbnailUrl }: { url: string; directUrl?: string; taskId?: string; token?: string; thumbnailUrl?: string }) {
+function VideoPlayer({ url, directUrl, taskId, token, thumbnailUrl, isFree }: { url: string; directUrl?: string; taskId?: string; token?: string; thumbnailUrl?: string; isFree?: boolean }) {
   const videoUrl = getVideoUrl(url, directUrl, taskId, token);
   const [loading, setLoading] = useState(true);
 
@@ -99,22 +99,37 @@ function VideoPlayer({ url, directUrl, taskId, token, thumbnailUrl }: { url: str
           <span className="text-[11px] text-text/30 font-medium">Загрузка видео...</span>
         </div>
       )}
+      {/* Watermark overlay for free users */}
+      {isFree && !loading && (
+        <div className="absolute inset-0 z-20 pointer-events-none flex items-end justify-end p-3">
+          <span className="text-white/40 text-sm font-bold drop-shadow-lg select-none">stoneai.ru</span>
+        </div>
+      )}
       <video
         src={videoUrl}
-        controls
+        controls={!isFree}
         playsInline
         preload="metadata"
+        controlsList={isFree ? "nodownload" : undefined}
+        onContextMenu={isFree ? (e) => e.preventDefault() : undefined}
         className={`w-full rounded-t-2xl bg-black ${loading ? "opacity-0" : "opacity-100"} transition-opacity`}
         style={{ maxHeight: 300 }}
         onLoadedData={() => setLoading(false)}
         onCanPlay={() => setLoading(false)}
       />
       <div className="bg-text/[0.06] px-4 py-2 flex items-center justify-between">
-        <span className="text-[11px] font-semibold text-text/40">{loading ? "Загружается..." : "Видео готово"}</span>
-        <a href={videoUrl} download={`stone-ai-video.mp4`} className="text-[11px] font-bold text-accent hover:underline flex items-center gap-1">
-          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V3" /></svg>
-          Скачать
-        </a>
+        <span className="text-[11px] font-semibold text-text/40">{loading ? "Загружается..." : isFree ? "Подписка для скачивания" : "Видео готово"}</span>
+        {isFree ? (
+          <a href="/pricing" className="text-[11px] font-bold text-accent hover:underline flex items-center gap-1">
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+            Подписка
+          </a>
+        ) : (
+          <a href={videoUrl} download={`stone-ai-video.mp4`} className="text-[11px] font-bold text-accent hover:underline flex items-center gap-1">
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V3" /></svg>
+            Скачать
+          </a>
+        )}
       </div>
     </div>
   );

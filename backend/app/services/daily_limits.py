@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 MSK = timezone(timedelta(hours=3))
 
 DAILY_LIMITS = {
-    "free":     {"fast": 10, "premium": 0,  "opus": 0,  "image": 2, "video": 1},
+    "free":     {"fast": 10, "premium": 0,  "opus": 0,  "image": 0, "video": 0},  # free uses trial limits (2 img + 1 vid TOTAL), not daily
     "mini":     {"fast": 20, "premium": 3,  "opus": 0,  "image": 2, "video": 1},
     "max":      {"fast": 50, "premium": 4,  "opus": 1,  "image": 5, "video": 1},
     "max-pro":  {"fast": 150, "premium": 12, "opus": 2, "image": 10, "video": 3},

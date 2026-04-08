@@ -1976,7 +1976,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                       {/* Video player */}
                       {msg.video && (
                         <div className="mb-2">
-                          <VideoPlayer url={msg.video.url} directUrl={msg.video.directUrl} taskId={msg.video.taskId} token={auth?.token} />
+                          <VideoPlayer url={msg.video.url} directUrl={msg.video.directUrl} taskId={msg.video.taskId} token={auth?.token} isFree={!limits?.plan || limits.plan === "free"} />
                         </div>
                       )}
 
