@@ -29,7 +29,7 @@ COST_BACKGROUND = 0.158    # ~15 RUB
 COST_ON_MODEL = 0.421      # ~40 RUB
 COST_MARKETPLACE = 0.21    # ~20 RUB
 
-DEFAULT_IMAGE_MODEL = "nano-banana"
+DEFAULT_IMAGE_MODEL = "gpt-image-1"  # GPT follows edit instructions better than Gemini
 
 OPENROUTER_IMAGE_MODELS = {"nano-banana", "nano-banana-pro", "gpt-image-1"}
 
@@ -166,16 +166,25 @@ async def _generate_image(prompt: str, model_id: str | None = None, input_image_
     if use_openai and settings.openai_api_key:
         try:
             async with httpx.AsyncClient(timeout=120.0) as client:
-                # If input image provided, use edit endpoint
                 if input_image_b64:
-                    prompt_with_ref = f"Edit this photo. Keep ALL foreground subjects and objects exactly as they are — do not remove, modify, or replace anything in the foreground (people, products, furniture, etc). ONLY replace the background with: {prompt}"
+                    # Use edits endpoint — sends image as file for proper editing
+                    prompt_with_ref = f"Keep ALL foreground subjects exactly as they are. ONLY replace the background with: {prompt}"
+                    # Convert base64 to bytes
+                    img_b64 = input_image_b64.split(",", 1)[-1] if "," in input_image_b64 else input_image_b64
+                    img_bytes = base64.b64decode(img_b64)
+                    resp = await client.post(
+                        "https://api.openai.com/v1/images/edits",
+                        headers={"Authorization": f"Bearer {settings.openai_api_key}"},
+                        files={"image": ("photo.png", img_bytes, "image/png")},
+                        data={"model": "gpt-image-1", "prompt": prompt_with_ref, "n": 1, "size": "1024x1024"},
+                    )
                 else:
-                    prompt_with_ref = prompt
-                resp = await client.post(
-                    "https://api.openai.com/v1/images/generations",
-                    headers={"Authorization": f"Bearer {settings.openai_api_key}", "Content-Type": "application/json"},
-                    json={"model": "gpt-image-1", "prompt": prompt_with_ref, "n": 1, "size": "1024x1024", "quality": "high"},
-                )
+                    # No input image — generate from scratch
+                    resp = await client.post(
+                        "https://api.openai.com/v1/images/generations",
+                        headers={"Authorization": f"Bearer {settings.openai_api_key}", "Content-Type": "application/json"},
+                        json={"model": "gpt-image-1", "prompt": prompt, "n": 1, "size": "1024x1024", "quality": "high"},
+                    )
                 if resp.status_code != 200:
                     error_body = resp.text[:300]
                     logger.error(f"OpenAI image error {resp.status_code}: {error_body}")
