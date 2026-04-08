@@ -210,21 +210,29 @@ export default function AdminPage() {
   }, [token]);
 
   useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearch(userSearch), 400);
+    const t = setTimeout(() => setDebouncedSearch(userSearch), 300);
     return () => clearTimeout(t);
   }, [userSearch]);
 
+  // Debounce tier/date filters too — prevents flashing
+  const [debouncedTier, setDebouncedTier] = useState(userTier);
+  const [debouncedDateFrom, setDebouncedDateFrom] = useState(userDateFrom);
+  const [debouncedDateTo, setDebouncedDateTo] = useState(userDateTo);
+  useEffect(() => { const t = setTimeout(() => setDebouncedTier(userTier), 200); return () => clearTimeout(t); }, [userTier]);
+  useEffect(() => { const t = setTimeout(() => setDebouncedDateFrom(userDateFrom), 200); return () => clearTimeout(t); }, [userDateFrom]);
+  useEffect(() => { const t = setTimeout(() => setDebouncedDateTo(userDateTo), 200); return () => clearTimeout(t); }, [userDateTo]);
+
   const loadTab = useCallback(() => {
     if (!authed || !token) return;
-    setLoading(true);
+    // Only show loading spinner on initial load / tab switch, not on filter changes
     if (tab === "stats") {
       fetchData("stats").then((d) => { if (d) setStats(d); setLoading(false); });
     } else if (tab === "users") {
       const params = new URLSearchParams({ limit: "200" });
       if (debouncedSearch) params.set("search", debouncedSearch);
-      if (userTier) params.set("tier", userTier);
-      if (userDateFrom) params.set("date_from", userDateFrom);
-      if (userDateTo) params.set("date_to", userDateTo);
+      if (debouncedTier) params.set("tier", debouncedTier);
+      if (debouncedDateFrom) params.set("date_from", debouncedDateFrom);
+      if (debouncedDateTo) params.set("date_to", debouncedDateTo);
       fetchData(`users?${params}`).then((d) => { if (d) { setUsers(d.users); setUsersTotal(d.total); } setLoading(false); });
     } else if (tab === "promos") {
       fetchData("promos").then((d) => { if (d) setPromos(d.promos); setLoading(false); });
@@ -237,7 +245,7 @@ export default function AdminPage() {
     } else {
       fetchData("transactions?limit=50").then((d) => { if (d) setTransactions(d.transactions); setLoading(false); });
     }
-  }, [authed, token, tab, fetchData, debouncedSearch, userTier, userDateFrom, userDateTo, analyticsDays, analyticsSortBy, analyticsSortOrder]);
+  }, [authed, token, tab, fetchData, debouncedSearch, debouncedTier, debouncedDateFrom, debouncedDateTo, analyticsDays, analyticsSortBy, analyticsSortOrder]);
 
   useEffect(() => { loadTab(); }, [loadTab]);
 
@@ -480,25 +488,28 @@ export default function AdminPage() {
                           </select>
                         </td>
                         <td className="py-3 px-4 text-right">
-                          <button
-                            onClick={async () => {
-                              const rub = prompt(`Баланс ${u.email || u.username}\nСейчас: ${(u.balance_usd * 95).toFixed(0)}₽ ($${u.balance_usd.toFixed(2)})\n\nНовый баланс в рублях:`);
-                              if (!rub || isNaN(Number(rub))) return;
-                              const usd = Number(rub) / 95;
-                              const res = await fetch(`${API_URL}/api/admin/web/users/${u.id}/balance`, {
-                                method: "PATCH",
-                                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-                                body: JSON.stringify({ balance_usd: usd, reason: "admin manual" }),
-                              });
-                              if (res.ok) {
-                                setUsers(prev => prev.map(x => x.id === u.id ? { ...x, balance_usd: usd } : x));
-                              }
-                            }}
-                            className="font-mono text-xs text-accent hover:underline cursor-pointer"
-                            title="Нажмите чтобы изменить баланс"
-                          >
-                            {(u.balance_usd * 95).toFixed(0)}₽
-                          </button>
+                          <div className="inline-flex items-center gap-1">
+                            <input
+                              type="number"
+                              defaultValue={Math.round(u.balance_usd * 95)}
+                              onBlur={async (e) => {
+                                const rub = Number(e.target.value);
+                                if (isNaN(rub) || rub === Math.round(u.balance_usd * 95)) return;
+                                const usd = rub / 95;
+                                const res = await fetch(`${API_URL}/api/admin/web/users/${u.id}/balance`, {
+                                  method: "PATCH",
+                                  headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                                  body: JSON.stringify({ balance_usd: usd, reason: "admin manual" }),
+                                });
+                                if (res.ok) {
+                                  setUsers(prev => prev.map(x => x.id === u.id ? { ...x, balance_usd: usd } : x));
+                                }
+                              }}
+                              onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+                              className="w-16 text-right font-mono text-xs bg-transparent border-b border-dashed border-text/10 focus:border-accent outline-none py-0.5 px-1"
+                            />
+                            <span className="text-[10px] text-text/25">₽</span>
+                          </div>
                         </td>
                         <td className="py-3 px-4 text-right font-mono text-xs">{u.total_requests.toLocaleString()}</td>
                         <td className="py-3 px-4 text-text/30 text-xs">{u.joined_at?.slice(0, 10) || "—"}</td>
