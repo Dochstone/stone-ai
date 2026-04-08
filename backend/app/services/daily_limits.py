@@ -8,7 +8,7 @@ import math
 import logging
 from datetime import date, datetime, timedelta, timezone, time
 
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
@@ -28,6 +28,14 @@ DAILY_LIMITS = {
     "mini":     {"fast": 20, "premium": 3,  "opus": 0,  "image": 2, "video": 1},
     "max":      {"fast": 50, "premium": 4,  "opus": 1,  "image": 5, "video": 1},
     "max-pro":  {"fast": 150, "premium": 12, "opus": 2, "image": 10, "video": 3},
+}
+
+# Pro and Elite: premium/opus limits are WEEKLY (7x daily), not daily
+# free/mini stay daily
+WEEKLY_TIERS = {"max", "max-pro"}
+WEEKLY_LIMITS = {
+    "max":      {"premium": 28, "opus": 7},     # 4*7, 1*7
+    "max-pro":  {"premium": 84, "opus": 14},     # 12*7, 2*7
 }
 
 ROLLOVER_RATE = {
@@ -105,6 +113,21 @@ def get_msk_reset_at() -> str:
     now = datetime.now(MSK)
     tomorrow = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
     return tomorrow.isoformat()
+
+
+async def get_weekly_usage(db: AsyncSession, tg_id: int, category: str) -> int:
+    """Sum usage for a category over the last 7 days."""
+    today = get_msk_today()
+    week_ago = today - timedelta(days=6)  # today + 6 previous days = 7 days
+    col = f"{category}_used"
+    result = await db.execute(
+        select(func.coalesce(func.sum(getattr(DailyUsage, col)), 0)).where(
+            DailyUsage.user_tg_id == tg_id,
+            DailyUsage.date >= week_ago,
+            DailyUsage.date <= today,
+        )
+    )
+    return result.scalar() or 0
 
 
 # ═══════════════════════════════════════════════════════════
@@ -224,18 +247,33 @@ async def check_daily_limit(
             return _denied(tier, "fast", row.fast_used, effective, row.rollover_fast, limits["fast"])
 
     elif category == "premium":
-        effective = limits["premium"] + row.rollover_premium
-        if row.premium_used >= effective:
-            return _denied(tier, "premium", row.premium_used, effective, row.rollover_premium, limits["premium"])
+        if tier in WEEKLY_TIERS:
+            weekly_limit = WEEKLY_LIMITS[tier]["premium"]
+            weekly_used = await get_weekly_usage(db, tg_id, "premium")
+            if weekly_used >= weekly_limit:
+                return _denied(tier, "premium", weekly_used, weekly_limit, 0, weekly_limit, weekly=True)
+        else:
+            effective = limits["premium"] + row.rollover_premium
+            if row.premium_used >= effective:
+                return _denied(tier, "premium", row.premium_used, effective, row.rollover_premium, limits["premium"])
 
     elif category == "opus":
-        # Check both opus and premium limits
-        opus_effective = limits["opus"] + row.rollover_opus
-        premium_effective = limits["premium"] + row.rollover_premium
-        if row.opus_used >= opus_effective:
-            return _denied(tier, "opus", row.opus_used, opus_effective, row.rollover_opus, limits["opus"])
-        if row.premium_used >= premium_effective:
-            return _denied(tier, "premium", row.premium_used, premium_effective, row.rollover_premium, limits["premium"])
+        if tier in WEEKLY_TIERS:
+            opus_weekly = WEEKLY_LIMITS[tier]["opus"]
+            premium_weekly = WEEKLY_LIMITS[tier]["premium"]
+            opus_used = await get_weekly_usage(db, tg_id, "opus")
+            premium_used = await get_weekly_usage(db, tg_id, "premium")
+            if opus_used >= opus_weekly:
+                return _denied(tier, "opus", opus_used, opus_weekly, 0, opus_weekly, weekly=True)
+            if premium_used >= premium_weekly:
+                return _denied(tier, "premium", premium_used, premium_weekly, 0, premium_weekly, weekly=True)
+        else:
+            opus_effective = limits["opus"] + row.rollover_opus
+            premium_effective = limits["premium"] + row.rollover_premium
+            if row.opus_used >= opus_effective:
+                return _denied(tier, "opus", row.opus_used, opus_effective, row.rollover_opus, limits["opus"])
+            if row.premium_used >= premium_effective:
+                return _denied(tier, "premium", row.premium_used, premium_effective, row.rollover_premium, limits["premium"])
 
     elif category == "image":
         if row.image_used >= limits["image"]:
@@ -265,16 +303,22 @@ async def check_daily_limit(
     }
 
 
-def _denied(tier: str, category: str, used: int, effective: int, rollover: int, daily_base: int) -> dict:
+def _denied(tier: str, category: str, used: int, effective: int, rollover: int, daily_base: int, weekly: bool = False) -> dict:
     """Build informative denial response."""
     cat_names = {"fast": "быстрых", "premium": "премиум", "opus": "Opus", "image": "картинок", "video": "видео"}
     reset_at = get_msk_reset_at()
 
-    # Calculate time until reset
     now = datetime.now(MSK)
-    tomorrow = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
-    hours_left = int((tomorrow - now).total_seconds() // 3600)
-    mins_left = int(((tomorrow - now).total_seconds() % 3600) // 60)
+    if weekly:
+        # Weekly reset: next Monday 00:00 MSK
+        days_until_monday = (7 - now.weekday()) % 7 or 7
+        reset_point = (now + timedelta(days=days_until_monday)).replace(hour=0, minute=0, second=0, microsecond=0)
+        hours_left = int((reset_point - now).total_seconds() // 3600)
+        mins_left = int(((reset_point - now).total_seconds() % 3600) // 60)
+    else:
+        tomorrow = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+        hours_left = int((tomorrow - now).total_seconds() // 3600)
+        mins_left = int(((tomorrow - now).total_seconds() % 3600) // 60)
 
     suggestions = []
     if category in ("premium", "opus"):
@@ -294,7 +338,7 @@ def _denied(tier: str, category: str, used: int, effective: int, rollover: int, 
     return {
         "allowed": False,
         "error": "daily_limit_exceeded",
-        "reason": f"Лимит {cat_names.get(category, category)}-запросов исчерпан. Обновится через {hours_left}ч {mins_left}мин.",
+        "reason": f"{'Недельный лимит' if weekly else 'Лимит'} {cat_names.get(category, category)}-запросов исчерпан. Обновится через {hours_left}ч {mins_left}мин.",
         "category": category,
         "used_today": used,
         "limit": effective,
@@ -338,7 +382,27 @@ async def get_limits_info(db: AsyncSession, user: User) -> dict:
 
     row = await get_or_create_today(db, tg_id, tier)
 
+    # For Pro/Elite: get weekly usage for premium/opus
+    weekly_premium = 0
+    weekly_opus = 0
+    is_weekly = tier in WEEKLY_TIERS
+    if is_weekly:
+        weekly_premium = await get_weekly_usage(db, tg_id, "premium")
+        weekly_opus = await get_weekly_usage(db, tg_id, "opus")
+
     def cat_info(cat: str) -> dict:
+        # Premium/Opus on Pro/Elite = weekly limits
+        if is_weekly and cat in ("premium", "opus"):
+            wlimit = WEEKLY_LIMITS.get(tier, {}).get(cat, 0)
+            wused = weekly_premium if cat == "premium" else weekly_opus
+            return {
+                "used": wused,
+                "limit": wlimit,
+                "base": wlimit,
+                "rollover": 0,
+                "available": max(0, wlimit - wused),
+                "period": "weekly",
+            }
         base = limits.get(cat, 0)
         rollover = getattr(row, f"rollover_{cat}", 0) if cat in ("fast", "premium", "opus") else 0
         used = getattr(row, f"{cat}_used", 0)
@@ -349,6 +413,7 @@ async def get_limits_info(db: AsyncSession, user: User) -> dict:
             "base": base,
             "rollover": rollover,
             "available": max(0, effective - used),
+            "period": "daily",
         }
 
     return {
