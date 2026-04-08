@@ -13,11 +13,8 @@ export const CHAT_MODELS = [
 ];
 
 export const IMAGE_MODELS = [
-  { id: "gpt-image-1", name: "GPT Image (рекомендуется)" },
   { id: "nano-banana", name: "Nano Banana (Gemini)" },
-  { id: "nano-banana-pro", name: "Nano Banana Pro" },
-  { id: "kolors-v3", name: "KOLORS V3 (Kling)" },
-  { id: "flux-schnell", name: "Flux Schnell" },
+  { id: "nano-banana-pro", name: "Nano Banana Pro (рекомендуется)" },
 ];
 
 export const CATEGORIES = [
