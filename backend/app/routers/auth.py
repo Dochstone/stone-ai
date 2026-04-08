@@ -200,10 +200,10 @@ async def verify_email(body: VerifyEmailRequest, request: Request, db: AsyncSess
     # Achievement: registered
     asyncio.create_task(check_and_update(user.telegram_id or user.id, "registered", 1))
 
-    # Welcome email
+    # Welcome email/TG
     try:
         from app.services.email_service import send_welcome
-        send_welcome(email, user.first_name or "")
+        send_welcome(email, user.first_name or "", tg_id=user.telegram_id)
     except Exception:
         pass
 
@@ -321,10 +321,10 @@ async def _get_or_create_oauth_user(
     # Achievement: registered
     asyncio.create_task(check_and_update(user.telegram_id or user.id, "registered", 1))
 
-    # Welcome email
+    # Welcome email/TG
     try:
         from app.services.email_service import send_welcome
-        send_welcome(email, user.first_name or "")
+        send_welcome(email, user.first_name or "", tg_id=user.telegram_id)
     except Exception:
         pass
 
@@ -681,6 +681,13 @@ async def confirm_tg_web_session(session_id: str, tg_id: int, tg_user_data: dict
 
             # Achievement: registered
             asyncio.create_task(check_and_update(tg_id, "registered", 1))
+
+            # Welcome in Telegram
+            try:
+                from app.services.email_service import send_welcome
+                send_welcome(None, tg_user_data.get("first_name", ""), tg_id=tg_id)
+            except Exception:
+                pass
 
         _tg_web_sessions[session_id] = {
             "status": "confirmed",

@@ -12,6 +12,32 @@ logger = logging.getLogger(__name__)
 EMAIL_PROXY_URL = os.getenv("EMAIL_PROXY_URL", "http://45.11.93.113:5050/send")
 EMAIL_PROXY_KEY = os.getenv("EMAIL_PROXY_KEY", "stoneai-email-secret-2026")
 
+
+def _send_telegram(tg_id: int, text: str):
+    """Send message via Telegram bot."""
+    try:
+        bot_token = os.getenv("BOT_TOKEN", "")
+        if not bot_token:
+            return
+        r = httpx.post(
+            f"https://api.telegram.org/bot{bot_token}/sendMessage",
+            json={"chat_id": tg_id, "text": text, "parse_mode": "HTML"},
+            timeout=5,
+        )
+        if r.status_code == 200:
+            logger.info(f"TG message sent to {tg_id}")
+    except Exception as e:
+        logger.warning(f"TG message failed for {tg_id}: {e}")
+
+
+def notify_user(email: str | None, tg_id: int | None, subject: str, html_body: str, tg_text: str):
+    """Send notification to user — email if available, Telegram as fallback."""
+    if email:
+        send_email_background(email, subject, html_body)
+    if tg_id and (not email or tg_id > 0):
+        t = threading.Thread(target=_send_telegram, args=(tg_id, tg_text), daemon=True)
+        t.start()
+
 FOOTER = """
 <div style="margin-top:32px;padding-top:20px;border-top:1px solid #f0f0f0;text-align:center">
     <a href="https://stoneai.ru" style="text-decoration:none">
@@ -86,7 +112,7 @@ def send_reset_code(to_email: str, code: str):
     send_email_background(to_email, f"Сброс пароля — Stone AI", html)
 
 
-def send_welcome(to_email: str, name: str = ""):
+def send_welcome(to_email: str, name: str = "", tg_id: int | None = None):
     """Send welcome email after registration."""
     greeting = f"Привет, {name}!" if name else "Добро пожаловать!"
     html = f"""
@@ -119,10 +145,23 @@ def send_welcome(to_email: str, name: str = ""):
         {FOOTER}
     </div>
     """
-    send_email_background(to_email, f"Добро пожаловать в Stone AI! 🎉", html)
+    if to_email:
+        send_email_background(to_email, "Добро пожаловать в Stone AI! 🎉", html)
+    if tg_id:
+        greeting = f"Привет, {name}!" if name else "Добро пожаловать!"
+        _send_telegram(tg_id, (
+            f"🎉 <b>{greeting}</b>\n\n"
+            f"Ваш аккаунт в Stone AI создан!\n\n"
+            f"💬 10 бесплатных запросов/день\n"
+            f"🧠 2 премиум запроса/день\n"
+            f"🎨 2 картинки + 1 видео\n"
+            f"🎁 100₽ на баланс\n"
+            f"🏆 27 достижений до 360₽\n\n"
+            f"👉 <a href='https://stoneai.ru/dashboard/chat'>Начать</a>"
+        ))
 
 
-def send_payment_confirmation(to_email: str, amount_rub: float, new_balance_rub: float, method: str = "Карта РФ / СБП"):
+def send_payment_confirmation(to_email: str, amount_rub: float, new_balance_rub: float, method: str = "Карта РФ / СБП", tg_id: int | None = None):
     """Send payment confirmation email after successful top-up."""
     html = f"""
     <div style="font-family:-apple-system,sans-serif;max-width:450px;margin:0 auto;padding:24px">
@@ -143,10 +182,18 @@ def send_payment_confirmation(to_email: str, amount_rub: float, new_balance_rub:
         {FOOTER}
     </div>
     """
-    send_email_background(to_email, f"Баланс пополнен: +{int(amount_rub)} ₽ — Stone AI", html)
+    if to_email:
+        send_email_background(to_email, f"Баланс пополнен: +{int(amount_rub)} ₽ — Stone AI", html)
+    if tg_id:
+        _send_telegram(tg_id, (
+            f"✅ <b>Баланс пополнен!</b>\n\n"
+            f"💵 +{int(amount_rub)}₽\n"
+            f"💳 {method}\n"
+            f"💰 Баланс: {int(new_balance_rub)}₽"
+        ))
 
 
-def send_subscription_activated(to_email: str, tier: str, price_rub: float):
+def send_subscription_activated(to_email: str, tier: str, price_rub: float, tg_id: int | None = None):
     """Send subscription activation email."""
     tier_names = {"mini": "Start", "max": "Pro", "max-pro": "Elite"}
     tier_label = tier_names.get(tier, tier)
@@ -179,7 +226,15 @@ def send_subscription_activated(to_email: str, tier: str, price_rub: float):
         {FOOTER}
     </div>
     """
-    send_email_background(to_email, f"Подписка {tier_label} активирована! — Stone AI", html)
+    if to_email:
+        send_email_background(to_email, f"Подписка {tier_label} активирована! — Stone AI", html)
+    if tg_id:
+        _send_telegram(tg_id, (
+            f"💎 <b>Подписка {tier_label} активирована!</b>\n\n"
+            f"💵 {int(price_rub)}₽/мес\n\n"
+            + "\n".join(f"✅ {f}" for f in features) +
+            f"\n\n👉 <a href='https://stoneai.ru/dashboard/chat'>Начать</a>"
+        ))
 
 
 def send_newsletter(to_email: str, subject: str, content_html: str):
