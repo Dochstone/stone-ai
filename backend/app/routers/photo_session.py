@@ -29,7 +29,7 @@ COST_BACKGROUND = 0.158    # ~15 RUB
 COST_ON_MODEL = 0.421      # ~40 RUB
 COST_MARKETPLACE = 0.21    # ~20 RUB
 
-DEFAULT_IMAGE_MODEL = "gpt-image-1"  # GPT follows edit instructions better than Gemini
+DEFAULT_IMAGE_MODEL = "nano-banana"  # Gemini handles background editing best
 
 OPENROUTER_IMAGE_MODELS = {"nano-banana", "nano-banana-pro", "gpt-image-1"}
 
@@ -189,32 +189,28 @@ async def _generate_image(prompt: str, model_id: str | None = None, input_image_
 
     settings = get_settings()
 
-    # If input image — use 2-step pipeline: remove bg → generate new bg → composite
-    if input_image_b64:
+    # For OpenAI models with input image — use rembg pipeline (GPT can't edit reliably)
+    use_openai = model_id in ("gpt-image-1", "gpt-5-image", "gpt-5-image-mini")
+    if input_image_b64 and use_openai:
         try:
             img_b64 = input_image_b64.split(",", 1)[-1] if "," in input_image_b64 else input_image_b64
             img_bytes = base64.b64decode(img_b64)
-            # Step 1: Remove background
-            logger.info("Removing background with rembg...")
+            logger.info("rembg pipeline: removing background...")
             foreground = await _remove_background(img_bytes)
-            # Step 2: Generate new background
-            logger.info(f"Generating background: {prompt[:80]}")
-            bg_url = await _generate_image(f"Background scene: {prompt}. No people, no objects in foreground. Just the background/environment.", model_id)
+            logger.info(f"rembg pipeline: generating background: {prompt[:80]}")
+            bg_url = await _generate_image(f"Background scene: {prompt}. No people, no objects. Just the environment.", model_id)
             if not bg_url:
                 raise RuntimeError("Background generation failed")
-            # Step 3: Composite
-            logger.info("Compositing foreground onto new background...")
-            result = await _composite_on_background(foreground, bg_url)
-            return result
+            logger.info("rembg pipeline: compositing...")
+            return await _composite_on_background(foreground, bg_url)
         except HTTPException:
             raise
         except Exception as e:
-            logger.error(f"Pipeline failed: {e}, falling back to generation")
-            # Fallback: generate from scratch with prompt
+            logger.error(f"rembg pipeline failed: {e}")
             pass
 
-    # Default to gpt-image-1 via OpenAI API
-    use_openai = model_id in (None, "gpt-image-1", "gpt-5-image", "gpt-5-image-mini") or not model_id
+    # Route: OpenRouter (Gemini) or OpenAI
+    use_openai = model_id in ("gpt-image-1", "gpt-5-image", "gpt-5-image-mini")
 
     if use_openai and settings.openai_api_key:
         try:
