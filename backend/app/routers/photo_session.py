@@ -151,8 +151,37 @@ async def _refund(db: AsyncSession, user: User, new_balance: float, cost_usd: fl
     await db.flush()
 
 
+async def _remove_background(image_bytes: bytes) -> bytes:
+    """Remove background from image using rembg (runs locally, no API cost)."""
+    import io
+    from PIL import Image
+    from rembg import remove
+    result = remove(image_bytes)
+    # Ensure PNG with alpha
+    img = Image.open(io.BytesIO(result)).convert("RGBA")
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    return buf.getvalue()
+
+
+async def _composite_on_background(foreground_bytes: bytes, background_b64: str) -> str:
+    """Composite foreground (with alpha) onto generated background. Returns data URL."""
+    import io
+    from PIL import Image
+    fg = Image.open(io.BytesIO(foreground_bytes)).convert("RGBA")
+    bg_data = background_b64.split(",", 1)[-1] if "," in background_b64 else background_b64
+    bg = Image.open(io.BytesIO(base64.b64decode(bg_data))).convert("RGBA")
+    # Resize bg to match fg
+    bg = bg.resize(fg.size, Image.LANCZOS)
+    # Paste foreground onto background
+    bg.paste(fg, (0, 0), fg)
+    buf = io.BytesIO()
+    bg.convert("RGB").save(buf, format="PNG", quality=95)
+    return f"data:image/png;base64,{base64.b64encode(buf.getvalue()).decode('ascii')}"
+
+
 async def _generate_image(prompt: str, model_id: str | None = None, input_image_b64: str | None = None) -> str | None:
-    """Generate image using OpenAI gpt-image-1 or OpenRouter models. Supports input image for editing."""
+    """Generate image. If input image provided, uses rembg + generate bg + composite pipeline."""
     from app.services.safety import check_blocked
     blocked = check_blocked(prompt)
     if blocked:
@@ -160,27 +189,37 @@ async def _generate_image(prompt: str, model_id: str | None = None, input_image_
 
     settings = get_settings()
 
-    # Default to gpt-image-1 via OpenAI API (most reliable for image generation)
+    # If input image — use 2-step pipeline: remove bg → generate new bg → composite
+    if input_image_b64:
+        try:
+            img_b64 = input_image_b64.split(",", 1)[-1] if "," in input_image_b64 else input_image_b64
+            img_bytes = base64.b64decode(img_b64)
+            # Step 1: Remove background
+            logger.info("Removing background with rembg...")
+            foreground = await _remove_background(img_bytes)
+            # Step 2: Generate new background
+            logger.info(f"Generating background: {prompt[:80]}")
+            bg_url = await _generate_image(f"Background scene: {prompt}. No people, no objects in foreground. Just the background/environment.", model_id)
+            if not bg_url:
+                raise RuntimeError("Background generation failed")
+            # Step 3: Composite
+            logger.info("Compositing foreground onto new background...")
+            result = await _composite_on_background(foreground, bg_url)
+            return result
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Pipeline failed: {e}, falling back to generation")
+            # Fallback: generate from scratch with prompt
+            pass
+
+    # Default to gpt-image-1 via OpenAI API
     use_openai = model_id in (None, "gpt-image-1", "gpt-5-image", "gpt-5-image-mini") or not model_id
 
     if use_openai and settings.openai_api_key:
         try:
             async with httpx.AsyncClient(timeout=120.0) as client:
-                if input_image_b64:
-                    # Use edits endpoint — sends image as file for proper editing
-                    prompt_with_ref = f"Keep ALL foreground subjects exactly as they are. ONLY replace the background with: {prompt}"
-                    # Convert base64 to bytes
-                    img_b64 = input_image_b64.split(",", 1)[-1] if "," in input_image_b64 else input_image_b64
-                    img_bytes = base64.b64decode(img_b64)
-                    resp = await client.post(
-                        "https://api.openai.com/v1/images/edits",
-                        headers={"Authorization": f"Bearer {settings.openai_api_key}"},
-                        files={"image": ("photo.png", img_bytes, "image/png")},
-                        data={"model": "gpt-image-1", "prompt": prompt_with_ref, "n": 1, "size": "1024x1024"},
-                    )
-                else:
-                    # No input image — generate from scratch
-                    resp = await client.post(
+                resp = await client.post(
                         "https://api.openai.com/v1/images/generations",
                         headers={"Authorization": f"Bearer {settings.openai_api_key}", "Content-Type": "application/json"},
                         json={"model": "gpt-image-1", "prompt": prompt, "n": 1, "size": "1024x1024", "quality": "high"},
