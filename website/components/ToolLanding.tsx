@@ -28,7 +28,7 @@ export default function ToolLanding({ badge, title, description, models, prompts
           <p className="text-text/60 max-w-2xl mx-auto mb-8">{description}</p>
           <div className="flex gap-3 justify-center flex-wrap">
             <a href={ctaHref} className="bg-accent text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors">{ctaText}</a>
-            <a href="/pricing" className="border-2 border-text/15 text-text px-6 py-3 rounded-xl font-bold text-sm hover:border-accent hover:text-accent transition-colors">Все 65+ моделей</a>
+            <a href="/pricing" className="border-2 border-text/15 text-text px-6 py-3 rounded-xl font-bold text-sm hover:border-accent hover:text-accent transition-colors">Все 65+ нейросетей</a>
           </div>
         </div>
 

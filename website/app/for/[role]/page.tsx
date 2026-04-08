@@ -110,7 +110,7 @@ export default function ProfessionPage({ params }: Props) {
         {/* CTA */}
         <section className="bg-dark text-white rounded-2xl p-8 sm:p-10 text-center">
           <h2 className="text-xl font-extrabold mb-3">Начните использовать AI в работе</h2>
-          <p className="text-white/40 text-sm mb-6">15 бесплатных запросов/день. 65+ моделей. Без VPN.</p>
+          <p className="text-white/40 text-sm mb-6">15 бесплатных запросов/день. 65+ нейросетей. Без VPN.</p>
           <Link href="/dashboard/chat" className="inline-flex items-center gap-2 bg-accent text-white font-bold px-8 py-4 rounded-xl hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25">
             Попробовать бесплатно <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
           </Link>

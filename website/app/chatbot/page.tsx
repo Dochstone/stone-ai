@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function ChatbotLandingPage() {
   return (
     <ToolLanding
-      badge="RAG + 65+ моделей"
+      badge="RAG + 65+ нейросетей"
       title="ИИ чат-бот для вашего бизнеса"
       description="Создайте AI-консультанта за 5 минут. Обучите на документах, подключите к сайту или Telegram. Отвечает 24/7 на основе ваших данных."
       models={[

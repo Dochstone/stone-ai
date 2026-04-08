@@ -38,7 +38,7 @@ export default function ToolPageHero({ badge, title, highlight, description, bre
             href="/models"
             className="border-2 border-text/15 text-text px-8 py-4 rounded-xl font-bold hover:border-accent hover:text-accent transition-colors"
           >
-            Все 65+ моделей
+            Все 65+ нейросетей
           </a>
         </div>
       </div>

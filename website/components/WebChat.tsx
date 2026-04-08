@@ -2386,7 +2386,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                     </div>
                     <div className="flex-1 border-l border-[#A855F7]/20 pl-4">
                       <p className="text-sm font-bold text-text">Pro</p>
-                      <p className="text-[11px] text-text/40">65+ моделей · 2 000 запросов · 50 картинок · 10 видео · 3D</p>
+                      <p className="text-[11px] text-text/40">65+ нейросетей · 2 000 запросов · 50 картинок · 10 видео · 3D</p>
                     </div>
                   </a>
 
@@ -2397,7 +2397,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                     </div>
                     <div className="flex-1 border-l border-text/[0.06] pl-4">
                       <p className="text-sm font-bold text-text">Elite</p>
-                      <p className="text-[11px] text-text/40">65+ моделей · 10 000 запросов · 300 картинок · 50 видео · API</p>
+                      <p className="text-[11px] text-text/40">65+ нейросетей · 10 000 запросов · 300 картинок · 50 видео · API</p>
                     </div>
                   </a>
                 </div>

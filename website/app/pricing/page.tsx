@@ -15,8 +15,8 @@ const pricingJsonLd = {
   offers: [
     { "@type": "Offer", name: "Free", price: "0", priceCurrency: "RUB", description: "15 запросов в день, 7 моделей" },
     { "@type": "Offer", name: "Start", price: "390", priceCurrency: "RUB", description: "500 запросов/мес, 20+ моделей" },
-    { "@type": "Offer", name: "Pro", price: "890", priceCurrency: "RUB", description: "2000 запросов/мес, 65+ моделей" },
-    { "@type": "Offer", name: "Elite", price: "1990", priceCurrency: "RUB", description: "10000 запросов/мес, 65+ моделей + API" },
+    { "@type": "Offer", name: "Pro", price: "890", priceCurrency: "RUB", description: "2000 запросов/мес, 65+ нейросетей" },
+    { "@type": "Offer", name: "Elite", price: "1990", priceCurrency: "RUB", description: "10000 запросов/мес, 65+ нейросетей + API" },
   ],
 };
 
@@ -31,7 +31,7 @@ const faqItems = [
   },
   {
     q: "Чем отличается Start от Pro?",
-    a: "Start (390₽) — 20+ моделей и 500 запросов/мес. Pro (890₽) — все 65+ моделей, 2000 запросов, видео, 3D, аудио. Для большинства задач хватает Start.",
+    a: "Start (390₽) — 20+ моделей и 500 запросов/мес. Pro (890₽) — все 65+ нейросетей, 2000 запросов, видео, 3D, аудио. Для большинства задач хватает Start.",
   },
   {
     q: "Что входит в Elite?",

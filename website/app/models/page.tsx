@@ -18,7 +18,7 @@ export default function ModelsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <div className="inline-block bg-accent/10 text-accent px-4 py-1.5 rounded-full text-sm font-semibold mb-4">
-            65+ моделей
+            65+ нейросетей
           </div>
           <h1 className="text-3xl md:text-4xl font-extrabold mb-4">
             Каталог AI-моделей

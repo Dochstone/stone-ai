@@ -60,7 +60,7 @@ export default function Nav() {
           <img src="/mascots/stone-mascot-idle.png" alt="" width="28" height="28" className="inline-block" />
           <span className="text-xl font-extrabold text-text">Stone AI</span>
           <span className="hidden sm:inline-flex items-center bg-accent/8 text-accent text-[9px] font-bold px-2 py-0.5 rounded-full border border-accent/15">
-            65+ моделей
+            65+ нейросетей
           </span>
         </a>
 

@@ -1,5 +1,5 @@
 const features = [
-  { name: "AI модели", free: "5 моделей", paid: "65+ моделей" },
+  { name: "AI модели", free: "5 моделей", paid: "65+ нейросетей" },
   { name: "Запросы в день", free: "15", paid: "До 10 000/мес" },
   { name: "GPT-5.1, Claude Opus 4", free: "---", paid: "check" },
   { name: "Генерация картинок", free: "---", paid: "check" },

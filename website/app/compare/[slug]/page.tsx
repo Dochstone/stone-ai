@@ -142,7 +142,7 @@ export default function ComparePage({ params }: Props) {
   const faqItems = [
     { q: `Что лучше: ${name1} или ${name2}?`, a: comp.verdict },
     { q: "Можно ли попробовать обе модели бесплатно?", a: "Да, Stone AI даёт 15 бесплатных запросов в день к быстрым моделям. Зарегистрируйтесь и попробуйте обе модели." },
-    { q: "Сколько стоит подписка?", a: "Подписка Start — 390₽/мес (20+ моделей). Pro — 890₽/мес (все 65+ моделей). Elite — 1990₽/мес (максимум)." },
+    { q: "Сколько стоит подписка?", a: "Подписка Start — 390₽/мес (20+ моделей). Pro — 890₽/мес (все 65+ нейросетей). Elite — 1990₽/мес (максимум)." },
   ];
 
   const jsonLd = {
@@ -311,7 +311,7 @@ export default function ComparePage({ params }: Props) {
 
         {/* CTA */}
         <section className="bg-dark text-white rounded-2xl p-8 sm:p-10 text-center">
-          <h2 className="text-xl font-extrabold mb-3">65+ моделей в одном чате</h2>
+          <h2 className="text-xl font-extrabold mb-3">65+ нейросетей в одном чате</h2>
           <p className="text-white/40 text-sm mb-6">15 бесплатных запросов в день. Без карты. Без VPN.</p>
           <Link href="/dashboard/chat" className="inline-flex items-center gap-2 bg-accent text-white font-bold px-8 py-4 rounded-xl hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25">
             Открыть полный чат
