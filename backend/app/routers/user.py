@@ -11,6 +11,19 @@ from app.middleware.auth import get_current_user
 from app.middleware.web_auth import extract_jwt_from_request, decode_jwt
 from app.models import User
 from app.models.usage import Usage
+from app.models.daily_usage import DailyUsage
+
+
+async def _get_total_requests(db: AsyncSession, tg_id: int) -> int:
+    """Sum all requests from daily_usage table."""
+    result = await db.scalar(
+        select(func.coalesce(
+            func.sum(DailyUsage.fast_used + DailyUsage.premium_used + DailyUsage.image_used + DailyUsage.video_used), 0
+        )).where(DailyUsage.user_tg_id == tg_id)
+    )
+    return result or 0
+
+
 from app.services.limiter import (
     get_or_create_user,
     get_today_usage,
@@ -120,7 +133,7 @@ async def get_me(
         },
         "total_deposited_usd": round(float(user.total_deposited_usd or 0), 2),
         "stats": {
-            "total_requests": user.total_requests or 0,
+            "total_requests": await _get_total_requests(db, user.telegram_id or user.id),
             "total_tokens": user.total_tokens_used or 0,
         },
     }

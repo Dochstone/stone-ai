@@ -97,7 +97,7 @@ function authProviderLabel(p: string): string {
 
 function StatCard({ label, value, sub, accent }: { label: string; value: string; sub?: string; accent?: boolean }) {
   return (
-    <div className="bg-white rounded-2xl border border-text/[0.06] p-5">
+    <div className="bg-bg rounded-2xl border border-text/[0.06] p-5">
       <div className="text-[11px] font-semibold text-text/35 uppercase tracking-wider mb-2">{label}</div>
       <div className={`text-2xl font-extrabold ${accent ? "text-accent" : "text-text"}`}>{value}</div>
       {sub && <div className="text-[11px] text-text/30 mt-1">{sub}</div>}
@@ -110,7 +110,7 @@ function StatCard({ label, value, sub, accent }: { label: string; value: string;
 function BarChart({ data }: { data: { label: string; value: number }[] }) {
   const max = Math.max(...data.map((d) => d.value), 0.01);
   return (
-    <div className="bg-white rounded-2xl border border-text/[0.06] p-5">
+    <div className="bg-bg rounded-2xl border border-text/[0.06] p-5">
       <div className="text-[11px] font-semibold text-text/35 uppercase tracking-wider mb-4">Расходы за 7 дней</div>
       <div className="flex items-end gap-2 h-32">
         {data.map((d, i) => (
@@ -239,7 +239,7 @@ function OverviewTab({ profile, usage, limits }: { profile: UserProfile; usage: 
   return (
     <div className="space-y-6">
       {/* Profile card */}
-      <div className="bg-white rounded-2xl border border-text/[0.06] p-6 flex items-center gap-5 hover:border-accent/15 transition-colors">
+      <div className="bg-bg rounded-2xl border border-text/[0.06] p-6 flex items-center gap-5 hover:border-accent/15 transition-colors">
         <AvatarUpload email={profile.email} name={profile.first_name} />
         <div className="min-w-0 flex-1">
           <h2 className="text-lg font-extrabold text-text truncate">
@@ -276,11 +276,15 @@ function OverviewTab({ profile, usage, limits }: { profile: UserProfile; usage: 
 
       {/* Daily limits */}
       {limits && (
-        <div className="bg-white rounded-2xl border border-text/[0.06] p-6">
+        <div className="bg-bg rounded-2xl border border-text/[0.06] p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-bold text-text">Использование сегодня</h3>
+            <h3 className="text-sm font-bold text-text">
+              {profile.plan === "max" || profile.plan === "max-pro" ? "Использование за неделю" : "Использование сегодня"}
+            </h3>
             {limits.reset_at && (
-              <span className="text-[10px] text-text/30">Обновится в 00:00 МСК</span>
+              <span className="text-[10px] text-text/30">
+                {profile.plan === "max" || profile.plan === "max-pro" ? "Недельный лимит" : "Обновится в 00:00 МСК"}
+              </span>
             )}
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -304,17 +308,32 @@ function OverviewTab({ profile, usage, limits }: { profile: UserProfile; usage: 
 
       {/* Quick links */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <a href="/dashboard/templates" className="bg-white rounded-2xl border border-text/[0.06] p-4 hover:shadow-md hover:border-accent/20 transition-all group">
+        <a href="/dashboard/chat" className="bg-bg rounded-2xl border border-text/[0.06] p-4 hover:shadow-md hover:border-accent/20 transition-all group">
+          <div className="text-lg mb-1">💬</div>
+          <div className="text-xs font-bold text-text group-hover:text-accent transition-colors">AI Чат</div>
+          <div className="text-[10px] text-text/30 mt-0.5">65+ нейросетей</div>
+        </a>
+        <a href="/dashboard/templates" className="bg-bg rounded-2xl border border-text/[0.06] p-4 hover:shadow-md hover:border-accent/20 transition-all group">
           <div className="text-lg mb-1">📝</div>
           <div className="text-xs font-bold text-text group-hover:text-accent transition-colors">AI-шаблоны</div>
-          <div className="text-[10px] text-text/30 mt-0.5">50+ готовых промптов</div>
+          <div className="text-[10px] text-text/30 mt-0.5">50+ промптов</div>
         </a>
-        <a href="/dashboard/gallery" className="bg-white rounded-2xl border border-text/[0.06] p-4 hover:shadow-md hover:border-accent/20 transition-all group">
+        <a href="/dashboard/gallery" className="bg-bg rounded-2xl border border-text/[0.06] p-4 hover:shadow-md hover:border-accent/20 transition-all group">
           <div className="text-lg mb-1">🎨</div>
           <div className="text-xs font-bold text-text group-hover:text-accent transition-colors">Галерея</div>
           <div className="text-[10px] text-text/30 mt-0.5">Все генерации</div>
         </a>
-        <a href="/dashboard/seo" className="bg-white rounded-2xl border border-text/[0.06] p-4 hover:shadow-md hover:border-accent/20 transition-all group">
+        <a href="/dashboard/photo-session" className="bg-bg rounded-2xl border border-text/[0.06] p-4 hover:shadow-md hover:border-accent/20 transition-all group">
+          <div className="text-lg mb-1">📸</div>
+          <div className="text-xs font-bold text-text group-hover:text-accent transition-colors">Фотосессия</div>
+          <div className="text-[10px] text-text/30 mt-0.5">Смена фона, карточки</div>
+        </a>
+        <a href="/dashboard/achievements" className="bg-bg rounded-2xl border border-text/[0.06] p-4 hover:shadow-md hover:border-accent/20 transition-all group">
+          <div className="text-lg mb-1">🏆</div>
+          <div className="text-xs font-bold text-text group-hover:text-accent transition-colors">Достижения</div>
+          <div className="text-[10px] text-text/30 mt-0.5">Награды до 360₽</div>
+        </a>
+        <a href="/dashboard/seo" className="bg-bg rounded-2xl border border-text/[0.06] p-4 hover:shadow-md hover:border-accent/20 transition-all group">
           <div className="text-lg mb-1">🔍</div>
           <div className="text-xs font-bold text-text group-hover:text-accent transition-colors">SEO-модуль</div>
           <div className="text-[10px] text-text/30 mt-0.5">Статьи, анализ, мета</div>
@@ -354,7 +373,7 @@ function BalanceTab({ profile, transactions }: { profile: UserProfile; transacti
   return (
     <div className="space-y-6">
       {/* Subscription hero */}
-      <div className="bg-white rounded-2xl border border-text/[0.06] p-8 text-center">
+      <div className="bg-bg rounded-2xl border border-text/[0.06] p-8 text-center">
         <div className="text-[11px] font-semibold text-text/35 uppercase tracking-wider mb-2">Текущий тариф</div>
         <div className="text-4xl font-extrabold text-accent mb-4">
           {profile.plan === "max-pro" ? "Elite" : profile.plan === "max" ? "Pro" : profile.plan === "mini" ? "Start" : "Free"}
@@ -373,14 +392,14 @@ function BalanceTab({ profile, transactions }: { profile: UserProfile; transacti
       <div className="flex items-center gap-3 flex-wrap">
         <span className="text-[11px] font-semibold text-text/30 uppercase">Фильтр</span>
         <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
-          className="bg-white border border-text/10 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-accent" />
+          className="bg-bg border border-text/10 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-accent" />
         <span className="text-text/20">—</span>
         <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
-          className="bg-white border border-text/10 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-accent" />
+          className="bg-bg border border-text/10 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-accent" />
       </div>
 
       {/* Transaction table */}
-      <div className="bg-white rounded-2xl border border-text/[0.06] overflow-hidden">
+      <div className="bg-bg rounded-2xl border border-text/[0.06] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -438,17 +457,17 @@ function HistoryTab({ usage }: { usage: UsageItem[] }) {
       {/* Filters */}
       <div className="flex items-center gap-3 flex-wrap">
         <select value={modelFilter} onChange={(e) => setModelFilter(e.target.value)}
-          className="bg-white border border-text/10 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-accent">
+          className="bg-bg border border-text/10 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-accent">
           <option value="">Все модели</option>
           {usedModelIds.map((id) => (
             <option key={id} value={id}>{MODELS.find((m) => m.id === id)?.name || id}</option>
           ))}
         </select>
         <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
-          className="bg-white border border-text/10 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-accent" />
+          className="bg-bg border border-text/10 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-accent" />
         <span className="text-text/20">—</span>
         <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
-          className="bg-white border border-text/10 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-accent" />
+          className="bg-bg border border-text/10 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-accent" />
       </div>
 
       {/* Summary */}
@@ -459,7 +478,7 @@ function HistoryTab({ usage }: { usage: UsageItem[] }) {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-text/[0.06] overflow-hidden">
+      <div className="bg-bg rounded-2xl border border-text/[0.06] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -572,7 +591,7 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
       )}
 
       {/* Display name */}
-      <div className="bg-white rounded-2xl border border-text/[0.06] p-6">
+      <div className="bg-bg rounded-2xl border border-text/[0.06] p-6">
         <h3 className="text-sm font-bold text-text mb-4">Профиль</h3>
         <div className="space-y-3">
           <div>
@@ -612,7 +631,7 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
 
       {/* Password (only for email auth) */}
       {(profile.auth_provider === "email" || profile.auth_provider === "both") && (
-        <div className="bg-white rounded-2xl border border-text/[0.06] p-6">
+        <div className="bg-bg rounded-2xl border border-text/[0.06] p-6">
           <h3 className="text-sm font-bold text-text mb-4">Смена пароля</h3>
           <div className="space-y-3 max-w-sm">
             <input type="password" placeholder="Текущий пароль" value={oldPass} onChange={(e) => setOldPass(e.target.value)}
@@ -628,7 +647,7 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
       )}
 
       {/* Link accounts */}
-      <div className="bg-white rounded-2xl border border-text/[0.06] p-6">
+      <div className="bg-bg rounded-2xl border border-text/[0.06] p-6">
         <h3 className="text-sm font-bold text-text mb-4">Привязка аккаунтов</h3>
         <div className="space-y-3">
           <div className="flex items-center justify-between py-2">
@@ -682,7 +701,7 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
       </div>
 
       {/* Preferences */}
-      <div className="bg-white rounded-2xl border border-text/[0.06] p-6">
+      <div className="bg-bg rounded-2xl border border-text/[0.06] p-6">
         <h3 className="text-sm font-bold text-text mb-4">Настройки чата</h3>
         <div className="space-y-4">
           {/* Language */}
@@ -766,7 +785,7 @@ function ReferralsTab({ stats, loading }: { stats: ReferralStats | null; loading
   return (
     <div className="space-y-6">
       {/* Ref link + QR */}
-      <div className="bg-white rounded-2xl border border-text/[0.06] p-6">
+      <div className="bg-bg rounded-2xl border border-text/[0.06] p-6">
         <h3 className="text-sm font-bold text-text mb-4">Ваша реферальная ссылка</h3>
         <div className="flex flex-col sm:flex-row gap-6 items-start">
           <div className="flex-1 min-w-0">
@@ -799,7 +818,7 @@ function ReferralsTab({ stats, loading }: { stats: ReferralStats | null; loading
       </div>
 
       {/* Referrals table */}
-      <div className="bg-white rounded-2xl border border-text/[0.06] overflow-hidden">
+      <div className="bg-bg rounded-2xl border border-text/[0.06] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -906,7 +925,7 @@ function ApiTab({ byok, auth, onRefreshByok }: { byok: ByokStatus | null; auth: 
       )}
 
       {/* API Token */}
-      <div className="bg-white rounded-2xl border border-text/[0.06] p-6">
+      <div className="bg-bg rounded-2xl border border-text/[0.06] p-6">
         <h3 className="text-sm font-bold text-text mb-1">API Token</h3>
         <p className="text-[11px] text-text/30 mb-4">Используйте этот токен для доступа к API Stone AI.</p>
         <div className="flex gap-2">
@@ -920,7 +939,7 @@ function ApiTab({ byok, auth, onRefreshByok }: { byok: ByokStatus | null; auth: 
       </div>
 
       {/* BYOK */}
-      <div className="bg-white rounded-2xl border border-text/[0.06] p-6">
+      <div className="bg-bg rounded-2xl border border-text/[0.06] p-6">
         <h3 className="text-sm font-bold text-text mb-1">BYOK — Свой ключ OpenRouter</h3>
         <p className="text-[11px] text-text/30 mb-4">Используйте свой ключ OpenRouter для снижения стоимости.</p>
 
@@ -954,7 +973,7 @@ function ApiTab({ byok, auth, onRefreshByok }: { byok: ByokStatus | null; auth: 
       </div>
 
       {/* curl example */}
-      <div className="bg-white rounded-2xl border border-text/[0.06] p-6">
+      <div className="bg-bg rounded-2xl border border-text/[0.06] p-6">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-bold text-text">Пример запроса</h3>
           <button onClick={copyCurl}
