@@ -50,20 +50,22 @@ function getModelLockInfo(modelId: string, balance: number, plan?: string): { lo
   if (FREE_MODEL_IDS.has(modelId)) return null;
   // Video/3D — need at least Mini
   if (VIDEO_MODEL_IDS.has(modelId) || THREED_MODEL_IDS.has(modelId)) {
-    if (!plan || plan === "free") return { locked: true, tier: "Start", price: "390₽/мес" };
+    if (!plan || plan === "free") return { locked: true, tier: "Start", price: "590₽/мес" };
     return null;
   }
   // Images — nano-banana is free, rest follow normal tier logic
   if (IMAGE_MODEL_IDS.has(modelId) && !FREE_MODEL_IDS.has(modelId)) {
     if (!plan || plan === "free") {
-      if (MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: "Start", price: "390₽/мес" };
-      return { locked: true, tier: "Pro", price: "890₽/мес" };
+      if (MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: "Start", price: "590₽/мес" };
+      return { locked: true, tier: "Pro", price: "1 290₽/мес" };
     }
-    if (plan === "mini" && !MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: "Pro", price: "890₽/мес" };
+    if (plan === "mini" && !MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: "Pro", price: "1 290₽/мес" };
     return null;
   }
   if (IMAGE_MODEL_IDS.has(modelId)) return null;
-  if (MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: "Start", price: "390₽/мес" };
+  // Premium models — free users get 2/day, don't lock on frontend (backend checks)
+  if (plan === "free") return null;
+  if (MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: "Start", price: "590₽/мес" };
   return { locked: true, tier: "Pro", price: "890₽/мес" };
 }
 

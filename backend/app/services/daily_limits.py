@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 MSK = timezone(timedelta(hours=3))
 
 DAILY_LIMITS = {
-    "free":     {"fast": 10, "premium": 0,  "opus": 0,  "image": 0, "video": 0},  # free uses trial limits (2 img + 1 vid TOTAL), not daily
+    "free":     {"fast": 10, "premium": 2,  "opus": 0,  "image": 0, "video": 0},  # free uses trial limits (2 img + 1 vid TOTAL), not daily
     "mini":     {"fast": 20, "premium": 3,  "opus": 0,  "image": 2, "video": 1},
     "max":      {"fast": 50, "premium": 4,  "opus": 1,  "image": 5, "video": 1},
     "max-pro":  {"fast": 150, "premium": 12, "opus": 2, "image": 10, "video": 3},
@@ -214,17 +214,19 @@ async def check_daily_limit(
     category = get_model_category(model_id)
     limits = DAILY_LIMITS.get(tier, DAILY_LIMITS["free"])
 
-    # Free users can only use FREE_PLAN_MODELS
+    # Free users: FREE_PLAN_MODELS always allowed, premium models allowed within daily limit
     if tier == "free" and model_id not in FREE_PLAN_MODELS:
-        return {
-            "allowed": False,
-            "error": "model_locked",
-            "reason": f"Эта модель доступна по подписке от 390₽/мес",
-            "required_tier": "mini",
-            "plan": tier,
-            "tier": tier,
-            "category": category,
-        }
+        if category != "premium" or limits.get("premium", 0) == 0:
+            return {
+                "allowed": False,
+                "error": "model_locked",
+                "reason": f"Эта модель доступна по подписке от 590₽/мес",
+                "required_tier": "mini",
+                "plan": tier,
+                "tier": tier,
+                "category": category,
+            }
+        # premium model on free tier — will be checked by daily limit below
 
     # Mini users can't access opus
     if tier == "mini" and category == "opus":
