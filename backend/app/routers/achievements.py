@@ -46,6 +46,9 @@ ACHIEVEMENTS = [
     {"slug": "first_referral", "title": "Амбассадор", "description": "Пригласите первого друга", "icon": "🤝", "category": "social", "condition": {"type": "count", "target": 1, "metric": "referrals"}, "reward_rub": 10},
     {"slug": "referrals_5", "title": "Лидер мнений", "description": "Пригласите 5 друзей", "icon": "📣", "category": "social", "condition": {"type": "count", "target": 5, "metric": "referrals"}, "reward_rub": 15},
     {"slug": "snake_50", "title": "Змеелов", "description": "Наберите 50 очков в змейке", "icon": "🐍", "category": "milestone", "condition": {"type": "count", "target": 50, "metric": "snake_score"}, "reward_rub": 5},
+    # Meta-achievements
+    {"slug": "collector_10", "title": "Коллекционер", "description": "Откройте 10 достижений", "icon": "🏅", "category": "milestone", "condition": {"type": "count", "target": 10, "metric": "achievements_total"}, "reward_rub": 50},
+    {"slug": "collector_20", "title": "Легенда", "description": "Откройте 20 достижений", "icon": "🏆", "category": "milestone", "condition": {"type": "count", "target": 20, "metric": "achievements_total"}, "reward_rub": 100},
 ]
 
 
@@ -223,6 +226,15 @@ async def check_and_update(tg_id: int, metric: str, value: int = 1) -> list[dict
                     ua.progress = value
                 elif cond.get("metric") == "unique_models":
                     ua.progress = unique_model_count
+                elif cond.get("metric") == "achievements_total":
+                    # Count completed achievements
+                    count_result = await db.execute(
+                        select(sqlfunc.count()).select_from(UserAchievement).where(
+                            UserAchievement.user_tg_id == tg_id,
+                            UserAchievement.is_completed == True,
+                        )
+                    )
+                    ua.progress = count_result.scalar() or 0
                 else:
                     ua.progress = value
 
@@ -234,6 +246,12 @@ async def check_and_update(tg_id: int, metric: str, value: int = 1) -> list[dict
                     unlocked.append({"slug": ach.slug, "title": ach.title, "icon": ach.icon, "reward_rub": ach.reward_rub})
 
             await db.commit()
+
+            # If any unlocked, check meta-achievements (collector_10/20)
+            if unlocked and metric != "achievements_total":
+                meta_unlocked = await check_and_update(tg_id, "achievements_total", 0)
+                unlocked.extend(meta_unlocked)
+
     except Exception as e:
         logger.warning(f"Achievement check error: {e}")
     return unlocked
