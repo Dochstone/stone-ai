@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 MSK = timezone(timedelta(hours=3))
 
 DAILY_LIMITS = {
-    "free":     {"fast": 10, "premium": 0,  "opus": 0,  "image": 0, "video": 0},
+    "free":     {"fast": 10, "premium": 0,  "opus": 0,  "image": 2, "video": 1},
     "mini":     {"fast": 20, "premium": 3,  "opus": 0,  "image": 2, "video": 1},
     "max":      {"fast": 50, "premium": 4,  "opus": 1,  "image": 5, "video": 1},
     "max-pro":  {"fast": 150, "premium": 12, "opus": 2, "image": 10, "video": 3},
@@ -34,8 +34,8 @@ DAILY_LIMITS = {
 # free/mini stay daily
 WEEKLY_TIERS = {"max", "max-pro"}
 WEEKLY_LIMITS = {
-    "max":      {"premium": 28, "opus": 7},     # 4*7, 1*7
-    "max-pro":  {"premium": 84, "opus": 14},     # 12*7, 2*7
+    "max":      {"premium": 28, "opus": 7,  "image": 35, "video": 7},    # 4*7, 1*7, 5*7, 1*7
+    "max-pro":  {"premium": 84, "opus": 14, "image": 70, "video": 21},   # 12*7, 2*7, 10*7, 3*7
 }
 
 ROLLOVER_RATE = {
@@ -276,20 +276,24 @@ async def check_daily_limit(
                 return _denied(tier, "premium", row.premium_used, premium_effective, row.rollover_premium, limits["premium"])
 
     elif category == "image":
-        if row.image_used >= limits["image"]:
-            return _denied(tier, "image", row.image_used, limits["image"], 0, limits["image"])
+        if tier in WEEKLY_TIERS:
+            weekly_limit = WEEKLY_LIMITS[tier]["image"]
+            weekly_used = await get_weekly_usage(db, tg_id, "image")
+            if weekly_used >= weekly_limit:
+                return _denied(tier, "image", weekly_used, weekly_limit, 0, weekly_limit, weekly=True)
+        else:
+            if row.image_used >= limits["image"]:
+                return _denied(tier, "image", row.image_used, limits["image"], 0, limits["image"])
 
     elif category == "video":
-        if tier == "free":
-            return {
-                "allowed": False,
-                "error": "model_locked",
-                "reason": "Генерация видео доступна по подписке от 390₽/мес",
-                "required_tier": "mini",
-                "plan": tier, "tier": tier, "category": category,
-            }
-        if row.video_used >= limits["video"]:
-            return _denied(tier, "video", row.video_used, limits["video"], 0, limits["video"])
+        if tier in WEEKLY_TIERS:
+            weekly_limit = WEEKLY_LIMITS[tier]["video"]
+            weekly_used = await get_weekly_usage(db, tg_id, "video")
+            if weekly_used >= weekly_limit:
+                return _denied(tier, "video", weekly_used, weekly_limit, 0, weekly_limit, weekly=True)
+        else:
+            if row.video_used >= limits["video"]:
+                return _denied(tier, "video", row.video_used, limits["video"], 0, limits["video"])
 
     # Allowed
     return {
@@ -382,19 +386,18 @@ async def get_limits_info(db: AsyncSession, user: User) -> dict:
 
     row = await get_or_create_today(db, tg_id, tier)
 
-    # For Pro/Elite: get weekly usage for premium/opus
-    weekly_premium = 0
-    weekly_opus = 0
+    # For Pro/Elite: get weekly usage
+    weekly_cache: dict[str, int] = {}
     is_weekly = tier in WEEKLY_TIERS
     if is_weekly:
-        weekly_premium = await get_weekly_usage(db, tg_id, "premium")
-        weekly_opus = await get_weekly_usage(db, tg_id, "opus")
+        for cat in ("premium", "opus", "image", "video"):
+            weekly_cache[cat] = await get_weekly_usage(db, tg_id, cat)
 
     def cat_info(cat: str) -> dict:
-        # Premium/Opus on Pro/Elite = weekly limits
-        if is_weekly and cat in ("premium", "opus"):
-            wlimit = WEEKLY_LIMITS.get(tier, {}).get(cat, 0)
-            wused = weekly_premium if cat == "premium" else weekly_opus
+        # Pro/Elite: premium, opus, image, video = weekly
+        if is_weekly and cat in WEEKLY_LIMITS.get(tier, {}):
+            wlimit = WEEKLY_LIMITS[tier][cat]
+            wused = weekly_cache.get(cat, 0)
             return {
                 "used": wused,
                 "limit": wlimit,
