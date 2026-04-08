@@ -355,10 +355,10 @@ async def product_on_model(
     scene_hint = f", in a setting of {req.scene}" if req.scene else ""
     pose_hint = f", pose: {req.pose}" if req.pose else ""
     prompt = (
-        f"Professional fashion photography. A {req.model_description} wearing/holding the product{scene_hint}{pose_hint}. "
-        f"High-end editorial style, studio or lifestyle setting, perfect lighting, "
-        f"sharp focus, photorealistic, magazine quality, "
-        f"natural skin texture, elegant composition, 4K detail."
+        f"Take the product from this photo and place it in a new scene: "
+        f"a {req.model_description} wearing/holding this exact product{scene_hint}{pose_hint}. "
+        f"Keep the product exactly as it appears in the original photo. "
+        f"High-end editorial style, perfect lighting, photorealistic, magazine quality."
     ).strip()
 
     model_id_used = req.model_id or DEFAULT_IMAGE_MODEL
@@ -416,11 +416,10 @@ async def marketplace_card(
     platform_hint = PLATFORM_SPECS.get(req.platform.lower(), f"clean e-commerce product photo for {req.platform}")
     bg_hint = f"Background color: {req.background_color}. " if req.background_color else ""
     prompt = (
-        f"{platform_hint}. "
-        f"Product: {req.product_name}. "
-        f"{bg_hint}"
-        f"Professional e-commerce product photography, perfectly centered, "
-        f"even lighting from all sides, no harsh shadows, crisp sharp details, "
+        f"Take this product photo and reformat it for {req.platform}: "
+        f"keep the product exactly as it appears, place it on a clean background. "
+        f"{platform_hint}. Product: {req.product_name}. {bg_hint}"
+        f"Perfectly centered, even lighting, no harsh shadows, crisp details, "
         f"photorealistic, commercial catalog quality."
     ).strip()
 
