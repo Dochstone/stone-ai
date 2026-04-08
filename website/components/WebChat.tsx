@@ -2016,43 +2016,42 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                         </div>
                       )}
 
-                      {/* Action buttons for AI messages — hide for image/video/3D/generating */}
-                      {msg.role === "assistant" && msg.content && !msg.content.startsWith("⏳") && !msg.video && !msg.threed && !msg.content.match(/^data:image\//) && !(msg.content.match(/\.(png|jpg|jpeg|webp|gif)(\?|$)/i) && msg.content.startsWith("http")) && (
-                        <div className="flex items-center gap-1 mt-2">
+                      {/* Action buttons — show on all AI messages except during generation */}
+                      {msg.role === "assistant" && !msg.content?.startsWith("⏳") && !(streaming && i === messages.length - 1) && (
+                        <div className="flex items-center gap-0.5 mt-2">
                           {/* Copy */}
                           <button
                             onClick={() => {
-                              navigator.clipboard.writeText(msg.content);
+                              const text = msg.content || msg.video?.url || msg.threed?.url || "";
+                              navigator.clipboard.writeText(text);
                               const btn = document.getElementById(`copy-${i}`);
-                              if (btn) { btn.textContent = "✓"; setTimeout(() => { btn.textContent = "Копировать"; }, 1500); }
+                              if (btn) { btn.innerHTML = "✓ Скопировано"; setTimeout(() => { btn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg> Копировать`; }, 1500); }
                             }}
                             id={`copy-${i}`}
-                            className="text-[10px] text-text/30 hover:text-accent px-2 py-1 rounded-lg hover:bg-accent/5 transition-colors"
+                            className="flex items-center gap-1 text-[10px] text-text/25 hover:text-accent px-2 py-1.5 rounded-lg hover:bg-accent/5 transition-all"
                           >
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                             Копировать
                           </button>
                           {/* Regenerate — only on last AI message */}
                           {i === messages.length - 1 && !streaming && (
                             <button
                               onClick={() => {
-                                // Find last user message and resend
                                 const lastUserMsg = [...messages].reverse().find(m => m.role === "user");
                                 if (lastUserMsg) {
-                                  setMessages(prev => prev.slice(0, -1)); // remove last AI response
+                                  setMessages(prev => prev.slice(0, -1));
                                   setInput(lastUserMsg.content);
-                                  setTimeout(() => {
-                                    const btn = document.querySelector("[data-send-btn]") as HTMLButtonElement;
-                                    if (btn) btn.click();
-                                  }, 100);
+                                  setTimeout(() => { (document.querySelector("[data-send-btn]") as HTMLButtonElement)?.click(); }, 100);
                                 }
                               }}
-                              className="text-[10px] text-text/30 hover:text-accent px-2 py-1 rounded-lg hover:bg-accent/5 transition-colors"
+                              className="flex items-center gap-1 text-[10px] text-text/25 hover:text-accent px-2 py-1.5 rounded-lg hover:bg-accent/5 transition-all"
                             >
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                               Повторить
                             </button>
                           )}
-                          {/* Voice */}
-                          {!msg.video && !msg.threed && auth?.token && (
+                          {/* Voice — only for text messages (not video/image/3D) */}
+                          {!msg.video && !msg.threed && msg.content && !msg.content.match(/^data:image\//) && !(msg.content.match(/\.(png|jpg|jpeg|webp|gif)(\?|$)/i)) && auth?.token && (
                             <VoiceButton text={msg.content} token={auth.token} />
                           )}
                         </div>
