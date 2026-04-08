@@ -23,11 +23,22 @@ from app.services.ai_router import get_openrouter_model
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/photo-session", tags=["photo-session"])
 
-# ─── Costs (USD, approx RUB / USD_TO_RUB) ───
+# ─── Costs per model (RUB → USD via USD_TO_RUB=95) ───
+PRICING = {
+    "background":  {"nano-banana": 15, "nano-banana-pro": 25},
+    "on-model":    {"nano-banana": 40, "nano-banana-pro": 60},
+    "marketplace": {"nano-banana": 35, "nano-banana-pro": 50},
+}
 
-COST_BACKGROUND = 0.158    # ~15 RUB
-COST_ON_MODEL = 0.421      # ~40 RUB
-COST_MARKETPLACE = 0.21    # ~20 RUB
+def _cost_usd(feature: str, model_id: str | None) -> float:
+    mid = model_id if model_id in ("nano-banana", "nano-banana-pro") else "nano-banana"
+    rub = PRICING.get(feature, PRICING["background"]).get(mid, 15)
+    return rub / USD_TO_RUB
+
+# Legacy constants for batch (uses background pricing)
+COST_BACKGROUND = 15 / 95
+COST_ON_MODEL = 40 / 95
+COST_MARKETPLACE = 35 / 95
 
 DEFAULT_IMAGE_MODEL = "nano-banana"  # Gemini handles background editing best
 
@@ -305,7 +316,9 @@ async def change_background(
     """Generate a product photo with a new background."""
     tg_id = tg_user["id"]
     user = await _find_user(db, tg_user)
-    new_balance, has_sub = await _check_and_deduct(db, user, COST_BACKGROUND)
+    model_id_used = req.model_id or DEFAULT_IMAGE_MODEL
+    cost_usd = _cost_usd("background", model_id_used)
+    new_balance, has_sub = await _check_and_deduct(db, user, cost_usd)
 
     # Build prompt
     style_hint = STYLE_PRESETS.get(req.style, "") if req.style else ""
@@ -318,23 +331,20 @@ async def change_background(
         f"perfect lighting, clean composition."
     ).strip()
 
-    model_id_used = req.model_id or DEFAULT_IMAGE_MODEL
-
     try:
         image_url = await _generate_image(prompt, model_id_used, input_image_b64=req.image_base64)
     except HTTPException:
-        await _refund(db, user, new_balance, COST_BACKGROUND, has_sub)
+        await _refund(db, user, new_balance, cost_usd, has_sub)
         raise
     except Exception as exc:
-        await _refund(db, user, new_balance, COST_BACKGROUND, has_sub)
+        await _refund(db, user, new_balance, cost_usd, has_sub)
         logger.error(f"Background generation failed: {exc}")
         raise HTTPException(502, f"Ошибка генерации: {str(exc)[:200]}")
 
     if not image_url:
-        await _refund(db, user, new_balance, COST_BACKGROUND, has_sub)
+        await _refund(db, user, new_balance, cost_usd, has_sub)
         raise HTTPException(502, "Модель не вернула изображение. Попробуйте другую модель.")
 
-    # Save generation
     gen = Generation(
         user_tg_id=tg_id,
         project_id=req.project_id,
@@ -344,7 +354,7 @@ async def change_background(
         result_url=image_url if image_url.startswith("http") else None,
         result_text=image_url if image_url.startswith("data:") else None,
         metadata_={"feature": "photo-session-background", "style": req.style, "background_prompt": req.background_prompt},
-        cost=COST_BACKGROUND,
+        cost=cost_usd,
     )
     db.add(gen)
     await db.commit()
@@ -354,7 +364,7 @@ async def change_background(
         "id": gen.id,
         "image_url": image_url,
         "model": model_id_used,
-        "cost_rub": round(COST_BACKGROUND * USD_TO_RUB, 2),
+        "cost_rub": round(cost_usd * USD_TO_RUB, 2),
         "balance_usd": new_balance,
     }
 
@@ -368,7 +378,9 @@ async def product_on_model(
     """Generate a fashion/lifestyle photo of a product worn or held by a model."""
     tg_id = tg_user["id"]
     user = await _find_user(db, tg_user)
-    new_balance, has_sub = await _check_and_deduct(db, user, COST_ON_MODEL)
+    model_id_used = req.model_id or DEFAULT_IMAGE_MODEL
+    cost_usd = _cost_usd("on-model", model_id_used)
+    new_balance, has_sub = await _check_and_deduct(db, user, cost_usd)
 
     # Build prompt
     scene_hint = f", in a setting of {req.scene}" if req.scene else ""
@@ -380,20 +392,18 @@ async def product_on_model(
         f"High-end editorial style, perfect lighting, photorealistic, magazine quality."
     ).strip()
 
-    model_id_used = req.model_id or DEFAULT_IMAGE_MODEL
-
     try:
         image_url = await _generate_image(prompt, model_id_used, input_image_b64=req.product_image_base64)
     except HTTPException:
-        await _refund(db, user, new_balance, COST_ON_MODEL, has_sub)
+        await _refund(db, user, new_balance, cost_usd, has_sub)
         raise
     except Exception as exc:
-        await _refund(db, user, new_balance, COST_ON_MODEL, has_sub)
+        await _refund(db, user, new_balance, cost_usd, has_sub)
         logger.error(f"On-model generation failed: {exc}")
         raise HTTPException(502, f"Ошибка генерации: {str(exc)[:200]}")
 
     if not image_url:
-        await _refund(db, user, new_balance, COST_ON_MODEL, has_sub)
+        await _refund(db, user, new_balance, cost_usd, has_sub)
         raise HTTPException(502, "Модель не вернула изображение. Попробуйте другую модель.")
 
     gen = Generation(
@@ -405,7 +415,7 @@ async def product_on_model(
         result_url=image_url if image_url.startswith("http") else None,
         result_text=image_url if image_url.startswith("data:") else None,
         metadata_={"feature": "photo-session-on-model", "model_description": req.model_description, "scene": req.scene, "pose": req.pose},
-        cost=COST_ON_MODEL,
+        cost=cost_usd,
     )
     db.add(gen)
     await db.commit()
@@ -415,7 +425,7 @@ async def product_on_model(
         "id": gen.id,
         "image_url": image_url,
         "model": model_id_used,
-        "cost_rub": round(COST_ON_MODEL * USD_TO_RUB, 2),
+        "cost_rub": round(cost_usd * USD_TO_RUB, 2),
         "balance_usd": new_balance,
     }
 
@@ -429,9 +439,10 @@ async def marketplace_card(
     """Generate a clean product card for a marketplace platform."""
     tg_id = tg_user["id"]
     user = await _find_user(db, tg_user)
-    new_balance, has_sub = await _check_and_deduct(db, user, COST_MARKETPLACE)
+    model_id_used = req.model_id or DEFAULT_IMAGE_MODEL
+    cost_usd = _cost_usd("marketplace", model_id_used)
+    new_balance, has_sub = await _check_and_deduct(db, user, cost_usd)
 
-    # Build prompt
     platform_hint = PLATFORM_SPECS.get(req.platform.lower(), f"clean e-commerce product photo for {req.platform}")
     bg_hint = f"Background color: {req.background_color}. " if req.background_color else ""
     prompt = (
@@ -442,20 +453,18 @@ async def marketplace_card(
         f"photorealistic, commercial catalog quality."
     ).strip()
 
-    model_id_used = req.model_id or DEFAULT_IMAGE_MODEL
-
     try:
         image_url = await _generate_image(prompt, model_id_used, input_image_b64=req.image_base64)
     except HTTPException:
-        await _refund(db, user, new_balance, COST_MARKETPLACE, has_sub)
+        await _refund(db, user, new_balance, cost_usd, has_sub)
         raise
     except Exception as exc:
-        await _refund(db, user, new_balance, COST_MARKETPLACE, has_sub)
+        await _refund(db, user, new_balance, cost_usd, has_sub)
         logger.error(f"Marketplace card generation failed: {exc}")
         raise HTTPException(502, f"Ошибка генерации: {str(exc)[:200]}")
 
     if not image_url:
-        await _refund(db, user, new_balance, COST_MARKETPLACE, has_sub)
+        await _refund(db, user, new_balance, cost_usd, has_sub)
         raise HTTPException(502, "Модель не вернула изображение. Попробуйте другую модель.")
 
     gen = Generation(
@@ -467,7 +476,7 @@ async def marketplace_card(
         result_url=image_url if image_url.startswith("http") else None,
         result_text=image_url if image_url.startswith("data:") else None,
         metadata_={"feature": "photo-session-marketplace", "platform": req.platform, "product_name": req.product_name},
-        cost=COST_MARKETPLACE,
+        cost=cost_usd,
     )
     db.add(gen)
     await db.commit()
@@ -477,7 +486,7 @@ async def marketplace_card(
         "id": gen.id,
         "image_url": image_url,
         "model": model_id_used,
-        "cost_rub": round(COST_MARKETPLACE * USD_TO_RUB, 2),
+        "cost_rub": round(cost_usd * USD_TO_RUB, 2),
         "balance_usd": new_balance,
     }
 
