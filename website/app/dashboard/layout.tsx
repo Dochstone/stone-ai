@@ -197,6 +197,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </button>
               <span className="text-sm font-bold text-text">AI Чат</span>
               <div className="flex items-center gap-2">
+                <button
+                  onClick={() => window.dispatchEvent(new Event("toggle-chat-history"))}
+                  aria-label="История чатов"
+                  className="text-text/40 hover:text-text/70 transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </button>
                 <ThemeToggle />
               </div>
             </>

@@ -761,10 +761,14 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
     setUserAvatar(getSavedAvatar());
     const avatarHandler = () => setUserAvatar(getSavedAvatar());
     window.addEventListener("avatar-changed", avatarHandler);
+    // Allow dashboard top bar to toggle chat history sidebar
+    const historyToggle = () => setSidebarOpen((p) => !p);
+    window.addEventListener("toggle-chat-history", historyToggle);
 
     return () => {
       window.removeEventListener("focus", onFocus);
       window.removeEventListener("avatar-changed", avatarHandler);
+      window.removeEventListener("toggle-chat-history", historyToggle);
       document.removeEventListener("visibilitychange", visHandler);
     };
   }, []);
