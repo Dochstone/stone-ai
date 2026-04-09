@@ -165,7 +165,8 @@ async def _generate_image_bg(task_id: int, tg_id: int, model_id: str, prompt: st
             image_bytes = await _gen_openai(settings, prompt)
 
         if not image_bytes:
-            await _update_task(task_id, "failed", error="Не удалось сгенерировать изображение")
+            logger.error(f"Image generation returned None for task {task_id}, model={model_id}")
+            await _update_task(task_id, "failed", error="Модель не вернула изображение. Попробуйте другую модель.")
             return
 
         # Watermark for free users
@@ -293,6 +294,15 @@ async def _gen_openrouter(settings, model_id: str, prompt: str) -> bytes | None:
         raw_content = message.get("content")
 
         # Extract image bytes from various response formats
+
+        # Check message.images[] (OpenRouter Gemini format)
+        for img in message.get("images", []):
+            if isinstance(img, dict):
+                url = img.get("image_url", {}).get("url", "") if isinstance(img.get("image_url"), dict) else ""
+                if url and url.startswith("data:image"):
+                    b64 = url.split(",", 1)[1]
+                    return base64.b64decode(b64)
+
         # Check multimodal parts
         if isinstance(raw_content, list):
             for item in raw_content:
