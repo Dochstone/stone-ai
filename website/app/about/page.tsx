@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 export const metadata: Metadata = {
   title: "О Stone AI — команда, миссия, технологии",
@@ -80,6 +81,7 @@ const tools = [
 export default function AboutPage() {
   return (
     <div className="pt-28 pb-20 min-h-screen">
+      <Breadcrumbs items={[{ label: "О нас" }]} />
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Hero */}
         <div className="text-center mb-16">
@@ -185,7 +187,7 @@ export default function AboutPage() {
 
         {/* Contact */}
         <section className="bg-gradient-to-r from-accent/10 to-teal/10 rounded-2xl border border-accent/10 p-8 md:p-12 text-center">
-          <img src="/mascots/stone-mascot-chat.webp" alt="Stone" width="80" height="80" className="mx-auto mb-4" />
+          <img src="/mascots/stone-mascot-chat.webp" alt="Stone AI маскот в чате" width="80" height="80" className="mx-auto mb-4" />
           <h2 className="text-2xl font-extrabold mb-4">Связаться с нами</h2>
           <p className="text-text/50 text-sm mb-8 max-w-md mx-auto">
             Вопросы, предложения, сотрудничество, баг-репорты

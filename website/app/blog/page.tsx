@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { SORTED_POSTS as POSTS } from "@/lib/blog";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "Блог",
+  title: "Блог Stone AI — гайды, сравнения и новости нейросетей",
   description:
     "Статьи про AI-модели, сравнения, гайды и советы. Как выбрать модель, сэкономить на AI и оплатить в рублях.",
   alternates: { canonical: "/blog" },
@@ -34,6 +35,7 @@ function formatDate(iso: string) {
 export default function BlogPage() {
   return (
     <div className="pt-28 pb-20 min-h-screen">
+      <Breadcrumbs items={[{ label: "Блог" }]} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogFaqJsonLd) }} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-14">
