@@ -1062,7 +1062,7 @@ export default function ProfilePage() {
 
       if (usageRes.status === "fulfilled" && usageRes.value.ok) {
         const data = await usageRes.value.json();
-        setUsage(Array.isArray(data) ? data : data.usage || data.items || []);
+        setUsage(Array.isArray(data) ? data : data.history || data.usage || data.items || []);
       }
 
       if (txRes.status === "fulfilled" && txRes.value.ok) {
