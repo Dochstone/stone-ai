@@ -103,7 +103,6 @@ export function ImageUploader({ onUpload, preview, onClear }: Props) {
         ref={inputRef}
         type="file"
         accept="image/jpeg,image/png,image/webp"
-        capture="environment"
         onChange={handleChange}
         className="hidden"
       />

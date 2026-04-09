@@ -175,7 +175,7 @@ export default function RootLayout({
   return (
     <html lang="ru" className={manrope.variable} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})()` }} />
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('theme');var d=t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(d){document.documentElement.classList.add('dark')};var c=d?'#1a1a1e':'#FAF9F5';var m=document.querySelector('meta[name="theme-color"]');if(m){m.setAttribute('content',c)}else{m=document.createElement('meta');m.name='theme-color';m.content=c;document.head.appendChild(m)}}catch(e){}})()` }} />
         {/* icons, manifest, apple-web-app, theme-color — via Metadata API export above */}
         <script
           type="application/ld+json"

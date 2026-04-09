@@ -2,10 +2,8 @@
 
 from app.config import USD_TO_RUB
 import base64
-import json
 import logging
 import re
-import uuid
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException
@@ -19,9 +17,12 @@ from app.middleware.auth import get_current_user
 from app.models.generation import Generation
 from app.models.user import User
 from app.services.ai_router import get_openrouter_model
+from app.middleware.rate_limit import RateLimiter
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/photo-session", tags=["photo-session"])
+
+photo_session_limiter = RateLimiter(max_requests=5, window_seconds=60)
 
 # ─── Costs per model (RUB → USD via USD_TO_RUB=95) ───
 PRICING = {
@@ -35,10 +36,6 @@ def _cost_usd(feature: str, model_id: str | None) -> float:
     rub = PRICING.get(feature, PRICING["background"]).get(mid, 15)
     return rub / USD_TO_RUB
 
-# Legacy constants for batch (uses background pricing)
-COST_BACKGROUND = 15 / 95
-COST_ON_MODEL = 40 / 95
-COST_MARKETPLACE = 35 / 95
 
 DEFAULT_IMAGE_MODEL = "nano-banana"  # Gemini handles background editing best
 
@@ -47,8 +44,18 @@ OPENROUTER_IMAGE_MODELS = {"nano-banana", "nano-banana-pro"}
 
 # ─── Schemas ───
 
+MAX_IMAGE_BASE64_LEN = 14_000_000  # ~10 MB decoded
+
+
+def _validate_image_size(b64: str):
+    """Reject base64 images larger than ~10 MB."""
+    raw = b64.split(",", 1)[-1] if "," in b64 else b64
+    if len(raw) > MAX_IMAGE_BASE64_LEN:
+        raise HTTPException(413, "Изображение слишком большое. Максимум 10 МБ.")
+
+
 class BackgroundRequest(BaseModel):
-    image_base64: str = Field(..., description="Base64-encoded product image (for reference in prompt)")
+    image_base64: str = Field(..., max_length=MAX_IMAGE_BASE64_LEN, description="Base64-encoded product image (for reference in prompt)")
     background_prompt: str = Field(..., description="Desired background description")
     style: str | None = Field(default=None, description="Style preset: studio, nature, gradient, abstract")
     model_id: str | None = None
@@ -56,7 +63,7 @@ class BackgroundRequest(BaseModel):
 
 
 class OnModelRequest(BaseModel):
-    product_image_base64: str = Field(..., description="Base64-encoded product image")
+    product_image_base64: str = Field(..., max_length=MAX_IMAGE_BASE64_LEN, description="Base64-encoded product image")
     model_description: str = Field(..., description="Description of the model (e.g. young woman, athletic man)")
     scene: str | None = Field(default=None, description="Scene/setting description")
     pose: str | None = Field(default=None, description="Desired pose")
@@ -65,7 +72,7 @@ class OnModelRequest(BaseModel):
 
 
 class MarketplaceCardRequest(BaseModel):
-    image_base64: str = Field(..., description="Base64-encoded product image")
+    image_base64: str = Field(..., max_length=MAX_IMAGE_BASE64_LEN, description="Base64-encoded product image")
     platform: str = Field(..., description="Target platform: wildberries, ozon, amazon, etsy")
     product_name: str = Field(..., description="Product name for the card")
     background_color: str | None = Field(default=None, description="Background color, e.g. white, light gray")
@@ -200,45 +207,11 @@ async def _generate_image(prompt: str, model_id: str | None = None, input_image_
 
     settings = get_settings()
 
-    # Photo session only uses Gemini (OpenRouter) — GPT can't edit images
-    # Force to nano-banana if somehow GPT was selected
-    if model_id in ("gpt-image-1", "gpt-5-image", "gpt-5-image-mini"):
+    # Force non-Gemini models to default
+    if model_id and model_id not in OPENROUTER_IMAGE_MODELS:
         model_id = "nano-banana"
 
-    use_openai = False  # Never use OpenAI for photo session editing
-
-    if use_openai and settings.openai_api_key:
-        try:
-            async with httpx.AsyncClient(timeout=120.0) as client:
-                resp = await client.post(
-                        "https://api.openai.com/v1/images/generations",
-                        headers={"Authorization": f"Bearer {settings.openai_api_key}", "Content-Type": "application/json"},
-                        json={"model": "gpt-image-1", "prompt": prompt, "n": 1, "size": "1024x1024", "quality": "high"},
-                    )
-                if resp.status_code != 200:
-                    error_body = resp.text[:300]
-                    logger.error(f"OpenAI image error {resp.status_code}: {error_body}")
-                    if "safety" in error_body.lower():
-                        raise HTTPException(400, "Промпт отклонён системой безопасности.")
-                    if "billing" in error_body.lower() or "limit" in error_body.lower():
-                        raise HTTPException(503, "Сервис генерации временно недоступен. Попробуйте позже.")
-                    raise RuntimeError(f"OpenAI error: {error_body[:200]}")
-
-                data = resp.json()
-                image_data = data["data"][0]
-                if "b64_json" in image_data:
-                    return f"data:image/png;base64,{image_data['b64_json']}"
-                if image_data.get("url"):
-                    img_resp = await client.get(image_data["url"], timeout=30.0)
-                    if img_resp.status_code == 200:
-                        return f"data:image/png;base64,{base64.b64encode(img_resp.content).decode('ascii')}"
-        except HTTPException:
-            raise
-        except Exception as exc:
-            logger.error(f"OpenAI image gen failed: {exc}")
-            raise RuntimeError(str(exc))
-
-    # Fallback: OpenRouter for other models (supports multimodal with image input)
+    # OpenRouter (Gemini) — the only provider for photo session
     openrouter_model = get_openrouter_model(model_id or "nano-banana")
 
     # Build message — multimodal if input image provided
@@ -315,9 +288,11 @@ async def change_background(
 ):
     """Generate a product photo with a new background."""
     tg_id = tg_user["id"]
+    photo_session_limiter.check(str(tg_id))
     from app.services.safety import check_banned
     if await check_banned(tg_id):
         raise HTTPException(403, "Аккаунт заблокирован")
+    _validate_image_size(req.image_base64)
     user = await _find_user(db, tg_user)
     model_id_used = req.model_id or DEFAULT_IMAGE_MODEL
     cost_usd = _cost_usd("background", model_id_used)
@@ -380,9 +355,11 @@ async def product_on_model(
 ):
     """Generate a fashion/lifestyle photo of a product worn or held by a model."""
     tg_id = tg_user["id"]
+    photo_session_limiter.check(str(tg_id))
     from app.services.safety import check_banned
     if await check_banned(tg_id):
         raise HTTPException(403, "Аккаунт заблокирован")
+    _validate_image_size(req.product_image_base64)
     user = await _find_user(db, tg_user)
     model_id_used = req.model_id or DEFAULT_IMAGE_MODEL
     cost_usd = _cost_usd("on-model", model_id_used)
@@ -444,9 +421,11 @@ async def marketplace_card(
 ):
     """Generate a clean product card for a marketplace platform."""
     tg_id = tg_user["id"]
+    photo_session_limiter.check(str(tg_id))
     from app.services.safety import check_banned
     if await check_banned(tg_id):
         raise HTTPException(403, "Аккаунт заблокирован")
+    _validate_image_size(req.image_base64)
     user = await _find_user(db, tg_user)
     model_id_used = req.model_id or DEFAULT_IMAGE_MODEL
     cost_usd = _cost_usd("marketplace", model_id_used)
@@ -517,14 +496,18 @@ async def batch_process(
 ):
     """Process multiple product photos with the same background. Max 10 images."""
     tg_id = tg_user["id"]
+    photo_session_limiter.check(str(tg_id))
     from app.services.safety import check_banned
     if await check_banned(tg_id):
         raise HTTPException(403, "Аккаунт заблокирован")
+    for img in req.images:
+        _validate_image_size(img)
     user = await _find_user(db, tg_user)
 
     from app.config import apply_discount
     tier = user.subscription_tier or "free"
-    per_image_cost = apply_discount(COST_BACKGROUND, tier)
+    model_id_used = req.model_id or DEFAULT_IMAGE_MODEL
+    per_image_cost = apply_discount(_cost_usd("background", model_id_used), tier)
     total_cost = per_image_cost * len(req.images)
     balance = float(user.balance_usd or 0)
 
@@ -532,7 +515,6 @@ async def batch_process(
         raise HTTPException(402, f"Недостаточно средств. Нужно ~{int(total_cost * USD_TO_RUB)}₽ для {len(req.images)} фото")
 
     style_hint = STYLE_PRESETS.get(req.style, "") if req.style else ""
-    model_id_used = req.model_id or DEFAULT_IMAGE_MODEL
     results = []
     total_spent = 0.0
 
@@ -554,7 +536,7 @@ async def batch_process(
             gen = Generation(
                 user_tg_id=tg_id, type="image", model=model_id_used,
                 prompt=f"[batch {i+1}/{len(req.images)}] {req.background_prompt}",
-                result_text=image_url, cost=COST_BACKGROUND,
+                result_text=image_url, cost=per_image_cost,
             )
             db.add(gen)
 
