@@ -4,6 +4,7 @@
 
 :root {
   --color-bg: #FAF9F5;
+  --color-surface: #FFFFFF;
   --color-text: #1A1916;
   --color-teal-light: #E6F7F4;
   --color-card-dark: #1C1C1E;
@@ -11,6 +12,7 @@
 
 :root.dark {
   --color-bg: #1a1a1e;
+  --color-surface: #232328;
   --color-text: #EDEAE5;
   --color-teal-light: #0E9A8325;
   --color-card-dark: #232328;

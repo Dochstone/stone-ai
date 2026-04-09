@@ -72,7 +72,7 @@ const STAT_CONFIGS: Record<string, { icon: string; color: string; bgColor: strin
 function StatCard({ id, label, value, sub }: { id: string; label: string; value: string; sub?: string }) {
   const cfg = STAT_CONFIGS[id] || STAT_CONFIGS.users;
   return (
-    <div className="bg-white rounded-2xl border border-text/5 p-5 hover:shadow-md transition-shadow">
+    <div className="bg-surface rounded-2xl border border-text/5 p-5 hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between mb-3">
         <div className={`w-10 h-10 rounded-xl ${cfg.bgColor} flex items-center justify-center ${cfg.color}`}>
           <Icon d={cfg.icon} />
@@ -282,7 +282,7 @@ export default function AdminPage() {
             <h1 className="text-2xl font-extrabold">Stone AI Admin</h1>
             <p className="text-text/40 text-sm mt-1">Панель управления</p>
           </div>
-          <form onSubmit={login} className="bg-white rounded-2xl border border-text/5 p-6 space-y-4 shadow-sm">
+          <form onSubmit={login} className="bg-surface rounded-2xl border border-text/5 p-6 space-y-4 shadow-sm">
             <div>
               <label className="text-xs font-semibold text-text/50 mb-1.5 block">Email</label>
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
@@ -311,7 +311,7 @@ export default function AdminPage() {
 
   /* ── Dashboard ── */
   return (
-    <div className="pt-24 pb-20 min-h-screen">
+    <div className="pt-24 pb-20 min-h-screen bg-bg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -336,7 +336,7 @@ export default function AdminPage() {
             <button key={t.id} onClick={() => setTab(t.id)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${
                 tab === t.id
-                  ? "bg-white text-text shadow-sm"
+                  ? "bg-surface text-text shadow-sm"
                   : "text-text/40 hover:text-text/60"
               }`}>
               <Icon d={t.icon} className="w-4 h-4" />
@@ -375,7 +375,7 @@ export default function AdminPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Top Models */}
-              <div className="bg-white rounded-2xl border border-text/5 p-6">
+              <div className="bg-surface rounded-2xl border border-text/5 p-6">
                 <div className="flex items-center justify-between mb-5">
                   <h3 className="font-bold text-sm">Топ-10 моделей</h3>
                   <span className="text-[10px] text-text/25 font-medium">запросов</span>
@@ -387,7 +387,7 @@ export default function AdminPage() {
               </div>
 
               {/* Payment Breakdown */}
-              <div className="bg-white rounded-2xl border border-text/5 p-6">
+              <div className="bg-surface rounded-2xl border border-text/5 p-6">
                 <div className="flex items-center justify-between mb-5">
                   <h3 className="font-bold text-sm">Способы оплаты</h3>
                   <span className="text-[10px] text-text/25 font-medium">за месяц</span>
@@ -413,7 +413,7 @@ export default function AdminPage() {
         {tab === "users" && !loading && (
           <div className="space-y-4 animate-fadeIn">
             {/* Filters */}
-            <div className="bg-white rounded-2xl border border-text/5 p-4">
+            <div className="bg-surface rounded-2xl border border-text/5 p-4">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="relative col-span-2 sm:col-span-1">
                   <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text/25" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -446,7 +446,7 @@ export default function AdminPage() {
               )}
             </div>
 
-            <div className="bg-white rounded-2xl border border-text/5 overflow-hidden">
+            <div className="bg-surface rounded-2xl border border-text/5 overflow-hidden">
               <div className="p-4 border-b border-text/5 flex items-center justify-between">
                 <div>
                   <span className="font-bold text-sm">Пользователи</span>
@@ -543,7 +543,7 @@ export default function AdminPage() {
 
         {/* ═══ Transactions Tab ═══ */}
         {tab === "transactions" && !loading && (
-          <div className="bg-white rounded-2xl border border-text/5 overflow-hidden animate-fadeIn">
+          <div className="bg-surface rounded-2xl border border-text/5 overflow-hidden animate-fadeIn">
             <div className="p-4 border-b border-text/5 flex items-center justify-between">
               <span className="font-bold text-sm">Последние платежи</span>
               <span className="text-text/25 text-xs bg-text/[0.04] px-2 py-0.5 rounded-md font-medium">{transactions.length}</span>
@@ -586,7 +586,7 @@ export default function AdminPage() {
         {tab === "promos" && !loading && (
           <div className="space-y-4 animate-fadeIn">
             {/* Create form */}
-            <div className="bg-white rounded-2xl border border-text/5 p-5">
+            <div className="bg-surface rounded-2xl border border-text/5 p-5">
               <h3 className="font-bold text-sm mb-4">Создать промокод</h3>
               <form onSubmit={async (e) => {
                 e.preventDefault();
@@ -633,7 +633,7 @@ export default function AdminPage() {
               {promos.map((p: any) => {
                 const pct = Math.min(100, (p.used / p.max_uses) * 100);
                 return (
-                  <div key={p.code} className="bg-white rounded-2xl border border-text/5 p-5 hover:shadow-md transition-shadow">
+                  <div key={p.code} className="bg-surface rounded-2xl border border-text/5 p-5 hover:shadow-md transition-shadow">
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <div className="flex items-center gap-2 mb-1">
@@ -682,7 +682,7 @@ export default function AdminPage() {
               })}
             </div>
             {promos.length === 0 && (
-              <div className="text-center py-12 bg-white rounded-2xl border border-text/5">
+              <div className="text-center py-12 bg-surface rounded-2xl border border-text/5">
                 <span className="text-3xl block mb-2">🏷️</span>
                 <p className="text-text/25 text-sm">Нет промокодов</p>
               </div>
@@ -698,7 +698,7 @@ export default function AdminPage() {
               <StatCard id="dau" label="Рефереров с приглашёнными" value={referrals.referrers.length.toString()} />
             </div>
 
-            <div className="bg-white rounded-2xl border border-text/5 overflow-hidden">
+            <div className="bg-surface rounded-2xl border border-text/5 overflow-hidden">
               <div className="p-4 border-b border-text/5">
                 <span className="font-bold text-sm">Рефереры</span>
               </div>
@@ -759,19 +759,19 @@ export default function AdminPage() {
               <>
                 {/* Summary cards */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                  <div className="bg-white rounded-xl border border-text/5 p-4">
+                  <div className="bg-surface rounded-xl border border-text/5 p-4">
                     <div className="text-[10px] text-text/30 uppercase font-bold tracking-wider">Просмотры</div>
                     <div className="text-2xl font-extrabold text-text mt-1">{analytics.total_views.toLocaleString()}</div>
                   </div>
-                  <div className="bg-white rounded-xl border border-text/5 p-4">
+                  <div className="bg-surface rounded-xl border border-text/5 p-4">
                     <div className="text-[10px] text-text/30 uppercase font-bold tracking-wider">Уникальные</div>
                     <div className="text-2xl font-extrabold text-accent mt-1">{analytics.unique_visitors.toLocaleString()}</div>
                   </div>
-                  <div className="bg-white rounded-xl border border-text/5 p-4">
+                  <div className="bg-surface rounded-xl border border-text/5 p-4">
                     <div className="text-[10px] text-text/30 uppercase font-bold tracking-wider">Ср. время</div>
                     <div className="text-2xl font-extrabold text-text mt-1">{analytics.avg_duration_sec > 60 ? `${Math.round(analytics.avg_duration_sec / 60)} мин` : `${Math.round(analytics.avg_duration_sec)} сек`}</div>
                   </div>
-                  <div className="bg-white rounded-xl border border-text/5 p-4">
+                  <div className="bg-surface rounded-xl border border-text/5 p-4">
                     <div className="text-[10px] text-text/30 uppercase font-bold tracking-wider">Мобильные</div>
                     <div className="text-2xl font-extrabold text-text mt-1">{analytics.mobile_percent}%</div>
                   </div>
@@ -779,7 +779,7 @@ export default function AdminPage() {
 
                 {/* Daily chart */}
                 {analytics.daily.length > 0 && (
-                  <div className="bg-white rounded-xl border border-text/5 p-5 mb-6">
+                  <div className="bg-surface rounded-xl border border-text/5 p-5 mb-6">
                     <h3 className="text-sm font-bold text-text mb-4">Просмотры по дням</h3>
                     <div className="flex items-end gap-1 h-32">
                       {analytics.daily.map((d: { date: string; views: number; unique: number }, i: number) => {
@@ -803,7 +803,7 @@ export default function AdminPage() {
                 )}
 
                 {/* Top pages table */}
-                <div className="bg-white rounded-xl border border-text/5 p-5 mb-6">
+                <div className="bg-surface rounded-xl border border-text/5 p-5 mb-6">
                   <h3 className="text-sm font-bold text-text mb-4">Страницы</h3>
                   <table className="w-full text-sm">
                     <thead>
@@ -829,7 +829,7 @@ export default function AdminPage() {
 
                 {/* Top referrers */}
                 {analytics.referrers.length > 0 && (
-                  <div className="bg-white rounded-xl border border-text/5 p-5">
+                  <div className="bg-surface rounded-xl border border-text/5 p-5">
                     <h3 className="text-sm font-bold text-text mb-4">Источники трафика</h3>
                     <div className="space-y-2">
                       {analytics.referrers.map((r: { referrer: string; views: number }, i: number) => (
