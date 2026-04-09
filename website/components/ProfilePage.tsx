@@ -197,7 +197,7 @@ function AvatarUpload({ email, name }: { email: string; name?: string | null }) 
     <div className="relative group">
       <div
         className="cursor-pointer"
-        onClick={() => { if (!uploading) fileRef.current?.click(); }}
+        onClick={() => { alert("click on avatar, ref=" + !!fileRef.current); if (!uploading) fileRef.current?.click(); }}
       >
         {avatar ? (
           <img src={avatar} alt="Avatar" className="w-16 h-16 rounded-full object-cover shrink-0" />
@@ -221,7 +221,7 @@ function AvatarUpload({ email, name }: { email: string; name?: string | null }) 
           </div>
         )}
       </div>
-      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) processAndUpload(f); e.target.value = ""; }} />
+      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { alert("onChange fired, files=" + e.target.files?.length); const f = e.target.files?.[0]; if (f) processAndUpload(f); e.target.value = ""; }} />
       {avatar && !uploading && (
         <button
           onClick={handleRemove}
