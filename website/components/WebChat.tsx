@@ -1324,7 +1324,8 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
     resetTextarea();
 
     try {
-      const res = await fetch(`${API_URL}/api/chat/image`, {
+      // Submit async generation
+      const res = await fetch(`${API_URL}/api/image/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
         body: JSON.stringify({ prompt, model_id: selectedModel }),
@@ -1341,21 +1342,43 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
           return;
         }
         const errMsg = detail?.message || (typeof detail === "string" ? detail : null) || err?.message || "Ошибка генерации";
-        setMessages([...history, { role: "assistant", content: errMsg }]);
+        setMessages([...history, { role: "assistant", content: errMsg, ts: Date.now() }]);
         setStreaming(false);
         setImageGenerating(false);
         return;
       }
 
-      const data = await res.json();
-      if (data.image_url) {
-        setMessages([...history, { role: "assistant", content: data.image_url }]);
-        saveToSession(prompt, data.image_url, undefined);
-      } else {
-        setMessages([...history, { role: "assistant", content: "Не удалось сгенерировать изображение" }]);
+      const { task_id } = await res.json();
+
+      // Poll for result
+      const maxPolls = 60; // 2s × 60 = 120s max
+      for (let i = 0; i < maxPolls; i++) {
+        await new Promise(r => setTimeout(r, 2000));
+        try {
+          const poll = await fetch(`${API_URL}/api/image/status/${task_id}`, {
+            headers: { Authorization: `Bearer ${auth.token}` },
+          });
+          const data = await poll.json();
+
+          if (data.status === "completed" && data.image_url) {
+            setMessages([...history, { role: "assistant", content: data.image_url, ts: Date.now() }]);
+            saveToSession(prompt, data.image_url, undefined);
+            setStreaming(false);
+            setImageGenerating(false);
+            return;
+          }
+          if (data.status === "failed") {
+            setMessages([...history, { role: "assistant", content: data.error || "Ошибка генерации", ts: Date.now() }]);
+            setStreaming(false);
+            setImageGenerating(false);
+            return;
+          }
+        } catch { /* retry on network error */ }
       }
+      // Timeout
+      setMessages([...history, { role: "assistant", content: "Таймаут генерации. Попробуйте снова.", ts: Date.now() }]);
     } catch {
-      setMessages([...history, { role: "assistant", content: "Ошибка соединения" }]);
+      setMessages([...history, { role: "assistant", content: "Ошибка соединения", ts: Date.now() }]);
     } finally {
       setStreaming(false);
       setImageGenerating(false);

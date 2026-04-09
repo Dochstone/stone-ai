@@ -14,5 +14,6 @@ from app.models.game_score import GameScore
 from app.models.achievement import Achievement, UserAchievement
 from app.models.violation import Violation
 from app.models.verification_code import VerificationCode
+from app.models.image_task import ImageTask
 
-__all__ = ["User", "Subscription", "Usage", "Pass", "Transaction", "AdBanner", "AdEvent", "ChatSession", "ChatMessage", "VideoTask", "ThreeDTask", "DailyUsage", "PromptTemplate", "SavedPrompt"]
+__all__ = ["User", "Subscription", "Usage", "Pass", "Transaction", "AdBanner", "AdEvent", "ChatSession", "ChatMessage", "VideoTask", "ThreeDTask", "DailyUsage", "PromptTemplate", "SavedPrompt", "ImageTask"]
