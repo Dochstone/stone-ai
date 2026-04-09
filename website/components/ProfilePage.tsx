@@ -615,9 +615,6 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
           const t = data.theme;
           if (t === "dark") {
             document.documentElement.classList.add("dark");
-          } else if (t === "system") {
-            const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-            document.documentElement.classList.toggle("dark", prefersDark);
           } else {
             document.documentElement.classList.remove("dark");
           }
@@ -636,9 +633,6 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
           // Apply theme from localStorage
           if (parsed.theme === "dark") {
             document.documentElement.classList.add("dark");
-          } else if (parsed.theme === "system") {
-            const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-            document.documentElement.classList.toggle("dark", prefersDark);
           }
         }
       } catch {}
@@ -851,15 +845,6 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
               <button onClick={() => toggleTheme("dark")}
                 className={`px-4 py-2 rounded-xl text-xs font-semibold transition-colors ${theme === "dark" ? "bg-text text-white" : "bg-bg text-text/40 hover:text-text/60"}`}>
                 Тёмная
-              </button>
-              <button onClick={() => {
-                setTheme("system");
-                localStorage.removeItem("theme");
-                const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-                document.documentElement.classList.toggle("dark", prefersDark);
-              }}
-                className={`px-4 py-2 rounded-xl text-xs font-semibold transition-colors ${theme === "system" ? "bg-accent text-white" : "bg-bg text-text/40 hover:text-text/60"}`}>
-                Системная
               </button>
             </div>
           </div>
