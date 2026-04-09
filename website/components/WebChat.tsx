@@ -299,7 +299,7 @@ function Sidebar({
     <>
       {/* Backdrop — mobile only */}
       <div
-        className={`fixed inset-0 z-30 lg:hidden transition-opacity duration-300 ${
+        className={`fixed inset-x-0 top-12 bottom-0 z-30 lg:hidden lg:top-0 transition-opacity duration-300 ${
           open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
         style={{ backgroundColor: "rgba(0,0,0,0.35)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)" }}
@@ -308,7 +308,7 @@ function Sidebar({
 
       {/* Sidebar panel */}
       <div
-        className={`webchat-sidebar fixed inset-y-0 left-0 z-40 bg-bg lg:bg-text/[0.02] flex flex-col lg:relative lg:shrink-0 border-r border-text/[0.06] ${open ? "open" : "closed"}`}
+        className={`webchat-sidebar fixed top-12 bottom-0 left-0 z-40 lg:inset-y-0 bg-bg lg:bg-text/[0.02] flex flex-col lg:relative lg:shrink-0 border-r border-text/[0.06] ${open ? "open" : "closed"}`}
       >
         {/* Top: New Chat + Collapse */}
         <div className="p-3 shrink-0">
@@ -761,14 +761,22 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
     setUserAvatar(getSavedAvatar());
     const avatarHandler = () => setUserAvatar(getSavedAvatar());
     window.addEventListener("avatar-changed", avatarHandler);
-    // Allow dashboard top bar to toggle chat history sidebar
+    // Allow dashboard top bar to toggle chat history sidebar and create new chat
     const historyToggle = () => setSidebarOpen((p) => !p);
+    const newChatHandler = () => {
+      setMessages([]);
+      setActiveSessionId(null);
+      localStorage.removeItem("stone_active_session");
+      sessionStorage.removeItem("stone_chat_messages");
+    };
     window.addEventListener("toggle-chat-history", historyToggle);
+    window.addEventListener("new-chat", newChatHandler);
 
     return () => {
       window.removeEventListener("focus", onFocus);
       window.removeEventListener("avatar-changed", avatarHandler);
       window.removeEventListener("toggle-chat-history", historyToggle);
+      window.removeEventListener("new-chat", newChatHandler);
       document.removeEventListener("visibilitychange", visHandler);
     };
   }, []);
