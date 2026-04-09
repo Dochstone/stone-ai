@@ -89,7 +89,6 @@ export const MODELS: AIModel[] = [
   { id: "pika-2", name: "Pika 2.0", company: "Pika", tier: "pro", category: "video", context: "3-5s", speed: "fast", description: "Самая быстрая генерация (<90 сек). Идеальна для соцсетей и коротких клипов.", strengths: ["Самая быстрая", "Соцсети", "3-5с"] },
   { id: "ltx-video", name: "LTX Video 2.3", company: "Lightricks", tier: "pro", category: "video", context: "5s", speed: "fast", description: "Open source видео-модель. Быстрая генерация с поддержкой аудио.", strengths: ["Быстрая", "Open source", "Аудио"] },
   { id: "cogvideox", name: "CogVideoX", company: "Zhipu", tier: "pro", category: "video", context: "5s", speed: "medium", description: "Модель от Zhipu AI. Хорошая детализация и плавные движения.", strengths: ["Детализация", "Плавное", "Качественная"] },
-  { id: "mochi", name: "Mochi 1", company: "Genmo", tier: "pro", category: "video", context: "5s", speed: "medium", description: "Open source модель от Genmo. Стилизованные и креативные видео.", strengths: ["Open source", "Креативная", "Стилизация"] },
   { id: "stable-video", name: "Stable Video", company: "Stability", tier: "pro", category: "video", context: "4s", speed: "medium", description: "Стабильное качество от Stability AI. Надёжная и предсказуемая.", strengths: ["Стабильная", "Надёжная", "4с"] },
 
   // TIER 8: 3D GENERATION (2 models)

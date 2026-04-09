@@ -115,7 +115,7 @@ VIDEO_MODELS = {
     "kling-v3", "sora-2", "veo-3", "luma-ray2", "luma-ray2-flash",
     "kling-v2", "runway-gen3", "pika-2", "minimax", "pixverse-v5",
     "luma-dream", "stable-video", "wan-2", "hunyuan", "ltx-video",
-    "cogvideox", "mochi",
+    "cogvideox",
 }
 
 # Models available on free plan — only 7 models (everything else is locked)
