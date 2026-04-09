@@ -323,17 +323,24 @@ async def web_admin_users(
 
     total_count = await db.scalar(count_q) or 0
 
-    # Get last activity for each user from usage table
+    # Get request counts and last activity from daily_usage
+    from app.models.daily_usage import DailyUsage
     user_ids = [u.telegram_id or u.id for u in users]
+    user_requests = {}
     last_activity = {}
     if user_ids:
-        activity_q = await db.execute(
-            select(Usage.user_tg_id, func.max(Usage.created_at).label("last_active"))
-            .where(Usage.user_tg_id.in_(user_ids))
-            .group_by(Usage.user_tg_id)
+        req_q = await db.execute(
+            select(
+                DailyUsage.user_tg_id,
+                func.coalesce(func.sum(DailyUsage.fast_used + DailyUsage.premium_used + DailyUsage.image_used + DailyUsage.video_used), 0).label("total"),
+                func.max(DailyUsage.date).label("last_date"),
+            )
+            .where(DailyUsage.user_tg_id.in_(user_ids))
+            .group_by(DailyUsage.user_tg_id)
         )
-        for row in activity_q.all():
-            last_activity[row.user_tg_id] = row.last_active
+        for row in req_q.all():
+            user_requests[row.user_tg_id] = row.total
+            last_activity[row.user_tg_id] = row.last_date
 
     return {
         "users": [
@@ -346,7 +353,7 @@ async def web_admin_users(
                 "balance_usd": round(float(u.balance_usd or 0), 4),
                 "total_deposited_usd": round(float(u.total_deposited_usd or 0), 2),
                 "subscription_tier": u.subscription_tier or "free",
-                "total_requests": u.total_requests or 0,
+                "total_requests": user_requests.get(u.telegram_id or u.id, 0),
                 "total_tokens_used": u.total_tokens_used or 0,
                 "joined_at": u.joined_at.isoformat() if u.joined_at else None,
                 "last_active": last_activity.get(u.telegram_id or u.id, u.last_login_date).isoformat()
