@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { POSTS } from "@/lib/blog";
 import { MODELS } from "@/lib/models";
 import { COMPARISONS, ALTERNATIVES, PROFESSIONS, TOOL_HUBS } from "@/lib/seo-data";
+import { USE_CASES } from "@/lib/use-cases";
 
 import { SITE_URL } from "@/lib/constants";
 
@@ -78,5 +79,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  return [...staticPages, ...blogPages, ...modelPages, ...comparePages, ...alternativePages, ...professionPages, ...toolHubPages];
+  const useCasePages: MetadataRoute.Sitemap = USE_CASES.map((uc) => ({
+    url: `${SITE_URL}/use-cases/${uc.slug}`,
+    lastModified: now,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  }));
+
+  return [...staticPages, ...blogPages, ...modelPages, ...comparePages, ...alternativePages, ...professionPages, ...toolHubPages, ...useCasePages];
 }
