@@ -92,6 +92,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   modelId?: string;
+  ts?: number;
   file?: FileAttachment;
   video?: { url: string; directUrl?: string; taskId?: string; thumbnailUrl?: string; cost_usd?: number };
   threed?: { url: string; cost_usd?: number };
@@ -325,6 +326,7 @@ function Sidebar({
   open,
   onToggle,
   sessions,
+  sessionsLoading,
   activeSessionId,
   onLoadSession,
   onNewChat,
@@ -340,6 +342,7 @@ function Sidebar({
   open: boolean;
   onToggle: () => void;
   sessions: ChatSessionItem[];
+  sessionsLoading?: boolean;
   activeSessionId: number | null;
   onLoadSession: (id: number) => void;
   onNewChat: () => void;
@@ -355,6 +358,15 @@ function Sidebar({
   const [sidebarSearch, setSidebarSearch] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editTitle, setEditTitle] = useState("");
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+
+  // Auto-reset confirm delete after 3 seconds
+  useEffect(() => {
+    if (confirmDeleteId !== null) {
+      const t = setTimeout(() => setConfirmDeleteId(null), 3000);
+      return () => clearTimeout(t);
+    }
+  }, [confirmDeleteId]);
 
   return (
     <>
@@ -465,7 +477,13 @@ function Sidebar({
 
         {/* Chat sessions list */}
         <div className="flex-1 overflow-y-auto px-2">
-          {sessions.length === 0 ? (
+          {sessionsLoading && sessions.length === 0 ? (
+            <div className="space-y-2 px-3 pt-2">
+              {[1,2,3,4,5].map(i => (
+                <div key={i} className="h-10 bg-text/[0.04] rounded-xl animate-pulse" />
+              ))}
+            </div>
+          ) : sessions.length === 0 ? (
             <div className="px-3 py-8 text-center">
               <img src="/mascots/stone-mascot-chat.webp" alt="Stone" width="64" height="64" className="mx-auto mb-2 opacity-60" />
               <p className="text-[11px] text-text/20">Здесь появятся ваши чаты</p>
@@ -550,12 +568,29 @@ function Sidebar({
                             </svg>
                           </button>
                           <button
-                            onClick={(e) => { e.stopPropagation(); onDeleteSession(s.id); }}
-                            className="text-text/10 hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (confirmDeleteId === s.id) {
+                                onDeleteSession(s.id);
+                                setConfirmDeleteId(null);
+                              } else {
+                                setConfirmDeleteId(s.id);
+                              }
+                            }}
+                            className={`p-1 shrink-0 transition-all ${
+                              confirmDeleteId === s.id
+                                ? "text-red-500 opacity-100"
+                                : "text-text/10 hover:text-red-400 opacity-0 group-hover:opacity-100"
+                            }`}
+                            title={confirmDeleteId === s.id ? "Нажмите ещё раз для удаления" : "Удалить"}
                           >
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                              <path strokeLinecap="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
+                            {confirmDeleteId === s.id ? (
+                              <span className="text-[10px] font-semibold">Удалить?</span>
+                            ) : (
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            )}
                           </button>
                         </div>
                       ))}
@@ -670,12 +705,22 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
   const [activeBotConfig, setActiveBotConfig] = useState<{ id: number; name: string; system_prompt: string; model_id: string; avatar_emoji: string } | null>(null);
   const [overlayMinimized, setOverlayMinimized] = useState(false);
   const [lastError, setLastError] = useState(false);
+  const [toast, setToast] = useState<{ msg: string; type: "error" | "success" | "info" } | null>(null);
+  const [sessionsLoading, setSessionsLoading] = useState(true);
 
   // Debounce model search (200ms)
   useEffect(() => {
     const t = setTimeout(() => setModelSearch(modelSearchRaw), 200);
     return () => clearTimeout(t);
   }, [modelSearchRaw]);
+
+  // Auto-dismiss toast
+  useEffect(() => {
+    if (toast) {
+      const t = setTimeout(() => setToast(null), 4000);
+      return () => clearTimeout(t);
+    }
+  }, [toast]);
 
   // Persist chat state to sessionStorage (survives F5)
   useEffect(() => {
@@ -930,7 +975,9 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         setSessions(list);
         try { sessionStorage.setItem("stone_sessions", JSON.stringify(list)); } catch {}
       }
-    } catch {}
+    } catch {} finally {
+      setSessionsLoading(false);
+    }
   }, [auth]);
 
   useEffect(() => { fetchSessions(); }, [fetchSessions]);
@@ -1043,7 +1090,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
       if (res.ok) {
         const data = await res.json();
         await navigator.clipboard.writeText(data.share_url);
-        alert("Ссылка скопирована!");
+        setToast({ msg: "Ссылка скопирована!", type: "success" });
       }
     } catch {}
   }, [auth]);
@@ -1113,13 +1160,13 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({ detail: "Upload failed" }));
-        alert(err.detail || "Ошибка загрузки");
+        setToast({ msg: err.detail || "Ошибка загрузки", type: "error" });
         return;
       }
       const data: FileAttachment = await res.json();
       setPendingFile(data);
     } catch {
-      alert("Ошибка загрузки файла");
+      setToast({ msg: "Ошибка загрузки файла", type: "error" });
     } finally {
       setUploading(false);
     }
@@ -1134,7 +1181,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
     const prompt = input.trim() || undefined;
     const imageUrl = pendingFile?.file_type === "image" ? pendingFile.content : undefined;
-    const userMsg: Message = { role: "user", content: prompt || `[3D из изображения: ${pendingFile?.file_name}]`, file: pendingFile || undefined };
+    const userMsg: Message = { role: "user", content: prompt || `[3D из изображения: ${pendingFile?.file_name}]`, ts: Date.now(), file: pendingFile || undefined };
     const history = [...messages, userMsg];
     setMessages(history);
     setInput("");
@@ -1222,7 +1269,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
     const prompt = input.trim();
     const imageUrl = pendingFile?.file_type === "image" ? pendingFile.content : undefined;
-    const userMsg: Message = { role: "user", content: prompt || "[Видео из изображения]", file: pendingFile || undefined };
+    const userMsg: Message = { role: "user", content: prompt || "[Видео из изображения]", ts: Date.now(), file: pendingFile || undefined };
     const history = [...messages, userMsg];
     setMessages(history);
     setInput("");
@@ -1323,7 +1370,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
     const imgLock = getModelLockInfo(selectedModel, auth.balanceUsd || 0, limits?.plan);
     if (imgLock) { setUpsellModal({ type: "locked", model: MODELS_MAP.get(selectedModel)?.name, tier: imgLock.tier }); return; }
     const prompt = input.trim();
-    const userMsg: Message = { role: "user", content: prompt };
+    const userMsg: Message = { role: "user", content: prompt, ts: Date.now() };
     const history = [...messages, userMsg];
     setMessages(history);
     setInput("");
@@ -1395,7 +1442,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
     if (streaming) return;
 
     const currentFile = !isGuest ? pendingFile : null;
-    const userMsg: Message = { role: "user", content: input.trim() || (currentFile ? `[Файл: ${currentFile.file_name}]` : ""), file: currentFile || undefined };
+    const userMsg: Message = { role: "user", content: input.trim() || (currentFile ? `[Файл: ${currentFile.file_name}]` : ""), ts: Date.now(), file: currentFile || undefined };
     const history = [...messages, userMsg];
     setMessages(history);
     setInput("");
@@ -1493,7 +1540,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
       let assistantContent = "";
       let billing: Message["billing"] | undefined;
 
-      setMessages([...history, { role: "assistant", content: "", modelId: isGuest ? "gpt-4o-mini" : selectedModel }]);
+      setMessages([...history, { role: "assistant", content: "", ts: Date.now(), modelId: isGuest ? "gpt-4o-mini" : selectedModel }]);
 
       while (true) {
         const { done, value } = await reader.read();
@@ -1547,7 +1594,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         }
       }
 
-      setMessages([...history, { role: "assistant", content: assistantContent, billing }]);
+      setMessages([...history, { role: "assistant", content: assistantContent, ts: Date.now(), billing }]);
 
       const userText = history[history.length - 1]?.content || "";
       if (assistantContent) saveToSession(userText, assistantContent, billing);
@@ -1707,6 +1754,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         open={sidebarOpen}
         onToggle={toggleSidebar}
         sessions={sessions}
+        sessionsLoading={sessionsLoading}
         activeSessionId={activeSessionId}
         onLoadSession={loadSession}
         onNewChat={newChat}
@@ -2037,11 +2085,16 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                         </div>
                       )}
 
-                      {/* Model badge for AI messages */}
+                      {/* Model badge + timestamp for AI messages */}
                       {msg.role === "assistant" && msg.content && !(streaming && i === messages.length - 1) && (
                         <div className="flex items-center gap-1.5 mt-1.5">
                           <span className="text-[9px] text-text/20 bg-text/[0.03] px-1.5 py-0.5 rounded">{MODELS_MAP.get(msg.modelId || "")?.name || msg.modelId || "AI"}</span>
+                          {msg.ts && <span className="text-[9px] text-text/15">{new Date(msg.ts).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}</span>}
                         </div>
+                      )}
+                      {/* Timestamp for user messages */}
+                      {msg.role === "user" && msg.ts && (
+                        <span className="text-[10px] text-white/30 mt-1 block">{new Date(msg.ts).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}</span>
                       )}
 
                       {/* Action buttons — show on all AI messages except during generation */}
@@ -2364,9 +2417,9 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                         setRecording(true);
                         setTimeout(() => { if (recorder.state === "recording") recorder.stop(); }, 30000);
                       } catch (err: any) {
-                        if (err?.name === "NotAllowedError") alert("Доступ к микрофону запрещён.");
-                        else if (err?.name === "NotFoundError") alert("Микрофон не найден.");
-                        else alert("Ошибка: " + (err?.message || ""));
+                        if (err?.name === "NotAllowedError") setToast({ msg: "Доступ к микрофону запрещён.", type: "error" });
+                        else if (err?.name === "NotFoundError") setToast({ msg: "Микрофон не найден.", type: "error" });
+                        else setToast({ msg: "Ошибка: " + (err?.message || ""), type: "error" });
                       }
                     })();
                   }}
@@ -2601,6 +2654,21 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Toast notification */}
+      {toast && (
+        <div
+          className={`fixed top-20 right-4 z-[200] px-4 py-3 rounded-xl text-sm font-medium shadow-lg max-w-sm ${
+            toast.type === "error" ? "bg-red-500 text-white" :
+            toast.type === "success" ? "bg-teal text-white" :
+            "bg-text/90 text-white"
+          }`}
+          style={{ animation: "toastSlideIn 0.3s ease-out" }}
+        >
+          {toast.msg}
+          <style>{`@keyframes toastSlideIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }`}</style>
         </div>
       )}
     </div>

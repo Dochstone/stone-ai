@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Leaderboard from "./games/Leaderboard";
 
@@ -16,6 +16,13 @@ export default function GenerationOverlay({ isVisible, estimatedTime, onMinimize
   type?: string;
 }) {
   const [view, setView] = useState<"main" | "snake" | "2048" | "leaderboard">("main");
+  const [elapsed, setElapsed] = useState(0);
+
+  useEffect(() => {
+    if (!isVisible) { setElapsed(0); return; }
+    const t = setInterval(() => setElapsed(e => e + 1), 1000);
+    return () => clearInterval(t);
+  }, [isVisible]);
 
   if (!isVisible) return null;
 
@@ -23,12 +30,12 @@ export default function GenerationOverlay({ isVisible, estimatedTime, onMinimize
 
   return (
     <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-[#12121a] rounded-2xl shadow-2xl border border-white/[0.08] w-full max-w-[420px] overflow-hidden relative">
+      <div className="bg-bg rounded-2xl shadow-2xl border border-text/10 w-full max-w-[420px] overflow-hidden relative">
         {/* Close button */}
         {onClose && (
           <button
             onClick={onClose}
-            className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/15 text-gray-400 hover:text-white transition-colors"
+            className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-lg bg-text/[0.06] hover:bg-text/10 text-text/50 hover:text-text transition-colors"
             aria-label="Закрыть"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -39,29 +46,30 @@ export default function GenerationOverlay({ isVisible, estimatedTime, onMinimize
         {view === "main" && (
           <div className="p-6 text-center">
             <img src="/mascots/stone-mascot-loading.webp" alt="" width="72" height="72" className="mx-auto mb-4 animate-bounce" style={{ animationDuration: "2s" }} />
-            <h3 className="text-base font-bold text-white mb-1">Генерация {typeLabel}...</h3>
-            <p className="text-xs text-gray-400 mb-6">{estimatedTime || "~30 секунд"}</p>
+            <h3 className="text-base font-bold text-text mb-1">Генерация {typeLabel}...</h3>
+            <p className="text-xs text-text/50 mb-1">{estimatedTime || "~30 секунд"}</p>
+            <p className="text-text/30 text-xs mb-6">{elapsed}с прошло</p>
 
             <div className="grid grid-cols-2 gap-3 mb-4">
               <button
                 onClick={() => setView("snake")}
-                className="flex flex-col items-center gap-2 p-4 bg-white/5 hover:bg-white/10 rounded-xl transition-colors"
+                className="flex flex-col items-center gap-2 p-4 bg-text/[0.06] hover:bg-text/10 rounded-xl transition-colors"
               >
                 <span className="text-2xl">🐍</span>
-                <span className="text-xs text-gray-300 font-medium">Змейка</span>
+                <span className="text-xs text-text/60 font-medium">Змейка</span>
               </button>
               <button
                 onClick={() => setView("2048")}
-                className="flex flex-col items-center gap-2 p-4 bg-white/5 hover:bg-white/10 rounded-xl transition-colors"
+                className="flex flex-col items-center gap-2 p-4 bg-text/[0.06] hover:bg-text/10 rounded-xl transition-colors"
               >
                 <span className="text-2xl">🧩</span>
-                <span className="text-xs text-gray-300 font-medium">2048</span>
+                <span className="text-xs text-text/60 font-medium">2048</span>
               </button>
             </div>
 
             <button
               onClick={() => setView("leaderboard")}
-              className="w-full py-2.5 rounded-xl bg-white/5 text-gray-400 font-semibold text-xs hover:bg-white/10 transition-colors mb-2"
+              className="w-full py-2.5 rounded-xl bg-text/[0.06] text-text/50 font-semibold text-xs hover:bg-text/10 transition-colors mb-2"
             >
               🏆 Таблица лидеров
             </button>
@@ -69,7 +77,7 @@ export default function GenerationOverlay({ isVisible, estimatedTime, onMinimize
             {onMinimize && (
               <button
                 onClick={onMinimize}
-                className="w-full py-2.5 text-sm text-gray-500 hover:text-white transition-colors"
+                className="w-full py-2.5 text-sm text-text/40 hover:text-text transition-colors"
               >
                 Свернуть в фон — результат появится в галерее
               </button>
@@ -80,12 +88,12 @@ export default function GenerationOverlay({ isVisible, estimatedTime, onMinimize
         {view === "snake" && (
           <div className="p-4">
             <div className="flex items-center justify-between mb-3">
-              <button onClick={() => setView("main")} className="text-gray-400 hover:text-white text-sm transition-colors">
+              <button onClick={() => setView("main")} className="text-text/50 hover:text-text text-sm transition-colors">
                 ← Назад
               </button>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <span className="text-[10px] text-gray-400">Генерация идёт...</span>
+                <span className="text-[10px] text-text/50">Генерация идёт...</span>
               </div>
             </div>
             <SnakeGame compact token={token} onClose={() => setView("main")} onShowLeaderboard={() => setView("leaderboard")} />
@@ -95,12 +103,12 @@ export default function GenerationOverlay({ isVisible, estimatedTime, onMinimize
         {view === "2048" && (
           <div className="p-4">
             <div className="flex items-center justify-between mb-3">
-              <button onClick={() => setView("main")} className="text-gray-400 hover:text-white text-sm transition-colors">
+              <button onClick={() => setView("main")} className="text-text/50 hover:text-text text-sm transition-colors">
                 ← Назад
               </button>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <span className="text-[10px] text-gray-400">Генерация идёт...</span>
+                <span className="text-[10px] text-text/50">Генерация идёт...</span>
               </div>
             </div>
             <Game2048 compact token={token} onClose={() => setView("main")} onShowLeaderboard={() => setView("leaderboard")} />
@@ -109,7 +117,7 @@ export default function GenerationOverlay({ isVisible, estimatedTime, onMinimize
 
         {view === "leaderboard" && (
           <div className="p-4">
-            <button onClick={() => setView("main")} className="text-gray-400 hover:text-white text-sm mb-3 transition-colors">
+            <button onClick={() => setView("main")} className="text-text/50 hover:text-text text-sm mb-3 transition-colors">
               ← Назад
             </button>
             <Leaderboard />
