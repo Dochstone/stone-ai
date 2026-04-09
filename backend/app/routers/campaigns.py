@@ -417,6 +417,10 @@ async def improve_ad(
             user.balance_usd = max(0, float(user.balance_usd or 0) - IMPROVE_COST_USD)
         c.cost_usd = (c.cost_usd or 0) + IMPROVE_COST_USD
 
+        from sqlalchemy.orm.attributes import flag_modified
+        flag_modified(c, "result")
+        await db.commit()
+
         return {
             "ok": True,
             "original": original,

@@ -260,8 +260,8 @@ export default function CampaignsPage() {
                         {(active.result.ads || []).map((ad: any, i: number) => (
                           <div key={i} className="bg-text/[0.02] rounded-xl p-3">
                             <p className="text-[10px] text-accent font-semibold mb-1">{ad.group}</p>
-                            <p className="text-sm font-bold text-[#1a0dab]">{ad.title1}</p>
-                            <p className="text-xs text-[#1a0dab]/70">{ad.title2}</p>
+                            <p className="text-sm font-bold text-accent">{ad.title1}</p>
+                            <p className="text-xs text-accent/70">{ad.title2}</p>
                             <p className="text-xs text-text/60 mt-1">{ad.text}</p>
                             <div className="flex flex-wrap gap-1 mt-2 pt-2 border-t border-text/[0.04]">
                               {[
@@ -288,7 +288,16 @@ export default function CampaignsPage() {
                                     });
                                     if (res.ok) {
                                       const d = await res.json();
-                                      loadCampaign(active.id);
+                                      if (d.improved) {
+                                        setActive((prev: any) => {
+                                          if (!prev?.result?.ads) return prev;
+                                          const ads = [...prev.result.ads];
+                                          ads[i] = { ...ads[i], ...d.improved };
+                                          return { ...prev, result: { ...prev.result, ads } };
+                                        });
+                                      } else {
+                                        loadCampaign(active.id);
+                                      }
                                     } else {
                                       const err = await res.json().catch(() => ({ detail: "Ошибка" }));
                                       alert(typeof err.detail === "string" ? err.detail : "Ошибка");
