@@ -669,6 +669,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [activeBotConfig, setActiveBotConfig] = useState<{ id: number; name: string; system_prompt: string; model_id: string; avatar_emoji: string } | null>(null);
   const [overlayMinimized, setOverlayMinimized] = useState(false);
+  const [lastError, setLastError] = useState(false);
 
   // Debounce model search (200ms)
   useEffect(() => {
@@ -1400,6 +1401,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
     setInput("");
     setPendingFile(null);
     setStreaming(true);
+    setLastError(false);
     resetTextarea();
 
     const abort = new AbortController();
@@ -1479,6 +1481,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         }
         const errMsg = typeof detail === "string" ? detail : detail?.error || detail?.message || "Ошибка";
         setMessages([...history, { role: "assistant", content: errMsg }]);
+        setLastError(true);
         setStreaming(false);
         return;
       }
@@ -1531,6 +1534,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                 assistantContent = "Ошибка генерации. Попробуйте ещё раз.";
               }
               setMessages([...history, { role: "assistant", content: assistantContent, modelId: isGuest ? "gpt-4o-mini" : selectedModel }]);
+              setLastError(true);
               continue;
             }
 
@@ -1552,6 +1556,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         // Stopped by user — keep what we have
       } else {
         setMessages([...history, { role: "assistant", content: "Ошибка соединения" }]);
+        setLastError(true);
       }
     } finally {
       setStreaming(false);
@@ -2124,6 +2129,27 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                 </div>
               )}
 
+              {/* Retry button on error */}
+              {lastError && messages.length > 0 && !streaming && (
+                <button
+                  onClick={() => {
+                    setLastError(false);
+                    const lastUserMsg = [...messages].reverse().find(m => m.role === "user");
+                    if (lastUserMsg) {
+                      setMessages(prev => prev.filter(m => m !== messages[messages.length - 1]));
+                      setInput(lastUserMsg.content);
+                      pendingSend.current = true;
+                    }
+                  }}
+                  className="flex items-center gap-2 mx-auto px-4 py-2 text-xs font-medium text-accent hover:bg-accent/10 rounded-xl transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182" />
+                  </svg>
+                  Повторить запрос
+                </button>
+              )}
+
               <div ref={bottomRef} />
             </div>
 
@@ -2230,6 +2256,25 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                 onChange={handleInputChange}
                 onKeyDown={handleKey}
                 onFocus={() => { setTimeout(() => textareaRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" }), 300); }}
+                onPaste={(e) => {
+                  const items = e.clipboardData?.items;
+                  if (!items) return;
+                  for (let i = 0; i < items.length; i++) {
+                    if (items[i].type.startsWith("image/")) {
+                      e.preventDefault();
+                      const file = items[i].getAsFile();
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                          const dataUrl = reader.result as string;
+                          setPendingFile({ file_id: `paste-${Date.now()}`, file_name: file.name || "pasted-image.png", file_type: "image", mime_type: file.type, size: file.size, content: dataUrl });
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                      return;
+                    }
+                  }
+                }}
                 placeholder={pendingFile ? "Вопрос к файлу..." : modelCatFilter === "health" ? "Опишите симптомы..." : isVideoModel ? "Опишите видео..." : is3DModel ? "Опишите 3D..." : "Сообщение..."}
                 data-onboard="chat-input"
                 rows={1}

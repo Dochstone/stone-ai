@@ -60,13 +60,107 @@ function sanitizeHtml(html: string): string {
     .replace(/<form\b[^<]*(?:(?!<\/form>)<[^<]*)*<\/form>/gi, '');
 }
 
+// ─── Syntax Highlighting ───
+
+function highlightCode(code: string, _lang: string): string {
+  const keywords =
+    "\\b(const|let|var|function|return|if|else|for|while|do|switch|case|break|continue|class|import|export|from|default|async|await|try|catch|finally|throw|new|this|typeof|instanceof|in|of|true|false|null|undefined|void|yield|static|get|set|extends|implements|interface|type|enum|public|private|protected|abstract|readonly|declare|module|namespace|require|def|self|lambda|print|elif|pass|raise|with|as|is|not|and|or|None|True|False)\\b";
+
+  // Escape HTML first
+  let highlighted = code
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+  // Tokenize to avoid highlighting inside strings/comments
+  // Use placeholder approach: extract strings & comments, highlight keywords/numbers, then restore
+  const tokens: string[] = [];
+  const placeholder = (val: string, style: string) => {
+    const idx = tokens.length;
+    tokens.push(`<span style="color:${style}">${val}</span>`);
+    return `\x00T${idx}T\x00`;
+  };
+
+  // Strings (double, single, backtick)
+  highlighted = highlighted.replace(/(["'`])(?:(?!\1|\\).|\\.)*\1/g, (m) =>
+    placeholder(m, "#a5d6ff")
+  );
+
+  // Comments (// and #)
+  highlighted = highlighted.replace(/(\/\/.*$|#.*$)/gm, (m) =>
+    placeholder(m, "#8b949e")
+  );
+
+  // Multi-line comments /* */
+  highlighted = highlighted.replace(/\/\*[\s\S]*?\*\//g, (m) =>
+    placeholder(m, "#8b949e")
+  );
+
+  // Keywords
+  highlighted = highlighted.replace(
+    new RegExp(keywords, "g"),
+    (m) => `<span style="color:#ff7b72">${m}</span>`
+  );
+
+  // Numbers
+  highlighted = highlighted.replace(
+    /\b(\d+\.?\d*)\b/g,
+    '<span style="color:#79c0ff">$1</span>'
+  );
+
+  // Restore tokens
+  highlighted = highlighted.replace(/\x00T(\d+)T\x00/g, (_, idx) => tokens[+idx]);
+
+  return highlighted;
+}
+
+// ─── Table Renderer ───
+
+function renderTable(tableText: string): string {
+  const lines = tableText.trim().split("\n");
+  if (lines.length < 2) return tableText;
+
+  const parseRow = (line: string) =>
+    line
+      .split("|")
+      .map((c) => c.trim())
+      .filter((c) => c !== "");
+
+  const headers = parseRow(lines[0]);
+  // Skip separator line (lines[1] which is like |---|---|)
+  const rows = lines.slice(2).map(parseRow);
+
+  let html =
+    '<div class="overflow-x-auto my-3"><table class="w-full text-sm border-collapse">';
+  html += "<thead><tr>";
+  headers.forEach((h) => {
+    html += `<th class="px-3 py-2 text-left text-xs font-semibold text-text/50 border-b border-text/10 bg-text/[0.03]">${h}</th>`;
+  });
+  html += "</tr></thead><tbody>";
+  rows.forEach((row) => {
+    html += '<tr class="border-b border-text/[0.04]">';
+    row.forEach((cell) => {
+      html += `<td class="px-3 py-2 text-text/70">${cell}</td>`;
+    });
+    html += "</tr>";
+  });
+  html += "</tbody></table></div>";
+  return html;
+}
+
 // ─── Markdown Renderer ───
 
 function renderMarkdown(text: string): string {
-  let html = text
+  // Process tables before other formatting (match consecutive lines starting with |)
+  let html = text.replace(
+    /((?:^\|.+\|$\n?){2,})/gm,
+    (match) => renderTable(match)
+  );
+
+  html = html
     .replace(/```(\w*)\n([\s\S]*?)```/g, (_match, lang, code) => {
-      const escaped = code.replace(/</g, "&lt;").replace(/>/g, "&gt;").trimEnd();
-      return `<div class="code-block-wrapper"><div class="code-block-header"><span class="code-lang">${lang || "code"}</span><button class="code-copy-btn" onclick="(function(btn){var code=btn.closest('.code-block-wrapper').querySelector('code').textContent;navigator.clipboard.writeText(code);btn.textContent='Скопировано!';setTimeout(function(){btn.textContent='Копировать'},2000)})(this)">Копировать</button></div><pre class="code-block"><code>${escaped}</code></pre></div>`;
+      const highlighted = highlightCode(code.trimEnd(), lang || "");
+      return `<div class="code-block-wrapper"><div class="code-block-header"><span class="code-lang">${lang || "code"}</span><button class="code-copy-btn" onclick="(function(btn){var code=btn.closest('.code-block-wrapper').querySelector('code').textContent;navigator.clipboard.writeText(code);btn.textContent='Скопировано!';setTimeout(function(){btn.textContent='Копировать'},2000)})(this)">Копировать</button></div><pre class="code-block"><code>${highlighted}</code></pre></div>`;
     })
     .replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
