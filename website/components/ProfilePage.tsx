@@ -527,22 +527,77 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
 
-  // Load settings from localStorage
+  // Load settings: try backend first, fall back to localStorage
   useEffect(() => {
-    try {
-      const s = localStorage.getItem("stone_settings");
-      if (s) {
-        const parsed = JSON.parse(s);
-        if (parsed.language) setLanguage(parsed.language);
-        if (parsed.theme) setTheme(parsed.theme);
-        if (parsed.systemPrompt) setSystemPrompt(parsed.systemPrompt);
-        if (parsed.maxTokens) setMaxTokens(parsed.maxTokens);
-      }
-    } catch {}
+    const loadSettings = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/user/settings`, {
+          headers: { Authorization: `Bearer ${auth.token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.language) setLanguage(data.language);
+          if (data.theme) setTheme(data.theme);
+          if (data.systemPrompt) setSystemPrompt(data.systemPrompt);
+          if (data.maxTokens) setMaxTokens(data.maxTokens);
+          localStorage.setItem("stone_settings", JSON.stringify(data));
+          // Apply theme from backend
+          const t = data.theme;
+          if (t === "dark") {
+            document.documentElement.classList.add("dark");
+          } else if (t === "system") {
+            const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+            document.documentElement.classList.toggle("dark", prefersDark);
+          } else {
+            document.documentElement.classList.remove("dark");
+          }
+          return;
+        }
+      } catch { /* fall through to localStorage */ }
+
+      try {
+        const s = localStorage.getItem("stone_settings");
+        if (s) {
+          const parsed = JSON.parse(s);
+          if (parsed.language) setLanguage(parsed.language);
+          if (parsed.theme) setTheme(parsed.theme);
+          if (parsed.systemPrompt) setSystemPrompt(parsed.systemPrompt);
+          if (parsed.maxTokens) setMaxTokens(parsed.maxTokens);
+          // Apply theme from localStorage
+          if (parsed.theme === "dark") {
+            document.documentElement.classList.add("dark");
+          } else if (parsed.theme === "system") {
+            const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+            document.documentElement.classList.toggle("dark", prefersDark);
+          }
+        }
+      } catch {}
+    };
+    loadSettings();
   }, []);
 
-  const saveSettings = () => {
-    localStorage.setItem("stone_settings", JSON.stringify({ language, theme, systemPrompt, maxTokens }));
+  const toggleTheme = (newTheme: string) => {
+    setTheme(newTheme);
+    if (newTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+    localStorage.setItem("theme", newTheme);
+  };
+
+  const saveSettings = async () => {
+    const settings = { language, theme, systemPrompt, maxTokens };
+    localStorage.setItem("stone_settings", JSON.stringify(settings));
+
+    try {
+      await fetch(`${API_URL}/api/user/settings`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
+        body: JSON.stringify(settings),
+      });
+    } catch { /* offline fallback — localStorage still has the settings */ }
+
     setMsg("Настройки сохранены");
     setTimeout(() => setMsg(""), 2000);
   };
@@ -719,16 +774,24 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
           <div>
             <label className="text-[11px] font-semibold text-text/35 uppercase block mb-1">Тема</label>
             <div className="flex gap-2">
-              <button onClick={() => setTheme("light")}
+              <button onClick={() => toggleTheme("light")}
                 className={`px-4 py-2 rounded-xl text-xs font-semibold transition-colors ${theme === "light" ? "bg-accent text-white" : "bg-bg text-text/40 hover:text-text/60"}`}>
                 Светлая
               </button>
-              <button onClick={() => setTheme("dark")}
+              <button onClick={() => toggleTheme("dark")}
                 className={`px-4 py-2 rounded-xl text-xs font-semibold transition-colors ${theme === "dark" ? "bg-text text-white" : "bg-bg text-text/40 hover:text-text/60"}`}>
                 Тёмная
               </button>
+              <button onClick={() => {
+                setTheme("system");
+                localStorage.removeItem("theme");
+                const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+                document.documentElement.classList.toggle("dark", prefersDark);
+              }}
+                className={`px-4 py-2 rounded-xl text-xs font-semibold transition-colors ${theme === "system" ? "bg-accent text-white" : "bg-bg text-text/40 hover:text-text/60"}`}>
+                Системная
+              </button>
             </div>
-            {theme === "dark" && <p className="text-[10px] text-text/25 mt-1">Тёмная тема скоро будет доступна</p>}
           </div>
 
           {/* System prompt */}

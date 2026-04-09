@@ -8,7 +8,7 @@ New Stone AI columns:  language, daily_lite_used, daily_premium_used,
 """
 
 from datetime import datetime
-from sqlalchemy import BigInteger, String, DateTime, Date, Integer, Float, Boolean, func, text, Numeric
+from sqlalchemy import BigInteger, String, DateTime, Date, Integer, Float, Boolean, Text, func, text, Numeric
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
@@ -68,6 +68,9 @@ class User(Base):
     ban_reason: Mapped[str | None] = mapped_column(String(256), nullable=True)
     last_ip: Mapped[str | None] = mapped_column(String(45), nullable=True)
     fingerprint: Mapped[str | None] = mapped_column(String(64), nullable=True)
+
+    # ─── User settings (JSON) ───
+    settings_json: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # ─── Subscription tier ───
     subscription_tier: Mapped[str | None] = mapped_column(String(20), server_default=text("'free'"))  # free/mini/opti/plus

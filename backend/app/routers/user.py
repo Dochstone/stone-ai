@@ -1,5 +1,6 @@
 """User endpoint — profile, limits, balance info, usage history, subscriptions."""
 
+import json
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, Query, Request, HTTPException
 from pydantic import BaseModel
@@ -137,6 +138,39 @@ async def get_me(
             "total_tokens": user.total_tokens_used or 0,
         },
     }
+
+
+@router.get("/user/settings")
+async def get_settings_endpoint(request: Request, db: AsyncSession = Depends(get_db)):
+    """Get user settings (language, theme, etc.)."""
+    user = await _get_user_from_request(request, db)
+    if user.settings_json:
+        try:
+            return json.loads(user.settings_json)
+        except Exception:
+            pass
+    return {}
+
+
+class UserSettingsRequest(BaseModel):
+    language: str | None = None
+    theme: str | None = None
+    systemPrompt: str | None = None
+    maxTokens: int | None = None
+
+
+@router.put("/user/settings")
+async def update_settings(
+    body: UserSettingsRequest,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    """Save user settings."""
+    user = await _get_user_from_request(request, db)
+    settings = body.model_dump(exclude_none=True)
+    user.settings_json = json.dumps(settings)
+    await db.commit()
+    return {"ok": True}
 
 
 @router.patch("/user/profile")
