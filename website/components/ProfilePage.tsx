@@ -145,12 +145,13 @@ function AvatarUpload({ email, name }: { email: string; name?: string | null }) 
   }, []);
 
   const processAndUpload = async (file: File) => {
-    if (!file.type.startsWith("image/")) return;
+    alert(`Файл выбран: ${file.name}, ${file.size} байт, ${file.type}`);
+    if (!file.type.startsWith("image/")) { alert("Не изображение"); return; }
     setUploading(true);
     try {
       const dataUrl: string = await new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
+        reader.onload = () => { alert(`FileReader OK, длина: ${(reader.result as string).length}`); resolve(reader.result as string); };
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
