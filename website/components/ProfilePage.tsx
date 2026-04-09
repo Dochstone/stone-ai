@@ -75,7 +75,8 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
 
 // ─── Helpers ───
 
-import { getInitials, getAvatarColor, getSavedAvatar, saveAvatar, removeAvatar, processAvatarFile } from "@/lib/avatar";
+import { getInitials, getAvatarColor, getSavedAvatar, saveAvatarFull, removeAvatarFull, syncAvatarFromProfile } from "@/lib/avatar";
+import AvatarCropper from "./AvatarCropper";
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("ru-RU", { day: "numeric", month: "short", year: "numeric" });
@@ -134,6 +135,8 @@ function BarChart({ data }: { data: { label: string; value: number }[] }) {
 
 function AvatarUpload({ email, name }: { email: string; name?: string | null }) {
   const [avatar, setAvatar] = useState<string | null>(null);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -143,51 +146,80 @@ function AvatarUpload({ email, name }: { email: string; name?: string | null }) 
     return () => window.removeEventListener("avatar-changed", handler);
   }, []);
 
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      const dataUrl = await processAvatarFile(file);
-      saveAvatar(dataUrl);
-      setAvatar(dataUrl);
-    } catch {}
+    if (!file || !file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = () => setCropSrc(reader.result as string);
+    reader.readAsDataURL(file);
     e.target.value = "";
   };
 
+  const handleCropped = async (base64: string) => {
+    setCropSrc(null);
+    setUploading(true);
+    await saveAvatarFull(base64);
+    setAvatar(getSavedAvatar());
+    setUploading(false);
+  };
+
+  const handleRemove = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setUploading(true);
+    await removeAvatarFull();
+    setAvatar(null);
+    setUploading(false);
+  };
+
   return (
-    <div className="relative group">
-      {avatar ? (
-        <img src={avatar} alt="Avatar" className="w-16 h-16 rounded-full object-cover shrink-0" />
-      ) : (
-        <div
-          className="w-16 h-16 rounded-full flex items-center justify-center shrink-0"
-          style={{ backgroundColor: getAvatarColor(email) }}
-        >
-          <span className="text-xl font-bold text-white">{getInitials(email, name)}</span>
-        </div>
-      )}
-      {/* Overlay on hover */}
-      <div
-        className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity"
-        onClick={() => fileRef.current?.click()}
-      >
-        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
-        </svg>
+    <>
+      <div className="relative group">
+        {avatar ? (
+          <img src={avatar} alt="Avatar" className="w-16 h-16 rounded-full object-cover shrink-0" />
+        ) : (
+          <div
+            className="w-16 h-16 rounded-full flex items-center justify-center shrink-0"
+            style={{ backgroundColor: getAvatarColor(email) }}
+          >
+            <span className="text-xl font-bold text-white">{getInitials(email, name)}</span>
+          </div>
+        )}
+        {uploading && (
+          <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center">
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
+        {!uploading && (
+          <div
+            className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity"
+            onClick={() => fileRef.current?.click()}
+          >
+            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+            </svg>
+          </div>
+        )}
+        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+        {avatar && !uploading && (
+          <button
+            onClick={handleRemove}
+            className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+            title="Удалить фото"
+          >
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
       </div>
-      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
-      {avatar && (
-        <button
-          onClick={(e) => { e.stopPropagation(); removeAvatar(); setAvatar(null); }}
-          className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-          title="Удалить фото"
-        >
-          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+      {cropSrc && (
+        <AvatarCropper
+          imageUrl={cropSrc}
+          onCrop={handleCropped}
+          onCancel={() => setCropSrc(null)}
+        />
       )}
-    </div>
+    </>
   );
 }
 
@@ -580,6 +612,7 @@ function HistoryTab({ usage, plan }: { usage: UsageItem[]; plan: string }) {
 
 function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState }) {
   const [displayName, setDisplayName] = useState(profile.first_name || "");
+  const [editEmail, setEditEmail] = useState(profile.email || "");
   const [oldPass, setOldPass] = useState("");
   const [newPass, setNewPass] = useState("");
   const [language, setLanguage] = useState("ru");
@@ -740,8 +773,42 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
           </div>
           <div>
             <label className="text-[11px] font-semibold text-text/35 uppercase block mb-1">Email</label>
-            <input value={profile.email} disabled
-              className="w-full bg-bg/50 border border-text/5 rounded-xl px-4 py-2.5 text-sm text-text/40" />
+            <div className="flex gap-2">
+              <input
+                value={editEmail}
+                onChange={(e) => setEditEmail(e.target.value)}
+                placeholder="email@example.com"
+                className="flex-1 bg-bg border border-text/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent"
+              />
+              {editEmail !== profile.email && (
+                <button
+                  onClick={async () => {
+                    setSaving(true);
+                    try {
+                      const res = await fetch(`${API_URL}/api/user/email`, {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
+                        body: JSON.stringify({ email: editEmail }),
+                      });
+                      if (res.ok) {
+                        const data = await res.json();
+                        setProfile((p) => p ? { ...p, email: data.email } : p);
+                        setMsg("Email сохранён");
+                      } else {
+                        const err = await res.json().catch(() => ({}));
+                        setMsg(err.detail || "Ошибка сохранения");
+                      }
+                    } catch { setMsg("Ошибка сети"); }
+                    setSaving(false);
+                    setTimeout(() => setMsg(""), 2000);
+                  }}
+                  disabled={saving}
+                  className="bg-accent text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-accent/90 transition-colors disabled:opacity-50 shrink-0"
+                >
+                  Сохранить
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -1174,6 +1241,7 @@ export default function ProfilePage() {
           created_at: u.created_at || new Date().toISOString(),
           stats: data.stats || u.stats || { total_requests: 0, total_tokens: 0 },
         });
+        syncAvatarFromProfile(u.avatar_url || null);
       }
 
       if (usageRes.status === "fulfilled" && usageRes.value.ok) {

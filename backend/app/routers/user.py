@@ -43,6 +43,14 @@ class UpdateProfileRequest(BaseModel):
     first_name: str | None = None
 
 
+class AvatarUploadRequest(BaseModel):
+    image_base64: str  # data:image/...;base64,... (max ~200KB after crop)
+
+
+class UpdateEmailRequest(BaseModel):
+    email: str
+
+
 class SubscribeRequest(BaseModel):
     tier: str  # mini, max, max-pro
 
@@ -115,6 +123,7 @@ async def get_me(
             "username": user.username,
             "first_name": user.first_name,
             "language": user.language,
+            "avatar_url": user.avatar_url,
             "auth_provider": user.auth_provider or "email",
             "created_at": user.joined_at.isoformat() if user.joined_at else None,
             "balance_usd": balance,
@@ -196,6 +205,101 @@ async def update_profile(
 
     await db.commit()
     return {"ok": True, "first_name": user.first_name}
+
+
+@router.post("/user/avatar")
+async def upload_avatar(
+    body: AvatarUploadRequest,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    """Upload user avatar (base64 -> saved to disk, URL stored in DB)."""
+    import base64 as b64mod
+    import os
+    import uuid as uuid_mod
+
+    user = await _get_user_from_request(request, db)
+
+    raw = body.image_base64
+    if "," in raw:
+        raw = raw.split(",", 1)[1]
+    if len(raw) > 500_000:
+        raise HTTPException(413, "Аватар слишком большой. Максимум ~300 КБ.")
+
+    try:
+        img_bytes = b64mod.b64decode(raw)
+    except Exception:
+        raise HTTPException(400, "Невалидный base64")
+
+    upload_dir = "/var/www/stone-ai/backend/uploads/avatars"
+    os.makedirs(upload_dir, exist_ok=True)
+
+    # Delete old avatar file if exists
+    if user.avatar_url and "/uploads/avatars/" in user.avatar_url:
+        old_file = os.path.join(upload_dir, os.path.basename(user.avatar_url))
+        if os.path.exists(old_file):
+            os.remove(old_file)
+
+    filename = f"{user.id}_{uuid_mod.uuid4().hex[:8]}.webp"
+    filepath = os.path.join(upload_dir, filename)
+    with open(filepath, "wb") as f:
+        f.write(img_bytes)
+
+    user.avatar_url = f"/uploads/avatars/{filename}"
+    await db.commit()
+
+    return {"ok": True, "avatar_url": user.avatar_url}
+
+
+@router.delete("/user/avatar")
+async def delete_avatar(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete user avatar."""
+    import os
+
+    user = await _get_user_from_request(request, db)
+
+    if user.avatar_url and "/uploads/avatars/" in user.avatar_url:
+        upload_dir = "/var/www/stone-ai/backend/uploads/avatars"
+        old_file = os.path.join(upload_dir, os.path.basename(user.avatar_url))
+        if os.path.exists(old_file):
+            os.remove(old_file)
+
+    user.avatar_url = None
+    await db.commit()
+
+    return {"ok": True}
+
+
+@router.patch("/user/email")
+async def update_email(
+    body: UpdateEmailRequest,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    """Change user email."""
+    import re as re_mod
+
+    user = await _get_user_from_request(request, db)
+
+    email = body.email.strip().lower()
+    if not re_mod.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
+        raise HTTPException(400, "Невалидный email")
+
+    if email == (user.email or "").lower():
+        return {"ok": True, "email": user.email}
+
+    # Check uniqueness
+    existing = await db.execute(select(User).where(User.email == email))
+    if existing.scalar_one_or_none():
+        raise HTTPException(409, "Этот email уже используется")
+
+    user.email = email
+    await db.commit()
+
+    return {"ok": True, "email": user.email}
 
 
 @router.get("/user/usage-history")

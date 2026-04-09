@@ -69,6 +69,9 @@ class User(Base):
     last_ip: Mapped[str | None] = mapped_column(String(45), nullable=True)
     fingerprint: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
+    # ─── Avatar ───
+    avatar_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
+
     # ─── User settings (JSON) ───
     settings_json: Mapped[str | None] = mapped_column(Text, nullable=True)
 
