@@ -695,8 +695,18 @@ async def confirm_tg_web_session(session_id: str, tg_id: int, tg_user_data: dict
             "created_at": time.time(),
         }
 
+        # Also update DB session
+        try:
+            await db.execute(text("UPDATE tg_web_sessions SET status = 'confirmed', user_id = :uid WHERE session_id = :sid"),
+                             {"uid": user.id, "sid": session_id})
+        except Exception:
+            pass
+
         await db.commit()
-        return user
+
+        # Generate JWT for direct login
+        token = create_jwt(user.id, user.email or "")
+        return user, token
 
 
 # ── Telegram WebApp auto-login (initData) ──

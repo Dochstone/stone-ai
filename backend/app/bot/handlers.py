@@ -69,7 +69,7 @@ async def cmd_start(message: Message):
             try:
                 from app.routers.auth import confirm_tg_web_session
                 tg_user = message.from_user
-                await confirm_tg_web_session(
+                user, token = await confirm_tg_web_session(
                     session_id,
                     tg_user.id,
                     {
@@ -78,15 +78,16 @@ async def cmd_start(message: Message):
                         "language_code": tg_user.language_code or "ru",
                     },
                 )
+                # Direct login link with token
+                login_url = f"https://stoneai.ru/auth/telegram-callback?token={token}&email={user.email or ''}&name={tg_user.first_name or ''}&balance={float(user.balance_usd or 0)}"
                 await message.answer(
                     "✅ <b>Авторизация подтверждена!</b>\n\n"
-                    "Вернитесь на сайт — вы будете автоматически залогинены.\n\n"
-                    "👉 <a href='https://stoneai.ru/webchat'>stoneai.ru</a>",
+                    "Нажмите кнопку ниже чтобы войти на сайт:",
                     parse_mode="HTML",
                     reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                         [InlineKeyboardButton(
-                            text="🌐 Вернуться на сайт",
-                            url="https://stoneai.ru/webchat",
+                            text="🌐 Войти на сайт",
+                            url=login_url,
                         )],
                     ]),
                 )
