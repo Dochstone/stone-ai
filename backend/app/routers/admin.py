@@ -401,15 +401,23 @@ async def web_admin_update_subscription(
     if not user:
         raise HTTPException(404, "User not found")
 
+    from datetime import datetime, timedelta
+
     old_tier = user.subscription_tier or "free"
     user.subscription_tier = body.tier if body.tier != "free" else None
 
-    # Reset monthly counters on upgrade
-    if body.tier != old_tier:
+    # Set subscription dates when upgrading from admin
+    if body.tier != "free" and body.tier != old_tier:
+        now = datetime.utcnow()
+        user.subscription_started = now
+        user.credits_reset_date = now + timedelta(days=30)
         user.monthly_fast_used = 0
         user.monthly_premium_used = 0
         user.monthly_images_used = 0
         user.monthly_videos_used = 0
+    elif body.tier == "free":
+        user.credits_reset_date = None
+        user.subscription_started = None
 
     await db.flush()
 
