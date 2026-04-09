@@ -161,6 +161,18 @@ export default function AdminPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [users, setUsers] = useState<UserRow[]>([]);
   const [usersTotal, setUsersTotal] = useState(0);
+  const [sortCol, setSortCol] = useState<string>("");
+  const [sortAsc, setSortAsc] = useState(false);
+  const toggleSort = (col: string, getter: (u: UserRow) => number | string) => {
+    const asc = sortCol === col ? !sortAsc : false;
+    setSortCol(col);
+    setSortAsc(asc);
+    setUsers(prev => [...prev].sort((a, b) => {
+      const va = getter(a), vb = getter(b);
+      if (typeof va === "number" && typeof vb === "number") return asc ? va - vb : vb - va;
+      return asc ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+    }));
+  };
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [promos, setPromos] = useState<any[]>([]);
   const [referrals, setReferrals] = useState<{ referrers: any[]; total_referred_users: number }>({ referrers: [], total_referred_users: 0 });
@@ -450,10 +462,10 @@ export default function AdminPage() {
                       <th className="text-left py-3 px-4 font-semibold">Email</th>
                       <th className="text-center py-3 px-4 font-semibold">Тариф</th>
                       <th className="text-right py-3 px-4 font-semibold">Баланс</th>
-                      <th className="text-right py-3 px-4 font-semibold cursor-pointer hover:text-accent" onClick={() => { setUsers(prev => [...prev].sort((a, b) => (b.today_requests || 0) - (a.today_requests || 0))); }}>Сегодня ▼</th>
-                      <th className="text-right py-3 px-4 font-semibold cursor-pointer hover:text-accent" onClick={() => { setUsers(prev => [...prev].sort((a, b) => b.total_requests - a.total_requests)); }}>Всего ▼</th>
-                      <th className="text-left py-3 px-4 font-semibold">Дата рег.</th>
-                      <th className="text-left py-3 px-4 font-semibold cursor-pointer hover:text-accent" onClick={() => { setUsers(prev => [...prev].sort((a, b) => (b.last_active || "").localeCompare(a.last_active || ""))); }}>Активность ▼</th>
+                      <th className="text-right py-3 px-4 font-semibold cursor-pointer hover:text-accent select-none" onClick={() => toggleSort("today", u => u.today_requests || 0)}>Сегодня {sortCol === "today" ? (sortAsc ? "▲" : "▼") : "↕"}</th>
+                      <th className="text-right py-3 px-4 font-semibold cursor-pointer hover:text-accent select-none" onClick={() => toggleSort("total", u => u.total_requests)}>Всего {sortCol === "total" ? (sortAsc ? "▲" : "▼") : "↕"}</th>
+                      <th className="text-left py-3 px-4 font-semibold cursor-pointer hover:text-accent select-none" onClick={() => toggleSort("joined", u => u.joined_at || "")}>Дата рег. {sortCol === "joined" ? (sortAsc ? "▲" : "▼") : "↕"}</th>
+                      <th className="text-left py-3 px-4 font-semibold cursor-pointer hover:text-accent select-none" onClick={() => toggleSort("active", u => u.last_active || "")}>Активность {sortCol === "active" ? (sortAsc ? "▲" : "▼") : "↕"}</th>
                     </tr>
                   </thead>
                   <tbody>
