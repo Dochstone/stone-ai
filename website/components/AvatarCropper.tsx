@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 
 interface Props {
   imageUrl: string;
@@ -9,44 +9,35 @@ interface Props {
 }
 
 const OUTPUT_SIZE = 256;
+const CANVAS_SIZE = 300;
+const CIRCLE_SIZE = 240;
 
 export default function AvatarCropper({ imageUrl, onCrop, onCancel }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
-  const [imgLoaded, setImgLoaded] = useState(false);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const [scale, setScale] = useState(1);
+  const offsetRef = useRef({ x: 0, y: 0 });
+  const scaleRef = useRef(1);
   const dragging = useRef(false);
   const lastPos = useRef({ x: 0, y: 0 });
+  const [sliderVal, setSliderVal] = useState(1);
+  const [ready, setReady] = useState(false);
 
-  const CIRCLE_SIZE = 240;
-
-  useEffect(() => {
-    const img = new Image();
-    img.onload = () => {
-      imgRef.current = img;
-      const minScale = CIRCLE_SIZE / Math.min(img.width, img.height);
-      setScale(Math.max(minScale, 1));
-      setOffset({ x: 0, y: 0 });
-      setImgLoaded(true);
-    };
-    img.src = imageUrl;
-  }, [imageUrl]);
-
-  const draw = useCallback(() => {
+  const draw = () => {
     const canvas = canvasRef.current;
     const img = imgRef.current;
     if (!canvas || !img) return;
     const ctx = canvas.getContext("2d")!;
     const w = canvas.width;
     const h = canvas.height;
+    const s = scaleRef.current;
+    const off = offsetRef.current;
+
     ctx.clearRect(0, 0, w, h);
 
-    const imgW = img.width * scale;
-    const imgH = img.height * scale;
-    const x = (w - imgW) / 2 + offset.x;
-    const y = (h - imgH) / 2 + offset.y;
+    const imgW = img.width * s;
+    const imgH = img.height * s;
+    const x = (w - imgW) / 2 + off.x;
+    const y = (h - imgH) / 2 + off.y;
     ctx.drawImage(img, x, y, imgW, imgH);
 
     // Darken outside circle
@@ -65,11 +56,21 @@ export default function AvatarCropper({ imageUrl, onCrop, onCancel }: Props) {
     ctx.beginPath();
     ctx.arc(w / 2, h / 2, CIRCLE_SIZE / 2, 0, Math.PI * 2);
     ctx.stroke();
-  }, [scale, offset]);
+  };
 
   useEffect(() => {
-    if (imgLoaded) draw();
-  }, [imgLoaded, draw]);
+    const img = new Image();
+    img.onload = () => {
+      imgRef.current = img;
+      const minScale = CIRCLE_SIZE / Math.min(img.width, img.height);
+      scaleRef.current = Math.max(minScale, 0.5);
+      setSliderVal(scaleRef.current);
+      offsetRef.current = { x: 0, y: 0 };
+      setReady(true);
+      draw();
+    };
+    img.src = imageUrl;
+  }, [imageUrl]);
 
   const handlePointerDown = (e: React.PointerEvent) => {
     dragging.current = true;
@@ -82,11 +83,8 @@ export default function AvatarCropper({ imageUrl, onCrop, onCancel }: Props) {
     const dx = e.clientX - lastPos.current.x;
     const dy = e.clientY - lastPos.current.y;
     lastPos.current = { x: e.clientX, y: e.clientY };
-    setOffset((prev) => {
-      const next = { x: prev.x + dx, y: prev.y + dy };
-      requestAnimationFrame(draw);
-      return next;
-    });
+    offsetRef.current = { x: offsetRef.current.x + dx, y: offsetRef.current.y + dy };
+    draw();
   };
 
   const handlePointerUp = () => {
@@ -98,36 +96,34 @@ export default function AvatarCropper({ imageUrl, onCrop, onCancel }: Props) {
     const img = imgRef.current;
     if (!img) return;
     const minScale = CIRCLE_SIZE / Math.min(img.width, img.height);
-    setScale((prev) => {
-      const next = Math.max(minScale, Math.min(5, prev - e.deltaY * 0.001));
-      requestAnimationFrame(draw);
-      return next;
-    });
+    scaleRef.current = Math.max(minScale, Math.min(5, scaleRef.current - e.deltaY * 0.001));
+    setSliderVal(scaleRef.current);
+    draw();
   };
 
   const handleCrop = () => {
     const img = imgRef.current;
-    const canvas = canvasRef.current;
-    if (!img || !canvas) return;
+    if (!img) return;
+
+    const s = scaleRef.current;
+    const off = offsetRef.current;
 
     const out = document.createElement("canvas");
     out.width = OUTPUT_SIZE;
     out.height = OUTPUT_SIZE;
     const ctx = out.getContext("2d")!;
 
-    const w = canvas.width;
-    const h = canvas.height;
-    const imgW = img.width * scale;
-    const imgH = img.height * scale;
-    const imgX = (w - imgW) / 2 + offset.x;
-    const imgY = (h - imgH) / 2 + offset.y;
+    const imgW = img.width * s;
+    const imgH = img.height * s;
+    const imgX = (CANVAS_SIZE - imgW) / 2 + off.x;
+    const imgY = (CANVAS_SIZE - imgH) / 2 + off.y;
 
-    const circleX = w / 2 - CIRCLE_SIZE / 2;
-    const circleY = h / 2 - CIRCLE_SIZE / 2;
+    const circleX = CANVAS_SIZE / 2 - CIRCLE_SIZE / 2;
+    const circleY = CANVAS_SIZE / 2 - CIRCLE_SIZE / 2;
 
-    const srcX = (circleX - imgX) / scale;
-    const srcY = (circleY - imgY) / scale;
-    const srcSize = CIRCLE_SIZE / scale;
+    const srcX = (circleX - imgX) / s;
+    const srcY = (circleY - imgY) / s;
+    const srcSize = CIRCLE_SIZE / s;
 
     ctx.drawImage(img, srcX, srcY, srcSize, srcSize, 0, 0, OUTPUT_SIZE, OUTPUT_SIZE);
 
@@ -142,11 +138,11 @@ export default function AvatarCropper({ imageUrl, onCrop, onCancel }: Props) {
           <p className="text-[11px] text-text/40 text-center mt-0.5">Перетащите и масштабируйте</p>
         </div>
 
-        <div ref={containerRef} className="relative flex items-center justify-center" style={{ height: 300 }}>
+        <div className="relative flex items-center justify-center" style={{ height: CANVAS_SIZE }}>
           <canvas
             ref={canvasRef}
-            width={300}
-            height={300}
+            width={CANVAS_SIZE}
+            height={CANVAS_SIZE}
             className="touch-none cursor-grab active:cursor-grabbing"
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
@@ -162,13 +158,15 @@ export default function AvatarCropper({ imageUrl, onCrop, onCancel }: Props) {
           </svg>
           <input
             type="range"
-            min={0.2}
-            max={3}
+            min={0.1}
+            max={4}
             step={0.01}
-            value={scale}
+            value={sliderVal}
             onChange={(e) => {
-              setScale(parseFloat(e.target.value));
-              requestAnimationFrame(draw);
+              const v = parseFloat(e.target.value);
+              scaleRef.current = v;
+              setSliderVal(v);
+              draw();
             }}
             className="flex-1 accent-accent h-1"
           />
@@ -186,7 +184,8 @@ export default function AvatarCropper({ imageUrl, onCrop, onCancel }: Props) {
           </button>
           <button
             onClick={handleCrop}
-            className="flex-1 py-2.5 rounded-xl text-sm font-bold bg-accent text-white hover:bg-accent/90 transition-colors"
+            disabled={!ready}
+            className="flex-1 py-2.5 rounded-xl text-sm font-bold bg-accent text-white hover:bg-accent/90 transition-colors disabled:opacity-50"
           >
             Сохранить
           </button>
