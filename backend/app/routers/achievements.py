@@ -119,7 +119,7 @@ async def claim_reward(slug: str, user: dict = Depends(get_current_user), db: As
     from sqlalchemy import update as sql_update
     await db.execute(
         sql_update(User).where(
-            (User.telegram_id == tg_id) | (User.id == tg_id)
+            User.telegram_id == tg_id
         ).values(balance_usd=User.balance_usd + reward_usd)
     )
 

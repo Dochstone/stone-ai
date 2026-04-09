@@ -1418,7 +1418,8 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
     if (!isGuest && (!input.trim() && !pendingFile)) return;
     if (isGuest && !input.trim()) return;
-    if (streaming) return;
+    if (streaming || sendingRef.current) return;
+    sendingRef.current = true;
 
     const currentFile = !isGuest ? pendingFile : null;
     const userMsg: Message = { role: "user", content: input.trim() || (currentFile ? `[Файл: ${currentFile.file_name}]` : ""), ts: Date.now(), file: currentFile || undefined };
@@ -1427,6 +1428,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
     setInput("");
     setPendingFile(null);
     setStreaming(true);
+    sendingRef.current = false;
     setLastError(false);
     resetTextarea();
 
@@ -1599,6 +1601,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
   // Auto-send after suggestion card click — switches model first
   const pendingSend = useRef(false);
+  const sendingRef = useRef(false);
   const handleSuggestionClick = useCallback((text: string, modelId: string) => {
     if (modelId) setSelectedModel(modelId);
     setInput(text);
