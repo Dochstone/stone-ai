@@ -92,9 +92,29 @@ async def lifespan(app: FastAPI):
             try:
                 from app.services.daily_limits import process_daily_rollover
                 from app.database import async_session
+                from app.models import User
                 async with async_session() as db:
                     count = await process_daily_rollover(db)
                 logger.info(f"✅ Daily rollover completed: {count} users")
+
+                # Expire subscriptions past credits_reset_date
+                async with async_session() as db:
+                    expired = await db.execute(
+                        select(User).where(
+                            User.subscription_tier != "free",
+                            User.subscription_tier.isnot(None),
+                            User.credits_reset_date < datetime.utcnow(),
+                        )
+                    )
+                    expired_users = expired.scalars().all()
+                    for u in expired_users:
+                        old_tier = u.subscription_tier
+                        u.subscription_tier = "free"
+                        u.credits_balance = 0
+                        logger.info(f"Subscription expired: user={u.id}, tier={old_tier}")
+                    if expired_users:
+                        await db.commit()
+                        logger.info(f"✅ Expired {len(expired_users)} subscriptions")
             except Exception as e:
                 logger.error(f"❌ Daily rollover error: {e}")
 

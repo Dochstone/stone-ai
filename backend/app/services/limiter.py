@@ -208,6 +208,11 @@ async def check_can_request(db: AsyncSession, tg_id: int, model_id: str) -> dict
     balance = float(user.balance_usd or 0) if user else 0.0
     sub_tier = (user.subscription_tier or "free") if user else "free"
 
+    # Check subscription expiry (downgrades to free if expired)
+    if user and sub_tier != "free":
+        from app.services.daily_limits import check_and_expire_subscription
+        sub_tier = await check_and_expire_subscription(db, user)
+
     return await check_daily_limit(db, tg_id, model_id, sub_tier, balance)
 
 

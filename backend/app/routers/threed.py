@@ -72,8 +72,10 @@ async def generate_threed(
         raise HTTPException(404, "Пользователь не найден")
 
     # Use daily limits system (same as chat)
-    from app.services.daily_limits import check_daily_limit, increment_usage
+    from app.services.daily_limits import check_daily_limit, increment_usage, check_and_expire_subscription
     tier = user.subscription_tier or "free"
+    if tier != "free":
+        tier = await check_and_expire_subscription(db, user)
     balance = float(user.balance_usd or 0)
 
     # 3D uses image limits

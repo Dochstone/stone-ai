@@ -547,7 +547,7 @@ async def heleket_webhook(request: Request, db: AsyncSession = Depends(get_db)):
 # SUBSCRIPTION PAYMENT — Create invoice for plan purchase
 # ═══════════════════════════════════════════════════════════
 
-PLAN_PRICES_RUB = {"mini": 390, "max": 890, "max-pro": 1990}
+PLAN_PRICES_RUB = {"mini": 590, "max": 1290, "max-pro": 2990}
 
 class SubscribePaymentRequest(BaseModel):
     tier: str  # mini, max, max-pro

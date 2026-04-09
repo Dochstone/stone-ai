@@ -119,7 +119,7 @@ async def confirm_stars_payment(
 # Stars Subscription — activate plan after Stars payment
 # ═══════════════════════════════════════════════════════════
 
-PLAN_PRICES_RUB = {"mini": 390, "max": 890, "max-pro": 1990}
+PLAN_PRICES_RUB = {"mini": 590, "max": 1290, "max-pro": 2990}
 
 class SubscribeStarsRequest(BaseModel):
     tier: str

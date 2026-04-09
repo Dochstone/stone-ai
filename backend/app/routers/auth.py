@@ -5,7 +5,7 @@ import re
 import time
 import uuid
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -32,10 +32,8 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
-# In-memory code store: {email: {"code": "123456", "ts": timestamp, "password": "hashed", ...}}
-_pending_codes: dict[str, dict] = {}
-_reset_codes: dict[str, dict] = {}
 CODE_TTL = 600  # 10 minutes
+MAX_CODE_ATTEMPTS = 5
 
 
 class RegisterRequest(BaseModel):
@@ -136,6 +134,9 @@ def _user_response(user: User, token: str) -> JSONResponse:
 @router.post("/register")
 async def register(body: RegisterRequest, request: Request, db: AsyncSession = Depends(get_db)):
     """Step 1: Send verification code to email."""
+    from app.models.verification_code import VerificationCode
+    from sqlalchemy import delete
+
     email = _validate_email(body.email)
     _validate_password(body.password)
 
@@ -144,11 +145,23 @@ async def register(body: RegisterRequest, request: Request, db: AsyncSession = D
         raise HTTPException(409, "Email уже зарегистрирован")
 
     code = generate_code()
-    _pending_codes[email] = {
-        "code": code,
-        "ts": time.time(),
-        "password_hash": hash_password(body.password),
-    }
+
+    # Delete old codes for this email + cleanup expired
+    await db.execute(delete(VerificationCode).where(
+        (VerificationCode.email == email) & (VerificationCode.code_type == "register")
+    ))
+    await db.execute(delete(VerificationCode).where(
+        VerificationCode.created_at < datetime.utcnow() - timedelta(seconds=CODE_TTL)
+    ))
+
+    vc = VerificationCode(
+        email=email,
+        code=code,
+        code_type="register",
+        password_hash=hash_password(body.password),
+    )
+    db.add(vc)
+    await db.flush()
 
     send_verification_code(email, code)
     return {"status": "code_sent", "message": "Код отправлен на почту"}
@@ -159,28 +172,48 @@ async def verify_email(body: VerifyEmailRequest, request: Request, db: AsyncSess
     """Step 2: Verify code and create account."""
     email = _validate_email(body.email)
 
-    pending = _pending_codes.get(email)
+    from app.models.verification_code import VerificationCode
+    from sqlalchemy import delete
+
+    result = await db.execute(
+        select(VerificationCode).where(
+            VerificationCode.email == email,
+            VerificationCode.code_type == "register",
+        )
+    )
+    pending = result.scalar_one_or_none()
     if not pending:
         raise HTTPException(400, "Сначала запросите код регистрации")
 
-    if time.time() - pending["ts"] > CODE_TTL:
-        _pending_codes.pop(email, None)
+    if (datetime.utcnow() - pending.created_at).total_seconds() > CODE_TTL:
+        await db.execute(delete(VerificationCode).where(VerificationCode.id == pending.id))
+        await db.flush()
         raise HTTPException(400, "Код истёк. Запросите новый.")
 
-    if pending["code"] != body.code.strip():
+    if pending.attempts >= MAX_CODE_ATTEMPTS:
+        await db.execute(delete(VerificationCode).where(VerificationCode.id == pending.id))
+        await db.flush()
+        raise HTTPException(429, "Слишком много попыток. Запросите новый код.")
+
+    if pending.code != body.code.strip():
+        pending.attempts += 1
+        await db.flush()
         raise HTTPException(400, "Неверный код")
+
+    saved_password_hash = pending.password_hash
 
     # Check again that email isn't taken
     existing = await db.execute(select(User).where(User.email == email))
     if existing.scalar_one_or_none():
-        _pending_codes.pop(email, None)
+        await db.execute(delete(VerificationCode).where(VerificationCode.id == pending.id))
+        await db.flush()
         raise HTTPException(409, "Email уже зарегистрирован")
 
     placeholder_tg_id = -int(time.time() * 1000) % (2**53)
     user = User(
         telegram_id=placeholder_tg_id,
         email=email,
-        password_hash=pending["password_hash"],
+        password_hash=saved_password_hash,
         auth_provider="email",
         first_name=email.split("@")[0],
         username=None,
@@ -194,7 +227,9 @@ async def verify_email(body: VerifyEmailRequest, request: Request, db: AsyncSess
     user.last_ip = request.client.host if request.client else None
     await update_login_streak(db, user)
 
-    _pending_codes.pop(email, None)
+    # Clean up verification code
+    await db.execute(delete(VerificationCode).where(VerificationCode.id == pending.id))
+    await db.flush()
     token = create_jwt(user.id, email)
 
     # Achievement: registered
@@ -221,8 +256,18 @@ async def forgot_password(body: ForgotPasswordRequest, db: AsyncSession = Depend
         # Don't reveal if email exists
         return {"status": "ok", "message": "Если аккаунт существует, код отправлен на почту"}
 
+    from app.models.verification_code import VerificationCode
+    from sqlalchemy import delete
+
     code = generate_code()
-    _reset_codes[email] = {"code": code, "ts": time.time()}
+
+    # Delete old reset codes for this email
+    await db.execute(delete(VerificationCode).where(
+        (VerificationCode.email == email) & (VerificationCode.code_type == "reset")
+    ))
+    vc = VerificationCode(email=email, code=code, code_type="reset")
+    db.add(vc)
+    await db.flush()
 
     send_reset_code(email, code)
     return {"status": "ok", "message": "Если аккаунт существует, код отправлен на почту"}
@@ -231,18 +276,35 @@ async def forgot_password(body: ForgotPasswordRequest, db: AsyncSession = Depend
 @router.post("/reset-password")
 async def reset_password(body: ResetPasswordRequest, db: AsyncSession = Depends(get_db)):
     """Verify reset code and set new password."""
+    from app.models.verification_code import VerificationCode
+    from sqlalchemy import delete
+
     email = _validate_email(body.email)
     _validate_password(body.new_password)
 
-    pending = _reset_codes.get(email)
+    result = await db.execute(
+        select(VerificationCode).where(
+            VerificationCode.email == email,
+            VerificationCode.code_type == "reset",
+        )
+    )
+    pending = result.scalar_one_or_none()
     if not pending:
         raise HTTPException(400, "Сначала запросите код сброса")
 
-    if time.time() - pending["ts"] > CODE_TTL:
-        _reset_codes.pop(email, None)
+    if (datetime.utcnow() - pending.created_at).total_seconds() > CODE_TTL:
+        await db.execute(delete(VerificationCode).where(VerificationCode.id == pending.id))
+        await db.flush()
         raise HTTPException(400, "Код истёк. Запросите новый.")
 
-    if pending["code"] != body.code.strip():
+    if pending.attempts >= MAX_CODE_ATTEMPTS:
+        await db.execute(delete(VerificationCode).where(VerificationCode.id == pending.id))
+        await db.flush()
+        raise HTTPException(429, "Слишком много попыток. Запросите новый код.")
+
+    if pending.code != body.code.strip():
+        pending.attempts += 1
+        await db.flush()
         raise HTTPException(400, "Неверный код")
 
     result = await db.execute(select(User).where(User.email == email))
@@ -251,9 +313,9 @@ async def reset_password(body: ResetPasswordRequest, db: AsyncSession = Depends(
         raise HTTPException(404, "Пользователь не найден")
 
     user.password_hash = hash_password(body.new_password)
+    await db.execute(delete(VerificationCode).where(VerificationCode.id == pending.id))
     await db.flush()
 
-    _reset_codes.pop(email, None)
     token = create_jwt(user.id, email)
     return _user_response(user, token)
 

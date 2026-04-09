@@ -17,6 +17,43 @@ from app.models.daily_usage import DailyUsage
 
 logger = logging.getLogger(__name__)
 
+
+async def check_and_expire_subscription(db: AsyncSession, user: User) -> str:
+    """Check if user's subscription has expired. Returns current tier (may downgrade to free)."""
+    tier = user.subscription_tier or "free"
+    if tier == "free":
+        return "free"
+
+    if user.credits_reset_date and user.credits_reset_date < datetime.utcnow():
+        logger.info(f"Subscription expired for user {user.id} (tier={tier}, expired={user.credits_reset_date})")
+        user.subscription_tier = "free"
+        user.credits_balance = 0
+        user.monthly_fast_used = 0
+        user.monthly_premium_used = 0
+        user.monthly_images_used = 0
+        user.monthly_videos_used = 0
+        user.monthly_3d_used = 0
+        user.monthly_audio_used = 0
+        user.opus_requests_used = 0
+        await db.flush()
+
+        # Notify user
+        try:
+            from app.services.email_service import notify_user
+            tier_names = {"mini": "Start", "max": "Pro", "max-pro": "Elite"}
+            notify_user(
+                user.email,
+                f"Подписка {tier_names.get(tier, tier)} истекла",
+                f"Ваша подписка {tier_names.get(tier, tier)} истекла. Продлите на stoneai.ru/pricing чтобы продолжить пользоваться всеми моделями.",
+                tg_id=user.telegram_id,
+            )
+        except Exception:
+            pass
+
+        return "free"
+    return tier
+
+
 # ═══════════════════════════════════════════════════════════
 # Constants
 # ═══════════════════════════════════════════════════════════
