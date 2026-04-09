@@ -195,36 +195,37 @@ function AvatarUpload({ email, name }: { email: string; name?: string | null }) 
 
   return (
     <div className="relative group">
-      {avatar ? (
-        <img src={avatar} alt="Avatar" className="w-16 h-16 rounded-full object-cover shrink-0" />
-      ) : (
-        <div
-          className="w-16 h-16 rounded-full flex items-center justify-center shrink-0"
-          style={{ backgroundColor: getAvatarColor(email) }}
-        >
-          <span className="text-xl font-bold text-white">{getInitials(email, name)}</span>
-        </div>
-      )}
-      {uploading && (
-        <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center">
-          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-        </div>
-      )}
-      {!uploading && (
-        <div
-          className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity"
-          onClick={() => fileRef.current?.click()}
-        >
-          <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
-          </svg>
-        </div>
-      )}
+      <div
+        className="cursor-pointer"
+        onClick={() => { if (!uploading) fileRef.current?.click(); }}
+      >
+        {avatar ? (
+          <img src={avatar} alt="Avatar" className="w-16 h-16 rounded-full object-cover shrink-0" />
+        ) : (
+          <div
+            className="w-16 h-16 rounded-full flex items-center justify-center shrink-0"
+            style={{ backgroundColor: getAvatarColor(email) }}
+          >
+            <span className="text-xl font-bold text-white">{getInitials(email, name)}</span>
+          </div>
+        )}
+        {uploading ? (
+          <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center">
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : (
+          <div className="absolute inset-0 rounded-full bg-black/30 flex items-center justify-center sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+            </svg>
+          </div>
+        )}
+      </div>
       <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) processAndUpload(f); e.target.value = ""; }} />
       {avatar && !uploading && (
         <button
           onClick={handleRemove}
-          className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center"
           title="Удалить фото"
         >
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
