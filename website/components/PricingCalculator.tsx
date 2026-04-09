@@ -12,11 +12,12 @@ export default function PricingCalculator() {
   const model = MODELS.find((m) => m.id === modelId) ?? MODELS[0];
 
   let cost: string;
+  const ppm = model.pricePerMillion || 0;
   if (model.priceUnit) {
-    cost = (model.pricePerMillion * requests).toFixed(2);
+    cost = (ppm * requests).toFixed(2);
   } else {
     const tokens = requests * AVG_TOKENS_PER_REQUEST;
-    cost = ((tokens / 1_000_000) * model.pricePerMillion).toFixed(2);
+    cost = ((tokens / 1_000_000) * ppm).toFixed(2);
   }
 
   return (
