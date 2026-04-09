@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Image from "next/image";
 
 // All AI-generated images
 const allImages = [
@@ -17,14 +16,38 @@ const allImages = [
 
 function ImageCarousel({ images, interval = 3000 }: { images: string[]; interval?: number }) {
   const [idx, setIdx] = useState(0);
+  const [nextIdx, setNextIdx] = useState(1);
+  const [fading, setFading] = useState(false);
+
   useEffect(() => {
-    const t = setInterval(() => setIdx((i) => (i + 1) % images.length), interval);
+    // Preload all images
+    images.forEach((src) => {
+      const img = new window.Image();
+      img.src = src;
+    });
+  }, [images]);
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      const next = (idx + 1) % images.length;
+      setNextIdx(next);
+      setFading(true);
+      setTimeout(() => {
+        setIdx(next);
+        setFading(false);
+      }, 700);
+    }, interval);
     return () => clearInterval(t);
-  }, [images.length, interval]);
+  }, [idx, images.length, interval]);
+
   return (
     <div className="relative w-full h-full overflow-hidden">
-      <Image key={images[idx]} src={images[idx]} alt="AI-сгенерированное изображение" fill sizes="(max-width: 640px) 100vw, 33vw"
-        className="object-cover" priority={idx === 0} />
+      <img src={images[idx]} alt="AI-сгенерированное изображение"
+        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
+        style={{ opacity: fading ? 0 : 1 }} />
+      <img src={images[nextIdx]} alt=""
+        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
+        style={{ opacity: fading ? 1 : 0 }} />
     </div>
   );
 }
