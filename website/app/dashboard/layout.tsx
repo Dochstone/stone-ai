@@ -186,6 +186,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex items-center justify-between px-4 h-12">
           {isChat ? (
             <>
+              <button
+                onClick={() => window.dispatchEvent(new Event("toggle-chat-history"))}
+                aria-label="История чатов"
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-text/40 hover:text-text/70 hover:bg-text/[0.05] transition-colors"
+              >
+                <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                </svg>
+              </button>
+              <span className="text-sm font-bold text-text">AI Чат</span>
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -194,27 +204,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => window.dispatchEvent(new CustomEvent("new-chat"))}
-                  aria-label="Новый чат"
-                  className="w-8 h-8 flex items-center justify-center rounded-lg text-accent hover:bg-accent/10 transition-colors"
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" d="M12 4v16m8-8H4" />
-                  </svg>
-                </button>
-              </div>
-              <span className="text-sm font-bold text-text">AI Чат</span>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => window.dispatchEvent(new Event("toggle-chat-history"))}
-                  aria-label="История чатов"
-                  className="w-8 h-8 flex items-center justify-center rounded-lg text-text/40 hover:text-text/70 hover:bg-text/[0.05] transition-colors"
-                >
-                  <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                   </svg>
                 </button>
                 <ThemeToggle />
