@@ -515,8 +515,8 @@ export default function AdminPage() {
                         </td>
                         <td className="py-3 px-4 text-right font-mono text-xs">{(u.today_requests || 0) > 0 ? <span className="text-accent font-bold">{u.today_requests}</span> : <span className="text-text/20">0</span>}</td>
                         <td className="py-3 px-4 text-right font-mono text-xs">{u.total_requests > 0 ? u.total_requests.toLocaleString() : <span className="text-text/20">0</span>}</td>
-                        <td className="py-3 px-4 text-text/30 text-xs">{u.joined_at?.slice(0, 10) || "—"}</td>
-                        <td className="py-3 px-4 text-text/30 text-xs">{u.last_active?.slice(0, 10) || "—"}</td>
+                        <td className="py-3 px-4 text-text/30 text-xs">{u.joined_at ? `${u.joined_at.slice(8,10)}.${u.joined_at.slice(5,7)}` : "—"}</td>
+                        <td className="py-3 px-4 text-text/30 text-xs">{u.last_active ? `${u.last_active.slice(8,10)}.${u.last_active.slice(5,7)}` : "—"}</td>
                       </tr>
                     ))}
                     {users.length === 0 && (
