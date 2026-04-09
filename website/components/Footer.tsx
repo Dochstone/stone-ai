@@ -21,7 +21,7 @@ export default function Footer() {
       {!hasPaidPlan && (
         <div className="bg-accent/5 border-b border-accent/10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-sm text-text/60"><span className="font-bold text-text">65+ нейросетей</span> от 390₽/мес</p>
+            <p className="text-sm text-text/60"><span className="font-bold text-text">65+ нейросетей</span> от 590₽/мес</p>
             <a href="/pricing" className="bg-accent text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors">
               Выбрать тариф
             </a>

@@ -29,9 +29,9 @@ export default function AlternativesPage({ params }: Props) {
   const models = alt.models.map((id) => MODELS.find((m) => m.id === id)).filter((m): m is NonNullable<typeof m> => !!m);
 
   const faqItems = [
-    { q: `Какие есть альтернативы ${alt.service}?`, a: `Лучшие альтернативы: ${models.map((m) => m.name).join(", ")}. Все доступны в Stone AI от 390₽/мес.` },
+    { q: `Какие есть альтернативы ${alt.service}?`, a: `Лучшие альтернативы: ${models.map((m) => m.name).join(", ")}. Все доступны в Stone AI от 590₽/мес.` },
     { q: `Можно ли использовать альтернативы ${alt.service} бесплатно?`, a: "Да, Stone AI даёт 15 бесплатных запросов в день к 8 моделям. Без карты и без VPN." },
-    { q: "Почему Stone AI лучше?", a: "65+ нейросетей от всех провайдеров за одну подписку от 390₽/мес. Не нужно платить за каждый сервис отдельно." },
+    { q: "Почему Stone AI лучше?", a: "65+ нейросетей от всех провайдеров за одну подписку от 590₽/мес. Не нужно платить за каждый сервис отдельно." },
   ];
 
   const jsonLd = { "@context": "https://schema.org", "@type": "Article", headline: alt.h1, description: alt.description, datePublished: "2026-04-07", author: { "@type": "Organization", name: "Stone AI", url: SITE_URL } };
@@ -87,7 +87,7 @@ export default function AlternativesPage({ params }: Props) {
           <h2 className="text-xl font-extrabold text-text mb-4">Почему Stone AI — лучшая альтернатива</h2>
           <div className="grid sm:grid-cols-3 gap-4 mt-4">
             <div className="text-center"><div className="text-3xl font-extrabold text-accent">65+</div><div className="text-xs text-text/40 mt-1">моделей</div></div>
-            <div className="text-center"><div className="text-3xl font-extrabold text-accent">390₽</div><div className="text-xs text-text/40 mt-1">от / месяц</div></div>
+            <div className="text-center"><div className="text-3xl font-extrabold text-accent">590₽</div><div className="text-xs text-text/40 mt-1">от / месяц</div></div>
             <div className="text-center"><div className="text-3xl font-extrabold text-accent">15</div><div className="text-xs text-text/40 mt-1">бесплатных/день</div></div>
           </div>
         </section>

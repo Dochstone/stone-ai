@@ -226,7 +226,7 @@ export default function Nav() {
             {!authEmail && (
               <a href="/pricing" onClick={() => setMenuOpen(false)}
                 className="border-2 border-accent text-accent px-5 py-3 min-h-[44px] rounded-xl font-bold text-sm text-center hover:bg-accent hover:text-white transition-colors flex items-center justify-center">
-                Тарифы от 390₽
+                Тарифы от 590₽
               </a>
             )}
             {authEmail ? (

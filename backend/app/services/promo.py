@@ -18,7 +18,7 @@ PROMO_CODES = {
         "days": 7,
         "max_uses": 5000,
         "one_per_user": True,
-        "desc": "7 дней Mini бесплатно",
+        "desc": "7 дней Start бесплатно",
     },
     "WELCOME": {
         "type": "days",
@@ -26,7 +26,7 @@ PROMO_CODES = {
         "days": 3,
         "max_uses": 10000,
         "one_per_user": True,
-        "desc": "3 дня Mini бесплатно",
+        "desc": "3 дня Start бесплатно",
     },
     "MAXFREE": {
         "type": "days",
@@ -34,7 +34,7 @@ PROMO_CODES = {
         "days": 3,
         "max_uses": 2000,
         "one_per_user": True,
-        "desc": "3 дня Max бесплатно",
+        "desc": "3 дня Pro бесплатно",
     },
     "BONUS500": {
         "type": "credits",
@@ -49,7 +49,7 @@ PROMO_CODES = {
         "days": 7,
         "max_uses": 1000,
         "one_per_user": True,
-        "desc": "7 дней Mini бесплатно (для читателей блога)",
+        "desc": "7 дней Start бесплатно (для читателей блога)",
     },
 }
 

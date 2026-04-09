@@ -200,7 +200,7 @@ export default function WelcomeScreen({ onSuggestion, activeTab, plan }: { onSug
             <a href="/pricing" className="flex items-center justify-between bg-accent/5 hover:bg-accent/10 border border-accent/15 rounded-xl px-4 py-3 transition-colors">
               <div>
                 <p className="text-[12px] font-bold text-text">Хотите GPT-5.4 и Claude Opus?</p>
-                <p className="text-[10px] text-text/40">Безлимит от 390₽/мес</p>
+                <p className="text-[10px] text-text/40">Безлимит от 590₽/мес</p>
               </div>
               <span className="text-accent text-xs font-bold shrink-0">Тарифы →</span>
             </a>

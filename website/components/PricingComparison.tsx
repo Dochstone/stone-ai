@@ -1,7 +1,7 @@
 const rows = [
   {
     feature: "Доступ к GPT-5",
-    stone: "От 390₽/мес (Start)",
+    stone: "От 590₽/мес (Start)",
     chatgpt: "$20/мес (Plus)",
     competitors: "Подписка, ~на 30% дороже",
   },

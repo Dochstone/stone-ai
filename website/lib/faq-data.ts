@@ -9,7 +9,7 @@ export const homeFaqData = [
   },
   {
     q: "Сколько стоят инструменты и подписка?",
-    a: '4 тарифа на <a href="/pricing" class="text-accent hover:underline font-semibold">странице цен</a>: <strong>Free</strong> — 15 чат-запросов/день, 7 моделей, 2 картинки + 1 видео навсегда. <strong>Start (390₽/мес)</strong> — 20+ моделей, 1 500 быстрых + 90 премиум запросов/мес, 240 картинок, 60 видео. <strong>Pro (890₽/мес)</strong> — все 65+ нейросетей вкл. Opus, 2 100 + 120 запросов, 450 картинок, 90 видео. <strong>Elite (1 990₽/мес)</strong> — 10 500 запросов, API, приоритет. Чат бесплатный по лимитам, инструменты с баланса: шаблоны от 3₽, SEO-статьи 15₽, презентации 40₽, фотосессия 15-40₽, кампании 29₽. Бонус 100₽ при регистрации.',
+    a: '4 тарифа на <a href="/pricing" class="text-accent hover:underline font-semibold">странице цен</a>: <strong>Free</strong> — 15 чат-запросов/день, 7 моделей, 2 картинки + 1 видео навсегда. <strong>Start (590₽/мес)</strong> — 20+ моделей, 1 500 быстрых + 90 премиум запросов/мес, 240 картинок, 60 видео. <strong>Pro (1 290₽/мес)</strong> — все 65+ нейросетей вкл. Opus, 2 100 + 120 запросов, 450 картинок, 90 видео. <strong>Elite (2 990₽/мес)</strong> — 10 500 запросов, API, приоритет. Чат бесплатный по лимитам, инструменты с баланса: шаблоны от 3₽, SEO-статьи 15₽, презентации 40₽, фотосессия 15-40₽, кампании 29₽. Бонус 100₽ при регистрации.',
   },
   {
     q: "Какие способы оплаты поддерживаются?",
@@ -21,7 +21,7 @@ export const homeFaqData = [
   },
   {
     q: "Чем Stone AI отличается от ChatGPT Plus?",
-    a: 'ChatGPT Plus стоит $20/мес (~1800₽) и даёт доступ только к моделям OpenAI. <a href="/pricing" class="text-accent hover:underline font-semibold">Stone AI Pro за 890₽/мес</a> — это 65+ нейросетей от 15 компаний: OpenAI, Anthropic, Google, Meta, xAI, DeepSeek, Mistral, Perplexity и других. Плюс инструменты которых нет в ChatGPT: <a href="/dashboard/campaigns" class="text-accent hover:underline">генератор рекламных кампаний</a>, <a href="/dashboard/photo-session" class="text-accent hover:underline">AI-фотосессия</a>, <a href="/dashboard/presentations" class="text-accent hover:underline">презентации с PPTX</a>, <a href="/dashboard/bots" class="text-accent hover:underline">конструктор ботов</a> с базой знаний. Подробное сравнение — в <a href="/blog/stone-ai-vs-chatgpt-plus" class="text-accent hover:underline">статье блога</a>.',
+    a: 'ChatGPT Plus стоит $20/мес (~1800₽) и даёт доступ только к моделям OpenAI. <a href="/pricing" class="text-accent hover:underline font-semibold">Stone AI Pro за 1 290₽/мес</a> — это 65+ нейросетей от 15 компаний: OpenAI, Anthropic, Google, Meta, xAI, DeepSeek, Mistral, Perplexity и других. Плюс инструменты которых нет в ChatGPT: <a href="/dashboard/campaigns" class="text-accent hover:underline">генератор рекламных кампаний</a>, <a href="/dashboard/photo-session" class="text-accent hover:underline">AI-фотосессия</a>, <a href="/dashboard/presentations" class="text-accent hover:underline">презентации с PPTX</a>, <a href="/dashboard/bots" class="text-accent hover:underline">конструктор ботов</a> с базой знаний. Подробное сравнение — в <a href="/blog/stone-ai-vs-chatgpt-plus" class="text-accent hover:underline">статье блога</a>.',
   },
   {
     q: "Как создать AI-бота с базой знаний?",

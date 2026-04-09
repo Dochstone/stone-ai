@@ -32,7 +32,7 @@ export default function ToolHubPage({ params }: Props) {
   const allCatModels = matchCat ? MODELS.filter((m) => m.category === matchCat) : hub.modelIds.map((id) => MODELS.find((m) => m.id === id)).filter((m): m is NonNullable<typeof m> => !!m);
 
   const faqItems = [
-    { q: `Сколько стоит ${hub.category.toLowerCase()}?`, a: "15 бесплатных запросов/день. Подписки от 390₽/мес." },
+    { q: `Сколько стоит ${hub.category.toLowerCase()}?`, a: "15 бесплатных запросов/день. Подписки от 590₽/мес." },
     { q: "Какие модели доступны?", a: `${allCatModels.length}+ моделей: ${allCatModels.slice(0, 5).map((m) => m.name).join(", ")} и другие.` },
     { q: "Нужна ли регистрация?", a: "Первые 2 запроса — без регистрации. Далее бесплатная регистрация (15 запросов/день)." },
   ];

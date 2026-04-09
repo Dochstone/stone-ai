@@ -103,7 +103,7 @@ export function generateMetadata({ params }: Props): Metadata {
   const isFree = model.tier === "free";
   return {
     title: `${model.name} онлайн ${isFree ? "бесплатно" : ""} — ${cat} нейросеть | Stone AI`,
-    description: `${model.name} от ${model.company} — попробуйте ${isFree ? "бесплатно" : "по подписке от 390₽"} в Stone AI. ${model.description || ""} Контекст ${model.context}. На русском языке, без VPN.`,
+    description: `${model.name} от ${model.company} — попробуйте ${isFree ? "бесплатно" : "по подписке от 590₽"} в Stone AI. ${model.description || ""} Контекст ${model.context}. На русском языке, без VPN.`,
     alternates: { canonical: `/models/${params.id}` },
     openGraph: {
       title: `${model.name} — попробовать ${isFree ? "бесплатно" : "онлайн"} | Stone AI`,
@@ -132,9 +132,9 @@ export default function ModelPage({ params }: Props) {
     description: model.description || `${model.name} — нейросеть от ${model.company}`,
     offers: {
       "@type": "Offer",
-      price: isFree ? "0" : "390",
+      price: isFree ? "0" : "590",
       priceCurrency: isFree ? "USD" : "RUB",
-      description: isFree ? "15 бесплатных запросов в день" : "Подписка от 390₽/мес",
+      description: isFree ? "15 бесплатных запросов в день" : "Подписка от 590₽/мес",
     },
     author: { "@type": "Organization", name: model.company },
   };
@@ -174,7 +174,7 @@ export default function ModelPage({ params }: Props) {
 
           <p className="text-text/60 text-lg leading-relaxed mb-8 max-w-2xl">
             {model.description || `${model.name} от ${model.company} — мощная нейросеть для ${cat.toLowerCase()}.`}
-            {" "}Доступна прямо в браузере. {isFree ? "Бесплатно, 15 запросов в день." : "Попробуйте бесплатно, подписка от 390₽/мес."}
+            {" "}Доступна прямо в браузере. {isFree ? "Бесплатно, 15 запросов в день." : "Попробуйте бесплатно, подписка от 590₽/мес."}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3">
@@ -201,7 +201,7 @@ export default function ModelPage({ params }: Props) {
           </div>
           <div className="bg-bg rounded-2xl border border-text/5 p-4 text-center">
             <div className="text-text/40 text-[10px] font-semibold uppercase mb-1">Тариф</div>
-            <div className="text-xl font-extrabold">{isFree ? "Free" : "от 390₽"}</div>
+            <div className="text-xl font-extrabold">{isFree ? "Free" : "от 590₽"}</div>
           </div>
           <div className="bg-bg rounded-2xl border border-text/5 p-4 text-center">
             <div className="text-text/40 text-[10px] font-semibold uppercase mb-1">Категория</div>
@@ -278,7 +278,7 @@ export default function ModelPage({ params }: Props) {
           <p className="text-text/50 text-sm mb-6 max-w-md mx-auto">
             {isFree
               ? `${model.name} доступна бесплатно — 15 запросов каждый день без регистрации карты.`
-              : `Начните с бесплатного плана, затем подключите подписку от 390₽/мес для полного доступа.`}
+              : `Начните с бесплатного плана, затем подключите подписку от 590₽/мес для полного доступа.`}
           </p>
           <a href={`/dashboard/chat?model=${model.id}`}
             className="inline-block bg-accent text-white px-10 py-4 rounded-xl font-bold text-lg hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25">

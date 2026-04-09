@@ -14,9 +14,9 @@ router = Router()
 # Stars products — subscription plans
 # Price in Stars: RUB price / ~1.3 RUB per Star
 STARS_PRODUCTS = {
-    "sub_mini": {"tier": "mini", "price": 300, "name": "Mini подписка (1 мес)"},
-    "sub_max": {"tier": "max", "price": 685, "name": "Max подписка (1 мес)"},
-    "sub_max_pro": {"tier": "max-pro", "price": 1531, "name": "Max Pro подписка (1 мес)"},
+    "sub_mini": {"tier": "mini", "price": 454, "name": "Start подписка (1 мес)"},
+    "sub_max": {"tier": "max", "price": 992, "name": "Pro подписка (1 мес)"},
+    "sub_max_pro": {"tier": "max-pro", "price": 2300, "name": "Elite подписка (1 мес)"},
 }
 
 
@@ -65,7 +65,7 @@ async def process_successful_payment(message: Message):
     if parts[0] == "sub" and len(parts) == 3:
         tier = parts[1]
         user_id = int(parts[2])
-        tier_names = {"mini": "Mini", "max": "Max", "max-pro": "Max Pro"}
+        tier_names = {"mini": "Start", "max": "Pro", "max-pro": "Elite"}
 
         try:
             async with httpx.AsyncClient() as client:

@@ -141,7 +141,7 @@ const jsonLdWebSite = {
   inLanguage: "ru",
   publisher: { "@id": `${SITE_URL}/#organization` },
   description:
-    "AI-студия нового поколения. Текст, картинки, видео и код. Бесплатный старт. Подписка от 390₽/мес.",
+    "AI-студия нового поколения. Текст, картинки, видео и код. Бесплатный старт. Подписка от 590₽/мес.",
   potentialAction: {
     "@type": "SearchAction",
     target: { "@type": "EntryPoint", urlTemplate: `${SITE_URL}/models?q={search_term_string}` },
@@ -165,7 +165,7 @@ const jsonLdSoftware = {
     highPrice: "130",
     priceCurrency: "USD",
     offerCount: "50",
-    description: "Бесплатный старт — 15 запросов в день. Подписка от 390₽/мес. Free / Start / Pro / Elite.",
+    description: "Бесплатный старт — 15 запросов в день. Подписка от 590₽/мес. Free / Start / Pro / Elite.",
   },
 };
 

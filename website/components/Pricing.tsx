@@ -238,7 +238,7 @@ export default function Pricing() {
     setLoading(true);
     setResult(null);
     try {
-      const pricesRub: Record<string, number> = { mini: 390, max: 890, "max-pro": 1990 };
+      const pricesRub: Record<string, number> = { mini: 590, max: 1290, "max-pro": 2990 };
       const usdAmount = (pricesRub[tier] || 950) / 95;
 
       if (method === "platega") {

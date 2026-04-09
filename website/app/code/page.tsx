@@ -62,7 +62,7 @@ const faqItems = [
   },
   {
     q: "Какая модель лучше для кода?",
-    a: "Claude Opus 4 и Claude Sonnet 4 считаются лучшими для программирования. Devstral — бюджетная альтернатива. Для алгоритмических задач — DeepSeek R1 или o3 (reasoning-модели). Все доступны по подписке от 390₽/мес.",
+    a: "Claude Opus 4 и Claude Sonnet 4 считаются лучшими для программирования. Devstral — бюджетная альтернатива. Для алгоритмических задач — DeepSeek R1 или o3 (reasoning-модели). Все доступны по подписке от 590₽/мес.",
   },
   {
     q: "Безопасно ли отправлять проприетарный код?",
@@ -95,7 +95,7 @@ export default function CodePage() {
         examples={examples}
       />
       <ToolFaq items={faqItems} />
-      <ToolCta title="Ускорьте свою разработку" subtitle="Claude Opus для сложных задач, Devstral для ежедневного кодинга. Подписка от 390₽/мес." />
+      <ToolCta title="Ускорьте свою разработку" subtitle="Claude Opus для сложных задач, Devstral для ежедневного кодинга. Подписка от 590₽/мес." />
     </>
   );
 }

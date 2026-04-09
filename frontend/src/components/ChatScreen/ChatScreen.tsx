@@ -88,7 +88,7 @@ export function ChatScreen() {
             transition: 'all 0.2s',
           }}
         >
-          {user.plan === 'max-pro' ? 'Max Pro' : user.plan === 'max' ? 'Max' : user.plan === 'mini' ? 'Mini' : 'Free'}
+          {user.plan === 'max-pro' ? 'Elite' : user.plan === 'max' ? 'Pro' : user.plan === 'mini' ? 'Start' : 'Free'}
         </div>
 
         <Tag

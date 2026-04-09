@@ -25,8 +25,8 @@ PLANS = {
         },
     },
     "mini": {
-        "name": "Mini",
-        "price_rub": 390,
+        "name": "Start",
+        "price_rub": 590,
         "credits": 1000,
         "limits": {
             "text_fast": 500,
@@ -46,8 +46,8 @@ PLANS = {
         },
     },
     "max": {
-        "name": "Max",
-        "price_rub": 890,
+        "name": "Pro",
+        "price_rub": 1290,
         "credits": 3000,
         "limits": {
             "text_fast": 2000,
@@ -67,8 +67,8 @@ PLANS = {
         },
     },
     "max-pro": {
-        "name": "Max Pro",
-        "price_rub": 1990,
+        "name": "Elite",
+        "price_rub": 2990,
         "credits": 10000,
         "limits": {
             "text_fast": 10000,

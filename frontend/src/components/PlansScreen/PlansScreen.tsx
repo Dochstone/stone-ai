@@ -106,20 +106,20 @@ const PLANS = [
     icon: '🆓',
   },
   {
-    id: 'mini', name: 'Mini', price: '390₽', priceSub: '/мес', stars: 300, tier: 'mini',
+    id: 'mini', name: 'Start', price: '590₽', priceSub: '/мес', stars: 300, tier: 'mini',
     features: ['20+ моделей', '500 запросов/мес', '15 картинок, 3 видео', 'GPT-5.1, Claude Sonnet'],
     color: '#007aff', gradient: 'linear-gradient(135deg, #007aff, #5856d6)',
     icon: '⚡',
   },
   {
-    id: 'max', name: 'Max', price: '890₽', priceSub: '/мес', stars: 685, tier: 'max',
+    id: 'max', name: 'Pro', price: '890₽', priceSub: '/мес', stars: 685, tier: 'max',
     features: ['65+ моделей', '2000 запросов/мес', '50 картинок, 10 видео', 'Claude Opus, 3D, аудио'],
     color: '#ff9500', gradient: 'linear-gradient(135deg, #ff9500, #ff6b00)',
     recommended: true,
     icon: '🔥',
   },
   {
-    id: 'max-pro', name: 'Max Pro', price: '1 990₽', priceSub: '/мес', stars: 1531, tier: 'max-pro',
+    id: 'max-pro', name: 'Elite', price: '1 990₽', priceSub: '/мес', stars: 1531, tier: 'max-pro',
     features: ['65+ моделей + API', '10 000 запросов/мес', '300 картинок, 50 видео', 'Приоритет, ранний доступ'],
     color: '#ff3b30', gradient: 'linear-gradient(135deg, #ff3b30, #ff2d55)',
     icon: '💎',
@@ -287,7 +287,7 @@ export function PlansScreen() {
           Выберите тариф
         </div>
         <div style={{ fontSize: 13, color: '#5a8a70', fontWeight: 500 }}>
-          Подписка от 390₽/мес — все модели без ограничений
+          Подписка от 590₽/мес — все модели без ограничений
         </div>
       </div>
 
@@ -307,7 +307,7 @@ export function PlansScreen() {
           background: `linear-gradient(135deg, ${p.primary}, ${p.secondary})`,
           WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
         }}>
-          {user.plan === 'max-pro' ? 'MAX PRO' : user.plan === 'max' ? 'MAX' : user.plan === 'mini' ? 'MINI' : 'FREE'}
+          {user.plan === 'max-pro' ? 'ELITE' : user.plan === 'max' ? 'PRO' : user.plan === 'mini' ? 'START' : 'FREE'}
         </div>
       </div>
 

@@ -179,10 +179,10 @@ export function HomeScreen() {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontSize: 11, fontWeight: 700, color: user.plan === 'max' || user.plan === 'max-pro' ? '#ff9500' : user.plan === 'mini' ? '#007aff' : '#5a8a70', background: user.plan === 'max' || user.plan === 'max-pro' ? 'rgba(255,149,0,0.15)' : user.plan === 'mini' ? 'rgba(0,122,255,0.15)' : 'rgba(90,138,112,0.15)', padding: '4px 10px', borderRadius: 8 }}>
-              {user.plan === 'max-pro' ? 'MAX PRO' : user.plan === 'max' ? 'MAX' : user.plan === 'mini' ? 'MINI' : 'FREE'}
+              {user.plan === 'max-pro' ? 'ELITE' : user.plan === 'max' ? 'PRO' : user.plan === 'mini' ? 'START' : 'FREE'}
             </span>
             <span style={{ fontSize: 10, color: '#5a8a70', cursor: 'pointer' }} onClick={() => window.open('https://stoneai.ru/pricing', '_blank')}>
-              {user.plan === 'free' || user.plan === 'per_token' ? 'Подписка от 390₽ →' : 'Управление →'}
+              {user.plan === 'free' || user.plan === 'per_token' ? 'Подписка от 590₽ →' : 'Управление →'}
             </span>
           </div>
         </div>

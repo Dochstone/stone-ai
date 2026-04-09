@@ -11,10 +11,10 @@ const pricingJsonLd = {
   "@context": "https://schema.org",
   "@type": "Product",
   name: "Stone AI",
-  description: "AI-студия нового поколения. Подписка от 390₽/мес.",
+  description: "AI-студия нового поколения. Подписка от 590₽/мес.",
   offers: [
     { "@type": "Offer", name: "Free", price: "0", priceCurrency: "RUB", description: "15 запросов в день, 7 моделей" },
-    { "@type": "Offer", name: "Start", price: "390", priceCurrency: "RUB", description: "500 запросов/мес, 20+ моделей" },
+    { "@type": "Offer", name: "Start", price: "590", priceCurrency: "RUB", description: "500 запросов/мес, 20+ моделей" },
     { "@type": "Offer", name: "Pro", price: "890", priceCurrency: "RUB", description: "2000 запросов/мес, 65+ нейросетей" },
     { "@type": "Offer", name: "Elite", price: "1990", priceCurrency: "RUB", description: "10000 запросов/мес, 65+ нейросетей + API" },
   ],
@@ -31,7 +31,7 @@ const faqItems = [
   },
   {
     q: "Чем отличается Start от Pro?",
-    a: "Start (390₽) — 20+ моделей и 500 запросов/мес. Pro (890₽) — все 65+ нейросетей, 2000 запросов, видео, 3D, аудио. Для большинства задач хватает Start.",
+    a: "Start (590₽) — 20+ моделей и 500 запросов/мес. Pro (890₽) — все 65+ нейросетей, 2000 запросов, видео, 3D, аудио. Для большинства задач хватает Start.",
   },
   {
     q: "Что входит в Elite?",
@@ -77,7 +77,7 @@ export default function PricingPage() {
           <p className="text-text/50 max-w-2xl mx-auto text-lg">
             {hasPaidPlan
               ? "Управляйте подпиской и сравнивайте тарифы."
-              : "Бесплатный старт — 15 запросов в день. Подписка от 390₽/мес открывает GPT-5, Claude Opus, генерацию картинок и видео."}
+              : "Бесплатный старт — 15 запросов в день. Подписка от 590₽/мес открывает GPT-5, Claude Opus, генерацию картинок и видео."}
           </p>
         </div>
       </div>
@@ -149,7 +149,7 @@ export default function PricingPage() {
                 </th>
                 <th className="text-center py-4 px-4 min-w-[90px]">
                   <span className="text-xs font-bold text-[#22D3EE]">Start</span>
-                  <p className="text-[10px] text-text/30 mt-0.5">390₽</p>
+                  <p className="text-[10px] text-text/30 mt-0.5">590₽</p>
                 </th>
                 <th className="text-center py-4 px-4 min-w-[90px] bg-[#A855F7]/[0.03]">
                   <span className="inline-block bg-[#A855F7] text-white text-[8px] font-bold px-2.5 py-0.5 rounded-full mb-1.5">ХИТ</span>

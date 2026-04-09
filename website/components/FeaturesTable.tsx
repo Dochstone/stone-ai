@@ -5,7 +5,7 @@ const features = [
   { name: "Генерация картинок", free: "---", paid: "check" },
   { name: "AI Поиск (Perplexity)", free: "---", paid: "check" },
   { name: "Глубокий анализ (o3, R1)", free: "---", paid: "check" },
-  { name: "Стоимость", free: "Бесплатно", paid: "От 390₽/мес" },
+  { name: "Стоимость", free: "Бесплатно", paid: "От 590₽/мес" },
   { name: "Оплата", free: "—", paid: "Карта РФ, СБП, крипто" },
 ];
 

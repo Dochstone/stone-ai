@@ -233,7 +233,7 @@ async def check_daily_limit(
         return {
             "allowed": False,
             "error": "model_locked",
-            "reason": f"Claude Opus доступен на тарифе Max от 890₽/мес",
+            "reason": f"Claude Opus доступен на тарифе Pro от 1290₽/мес",
             "required_tier": "max",
             "plan": tier,
             "tier": tier,

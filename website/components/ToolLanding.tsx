@@ -83,7 +83,7 @@ export default function ToolLanding({ badge, title, description, models, prompts
         {/* CTA */}
         <div className="text-center bg-gradient-to-r from-accent/10 to-teal/10 rounded-2xl p-10">
           <h2 className="text-2xl font-extrabold mb-3">{ctaText}</h2>
-          <p className="text-text/50 mb-6">65+ нейросетей · Карта РФ · СБП · Крипто · От 390₽/мес</p>
+          <p className="text-text/50 mb-6">65+ нейросетей · Карта РФ · СБП · Крипто · От 590₽/мес</p>
           <a href={ctaHref} className="bg-accent text-white px-8 py-3.5 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors inline-block">{ctaText}</a>
         </div>
       </div>

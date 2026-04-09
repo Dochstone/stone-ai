@@ -28,7 +28,7 @@ export function ProfileScreen() {
   const stats = [
     { icon: '📊', value: fmt(safeNum(user.liteToday) + safeNum(user.premiumToday)), label: 'Сегодня', color: p.primary },
     { icon: '⚡', value: fmt(safeNum(user.totalRequests)), label: 'Всего запросов', color: p.secondary || p.primary },
-    { icon: '⭐', value: user.plan === 'max-pro' ? 'Max Pro' : user.plan === 'max' ? 'Max' : user.plan === 'mini' ? 'Mini' : 'Free', label: 'Подписка', color: '#ff9500' },
+    { icon: '⭐', value: user.plan === 'max-pro' ? 'Elite' : user.plan === 'max' ? 'Pro' : user.plan === 'mini' ? 'Start' : 'Free', label: 'Подписка', color: '#ff9500' },
     { icon: '📉', value: `$${safeNum(user.totalDepositedUsd).toFixed(2)}`, label: 'Внесено', color: '#bf5af2' },
   ]
 
@@ -114,7 +114,7 @@ export function ProfileScreen() {
               Управление подпиской
             </div>
             <div style={{ fontSize: 10, color: '#8aaa98' }}>
-              {user.plan === 'free' || user.plan === 'per_token' ? 'Подписка от 390₽/мес' : `Тариф: ${user.plan === 'max-pro' ? 'Max Pro' : user.plan === 'max' ? 'Max' : user.plan === 'mini' ? 'Mini' : 'Free'}`}
+              {user.plan === 'free' || user.plan === 'per_token' ? 'Подписка от 590₽/мес' : `Тариф: ${user.plan === 'max-pro' ? 'Elite' : user.plan === 'max' ? 'Pro' : user.plan === 'mini' ? 'Start' : 'Free'}`}
             </div>
           </div>
           <span style={{

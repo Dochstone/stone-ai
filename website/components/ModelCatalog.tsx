@@ -140,7 +140,7 @@ export default function ModelCatalog() {
             className="bg-bg border border-text/10 rounded-lg px-3 py-1.5 text-xs font-medium text-text focus:outline-none focus:border-accent">
             <option value="all">Все тарифы</option>
             <option value="free">Free (бесплатные)</option>
-            <option value="mini">Start (от 390₽)</option>
+            <option value="mini">Start (от 590₽)</option>
             <option value="max">Pro (от 890₽)</option>
           </select>
           <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)}
@@ -262,7 +262,7 @@ export default function ModelCatalog() {
                           <div className="bg-text/[0.03] rounded-xl p-3 border border-text/[0.06]">
                             <span className="text-text/40 text-[10px] uppercase font-semibold">Тариф</span>
                             <p className={`font-bold mt-0.5 text-sm ${getTierLabel(exp.id).label === "Free" ? "text-teal" : "text-accent"}`}>
-                              {getTierLabel(exp.id).label === "Free" ? "Бесплатно" : getTierLabel(exp.id).label === "Start" ? "от 390₽" : "от 890₽"}
+                              {getTierLabel(exp.id).label === "Free" ? "Бесплатно" : getTierLabel(exp.id).label === "Start" ? "от 590₽" : "от 890₽"}
                             </p>
                           </div>
                         </div>
