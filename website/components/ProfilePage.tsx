@@ -591,7 +591,12 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
   const [oldPass, setOldPass] = useState("");
   const [newPass, setNewPass] = useState("");
   const [language, setLanguage] = useState("ru");
-  const [theme, setTheme] = useState("light");
+  const [theme, setTheme] = useState(() => {
+    if (typeof document !== "undefined") {
+      return document.documentElement.classList.contains("dark") ? "dark" : "light";
+    }
+    return "light";
+  });
   const [systemPrompt, setSystemPrompt] = useState("");
   const [maxTokens, setMaxTokens] = useState(4096);
   const [saving, setSaving] = useState(false);
@@ -611,12 +616,13 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
           if (data.systemPrompt) setSystemPrompt(data.systemPrompt);
           if (data.maxTokens) setMaxTokens(data.maxTokens);
           localStorage.setItem("stone_settings", JSON.stringify(data));
-          // Apply theme from backend
-          const t = data.theme;
-          if (t === "dark") {
-            document.documentElement.classList.add("dark");
-          } else {
-            document.documentElement.classList.remove("dark");
+          // Apply theme from backend (only if explicitly saved)
+          if (data.theme) {
+            if (data.theme === "dark") {
+              document.documentElement.classList.add("dark");
+            } else {
+              document.documentElement.classList.remove("dark");
+            }
           }
           return;
         }
