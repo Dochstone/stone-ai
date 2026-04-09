@@ -1828,7 +1828,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
           <div className="flex-1 overflow-y-auto relative min-h-0 overscroll-contain" ref={messagesContainerRef}>
             <div className="max-w-3xl mx-auto px-3 sm:px-4 py-6 space-y-5">
               {messages.map((msg, i) => (
-                <div key={i} className={`flex gap-2.5 sm:gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
+                <div key={i} className={`flex gap-2.5 sm:gap-3 group ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
                   {/* Avatar */}
                   <div className="shrink-0 mt-0.5">
                     {msg.role === "user" ? (
@@ -1951,36 +1951,31 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                         </div>
                       )}
 
-                      {/* Model badge + timestamp for AI messages */}
-                      {msg.role === "assistant" && msg.content && !(streaming && i === messages.length - 1) && (
-                        <div className="flex items-center gap-1.5 mt-1.5">
-                          <span className="text-[9px] text-text/20 bg-text/[0.03] px-1.5 py-0.5 rounded">{MODELS_MAP.get(msg.modelId || "")?.name || msg.modelId || "AI"}</span>
-                          {msg.ts && <span className="text-[9px] text-text/15">{new Date(msg.ts).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}</span>}
-                        </div>
+                      {/* Timestamp for AI messages */}
+                      {msg.role === "assistant" && msg.content && !(streaming && i === messages.length - 1) && msg.ts && (
+                        <span className="text-[9px] text-text/15 mt-1 block">{new Date(msg.ts).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}</span>
                       )}
                       {/* Timestamp for user messages */}
                       {msg.role === "user" && msg.ts && (
                         <span className="text-[10px] text-white/30 mt-1 block">{new Date(msg.ts).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}</span>
                       )}
 
-                      {/* Action buttons — show on all AI messages except during generation */}
+                      {/* Action buttons — icon-only, appear on hover */}
                       {msg.role === "assistant" && !msg.content?.startsWith("⏳") && !(streaming && i === messages.length - 1) && (
-                        <div className="flex items-center gap-0.5 mt-2">
-                          {/* Copy */}
+                        <div className="flex items-center gap-1 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => {
                               const text = msg.content || msg.video?.url || msg.threed?.url || "";
                               navigator.clipboard.writeText(text);
                               const btn = document.getElementById(`copy-${i}`);
-                              if (btn) { btn.innerHTML = "✓ Скопировано"; setTimeout(() => { btn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg> Копировать`; }, 1500); }
+                              if (btn) { btn.textContent = "✓"; setTimeout(() => { btn.textContent = ""; }, 1200); }
                             }}
                             id={`copy-${i}`}
-                            className="flex items-center gap-1 text-[10px] text-text/25 hover:text-accent px-2 py-1.5 rounded-lg hover:bg-accent/5 transition-all"
+                            title="Копировать"
+                            className="w-7 h-7 flex items-center justify-center text-text/20 hover:text-accent hover:bg-accent/5 rounded-lg transition-all text-[10px]"
                           >
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                            Копировать
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                           </button>
-                          {/* Regenerate — only on last AI message */}
                           {i === messages.length - 1 && !streaming && (
                             <button
                               onClick={() => {
@@ -1988,16 +1983,15 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                                 if (lastUserMsg) {
                                   setMessages(prev => prev.slice(0, -1));
                                   setInput(lastUserMsg.content);
-                                  setTimeout(() => { (document.querySelector("[data-send-btn]") as HTMLButtonElement)?.click(); }, 100);
+                                  pendingSend.current = true;
                                 }
                               }}
-                              className="flex items-center gap-1 text-[10px] text-text/25 hover:text-accent px-2 py-1.5 rounded-lg hover:bg-accent/5 transition-all"
+                              title="Повторить"
+                              className="w-7 h-7 flex items-center justify-center text-text/20 hover:text-accent hover:bg-accent/5 rounded-lg transition-all"
                             >
-                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                              Повторить
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182" /></svg>
                             </button>
                           )}
-                          {/* Voice — only for text messages (not video/image/3D) */}
                           {!msg.video && !msg.threed && msg.content && !msg.content.match(/^data:image\//) && !(msg.content.match(/\.(png|jpg|jpeg|webp|gif)(\?|$)/i)) && auth?.token && (
                             <VoiceButton text={msg.content} token={auth.token} />
                           )}

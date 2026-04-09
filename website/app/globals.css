@@ -23,17 +23,21 @@ html {
   overscroll-behavior: none;
 }
 
-/* Streaming cursor — blinking caret after last character */
+/* Streaming cursor — thin blinking line */
 .streaming-cursor::after {
-  content: "▊";
-  display: inline;
-  color: var(--color-accent, #C4623D);
-  animation: blink-cursor 0.8s step-end infinite;
-  margin-left: 1px;
-  font-weight: bold;
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  background: var(--color-text);
+  opacity: 0.4;
+  animation: blink-cursor 1s ease-in-out infinite;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  border-radius: 1px;
 }
 @keyframes blink-cursor {
-  0%, 100% { opacity: 1; }
+  0%, 100% { opacity: 0.4; }
   50% { opacity: 0; }
 }
 
