@@ -75,7 +75,7 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
 
 // ─── Helpers ───
 
-import { getInitials, getAvatarColor, getSavedAvatar, saveAvatarFull, removeAvatarFull, syncAvatarFromProfile } from "@/lib/avatar";
+import { getInitials, getAvatarColor, getSavedAvatar, saveAvatar, removeAvatarFull, syncAvatarFromProfile } from "@/lib/avatar";
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("ru-RU", { day: "numeric", month: "short", year: "numeric" });
@@ -148,37 +148,36 @@ function AvatarUpload({ email, name }: { email: string; name?: string | null }) 
     if (!file.type.startsWith("image/")) return;
     setUploading(true);
     try {
-      // Read file as data URL
-      const dataUrl = await new Promise<string>((resolve, reject) => {
+      const dataUrl: string = await new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result as string);
-        reader.onerror = () => reject(new Error("File read error"));
+        reader.onerror = reject;
         reader.readAsDataURL(file);
       });
 
-      // Resize to 256x256 center crop
-      const base64 = await new Promise<string>((resolve) => {
-        const img = document.createElement("img");
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          canvas.width = 256;
-          canvas.height = 256;
-          const ctx = canvas.getContext("2d")!;
-          const side = Math.min(img.naturalWidth, img.naturalHeight);
-          const sx = (img.naturalWidth - side) / 2;
-          const sy = (img.naturalHeight - side) / 2;
-          ctx.drawImage(img, sx, sy, side, side, 0, 0, 256, 256);
-          resolve(canvas.toDataURL("image/webp", 0.85));
-        };
-        img.onerror = () => {
-          // Fallback: upload original data URL without resize
-          resolve(dataUrl);
-        };
-        img.src = dataUrl;
-      });
-
-      await saveAvatarFull(base64);
-      setAvatar(getSavedAvatar());
+      // Upload directly — backend handles any size up to 500KB base64
+      const auth = JSON.parse(localStorage.getItem("stone_auth") || "{}");
+      if (auth.token) {
+        const API = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
+        const res = await fetch(`${API}/api/user/avatar`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
+          body: JSON.stringify({ image_base64: dataUrl }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const url = data.avatar_url ? `${API}${data.avatar_url}` : dataUrl;
+          saveAvatar(url);
+          setAvatar(url);
+        } else {
+          // Fallback: save locally
+          saveAvatar(dataUrl);
+          setAvatar(dataUrl);
+        }
+      } else {
+        saveAvatar(dataUrl);
+        setAvatar(dataUrl);
+      }
     } catch (e) {
       console.error("Avatar upload failed:", e);
     }

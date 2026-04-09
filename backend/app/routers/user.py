@@ -223,8 +223,8 @@ async def upload_avatar(
     raw = body.image_base64
     if "," in raw:
         raw = raw.split(",", 1)[1]
-    if len(raw) > 500_000:
-        raise HTTPException(413, "Аватар слишком большой. Максимум ~300 КБ.")
+    if len(raw) > 5_000_000:
+        raise HTTPException(413, "Аватар слишком большой. Максимум 3 МБ.")
 
     try:
         img_bytes = b64mod.b64decode(raw)
