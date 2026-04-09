@@ -18,8 +18,9 @@ const popularModels = [
 ];
 
 function calcCost(model: (typeof MODELS)[number], reqs: number) {
-  if (model.priceUnit) return model.pricePerMillion * reqs;
-  return (reqs * AVG_TOKENS * model.pricePerMillion) / 1_000_000;
+  const ppm = model.pricePerMillion || 0;
+  if (model.priceUnit) return ppm * reqs;
+  return (reqs * AVG_TOKENS * ppm) / 1_000_000;
 }
 
 function formatCost(c: number) {
