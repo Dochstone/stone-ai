@@ -3,6 +3,7 @@ import { POSTS } from "@/lib/blog";
 import { MODELS } from "@/lib/models";
 import { COMPARISONS, ALTERNATIVES, PROFESSIONS, TOOL_HUBS } from "@/lib/seo-data";
 import { USE_CASES } from "@/lib/use-cases";
+import { GLOSSARY } from "@/lib/glossary";
 
 import { SITE_URL } from "@/lib/constants";
 
@@ -86,5 +87,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...blogPages, ...modelPages, ...comparePages, ...alternativePages, ...professionPages, ...toolHubPages, ...useCasePages];
+  const glossaryPages: MetadataRoute.Sitemap = GLOSSARY.map((g) => ({
+    url: `${SITE_URL}/glossary/${g.slug}`,
+    lastModified: now,
+    changeFrequency: "monthly",
+    priority: 0.6,
+  }));
+
+  return [...staticPages, ...blogPages, ...modelPages, ...comparePages, ...alternativePages, ...professionPages, ...toolHubPages, ...useCasePages, ...glossaryPages];
 }
