@@ -257,6 +257,7 @@ async def run_campaign_pipeline(campaign_id: int, niche: str, url: str | None, b
             user = u.scalar_one_or_none()
             if user:
                 user.balance_usd = max(0, float(user.balance_usd or 0) - COST_USD)
+                user.total_requests = (user.total_requests or 0) + 1
             await db.commit()
 
     except Exception as e:

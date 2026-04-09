@@ -187,6 +187,7 @@ async def run_agent_task(task_id: int, instruction: str, model_id: str, max_step
             u = user.scalar_one_or_none()
             if u:
                 u.balance_usd = round(max(0, float(u.balance_usd or 0) - total_cost), 6)
+                u.total_requests = (u.total_requests or 0) + 1
 
             await db.commit()
 

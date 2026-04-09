@@ -18,6 +18,7 @@ from app.models.generation import Generation
 from app.models.user import User
 from app.services.ai_router import get_openrouter_model
 from app.middleware.rate_limit import RateLimiter
+from app.services.limiter import record_usage
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/photo-session", tags=["photo-session"])
@@ -339,6 +340,7 @@ async def change_background(
         cost=cost_usd,
     )
     db.add(gen)
+    await record_usage(db, tg_id, model_id_used, cost_usd=cost_usd)
     await db.commit()
     await db.refresh(gen)
 
@@ -405,6 +407,7 @@ async def product_on_model(
         cost=cost_usd,
     )
     db.add(gen)
+    await record_usage(db, tg_id, model_id_used, cost_usd=cost_usd)
     await db.commit()
     await db.refresh(gen)
 
@@ -471,6 +474,7 @@ async def marketplace_card(
         cost=cost_usd,
     )
     db.add(gen)
+    await record_usage(db, tg_id, model_id_used, cost_usd=cost_usd)
     await db.commit()
     await db.refresh(gen)
 
@@ -543,6 +547,7 @@ async def batch_process(
                 result_text=image_url, cost=per_image_cost,
             )
             db.add(gen)
+            await record_usage(db, tg_id, model_id_used, cost_usd=per_image_cost)
 
             results.append({"index": i, "status": "ok", "image_url": image_url, "id": gen.id})
         except Exception as e:

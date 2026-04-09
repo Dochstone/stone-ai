@@ -148,6 +148,8 @@ async def generate_video(
 
     # Increment usage ONLY after successful submit (user doesn't lose generation on error)
     await increment_usage(db, tg_id, req.model_id, tier)
+    if user:
+        user.total_requests = (user.total_requests or 0) + 1
     await db.commit()
 
     return {

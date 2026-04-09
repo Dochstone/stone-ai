@@ -119,6 +119,8 @@ async def generate_threed(
 
     # Increment usage ONLY after successful submit
     await increment_usage(db, tg_id, req.model_id, tier)
+    if user:
+        user.total_requests = (user.total_requests or 0) + 1
 
     # Sync result (e.g. TripoSR returns immediately)
     if fal_result.get("request_id") == "__sync__" and fal_result.get("model_url"):

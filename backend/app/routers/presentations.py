@@ -426,6 +426,7 @@ async def generate_presentation(
         cost=actual_cost,
     )
     db.add(gen)
+    user.total_requests = (user.total_requests or 0) + 1
     await db.commit()
     await db.refresh(gen)
 
