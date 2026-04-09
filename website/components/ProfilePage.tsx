@@ -792,7 +792,7 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
                       });
                       if (res.ok) {
                         const data = await res.json();
-                        setProfile((p) => p ? { ...p, email: data.email } : p);
+                        setEditEmail(data.email);
                         setMsg("Email сохранён");
                       } else {
                         const err = await res.json().catch(() => ({}));
