@@ -148,27 +148,35 @@ function AvatarUpload({ email, name }: { email: string; name?: string | null }) 
     if (!file.type.startsWith("image/")) return;
     setUploading(true);
     try {
-      const base64 = await new Promise<string>((resolve, reject) => {
+      // Read file as data URL
+      const dataUrl = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = () => {
-          const img = new Image();
-          img.onload = () => {
-            const canvas = document.createElement("canvas");
-            canvas.width = 256;
-            canvas.height = 256;
-            const ctx = canvas.getContext("2d")!;
-            const side = Math.min(img.width, img.height);
-            const sx = (img.width - side) / 2;
-            const sy = (img.height - side) / 2;
-            ctx.drawImage(img, sx, sy, side, side, 0, 0, 256, 256);
-            resolve(canvas.toDataURL("image/webp", 0.85));
-          };
-          img.onerror = () => reject(new Error("Image load error"));
-          img.src = reader.result as string;
-        };
+        reader.onload = () => resolve(reader.result as string);
         reader.onerror = () => reject(new Error("File read error"));
         reader.readAsDataURL(file);
       });
+
+      // Resize to 256x256 center crop
+      const base64 = await new Promise<string>((resolve) => {
+        const img = document.createElement("img");
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = 256;
+          canvas.height = 256;
+          const ctx = canvas.getContext("2d")!;
+          const side = Math.min(img.naturalWidth, img.naturalHeight);
+          const sx = (img.naturalWidth - side) / 2;
+          const sy = (img.naturalHeight - side) / 2;
+          ctx.drawImage(img, sx, sy, side, side, 0, 0, 256, 256);
+          resolve(canvas.toDataURL("image/webp", 0.85));
+        };
+        img.onerror = () => {
+          // Fallback: upload original data URL without resize
+          resolve(dataUrl);
+        };
+        img.src = dataUrl;
+      });
+
       await saveAvatarFull(base64);
       setAvatar(getSavedAvatar());
     } catch (e) {

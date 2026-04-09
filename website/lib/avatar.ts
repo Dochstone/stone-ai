@@ -63,7 +63,9 @@ export async function deleteAvatarFromServer(): Promise<boolean> {
 
 /** Save avatar: upload to server + cache in localStorage */
 export async function saveAvatarFull(base64: string): Promise<void> {
+  console.log("[avatar] uploading, base64 length:", base64.length);
   const serverUrl = await uploadAvatarToServer(base64);
+  console.log("[avatar] server response:", serverUrl);
   // Cache locally for instant display
   saveAvatar(serverUrl ? `${API_URL}${serverUrl}` : base64);
 }
