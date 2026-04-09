@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { SkeletonStats, SkeletonTable } from "@/components/Skeleton";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
@@ -180,6 +180,15 @@ export default function AdminPage() {
   const [analyticsDays, setAnalyticsDays] = useState(7);
   const [analyticsSortBy, setAnalyticsSortBy] = useState("views");
   const [analyticsSortOrder, setAnalyticsSortOrder] = useState("desc");
+  const [txTotal, setTxTotal] = useState(0);
+  const [usersPage, setUsersPage] = useState(0);
+  const [txPage, setTxPage] = useState(0);
+  const USERS_PER_PAGE = 50;
+  const TX_PER_PAGE = 30;
+  const [revenueChart, setRevenueChart] = useState<{date: string; revenue_usd: number; transactions: number}[]>([]);
+  const [chartDays, setChartDays] = useState(14);
+  const [expandedUser, setExpandedUser] = useState<number | null>(null);
+  const [userDetail, setUserDetail] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [userSearch, setUserSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -223,7 +232,7 @@ export default function AdminPage() {
   }, [token]);
 
   useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearch(userSearch), 300);
+    const t = setTimeout(() => { setDebouncedSearch(userSearch); setUsersPage(0); }, 300);
     return () => clearTimeout(t);
   }, [userSearch]);
 
@@ -231,17 +240,21 @@ export default function AdminPage() {
   const [debouncedTier, setDebouncedTier] = useState(userTier);
   const [debouncedDateFrom, setDebouncedDateFrom] = useState(userDateFrom);
   const [debouncedDateTo, setDebouncedDateTo] = useState(userDateTo);
-  useEffect(() => { const t = setTimeout(() => setDebouncedTier(userTier), 200); return () => clearTimeout(t); }, [userTier]);
-  useEffect(() => { const t = setTimeout(() => setDebouncedDateFrom(userDateFrom), 200); return () => clearTimeout(t); }, [userDateFrom]);
-  useEffect(() => { const t = setTimeout(() => setDebouncedDateTo(userDateTo), 200); return () => clearTimeout(t); }, [userDateTo]);
+  useEffect(() => { const t = setTimeout(() => { setDebouncedTier(userTier); setUsersPage(0); }, 200); return () => clearTimeout(t); }, [userTier]);
+  useEffect(() => { const t = setTimeout(() => { setDebouncedDateFrom(userDateFrom); setUsersPage(0); }, 200); return () => clearTimeout(t); }, [userDateFrom]);
+  useEffect(() => { const t = setTimeout(() => { setDebouncedDateTo(userDateTo); setUsersPage(0); }, 200); return () => clearTimeout(t); }, [userDateTo]);
 
   const loadTab = useCallback(() => {
     if (!authed || !token) return;
     // Only show loading spinner on initial load / tab switch, not on filter changes
     if (tab === "stats") {
       fetchData("stats").then((d) => { if (d) setStats(d); setLoading(false); });
+      fetch(`${API_URL}/api/admin/web/revenue-chart?days=${chartDays}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }).then(r => r.ok ? r.json() : null).then(d => { if (d) setRevenueChart(d.chart); });
     } else if (tab === "users") {
-      const params = new URLSearchParams({ limit: "200" });
+      const params = new URLSearchParams({ limit: String(USERS_PER_PAGE) });
+      params.set("offset", String(usersPage * USERS_PER_PAGE));
       if (debouncedSearch) params.set("search", debouncedSearch);
       if (debouncedTier) params.set("tier", debouncedTier);
       if (debouncedDateFrom) params.set("date_from", debouncedDateFrom);
@@ -256,9 +269,10 @@ export default function AdminPage() {
         headers: { Authorization: `Bearer ${token}` },
       }).then(r => r.ok ? r.json() : null).then(d => { if (d) setAnalytics(d); setLoading(false); }).catch(() => setLoading(false));
     } else {
-      fetchData("transactions?limit=50").then((d) => { if (d) setTransactions(d.transactions); setLoading(false); });
+      const txParams = new URLSearchParams({ limit: String(TX_PER_PAGE), offset: String(txPage * TX_PER_PAGE) });
+      fetchData(`transactions?${txParams}`).then((d) => { if (d) { setTransactions(d.transactions); setTxTotal(d.total); } setLoading(false); });
     }
-  }, [authed, token, tab, fetchData, debouncedSearch, debouncedTier, debouncedDateFrom, debouncedDateTo, analyticsDays, analyticsSortBy, analyticsSortOrder]);
+  }, [authed, token, tab, fetchData, debouncedSearch, debouncedTier, debouncedDateFrom, debouncedDateTo, usersPage, txPage, chartDays, analyticsDays, analyticsSortBy, analyticsSortOrder]);
 
   useEffect(() => { loadTab(); }, [loadTab]);
 
@@ -267,6 +281,26 @@ export default function AdminPage() {
     setToken(""); setAuthed(false);
     setStats(null); setUsers([]); setTransactions([]);
   };
+
+  function exportCSV(data: any[], filename: string) {
+    if (!data.length) return;
+    const headers = Object.keys(data[0]);
+    const bom = "\uFEFF";
+    const csv = bom + headers.join(";") + "\n" + data.map(row =>
+      headers.map(h => {
+        const v = row[h];
+        return typeof v === "string" ? `"${v.replace(/"/g, '""')}"` : (v ?? "");
+      }).join(";")
+    ).join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   /* ── Login screen ── */
   if (!authed) {
@@ -406,6 +440,37 @@ export default function AdminPage() {
                 )}
               </div>
             </div>
+
+            {/* Revenue chart */}
+            <div className="bg-surface rounded-2xl border border-text/5 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold text-text">Доход</h3>
+                <select value={chartDays} onChange={e => setChartDays(Number(e.target.value))}
+                  className="bg-bg border border-text/10 rounded-lg px-2 py-1 text-xs">
+                  <option value={7}>7 дней</option>
+                  <option value={14}>14 дней</option>
+                  <option value={30}>30 дней</option>
+                </select>
+              </div>
+              <div className="flex items-end gap-1 h-32">
+                {revenueChart.map((d, i) => {
+                  const max = Math.max(...revenueChart.map(r => r.revenue_usd), 0.01);
+                  return (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-1" title={`${d.date}: $${d.revenue_usd} (${d.transactions} оплат)`}>
+                      <span className="text-[8px] text-text/20">{d.revenue_usd > 0 ? `$${d.revenue_usd.toFixed(0)}` : ""}</span>
+                      <div className="w-full bg-teal/10 rounded-t" style={{ height: `${(d.revenue_usd / max) * 100}%`, minHeight: d.revenue_usd > 0 ? 4 : 1 }}>
+                        <div className="w-full h-full bg-teal/60 rounded-t" />
+                      </div>
+                      {revenueChart.length <= 14 && <span className="text-[7px] text-text/15">{d.date.slice(5)}</span>}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="flex justify-between mt-2 text-[10px] text-text/30">
+                <span>Всего: ${revenueChart.reduce((s, d) => s + d.revenue_usd, 0).toFixed(2)}</span>
+                <span>{revenueChart.reduce((s, d) => s + d.transactions, 0)} оплат</span>
+              </div>
+            </div>
           </div>
         )}
 
@@ -452,6 +517,12 @@ export default function AdminPage() {
                   <span className="font-bold text-sm">Пользователи</span>
                   <span className="text-text/30 text-xs ml-2 bg-text/[0.04] px-2 py-0.5 rounded-md font-medium">{usersTotal}</span>
                 </div>
+                <button
+                  onClick={() => exportCSV(users, "users.csv")}
+                  className="px-3 py-1.5 text-xs font-medium rounded-lg bg-text/[0.04] text-text/50 hover:bg-text/10 transition-colors"
+                >
+                  Экспорт CSV
+                </button>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -470,11 +541,22 @@ export default function AdminPage() {
                   </thead>
                   <tbody>
                     {users.map((u) => (
-                      <tr key={u.id} className="border-t border-text/[0.04] hover:bg-text/[0.02] transition-colors">
+                      <React.Fragment key={u.id}>
+                      <tr className="border-t border-text/[0.04] hover:bg-text/[0.02] transition-colors cursor-pointer" onClick={() => {
+                        if (expandedUser === u.id) {
+                          setExpandedUser(null);
+                          setUserDetail(null);
+                        } else {
+                          setExpandedUser(u.id);
+                          fetch(`${API_URL}/api/admin/web/user/${u.id}`, {
+                            headers: { Authorization: `Bearer ${token}` },
+                          }).then(r => r.ok ? r.json() : null).then(d => setUserDetail(d));
+                        }
+                      }}>
                         <td className="py-3 px-4 font-mono text-text/30 text-xs">{u.tg_id || u.id}</td>
                         <td className="py-3 px-4 font-medium">{u.first_name || u.username || "—"}</td>
                         <td className="py-3 px-4 text-text/50 text-xs">{u.email || "—"}</td>
-                        <td className="py-3 px-4 text-center">
+                        <td className="py-3 px-4 text-center" onClick={e => e.stopPropagation()}>
                           <select
                             value={u.subscription_tier}
                             onChange={async (e) => {
@@ -501,7 +583,7 @@ export default function AdminPage() {
                             <option value="max-pro">Elite</option>
                           </select>
                         </td>
-                        <td className="py-3 px-4 text-right">
+                        <td className="py-3 px-4 text-right" onClick={e => e.stopPropagation()}>
                           <div className="inline-flex items-center gap-1">
                             <input
                               type="number"
@@ -530,13 +612,75 @@ export default function AdminPage() {
                         <td className="py-3 px-4 text-text/30 text-xs">{u.joined_at ? `${u.joined_at.slice(8,10)}.${u.joined_at.slice(5,7)}` : "—"}</td>
                         <td className="py-3 px-4 text-text/30 text-xs">{u.last_active ? `${u.last_active.slice(8,10)}.${u.last_active.slice(5,7)}` : "—"}</td>
                       </tr>
+                      {expandedUser === u.id && userDetail && (
+                        <tr>
+                          <td colSpan={9} className="px-5 py-4 bg-text/[0.02]">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
+                              <div className="text-xs"><span className="text-text/30">Email:</span> <span className="text-text/70">{userDetail.user.email || "—"}</span></div>
+                              <div className="text-xs"><span className="text-text/30">TG:</span> <span className="text-text/70">{userDetail.user.telegram_id || "—"}</span></div>
+                              <div className="text-xs"><span className="text-text/30">Подписка до:</span> <span className="text-text/70">{userDetail.user.credits_reset_date?.slice(0,10) || "—"}</span></div>
+                              <div className="text-xs"><span className="text-text/30">Auth:</span> <span className="text-text/70">{userDetail.user.auth_provider}</span></div>
+                            </div>
+                            {userDetail.recent_usage.length > 0 && (
+                              <div className="mb-3">
+                                <div className="text-[10px] font-semibold text-text/30 uppercase mb-1">Использование (последние дни)</div>
+                                <div className="flex gap-1 flex-wrap">
+                                  {userDetail.recent_usage.map((u: any) => (
+                                    <div key={u.date} className="bg-bg rounded px-2 py-1 text-[10px]">
+                                      <span className="text-text/30">{u.date.slice(5)}</span>{" "}
+                                      <span className="text-text/60">{u.fast+u.premium+u.opus+u.image+u.video} req</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            {userDetail.transactions.length > 0 && (
+                              <div>
+                                <div className="text-[10px] font-semibold text-text/30 uppercase mb-1">Транзакции</div>
+                                <div className="flex gap-1 flex-wrap">
+                                  {userDetail.transactions.map((t: any, i: number) => (
+                                    <div key={i} className="bg-bg rounded px-2 py-1 text-[10px]">
+                                      <span className="text-teal font-bold">${t.amount_usd}</span>{" "}
+                                      <span className="text-text/30">{t.currency} {t.created_at?.slice(0,10)}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      )}
+                      </React.Fragment>
                     ))}
                     {users.length === 0 && (
-                      <tr><td colSpan={8} className="py-12 text-center text-text/25 text-sm">Нет пользователей</td></tr>
+                      <tr><td colSpan={9} className="py-12 text-center text-text/25 text-sm">Нет пользователей</td></tr>
                     )}
                   </tbody>
                 </table>
               </div>
+              {usersTotal > USERS_PER_PAGE && (
+                <div className="flex items-center justify-between px-5 py-3 border-t border-text/[0.06]">
+                  <span className="text-xs text-text/40">
+                    {usersPage * USERS_PER_PAGE + 1}&ndash;{Math.min((usersPage + 1) * USERS_PER_PAGE, usersTotal)} из {usersTotal}
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setUsersPage(p => Math.max(0, p - 1))}
+                      disabled={usersPage === 0}
+                      className="px-3 py-1.5 text-xs font-medium rounded-lg bg-text/[0.04] text-text/50 hover:bg-text/10 disabled:opacity-30 transition-colors"
+                    >
+                      &larr; Назад
+                    </button>
+                    <button
+                      onClick={() => setUsersPage(p => p + 1)}
+                      disabled={(usersPage + 1) * USERS_PER_PAGE >= usersTotal}
+                      className="px-3 py-1.5 text-xs font-medium rounded-lg bg-text/[0.04] text-text/50 hover:bg-text/10 disabled:opacity-30 transition-colors"
+                    >
+                      Далее &rarr;
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -545,8 +689,16 @@ export default function AdminPage() {
         {tab === "transactions" && !loading && (
           <div className="bg-surface rounded-2xl border border-text/5 overflow-hidden animate-fadeIn">
             <div className="p-4 border-b border-text/5 flex items-center justify-between">
-              <span className="font-bold text-sm">Последние платежи</span>
-              <span className="text-text/25 text-xs bg-text/[0.04] px-2 py-0.5 rounded-md font-medium">{transactions.length}</span>
+              <div>
+                <span className="font-bold text-sm">Последние платежи</span>
+                <span className="text-text/25 text-xs ml-2 bg-text/[0.04] px-2 py-0.5 rounded-md font-medium">{txTotal}</span>
+              </div>
+              <button
+                onClick={() => exportCSV(transactions, "transactions.csv")}
+                className="px-3 py-1.5 text-xs font-medium rounded-lg bg-text/[0.04] text-text/50 hover:bg-text/10 transition-colors"
+              >
+                Экспорт CSV
+              </button>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -579,6 +731,29 @@ export default function AdminPage() {
                 </tbody>
               </table>
             </div>
+            {txTotal > TX_PER_PAGE && (
+              <div className="flex items-center justify-between px-5 py-3 border-t border-text/[0.06]">
+                <span className="text-xs text-text/40">
+                  {txPage * TX_PER_PAGE + 1}&ndash;{Math.min((txPage + 1) * TX_PER_PAGE, txTotal)} из {txTotal}
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setTxPage(p => Math.max(0, p - 1))}
+                    disabled={txPage === 0}
+                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-text/[0.04] text-text/50 hover:bg-text/10 disabled:opacity-30 transition-colors"
+                  >
+                    &larr; Назад
+                  </button>
+                  <button
+                    onClick={() => setTxPage(p => p + 1)}
+                    disabled={(txPage + 1) * TX_PER_PAGE >= txTotal}
+                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-text/[0.04] text-text/50 hover:bg-text/10 disabled:opacity-30 transition-colors"
+                  >
+                    Далее &rarr;
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

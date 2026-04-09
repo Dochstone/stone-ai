@@ -1,11 +1,11 @@
 """Admin API — stats and user management. Protected by ADMIN_TG_IDS or ADMIN_EMAILS."""
 
 import os
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel
-from sqlalchemy import select, func, case, and_
+from sqlalchemy import select, func, case, and_, cast, Date
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
@@ -464,6 +464,8 @@ async def web_admin_transactions(
     offset: int = Query(0, ge=0),
 ):
     """Recent transactions for web admin."""
+    total = await db.scalar(select(func.count()).select_from(Transaction)) or 0
+
     q = (
         select(Transaction)
         .order_by(Transaction.created_at.desc())
@@ -485,6 +487,9 @@ async def web_admin_transactions(
             }
             for t in txns
         ],
+        "total": total,
+        "offset": offset,
+        "limit": limit,
     }
 
 
@@ -751,3 +756,101 @@ async def web_admin_violations_count(
     from app.models.violation import Violation
     total = await db.scalar(select(func.count()).select_from(Violation)) or 0
     return {"count": total}
+
+
+@router.get("/web/revenue-chart")
+async def web_admin_revenue_chart(
+    _admin: dict = Depends(require_web_admin),
+    db: AsyncSession = Depends(get_db),
+    days: int = Query(default=14, le=90),
+):
+    """Revenue chart data — daily revenue and transaction count."""
+    start_date = date.today() - timedelta(days=days)
+
+    result = await db.execute(
+        select(
+            cast(Transaction.created_at, Date).label("date"),
+            func.sum(Transaction.amount_usd).label("revenue"),
+            func.count().label("count"),
+        )
+        .where(
+            Transaction.status == "completed",
+            Transaction.created_at >= start_date,
+        )
+        .group_by(cast(Transaction.created_at, Date))
+        .order_by(cast(Transaction.created_at, Date))
+    )
+    rows = result.all()
+
+    # Fill gaps (days with no transactions)
+    chart = []
+    current = start_date
+    row_map = {str(r.date): {"revenue": float(r.revenue or 0), "count": r.count} for r in rows}
+    while current <= date.today():
+        key = str(current)
+        entry = row_map.get(key, {"revenue": 0, "count": 0})
+        chart.append({
+            "date": key,
+            "revenue_usd": round(entry["revenue"], 2),
+            "transactions": entry["count"],
+        })
+        current += timedelta(days=1)
+
+    return {"chart": chart, "days": days}
+
+
+@router.get("/web/user/{user_id}")
+async def web_admin_user_detail(
+    user_id: int,
+    _admin: dict = Depends(require_web_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Detailed user info for admin."""
+    from app.models.daily_usage import DailyUsage
+
+    user = await db.execute(select(User).where(User.id == user_id))
+    user = user.scalar_one_or_none()
+    if not user:
+        raise HTTPException(404, "User not found")
+
+    # Recent usage (last 10)
+    recent_usage = await db.execute(
+        select(DailyUsage)
+        .where(DailyUsage.user_tg_id == user.telegram_id)
+        .order_by(DailyUsage.date.desc())
+        .limit(10)
+    )
+    usage_rows = recent_usage.scalars().all()
+
+    # Transactions
+    txs = await db.execute(
+        select(Transaction)
+        .where(Transaction.user_tg_id == user.telegram_id)
+        .order_by(Transaction.created_at.desc())
+        .limit(10)
+    )
+    tx_rows = txs.scalars().all()
+
+    return {
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "username": user.username,
+            "first_name": user.first_name,
+            "telegram_id": user.telegram_id,
+            "balance_usd": round(float(user.balance_usd or 0), 4),
+            "subscription_tier": user.subscription_tier or "free",
+            "credits_reset_date": user.credits_reset_date.isoformat() if user.credits_reset_date else None,
+            "auth_provider": user.auth_provider,
+            "joined_at": user.joined_at.isoformat() if user.joined_at else None,
+            "is_banned": user.is_banned if hasattr(user, "is_banned") else False,
+        },
+        "recent_usage": [
+            {"date": str(u.date), "fast": u.fast_used, "premium": u.premium_used, "opus": u.opus_used, "image": u.image_used, "video": u.video_used}
+            for u in usage_rows
+        ],
+        "transactions": [
+            {"amount_usd": round(float(t.amount_usd or 0), 2), "currency": t.currency, "status": t.status, "created_at": t.created_at.isoformat() if t.created_at else None}
+            for t in tx_rows
+        ],
+    }
