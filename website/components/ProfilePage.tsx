@@ -506,7 +506,8 @@ function BalanceTab({ profile, transactions, auth, onRefresh }: { profile: UserP
 
 // ─── Tab: History ───
 
-function HistoryTab({ usage }: { usage: UsageItem[] }) {
+function HistoryTab({ usage, plan }: { usage: UsageItem[]; plan: string }) {
+  const isSub = plan !== "free";
   const [modelFilter, setModelFilter] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -518,8 +519,6 @@ function HistoryTab({ usage }: { usage: UsageItem[] }) {
     return true;
   });
 
-  const totalCost = filtered.reduce((s, u) => s + u.cost_usd, 0);
-  const totalTokens = filtered.reduce((s, u) => s + u.tokens_in + u.tokens_out, 0);
   const usedModelIds = Array.from(new Set(usage.map((u) => u.model_id)));
 
   return (
@@ -541,10 +540,9 @@ function HistoryTab({ usage }: { usage: UsageItem[] }) {
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <StatCard label="Запросов" value={filtered.length.toLocaleString()} />
-        <StatCard label="Токенов" value={totalTokens.toLocaleString()} />
-        <StatCard label="Потрачено" value={`$${totalCost.toFixed(2)}`} accent />
+        <StatCard label="Моделей использовано" value={usedModelIds.length.toString()} />
       </div>
 
       {/* Table */}
@@ -555,24 +553,18 @@ function HistoryTab({ usage }: { usage: UsageItem[] }) {
               <tr className="border-b border-text/[0.06] text-left">
                 <th className="px-3 sm:px-5 py-3 text-[10px] font-semibold text-text/30 uppercase">Дата</th>
                 <th className="px-3 sm:px-5 py-3 text-[10px] font-semibold text-text/30 uppercase">Модель</th>
-                <th className="px-3 sm:px-5 py-3 text-[10px] font-semibold text-text/30 uppercase text-right hidden sm:table-cell">Input</th>
-                <th className="px-3 sm:px-5 py-3 text-[10px] font-semibold text-text/30 uppercase text-right hidden sm:table-cell">Output</th>
-                <th className="px-3 sm:px-5 py-3 text-[10px] font-semibold text-text/30 uppercase text-right">Стоимость</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 && (
-                <tr><td colSpan={5} className="px-5 py-8 text-center text-text/20 text-xs">Нет запросов</td></tr>
+                <tr><td colSpan={2} className="px-5 py-8 text-center text-text/20 text-xs">Нет запросов</td></tr>
               )}
               {filtered.map((u, i) => {
                 const model = MODELS.find((m) => m.id === u.model_id);
                 return (
                   <tr key={i} className="border-b border-text/[0.03] hover:bg-bg/50 transition-colors">
                     <td className="px-3 sm:px-5 py-3 text-text/60 text-xs">{formatDateTime(u.created_at)}</td>
-                    <td className="px-3 sm:px-5 py-3 text-xs font-medium text-text truncate max-w-[120px] sm:max-w-none">{model?.name || u.model_id}</td>
-                    <td className="px-3 sm:px-5 py-3 text-xs text-text/40 text-right hidden sm:table-cell">{u.tokens_in.toLocaleString()}</td>
-                    <td className="px-3 sm:px-5 py-3 text-xs text-text/40 text-right hidden sm:table-cell">{u.tokens_out.toLocaleString()}</td>
-                    <td className="px-3 sm:px-5 py-3 text-xs font-bold text-accent text-right">${u.cost_usd.toFixed(2)}</td>
+                    <td className="px-3 sm:px-5 py-3 text-xs font-medium text-text">{model?.name || u.model_id}</td>
                   </tr>
                 );
               })}
@@ -1299,7 +1291,7 @@ export default function ProfilePage() {
         {/* Tab content */}
         {tab === "overview" && <OverviewTab profile={profile} usage={usage} limits={dailyLimits} />}
         {tab === "balance" && <BalanceTab profile={profile} transactions={transactions} auth={auth} onRefresh={fetchData} />}
-        {tab === "history" && <HistoryTab usage={usage} />}
+        {tab === "history" && <HistoryTab usage={usage} plan={profile.plan} />}
         {tab === "settings" && <SettingsTab profile={profile} auth={auth} />}
         {tab === "referrals" && <ReferralsTab stats={referralStats} loading={loading} />}
         {tab === "api" && <ApiTab byok={byok} auth={auth} onRefreshByok={refreshByok} />}
