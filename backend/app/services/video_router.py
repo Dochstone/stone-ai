@@ -202,8 +202,7 @@ async def check_video_status(model_id: str, fal_request_id: str) -> dict:
                     logger.error(f"fal.ai COMPLETED but empty result for {model_id}, request_id={fal_request_id}")
 
                 if not video_url:
-                    # Don't mark as completed without URL — keep polling
-                    return {"status": "IN_PROGRESS"}
+                    return {"status": "FAILED", "error": "Модель завершила генерацию, но не вернула видео. Попробуйте снова."}
 
                 return {
                     "status": "COMPLETED",
