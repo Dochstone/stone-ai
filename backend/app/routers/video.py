@@ -56,8 +56,10 @@ async def generate_video(
     Charges balance BEFORE generation. Returns task_id for polling.
     On failure, balance is refunded.
     """
-    from app.services.safety import check_blocked, log_violation
+    from app.services.safety import check_blocked, check_banned, log_violation
     tg_id = tg_user["id"]
+    if await check_banned(tg_id):
+        raise HTTPException(403, "Аккаунт заблокирован")
     blocked = check_blocked(req.prompt)
     if blocked:
         asyncio.create_task(log_violation(tg_id, "video", req.prompt, blocked))

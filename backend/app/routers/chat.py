@@ -304,7 +304,7 @@ async def chat(
 # Image Generation — OpenAI gpt-image-1 / DALL-E 3
 # ═══════════════════════════════════════════════════════════
 
-IMAGE_MODELS = {"nano-banana", "nano-banana-pro", "gpt-image-1", "gpt-5-image", "gpt-5-image-mini", "flux-schnell", "stable-diffusion-xl", "kolors-v2", "kolors-v3"}
+IMAGE_MODELS = {"nano-banana", "nano-banana-pro", "gpt-image-1", "gpt-5-image", "gpt-5-image-mini", "kolors-v2", "kolors-v3"}
 
 
 def _add_watermark(image_bytes: bytes) -> bytes:
@@ -394,7 +394,7 @@ async def generate_image(
     settings = get_settings()
 
     # OpenRouter image models (Gemini image, etc.) — generate via chat API
-    OPENROUTER_IMAGE_MODELS = {"nano-banana", "nano-banana-pro"}
+    OPENROUTER_IMAGE_MODELS = {"nano-banana", "nano-banana-pro", "gpt-5-image", "gpt-5-image-mini"}
     if req.model_id in OPENROUTER_IMAGE_MODELS:
         try:
             from app.services.ai_router import get_openrouter_model

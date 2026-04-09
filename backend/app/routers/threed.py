@@ -53,6 +53,10 @@ async def generate_threed(
     tg_id = tg_user["id"]
     db_id = tg_user.get("db_id")
 
+    from app.services.safety import check_banned
+    if await check_banned(tg_id):
+        raise HTTPException(403, "Аккаунт заблокирован")
+
     model = get_threed_model(req.model_id)
     if not model:
         raise HTTPException(400, "Неизвестная 3D-модель")

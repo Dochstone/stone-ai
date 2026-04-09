@@ -1,6 +1,8 @@
 """Safety prompts and content moderation rules for all AI modules."""
 
 import logging
+import re
+import unicodedata
 
 logger = logging.getLogger(__name__)
 
@@ -33,24 +35,62 @@ SAFETY_RULES_IMAGE = (
 
 # Blocked keywords for quick pre-check before sending to AI
 BLOCKED_KEYWORDS_RU = {
-    "порно", "порнография", "секс видео", "детское порно", "cp ", "наркотики купить",
-    "как сделать бомбу", "как убить", "как взломать", "ddos", "фишинг",
+    "порно", "порнография", "секс видео", "детское порно", "наркотики купить",
+    "как сделать бомбу", "как убить", "как взломать", "фишинг",
+    "изнасилование", "суицид", "самоубийство", "как покончить",
+    "детская порнография", "эротика несовершеннолетних",
+    "купить оружие", "синтез наркотиков", "как отравить",
+    "как сделать взрывчатку", "рецепт метамфетамина",
 }
 
 BLOCKED_KEYWORDS_EN = {
     "child porn", "csam", "how to make a bomb", "how to kill", "how to hack",
     "ddos attack", "phishing kit", "exploit code", "ransomware",
+    "child sexual", "underage", "jailbreak prompt", "ignore previous instructions",
+    "you are now dan", "bypass your filters", "act as an unrestricted",
+    "how to synthesize", "how to manufacture drugs",
+    "suicide methods", "self harm instructions",
 }
 
 BLOCKED_KEYWORDS = BLOCKED_KEYWORDS_RU | BLOCKED_KEYWORDS_EN
 
+# Homoglyph normalization map (common unicode substitutions)
+_HOMOGLYPHS = str.maketrans({
+    '0': 'о', 'О': 'о', '3': 'з', 'З': 'з',
+    'a': 'а', 'A': 'А', 'e': 'е', 'E': 'Е',
+    'o': 'о', 'p': 'р', 'P': 'Р', 'c': 'с',
+    'C': 'С', 'x': 'х', 'X': 'Х', 'T': 'Т',
+    'y': 'у', 'H': 'Н', 'K': 'К', 'k': 'к',
+    'B': 'В', 'M': 'М',
+    # Cyrillic lookalikes to Latin
+    'а': 'a', 'е': 'e', 'о': 'o', 'р': 'p',
+    'с': 'c', 'у': 'y', 'х': 'x', 'к': 'k',
+})
+
+
+def _normalize_text(text: str) -> str:
+    """Normalize text to defeat common bypass techniques."""
+    # 1. Lowercase
+    text = text.lower()
+    # 2. Remove zero-width characters and invisible unicode
+    text = re.sub(r'[\u200b-\u200f\u2060\ufeff\u00ad]', '', text)
+    # 3. Collapse repeated spaces and separators between letters
+    text = re.sub(r'(?<=\w)\s+(?=\w)', '', text)  # "п о р н о" → "порно"
+    # 4. Remove common leetspeak separators
+    text = re.sub(r'[_\-\.\*\|/\\]', '', text)
+    # 5. Normalize unicode (NFC form)
+    text = unicodedata.normalize('NFC', text)
+    # 6. Apply homoglyph mapping (both directions)
+    normalized_cyr = text.translate(_HOMOGLYPHS)
+    return text + " " + normalized_cyr
+
 
 def check_blocked(text: str) -> str | None:
-    """Quick keyword check. Returns blocking reason or None if clean."""
-    lower = text.lower()
+    """Keyword check with normalization against bypass techniques. Returns blocking reason or None."""
+    normalized = _normalize_text(text)
     for kw in BLOCKED_KEYWORDS:
-        if kw in lower:
-            return f"Запрос содержит запрещённый контент и не может быть обработан."
+        if kw in normalized:
+            return "Запрос содержит запрещённый контент и не может быть обработан."
     return None
 
 

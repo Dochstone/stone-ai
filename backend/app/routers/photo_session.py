@@ -315,6 +315,9 @@ async def change_background(
 ):
     """Generate a product photo with a new background."""
     tg_id = tg_user["id"]
+    from app.services.safety import check_banned
+    if await check_banned(tg_id):
+        raise HTTPException(403, "Аккаунт заблокирован")
     user = await _find_user(db, tg_user)
     model_id_used = req.model_id or DEFAULT_IMAGE_MODEL
     cost_usd = _cost_usd("background", model_id_used)
@@ -377,6 +380,9 @@ async def product_on_model(
 ):
     """Generate a fashion/lifestyle photo of a product worn or held by a model."""
     tg_id = tg_user["id"]
+    from app.services.safety import check_banned
+    if await check_banned(tg_id):
+        raise HTTPException(403, "Аккаунт заблокирован")
     user = await _find_user(db, tg_user)
     model_id_used = req.model_id or DEFAULT_IMAGE_MODEL
     cost_usd = _cost_usd("on-model", model_id_used)
@@ -438,6 +444,9 @@ async def marketplace_card(
 ):
     """Generate a clean product card for a marketplace platform."""
     tg_id = tg_user["id"]
+    from app.services.safety import check_banned
+    if await check_banned(tg_id):
+        raise HTTPException(403, "Аккаунт заблокирован")
     user = await _find_user(db, tg_user)
     model_id_used = req.model_id or DEFAULT_IMAGE_MODEL
     cost_usd = _cost_usd("marketplace", model_id_used)
@@ -508,6 +517,9 @@ async def batch_process(
 ):
     """Process multiple product photos with the same background. Max 10 images."""
     tg_id = tg_user["id"]
+    from app.services.safety import check_banned
+    if await check_banned(tg_id):
+        raise HTTPException(403, "Аккаунт заблокирован")
     user = await _find_user(db, tg_user)
 
     from app.config import apply_discount
