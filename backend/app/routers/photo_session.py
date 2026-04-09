@@ -236,7 +236,11 @@ async def _generate_image(prompt: str, model_id: str | None = None, input_image_
             json={"model": openrouter_model, "messages": [{"role": "user", "content": user_content}], "max_tokens": 8192},
         )
         if resp.status_code != 200:
-            raise RuntimeError(f"OpenRouter error {resp.status_code}")
+            body = resp.text[:300]
+            logger.error(f"OpenRouter error {resp.status_code}: {body}")
+            if "safety" in body.lower() or "blocked" in body.lower():
+                raise HTTPException(400, "Промпт отклонён системой безопасности.")
+            raise RuntimeError(f"OpenRouter error {resp.status_code}: {body[:100]}")
 
         data = resp.json()
         message = data.get("choices", [{}])[0].get("message", {})

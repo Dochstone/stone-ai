@@ -18,6 +18,9 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/games", tags=["games"])
 
 
+MAX_VALID_SCORE = 100_000  # anti-cheat: realistic max for snake
+
+
 class ScoreSubmit(BaseModel):
     game: str = "snake"
     score: int
@@ -26,6 +29,8 @@ class ScoreSubmit(BaseModel):
 @router.post("/score")
 async def save_score(data: ScoreSubmit, user: dict = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     tg_id = user["id"]
+    if data.score < 0 or data.score > MAX_VALID_SCORE:
+        return {"saved": False, "score": 0, "is_new_record": False}
     month = datetime.utcnow().strftime("%Y-%m")
 
     result = await db.execute(
