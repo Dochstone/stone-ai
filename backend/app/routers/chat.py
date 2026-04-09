@@ -34,16 +34,19 @@ from app.routers.achievements import check_and_update
 logger = logging.getLogger(__name__)
 
 
-async def _save_generation(db, tg_id: int, gen_type: str, model: str, prompt: str, result_url: str | None = None, result_text: str | None = None, cost: float | None = None):
-    """Save a generation record to the gallery. Uses separate session to avoid breaking main transaction."""
+async def _save_generation(db, tg_id: int, gen_type: str, model: str, prompt: str, result_url: str | None = None, result_text: str | None = None, cost: float | None = None) -> int | None:
+    """Save a generation record to the gallery. Uses separate session to avoid breaking main transaction. Returns generation ID."""
     try:
         from app.database import async_session
         async with async_session() as gen_db:
             gen = Generation(user_tg_id=tg_id, type=gen_type, model=model, prompt=prompt, result_url=result_url, result_text=result_text, cost=cost)
             gen_db.add(gen)
             await gen_db.commit()
+            await gen_db.refresh(gen)
+            return gen.id
     except Exception as e:
         logger.warning(f"Failed to save generation: {e}")
+        return None
 
 router = APIRouter(prefix="/api", tags=["chat"])
 
@@ -360,6 +363,49 @@ def _add_watermark(image_bytes: bytes) -> bytes:
     return buf.getvalue()
 
 
+async def _save_image_to_disk(image_bytes: bytes, gen_id: int) -> str:
+    """Save image to disk and return public URL."""
+    import os
+    from PIL import Image
+    from io import BytesIO
+
+    media_dir = "/var/www/stone-ai/media/images"
+    os.makedirs(media_dir, exist_ok=True)
+
+    # Convert to WebP for smaller size
+    try:
+        img = Image.open(BytesIO(image_bytes))
+        buf = BytesIO()
+        img.save(buf, format="WEBP", quality=85)
+        image_bytes = buf.getvalue()
+        ext = "webp"
+    except Exception:
+        ext = "png"
+
+    filepath = f"{media_dir}/{gen_id}.{ext}"
+
+    with open(filepath, "wb") as f:
+        f.write(image_bytes)
+
+    return f"https://stoneai.ru/media/images/{gen_id}.{ext}"
+
+
+async def _save_image_bg(gen_id: int, image_bytes: bytes):
+    """Background: save image to disk, update DB with disk URL, remove base64."""
+    try:
+        disk_url = await _save_image_to_disk(image_bytes, gen_id)
+        from app.database import async_session
+        async with async_session() as db:
+            result = await db.execute(select(Generation).where(Generation.id == gen_id))
+            gen = result.scalar_one_or_none()
+            if gen:
+                gen.result_url = disk_url
+                gen.result_text = None  # remove base64 from DB
+                await db.commit()
+    except Exception as e:
+        logger.error(f"Failed to save image to disk: {e}")
+
+
 class ImageGenRequest(BaseModel):
     prompt: str
     model_id: str = "nano-banana"
@@ -538,9 +584,18 @@ async def generate_image(
                     raise HTTPException(400, "Не удалось сгенерировать изображение. Попробуйте описать картинку подробнее.")
 
                 await record_usage(db, tg_id, req.model_id, cost_usd=0)
-                await _save_generation(db, tg_id, "image", req.model_id, req.prompt, result_text=image_url)
+                gen_id = await _save_generation(db, tg_id, "image", req.model_id, req.prompt, result_text=image_url)
                 await db.commit()
                 asyncio.create_task(check_and_update(tg_id, "images", db_user.monthly_images_used or 1 if db_user else 1))
+
+                # Save to disk in background
+                if gen_id:
+                    try:
+                        raw_b64 = image_url.split(",", 1)[1] if image_url.startswith("data:") else None
+                        if raw_b64:
+                            asyncio.create_task(_save_image_bg(gen_id, base64.b64decode(raw_b64)))
+                    except Exception:
+                        pass
 
                 return {"image_url": image_url, "model": req.model_id}
 
@@ -577,17 +632,27 @@ async def generate_image(
                         img_resp = await client.get(image_source_url)
                         if img_resp.status_code == 200:
                             image_url = f"data:image/png;base64,{base64.b64encode(img_resp.content).decode('ascii')}"
-                            # Watermark for free
-                            if tier == "free" and balance <= 0:
+                            # Watermark for free users
+                            if tier == "free":
                                 try:
                                     watermarked = _add_watermark(img_resp.content)
                                     image_url = f"data:image/png;base64,{base64.b64encode(watermarked).decode('ascii')}"
                                 except Exception:
                                     pass
                             await record_usage(db, tg_id, req.model_id, cost_usd=0)
-                            await _save_generation(db, tg_id, "image", req.model_id, req.prompt, result_url=image_source_url, result_text=image_url)
+                            gen_id = await _save_generation(db, tg_id, "image", req.model_id, req.prompt, result_url=image_source_url, result_text=image_url)
                             await db.commit()
                             asyncio.create_task(check_and_update(tg_id, "images", db_user.monthly_images_used or 1 if db_user else 1))
+
+                            # Save to disk in background
+                            if gen_id:
+                                try:
+                                    raw_b64 = image_url.split(",", 1)[1] if image_url.startswith("data:") else None
+                                    if raw_b64:
+                                        asyncio.create_task(_save_image_bg(gen_id, base64.b64decode(raw_b64)))
+                                except Exception:
+                                    pass
+
                             return {"image_url": image_url, "model": req.model_id}
                     break
                 if status.get("status") == "FAILED":
@@ -646,7 +711,7 @@ async def generate_image(
                 raise HTTPException(502, "No image in response")
 
         # Add watermark for free users
-        if tier == "free" and balance <= 0 and image_url.startswith("data:image"):
+        if tier == "free" and image_url.startswith("data:image"):
             try:
                 raw_b64 = image_url.split(",", 1)[1]
                 img_bytes = base64.b64decode(raw_b64)
@@ -657,10 +722,19 @@ async def generate_image(
 
         # Record usage
         await record_usage(db, tg_id, req.model_id, tokens_in=0, tokens_out=0, cost_usd=0)
-        await _save_generation(db, tg_id, "image", req.model_id, req.prompt, result_text=image_url)
+        gen_id = await _save_generation(db, tg_id, "image", req.model_id, req.prompt, result_text=image_url)
         await db.commit()
 
         asyncio.create_task(check_and_update(tg_id, "images", db_user.monthly_images_used or 1 if db_user else 1))
+
+        # Save to disk in background
+        if gen_id:
+            try:
+                raw_b64 = image_url.split(",", 1)[1] if image_url.startswith("data:") else None
+                if raw_b64:
+                    asyncio.create_task(_save_image_bg(gen_id, base64.b64decode(raw_b64)))
+            except Exception:
+                pass
 
         return {"image_url": image_url, "model": req.model_id}
 
