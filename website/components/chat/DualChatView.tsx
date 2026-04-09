@@ -165,7 +165,7 @@ export default function DualChatView({ token, onClose }: { token: string; onClos
           )}
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto p-3 text-sm text-text/80 leading-relaxed min-h-[120px] max-h-[50vh]">
+      <div className="flex-1 overflow-y-auto p-3 text-sm text-text/80 leading-relaxed min-h-[120px]">
         {content ? (
           <div dangerouslySetInnerHTML={{ __html: mdToHtml(content) }} />
         ) : streaming ? (
@@ -209,7 +209,7 @@ export default function DualChatView({ token, onClose }: { token: string; onClos
       )}
 
       {/* Response panels */}
-      <div className="flex-1 min-h-0 px-4 py-3">
+      <div className="flex-1 min-h-0 px-4 py-3 flex flex-col">
         {/* Mobile tabs */}
         <div className="flex gap-2 mb-2 sm:hidden">
           <button onClick={() => setMobileTab(1)}
@@ -229,7 +229,7 @@ export default function DualChatView({ token, onClose }: { token: string; onClos
         </div>
 
         {/* Mobile: tabs */}
-        <div className="sm:hidden h-full">
+        <div className="sm:hidden flex-1 min-h-0 flex flex-col">
           {mobileTab === 1
             ? <ResponsePanel content={resp1} modelName={model1Name} side={1} isPreferred={preferred === 1} time={time1} />
             : <ResponsePanel content={resp2} modelName={model2Name} side={2} isPreferred={preferred === 2} time={time2} />
