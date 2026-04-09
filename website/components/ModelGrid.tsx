@@ -42,8 +42,11 @@ const modelBadges: Record<string, { label: string; color: string }[]> = {
 
 function formatPrice(model: (typeof MODELS)[number]) {
   if (model.tier === "free") return "FREE";
-  if (model.priceUnit) return `$${model.pricePerMillion}${model.priceUnit}`;
-  return `$${model.pricePerMillion}/1M`;
+  const s = model.speed || "medium";
+  if (s === "instant") return "Мгновенная";
+  if (s === "fast") return "Быстрая";
+  if (s === "slow") return "Глубокая";
+  return "Средняя";
 }
 
 const TABS: { id: "all" | ModelCategory; label: string }[] = [

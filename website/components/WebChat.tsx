@@ -73,10 +73,13 @@ function getModelLockInfo(modelId: string, balance: number, plan?: string): { lo
 
 // ─── Helpers ───
 
-function formatPrice(m: AIModel) {
+function formatSpeed(m: AIModel) {
   if (m.tier === "free") return "FREE";
-  if (m.priceUnit) return `$${m.pricePerMillion}${m.priceUnit}`;
-  return `$${m.pricePerMillion}/1M`;
+  const s = m.speed || "medium";
+  if (s === "instant") return "Мгновенная";
+  if (s === "fast") return "Быстрая";
+  if (s === "slow") return "Глубокая";
+  return "Средняя";
 }
 
 // ─── Types ───
@@ -1794,7 +1797,8 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                   return [...list].sort((a, b) => {
                     const aL = getModelLockInfo(a.id, bal, limits?.plan) !== null, bL = getModelLockInfo(b.id, bal, limits?.plan) !== null;
                     if (!aL && bL) return -1; if (aL && !bL) return 1;
-                    return a.pricePerMillion - b.pricePerMillion;
+                    const speedOrder: Record<string, number> = { instant: 0, fast: 1, medium: 2, slow: 3 };
+                    return (speedOrder[a.speed || "medium"] || 2) - (speedOrder[b.speed || "medium"] || 2);
                   }).map(m => {
                     const lock = getModelLockInfo(m.id, bal, limits?.plan);
                     return (

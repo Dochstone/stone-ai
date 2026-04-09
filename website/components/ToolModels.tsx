@@ -20,8 +20,11 @@ const companyColors: Record<string, string> = {
 
 function formatPrice(m: AIModel) {
   if (m.tier === "free") return "FREE";
-  if (m.priceUnit) return `$${m.pricePerMillion}${m.priceUnit}`;
-  return `$${m.pricePerMillion}/1M`;
+  const s = m.speed || "medium";
+  if (s === "instant") return "Мгновенная";
+  if (s === "fast") return "Быстрая";
+  if (s === "slow") return "Глубокая";
+  return "Средняя";
 }
 
 interface ToolModelsProps {

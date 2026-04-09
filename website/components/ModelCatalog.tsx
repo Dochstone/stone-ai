@@ -65,9 +65,11 @@ function getTierLabel(id: string): { label: string; style: string } {
 }
 
 function getSpeed(model: AIModel): string {
-  if (model.pricePerMillion <= 3) return "Быстрая";
-  if (model.pricePerMillion <= 15) return "Средняя";
-  return "Мощная";
+  const s = model.speed || "medium";
+  if (s === "instant") return "Мгновенная";
+  if (s === "fast") return "Быстрая";
+  if (s === "slow") return "Мощная";
+  return "Средняя";
 }
 
 type SortKey = "name" | "tier" | "context";

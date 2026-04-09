@@ -77,9 +77,7 @@ export default function PricingTable() {
                   <span className="text-xs text-text/35">{model.company}</span>
                 </td>
                 <td className="py-3 px-3 text-text/50 whitespace-nowrap">
-                  {model.priceUnit
-                    ? `$${model.pricePerMillion}${model.priceUnit}`
-                    : `$${model.pricePerMillion}`}
+                  {model.tier === "free" ? "FREE" : model.speed === "instant" ? "Мгновенная" : model.speed === "fast" ? "Быстрая" : model.speed === "slow" ? "Глубокая" : "Средняя"}
                 </td>
                 {VOLUMES.map((v) => {
                   const c = calcCost(model, v);
