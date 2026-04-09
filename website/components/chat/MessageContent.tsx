@@ -5,8 +5,7 @@ import { useState } from "react";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
 const IMAGE_MODEL_IDS = new Set([
-  "nano-banana-pro", "nano-banana", "gpt-5-image", "gpt-5-image-mini",
-  "flux-schnell", "stable-diffusion-xl",
+  "nano-banana", "nano-banana-pro", "gpt-image-1", "gpt-5-image", "gpt-5-image-mini", "kolors-v2", "kolors-v3",
 ]);
 
 // ─── Helpers ───
@@ -48,6 +47,19 @@ function stripImageFromText(content: string): string {
     .trim();
 }
 
+// ─── HTML Sanitizer ───
+
+function sanitizeHtml(html: string): string {
+  return html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/on\w+\s*=\s*"[^"]*"/gi, '')
+    .replace(/on\w+\s*=\s*'[^']*'/gi, '')
+    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+    .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '')
+    .replace(/<embed\b[^>]*>/gi, '')
+    .replace(/<form\b[^<]*(?:(?!<\/form>)<[^<]*)*<\/form>/gi, '');
+}
+
 // ─── Markdown Renderer ───
 
 function renderMarkdown(text: string): string {
@@ -68,6 +80,10 @@ function renderMarkdown(text: string): string {
     .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" class="md-link">$1</a>')
     .replace(/\n/g, "<br/>");
 
+  html = html.replace(/((?:<li class="md-li md-oli">.*?<\/li><br\/>?)+)/g, (match) => {
+    const cleaned = match.replace(/<br\/?>/g, "");
+    return `<ol class="md-ol">${cleaned}</ol>`;
+  });
   html = html.replace(/((?:<li class="md-li">.*?<\/li><br\/>?)+)/g, (match) => {
     const cleaned = match.replace(/<br\/?>/g, "");
     return `<ul class="md-ul">${cleaned}</ul>`;
@@ -262,7 +278,7 @@ export default function MessageContent({ content, role, selectedModel }: { conte
       ) : displayContent.match(/^https?:\/\/\S+$/) ? (
         <ImageWithDownload url={displayContent.trim()} />
       ) : displayContent ? (
-        <div className="md-content break-words" dangerouslySetInnerHTML={{ __html: renderMarkdown(displayContent) }} />
+        <div className="md-content break-words" dangerouslySetInnerHTML={{ __html: sanitizeHtml(renderMarkdown(displayContent)) }} />
       ) : null}
     </div>
   );

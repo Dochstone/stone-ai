@@ -18,7 +18,7 @@ import { OnboardingFlow } from "@/components/OnboardingFlow";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
 const IMAGE_MODEL_IDS = new Set([
-  "nano-banana-pro", "nano-banana", "gpt-5-image", "gpt-5-image-mini",
+  "nano-banana", "nano-banana-pro", "gpt-image-1", "gpt-5-image", "gpt-5-image-mini", "kolors-v2", "kolors-v3",
 ]);
 
 const VIDEO_MODEL_IDS = new Set([
@@ -770,11 +770,11 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
     setLoaded(true);
     const onFocus = () => loadAuth();
     window.addEventListener("focus", onFocus);
-    document.addEventListener("visibilitychange", () => { if (!document.hidden) loadAuth(); });
+    const visHandler = () => { if (!document.hidden) loadAuth(); };
+    document.addEventListener("visibilitychange", visHandler);
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
       setSidebarOpen(false);
     }
-    return () => window.removeEventListener("focus", onFocus);
     // Onboarding — for both guests and logged-in users
     const isAuthed = !!localStorage.getItem("stone_auth");
     const guestDone = localStorage.getItem("stone_guest_onboarded");
@@ -784,9 +784,14 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
     }
     // Avatar
     setUserAvatar(getSavedAvatar());
-    const onAvatarChange = () => setUserAvatar(getSavedAvatar());
-    window.addEventListener("avatar-changed", onAvatarChange);
-    return () => window.removeEventListener("avatar-changed", onAvatarChange);
+    const avatarHandler = () => setUserAvatar(getSavedAvatar());
+    window.addEventListener("avatar-changed", avatarHandler);
+
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("avatar-changed", avatarHandler);
+      document.removeEventListener("visibilitychange", visHandler);
+    };
   }, []);
 
   // Fetch usage limits
@@ -1561,7 +1566,8 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
   // Auto-send after suggestion card click — switches model first
   const pendingSend = useRef(false);
-  const handleSuggestionClick = useCallback((text: string, _modelId: string) => {
+  const handleSuggestionClick = useCallback((text: string, modelId: string) => {
+    if (modelId) setSelectedModel(modelId);
     setInput(text);
     pendingSend.current = true;
   }, []);

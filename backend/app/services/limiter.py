@@ -252,6 +252,9 @@ async def record_usage(
     # Update user counters
     result = await db.execute(select(User).where(User.telegram_id == tg_id))
     user = result.scalar_one_or_none()
+    if not user:
+        result = await db.execute(select(User).where(User.id == tg_id))
+        user = result.scalar_one_or_none()
     if user:
         user.total_requests = (user.total_requests or 0) + 1
         user.total_tokens_used = (user.total_tokens_used or 0) + tokens_in + tokens_out

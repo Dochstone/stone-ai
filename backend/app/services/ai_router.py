@@ -126,6 +126,17 @@ def get_model_tier(model_id: str) -> str:
 # Video models are handled separately.
 
 
+_MODEL_CATEGORY_MAP = {}
+for _m in MODELS_REGISTRY:
+    _cat = _m.get("category", "chat")
+    if _cat == "image":
+        _MODEL_CATEGORY_MAP[_m["id"]] = "image"
+    elif _m["tier"] in (1, 2, 5):
+        _MODEL_CATEGORY_MAP[_m["id"]] = "fast"
+    else:
+        _MODEL_CATEGORY_MAP[_m["id"]] = "premium"
+
+
 def get_model_category(model_id: str) -> str:
     """Return 'fast', 'premium', 'image', or 'unknown'.
 
@@ -135,14 +146,7 @@ def get_model_category(model_id: str) -> str:
       - image   = tier 4 (image generation)
     Video models are handled separately.
     """
-    model = next((m for m in MODELS_REGISTRY if m["id"] == model_id), None)
-    if not model:
-        return "unknown"
-    if model.get("category") == "image":
-        return "image"
-    if model["tier"] in (1, 2, 5):
-        return "fast"
-    return "premium"  # tier 3, 6
+    return _MODEL_CATEGORY_MAP.get(model_id, "premium")
 
 
 async def stream_chat_response(
@@ -167,7 +171,10 @@ async def stream_chat_response(
     # Rough estimate: 1 token ≈ 4 chars for English, 2 chars for Russian
     model_info = next((m for m in MODELS_REGISTRY if m["id"] == model_id), None)
     ctx_str = model_info["context_length"] if model_info else "128K"
-    max_ctx = int(ctx_str.replace("K", "000").replace("M", "000000")) if isinstance(ctx_str, str) else 128000
+    try:
+        max_ctx = int(ctx_str.replace("K", "000").replace("M", "000000")) if isinstance(ctx_str, str) else 128000
+    except (ValueError, AttributeError):
+        max_ctx = 8000  # safe default for image/special models
     # Reserve tokens for output and system prompt
     max_input_chars = (max_ctx - max_tokens - 2000) * 3  # ~3 chars per token average
 

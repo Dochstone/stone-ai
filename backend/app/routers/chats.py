@@ -77,6 +77,7 @@ async def create_session(
     )
     db.add(session)
     await db.flush()
+    await db.commit()
 
     return {
         "id": session.id,
@@ -181,6 +182,7 @@ async def save_message(
 
     session.updated_at = datetime.utcnow()
     await db.flush()
+    await db.commit()
 
     return {"id": msg.id, "session_title": session.title}
 
@@ -245,6 +247,7 @@ async def rename_session(
 
     session.title = body.title[:100].strip()
     await db.flush()
+    await db.commit()
 
     return {"status": "ok", "title": session.title}
 
@@ -268,6 +271,7 @@ async def delete_session(
 
     await db.execute(delete(ChatMessage).where(ChatMessage.session_id == session_id))
     await db.delete(session)
+    await db.commit()
 
     return {"status": "ok"}
 
@@ -287,6 +291,7 @@ async def delete_all_sessions(
     if session_ids:
         await db.execute(delete(ChatMessage).where(ChatMessage.session_id.in_(session_ids)))
         await db.execute(delete(ChatSession).where(ChatSession.user_tg_id == tg_id))
+    await db.commit()
     return {"status": "ok", "deleted": len(session_ids)}
 
 
@@ -310,6 +315,7 @@ async def share_session(
     if not session.share_token:
         session.share_token = secrets.token_urlsafe(16)
         await db.flush()
+        await db.commit()
 
     return {"share_token": session.share_token, "share_url": f"https://stoneai.ru/shared/{session.share_token}"}
 
@@ -333,6 +339,7 @@ async def unshare_session(
 
     session.share_token = None
     await db.flush()
+    await db.commit()
     return {"status": "ok"}
 
 

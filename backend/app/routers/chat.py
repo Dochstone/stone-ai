@@ -10,7 +10,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -58,6 +58,16 @@ class ChatRequest(BaseModel):
     system_prompt: str | None = None
     project_id: str | None = None
 
+    @field_validator("messages")
+    @classmethod
+    def validate_messages(cls, v):
+        if len(v) > 50:
+            raise ValueError("Too many messages (max 50)")
+        for msg in v:
+            if "content" in msg and isinstance(msg["content"], str) and len(msg["content"]) > 100000:
+                raise ValueError("Message too long (max 100K chars)")
+        return v
+
 
 @router.post("/chat/guest")
 async def chat_guest(
@@ -66,8 +76,7 @@ async def chat_guest(
     db: AsyncSession = Depends(get_db),
 ):
     """Guest chat — no auth required, limited to 10 requests per IP, fast models only."""
-    from fastapi import Request as _Req  # noqa: already imported via middleware
-    ip = request.headers.get("X-Forwarded-For", request.client.host if request.client else "unknown").split(",")[0].strip()
+    ip = request.headers.get("X-Real-IP") or request.headers.get("X-Forwarded-For", "").split(",")[0].strip() or (request.client.host if request.client else "unknown")
 
     used = _guest_usage.get(ip, 0)
     if used >= GUEST_LIMIT:
@@ -94,7 +103,7 @@ async def chat_guest(
     blocked = check_blocked(req.messages[-1].get("content", "") if req.messages else "")
     if blocked:
         async def blocked_gen():
-            yield f'data: {{"content": "{blocked}"}}\n\n'
+            yield f'data: {json.dumps({"content": blocked})}\n\n'
             yield "data: [DONE]\n\n"
         return StreamingResponse(blocked_gen(), media_type="text/event-stream")
     default_system = "Always respond in the same language as the user's message. Match the user's language exactly."
@@ -128,8 +137,7 @@ async def chat_guest(
 @router.get("/chat/guest/status")
 async def guest_status(request: "Request"):
     """Check guest usage for current IP."""
-    from fastapi import Request as _Req
-    ip = request.headers.get("X-Forwarded-For", request.client.host if request.client else "unknown").split(",")[0].strip()
+    ip = request.headers.get("X-Real-IP") or request.headers.get("X-Forwarded-For", "").split(",")[0].strip() or (request.client.host if request.client else "unknown")
     used = _guest_usage.get(ip, 0)
     return {"used": used, "limit": GUEST_LIMIT, "remaining": max(0, GUEST_LIMIT - used)}
 
@@ -211,7 +219,7 @@ async def chat(
                                              username=db_user.username if db_user else None,
                                              email=db_user.email if db_user else None))
             async def blocked_gen():
-                yield f'data: {{"content": "{blocked}"}}\n\n'
+                yield f'data: {json.dumps({"content": blocked})}\n\n'
                 yield "data: [DONE]\n\n"
             return StreamingResponse(blocked_gen(), media_type="text/event-stream")
     default_system = "Always respond in the same language as the user's message. Match the user's language exactly."
@@ -242,8 +250,12 @@ async def chat(
             yield chunk
 
             # Check for error in stream
-            if '"error"' in chunk:
-                had_error = True
+            try:
+                chunk_data = json.loads(chunk.replace("data: ", "", 1).strip())
+                if isinstance(chunk_data, dict) and "error" in chunk_data:
+                    had_error = True
+            except (json.JSONDecodeError, ValueError):
+                pass
 
             # Extract usage data from the usage chunk
             if '"usage"' in chunk:
@@ -262,13 +274,6 @@ async def chat(
         real_cost = 0.0
 
         if not using_byok and not had_error:
-            await record_usage(
-                db, tg_id, req.model_id,
-                tokens_in=tokens_in,
-                tokens_out=tokens_out,
-                cost_usd=0.0,
-            )
-
             # Send billing info as final SSE chunk
             balance = float(db_user.balance_usd or 0) if db_user else 0.0
             billing_data = {
@@ -282,7 +287,17 @@ async def chat(
             }
             yield f"data: {json.dumps(billing_data)}\n\n"
 
-            await db.commit()
+            # Record usage in background task with separate DB session for reliability
+            async def _record_usage_bg(tg_id, model_id, tokens_in, tokens_out, cost_usd):
+                try:
+                    from app.database import async_session
+                    async with async_session() as bg_db:
+                        await record_usage(bg_db, tg_id, model_id, tokens_in=tokens_in, tokens_out=tokens_out, cost_usd=cost_usd)
+                        await bg_db.commit()
+                except Exception as e:
+                    logger.error(f"Failed to record usage: {e}")
+
+            asyncio.create_task(_record_usage_bg(tg_id, req.model_id, tokens_in, tokens_out, 0.0))
 
             # Achievement: messages sent
             if db_user:
