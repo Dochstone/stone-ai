@@ -742,12 +742,27 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
   // Load auth from localStorage + re-check on tab focus (after TG redirect)
   useEffect(() => {
-    const loadAuth = () => {
+    const loadAuth = async () => {
       try {
         const saved = localStorage.getItem("stone_auth");
         if (saved) {
           const parsed = JSON.parse(saved);
           if (parsed.token) { setAuth(parsed); setShowGuestLimit(false); }
+        }
+      } catch {}
+      // Check pending TG session on every focus
+      try {
+        const tgSid = sessionStorage.getItem("stone_tg_session");
+        if (tgSid && !localStorage.getItem("stone_auth")) {
+          const res = await fetch(`${API_URL}/api/auth/telegram-web-check?session=${tgSid}`);
+          const data = await res.json();
+          if (data.status === "ok" && data.token) {
+            sessionStorage.removeItem("stone_tg_session");
+            const authData = { token: data.token, email: data.user?.email || data.user?.first_name || data.user?.username || "Telegram", balanceUsd: data.user?.balance_usd || 0 };
+            localStorage.setItem("stone_auth", JSON.stringify(authData));
+            setAuth(authData);
+            setShowGuestLimit(false);
+          }
         }
       } catch {}
     };
