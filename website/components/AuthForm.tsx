@@ -37,15 +37,22 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
   const [tgSessionId, setTgSessionId] = useState("");
   const [tgPolling, setTgPolling] = useState(false);
 
-  // Restore TG polling after returning from Telegram app (iOS)
+  // Restore TG polling after returning from Telegram app
   useEffect(() => {
-    try {
-      const saved = sessionStorage.getItem("stone_tg_session");
-      if (saved && !tgPolling) {
-        setTgSessionId(saved);
-        setTgPolling(true);
-      }
-    } catch {}
+    const restore = () => {
+      try {
+        const saved = sessionStorage.getItem("stone_tg_session");
+        if (saved && !tgPolling) {
+          setTgSessionId(saved);
+          setTgPolling(true);
+        }
+      } catch {}
+    };
+    restore();
+    // Also restore on tab focus (user returns from Telegram)
+    window.addEventListener("focus", restore);
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) restore(); });
+    return () => window.removeEventListener("focus", restore);
   }, []);
 
   useEffect(() => {
@@ -69,7 +76,7 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
             setTgPolling(false);
             return;
           }
-          if (data.status !== "pending") {
+          if (data.status && data.status !== "pending" && data.status !== "ok") {
             setTgPolling(false);
             return;
           }
