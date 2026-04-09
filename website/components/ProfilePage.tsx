@@ -345,9 +345,46 @@ function OverviewTab({ profile, usage, limits }: { profile: UserProfile; usage: 
 
 // ─── Tab: Balance ───
 
-function BalanceTab({ profile, transactions }: { profile: UserProfile; transactions: Transaction[] }) {
+function BalanceTab({ profile, transactions, auth, onRefresh }: { profile: UserProfile; transactions: Transaction[]; auth: AuthState; onRefresh: () => void }) {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [subscribing, setSubscribing] = useState(false);
+  const [subMsg, setSubMsg] = useState("");
+
+  const plans = [
+    { tier: "mini", name: "Start", price: 590, features: "20+ моделей, 500 запросов/мес" },
+    { tier: "max", name: "Pro", price: 1290, features: "65+ моделей, 2000 запросов, видео, 3D" },
+    { tier: "max-pro", name: "Elite", price: 2990, features: "10000 запросов, API, приоритет" },
+  ];
+
+  const buyFromBalance = async (tier: string) => {
+    setSubscribing(true);
+    setSubMsg("");
+    try {
+      const res = await fetch(`${API_URL}/api/subscribe`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
+        body: JSON.stringify({ tier }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSubMsg(`Подписка ${data.plan_name} активирована!`);
+        onRefresh();
+      } else {
+        const detail = data.detail || data.message || data.error;
+        if (typeof detail === "object" && detail.message) {
+          setSubMsg(detail.message);
+        } else {
+          setSubMsg(typeof detail === "string" ? detail : "Ошибка активации");
+        }
+      }
+    } catch {
+      setSubMsg("Ошибка соединения");
+    } finally {
+      setSubscribing(false);
+      setTimeout(() => setSubMsg(""), 5000);
+    }
+  };
 
   const filtered = transactions.filter((t) => {
     if (dateFrom && t.created_at < dateFrom) return false;
@@ -381,12 +418,45 @@ function BalanceTab({ profile, transactions }: { profile: UserProfile; transacti
         {profile.plan !== "max-pro" && (
           <a
             href="/pricing"
-            className="inline-flex items-center gap-2 bg-accent text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors"
+            className="inline-flex items-center gap-2 bg-accent/10 text-accent px-6 py-3 rounded-xl font-bold text-sm hover:bg-accent hover:text-white transition-colors"
           >
-            {profile.plan === "free" ? "Выбрать тариф" : profile.plan === "mini" ? "Улучшить тариф" : "Сменить тариф"}
+            {profile.plan === "free" ? "Все тарифы →" : "Сменить тариф →"}
           </a>
         )}
+        <div className="text-[11px] text-text/25 mt-2">
+          Баланс: {Math.round(profile.balance_usd * 95)}&thinsp;₽ (${profile.balance_usd.toFixed(2)})
+        </div>
       </div>
+
+      {/* Buy from balance */}
+      {profile.plan !== "max-pro" && (
+        <div>
+          {subMsg && (
+            <div className={`mb-4 px-4 py-2.5 rounded-xl text-sm font-medium ${subMsg.includes("активирована") ? "bg-teal-light text-teal" : "bg-red-50 text-red-500"}`}>
+              {subMsg}
+            </div>
+          )}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {plans.filter(p => {
+              const tierOrder = { free: 0, mini: 1, max: 2, "max-pro": 3 };
+              return (tierOrder[p.tier as keyof typeof tierOrder] || 0) > (tierOrder[profile.plan as keyof typeof tierOrder] || 0);
+            }).map(p => (
+              <div key={p.tier} className="bg-bg rounded-2xl border border-text/[0.06] p-5 text-center">
+                <div className="text-lg font-extrabold text-text mb-1">{p.name}</div>
+                <div className="text-2xl font-extrabold text-accent mb-1">{p.price.toLocaleString()}&thinsp;₽<span className="text-xs font-normal text-text/30">/мес</span></div>
+                <div className="text-[11px] text-text/40 mb-4">{p.features}</div>
+                <button
+                  onClick={() => buyFromBalance(p.tier)}
+                  disabled={subscribing || profile.balance_usd * 95 < p.price}
+                  className="w-full bg-accent text-white py-2.5 rounded-xl text-sm font-bold hover:bg-accent/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {subscribing ? "..." : profile.balance_usd * 95 >= p.price ? "Купить с баланса" : `Нужно ${p.price}₽`}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex items-center gap-3 flex-wrap">
@@ -1237,7 +1307,7 @@ export default function ProfilePage() {
 
         {/* Tab content */}
         {tab === "overview" && <OverviewTab profile={profile} usage={usage} limits={dailyLimits} />}
-        {tab === "balance" && <BalanceTab profile={profile} transactions={transactions} />}
+        {tab === "balance" && <BalanceTab profile={profile} transactions={transactions} auth={auth} onRefresh={fetchData} />}
         {tab === "history" && <HistoryTab usage={usage} />}
         {tab === "settings" && <SettingsTab profile={profile} auth={auth} />}
         {tab === "referrals" && <ReferralsTab stats={referralStats} loading={loading} />}
