@@ -26,6 +26,7 @@ interface UserRow {
   subscription_tier: string;
   total_deposited_usd: number;
   total_requests: number;
+  today_requests: number;
   total_tokens_used: number;
   joined_at: string | null;
   last_active: string | null;
@@ -449,9 +450,10 @@ export default function AdminPage() {
                       <th className="text-left py-3 px-4 font-semibold">Email</th>
                       <th className="text-center py-3 px-4 font-semibold">Тариф</th>
                       <th className="text-right py-3 px-4 font-semibold">Баланс</th>
-                      <th className="text-right py-3 px-4 font-semibold">Запросов</th>
+                      <th className="text-right py-3 px-4 font-semibold cursor-pointer hover:text-accent" onClick={() => { setUsers(prev => [...prev].sort((a, b) => (b.today_requests || 0) - (a.today_requests || 0))); }}>Сегодня ▼</th>
+                      <th className="text-right py-3 px-4 font-semibold cursor-pointer hover:text-accent" onClick={() => { setUsers(prev => [...prev].sort((a, b) => b.total_requests - a.total_requests)); }}>Всего ▼</th>
                       <th className="text-left py-3 px-4 font-semibold">Дата рег.</th>
-                      <th className="text-left py-3 px-4 font-semibold">Активность</th>
+                      <th className="text-left py-3 px-4 font-semibold cursor-pointer hover:text-accent" onClick={() => { setUsers(prev => [...prev].sort((a, b) => (b.last_active || "").localeCompare(a.last_active || ""))); }}>Активность ▼</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -511,7 +513,8 @@ export default function AdminPage() {
                             <span className="text-[10px] text-text/25">₽</span>
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-right font-mono text-xs">{u.total_requests.toLocaleString()}</td>
+                        <td className="py-3 px-4 text-right font-mono text-xs">{(u.today_requests || 0) > 0 ? <span className="text-accent font-bold">{u.today_requests}</span> : <span className="text-text/20">0</span>}</td>
+                        <td className="py-3 px-4 text-right font-mono text-xs">{u.total_requests > 0 ? u.total_requests.toLocaleString() : <span className="text-text/20">0</span>}</td>
                         <td className="py-3 px-4 text-text/30 text-xs">{u.joined_at?.slice(0, 10) || "—"}</td>
                         <td className="py-3 px-4 text-text/30 text-xs">{u.last_active?.slice(0, 10) || "—"}</td>
                       </tr>

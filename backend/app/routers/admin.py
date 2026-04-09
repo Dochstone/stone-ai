@@ -327,6 +327,7 @@ async def web_admin_users(
     from app.models.daily_usage import DailyUsage
     user_ids = [u.telegram_id or u.id for u in users]
     user_requests = {}
+    user_today = {}
     last_activity = {}
     if user_ids:
         req_q = await db.execute(
@@ -341,6 +342,16 @@ async def web_admin_users(
         for row in req_q.all():
             user_requests[row.user_tg_id] = row.total
             last_activity[row.user_tg_id] = row.last_date
+        # Today's requests per user
+        today_q = await db.execute(
+            select(
+                DailyUsage.user_tg_id,
+                func.coalesce(DailyUsage.fast_used + DailyUsage.premium_used + DailyUsage.image_used + DailyUsage.video_used, 0).label("today"),
+            )
+            .where(DailyUsage.user_tg_id.in_(user_ids), DailyUsage.date == today)
+        )
+        for row in today_q.all():
+            user_today[row.user_tg_id] = row.today
 
     return {
         "users": [
@@ -354,6 +365,7 @@ async def web_admin_users(
                 "total_deposited_usd": round(float(u.total_deposited_usd or 0), 2),
                 "subscription_tier": u.subscription_tier or "free",
                 "total_requests": user_requests.get(u.telegram_id or u.id, 0),
+                "today_requests": user_today.get(u.telegram_id or u.id, 0),
                 "total_tokens_used": u.total_tokens_used or 0,
                 "joined_at": u.joined_at.isoformat() if u.joined_at else None,
                 "last_active": last_activity.get(u.telegram_id or u.id, u.last_login_date).isoformat()
