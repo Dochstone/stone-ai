@@ -165,11 +165,76 @@ async def lifespan(app: FastAPI):
 
     cleanup_task = asyncio.create_task(agent_cleanup_loop())
 
+    async def video_worker_loop():
+        """Server-side polling: check all processing video tasks, complete them when ready."""
+        while True:
+            await asyncio.sleep(10)  # every 10 seconds
+            try:
+                from app.database import async_session
+                from app.models.video_task import VideoTask
+                from app.services.video_router import check_video_status as fal_check
+                async with async_session() as db:
+                    result = await db.execute(
+                        select(VideoTask).where(VideoTask.status == "processing")
+                    )
+                    tasks = result.scalars().all()
+                    for task in tasks:
+                        # Timeout: 10 min
+                        if task.created_at and (datetime.utcnow() - task.created_at).total_seconds() > 600:
+                            task.status = "failed"
+                            task.error_message = "Таймаут генерации (10 мин). Попробуйте снова."
+                            await db.commit()
+                            logger.info(f"Video worker: task {task.task_id} timed out")
+                            continue
+
+                        if not task.fal_request_id:
+                            continue
+
+                        try:
+                            is_kling = task.fal_request_id.startswith("kling:")
+                            if is_kling:
+                                from app.services.kling_client import check_kling_status
+                                s = get_settings()
+                                kling_id = task.fal_request_id.split(":", 1)[1]
+                                fal_status = await check_kling_status(s.kling_access_key, s.kling_secret_key, kling_id, is_image2video=bool(task.source_image_url))
+                            else:
+                                fal_status = await fal_check(task.model_id, task.fal_request_id)
+
+                            status = fal_status.get("status", "UNKNOWN")
+
+                            if status == "COMPLETED":
+                                fal_url = fal_status.get("video_url")
+                                task.status = "completed"
+                                task.video_url = fal_url
+                                task.completed_at = datetime.utcnow()
+                                await db.commit()
+                                logger.info(f"Video worker: task {task.task_id} completed")
+
+                                # Save to disk in background
+                                from app.routers.video import _save_video_to_disk
+                                asyncio.create_task(_save_video_to_disk(task.task_id, fal_url, task.user_tg_id, task.model_id, task.prompt, task.cost_usd))
+                                asyncio.create_task(check_and_update(task.user_tg_id, "videos", 1))
+
+                            elif status == "FAILED":
+                                task.status = "failed"
+                                task.error_message = fal_status.get("error", "Генерация не удалась")
+                                await db.commit()
+                                logger.info(f"Video worker: task {task.task_id} failed: {task.error_message}")
+
+                        except Exception as e:
+                            logger.warning(f"Video worker error for {task.task_id}: {e}")
+
+            except Exception as e:
+                logger.error(f"Video worker loop error: {e}")
+
+    video_worker_task = asyncio.create_task(video_worker_loop())
+
     yield
 
     # Shutdown
     rollover_task.cancel()
     cleanup_task.cancel()
+    video_worker_task.cancel()
     if bot:
         await bot.session.close()
     logger.info("👋 Stone AI shut down")

@@ -793,7 +793,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
       .catch(() => {});
   }, [auth?.token, messages.length]); // refetch after each message
 
-  // Resume pending video generation on page load
+  // Resume pending video generation on page load (server-side worker completes them)
   useEffect(() => {
     if (!auth?.token) return;
     fetch(`${API_URL}/api/video/history`, { headers: { Authorization: `Bearer ${auth.token}` } })
@@ -802,7 +802,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         if (!data?.videos) return;
         const pending = data.videos.find((v: any) => v.status === "pending" || v.status === "processing");
         if (!pending) return;
-        // Resume polling
+        // Resume polling (server worker checks fal.ai every 10s, we just poll DB)
         setVideoGenerating(true); setOverlayMinimized(false);
         setMessages(prev => {
           if (prev.some(m => m.content?.includes("Генерация видео"))) return prev;
@@ -811,7 +811,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         let resumeAttempts = 0;
         const poll = async () => {
           resumeAttempts++;
-          if (resumeAttempts > 100) { setVideoGenerating(false); return; }
+          if (resumeAttempts > 60) { setVideoGenerating(false); return; } // 5 min max (5s * 60)
           try {
             const r = await fetch(`${API_URL}/api/video/status/${pending.task_id}`, {
               headers: { Authorization: `Bearer ${auth!.token}` },
@@ -832,7 +832,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
               setVideoGenerating(false);
               return;
             }
-            pollTimerRef.current = setTimeout(poll, 3000);
+            pollTimerRef.current = setTimeout(poll, 5000);
           } catch (err) {
             console.warn("Video poll failed, retrying:", err);
             pollTimerRef.current = setTimeout(poll, 5000);
