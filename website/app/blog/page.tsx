@@ -8,6 +8,11 @@ export const metadata: Metadata = {
   description:
     "Статьи про AI-модели, сравнения, гайды и советы. Как выбрать модель, сэкономить на AI и оплатить в рублях.",
   alternates: { canonical: "/blog" },
+  openGraph: {
+    title: "Блог",
+    description:
+      "Статьи про AI-модели, сравнения, гайды и советы. Как выбрать модель, сэкономить на AI и оплатить в рублях.",
+  },
 };
 
 const blogFaqItems = [

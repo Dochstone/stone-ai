@@ -10,6 +10,10 @@ export const metadata: Metadata = {
   title: "Генерация видео нейросетью — ИИ из текста в видео",
   description: "Нейросеть для генерации видео из текста и фото. ИИ-модели Sora 2, Veo 3, Runway Gen-3, Pika 2.0. От $0.15 за видео.",
   alternates: { canonical: "/video" },
+  openGraph: {
+    title: "Генерация видео нейросетью — ИИ из текста в видео",
+    description: "Нейросеть для генерации видео из текста и фото. ИИ-модели Sora 2, Veo 3, Runway Gen-3, Pika 2.0. От $0.15 за видео.",
+  },
 };
 
 const modelIds = ["sora-2", "veo-3", "runway-gen3", "minimax", "pixverse-v5", "luma-dream", "pika-2", "wan-2", "hunyuan", "ltx-video", "stable-video"];

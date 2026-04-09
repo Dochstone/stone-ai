@@ -71,8 +71,8 @@ export default function PricingPage() {
             4 тарифа
           </div>
           <h1 className="text-3xl md:text-5xl font-extrabold mb-4">
-            AI-студия —{" "}
-            <span className="bg-gradient-to-r from-accent to-teal bg-clip-text text-transparent">все нейросети</span>
+            Тарифы{" "}
+            <span className="bg-gradient-to-r from-accent to-teal bg-clip-text text-transparent">Stone AI</span>
           </h1>
           <p className="text-text/50 max-w-2xl mx-auto text-lg">
             {hasPaidPlan

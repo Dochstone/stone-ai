@@ -22,8 +22,6 @@ const OG_IMAGE = `${SITE_URL}/og-image.png`;
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 export const metadata: Metadata = {
@@ -71,9 +69,6 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Stone AI — AI-студия нового поколения",
-    description:
-      "65+ нейросетей, 15 инструментов: чат, картинки, видео, реклама, SEO, презентации, боты и агенты. Бесплатный старт + 100₽ на баланс.",
     images: [OG_IMAGE],
   },
   robots: {
