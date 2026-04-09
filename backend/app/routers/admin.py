@@ -325,6 +325,7 @@ async def web_admin_users(
 
     # Get request counts and last activity from daily_usage
     from app.models.daily_usage import DailyUsage
+    today = date.today()
     user_ids = [u.telegram_id or u.id for u in users]
     user_requests = {}
     user_today = {}
