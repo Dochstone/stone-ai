@@ -111,7 +111,7 @@ export default function CampaignsPage() {
         {/* First time hint */}
         {campaigns.length === 0 && !running && (
           <div className="bg-gradient-to-r from-accent/5 to-teal/5 border border-accent/10 rounded-2xl p-5 mb-6 flex items-start gap-4">
-            <img src="/mascots/stone-mascot-idle.png" alt="" width="56" height="56" className="shrink-0 mt-1 hidden sm:block" />
+            <img src="/mascots/stone-mascot-idle.webp" alt="" width="56" height="56" className="shrink-0 mt-1 hidden sm:block" />
             <div>
               <h3 className="font-bold text-text text-sm mb-1">Как это работает</h3>
               <p className="text-xs text-text/50 leading-relaxed">
@@ -337,7 +337,7 @@ export default function CampaignsPage() {
               </div>
             ) : (
               <div className="text-center py-16">
-                <img src="/mascots/stone-mascot-idle.png" alt="Stone" width="90" height="90" className="mx-auto mb-3" />
+                <img src="/mascots/stone-mascot-idle.webp" alt="Stone" width="90" height="90" className="mx-auto mb-3" />
                 <p className="text-text/25 text-sm">Введите нишу и создайте первую кампанию</p>
               </div>
             )}

@@ -251,7 +251,7 @@ export default function AgentPage() {
               </div>
             ) : (
               <div className="text-center py-12">
-                <img src="/mascots/stone-mascot-loading.png" alt="Stone" width="90" height="90" className="mx-auto mb-3" />
+                <img src="/mascots/stone-mascot-loading.webp" alt="Stone" width="90" height="90" className="mx-auto mb-3" />
                 <p className="text-text/25 text-sm">Опишите задачу и запустите агента</p>
               </div>
             )}

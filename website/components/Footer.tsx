@@ -33,7 +33,7 @@ export default function Footer() {
         {/* Brand row */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-10 pb-8 border-b border-text/[0.06]">
           <div className="flex items-center gap-3">
-            <img src="/mascots/stone-mascot-idle.png" alt="" width="32" height="32" />
+            <img src="/mascots/stone-mascot-idle.webp" alt="" width="32" height="32" />
             <div>
               <h3 className="text-lg font-extrabold leading-none">Stone AI</h3>
               <p className="text-[9px] text-text/25 tracking-[0.1em] uppercase mt-0.5">AI-студия нового поколения</p>

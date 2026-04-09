@@ -9,6 +9,7 @@ import { SITE_URL } from "@/lib/constants";
 export const metadata: Metadata = {
   title: "Озвучка текста нейросетью — ИИ голосовой бот",
   description: "Нейросеть для озвучки текста 10+ голосами. ИИ чат-бот с голосовым вводом Whisper. TTS и STT онлайн. От $0.01.",
+  alternates: { canonical: "/audio" },
 };
 
 const examples = [

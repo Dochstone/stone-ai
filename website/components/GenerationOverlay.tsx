@@ -38,7 +38,7 @@ export default function GenerationOverlay({ isVisible, estimatedTime, onMinimize
         )}
         {view === "main" && (
           <div className="p-6 text-center">
-            <img src="/mascots/stone-mascot-loading.png" alt="" width="72" height="72" className="mx-auto mb-4 animate-bounce" style={{ animationDuration: "2s" }} />
+            <img src="/mascots/stone-mascot-loading.webp" alt="" width="72" height="72" className="mx-auto mb-4 animate-bounce" style={{ animationDuration: "2s" }} />
             <h3 className="text-base font-bold text-white mb-1">Генерация {typeLabel}...</h3>
             <p className="text-xs text-gray-400 mb-6">{estimatedTime || "~30 секунд"}</p>
 

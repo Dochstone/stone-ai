@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   title: "ИИ поиск нейросетью — Perplexity в Telegram",
   description:
     "Поиск в интернете нейросетью: актуальные данные, источники. ИИ чат-бот Perplexity Sonar и Deep Research. В Telegram.",
+  alternates: { canonical: "/search" },
   openGraph: {
     title: "AI Поиск — Perplexity в Telegram",
     description: "Perplexity в Telegram. Real-time данные, ссылки на источники, глубокие исследования.",

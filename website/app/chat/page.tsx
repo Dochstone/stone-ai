@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   title: "ИИ чат-бот — AI-студия нового поколения",
   description:
     "Чат с нейросетями GPT-5, Claude Opus, Gemini Pro, DeepSeek R1 прямо в Telegram. Оплата в рублях. 15 бесплатных запросов в день.",
+  alternates: { canonical: "/chat" },
   openGraph: {
     title: "AI Чат — AI-студия нового поколения",
     description: "GPT-5, Claude Opus, Gemini Pro и другие AI-модели прямо в Telegram.",

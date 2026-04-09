@@ -15,6 +15,7 @@ export const metadata: Metadata = {
     "Google Ads UTM",
     "UTM ссылка",
   ],
+  alternates: { canonical: "/tools/utm-builder" },
 };
 
 export default function UTMBuilderPage() {

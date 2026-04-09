@@ -169,7 +169,7 @@ export default function DashboardPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
         {/* Welcome header */}
         <div className="mb-8 flex items-center gap-4">
-          <img src="/mascots/stone-mascot-idle.png" alt="" width="64" height="64" className="shrink-0" />
+          <img src="/mascots/stone-mascot-idle.webp" alt="" width="64" height="64" className="shrink-0" />
           <div>
             <h1 className="text-2xl font-extrabold text-text mb-1">
               {auth ? `Добро пожаловать!` : "Добро пожаловать!"}

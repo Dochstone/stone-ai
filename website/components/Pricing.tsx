@@ -13,7 +13,7 @@ const plans = [
     badge: "Гибкий", accent: false,
     features: ["10 бесплатных чат-запросов/день", "8 бесплатных моделей", "2 картинки + 1 видео (с водяным знаком)", "AI-шаблоны от 3₽", "Презентации, SEO, кампании — с баланса", "Бонус 100₽ при регистрации"],
     locked: [],
-    cta: "Пополнить баланс", icon: "💰", color: "#14B8A6", img: "/plan-payperuse.jpg",
+    cta: "Пополнить баланс", icon: "💰", color: "#14B8A6", img: "/plan-payperuse.webp",
   },
   {
     id: "mini", name: "Start", price: "590₽", oldPrice: "890₽", priceNum: 590, premium: false, period: "/мес", desc: "20+ моделей",

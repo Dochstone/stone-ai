@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Оферта",
+  alternates: { canonical: "/terms" },
 };
 
 export default function TermsPage() {

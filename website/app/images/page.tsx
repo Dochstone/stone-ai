@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   title: "Генерация картинок нейросетью — ИИ бесплатно онлайн",
   description:
     "Генерация картинок нейросетью в Telegram. ИИ-генератор: Flux, GPT-5 Image, SDXL. От $0.012 за картинку.",
+  alternates: { canonical: "/images" },
   openGraph: {
     title: "Генерация картинок AI — Flux, GPT-5 Image, SDXL",
     description: "Создавайте AI-изображения в Telegram. 6 моделей, от $0.012 за картинку.",

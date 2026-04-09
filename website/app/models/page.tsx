@@ -5,6 +5,12 @@ export const metadata: Metadata = {
   title: "Все 65+ нейросетей",
   description:
     "Каталог из 65+ нейросетей: GPT-5, Claude Opus, Gemini Pro, DeepSeek, Flux и другие. Бесплатный старт. Подписка от 390₽/мес.",
+  alternates: { canonical: "/models" },
+  openGraph: {
+    title: "65+ нейросетей в одном каталоге | Stone AI",
+    description:
+      "GPT-5, Claude Opus, Gemini Pro, DeepSeek, Flux, Sora и другие. Сравнение моделей, цены, возможности.",
+  },
 };
 
 import Breadcrumbs from "@/components/Breadcrumbs";

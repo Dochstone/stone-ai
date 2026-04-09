@@ -4,6 +4,7 @@ import CodeBlock from "@/components/CodeBlock";
 export const metadata: Metadata = {
   title: "API Документация",
   description: "API документация Stone AI: авторизация, POST /api/chat, GET /api/models, биллинг, лимиты, коды ошибок.",
+  alternates: { canonical: "/docs" },
 };
 
 const BASE_URL = "https://stoneai.ru";
