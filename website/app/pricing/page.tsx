@@ -13,7 +13,7 @@ const pricingJsonLd = {
   name: "Stone AI",
   description: "AI-студия нового поколения. Подписка от 590₽/мес.",
   offers: [
-    { "@type": "Offer", name: "Free", price: "0", priceCurrency: "RUB", description: "15 запросов в день, 7 моделей" },
+    { "@type": "Offer", name: "Free", price: "0", priceCurrency: "RUB", description: "10 запросов в день, 7 моделей" },
     { "@type": "Offer", name: "Start", price: "590", priceCurrency: "RUB", description: "500 запросов/мес, 20+ моделей" },
     { "@type": "Offer", name: "Pro", price: "890", priceCurrency: "RUB", description: "2000 запросов/мес, 65+ нейросетей" },
     { "@type": "Offer", name: "Elite", price: "1990", priceCurrency: "RUB", description: "10000 запросов/мес, 65+ нейросетей + API" },
@@ -27,7 +27,7 @@ const faqItems = [
   },
   {
     q: "Можно ли попробовать бесплатно?",
-    a: "Да! Тариф Free даёт 15 запросов в день к 7 моделям (GPT-4o mini, Gemini Flash, Claude Haiku и другие). Без оплаты и без регистрации карты.",
+    a: "Да! Тариф Free даёт 10 запросов в день к 7 моделям (GPT-4o mini, Gemini Flash, Claude Haiku и другие). Без оплаты и без регистрации карты.",
   },
   {
     q: "Чем отличается Start от Pro?",
@@ -77,7 +77,7 @@ export default function PricingPage() {
           <p className="text-text/50 max-w-2xl mx-auto text-lg">
             {hasPaidPlan
               ? "Управляйте подпиской и сравнивайте тарифы."
-              : "Бесплатный старт — 15 запросов в день. Подписка от 590₽/мес открывает GPT-5, Claude Opus, генерацию картинок и видео."}
+              : "Бесплатный старт — 10 запросов в день. Подписка от 590₽/мес открывает GPT-5, Claude Opus, генерацию картинок и видео."}
           </p>
         </div>
       </div>
@@ -221,7 +221,7 @@ export default function PricingPage() {
         <div className="max-w-3xl mx-auto px-4 mt-16">
           <div className="bg-gradient-to-br from-accent/5 to-teal/5 border border-accent/10 rounded-2xl p-8 sm:p-10 text-center">
             <h2 className="text-2xl font-extrabold mb-2">Начните прямо сейчас</h2>
-            <p className="text-text/50 text-sm mb-6">15 бесплатных запросов каждый день. Без регистрации карты.</p>
+            <p className="text-text/50 text-sm mb-6">10 бесплатных запросов каждый день. Без регистрации карты.</p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <a href="/dashboard/chat" className="bg-accent text-white px-8 py-3.5 rounded-xl font-bold text-sm hover:bg-accent/90 transition-all shadow-md shadow-accent/20">
                 Попробовать бесплатно

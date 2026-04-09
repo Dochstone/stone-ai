@@ -80,7 +80,7 @@ const MODEL_PROMPTS: Record<string, string[]> = {
 // FAQ per category
 const CATEGORY_FAQ: Record<string, { q: string; a: string }[]> = {
   chat: [
-    { q: "Сколько запросов можно делать?", a: "Бесплатно — 15 запросов в день. На подписке Start — 500/мес, Pro — 2000/мес, Elite — 10000/мес." },
+    { q: "Сколько запросов можно делать?", a: "Бесплатно — 10 запросов в день. На подписке Start — 500/мес, Pro — 2000/мес, Elite — 10000/мес." },
     { q: "Сохраняется ли история разговора?", a: "Да, все чаты сохраняются в вашем аккаунте. Можно вернуться к любому диалогу." },
     { q: "Можно загружать файлы?", a: "Да, поддерживаются изображения (JPEG, PNG, WebP) и PDF-документы до 10 МБ." },
   ],
@@ -134,7 +134,7 @@ export default function ModelPage({ params }: Props) {
       "@type": "Offer",
       price: isFree ? "0" : "590",
       priceCurrency: isFree ? "USD" : "RUB",
-      description: isFree ? "15 бесплатных запросов в день" : "Подписка от 590₽/мес",
+      description: isFree ? "10 бесплатных запросов в день" : "Подписка от 590₽/мес",
     },
     author: { "@type": "Organization", name: model.company },
   };
@@ -174,7 +174,7 @@ export default function ModelPage({ params }: Props) {
 
           <p className="text-text/60 text-lg leading-relaxed mb-8 max-w-2xl">
             {model.description || `${model.name} от ${model.company} — мощная нейросеть для ${cat.toLowerCase()}.`}
-            {" "}Доступна прямо в браузере. {isFree ? "Бесплатно, 15 запросов в день." : "Попробуйте бесплатно, подписка от 590₽/мес."}
+            {" "}Доступна прямо в браузере. {isFree ? "Бесплатно, 10 запросов в день." : "Попробуйте бесплатно, подписка от 590₽/мес."}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3">
@@ -277,7 +277,7 @@ export default function ModelPage({ params }: Props) {
           <h2 className="font-extrabold text-2xl mb-2">Попробуйте {model.name} прямо сейчас</h2>
           <p className="text-text/50 text-sm mb-6 max-w-md mx-auto">
             {isFree
-              ? `${model.name} доступна бесплатно — 15 запросов каждый день без регистрации карты.`
+              ? `${model.name} доступна бесплатно — 10 запросов каждый день без регистрации карты.`
               : `Начните с бесплатного плана, затем подключите подписку от 590₽/мес для полного доступа.`}
           </p>
           <a href={`/dashboard/chat?model=${model.id}`}

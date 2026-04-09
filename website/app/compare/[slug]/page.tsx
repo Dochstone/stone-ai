@@ -141,7 +141,7 @@ export default function ComparePage({ params }: Props) {
 
   const faqItems = [
     { q: `Что лучше: ${name1} или ${name2}?`, a: comp.verdict },
-    { q: "Можно ли попробовать обе модели бесплатно?", a: "Да, Stone AI даёт 15 бесплатных запросов в день к быстрым моделям. Зарегистрируйтесь и попробуйте обе модели." },
+    { q: "Можно ли попробовать обе модели бесплатно?", a: "Да, Stone AI даёт 10 бесплатных запросов в день к быстрым моделям. Зарегистрируйтесь и попробуйте обе модели." },
     { q: "Сколько стоит подписка?", a: "Подписка Start — 590₽/мес (20+ моделей). Pro — 890₽/мес (все 65+ нейросетей). Elite — 1990₽/мес (максимум)." },
   ];
 
@@ -312,7 +312,7 @@ export default function ComparePage({ params }: Props) {
         {/* CTA */}
         <section className="bg-dark text-white rounded-2xl p-8 sm:p-10 text-center">
           <h2 className="text-xl font-extrabold mb-3">65+ нейросетей в одном чате</h2>
-          <p className="text-white/40 text-sm mb-6">15 бесплатных запросов в день. Без карты. Без VPN.</p>
+          <p className="text-white/40 text-sm mb-6">10 бесплатных запросов в день. Без карты. Без VPN.</p>
           <Link href="/dashboard/chat" className="inline-flex items-center gap-2 bg-accent text-white font-bold px-8 py-4 rounded-xl hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25">
             Открыть полный чат
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>

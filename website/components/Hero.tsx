@@ -364,7 +364,7 @@ export default function Hero() {
             </a>
           </div>
           {!hasPaidPlan && (
-            <p className="mt-3 text-xs text-text/30">Бесплатно 15 запросов/день · Подписка от 590₽/мес</p>
+            <p className="mt-3 text-xs text-text/30">Бесплатно 10 запросов/день · Подписка от 590₽/мес</p>
           )}
 
           <div className="mt-4 flex items-center justify-center">

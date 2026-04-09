@@ -229,7 +229,7 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
               <p className="text-white/50 text-xs leading-relaxed">GPT-5 · Claude · Gemini · DeepSeek · Llama · Mistral</p>
               <div className="flex gap-3 mt-3">
                 {[
-                  { icon: "⚡", text: "15 запросов/день" },
+                  { icon: "⚡", text: "10 запросов/день" },
                   { icon: "🎨", text: "Картинки" },
                   { icon: "💾", text: "История" },
                 ].map((b, i) => (

@@ -46,7 +46,7 @@ Stone AI — российская платформа для работы с ис
 ## Тарифы
 
 ### Pay-per-Use (бесплатно)
-- 15 запросов/день к 8 моделям (GPT-4o mini, Claude Haiku, Gemini Flash, DeepSeek V3, Llama 4, Mistral Large, Nano Banana, Veo 3)
+- 10 запросов/день к 8 моделям (GPT-4o mini, Claude Haiku, Gemini Flash, DeepSeek V3, Llama 4, Mistral Large, Nano Banana, Veo 3)
 - 2 картинки + 1 видео навсегда (пробный период)
 - Инструменты с баланса (от 3₽/запрос)
 

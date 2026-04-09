@@ -9,7 +9,7 @@ import { SITE_URL } from "@/lib/constants";
 export const metadata: Metadata = {
   title: "ИИ чат-бот — AI-студия нового поколения",
   description:
-    "Чат с нейросетями GPT-5, Claude Opus, Gemini Pro, DeepSeek R1 прямо в Telegram. Оплата в рублях. 15 бесплатных запросов в день.",
+    "Чат с нейросетями GPT-5, Claude Opus, Gemini Pro, DeepSeek R1 прямо в Telegram. Оплата в рублях. 10 бесплатных запросов в день.",
   alternates: { canonical: "/chat" },
   openGraph: {
     title: "AI Чат — AI-студия нового поколения",
@@ -65,7 +65,7 @@ const faqItems = [
   },
   {
     q: "Сколько запросов включено в подписку?",
-    a: "Free — 15 запросов в день к 7 моделям. Start (590₽/мес) — 500 запросов/мес к быстрым + 20 к премиум. Pro (890₽/мес) — 2 000 + 100. Elite (1990₽/мес) — 10 000 + 500. Все тарифы на странице /pricing.",
+    a: "Free — 10 запросов в день к 7 моделям. Start (590₽/мес) — 500 запросов/мес к быстрым + 20 к премиум. Pro (890₽/мес) — 2 000 + 100. Elite (1990₽/мес) — 10 000 + 500. Все тарифы на странице /pricing.",
   },
 ];
 
@@ -94,7 +94,7 @@ export default function ChatPage() {
         examples={examples}
       />
       <ToolFaq items={faqItems} />
-      <ToolCta title="Начните общаться с AI" subtitle="5 моделей бесплатно, 15 запросов в день. Бесплатный старт." />
+      <ToolCta title="Начните общаться с AI" subtitle="5 моделей бесплатно, 10 запросов в день. Бесплатный старт." />
     </>
   );
 }

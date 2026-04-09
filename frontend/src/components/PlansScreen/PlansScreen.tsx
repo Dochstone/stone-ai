@@ -101,7 +101,7 @@ const KEYFRAMES = `
 const PLANS = [
   {
     id: 'free', name: 'Free', price: '0₽', priceSub: 'навсегда', stars: 0, tier: 'free',
-    features: ['7 моделей', '15 запросов/день', '2 картинки/день'],
+    features: ['7 моделей', '10 запросов/день', '2 картинки/день'],
     color: '#5a8a70', gradient: 'linear-gradient(135deg, #5a8a70, #3d6b55)',
     icon: '🆓',
   },

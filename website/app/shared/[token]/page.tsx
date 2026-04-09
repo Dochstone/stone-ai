@@ -90,7 +90,7 @@ export default function SharedChatPage() {
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
           <div>
             <p className="text-xs font-bold text-text">Хотите так же?</p>
-            <p className="text-[10px] text-text/40">65+ нейросетей · 15 запросов бесплатно</p>
+            <p className="text-[10px] text-text/40">65+ нейросетей · 10 запросов бесплатно</p>
           </div>
           <a href="/dashboard/chat" className="bg-accent text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20">
             Начать бесплатно

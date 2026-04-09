@@ -73,7 +73,7 @@ const TOOLS = [
     price: "бесплатно",
     href: "/dashboard/chat",
     color: "from-accent to-[#D4835F]",
-    features: ["15 запросов/день", "7 моделей FREE", "Файлы и голос"],
+    features: ["10 запросов/день", "7 моделей FREE", "Файлы и голос"],
   },
 ];
 

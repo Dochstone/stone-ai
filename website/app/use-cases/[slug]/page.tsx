@@ -142,7 +142,7 @@ export default function UseCasePage({ params }: { params: { slug: string } }) {
         {/* CTA */}
         <div className="bg-accent/5 border border-accent/10 rounded-2xl p-8 text-center">
           <h2 className="text-xl font-bold text-text mb-2">Попробуйте прямо сейчас</h2>
-          <p className="text-sm text-text/50 mb-4">15 бесплатных запросов в день. Без регистрации карты.</p>
+          <p className="text-sm text-text/50 mb-4">10 бесплатных запросов в день. Без регистрации карты.</p>
           <Link
             href="/dashboard/chat"
             className="inline-flex bg-accent text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors"

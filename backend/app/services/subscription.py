@@ -8,13 +8,13 @@ PLANS = {
         "price_rub": 0,
         "credits": 0,
         "limits": {
-            "text_fast": 15,        # per day
-            "text_premium": 0,      # locked
-            "opus_limit": 0,        # locked
-            "images": 2,            # per day (Nano Banana only)
-            "videos": 0,            # locked
-            "models_3d": 0,         # locked
-            "audio": 0,             # locked
+            "text_fast": 10,         # per day
+            "text_premium": 2,       # per day
+            "opus_limit": 0,         # locked
+            "images": 2,             # TOTAL trial (not daily)
+            "videos": 1,             # TOTAL trial (not daily)
+            "models_3d": 0,          # locked
+            "audio": 0,              # locked
         },
         "period": "day",
         "features": {
@@ -29,11 +29,11 @@ PLANS = {
         "price_rub": 590,
         "credits": 1000,
         "limits": {
-            "text_fast": 500,
-            "text_premium": 20,
-            "opus_limit": 5,
-            "images": 15,
-            "videos": 3,
+            "text_fast": 600,        # 20/day × 30
+            "text_premium": 90,      # 3/day × 30
+            "opus_limit": 0,         # locked on Start
+            "images": 60,            # 2/day × 30
+            "videos": 30,            # 1/day × 30
             "models_3d": 0,
             "audio": 0,
         },
@@ -50,11 +50,11 @@ PLANS = {
         "price_rub": 1290,
         "credits": 3000,
         "limits": {
-            "text_fast": 2000,
-            "text_premium": 100,
-            "opus_limit": 20,
-            "images": 50,
-            "videos": 10,
+            "text_fast": 1500,       # 50/day × 30
+            "text_premium": 112,     # 28/week × 4
+            "opus_limit": 28,        # 7/week × 4
+            "images": 140,           # 35/week × 4
+            "videos": 28,            # 7/week × 4
             "models_3d": 5,
             "audio": 20,
         },
@@ -71,11 +71,11 @@ PLANS = {
         "price_rub": 2990,
         "credits": 10000,
         "limits": {
-            "text_fast": 10000,
-            "text_premium": 500,
-            "opus_limit": 80,
-            "images": 300,
-            "videos": 50,
+            "text_fast": 4500,       # 150/day × 30
+            "text_premium": 336,     # 84/week × 4
+            "opus_limit": 56,        # 14/week × 4
+            "images": 280,           # 70/week × 4
+            "videos": 84,            # 21/week × 4
             "models_3d": 30,
             "audio": 100,
         },

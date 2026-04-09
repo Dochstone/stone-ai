@@ -30,7 +30,7 @@ export default function AlternativesPage({ params }: Props) {
 
   const faqItems = [
     { q: `Какие есть альтернативы ${alt.service}?`, a: `Лучшие альтернативы: ${models.map((m) => m.name).join(", ")}. Все доступны в Stone AI от 590₽/мес.` },
-    { q: `Можно ли использовать альтернативы ${alt.service} бесплатно?`, a: "Да, Stone AI даёт 15 бесплатных запросов в день к 8 моделям. Без карты и без VPN." },
+    { q: `Можно ли использовать альтернативы ${alt.service} бесплатно?`, a: "Да, Stone AI даёт 10 бесплатных запросов в день к 8 моделям. Без карты и без VPN." },
     { q: "Почему Stone AI лучше?", a: "65+ нейросетей от всех провайдеров за одну подписку от 590₽/мес. Не нужно платить за каждый сервис отдельно." },
   ];
 
@@ -114,7 +114,7 @@ export default function AlternativesPage({ params }: Props) {
         {/* CTA */}
         <section className="bg-dark text-white rounded-2xl p-8 sm:p-10 text-center">
           <h2 className="text-xl font-extrabold mb-3">Попробуйте Stone AI бесплатно</h2>
-          <p className="text-white/40 text-sm mb-6">65+ нейросетей. Без VPN. На русском. 15 запросов/день бесплатно.</p>
+          <p className="text-white/40 text-sm mb-6">65+ нейросетей. Без VPN. На русском. 10 запросов/день бесплатно.</p>
           <Link href="/dashboard/chat" className="inline-flex items-center gap-2 bg-accent text-white font-bold px-8 py-4 rounded-xl hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25">
             Начать бесплатно <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
           </Link>

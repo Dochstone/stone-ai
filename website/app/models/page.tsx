@@ -17,7 +17,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { SITE_URL } from "@/lib/constants";
 
 const faqItems = [
-  { q: "Сколько моделей доступно бесплатно?", a: "8 моделей бесплатно: GPT-4o mini, Claude Haiku, Gemini Flash, DeepSeek V3, Llama 4, Mistral Large, Nano Banana и другие. 15 запросов в день." },
+  { q: "Сколько моделей доступно бесплатно?", a: "8 моделей бесплатно: GPT-4o mini, Claude Haiku, Gemini Flash, DeepSeek V3, Llama 4, Mistral Large, Nano Banana и другие. 10 запросов в день." },
   { q: "Чем отличаются тарифы по доступу к моделям?", a: "Free — 8 моделей. Start (590₽/мес) — 20+ моделей. Pro (1290₽/мес) и Elite (2990₽/мес) — все 65+ моделей включая Claude Opus и GPT-5." },
   { q: "Можно ли переключаться между моделями в чате?", a: "Да, переключение между моделями — один клик в нижней панели чата. История сохраняется." },
   { q: "Какие модели лучше для генерации картинок?", a: "Nano Banana Pro — лучшее качество. GPT-5 Image — фотореализм. Flux — скорость. Все доступны в Stone AI." },
@@ -78,7 +78,7 @@ export default function ModelsPage() {
           >
             Попробовать бесплатно
           </a>
-          <p className="mt-3 text-sm text-text/40">15 бесплатных запросов каждый день</p>
+          <p className="mt-3 text-sm text-text/40">10 бесплатных запросов каждый день</p>
         </div>
       </div>
     </div>

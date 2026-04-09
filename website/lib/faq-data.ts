@@ -1,7 +1,7 @@
 export const homeFaqData = [
   {
     q: "Как начать пользоваться Stone AI?",
-    a: 'Откройте <a href="/dashboard/chat" class="text-accent hover:underline font-semibold">AI-чат</a> или <a href="/dashboard" class="text-accent hover:underline font-semibold">панель инструментов</a>. 15 бесплатных запросов каждый день к 8 моделям — GPT-4o mini, Claude Haiku 4.5, Gemini 2.0 Flash, DeepSeek V3, Llama 4 Maverick, Mistral Large и Nano Banana и Veo 3 (1 бесплатное видео). Регистрация не обязательна для чата. Для полного доступа к инструментам создайте аккаунт за 30 секунд через Google, Яндекс или email.',
+    a: 'Откройте <a href="/dashboard/chat" class="text-accent hover:underline font-semibold">AI-чат</a> или <a href="/dashboard" class="text-accent hover:underline font-semibold">панель инструментов</a>. 10 бесплатных запросов каждый день к 8 моделям — GPT-4o mini, Claude Haiku 4.5, Gemini 2.0 Flash, DeepSeek V3, Llama 4 Maverick, Mistral Large и Nano Banana и Veo 3 (1 бесплатное видео). Регистрация не обязательна для чата. Для полного доступа к инструментам создайте аккаунт за 30 секунд через Google, Яндекс или email.',
   },
   {
     q: "Что такое панель инструментов и какие инструменты доступны?",

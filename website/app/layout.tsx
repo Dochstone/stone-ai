@@ -160,7 +160,7 @@ const jsonLdSoftware = {
     highPrice: "130",
     priceCurrency: "USD",
     offerCount: "50",
-    description: "Бесплатный старт — 15 запросов в день. Подписка от 590₽/мес. Free / Start / Pro / Elite.",
+    description: "Бесплатный старт — 10 запросов в день. Подписка от 590₽/мес. Free / Start / Pro / Elite.",
   },
 };
 

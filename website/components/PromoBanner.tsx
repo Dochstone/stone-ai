@@ -25,7 +25,7 @@ export default function PromoBanner() {
     <section className="bg-gradient-to-r from-accent/90 to-teal/90 py-4">
       <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8">
         <p className="text-white text-center text-sm sm:text-base font-bold tracking-tight">
-          15 бесплатных запросов каждый день — без регистрации
+          10 бесплатных запросов каждый день — без регистрации
         </p>
         <a
           href="/dashboard/chat"

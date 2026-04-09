@@ -128,7 +128,7 @@ async def cmd_start(message: Message):
         "<b>Stone AI — 65+ нейросетей в одном окне</b>\n\n"
         "GPT-5.4, Claude Opus, Gemini Pro, DeepSeek, Sora 2 — "
         "текст, картинки, видео, 3D и аудио.\n\n"
-        "✅ <b>Бесплатно</b> — 15 запросов/день, 7 моделей\n"
+        "✅ <b>Бесплатно</b> — 10 запросов/день, 7 моделей\n"
         "⭐ <b>Подписка от 590₽/мес</b> — все 65+ моделей\n\n"
         "Нажми кнопку ниже, чтобы начать 👇",
         parse_mode="HTML",
@@ -149,7 +149,7 @@ async def cmd_help(message: Message):
         "/start — Главное меню\n"
         "/plan — Текущий тариф\n"
         "/help — Эта справка\n\n"
-        "<b>Бесплатные модели (15 запросов/день):</b>\n"
+        "<b>Бесплатные модели (10 запросов/день):</b>\n"
         "GPT-4o mini, Claude Haiku, Gemini Flash, "
         "Llama 4, Mistral Large, DeepSeek V3, Nano Banana\n\n"
         "<b>Подписка от 590₽/мес:</b>\n"
@@ -180,7 +180,7 @@ async def cmd_plan(message: Message):
             if not user:
                 text = (
                     "<b>Тариф: FREE</b>\n\n"
-                    "7 моделей, 15 запросов/день\n\n"
+                    "7 моделей, 10 запросов/день\n\n"
                     "Подписка от 590₽/мес открывает 65+ моделей."
                 )
             else:
@@ -191,7 +191,7 @@ async def cmd_plan(message: Message):
                 text = f"<b>Тариф: {tier_emoji} {tier_name}</b>\n\n"
 
                 if tier == "free":
-                    text += "7 моделей, 15 запросов/день\n\n"
+                    text += "7 моделей, 10 запросов/день\n\n"
                     text += "Подписка от 590₽/мес открывает 65+ моделей."
                 else:
                     if user.credits_reset_date:
@@ -204,7 +204,7 @@ async def cmd_plan(message: Message):
     except Exception:
         text = (
             "<b>Тариф: 🆓 Free</b>\n\n"
-            "7 моделей, 15 запросов/день\n\n"
+            "7 моделей, 10 запросов/день\n\n"
             "Подписка от 590₽/мес."
         )
 
@@ -239,7 +239,7 @@ async def callback_plans(callback):
 
     await callback.message.answer(
         "<b>Тарифы Stone AI</b>\n\n"
-        "🆓 <b>Free</b> — 0₽, 7 моделей, 15 запросов/день\n"
+        "🆓 <b>Free</b> — 0₽, 7 моделей, 10 запросов/день\n"
         "💙 <b>Start</b> — 590₽/мес, 20+ моделей, 500 запросов\n"
         "🧡 <b>Pro</b> — 1 290₽/мес, 65+ моделей, видео, 3D\n"
         "⭐ <b>Elite</b> — 2 990₽/мес, безлимит, API\n\n"

@@ -7,7 +7,7 @@ const steps = [
   {
     num: "02",
     title: "Попробуйте бесплатно",
-    desc: "15 запросов в день к 7 моделям — GPT-4o mini, Gemini Flash, Claude Haiku и другие. Без оплаты.",
+    desc: "10 запросов в день к 7 моделям — GPT-4o mini, Gemini Flash, Claude Haiku и другие. Без оплаты.",
   },
   {
     num: "03",

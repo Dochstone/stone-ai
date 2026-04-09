@@ -33,7 +33,7 @@ export default function AudioPage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Stone AI — AI Аудио", applicationCategory: "MultimediaApplication", description: "Озвучка текста 10+ голосами, голосовой ввод через Whisper AI.", offers: { "@type": "Offer", price: "0", priceCurrency: "USD", description: "15 бесплатных запросов в день" } }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Stone AI — AI Аудио", applicationCategory: "MultimediaApplication", description: "Озвучка текста 10+ голосами, голосовой ввод через Whisper AI.", offers: { "@type": "Offer", price: "0", priceCurrency: "USD", description: "10 бесплатных запросов в день" } }) }} />
       <ToolPageHero breadcrumb="AI Аудио"
         badge="Нейросеть для озвучки"
         title="ИИ Аудио — озвучка"

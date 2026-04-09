@@ -85,7 +85,7 @@ export default function UseCasesPage() {
         <div className="bg-accent/5 border border-accent/10 rounded-2xl p-8 text-center mt-12">
           <h2 className="text-xl font-bold text-text mb-2">Попробуйте AI прямо сейчас</h2>
           <p className="text-sm text-text/50 mb-4">
-            15 бесплатных запросов в день. 65+ нейросетей. Без VPN.
+            10 бесплатных запросов в день. 65+ нейросетей. Без VPN.
           </p>
           <Link
             href="/dashboard/chat"

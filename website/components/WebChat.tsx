@@ -2331,7 +2331,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                   </h3>
                   <p className="text-white/60 text-xs">
                     {upsellModal?.type === "limit"
-                      ? "15 бесплатных запросов использованы"
+                      ? "10 бесплатных запросов использованы"
                       : `Нужен тариф ${lockModal?.tier || (upsellModal?.tier === "max" ? "Pro" : "Start")}`}
                   </p>
                 </div>
@@ -2458,7 +2458,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                   {/* Benefits */}
                   <div className="grid grid-cols-2 gap-2 mb-5">
                     {[
-                      { icon: "⚡", text: "15 запросов в день" },
+                      { icon: "⚡", text: "10 запросов в день" },
                       { icon: "🧠", text: "8 моделей бесплатно" },
                       { icon: "🎨", text: "Генерация картинок" },
                       { icon: "💾", text: "Сохранение истории" },
