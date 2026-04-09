@@ -269,3 +269,88 @@ button[class*="rounded-xl"] {
 .card-hover:hover {
   @apply -translate-y-1 shadow-lg;
 }
+
+/* ── WebChat markdown styles ── */
+.md-content { line-height: 1.7; overflow-wrap: break-word; word-break: break-word; max-width: 100%; }
+.md-content h1, .md-content .md-h1 { font-size: 1.25rem; font-weight: 800; margin: 1rem 0 0.5rem; color: var(--text); }
+.md-content h2, .md-content .md-h2 { font-size: 1.1rem; font-weight: 700; margin: 0.75rem 0 0.4rem; color: var(--text); }
+.md-content h3, .md-content .md-h3 { font-size: 1rem; font-weight: 600; margin: 0.5rem 0 0.3rem; color: var(--text); }
+.md-content strong { font-weight: 700; }
+.md-content em { font-style: italic; }
+.md-content del { text-decoration: line-through; opacity: 0.6; }
+.md-content .md-ul { list-style: disc; padding-left: 1.25rem; margin: 0.5rem 0; }
+.md-content .md-li { margin: 0.15rem 0; display: list-item; }
+.md-content .md-oli { list-style: decimal; }
+.md-content .md-link { color: #C4623D; text-decoration: underline; text-underline-offset: 2px; word-break: break-all; }
+.md-content .md-link:hover { opacity: 0.8; }
+.md-content .inline-code {
+  background: rgba(128,128,128,0.1); padding: 0.15em 0.4em; border-radius: 0.375rem;
+  font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.85em; color: var(--accent);
+}
+.md-content pre { max-width: 100%; overflow-x: auto; }
+.md-content a { word-break: break-all; }
+.md-content img { max-width: 100%; height: auto; }
+
+/* ── Code blocks ── */
+.code-block-wrapper {
+  margin: 0.75rem 0; border-radius: 0.75rem; overflow: hidden;
+  border: 1px solid rgba(26,25,22,0.06); max-width: calc(100vw - 100px);
+}
+.code-block-header {
+  display: flex; align-items: center; justify-content: space-between;
+  background: #1C1C1E; padding: 0.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.code-lang { font-size: 0.65rem; color: rgba(255,255,255,0.3); font-family: monospace; }
+.code-copy-btn {
+  font-size: 0.65rem; color: rgba(255,255,255,0.3); background: none; border: none;
+  cursor: pointer; font-family: inherit; padding: 0;
+}
+.code-copy-btn:hover { color: rgba(255,255,255,0.6); }
+.code-block {
+  background: #1C1C1E; padding: 1rem; overflow-x: auto; margin: 0;
+  font-size: 0.8rem; line-height: 1.6; -webkit-overflow-scrolling: touch;
+}
+.code-block code {
+  color: rgba(255,255,255,0.85); font-family: 'SF Mono', 'Fira Code', monospace; white-space: pre;
+}
+
+/* ── Safe area inset for chat input ── */
+@supports(padding-bottom: env(safe-area-inset-bottom)) {
+  .chat-input-safe { padding-bottom: calc(0.25rem + env(safe-area-inset-bottom)); }
+}
+
+/* ── WebChat sidebar transitions ── */
+.webchat-sidebar {
+  width: 280px;
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.webchat-sidebar.open { transform: translateX(0); }
+.webchat-sidebar.closed { transform: translateX(-100%); }
+
+@media (min-width: 1024px) {
+  .webchat-sidebar {
+    position: relative !important;
+    transform: none !important;
+    transition: width 0.3s cubic-bezier(0.4,0,0.2,1);
+  }
+  .webchat-sidebar.open { width: 280px; }
+  .webchat-sidebar.closed { width: 0; overflow: hidden; }
+}
+
+/* ── Chat animations ── */
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+@keyframes waveRec {
+  from { transform: scaleY(0.3); }
+  to { transform: scaleY(1); }
+}
+@keyframes toastSlideIn {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}

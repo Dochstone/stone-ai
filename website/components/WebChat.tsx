@@ -14,6 +14,8 @@ const MessageContent = dynamic(() => import("@/components/chat/MessageContent"),
 import { VideoPlayer, getVideoUrl } from "@/components/chat/MessageContent";
 import { getSavedAvatar } from "@/lib/avatar";
 import { OnboardingFlow } from "@/components/OnboardingFlow";
+import { PROMPT_CATEGORIES, PROMPT_TEMPLATES } from "@/lib/prompt-templates";
+import { DEFAULT_MODEL, PLAN_DISPLAY, UPGRADE_CTA_PRICE } from "@/lib/constants";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
@@ -50,23 +52,23 @@ function getModelLockInfo(modelId: string, balance: number, plan?: string): { lo
   if (FREE_MODEL_IDS.has(modelId)) return null;
   // Video/3D — need at least Mini
   if (VIDEO_MODEL_IDS.has(modelId) || THREED_MODEL_IDS.has(modelId)) {
-    if (!plan || plan === "free") return { locked: true, tier: "Start", price: "590₽/мес" };
+    if (!plan || plan === "free") return { locked: true, tier: PLAN_DISPLAY.mini.name, price: PLAN_DISPLAY.mini.price };
     return null;
   }
   // Images — nano-banana is free, rest follow normal tier logic
   if (IMAGE_MODEL_IDS.has(modelId) && !FREE_MODEL_IDS.has(modelId)) {
     if (!plan || plan === "free") {
-      if (MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: "Start", price: "590₽/мес" };
-      return { locked: true, tier: "Pro", price: "1 290₽/мес" };
+      if (MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: PLAN_DISPLAY.mini.name, price: PLAN_DISPLAY.mini.price };
+      return { locked: true, tier: PLAN_DISPLAY.max.name, price: PLAN_DISPLAY.max.price };
     }
-    if (plan === "mini" && !MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: "Pro", price: "1 290₽/мес" };
+    if (plan === "mini" && !MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: PLAN_DISPLAY.max.name, price: PLAN_DISPLAY.max.price };
     return null;
   }
   if (IMAGE_MODEL_IDS.has(modelId)) return null;
   // Premium models — free users get 2/day, don't lock on frontend (backend checks)
   if (plan === "free") return null;
-  if (MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: "Start", price: "590₽/мес" };
-  return { locked: true, tier: "Pro", price: "890₽/мес" };
+  if (MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: PLAN_DISPLAY.mini.name, price: PLAN_DISPLAY.mini.price };
+  return { locked: true, tier: PLAN_DISPLAY.max.name, price: "890₽/мес" };
 }
 
 // ─── Helpers ───
@@ -138,82 +140,7 @@ const companyIcons: Record<string, string> = {
   Stability: "S", Moonshot: "K",
 };
 
-// ─── Prompt Templates ───
-
-const PROMPT_CATEGORIES = [
-  { id: "popular", label: "Популярное", icon: "⭐" },
-  { id: "marketing", label: "Маркетинг", icon: "📢" },
-  { id: "code", label: "Код", icon: "💻" },
-  { id: "text", label: "Тексты", icon: "✍️" },
-  { id: "images", label: "Картинки", icon: "🎨" },
-  { id: "analysis", label: "Анализ", icon: "📊" },
-  { id: "translate", label: "Перевод", icon: "🌍" },
-];
-
-const PROMPT_TEMPLATES: Record<string, { text: string; model: string }[]> = {
-  popular: [
-    { text: "Напиши пост для Telegram-канала на тему: ", model: "gpt-4o-mini" },
-    { text: "Сгенерируй фотореалистичную картинку: ", model: "nano-banana-pro" },
-    { text: "Объясни простыми словами что такое ", model: "gpt-4o-mini" },
-    { text: "Найди актуальную информацию про ", model: "perplexity-sonar" },
-    { text: "Напиши функцию на Python которая ", model: "devstral" },
-    { text: "Переведи на английский сохранив тон: ", model: "gpt-4o-mini" },
-  ],
-  marketing: [
-    { text: "Напиши 5 вариантов заголовка для рекламы продукта: ", model: "gpt-4o-mini" },
-    { text: "Составь контент-план на неделю для Telegram-канала про ", model: "gpt-4o-mini" },
-    { text: "Напиши email-рассылку для клиентов. Тема: ", model: "gpt-4o-mini" },
-    { text: "Напиши описание товара для маркетплейса. Товар: ", model: "gpt-4o-mini" },
-    { text: "Придумай 10 идей для Reels/Shorts на тему ", model: "gpt-4o-mini" },
-    { text: "Проанализируй целевую аудиторию для продукта: ", model: "gpt-4o-mini" },
-    { text: "Напиши скрипт продаж для холодного звонка. Продукт: ", model: "gpt-4o-mini" },
-    { text: "Составь УТП (уникальное торговое предложение) для ", model: "gpt-4o-mini" },
-  ],
-  code: [
-    { text: "Напиши функцию на Python: ", model: "devstral" },
-    { text: "Сделай code review этого кода и найди баги:\n\n", model: "devstral" },
-    { text: "Перепиши этот код с async/await:\n\n", model: "devstral" },
-    { text: "Напиши SQL-запрос: ", model: "gpt-4o-mini" },
-    { text: "Напиши unit-тесты для этой функции:\n\n", model: "devstral" },
-    { text: "Напиши REST API на FastAPI: ", model: "devstral" },
-    { text: "Объясни этот алгоритм строка за строкой:\n\n", model: "gpt-4o-mini" },
-    { text: "Напиши Dockerfile для Node.js приложения с multi-stage build", model: "devstral" },
-  ],
-  text: [
-    { text: "Напиши статью на тему: ", model: "gpt-4o-mini" },
-    { text: "Перепиши текст в более формальном стиле:\n\n", model: "gpt-4o-mini" },
-    { text: "Сократи текст до 3 предложений сохранив смысл:\n\n", model: "gpt-4o-mini" },
-    { text: "Напиши сценарий для YouTube-видео на 5 минут. Тема: ", model: "gpt-4o-mini" },
-    { text: "Исправь грамматические ошибки в тексте:\n\n", model: "gpt-4o-mini" },
-    { text: "Напиши резюме/CV для специалиста: ", model: "gpt-4o-mini" },
-    { text: "Составь список плюсов и минусов: ", model: "gpt-4o-mini" },
-    { text: "Напиши поздравление с днём рождения для ", model: "gpt-4o-mini" },
-  ],
-  images: [
-    { text: "Фотореалистичный портрет: ", model: "nano-banana-pro" },
-    { text: "Минималистичный логотип для компании: ", model: "nano-banana-pro" },
-    { text: "Flat illustration для мобильного приложения: ", model: "nano-banana" },
-    { text: "Обложка для Telegram-канала: ", model: "nano-banana-pro" },
-    { text: "Мем в стиле: ", model: "nano-banana" },
-    { text: "Концепт-арт: ", model: "nano-banana-pro" },
-  ],
-  analysis: [
-    { text: "Проанализируй этот документ и выдели ключевые пункты:\n\n", model: "gpt-4o-mini" },
-    { text: "Сравни плюсы и минусы: ", model: "gpt-4o-mini" },
-    { text: "Составь SWOT-анализ для компании: ", model: "gpt-4o-mini" },
-    { text: "Найди актуальные данные и проведи исследование рынка: ", model: "perplexity-sonar" },
-    { text: "Проверь этот контракт на скрытые риски:\n\n", model: "gpt-4o-mini" },
-    { text: "Посчитай unit-экономику для бизнеса: ", model: "gpt-4o-mini" },
-  ],
-  translate: [
-    { text: "Переведи на английский, сохрани деловой тон:\n\n", model: "gpt-4o-mini" },
-    { text: "Переведи на русский:\n\n", model: "gpt-4o-mini" },
-    { text: "Переведи маркетинговый текст на английский. Адаптируй метафоры:\n\n", model: "gpt-4o-mini" },
-    { text: "Переведи техническую документацию. Термины оставь на английском:\n\n", model: "gpt-4o-mini" },
-    { text: "Переведи с китайского на русский:\n\n", model: "gpt-4o-mini" },
-    { text: "Переведи субтитры с японского на русский:\n\n", model: "gpt-4o-mini" },
-  ],
-};
+// PROMPT_CATEGORIES and PROMPT_TEMPLATES imported from @/lib/prompt-templates
 
 // ─── Templates Picker (reusable in welcome + inline) ───
 
@@ -611,7 +538,7 @@ function Sidebar({
         {plan !== "max" && plan !== "max-pro" && (
           <div className="p-3 shrink-0 border-t border-text/[0.06]">
             <a href="/pricing" className="block bg-accent/10 hover:bg-accent/15 rounded-xl p-3 transition-colors text-center">
-              <p className="text-[11px] font-bold text-accent">Безлимит от 590₽/мес</p>
+              <p className="text-[11px] font-bold text-accent">Безлимит от {UPGRADE_CTA_PRICE}</p>
               <p className="text-[9px] text-text/40 mt-0.5">GPT-5.4, Claude Opus, видео</p>
             </a>
           </div>
@@ -635,7 +562,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
       const urlModel = new URLSearchParams(window.location.search).get("model");
       if (urlModel && MODELS.some(m => m.id === urlModel)) return urlModel;
     } catch {}
-    try { return sessionStorage.getItem("stone_chat_model") || "gpt-4o-mini"; } catch { return "gpt-4o-mini"; }
+    try { return sessionStorage.getItem("stone_chat_model") || DEFAULT_MODEL; } catch { return DEFAULT_MODEL; }
   });
   const [lockModal, setLockModal] = useState<{ model: string; tier: string; price: string } | null>(null);
   const [modelPickerOpen, setModelPickerOpen] = useState(false);
@@ -730,15 +657,15 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
       } else {
         sessionStorage.removeItem("stone_chat_messages");
       }
-    } catch {}
+    } catch { /* sessionStorage may be unavailable in SSR */ }
   }, [messages]);
 
   useEffect(() => {
-    try { sessionStorage.setItem("stone_chat_model", selectedModel); } catch {}
+    try { sessionStorage.setItem("stone_chat_model", selectedModel); } catch { /* sessionStorage may be unavailable in SSR */ }
   }, [selectedModel]);
 
   useEffect(() => {
-    try { sessionStorage.setItem("stone_chat_tab", modelCatFilter); } catch {}
+    try { sessionStorage.setItem("stone_chat_tab", modelCatFilter); } catch { /* sessionStorage may be unavailable in SSR */ }
   }, [modelCatFilter]);
 
   useEffect(() => {
@@ -795,7 +722,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
           const parsed = JSON.parse(saved);
           if (parsed.token) { setAuth(parsed); setShowGuestLimit(false); }
         }
-      } catch {}
+      } catch { /* localStorage may be unavailable in SSR */ }
       // Check pending TG session on every focus
       try {
         const tgSid = sessionStorage.getItem("stone_tg_session");
@@ -810,7 +737,9 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
             setShowGuestLimit(false);
           }
         }
-      } catch {}
+      } catch (err) {
+        console.warn("Telegram auth check failed:", err);
+      }
     };
     loadAuth();
     setLoaded(true);
@@ -889,13 +818,14 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
               return;
             }
             pollTimerRef.current = setTimeout(poll, 3000);
-          } catch {
+          } catch (err) {
+            console.warn("Video poll failed, retrying:", err);
             pollTimerRef.current = setTimeout(poll, 5000);
           }
         };
         pollTimerRef.current = setTimeout(poll, 1000);
       })
-      .catch(() => {});
+      .catch((err) => { console.warn("Failed to resume pending video generation:", err); });
   }, [auth?.token]); // only on mount
 
   // Auto-scroll — only if user is near bottom (not reading history)
@@ -927,7 +857,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         setSelectedModel(bot.model_id);
         sessionStorage.removeItem("stone_bot_config");
       }
-    } catch {}
+    } catch { /* sessionStorage may be unavailable in SSR */ }
   }, []);
 
   // Load model-viewer script for 3D (once)
@@ -973,9 +903,11 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         const data = await res.json();
         const list = data.sessions || [];
         setSessions(list);
-        try { sessionStorage.setItem("stone_sessions", JSON.stringify(list)); } catch {}
+        try { sessionStorage.setItem("stone_sessions", JSON.stringify(list)); } catch { /* sessionStorage may be unavailable in SSR */ }
       }
-    } catch {} finally {
+    } catch (err) {
+      console.warn("Failed to fetch chat sessions:", err);
+    } finally {
       setSessionsLoading(false);
     }
   }, [auth]);
@@ -1036,7 +968,9 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
           return msg;
         }));
       }
-    } catch {}
+    } catch (err) {
+      console.warn("Failed to load session:", err);
+    }
   }, [auth]);
 
   const newChat = useCallback(() => {
@@ -1064,7 +998,9 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
       });
       setSessions((prev) => prev.filter((s) => s.id !== sessionId));
       if (activeSessionId === sessionId) newChat();
-    } catch {}
+    } catch (err) {
+      console.warn("Failed to delete session:", err);
+    }
   }, [auth, activeSessionId, newChat]);
 
   const deleteAllSessions = useCallback(async () => {
@@ -1075,9 +1011,11 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         headers: { Authorization: `Bearer ${auth.token}` },
       });
       setSessions([]);
-      try { sessionStorage.removeItem("stone_sessions"); } catch {}
+      try { sessionStorage.removeItem("stone_sessions"); } catch { /* sessionStorage may be unavailable in SSR */ }
       newChat();
-    } catch {}
+    } catch (err) {
+      console.warn("Failed to delete all sessions:", err);
+    }
   }, [auth, newChat]);
 
   const shareSession = useCallback(async (sessionId: number) => {
@@ -1092,7 +1030,9 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         await navigator.clipboard.writeText(data.share_url);
         setToast({ msg: "Ссылка скопирована!", type: "success" });
       }
-    } catch {}
+    } catch (err) {
+      console.warn("Failed to share session:", err);
+    }
   }, [auth]);
 
   const renameSession = useCallback(async (sessionId: number, title: string) => {
@@ -1104,7 +1044,9 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         body: JSON.stringify({ title }),
       });
       setSessions(prev => prev.map(s => s.id === sessionId ? { ...s, title } : s));
-    } catch {}
+    } catch (err) {
+      console.warn("Failed to rename session:", err);
+    }
   }, [auth]);
 
   const saveToSession = useCallback(async (userContent: string, assistantContent: string, billing: any) => {
@@ -1140,7 +1082,9 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
       });
       // Small delay to let backend generate smart title
       setTimeout(() => fetchSessions(), 1500);
-    } catch {}
+    } catch (err) {
+      console.warn("Failed to save messages to session:", err);
+    }
   }, [auth, activeSessionId, selectedModel, fetchSessions]);
 
   const handleFileSelect = useCallback(async (file: File) => {
@@ -1491,7 +1435,9 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
               }
             }
           }
-        } catch {}
+        } catch (err) {
+          console.warn("RAG knowledge search failed, proceeding without context:", err);
+        }
       }
 
       const chatUrl = isGuest ? `${API_URL}/api/chat/guest` : `${API_URL}/api/chat`;
@@ -1502,7 +1448,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         method: "POST",
         headers,
         body: JSON.stringify({
-          model_id: isGuest ? "gpt-4o-mini" : selectedModel,
+          model_id: isGuest ? DEFAULT_MODEL : selectedModel,
           messages: apiMessages,
           ...(selectedProjectId && !isGuest ? { project_id: selectedProjectId } : {}),
           ...(ragSystemPrompt ? { system_prompt: ragSystemPrompt } : modelCatFilter === "health" ? { system_prompt: "Ты — AI-ассистент по общим вопросам здоровья. Ты НЕ врач и НЕ ставишь диагнозы. Анализируй фото и описания симптомов, предлагай возможные причины (2-3 варианта), рекомендуй к какому специалисту обратиться. Заверши: \"Для точного диагноза обратитесь к врачу.\" Отвечай на русском." } : {}),
@@ -1540,7 +1486,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
       let assistantContent = "";
       let billing: Message["billing"] | undefined;
 
-      setMessages([...history, { role: "assistant", content: "", ts: Date.now(), modelId: isGuest ? "gpt-4o-mini" : selectedModel }]);
+      setMessages([...history, { role: "assistant", content: "", ts: Date.now(), modelId: isGuest ? DEFAULT_MODEL : selectedModel }]);
 
       while (true) {
         const { done, value } = await reader.read();
@@ -1580,7 +1526,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
               } else {
                 assistantContent = "Ошибка генерации. Попробуйте ещё раз.";
               }
-              setMessages([...history, { role: "assistant", content: assistantContent, modelId: isGuest ? "gpt-4o-mini" : selectedModel }]);
+              setMessages([...history, { role: "assistant", content: assistantContent, modelId: isGuest ? DEFAULT_MODEL : selectedModel }]);
               setLastError(true);
               continue;
             }
@@ -1588,9 +1534,9 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
             const content = data.content || data.choices?.[0]?.delta?.content;
             if (content) {
               assistantContent += content;
-              setMessages([...history, { role: "assistant", content: assistantContent, billing, modelId: isGuest ? "gpt-4o-mini" : selectedModel }]);
+              setMessages([...history, { role: "assistant", content: assistantContent, billing, modelId: isGuest ? DEFAULT_MODEL : selectedModel }]);
             }
-          } catch {}
+          } catch { /* SSE chunk may be partial JSON, skip malformed lines */ }
         }
       }
 
@@ -1680,76 +1626,6 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         </div>
       )}
 
-      {/* Inline styles for markdown */}
-      <style>{`
-        .md-content { line-height: 1.7; }
-        .md-content h1, .md-content .md-h1 { font-size: 1.25rem; font-weight: 800; margin: 1rem 0 0.5rem; color: var(--text); }
-        .md-content h2, .md-content .md-h2 { font-size: 1.1rem; font-weight: 700; margin: 0.75rem 0 0.4rem; color: var(--text); }
-        .md-content h3, .md-content .md-h3 { font-size: 1rem; font-weight: 600; margin: 0.5rem 0 0.3rem; color: var(--text); }
-        .md-content strong { font-weight: 700; }
-        .md-content em { font-style: italic; }
-        .md-content del { text-decoration: line-through; opacity: 0.6; }
-        .md-content .md-ul { list-style: disc; padding-left: 1.25rem; margin: 0.5rem 0; }
-        .md-content .md-li { margin: 0.15rem 0; display: list-item; }
-        .md-content .md-oli { list-style: decimal; }
-        .md-content .md-link { color: #C4623D; text-decoration: underline; text-underline-offset: 2px; }
-        .md-content .md-link:hover { opacity: 0.8; }
-        .md-content .inline-code {
-          background: rgba(128,128,128,0.1); padding: 0.15em 0.4em; border-radius: 0.375rem;
-          font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.85em; color: var(--accent);
-        }
-        .code-block-wrapper { margin: 0.75rem 0; border-radius: 0.75rem; overflow: hidden; border: 1px solid rgba(26,25,22,0.06); max-width: calc(100vw - 100px); }
-        .code-block-header {
-          display: flex; align-items: center; justify-content: space-between;
-          background: #1C1C1E; padding: 0.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.06);
-        }
-        .code-lang { font-size: 0.65rem; color: rgba(255,255,255,0.3); font-family: monospace; }
-        .code-copy-btn {
-          font-size: 0.65rem; color: rgba(255,255,255,0.3); background: none; border: none;
-          cursor: pointer; font-family: inherit; padding: 0;
-        }
-        .code-copy-btn:hover { color: rgba(255,255,255,0.6); }
-        .code-block {
-          background: #1C1C1E; padding: 1rem; overflow-x: auto; margin: 0;
-          font-size: 0.8rem; line-height: 1.6; -webkit-overflow-scrolling: touch;
-        }
-        .code-block code { color: rgba(255,255,255,0.85); font-family: 'SF Mono', 'Fira Code', monospace; white-space: pre; }
-        .md-content { overflow-wrap: break-word; word-break: break-word; max-width: 100%; }
-        .md-content pre { max-width: 100%; overflow-x: auto; }
-        .md-content a, .md-content .md-link { word-break: break-all; }
-        .md-content img { max-width: 100%; height: auto; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-        .streaming-cursor::after {
-          content: '▊';
-          display: inline;
-          color: #C4623D;
-          animation: blink 0.8s step-end infinite;
-          margin-left: 1px;
-          font-size: 0.85em;
-        }
-        @supports(padding-bottom: env(safe-area-inset-bottom)) {
-          .chat-input-safe { padding-bottom: calc(0.25rem + env(safe-area-inset-bottom)); }
-        }
-
-        /* Sidebar: mobile = slide overlay, desktop = width transition */
-        .webchat-sidebar {
-          width: 280px;
-          transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-        }
-        .webchat-sidebar.open { transform: translateX(0); }
-        .webchat-sidebar.closed { transform: translateX(-100%); }
-
-        @media (min-width: 1024px) {
-          .webchat-sidebar {
-            position: relative !important;
-            transform: none !important;
-            transition: width 0.3s cubic-bezier(0.4,0,0.2,1);
-          }
-          .webchat-sidebar.open { width: 280px; }
-          .webchat-sidebar.closed { width: 0; overflow: hidden; }
-        }
-      `}</style>
-
       <Sidebar
         open={sidebarOpen}
         onToggle={toggleSidebar}
@@ -1774,7 +1650,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
             setModelCatFilter(id);
             setActiveSessionId(savedSession);
             setMessages(savedMessages);
-            if (id === "health" || id === "free") setSelectedModel("gpt-4o-mini");
+            if (id === "health" || id === "free") setSelectedModel(DEFAULT_MODEL);
           }
         }}
       />
@@ -2036,16 +1912,6 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                               </div>
                             </div>
                           </div>
-                          <style>{`
-                            @keyframes shimmer {
-                              0% { background-position: -200% center; }
-                              100% { background-position: 200% center; }
-                            }
-                            @keyframes bounce {
-                              0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-                              40% { transform: scale(1); opacity: 1; }
-                            }
-                          `}</style>
                         </div>
                       )}
 
@@ -2146,7 +2012,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
               {messages.length > 0 && messages.length % 10 === 5 && !streaming && limits?.plan !== "max" && limits?.plan !== "max-pro" && (
                 <div className="max-w-3xl mx-auto px-3 sm:px-4">
                   <a href="/pricing" className="flex items-center justify-between bg-accent/5 border border-accent/10 rounded-xl px-4 py-2.5 hover:bg-accent/10 transition-colors">
-                    <span className="text-[11px] text-text/50">Нравится? <span className="font-bold text-accent">Безлимит от 590₽/мес</span></span>
+                    <span className="text-[11px] text-text/50">Нравится? <span className="font-bold text-accent">Безлимит от {UPGRADE_CTA_PRICE}</span></span>
                     <span className="text-[10px] text-accent font-semibold">Тарифы →</span>
                   </a>
                 </div>
@@ -2271,7 +2137,6 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                 <span className="text-[11px] text-red-500 font-medium shrink-0">Говорите...</span>
               </div>
             )}
-            <style>{`@keyframes waveRec { from { transform: scaleY(0.3); } to { transform: scaleY(1); } }`}</style>
 
             <div className="flex items-center bg-text/[0.03] border border-text/[0.10] rounded-2xl focus-within:border-accent/30 focus-within:ring-2 focus-within:ring-accent/10 focus-within:bg-bg transition-all min-w-0" style={{ padding: "4px 8px", gap: 6 }}>
               {/* File attach */}
@@ -2411,7 +2276,9 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                           try {
                             const res = await fetch(`${API_URL}/api/audio/stt`, { method: "POST", headers: { Authorization: `Bearer ${auth!.token}` }, body: form });
                             if (res.ok) { const data = await res.json(); if (data.text) setInput(prev => prev + data.text); }
-                          } catch {}
+                          } catch (err) {
+                            console.warn("Speech-to-text failed:", err);
+                          }
                         };
                         recorder.start();
                         setRecording(true);
@@ -2668,7 +2535,6 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
           style={{ animation: "toastSlideIn 0.3s ease-out" }}
         >
           {toast.msg}
-          <style>{`@keyframes toastSlideIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }`}</style>
         </div>
       )}
     </div>
