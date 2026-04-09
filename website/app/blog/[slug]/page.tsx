@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import dynamic from "next/dynamic";
 import { POSTS, getPost } from "@/lib/blog";
 import { breadcrumbJsonLd } from "@/components/Breadcrumbs";
 
 import { SITE_URL } from "@/lib/constants";
+
+const ChatWidget = dynamic(() => import("@/components/ChatWidget"), { ssr: false });
 
 export const revalidate = 3600;
 
@@ -123,6 +126,7 @@ export default function BlogPostPage({ params }: Props) {
           </div>
         </div>
       </article>
+      <ChatWidget />
     </div>
   );
 }

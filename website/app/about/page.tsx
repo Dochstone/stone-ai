@@ -82,6 +82,18 @@ export default function AboutPage() {
   return (
     <div className="pt-28 pb-20 min-h-screen">
       <Breadcrumbs items={[{ label: "О нас" }]} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "AboutPage",
+        name: "О Stone AI",
+        description: "Stone AI — российская платформа доступа к 65+ нейросетям.",
+        url: "https://stoneai.ru/about",
+        mainEntity: {
+          "@type": "Organization",
+          name: "Stone AI",
+          url: "https://stoneai.ru",
+        },
+      }) }} />
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Hero */}
         <div className="text-center mb-16">
