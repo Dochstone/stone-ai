@@ -238,7 +238,7 @@ export default function PhotoSessionPage() {
           {/* Left column: settings */}
           <div className="space-y-5 animate-fadeIn" key={tab}>
             {/* Image upload */}
-            <div className="bg-white rounded-2xl border border-text/5 p-5">
+            <div className="bg-bg rounded-2xl border border-text/5 p-5">
               <h3 className="text-sm font-bold text-text mb-3">
                 {tab === "model" ? "Фото товара (одежда / аксессуары)" : "Фото товара"}
               </h3>
@@ -251,7 +251,7 @@ export default function PhotoSessionPage() {
 
             {/* Tab-specific controls */}
             {tab === "background" && (
-              <div className="bg-white rounded-2xl border border-text/5 p-5 space-y-4">
+              <div className="bg-bg rounded-2xl border border-text/5 p-5 space-y-4">
                 <div>
                   <label className="text-sm font-bold text-text block mb-2">
                     Описание фона
@@ -295,7 +295,7 @@ export default function PhotoSessionPage() {
             )}
 
             {tab === "model" && (
-              <div className="bg-white rounded-2xl border border-text/5 p-5 space-y-4">
+              <div className="bg-bg rounded-2xl border border-text/5 p-5 space-y-4">
                 <div>
                   <label className="text-sm font-bold text-text block mb-2">
                     Описание модели
@@ -352,7 +352,7 @@ export default function PhotoSessionPage() {
             )}
 
             {tab === "marketplace" && (
-              <div className="bg-white rounded-2xl border border-text/5 p-5 space-y-4">
+              <div className="bg-bg rounded-2xl border border-text/5 p-5 space-y-4">
                 {/* Marketplace cards */}
                 <div>
                   <label className="text-sm font-bold text-text block mb-2">
@@ -416,87 +416,135 @@ export default function PhotoSessionPage() {
             )}
 
             {tab === "batch" && (
-              <div className="bg-white rounded-2xl border border-text/5 p-5 space-y-4">
-                <div>
-                  <label className="text-sm font-bold text-text block mb-2">Загрузите до 10 фото товаров</label>
+              <div className="space-y-4">
+                {/* Upload area */}
+                <div className="bg-bg rounded-2xl border border-text/5 p-5">
+                  <label className="text-sm font-bold text-text block mb-3">Фото товаров ({batchImages.length}/10)</label>
+                  <div
+                    onClick={() => { if (batchImages.length < 10) document.getElementById("batch-file-input")?.click(); }}
+                    className={`min-h-[120px] rounded-xl border-2 border-dashed cursor-pointer flex flex-col items-center justify-center gap-2 p-4 transition-all ${
+                      batchImages.length >= 10 ? "border-text/10 bg-text/[0.02] cursor-not-allowed" : "border-text/15 hover:border-accent bg-text/[0.02] hover:bg-text/[0.04]"
+                    }`}
+                  >
+                    <svg className="w-8 h-8 text-text/20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                    </svg>
+                    <p className="text-xs text-text/40 font-medium">
+                      {batchImages.length >= 10 ? "Максимум 10 фото" : "Нажмите для выбора фото"}
+                    </p>
+                    <p className="text-[10px] text-text/20">JPEG, PNG, WebP</p>
+                  </div>
                   <input
+                    id="batch-file-input"
                     type="file"
                     multiple
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
                     onChange={async (e) => {
-                      const files = Array.from(e.target.files || []).slice(0, 10);
-                      const previews: string[] = [];
+                      const files = Array.from(e.target.files || []).slice(0, 10 - batchImages.length);
+                      const newImages: string[] = [];
                       for (const f of files) {
                         const reader = new FileReader();
                         const url = await new Promise<string>(r => { reader.onload = () => r(reader.result as string); reader.readAsDataURL(f); });
-                        previews.push(url);
+                        newImages.push(url);
                       }
-                      setBatchImages(previews);
+                      setBatchImages(prev => [...prev, ...newImages].slice(0, 10));
+                      e.target.value = "";
                     }}
-                    className="w-full text-sm text-text/50 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-accent/10 file:text-accent hover:file:bg-accent/20"
                   />
+
                   {batchImages.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-3">
+                    <div className="grid grid-cols-5 gap-2 mt-3">
                       {batchImages.map((img, i) => (
-                        <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden border border-text/10">
+                        <div key={i} className="relative group aspect-square rounded-xl overflow-hidden border border-text/10">
                           <img src={img} alt="" className="w-full h-full object-cover" />
-                          <button onClick={() => setBatchImages(prev => prev.filter((_, j) => j !== i))}
-                            className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/50 rounded-full text-white text-[8px] flex items-center justify-center">×</button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setBatchImages(prev => prev.filter((_, j) => j !== i)); }}
+                            className="absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full text-white text-[10px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          >×</button>
+                          <span className="absolute bottom-1 left-1 text-[9px] font-bold text-white bg-black/40 px-1.5 py-0.5 rounded">{i + 1}</span>
                         </div>
                       ))}
                     </div>
                   )}
-                  <p className="text-[10px] text-text/25 mt-1">{batchImages.length}/10 фото · ~{batchImages.length * 15}₽</p>
                 </div>
-                <div>
-                  <label className="text-sm font-bold text-text block mb-2">Описание фона (одно для всех)</label>
-                  <input value={bgPrompt} onChange={e => setBgPrompt(e.target.value)}
-                    placeholder="Белый студийный фон с мягким освещением"
-                    className="w-full px-4 py-2.5 rounded-xl border border-text/10 bg-text/[0.02] text-sm text-text placeholder:text-text/30 focus:outline-none focus:border-accent" />
+
+                {/* Background prompt + presets */}
+                <div className="bg-bg rounded-2xl border border-text/5 p-5 space-y-4">
+                  <div>
+                    <label className="text-sm font-bold text-text block mb-2">Описание фона (одно для всех)</label>
+                    <input value={bgPrompt} onChange={e => setBgPrompt(e.target.value)}
+                      placeholder="Белый студийный фон с мягким освещением"
+                      className="w-full px-4 py-2.5 rounded-xl border border-text/10 bg-text/[0.02] text-sm text-text placeholder:text-text/30 focus:outline-none focus:border-accent transition-colors" />
+                  </div>
+
+                  {presets.length > 0 && (
+                    <div>
+                      <label className="text-xs font-bold text-text/40 block mb-2">Готовые фоны</label>
+                      <div className="flex flex-wrap gap-2">
+                        {presets.map((p) => (
+                          <button key={p.id} onClick={() => setBgPrompt(p.prompt)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                              bgPrompt === p.prompt
+                                ? "bg-accent/10 text-accent border border-accent/20"
+                                : "bg-text/[0.04] text-text/50 hover:text-text/70 border border-transparent"
+                            }`}>{p.emoji} {p.name}</button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <ModelSelector value={selectedModel} onChange={setSelectedModel} />
                 </div>
+
+                {/* Generate button */}
                 <button
                   onClick={async () => {
                     if (batchImages.length === 0 || !bgPrompt.trim()) return;
                     setGenerating(true);
+                    setBatchResults([]);
+                    setError(null);
                     try {
                       const auth = getAuth();
                       if (!auth?.token) return;
                       const res = await fetch(`${API_URL}/api/photo-session/batch`, {
                         method: "POST",
                         headers: { Authorization: `Bearer ${auth.token}`, "Content-Type": "application/json" },
-                        body: JSON.stringify({ images: batchImages, background_prompt: bgPrompt }),
+                        body: JSON.stringify({ images: batchImages, background_prompt: bgPrompt, model_id: selectedModel }),
                       });
                       if (res.ok) {
                         const data = await res.json();
                         const okResults = data.results.filter((r: { status: string }) => r.status === "ok");
-                        if (okResults.length > 0) {
-                          setBatchResults(okResults.map((r: { image_url: string }) => r.image_url));
+                        setBatchResults(okResults.map((r: { image_url: string }) => r.image_url));
+                        if (data.failed > 0) {
+                          setError(`${data.processed} из ${batchImages.length} обработано, ${data.failed} ошибок`);
                         }
-                        alert(`Готово: ${data.processed} из ${batchImages.length} обработано`);
                       } else {
                         const err = await res.json().catch(() => ({ detail: "Ошибка" }));
-                        alert(typeof err.detail === "string" ? err.detail : "Ошибка пакетной обработки");
+                        setError(typeof err.detail === "string" ? err.detail : "Ошибка пакетной обработки");
                       }
-                    } catch { alert("Ошибка сети"); }
+                    } catch { setError("Ошибка сети"); }
                     setGenerating(false);
                   }}
                   disabled={generating || batchImages.length === 0 || !bgPrompt.trim()}
-                  className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all ${batchImages.length > 0 && bgPrompt.trim() ? "bg-accent text-white hover:bg-accent/90" : "bg-text/10 text-text/30 cursor-not-allowed"}`}
+                  className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all ${
+                    batchImages.length > 0 && bgPrompt.trim() && !generating
+                      ? "bg-accent text-white hover:bg-accent/90 active:scale-[0.98]"
+                      : "bg-text/10 text-text/30 cursor-not-allowed"
+                  }`}
                 >
-                  {generating ? "Обработка..." : `Обработать ${batchImages.length} фото (~${batchImages.length * 15}₽)`}
+                  {generating ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Обработка {batchImages.length} фото...
+                    </span>
+                  ) : (
+                    `Обработать ${batchImages.length} фото (~${batchImages.length * 15}₽)`
+                  )}
                 </button>
-                {batchResults.length > 0 && (
-                  <div>
-                    <p className="text-sm font-bold text-text mb-2">Результаты:</p>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                      {batchResults.map((url, i) => (
-                        <a key={i} href={url} download={`stoneai-batch-${i+1}.png`} className="block rounded-xl overflow-hidden border border-text/10 hover:border-accent/30 transition-colors">
-                          <img src={url} alt="" className="w-full aspect-square object-cover" />
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             )}
 
@@ -533,7 +581,7 @@ export default function PhotoSessionPage() {
           {/* Right column: result */}
           <div className="space-y-5">
             {generating && (
-              <div className="bg-white rounded-2xl border border-text/5 p-5 animate-fadeIn">
+              <div className="bg-bg rounded-2xl border border-text/5 p-5 animate-fadeIn">
                 <div className="aspect-square bg-text/[0.03] rounded-xl flex flex-col items-center justify-center gap-4">
                   <svg className="w-10 h-10 animate-spin text-accent/40" viewBox="0 0 24 24" fill="none">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -545,7 +593,7 @@ export default function PhotoSessionPage() {
             )}
 
             {resultUrl && !generating && (
-              <div className="bg-white rounded-2xl border border-text/5 p-5 space-y-4 animate-fadeIn">
+              <div className="bg-bg rounded-2xl border border-text/5 p-5 space-y-4 animate-fadeIn">
                 <h3 className="text-sm font-bold text-text">Результат</h3>
 
                 {/* Full-size result */}
@@ -591,14 +639,66 @@ export default function PhotoSessionPage() {
               </div>
             )}
 
-            {!resultUrl && !generating && (
-              <div className="bg-white rounded-2xl border border-text/5 p-5">
+            {/* Batch results */}
+            {tab === "batch" && batchResults.length > 0 && !generating && (
+              <div className="bg-bg rounded-2xl border border-text/5 p-5 space-y-4 animate-fadeIn">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-text">Результаты ({batchResults.length})</h3>
+                  <button
+                    onClick={() => {
+                      batchResults.forEach((url, i) => {
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = `stoneai-batch-${i + 1}.png`;
+                        a.click();
+                      });
+                    }}
+                    className="text-xs font-bold text-accent bg-accent/10 hover:bg-accent/20 px-3 py-1.5 rounded-lg transition-colors"
+                  >
+                    Скачать все
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {batchResults.map((url, i) => (
+                    <div key={i} className="rounded-xl overflow-hidden border border-text/10 hover:border-accent/30 transition-colors group relative">
+                      <img src={url} alt={`Результат ${i + 1}`} className="w-full aspect-square object-cover" />
+                      <button
+                        onClick={() => { const a = document.createElement("a"); a.href = url; a.download = `stoneai-batch-${i + 1}.png`; a.click(); }}
+                        className="absolute bottom-2 right-2 w-8 h-8 bg-black/50 backdrop-blur rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                        </svg>
+                      </button>
+                      <span className="absolute top-2 left-2 text-[10px] font-bold text-white bg-black/40 backdrop-blur px-2 py-0.5 rounded-md">{i + 1}/{batchResults.length}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Batch generating state */}
+            {tab === "batch" && generating && (
+              <div className="bg-bg rounded-2xl border border-text/5 p-5 animate-fadeIn">
+                <div className="aspect-square bg-text/[0.03] rounded-xl flex flex-col items-center justify-center gap-4">
+                  <svg className="w-10 h-10 animate-spin text-accent/40" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  <p className="text-sm text-text/30 font-medium">Обработка {batchImages.length} фото...</p>
+                  <p className="text-xs text-text/20">Это может занять 1-2 минуты</p>
+                </div>
+              </div>
+            )}
+
+            {!resultUrl && !generating && !(tab === "batch" && batchResults.length > 0) && (
+              <div className="bg-bg rounded-2xl border border-text/5 p-5">
                 <div className="aspect-square bg-text/[0.02] rounded-xl flex flex-col items-center justify-center gap-3">
                   <svg className="w-12 h-12 text-text/10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
                   </svg>
                   <p className="text-sm text-text/25 font-medium text-center">
-                    Загрузите фото и нажмите<br />"Сгенерировать"
+                    {tab === "batch" ? "Загрузите фото и нажмите\n\"Обработать\"" : "Загрузите фото и нажмите\n\"Сгенерировать\""}
                   </p>
                 </div>
               </div>
