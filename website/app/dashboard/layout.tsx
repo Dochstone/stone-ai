@@ -183,20 +183,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="min-h-screen">
       {/* Mobile top bar */}
       <div className="lg:hidden sticky top-0 z-30 bg-bg/95 backdrop-blur-md border-b border-text/5">
-        <div className="flex items-center justify-between px-4 h-12">
+        <div className="relative flex items-center justify-between px-4 h-12">
           {isChat ? (
             <>
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 aria-label="Меню"
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-text/40 hover:text-text/70 hover:bg-text/[0.05] transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-text/40 hover:text-text/70 hover:bg-text/[0.05] transition-colors z-10"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
-              <span className="text-sm font-bold text-text">AI Чат</span>
-              <div className="flex items-center gap-1">
+              <span className="absolute left-1/2 -translate-x-1/2 text-sm font-bold text-text">AI Чат</span>
+              <div className="flex items-center gap-1 z-10">
                 <button
                   onClick={() => window.dispatchEvent(new Event("toggle-chat-history"))}
                   aria-label="История чатов"
