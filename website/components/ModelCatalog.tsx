@@ -20,29 +20,29 @@ const categoryLabels: Record<ModelCategory, string> = {
 };
 
 const companyColors: Record<string, string> = {
-  OpenAI: "bg-green-100 text-green-700",
-  Anthropic: "bg-orange-100 text-orange-700",
-  Google: "bg-blue-100 text-blue-700",
-  Meta: "bg-sky-100 text-sky-700",
-  Mistral: "bg-purple-100 text-purple-700",
-  DeepSeek: "bg-cyan-100 text-cyan-700",
-  xAI: "bg-slate-100 text-slate-700",
-  Perplexity: "bg-indigo-100 text-indigo-700",
-  BFL: "bg-amber-100 text-amber-700",
-  Stability: "bg-pink-100 text-pink-700",
-  Alibaba: "bg-orange-50 text-orange-600",
-  MiniMax: "bg-rose-100 text-rose-700",
-  Zhipu: "bg-violet-100 text-violet-700",
-  Moonshot: "bg-blue-50 text-blue-600",
-  Cohere: "bg-yellow-100 text-yellow-700",
-  Microsoft: "bg-blue-100 text-blue-700",
-  NVIDIA: "bg-lime-100 text-lime-700",
-  Gryphe: "bg-red-100 text-red-700",
-  Kuaishou: "bg-red-100 text-red-700",
-  Runway: "bg-slate-100 text-slate-700",
-  Pika: "bg-pink-100 text-pink-700",
-  Luma: "bg-indigo-100 text-indigo-700",
-  Tripo3D: "bg-cyan-100 text-cyan-700",
+  OpenAI: "bg-green-500/10 text-green-600",
+  Anthropic: "bg-orange-500/10 text-orange-600",
+  Google: "bg-blue-500/10 text-blue-600",
+  Meta: "bg-sky-500/10 text-sky-600",
+  Mistral: "bg-purple-500/10 text-purple-600",
+  DeepSeek: "bg-cyan-500/10 text-cyan-600",
+  xAI: "bg-slate-500/10 text-slate-600",
+  Perplexity: "bg-indigo-500/10 text-indigo-600",
+  BFL: "bg-amber-500/10 text-amber-600",
+  Stability: "bg-pink-500/10 text-pink-600",
+  Alibaba: "bg-orange-500/10 text-orange-600",
+  MiniMax: "bg-rose-500/10 text-rose-600",
+  Zhipu: "bg-violet-500/10 text-violet-600",
+  Moonshot: "bg-blue-500/10 text-blue-600",
+  Cohere: "bg-yellow-500/10 text-yellow-600",
+  Microsoft: "bg-blue-500/10 text-blue-600",
+  NVIDIA: "bg-lime-500/10 text-lime-600",
+  Gryphe: "bg-red-500/10 text-red-600",
+  Kuaishou: "bg-red-500/10 text-red-600",
+  Runway: "bg-slate-500/10 text-slate-600",
+  Pika: "bg-pink-500/10 text-pink-600",
+  Luma: "bg-indigo-500/10 text-indigo-600",
+  Tripo3D: "bg-cyan-500/10 text-cyan-600",
 };
 
 // Model tier based on pricing (same as WebChat)
@@ -60,8 +60,8 @@ const MINI_MODEL_IDS = new Set([
 
 function getTierLabel(id: string): { label: string; style: string } {
   if (FREE_MODEL_IDS.has(id)) return { label: "Free", style: "bg-teal-light text-teal" };
-  if (MINI_MODEL_IDS.has(id)) return { label: "Start", style: "bg-cyan-100 text-cyan-700" };
-  return { label: "Pro", style: "bg-purple-100 text-purple-700" };
+  if (MINI_MODEL_IDS.has(id)) return { label: "Start", style: "bg-cyan-500/10 text-cyan-600" };
+  return { label: "Pro", style: "bg-purple-500/10 text-purple-600" };
 }
 
 function getSpeed(model: AIModel): string {
@@ -181,7 +181,7 @@ export default function ModelCatalog() {
                       >
                         <div className="p-5">
                           <div className="flex items-center justify-between mb-2">
-                            <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold ${companyColors[model.company] ?? "bg-gray-100 text-gray-700"}`}>{model.company}</span>
+                            <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold ${companyColors[model.company] ?? "bg-gray-500/10 text-gray-600"}`}>{model.company}</span>
                             <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${tierInfo.style}`}>{tierInfo.label}</span>
                           </div>
                           <h3 className="font-bold text-sm mb-1.5">{model.name}</h3>
@@ -236,7 +236,7 @@ export default function ModelCatalog() {
                     <div className="flex flex-col md:flex-row gap-6">
                       <div className="flex-1 space-y-4">
                         <div className="flex items-center gap-3 flex-wrap">
-                          <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${companyColors[exp.company] ?? "bg-gray-100 text-gray-700"}`}>{exp.company}</span>
+                          <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${companyColors[exp.company] ?? "bg-gray-500/10 text-gray-600"}`}>{exp.company}</span>
                           <h3 className="font-extrabold text-lg">{exp.name}</h3>
                           <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${getTierLabel(exp.id).style}`}>{getTierLabel(exp.id).label}</span>
                         </div>

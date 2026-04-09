@@ -82,7 +82,7 @@ export default function ReferralPage() {
   return (
     <div className="min-h-screen bg-bg">
       {/* Header */}
-      <div className="bg-white border-b border-text/5">
+      <div className="bg-surface border-b border-text/5">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
           <a href="/" className="text-lg font-extrabold text-text">Stone AI</a>
           <div className="flex items-center gap-4">
@@ -108,22 +108,22 @@ export default function ReferralPage() {
 
         {/* Stats cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-2xl border border-text/5 p-5 text-center">
+          <div className="bg-surface rounded-2xl border border-text/5 p-5 text-center">
             <p className="text-2xl font-extrabold text-text">{stats?.referral_count ?? 0}</p>
             <p className="text-xs text-text/40 mt-1">Приглашённых</p>
           </div>
-          <div className="bg-white rounded-2xl border border-text/5 p-5 text-center">
+          <div className="bg-surface rounded-2xl border border-text/5 p-5 text-center">
             <p className="text-2xl font-extrabold text-accent">${(stats?.referral_balance ?? 0).toFixed(2)}</p>
             <p className="text-xs text-text/40 mt-1">Заработано</p>
           </div>
-          <div className="bg-white rounded-2xl border border-text/5 p-5 text-center">
+          <div className="bg-surface rounded-2xl border border-text/5 p-5 text-center">
             <p className="text-2xl font-extrabold text-teal">10%</p>
             <p className="text-xs text-text/40 mt-1">Комиссия</p>
           </div>
         </div>
 
         {/* Referral link */}
-        <div className="bg-white rounded-2xl border border-text/5 p-6 mb-6">
+        <div className="bg-surface rounded-2xl border border-text/5 p-6 mb-6">
           <h2 className="font-bold text-sm mb-3">Ваша реферальная ссылка</h2>
           {stats?.referral_code ? (
             <div className="flex gap-2">
@@ -150,7 +150,7 @@ export default function ReferralPage() {
         </div>
 
         {/* Apply code */}
-        <div className="bg-white rounded-2xl border border-text/5 p-6 mb-6">
+        <div className="bg-surface rounded-2xl border border-text/5 p-6 mb-6">
           <h2 className="font-bold text-sm mb-3">Ввести реферальный код</h2>
           <div className="flex gap-2">
             <input
@@ -173,7 +173,7 @@ export default function ReferralPage() {
         </div>
 
         {/* How it works */}
-        <div className="bg-white rounded-2xl border border-text/5 p-6 mb-6">
+        <div className="bg-surface rounded-2xl border border-text/5 p-6 mb-6">
           <h2 className="font-bold text-sm mb-4">Как это работает</h2>
           <div className="space-y-3">
             {[
@@ -193,7 +193,7 @@ export default function ReferralPage() {
 
         {/* Referrals list */}
         {stats && stats.referrals.length > 0 && (
-          <div className="bg-white rounded-2xl border border-text/5 p-6">
+          <div className="bg-surface rounded-2xl border border-text/5 p-6">
             <h2 className="font-bold text-sm mb-4">Ваши рефералы</h2>
             <div className="space-y-2">
               {stats.referrals.map((r, i) => (
@@ -221,7 +221,7 @@ export default function ReferralPage() {
         )}
 
         {stats && stats.referrals.length === 0 && (
-          <div className="bg-white rounded-2xl border border-text/5 p-8 text-center">
+          <div className="bg-surface rounded-2xl border border-text/5 p-8 text-center">
             <p className="text-text/20 text-3xl mb-2">👥</p>
             <p className="text-sm text-text/30">Пока нет рефералов. Поделитесь ссылкой!</p>
           </div>

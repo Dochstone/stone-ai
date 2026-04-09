@@ -215,7 +215,7 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
 
   return (
     <div className="min-h-screen bg-bg flex items-center justify-center px-4 pt-24 pb-12">
-      <div className="w-full max-w-[860px] bg-white rounded-2xl border border-text/5 shadow-xl overflow-hidden">
+      <div className="w-full max-w-[860px] bg-surface rounded-2xl border border-text/5 shadow-xl overflow-hidden">
         <div className="flex flex-col md:flex-row">
           {/* Left — hero image */}
           <div className="hidden md:block md:w-[340px] shrink-0 relative">
@@ -340,7 +340,7 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
               {/* OAuth buttons */}
               <div className="space-y-2.5 mb-6">
                 <button onClick={googleLogin}
-                  className="w-full flex items-center justify-center gap-3 bg-white border-2 border-text/10 py-3 rounded-xl font-semibold text-sm hover:border-text/20 hover:bg-gray-50 transition-colors">
+                  className="w-full flex items-center justify-center gap-3 bg-surface border-2 border-text/10 py-3 rounded-xl font-semibold text-sm hover:border-text/20 hover:bg-text/5 transition-colors">
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
@@ -374,11 +374,11 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
               {/* Tabs */}
               <div className="flex gap-1 bg-bg rounded-xl p-1 mb-5">
                 <button onClick={() => { setScreen("login"); setError(""); }}
-                  className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${screen === "login" ? "bg-white text-text shadow-sm" : "text-text/40"}`}>
+                  className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${screen === "login" ? "bg-surface text-text shadow-sm" : "text-text/40"}`}>
                   Вход
                 </button>
                 <button onClick={() => { setScreen("register"); setError(""); }}
-                  className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${screen === "register" ? "bg-white text-text shadow-sm" : "text-text/40"}`}>
+                  className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${screen === "register" ? "bg-surface text-text shadow-sm" : "text-text/40"}`}>
                   Регистрация
                 </button>
               </div>
@@ -410,8 +410,8 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
                 )}
 
                 {error && (
-                  <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl px-4 py-2.5" role="alert">
-                    <p className="text-red-600 dark:text-red-400 text-xs font-medium">{error}</p>
+                  <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2.5" role="alert">
+                    <p className="text-red-500 text-xs font-medium">{error}</p>
                   </div>
                 )}
 

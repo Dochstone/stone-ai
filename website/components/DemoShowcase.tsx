@@ -72,7 +72,7 @@ export default function DemoShowcase() {
         {/* Video + 3D + Audio row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {/* Video — lazy loaded */}
-          <div className="rounded-2xl overflow-hidden border border-text/[0.06] bg-white">
+          <div className="rounded-2xl overflow-hidden border border-text/[0.06] bg-surface">
             <LazyLoad className="w-full aspect-video">
               <video src="/demo/video-1.mp4" muted loop playsInline autoPlay preload="none" className="w-full h-full object-cover" />
             </LazyLoad>
@@ -87,7 +87,7 @@ export default function DemoShowcase() {
           </div>
 
           {/* 3D — lazy loaded */}
-          <div className="rounded-2xl overflow-hidden border border-text/[0.06] bg-white">
+          <div className="rounded-2xl overflow-hidden border border-text/[0.06] bg-surface">
             <LazyLoad className="aspect-video bg-[#f0f0f0] dark:bg-[#1C1C1E]">
               <div className="w-full h-full" dangerouslySetInnerHTML={{ __html: `<model-viewer src="/demo/model-demo.glb" auto-rotate camera-controls touch-action="pan-y" style="width:100%;height:100%;background:inherit" shadow-intensity="1" exposure="1.2"></model-viewer>` }} />
             </LazyLoad>
@@ -102,7 +102,7 @@ export default function DemoShowcase() {
           </div>
 
           {/* Audio — real playable audio */}
-          <div className="rounded-2xl overflow-hidden border border-text/[0.06] bg-white">
+          <div className="rounded-2xl overflow-hidden border border-text/[0.06] bg-surface">
             <div className="aspect-video bg-cover bg-center flex flex-col items-center justify-center relative" style={{ backgroundImage: "url(/demo/audio-poster.jpg)" }}>
               <audio id="demo-audio" src="/demo/audio-demo.mp3" preload="metadata" />
               <button

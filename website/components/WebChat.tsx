@@ -1786,7 +1786,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 mt-0.5 ${
                           lock ? "bg-text/5 text-text/30"
                           : FREE_MODEL_IDS.has(m.id) ? "bg-teal-light text-teal"
-                          : MINI_MODEL_IDS.has(m.id) ? "bg-blue-100 text-blue-600"
+                          : MINI_MODEL_IDS.has(m.id) ? "bg-blue-500/10 text-blue-600"
                           : "bg-accent/10 text-accent"
                         }`}>
                           {lock ? lock.tier : FREE_MODEL_IDS.has(m.id) ? "Бесплатно" : MINI_MODEL_IDS.has(m.id) ? "Start" : "Pro"}
@@ -2127,7 +2127,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
             {/* Recording animation */}
             {recording && (
-              <div className="flex items-center gap-2 mb-2 px-2 py-1.5 bg-red-50 border border-red-200 rounded-xl">
+              <div className="flex items-center gap-2 mb-2 px-2 py-1.5 bg-red-500/10 border border-red-500/20 rounded-xl">
                 <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
                 <div className="flex items-end gap-[2px] h-4 flex-1">
                   {Array.from({ length: 24 }, (_, i) => (
@@ -2479,7 +2479,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                   {/* Auth buttons — direct OAuth, no redirect */}
                   <div className="space-y-2">
                     <a href={`https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}&redirect_uri=${typeof window !== "undefined" ? encodeURIComponent(window.location.origin + "/auth/google/callback") : ""}&response_type=code&scope=email%20profile&prompt=select_account`}
-                      className="w-full flex items-center justify-center gap-3 bg-white border border-text/10 py-3 rounded-xl font-semibold text-sm hover:border-text/20 hover:shadow-sm transition-all">
+                      className="w-full flex items-center justify-center gap-3 bg-surface border border-text/10 py-3 rounded-xl font-semibold text-sm hover:border-text/20 hover:shadow-sm transition-all">
                       <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
                         <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />

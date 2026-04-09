@@ -403,8 +403,8 @@ function BalanceTab({ profile, transactions, auth, onRefresh }: { profile: UserP
 
   const statusColor = (s: string) => {
     if (s === "completed" || s === "success") return "text-teal bg-teal-light";
-    if (s === "pending") return "text-yellow-600 bg-yellow-50";
-    return "text-red-500 bg-red-50";
+    if (s === "pending") return "text-yellow-500 bg-yellow-500/10";
+    return "text-red-500 bg-red-500/10";
   };
 
   return (
@@ -432,7 +432,7 @@ function BalanceTab({ profile, transactions, auth, onRefresh }: { profile: UserP
       {profile.plan !== "max-pro" && (
         <div>
           {subMsg && (
-            <div className={`mb-4 px-4 py-2.5 rounded-xl text-sm font-medium ${subMsg.includes("активирована") ? "bg-teal-light text-teal" : "bg-red-50 text-red-500"}`}>
+            <div className={`mb-4 px-4 py-2.5 rounded-xl text-sm font-medium ${subMsg.includes("активирована") ? "bg-teal-light text-teal" : "bg-red-500/10 text-red-500"}`}>
               {subMsg}
             </div>
           )}
@@ -771,7 +771,7 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
         <div className="space-y-3">
           <div className="flex items-center justify-between py-2">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center">
                 <span className="text-sm font-bold text-blue-600">T</span>
               </div>
               <div>
@@ -786,7 +786,7 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
           </div>
           <div className="flex items-center justify-between py-2 border-t border-text/[0.04]">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-red-500/10 rounded-lg flex items-center justify-center">
                 <span className="text-sm font-bold text-red-500">G</span>
               </div>
               <div>
@@ -801,8 +801,8 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
           </div>
           <div className="flex items-center justify-between py-2 border-t border-text/[0.04]">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-yellow-50 rounded-lg flex items-center justify-center">
-                <span className="text-sm font-bold text-yellow-600">Я</span>
+              <div className="w-8 h-8 bg-yellow-500/10 rounded-lg flex items-center justify-center">
+                <span className="text-sm font-bold text-yellow-500">Я</span>
               </div>
               <div>
                 <div className="text-sm font-medium text-text">Яндекс</div>
@@ -1281,7 +1281,7 @@ export default function ProfilePage() {
           ))}
           <button
             onClick={logout}
-            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[13px] font-semibold whitespace-nowrap transition-colors shrink-0 text-text/30 hover:bg-red-50 hover:text-red-500"
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[13px] font-semibold whitespace-nowrap transition-colors shrink-0 text-text/30 hover:bg-red-500/10 hover:text-red-500"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />

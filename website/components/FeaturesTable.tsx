@@ -27,7 +27,7 @@ export default function FeaturesTable() {
         </p>
 
         <div className="max-w-2xl mx-auto overflow-x-auto -mx-4 px-4 sm:mx-auto sm:px-0">
-          <div className="min-w-[420px] overflow-hidden rounded-2xl border border-text/10 bg-white">
+          <div className="min-w-[420px] overflow-hidden rounded-2xl border border-text/10 bg-surface">
             <table className="w-full text-xs sm:text-sm">
               <thead>
                 <tr className="bg-bg">

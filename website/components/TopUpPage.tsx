@@ -150,7 +150,7 @@ export default function TopUpPage() {
   return (
     <div className="pt-24 min-h-screen bg-bg">
       {/* Header */}
-      <div className="bg-white border-b border-text/5">
+      <div className="bg-surface border-b border-text/5">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
           <a href="/" className="text-lg font-extrabold text-text">Stone AI</a>
           <div className="flex items-center gap-4">
@@ -163,7 +163,7 @@ export default function TopUpPage() {
 
       <div className="max-w-3xl mx-auto px-4 py-10">
         {/* Balance card */}
-        <div className="bg-white rounded-2xl border border-text/5 p-8 text-center mb-10">
+        <div className="bg-surface rounded-2xl border border-text/5 p-8 text-center mb-10">
           <p className="text-xs text-text/40 font-semibold uppercase tracking-wide mb-2">Ваш баланс</p>
           <p className="text-4xl font-extrabold text-text">${auth.balanceUsd.toFixed(2)}</p>
           {pollOrderId && (
@@ -172,7 +172,7 @@ export default function TopUpPage() {
         </div>
 
         {/* Top-up form */}
-        <div className="bg-white rounded-2xl border border-text/5 p-8 mb-10">
+        <div className="bg-surface rounded-2xl border border-text/5 p-8 mb-10">
           <h2 className="font-bold text-lg mb-6">Пополнить баланс / Выбрать тариф</h2>
 
           {/* Amount */}
@@ -248,7 +248,7 @@ export default function TopUpPage() {
         </div>
 
         {/* Transaction History */}
-        <div className="bg-white rounded-2xl border border-text/5 p-8">
+        <div className="bg-surface rounded-2xl border border-text/5 p-8">
           <h2 className="font-bold text-lg mb-4">История</h2>
 
           {historyLoading && <p className="text-sm text-text/30">Загрузка...</p>}
@@ -267,7 +267,7 @@ export default function TopUpPage() {
                   </div>
                   <div className="flex items-center gap-3">
                     <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                      tx.status === "completed" ? "bg-teal-light text-teal" : "bg-amber-50 text-amber-600"
+                      tx.status === "completed" ? "bg-teal-light text-teal" : "bg-amber-500/10 text-amber-500"
                     }`}>
                       {tx.status === "completed" ? "Оплачено" : tx.status}
                     </span>

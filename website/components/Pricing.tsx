@@ -396,7 +396,7 @@ export default function Pricing() {
         {/* Success message */}
         {result && !modal && (
           <div className={`mt-6 max-w-md mx-auto rounded-xl px-5 py-3 text-center text-sm font-medium ${
-            result.ok ? "bg-teal/10 text-teal" : "bg-red-50 text-red-600 dark:bg-red-500/10"
+            result.ok ? "bg-teal/10 text-teal" : "bg-red-500/10 text-red-600"
           }`}>
             {result.message}
             {result.ok && (
