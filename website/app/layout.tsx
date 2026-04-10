@@ -101,6 +101,7 @@ export const metadata: Metadata = {
   },
   other: {
     "theme-color": "#FAF9F5",
+    "mobile-web-app-capable": "yes",
   },
 };
 
