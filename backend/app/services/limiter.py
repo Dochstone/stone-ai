@@ -62,19 +62,32 @@ _UPGRADE_MESSAGES = {
 
 # ─── Helper functions ───
 
-async def get_or_create_user(db: AsyncSession, tg_user: dict) -> User:
+async def get_or_create_user(db: AsyncSession, tg_user: dict, start_param: str | None = None) -> User:
     """Get existing user or create new one from Telegram data."""
     tg_id = tg_user["id"]
     result = await db.execute(select(User).where(User.telegram_id == tg_id))
     user = result.scalar_one_or_none()
 
     if not user:
+        utm_source = None
+        utm_medium = None
+        utm_campaign = None
+        if start_param and start_param.startswith("src_"):
+            utm_source = start_param[4:]
+            utm_medium = "telegram"
+        elif start_param:
+            utm_source = start_param
+            utm_medium = "telegram"
+
         user = User(
             telegram_id=tg_id,
             username=tg_user.get("username"),
             first_name=tg_user.get("first_name"),
             language=tg_user.get("language_code", "ru"),
             balance_usd=1.05,  # Welcome bonus ≈100₽ ($1.05 × 95₽)
+            utm_source=utm_source,
+            utm_medium=utm_medium,
+            utm_campaign=utm_campaign,
         )
         db.add(user)
         await db.flush()

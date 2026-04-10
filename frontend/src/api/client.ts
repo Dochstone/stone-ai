@@ -3,15 +3,17 @@
  * Handles auth headers, SSE streaming, and error handling.
  */
 
-import { getInitData } from '../utils/telegram'
+import { getInitData, getStartParam } from '../utils/telegram'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'https://stone-ai-production.up.railway.app'
 
 function getHeaders(): Record<string, string> {
   const initData = getInitData()
+  const startParam = getStartParam()
   return {
     'Content-Type': 'application/json',
     ...(initData ? { Authorization: `tma ${initData}` } : {}),
+    ...(startParam ? { 'X-Start-Param': startParam } : {}),
   }
 }
 

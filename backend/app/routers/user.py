@@ -64,7 +64,7 @@ async def _get_user_from_request(request: Request, db: AsyncSession) -> User:
     if token:
         payload = decode_jwt(token)
         user_id = int(payload["sub"])
-        result = await db.execute(select(User).where(User.id == user_id))
+        result = await db.execute(select(User).where(User.id == user_id).with_for_update())
         user = result.scalar_one_or_none()
         if user:
             return user
@@ -89,7 +89,7 @@ async def get_me(
     if token:
         payload = decode_jwt(token)
         user_id = int(payload["sub"])
-        result = await db.execute(select(User).where(User.id == user_id))
+        result = await db.execute(select(User).where(User.id == user_id).with_for_update())
         user = result.scalar_one_or_none()
         if not user:
             raise HTTPException(404, "User not found")
@@ -98,7 +98,8 @@ async def get_me(
         try:
             tg_user = await get_current_user(request)
             tg_id = tg_user["id"]
-            user = await get_or_create_user(db, tg_user)
+            start_param = request.headers.get("X-Start-Param")
+            user = await get_or_create_user(db, tg_user, start_param=start_param)
         except Exception:
             raise HTTPException(401, "Not authenticated")
 
@@ -374,13 +375,13 @@ async def user_limits(request: Request, db: AsyncSession = Depends(get_db)):
     if token:
         payload = decode_jwt(token)
         user_id = int(payload["sub"])
-        result = await db.execute(select(User).where(User.id == user_id))
+        result = await db.execute(select(User).where(User.id == user_id).with_for_update())
         user = result.scalar_one_or_none()
     else:
         # Try TG auth
         try:
             tg_user = await get_current_user(request)
-            result = await db.execute(select(User).where(User.telegram_id == tg_user["id"]))
+            result = await db.execute(select(User).where(User.telegram_id == tg_user["id"]).with_for_update())
             user = result.scalar_one_or_none()
         except Exception:
             raise HTTPException(status_code=401, detail="Not authenticated")
@@ -423,12 +424,12 @@ async def subscribe(req: SubscribeRequest, request: Request, db: AsyncSession = 
     if token:
         payload = decode_jwt(token)
         user_id = int(payload["sub"])
-        result = await db.execute(select(User).where(User.id == user_id))
+        result = await db.execute(select(User).where(User.id == user_id).with_for_update())
         user = result.scalar_one_or_none()
     else:
         try:
             tg_user = await get_current_user(request)
-            result = await db.execute(select(User).where(User.telegram_id == tg_user["id"]))
+            result = await db.execute(select(User).where(User.telegram_id == tg_user["id"]).with_for_update())
             user = result.scalar_one_or_none()
         except Exception:
             raise HTTPException(401, "Не авторизован")
@@ -469,6 +470,7 @@ async def subscribe(req: SubscribeRequest, request: Request, db: AsyncSession = 
     user.opus_requests_used = 0
 
     await db.flush()
+    await db.commit()
 
     return {
         "status": "ok",
