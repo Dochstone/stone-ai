@@ -271,16 +271,17 @@ export default function AdminPage() {
       fetchData("referrals").then((d) => { if (d) setReferrals(d); setLoading(false); });
     } else if (tab === "costs") {
       const period = new Date().toISOString().slice(0, 7);
+      const h = { Authorization: `Bearer ${token}` };
       Promise.all([
-        fetch(`${API_URL}/api/admin/costs?period=${period}`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : null),
-        fetch(`${API_URL}/api/admin/costs/users`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : null),
-        fetch(`${API_URL}/api/admin/costs/models`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : null),
+        fetch(`${API_URL}/api/admin/costs?period=${period}`, { headers: h }).then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch(`${API_URL}/api/admin/costs/users`, { headers: h }).then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch(`${API_URL}/api/admin/costs/models`, { headers: h }).then(r => r.ok ? r.json() : null).catch(() => null),
       ]).then(([o, u, m]) => {
-        if (o) setCostsData(o);
-        if (u?.users) setCostsUsers(u.users);
-        if (m?.models) setCostsModels(m.models);
+        setCostsData(o || { period, total_revenue_usd: 0, total_provider_cost_usd: 0, gross_margin_usd: 0, margin_percent: 0, breakdown: { chat: { provider_cost: 0, requests: 0 }, video: { revenue: 0, provider_cost: 0, requests: 0 }, image: { revenue: 0, provider_cost: 0, requests: 0 } } });
+        setCostsUsers(u?.users || []);
+        setCostsModels(m?.models || []);
         setLoading(false);
-      }).catch(() => setLoading(false));
+      });
     } else if (tab === "analytics") {
       fetch(`${API_URL}/api/analytics/stats?days=${analyticsDays}&sort_by=${analyticsSortBy}&order=${analyticsSortOrder}`, {
         headers: { Authorization: `Bearer ${token}` },
