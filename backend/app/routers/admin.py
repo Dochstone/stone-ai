@@ -879,7 +879,8 @@ from app.models.threed_task import ThreeDTask
 
 @router.get("/costs")
 async def admin_costs(
-    _admin=Depends(require_admin),
+    request: Request,
+    _admin=Depends(require_web_admin),
     period: str = Query(default=None, description="YYYY-MM, defaults to current month"),
     db: AsyncSession = Depends(get_db),
 ):
@@ -957,7 +958,8 @@ async def admin_costs(
 
 @router.get("/costs/users")
 async def admin_costs_users(
-    _admin=Depends(require_admin),
+    request: Request,
+    _admin=Depends(require_web_admin),
     db: AsyncSession = Depends(get_db),
 ):
     """Per-user profitability: revenue vs provider cost."""
@@ -1021,7 +1023,8 @@ async def admin_costs_users(
 
 @router.get("/costs/models")
 async def admin_costs_models(
-    _admin=Depends(require_admin),
+    request: Request,
+    _admin=Depends(require_web_admin),
     db: AsyncSession = Depends(get_db),
 ):
     """Per-model cost breakdown."""
