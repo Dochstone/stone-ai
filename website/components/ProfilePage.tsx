@@ -75,7 +75,7 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
 
 // ─── Helpers ───
 
-import { getInitials, getAvatarColor, getSavedAvatar, saveAvatar, removeAvatarFull, syncAvatarFromProfile } from "@/lib/avatar";
+import { getInitials, getAvatarColor, getSavedAvatar, saveAvatar, removeAvatar, processAvatarFile, syncAvatarFromProfile } from "@/lib/avatar";
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("ru-RU", { day: "numeric", month: "short", year: "numeric" });
@@ -134,7 +134,6 @@ function BarChart({ data }: { data: { label: string; value: number }[] }) {
 
 function AvatarUpload({ email, name }: { email: string; name?: string | null }) {
   const [avatar, setAvatar] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -144,74 +143,50 @@ function AvatarUpload({ email, name }: { email: string; name?: string | null }) 
     return () => window.removeEventListener("avatar-changed", handler);
   }, []);
 
-  const handleFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !file.type.startsWith("image/")) return;
-    setUploading(true);
+    if (!file) return;
     try {
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const img = document.createElement("img");
-          img.onload = () => {
-            const c = document.createElement("canvas");
-            c.width = 128; c.height = 128;
-            const ctx = c.getContext("2d")!;
-            const side = Math.min(img.naturalWidth, img.naturalHeight);
-            ctx.drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, 128, 128);
-            resolve(c.toDataURL("image/webp", 0.85));
-          };
-          img.onerror = () => resolve(reader.result as string);
-          img.src = reader.result as string;
-        };
-        reader.onerror = () => reject(new Error("read error"));
-        reader.readAsDataURL(file);
-      });
+      const dataUrl = await processAvatarFile(file);
       saveAvatar(dataUrl);
       setAvatar(dataUrl);
     } catch {}
-    setUploading(false);
-    if (fileRef.current) fileRef.current.value = "";
-  }, []);
-
-  const handleRemove = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setUploading(true);
-    await removeAvatarFull();
-    setAvatar(null);
-    setUploading(false);
+    e.target.value = "";
   };
 
   return (
-    <>
-      <div className="relative group cursor-pointer" onClick={() => { if (!uploading) fileRef.current?.click(); }}>
-        {avatar ? (
-          <img src={avatar} alt="Avatar" className="w-16 h-16 rounded-full object-cover shrink-0" />
-        ) : (
-          <div className="w-16 h-16 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: getAvatarColor(email) }}>
-            <span className="text-xl font-bold text-white">{getInitials(email, name)}</span>
-          </div>
-        )}
-        {uploading && (
-          <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center">
-            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-          </div>
-        )}
-        {!uploading && (
-          <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
-            </svg>
-          </div>
-        )}
+    <div className="relative group">
+      {avatar ? (
+        <img src={avatar} alt="Avatar" className="w-16 h-16 rounded-full object-cover shrink-0" />
+      ) : (
+        <div
+          className="w-16 h-16 rounded-full flex items-center justify-center shrink-0"
+          style={{ backgroundColor: getAvatarColor(email) }}
+        >
+          <span className="text-xl font-bold text-white">{getInitials(email, name)}</span>
+        </div>
+      )}
+      <div
+        className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity"
+        onClick={() => fileRef.current?.click()}
+      >
+        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+        </svg>
       </div>
       <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
-      {avatar && !uploading && (
-        <button onClick={handleRemove} className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" title="Удалить фото">
-          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
+      {avatar && (
+        <button
+          onClick={(e) => { e.stopPropagation(); removeAvatar(); setAvatar(null); }}
+          className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+          title="Удалить фото"
+        >
+          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
         </button>
       )}
-    </>
+    </div>
   );
 }
 

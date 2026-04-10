@@ -28,6 +28,37 @@ export function removeAvatar(): void {
   window.dispatchEvent(new Event("avatar-changed"));
 }
 
+const MAX_SIZE = 128;
+
+/** Resize image file to MAX_SIZE square, return base64 data URL */
+export function processAvatarFile(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    if (!file.type.startsWith("image/")) {
+      reject(new Error("Только изображения"));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = MAX_SIZE;
+        canvas.height = MAX_SIZE;
+        const ctx = canvas.getContext("2d")!;
+        const side = Math.min(img.width, img.height);
+        const sx = (img.width - side) / 2;
+        const sy = (img.height - side) / 2;
+        ctx.drawImage(img, sx, sy, side, side, 0, 0, MAX_SIZE, MAX_SIZE);
+        resolve(canvas.toDataURL("image/webp", 0.85));
+      };
+      img.onerror = () => reject(new Error("Ошибка загрузки изображения"));
+      img.src = reader.result as string;
+    };
+    reader.onerror = () => reject(new Error("Ошибка чтения файла"));
+    reader.readAsDataURL(file);
+  });
+}
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
 export async function uploadAvatarToServer(base64: string): Promise<string | null> {
