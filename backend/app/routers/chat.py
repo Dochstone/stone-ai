@@ -438,10 +438,9 @@ async def generate_image(
     db_user = result.scalar_one_or_none()
 
     tier = db_user.subscription_tier or "free" if db_user else "free"
-    balance = float(db_user.balance_usd or 0) if db_user else 0
-
-    # Free users: 2 images total (lifetime trial), then need balance
-    if tier == "free" and balance <= 0:
+    # Chat image generation stays on subscription and chat limits only.
+    # Free users have a fixed lifetime trial that balance top-ups must not extend.
+    if tier == "free":
         from app.config import FREE_TRIAL_IMAGES
         from sqlalchemy import func as sql_func
         total_images = await db.scalar(

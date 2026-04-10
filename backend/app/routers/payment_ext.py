@@ -102,6 +102,7 @@ async def create_lava_order(
         product_type="topup",
         product_id=f"topup_usd:{req.usd_amount:.2f}",
         status="pending",
+        tx_hash=order_id,
         provider_id=f"lava:{invoice.get('id', order_id)}",
     )
     db.add(tx)
@@ -185,7 +186,7 @@ async def lava_webhook(request: Request, db: AsyncSession = Depends(get_db)):
     try:
         user_row = await db.execute(text("SELECT email FROM users WHERE telegram_id = :tid OR id = :tid LIMIT 1"), {"tid": user_tg_id})
         user_email = user_row.scalar()
-        if user_email:
+        if user_email and new_balance is not None:
             from app.services.email_service import send_payment_confirmation
             send_payment_confirmation(user_email, round(usd_amount * 95), round(new_balance * 95), "Карта РФ / СБП")
     except Exception as e:
@@ -203,8 +204,8 @@ async def check_lava_payment(
     """Check Lava payment status (polled by frontend)."""
     result = await db.execute(
         text("SELECT status, amount_usd FROM transactions "
-             "WHERE provider_id LIKE :pid AND user_tg_id = :tid ORDER BY id DESC LIMIT 1"),
-        {"pid": f"lava:%{order_id}%", "tid": tg_user["id"]}
+             "WHERE tx_hash = :order_id AND user_tg_id = :tid ORDER BY id DESC LIMIT 1"),
+        {"order_id": order_id, "tid": tg_user["id"]}
     )
     row = result.fetchone()
 
@@ -259,6 +260,7 @@ async def create_platega_order(
         product_type="subscription" if is_subscription else "topup",
         product_id=f"sub:{req.tier}" if is_subscription else f"topup_usd:{req.usd_amount:.2f}",
         status="pending",
+        tx_hash=order_id,
         provider_id=f"platega:{transaction_id}",
     )
     db.add(tx)
@@ -319,6 +321,8 @@ async def platega_webhook(request: Request, db: AsyncSession = Depends(get_db)):
     if tx_status == "completed":
         return {"ok": True, "message": "Already processed"}
 
+    new_balance = None
+
     # Handle subscription or top-up
     if product_type == "subscription" and product_id and product_id.startswith("sub:"):
         tier = product_id.split(":", 1)[1]
@@ -375,7 +379,7 @@ async def platega_webhook(request: Request, db: AsyncSession = Depends(get_db)):
     try:
         user_row = await db.execute(text("SELECT email FROM users WHERE telegram_id = :tid OR id = :tid LIMIT 1"), {"tid": user_tg_id})
         user_email = user_row.scalar()
-        if user_email:
+        if user_email and new_balance is not None:
             from app.services.email_service import send_payment_confirmation
             amount_rub = round(usd_amount * 95)
             balance_rub = round(new_balance * 95)
@@ -394,16 +398,16 @@ async def check_platega_payment(
 ):
     """Check Platega payment status (polled by frontend)."""
     result = await db.execute(
-        text("SELECT status, amount_usd, provider_id FROM transactions "
-             "WHERE provider_id LIKE :pid AND user_tg_id = :tid ORDER BY id DESC LIMIT 1"),
-        {"pid": f"platega:%", "tid": tg_user["id"]}
+        text("SELECT status, amount_usd FROM transactions "
+             "WHERE tx_hash = :order_id AND user_tg_id = :tid ORDER BY id DESC LIMIT 1"),
+        {"order_id": order_id, "tid": tg_user["id"]}
     )
     row = result.fetchone()
 
     if not row:
         raise HTTPException(status_code=404, detail="Заказ не найден")
 
-    status, usd_amount, provider_id = row
+    status, usd_amount = row
     return {"status": status, "usd_amount": usd_amount}
 
 
@@ -447,6 +451,7 @@ async def create_crypto_order(
         product_type="topup",
         product_id=f"topup_usd:{req.usd_amount:.2f}",
         status="pending",
+        tx_hash=order_id,
         provider_id=f"heleket:{invoice.get('uuid', order_id)}",
     )
     db.add(tx)
@@ -503,8 +508,8 @@ async def heleket_webhook(request: Request, db: AsyncSession = Depends(get_db)):
 
     # Mark transaction as completed
     await db.execute(
-        text("UPDATE transactions SET status = 'completed', tx_hash = :txh WHERE id = :tid"),
-        {"txh": payment_uuid, "tid": tx_id}
+        text("UPDATE transactions SET status = 'completed' WHERE id = :tid"),
+        {"tid": tx_id}
     )
     await db.execute(
         text("UPDATE users SET total_deposited_usd = COALESCE(total_deposited_usd, 0) + :amt WHERE telegram_id = :tid"),
@@ -622,6 +627,7 @@ async def create_subscribe_payment(
         product_type="subscription",
         product_id=f"sub:{req.tier}",
         status="pending",
+        tx_hash=order_id,
         provider_id=f"heleket:{invoice.get('uuid', order_id)}",
     )
     db.add(tx)
@@ -647,8 +653,8 @@ async def check_crypto_payment(
     """Check Heleket crypto payment status (polled by frontend)."""
     result = await db.execute(
         text("SELECT status, amount_usd FROM transactions "
-             "WHERE provider_id LIKE :pid AND user_tg_id = :tid ORDER BY id DESC LIMIT 1"),
-        {"pid": f"heleket:%", "tid": tg_user["id"]}
+             "WHERE tx_hash = :order_id AND user_tg_id = :tid ORDER BY id DESC LIMIT 1"),
+        {"order_id": order_id, "tid": tg_user["id"]}
     )
     row = result.fetchone()
 
