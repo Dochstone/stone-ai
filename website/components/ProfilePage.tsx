@@ -221,7 +221,7 @@ function AvatarUpload({ email, name }: { email: string; name?: string | null }) 
           </div>
         )}
       </div>
-      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { alert("onChange fired, files=" + e.target.files?.length); const f = e.target.files?.[0]; if (f) processAndUpload(f); e.target.value = ""; }} />
+      <input ref={fileRef} type="file" accept="image/*" style={{ position: "absolute", width: 1, height: 1, opacity: 0, overflow: "hidden", pointerEvents: "none" }} onChange={(e) => { alert("onChange fired, files=" + e.target.files?.length); const f = e.target.files?.[0]; if (f) processAndUpload(f); e.target.value = ""; }} />
       {avatar && !uploading && (
         <button
           onClick={handleRemove}
