@@ -212,6 +212,7 @@ async def lifespan(app: FastAPI):
 
                                 # Save to disk in background
                                 from app.routers.video import _save_video_to_disk
+                                from app.routers.achievements import check_and_update
                                 asyncio.create_task(_save_video_to_disk(task.task_id, fal_url, task.user_tg_id, task.model_id, task.prompt, task.cost_usd))
                                 asyncio.create_task(check_and_update(task.user_tg_id, "videos", 1))
 
