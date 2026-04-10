@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
+import { PLAN_PRICES_RUB, PRICING_PLANS, type PaidPlanId, type PricingPlan } from "@/lib/pricing";
 
 const TonPayButton = dynamic(() => import("./TonPayButton"), { ssr: false });
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
-const plans = [
+const plans = PRICING_PLANS; /*
   {
     id: "free", name: "Pay-per-Use", price: "от 3₽", oldPrice: "", priceNum: 0, premium: false, period: "/запрос", desc: "Без подписки",
     badge: "Гибкий", accent: false,
@@ -36,7 +37,7 @@ const plans = [
     locked: [],
     cta: "Стать Elite", icon: "💎", color: "#F43F5E", img: "/plan-maxpro.jpg?v=3",
   },
-];
+*/
 
 /* ═══ Keyframes ═══ */
 const KEYFRAMES = `
@@ -123,12 +124,12 @@ const KEYFRAMES = `
 
 export default function Pricing() {
   const [loading, setLoading] = useState(false);
-  const [modal, setModal] = useState<typeof plans[0] | null>(() => {
+  const [modal, setModal] = useState<PricingPlan | null>(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       const planId = params.get("plan");
       if (planId) {
-        const found = plans.find(p => p.id === planId);
+        const found = plans.find((p) => p.id === planId);
         if (found && found.id !== "free") return found;
       }
     }
@@ -177,7 +178,7 @@ export default function Pricing() {
     setTimeout(() => { setModal(null); setClosing(false); }, 300);
   };
 
-  const openPlan = (plan: typeof plans[0]) => {
+  const openPlan = (plan: PricingPlan) => {
     const auth = getAuth();
     if (!auth && plan.id !== "free") { window.location.href = "/profile"; return; }
     setModal(plan);
@@ -232,14 +233,13 @@ export default function Pricing() {
     setLoading(false);
   };
 
-  const pay = async (tier: string, method: "platega" | "crypto" = "platega") => {
+  const pay = async (tier: PaidPlanId, method: "platega" | "crypto" = "platega") => {
     const auth = getAuth();
     if (!auth) { window.location.href = "/profile"; return; }
     setLoading(true);
     setResult(null);
     try {
-      const pricesRub: Record<string, number> = { mini: 590, max: 1290, "max-pro": 2990 };
-      const usdAmount = (pricesRub[tier] || 950) / 95;
+      const usdAmount = PLAN_PRICES_RUB[tier] / 95;
 
       if (method === "platega") {
         const res = await fetch(`${API_URL}/api/payment/platega/create-order`, {
@@ -695,7 +695,7 @@ export default function Pricing() {
 
                   {/* Main pay button */}
                   <button
-                    onClick={() => pay(modal.id, "platega")}
+                    onClick={() => pay(modal.id as PaidPlanId, "platega")}
                     disabled={loading}
                     className="w-full py-3.5 min-h-[50px] rounded-2xl font-bold text-[15px] text-white transition-all duration-200 disabled:opacity-50 active:scale-[0.97] relative overflow-hidden"
                     style={{
@@ -734,7 +734,7 @@ export default function Pricing() {
                   {payExpanded && (
                     <div className="space-y-2 mt-1 animate-fadeIn">
                       <button
-                        onClick={() => pay(modal.id, "crypto")}
+                        onClick={() => pay(modal.id as PaidPlanId, "crypto")}
                         disabled={loading}
                         className="w-full flex items-center gap-3 p-3 rounded-xl border border-text/[0.06] hover:border-accent/20 hover:bg-accent/5 transition-all disabled:opacity-50 active:scale-[0.98]"
                       >
