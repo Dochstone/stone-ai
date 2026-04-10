@@ -276,32 +276,9 @@ export default function AdminPage() {
         fetch(`${API_URL}/api/admin/costs/users`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : null),
         fetch(`${API_URL}/api/admin/costs/models`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : null),
       ]).then(([o, u, m]) => {
-        // Use real data or fallback to demo data
-        const demoOverview = {
-          period, total_revenue_usd: 27.16, total_provider_cost_usd: 3.42, gross_margin_usd: 23.74, margin_percent: 87.4,
-          breakdown: {
-            chat: { provider_cost: 2.18, requests: 347 },
-            video: { revenue: 4.50, provider_cost: 0.84, requests: 6 },
-            image: { revenue: 3.20, provider_cost: 0.40, requests: 12 },
-          },
-        };
-        const demoUsers = [
-          { tg_id: 9005423677282972, username: "", first_name: "Aleksandr", plan: "max", total_paid_usd: 13.58, total_provider_cost_usd: 1.87, total_requests: 203, margin_usd: 11.71, margin_percent: 86.2 },
-          { tg_id: 5802661354, username: "SAMPAUK", first_name: "PauK", plan: "max", total_paid_usd: 13.58, total_provider_cost_usd: 1.55, total_requests: 144, margin_usd: 12.03, margin_percent: 88.6 },
-          { tg_id: 5033724037, username: "InterferenceAI", first_name: "AI", plan: "free", total_paid_usd: 0, total_provider_cost_usd: 0.08, total_requests: 7, margin_usd: -0.08, margin_percent: 0 },
-        ];
-        const demoModels = [
-          { model_id: "gpt-4o-mini", requests: 189, total_provider_cost_usd: 0.0340, avg_cost_per_request: 0.000180, total_tokens_in: 142000, total_tokens_out: 98000 },
-          { model_id: "claude-sonnet-4", requests: 42, total_provider_cost_usd: 1.2600, avg_cost_per_request: 0.030000, total_tokens_in: 56000, total_tokens_out: 34000 },
-          { model_id: "claude-opus-4", requests: 8, total_provider_cost_usd: 0.9200, avg_cost_per_request: 0.115000, total_tokens_in: 8400, total_tokens_out: 4200 },
-          { model_id: "gemini-2.0-flash", requests: 67, total_provider_cost_usd: 0.0120, avg_cost_per_request: 0.000179, total_tokens_in: 52000, total_tokens_out: 38000 },
-          { model_id: "deepseek-r1", requests: 23, total_provider_cost_usd: 0.1840, avg_cost_per_request: 0.008000, total_tokens_in: 28000, total_tokens_out: 18000 },
-          { model_id: "gpt-5.4", requests: 18, total_provider_cost_usd: 0.5100, avg_cost_per_request: 0.028333, total_tokens_in: 21000, total_tokens_out: 12000 },
-        ];
-        const hasRealData = o && o.total_revenue_usd > 0;
-        setCostsData(hasRealData ? o : demoOverview);
-        setCostsUsers(u?.users?.length ? u.users : demoUsers);
-        setCostsModels(m?.models?.length ? m.models : demoModels);
+        if (o) setCostsData(o);
+        if (u?.users) setCostsUsers(u.users);
+        if (m?.models) setCostsModels(m.models);
         setLoading(false);
       }).catch(() => setLoading(false));
     } else if (tab === "analytics") {
