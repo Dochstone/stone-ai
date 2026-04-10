@@ -194,7 +194,17 @@ function AvatarUpload({ email, name }: { email: string; name?: string | null }) 
   };
 
   return (
-    <>
+    <div style={{ position: "relative" }}>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        style={{ position: "fixed", width: 1, height: 1, opacity: 0, overflow: "hidden", pointerEvents: "auto" }}
+        tabIndex={-1}
+        aria-hidden="true"
+      />
+
       {cropSrc && (
         <AvatarCropper
           imageSrc={cropSrc}
@@ -202,15 +212,7 @@ function AvatarUpload({ email, name }: { email: string; name?: string | null }) 
           onCancel={() => setCropSrc(null)}
         />
       )}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFileChange}
-        style={{ position: "absolute", width: 1, height: 1, opacity: 0, overflow: "hidden", pointerEvents: "none" }}
-        tabIndex={-1}
-        aria-hidden="true"
-      />
+
       <div className="flex items-center gap-4">
         <button type="button" onClick={openFilePicker} disabled={uploading} className="relative group focus:outline-none shrink-0">
           <div className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center border border-text/10">
@@ -237,7 +239,7 @@ function AvatarUpload({ email, name }: { email: string; name?: string | null }) 
         )}
         {avatarError && <p className="text-xs text-red-400">{avatarError}</p>}
       </div>
-    </>
+    </div>
   );
 }
 
