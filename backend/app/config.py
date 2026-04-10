@@ -25,6 +25,8 @@ class Settings:
     """Application settings loaded from environment variables."""
 
     def __init__(self):
+        self.dev_auth_bypass = os.getenv("DEV_AUTH_BYPASS", "").strip().lower() in {"1", "true", "yes", "on"}
+
         # Telegram
         self.bot_token = os.getenv("BOT_TOKEN", "")
         self.webapp_url = os.getenv("WEBAPP_URL", "https://stone-ai-1.vercel.app")
@@ -46,7 +48,7 @@ class Settings:
             self.database_url = raw_db_url
 
         # Security
-        self.secret_key = os.getenv("SECRET_KEY", "change-me")
+        self.secret_key = os.getenv("SECRET_KEY", "").strip()
 
         # CORS
         self.cors_origins = [

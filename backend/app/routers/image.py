@@ -213,16 +213,6 @@ async def _generate_image_bg(task_id: int, tg_id: int, model_id: str, prompt: st
             from app.services.limiter import record_usage
             await record_usage(db, tg_id, model_id, cost_usd=0)
 
-            # Increment daily usage
-            from app.services.daily_limits import increment_usage
-            user_result = await db.execute(select(User).where(User.telegram_id == tg_id))
-            user = user_result.scalar_one_or_none()
-            if not user:
-                user_result = await db.execute(select(User).where(User.id == tg_id))
-                user = user_result.scalar_one_or_none()
-            sub_tier = (user.subscription_tier or "free") if user else "free"
-            await increment_usage(db, tg_id, model_id, sub_tier)
-
             # Save generation record
             gen = Generation(
                 user_tg_id=tg_id, type="image", model=model_id,
