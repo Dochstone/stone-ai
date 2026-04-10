@@ -135,7 +135,6 @@ function BarChart({ data }: { data: { label: string; value: number }[] }) {
 // ─── Tab: Overview ───
 
 function AvatarUpload({ email, name }: { email: string; name?: string | null }) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -153,15 +152,7 @@ function AvatarUpload({ email, name }: { email: string; name?: string | null }) 
     return () => window.removeEventListener("avatar-changed", handler);
   }, []);
 
-  const openFilePicker = () => {
-    const input = fileInputRef.current;
-    if (!input) { alert("ref is null!"); return; }
-    alert("clicking input, tagName=" + input.tagName + ", type=" + input.type);
-    input.click();
-  };
-
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    alert("handleFileChange! files=" + (e.target.files?.length || 0));
     const file = e.target.files?.[0];
     if (!file) return;
     setAvatarError(null);
@@ -170,8 +161,6 @@ function AvatarUpload({ email, name }: { email: string; name?: string | null }) 
       setCropSrc(dataUrl);
     } catch (err: unknown) {
       setAvatarError(err instanceof Error ? err.message : "Ошибка чтения файла");
-    } finally {
-      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -203,13 +192,11 @@ function AvatarUpload({ email, name }: { email: string; name?: string | null }) 
   return (
     <div style={{ position: "relative" }}>
       <input
-        ref={fileInputRef}
+        id="avatar-file-input"
         type="file"
         accept="image/*"
         onChange={handleFileChange}
-        style={{ position: "fixed", width: 1, height: 1, opacity: 0, overflow: "hidden", pointerEvents: "auto" }}
-        tabIndex={-1}
-        aria-hidden="true"
+        style={{ display: "none" }}
       />
 
       {cropSrc && (
@@ -221,7 +208,11 @@ function AvatarUpload({ email, name }: { email: string; name?: string | null }) 
       )}
 
       <div className="flex items-center gap-4">
-        <button type="button" onClick={openFilePicker} disabled={uploading} className="relative group focus:outline-none shrink-0">
+        <label
+          htmlFor={uploading ? undefined : "avatar-file-input"}
+          className="relative group focus:outline-none shrink-0 cursor-pointer"
+          style={{ display: "block" }}
+        >
           <div className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center border border-text/10">
             {uploading ? (
               <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
@@ -238,7 +229,8 @@ function AvatarUpload({ email, name }: { email: string; name?: string | null }) 
               <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
             </svg>
           </div>
-        </button>
+        </label>
+
         {avatarUrl && !uploading && (
           <button type="button" onClick={handleRemoveAvatar} className="text-xs text-red-400 hover:text-red-300 transition-colors">
             Удалить фото
