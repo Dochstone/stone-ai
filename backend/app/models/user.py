@@ -74,6 +74,7 @@ class User(Base):
     utm_medium: Mapped[str | None] = mapped_column(String(128), nullable=True)
     utm_campaign: Mapped[str | None] = mapped_column(String(128), nullable=True)
     first_referrer: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    used_promo_codes: Mapped[str | None] = mapped_column(String(512), nullable=True)
 
     # ─── Avatar ───
     avatar_url: Mapped[str | None] = mapped_column(String(512), nullable=True)

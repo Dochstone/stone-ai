@@ -52,7 +52,40 @@ router = APIRouter(prefix="/api", tags=["chat"])
 
 # ─── Guest (anonymous) rate limiting by IP ───
 GUEST_LIMIT = 2
-_guest_usage: dict[str, int] = {}  # ip -> total requests
+_guest_usage: dict[str, tuple[int, float]] = {}  # ip -> (count, first_seen_ts)
+_GUEST_WINDOW = 86400  # 24 hours
+
+
+def _get_guest_usage(ip: str) -> int:
+    """Get guest request count, auto-expire after window."""
+    import time as _t
+    entry = _guest_usage.get(ip)
+    if not entry:
+        return 0
+    count, first_seen = entry
+    if _t.time() - first_seen > _GUEST_WINDOW:
+        _guest_usage.pop(ip, None)
+        return 0
+    return count
+
+
+def _inc_guest_usage(ip: str):
+    import time as _t
+    entry = _guest_usage.get(ip)
+    if entry:
+        count, first_seen = entry
+        if _t.time() - first_seen > _GUEST_WINDOW:
+            _guest_usage[ip] = (1, _t.time())
+        else:
+            _guest_usage[ip] = (count + 1, first_seen)
+    else:
+        _guest_usage[ip] = (1, _t.time())
+    # Periodic cleanup: cap dict size
+    if len(_guest_usage) > 10000:
+        now = _t.time()
+        expired = [k for k, (_, ts) in _guest_usage.items() if now - ts > _GUEST_WINDOW]
+        for k in expired:
+            _guest_usage.pop(k, None)
 
 
 def _get_request_ip(request: Request) -> str:
@@ -92,7 +125,7 @@ async def chat_guest(
     """Guest chat — no auth required, limited to 10 requests per IP, fast models only."""
     ip = _get_request_ip(request)
 
-    used = _guest_usage.get(ip, 0)
+    used = _get_guest_usage(ip)
     if used >= GUEST_LIMIT:
         raise HTTPException(
             status_code=429,
@@ -125,7 +158,7 @@ async def chat_guest(
     max_tokens = MAX_TOKENS_LITE
 
     async def generate():
-        _guest_usage[ip] = used + 1
+        _inc_guest_usage(ip)
 
         async for chunk in stream_chat_response(req.model_id, req.messages, system_prompt, max_tokens=max_tokens):
             yield chunk
@@ -135,7 +168,7 @@ async def chat_guest(
                 "tokens_in": 0, "tokens_out": 0,
                 "cost_usd": 0, "balance_usd": 0,
                 "billing_mode": "guest",
-                "guest_used": _guest_usage.get(ip, 0),
+                "guest_used": _get_guest_usage(ip),
                 "guest_limit": GUEST_LIMIT,
             }
         }
@@ -152,7 +185,7 @@ async def chat_guest(
 async def guest_status(request: "Request"):
     """Check guest usage for current IP."""
     ip = _get_request_ip(request)
-    used = _guest_usage.get(ip, 0)
+    used = _get_guest_usage(ip)
     return {"used": used, "limit": GUEST_LIMIT, "remaining": max(0, GUEST_LIMIT - used)}
 
 

@@ -49,6 +49,8 @@ class Settings:
 
         # Security
         self.secret_key = os.getenv("SECRET_KEY", "").strip()
+        if self.secret_key and len(self.secret_key) < 16:
+            raise RuntimeError("SECRET_KEY must be at least 16 characters")
         self.internal_api_key = os.getenv("INTERNAL_API_KEY", self.secret_key).strip()
         self.trusted_proxy_ips = {
             ip.strip() for ip in os.getenv("TRUSTED_PROXY_IPS", "").split(",") if ip.strip()

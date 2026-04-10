@@ -53,9 +53,16 @@ PROMO_CODES = {
     },
 }
 
-# In-memory usage tracking (MVP — move to DB later)
-_promo_usage: dict[str, set[int]] = {code: set() for code in PROMO_CODES}
-_promo_total_uses: dict[str, int] = {code: 0 for code in PROMO_CODES}
+from sqlalchemy import func, select, text
+
+
+async def _count_promo_uses(db: AsyncSession, code: str) -> int:
+    """Count total uses of a promo code from DB."""
+    result = await db.execute(
+        text("SELECT COUNT(*) FROM users WHERE used_promo_codes LIKE :pattern"),
+        {"pattern": f"%{code}%"},
+    )
+    return result.scalar() or 0
 
 
 async def apply_promo(db: AsyncSession, user: User, code: str) -> dict:
@@ -67,10 +74,12 @@ async def apply_promo(db: AsyncSession, user: User, code: str) -> dict:
 
     promo = PROMO_CODES[code]
 
-    if _promo_total_uses.get(code, 0) >= promo["max_uses"]:
+    total_uses = await _count_promo_uses(db, code)
+    if total_uses >= promo["max_uses"]:
         return {"ok": False, "error": "Промокод больше не действует"}
 
-    if promo["one_per_user"] and user.id in _promo_usage.get(code, set()):
+    used_codes = (user.used_promo_codes or "").split(",")
+    if promo["one_per_user"] and code in used_codes:
         return {"ok": False, "error": "Вы уже использовали этот промокод"}
 
     now = datetime.now(timezone.utc)
@@ -103,10 +112,9 @@ async def apply_promo(db: AsyncSession, user: User, code: str) -> dict:
         user.credits_balance = int(user.credits_balance or 0) + credits
         message = f"+{credits} кредитов добавлено к вашему тарифу!"
 
+    existing = (user.used_promo_codes or "").strip(",")
+    user.used_promo_codes = f"{existing},{code}" if existing else code
     await db.flush()
-
-    _promo_usage.setdefault(code, set()).add(user.id)
-    _promo_total_uses[code] = _promo_total_uses.get(code, 0) + 1
 
     logger.info(f"Promo {code} applied for user {user.id}: {promo['desc']}")
 

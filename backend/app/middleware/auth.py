@@ -16,7 +16,7 @@ from fastapi import HTTPException, Request
 from app.config import get_settings
 
 
-def validate_init_data(init_data: str, bot_token: str, max_age: int = 86400) -> dict:
+def validate_init_data(init_data: str, bot_token: str, max_age: int = 300) -> dict:
     """
     Validate Telegram WebApp initData and return parsed user data.
 
@@ -74,8 +74,11 @@ async def get_current_user(request: Request) -> dict:
     """
     settings = get_settings()
 
-    # Dev mode: only if explicitly enabled via DEV_AUTH_BYPASS=true
+    # Dev mode: only if explicitly enabled AND not in production
     if settings.dev_auth_bypass and (not settings.bot_token or settings.bot_token.startswith("PLACEHOLDER")):
+        import os
+        if os.getenv("ENVIRONMENT", "").lower() == "production":
+            raise HTTPException(503, "DEV_AUTH_BYPASS is not allowed in production")
         return {
             "id": 123456789,
             "first_name": "Dev",

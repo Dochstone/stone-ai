@@ -119,7 +119,7 @@ def _set_cookie_response(data: dict, token: str) -> JSONResponse:
         value=token,
         httponly=True,
         secure=True,
-        samesite="lax",
+        samesite="strict",
         max_age=JWT_EXPIRE_DAYS * 86400,
     )
     return response
@@ -222,7 +222,7 @@ async def verify_email(body: VerifyEmailRequest, request: Request, db: AsyncSess
         await db.flush()
         raise HTTPException(409, "Email уже зарегистрирован")
 
-    placeholder_tg_id = -int(time.time() * 1000) % (2**53)
+    placeholder_tg_id = -int(uuid.uuid4().int % (2**53))
     user = User(
         telegram_id=placeholder_tg_id,
         email=email,
@@ -385,7 +385,7 @@ async def _get_or_create_oauth_user(
         return user, token
 
     # New user
-    placeholder_tg_id = -int(time.time() * 1000) % (2**53)
+    placeholder_tg_id = -int(uuid.uuid4().int % (2**53))
     user = User(
         telegram_id=placeholder_tg_id,
         email=email,
@@ -662,6 +662,7 @@ async def telegram_web_start():
 
     Returns session_id that the website will use to poll for completion.
     """
+    _cleanup_old_sessions()
     session_id = uuid.uuid4().hex[:16]
     # Save to DB (survives restarts)
     try:

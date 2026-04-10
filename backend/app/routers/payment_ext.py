@@ -745,6 +745,19 @@ import uuid as _uuid
 import httpx
 
 _ton_orders: dict[str, dict] = {}
+_ton_last_cleanup: float = 0.0
+
+
+def _cleanup_ton_orders():
+    """Remove TON orders older than 1 hour. Called periodically."""
+    global _ton_last_cleanup
+    now = _time.time()
+    if now - _ton_last_cleanup < 300:  # max once per 5 min
+        return
+    _ton_last_cleanup = now
+    expired = [k for k, v in _ton_orders.items() if now - v.get("created_at", 0) > 3600]
+    for k in expired:
+        _ton_orders.pop(k, None)
 
 
 @router.get("/ton-rate")
@@ -821,6 +834,7 @@ async def check_ton_payment(
     db: AsyncSession = Depends(get_db),
 ):
     """Check if TON payment received via TONAPI."""
+    _cleanup_ton_orders()
     order = _ton_orders.get(order_id)
     if not order:
         raise HTTPException(404, "Заказ не найден")
