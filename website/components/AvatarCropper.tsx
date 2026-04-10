@@ -1,193 +1,221 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useCallback, useState } from "react";
 
-interface Props {
-  imageUrl: string;
-  onCrop: (croppedBase64: string) => void;
+interface AvatarCropperProps {
+  imageSrc: string;
+  onSave: (croppedDataUrl: string) => void;
   onCancel: () => void;
 }
 
-const OUTPUT_SIZE = 256;
-const CANVAS_SIZE = 300;
-const CIRCLE_SIZE = 240;
-
-export default function AvatarCropper({ imageUrl, onCrop, onCancel }: Props) {
+export default function AvatarCropper({ imageSrc, onSave, onCancel }: AvatarCropperProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const imgRef = useRef<HTMLImageElement | null>(null);
-  const offsetRef = useRef({ x: 0, y: 0 });
-  const scaleRef = useRef(1);
-  const dragging = useRef(false);
-  const lastPos = useRef({ x: 0, y: 0 });
-  const [sliderVal, setSliderVal] = useState(1);
-  const [ready, setReady] = useState(false);
+  const imageRef = useRef<HTMLImageElement | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const draw = () => {
+  const offsetX = useRef(0);
+  const offsetY = useRef(0);
+  const scale = useRef(1);
+  const isDragging = useRef(false);
+  const lastPointer = useRef({ x: 0, y: 0 });
+
+  const [zoom, setZoom] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const CANVAS_SIZE = 320;
+  const CIRCLE_RADIUS = 140;
+
+  const draw = useCallback(() => {
     const canvas = canvasRef.current;
-    const img = imgRef.current;
+    const img = imageRef.current;
     if (!canvas || !img) return;
-    const ctx = canvas.getContext("2d")!;
-    const w = canvas.width;
-    const h = canvas.height;
-    const s = scaleRef.current;
-    const off = offsetRef.current;
 
-    ctx.clearRect(0, 0, w, h);
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-    const imgW = img.width * s;
-    const imgH = img.height * s;
-    const x = (w - imgW) / 2 + off.x;
-    const y = (h - imgH) / 2 + off.y;
-    ctx.drawImage(img, x, y, imgW, imgH);
+    ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
-    // Darken outside circle
+    const w = img.naturalWidth * scale.current;
+    const h = img.naturalHeight * scale.current;
+    ctx.drawImage(img, offsetX.current, offsetY.current, w, h);
+
     ctx.save();
     ctx.fillStyle = "rgba(0,0,0,0.55)";
-    ctx.fillRect(0, 0, w, h);
+    ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+
     ctx.globalCompositeOperation = "destination-out";
     ctx.beginPath();
-    ctx.arc(w / 2, h / 2, CIRCLE_SIZE / 2, 0, Math.PI * 2);
+    ctx.arc(CANVAS_SIZE / 2, CANVAS_SIZE / 2, CIRCLE_RADIUS, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
 
-    // Circle border
-    ctx.strokeStyle = "rgba(255,255,255,0.6)";
+    ctx.save();
+    ctx.strokeStyle = "rgba(255,255,255,0.8)";
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(w / 2, h / 2, CIRCLE_SIZE / 2, 0, Math.PI * 2);
+    ctx.arc(CANVAS_SIZE / 2, CANVAS_SIZE / 2, CIRCLE_RADIUS, 0, Math.PI * 2);
     ctx.stroke();
-  };
+    ctx.restore();
+  }, []);
+
+  const clampOffset = useCallback(() => {
+    const img = imageRef.current;
+    if (!img) return;
+    const w = img.naturalWidth * scale.current;
+    const h = img.naturalHeight * scale.current;
+    const minX = CANVAS_SIZE - w;
+    const minY = CANVAS_SIZE - h;
+    offsetX.current = Math.min(0, Math.max(minX, offsetX.current));
+    offsetY.current = Math.min(0, Math.max(minY, offsetY.current));
+  }, []);
 
   useEffect(() => {
     const img = new Image();
     img.onload = () => {
-      imgRef.current = img;
-      const minScale = CIRCLE_SIZE / Math.min(img.width, img.height);
-      scaleRef.current = Math.max(minScale, 0.5);
-      setSliderVal(scaleRef.current);
-      offsetRef.current = { x: 0, y: 0 };
-      setReady(true);
+      imageRef.current = img;
+      const fitScale = Math.max(CANVAS_SIZE / img.naturalWidth, CANVAS_SIZE / img.naturalHeight);
+      scale.current = fitScale;
+      offsetX.current = (CANVAS_SIZE - img.naturalWidth * fitScale) / 2;
+      offsetY.current = (CANVAS_SIZE - img.naturalHeight * fitScale) / 2;
+      setZoom(1);
       draw();
     };
-    img.src = imageUrl;
-  }, [imageUrl]);
+    img.src = imageSrc;
+  }, [imageSrc, draw]);
 
-  const handlePointerDown = (e: React.PointerEvent) => {
-    dragging.current = true;
-    lastPos.current = { x: e.clientX, y: e.clientY };
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-  };
-
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!dragging.current) return;
-    const dx = e.clientX - lastPos.current.x;
-    const dy = e.clientY - lastPos.current.y;
-    lastPos.current = { x: e.clientX, y: e.clientY };
-    offsetRef.current = { x: offsetRef.current.x + dx, y: offsetRef.current.y + dy };
+  const handleZoom = useCallback((newZoom: number) => {
+    const img = imageRef.current;
+    if (!img) return;
+    const baseScale = Math.max(CANVAS_SIZE / img.naturalWidth, CANVAS_SIZE / img.naturalHeight);
+    const prevScale = scale.current;
+    const nextScale = baseScale * newZoom;
+    const cx = CANVAS_SIZE / 2;
+    const cy = CANVAS_SIZE / 2;
+    offsetX.current = cx - (cx - offsetX.current) * (nextScale / prevScale);
+    offsetY.current = cy - (cy - offsetY.current) * (nextScale / prevScale);
+    scale.current = nextScale;
+    setZoom(newZoom);
+    clampOffset();
     draw();
+  }, [clampOffset, draw]);
+
+  const getPointer = (e: React.MouseEvent | React.TouchEvent | MouseEvent | TouchEvent) => {
+    if ("touches" in e && e.touches.length > 0) {
+      return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
+    if ("clientX" in e) {
+      return { x: e.clientX, y: e.clientY };
+    }
+    return { x: 0, y: 0 };
   };
 
-  const handlePointerUp = () => {
-    dragging.current = false;
-  };
-
-  const handleWheel = (e: React.WheelEvent) => {
+  const onPointerDown = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
-    const img = imgRef.current;
-    if (!img) return;
-    const minScale = CIRCLE_SIZE / Math.min(img.width, img.height);
-    scaleRef.current = Math.max(minScale, Math.min(5, scaleRef.current - e.deltaY * 0.001));
-    setSliderVal(scaleRef.current);
+    isDragging.current = true;
+    lastPointer.current = getPointer(e);
+  }, []);
+
+  const onPointerMove = useCallback((e: MouseEvent | TouchEvent) => {
+    if (!isDragging.current) return;
+    e.preventDefault();
+    const p = getPointer(e);
+    offsetX.current += p.x - lastPointer.current.x;
+    offsetY.current += p.y - lastPointer.current.y;
+    lastPointer.current = p;
+    clampOffset();
     draw();
-  };
+  }, [clampOffset, draw]);
 
-  const handleCrop = () => {
-    const img = imgRef.current;
+  const onPointerUp = useCallback(() => {
+    isDragging.current = false;
+  }, []);
+
+  const onWheel = useCallback((e: React.WheelEvent) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.05 : 0.05;
+    const newZoom = Math.min(3, Math.max(1, zoom + delta));
+    handleZoom(newZoom);
+  }, [zoom, handleZoom]);
+
+  useEffect(() => {
+    const el = canvasRef.current;
+    if (!el) return;
+    el.addEventListener("mousemove", onPointerMove as EventListener);
+    el.addEventListener("mouseup", onPointerUp);
+    el.addEventListener("mouseleave", onPointerUp);
+    el.addEventListener("touchmove", onPointerMove as EventListener, { passive: false });
+    el.addEventListener("touchend", onPointerUp);
+    return () => {
+      el.removeEventListener("mousemove", onPointerMove as EventListener);
+      el.removeEventListener("mouseup", onPointerUp);
+      el.removeEventListener("mouseleave", onPointerUp);
+      el.removeEventListener("touchmove", onPointerMove as EventListener);
+      el.removeEventListener("touchend", onPointerUp);
+    };
+  }, [onPointerMove, onPointerUp]);
+
+  const handleSave = useCallback(() => {
+    const img = imageRef.current;
     if (!img) return;
-
-    const s = scaleRef.current;
-    const off = offsetRef.current;
-
-    const out = document.createElement("canvas");
-    out.width = OUTPUT_SIZE;
-    out.height = OUTPUT_SIZE;
-    const ctx = out.getContext("2d")!;
-
-    const imgW = img.width * s;
-    const imgH = img.height * s;
-    const imgX = (CANVAS_SIZE - imgW) / 2 + off.x;
-    const imgY = (CANVAS_SIZE - imgH) / 2 + off.y;
-
-    const circleX = CANVAS_SIZE / 2 - CIRCLE_SIZE / 2;
-    const circleY = CANVAS_SIZE / 2 - CIRCLE_SIZE / 2;
-
-    const srcX = (circleX - imgX) / s;
-    const srcY = (circleY - imgY) / s;
-    const srcSize = CIRCLE_SIZE / s;
-
-    ctx.drawImage(img, srcX, srcY, srcSize, srcSize, 0, 0, OUTPUT_SIZE, OUTPUT_SIZE);
-
-    onCrop(out.toDataURL("image/webp", 0.85));
-  };
+    setIsLoading(true);
+    const output = document.createElement("canvas");
+    output.width = 256;
+    output.height = 256;
+    const ctx = output.getContext("2d");
+    if (!ctx) return;
+    const srcX = (CANVAS_SIZE / 2 - CIRCLE_RADIUS - offsetX.current) / scale.current;
+    const srcY = (CANVAS_SIZE / 2 - CIRCLE_RADIUS - offsetY.current) / scale.current;
+    const srcSize = (CIRCLE_RADIUS * 2) / scale.current;
+    ctx.drawImage(img, srcX, srcY, srcSize, srcSize, 0, 0, 256, 256);
+    const dataUrl = output.toDataURL("image/webp", 0.85);
+    onSave(dataUrl);
+  }, [onSave]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-bg rounded-2xl border border-text/10 shadow-xl max-w-sm w-full overflow-hidden">
-        <div className="p-4 border-b border-text/[0.06]">
-          <h3 className="text-sm font-bold text-text text-center">Выберите область</h3>
-          <p className="text-[11px] text-text/40 text-center mt-0.5">Перетащите и масштабируйте</p>
-        </div>
-
-        <div className="relative flex items-center justify-center" style={{ height: CANVAS_SIZE }}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ backdropFilter: "blur(8px)", backgroundColor: "rgba(0,0,0,0.7)" }}
+    >
+      <div className="flex flex-col items-center gap-4 rounded-2xl p-6 bg-bg border border-text/10">
+        <h2 className="text-lg font-semibold text-text">Выберите область</h2>
+        <div ref={containerRef} style={{ position: "relative", width: CANVAS_SIZE, height: CANVAS_SIZE, borderRadius: 12, overflow: "hidden" }}>
           <canvas
             ref={canvasRef}
             width={CANVAS_SIZE}
             height={CANVAS_SIZE}
-            className="touch-none cursor-grab active:cursor-grabbing"
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
-            onWheel={handleWheel}
+            style={{ display: "block", cursor: "grab", touchAction: "none" }}
+            onMouseDown={onPointerDown}
+            onTouchStart={onPointerDown}
+            onWheel={onWheel}
           />
         </div>
-
-        {/* Zoom slider */}
-        <div className="px-6 pb-2 flex items-center gap-3">
-          <svg className="w-4 h-4 text-text/30 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM13.5 10.5h-6" />
-          </svg>
+        <div className="flex items-center gap-3 w-full">
+          <span className="text-text/50 text-xs">−</span>
           <input
             type="range"
-            min={0.1}
-            max={4}
+            min={1}
+            max={3}
             step={0.01}
-            value={sliderVal}
-            onChange={(e) => {
-              const v = parseFloat(e.target.value);
-              scaleRef.current = v;
-              setSliderVal(v);
-              draw();
-            }}
-            className="flex-1 accent-accent h-1"
+            value={zoom}
+            onChange={(e) => handleZoom(Number(e.target.value))}
+            className="flex-1 accent-accent"
           />
-          <svg className="w-4 h-4 text-text/30 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM10.5 7.5v6m3-3h-6" />
-          </svg>
+          <span className="text-text/50 text-xs">+</span>
         </div>
-
-        <div className="flex gap-3 p-4 border-t border-text/[0.06]">
+        <div className="flex gap-3 w-full">
           <button
             onClick={onCancel}
-            className="flex-1 py-2.5 rounded-xl text-sm font-semibold border border-text/10 text-text/60 hover:bg-text/[0.04] transition-colors"
+            disabled={isLoading}
+            className="flex-1 py-2.5 rounded-xl text-sm font-medium border border-text/10 text-text/60 hover:bg-text/[0.04] transition-colors"
           >
             Отмена
           </button>
           <button
-            onClick={handleCrop}
-            disabled={!ready}
+            onClick={handleSave}
+            disabled={isLoading}
             className="flex-1 py-2.5 rounded-xl text-sm font-bold bg-accent text-white hover:bg-accent/90 transition-colors disabled:opacity-50"
           >
-            Сохранить
+            {isLoading ? "Сохранение..." : "Сохранить"}
           </button>
         </div>
       </div>

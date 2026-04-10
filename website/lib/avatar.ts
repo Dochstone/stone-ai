@@ -1,4 +1,14 @@
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 const AVATAR_KEY = "stone_avatar";
+
+function getAuthToken(): string {
+  try {
+    const auth = JSON.parse(localStorage.getItem("stone_auth") || "{}");
+    return auth.token || "";
+  } catch {
+    return "";
+  }
+}
 
 export function getAvatarColor(email: string): string {
   const colors = ["#C4623D", "#0E9A83", "#4285f4", "#7c3aed", "#ec4899", "#f59e0b", "#06b6d4", "#10a37f"];
@@ -18,101 +28,75 @@ export function getSavedAvatar(): string | null {
   return localStorage.getItem(AVATAR_KEY);
 }
 
-export function saveAvatar(dataUrl: string): void {
-  localStorage.setItem(AVATAR_KEY, dataUrl);
-  window.dispatchEvent(new Event("avatar-changed"));
-}
-
-export function removeAvatar(): void {
-  localStorage.removeItem(AVATAR_KEY);
-  window.dispatchEvent(new Event("avatar-changed"));
-}
-
-const MAX_SIZE = 128;
-
-/** Resize image file to MAX_SIZE square, return base64 data URL */
 export function processAvatarFile(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     if (!file.type.startsWith("image/")) {
-      reject(new Error("Только изображения"));
+      reject(new Error("Файл должен быть изображением"));
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      reject(new Error("Файл слишком большой (макс. 10 МБ)"));
       return;
     }
     const reader = new FileReader();
-    reader.onload = () => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = MAX_SIZE;
-        canvas.height = MAX_SIZE;
-        const ctx = canvas.getContext("2d")!;
-        const side = Math.min(img.width, img.height);
-        const sx = (img.width - side) / 2;
-        const sy = (img.height - side) / 2;
-        ctx.drawImage(img, sx, sy, side, side, 0, 0, MAX_SIZE, MAX_SIZE);
-        resolve(canvas.toDataURL("image/webp", 0.85));
-      };
-      img.onerror = () => reject(new Error("Ошибка загрузки изображения"));
-      img.src = reader.result as string;
-    };
+    reader.onload = (e) => resolve(e.target?.result as string);
     reader.onerror = () => reject(new Error("Ошибка чтения файла"));
     reader.readAsDataURL(file);
   });
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
+export async function uploadAvatarToServer(base64DataUrl: string): Promise<string> {
+  const token = getAuthToken();
+  const res = await fetch(`${API_URL}/api/user/avatar`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ image_base64: base64DataUrl }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.message || `Ошибка сервера: ${res.status}`);
+  }
+  const data = await res.json();
+  if (!data.ok || !data.avatar_url) throw new Error("Сервер не вернул URL аватарки");
+  return `${API_URL}${data.avatar_url}`;
+}
 
-export async function uploadAvatarToServer(base64: string): Promise<string | null> {
+export function saveAvatar(fullUrl: string): void {
+  localStorage.setItem(AVATAR_KEY, fullUrl);
+  window.dispatchEvent(new CustomEvent("avatar-changed", { detail: { url: fullUrl } }));
+}
+
+export async function removeAvatar(): Promise<void> {
+  const token = getAuthToken();
+  await fetch(`${API_URL}/api/user/avatar`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  }).catch(() => {});
+  localStorage.removeItem(AVATAR_KEY);
+  window.dispatchEvent(new CustomEvent("avatar-changed", { detail: { url: null } }));
+}
+
+export async function syncAvatarFromProfile(): Promise<string | null> {
+  const token = getAuthToken();
+  if (!token) return null;
   try {
-    const auth = JSON.parse(localStorage.getItem("stone_auth") || "{}");
-    if (!auth.token) return null;
-    const res = await fetch(`${API_URL}/api/user/avatar`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
-      body: JSON.stringify({ image_base64: base64 }),
+    const res = await fetch(`${API_URL}/api/user/me`, {
+      headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) return null;
     const data = await res.json();
-    return data.avatar_url || null;
-  } catch {
-    return null;
-  }
-}
-
-export async function deleteAvatarFromServer(): Promise<boolean> {
-  try {
-    const auth = JSON.parse(localStorage.getItem("stone_auth") || "{}");
-    if (!auth.token) return false;
-    const res = await fetch(`${API_URL}/api/user/avatar`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${auth.token}` },
-    });
-    return res.ok;
-  } catch {
-    return false;
-  }
-}
-
-/** Save avatar: upload to server + cache in localStorage */
-export async function saveAvatarFull(base64: string): Promise<void> {
-  console.log("[avatar] uploading, base64 length:", base64.length);
-  const serverUrl = await uploadAvatarToServer(base64);
-  console.log("[avatar] server response:", serverUrl);
-  // Cache locally for instant display
-  saveAvatar(serverUrl ? `${API_URL}${serverUrl}` : base64);
-}
-
-/** Remove avatar from server + localStorage */
-export async function removeAvatarFull(): Promise<void> {
-  await deleteAvatarFromServer();
-  removeAvatar();
-}
-
-/** Sync avatar from server profile data */
-export function syncAvatarFromProfile(avatarUrl: string | null): void {
-  if (avatarUrl) {
-    const full = avatarUrl.startsWith("http") ? avatarUrl : `${API_URL}${avatarUrl}`;
-    if (getSavedAvatar() !== full) {
-      saveAvatar(full);
+    const u = data.user || data;
+    const serverUrl = u?.avatar_url ? `${API_URL}${u.avatar_url}` : null;
+    const localUrl = localStorage.getItem(AVATAR_KEY);
+    if (serverUrl && serverUrl !== localUrl) {
+      saveAvatar(serverUrl);
+      return serverUrl;
     }
+    return localUrl;
+  } catch {
+    return localStorage.getItem(AVATAR_KEY);
   }
 }
