@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useCallback, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface AvatarCropperProps {
   imageSrc: string;
@@ -171,9 +172,9 @@ export default function AvatarCropper({ imageSrc, onSave, onCancel }: AvatarCrop
     onSave(dataUrl);
   }, [onSave]);
 
-  return (
+  const modal = (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="fixed inset-0 z-[9999] flex items-center justify-center"
       style={{ backdropFilter: "blur(8px)", backgroundColor: "rgba(0,0,0,0.7)" }}
     >
       <div className="flex flex-col items-center gap-4 rounded-2xl p-6 bg-bg border border-text/10">
@@ -221,4 +222,6 @@ export default function AvatarCropper({ imageSrc, onSave, onCancel }: AvatarCrop
       </div>
     </div>
   );
+
+  return createPortal(modal, document.body);
 }

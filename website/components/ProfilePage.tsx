@@ -196,6 +196,7 @@ function AvatarUpload({ email, name }: { email: string; name?: string | null }) 
         type="file"
         accept="image/*"
         onChange={handleFileChange}
+        onInput={handleFileChange as unknown as React.FormEventHandler<HTMLInputElement>}
         style={{ display: "none" }}
       />
 
