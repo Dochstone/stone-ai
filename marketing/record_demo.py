@@ -1,11 +1,17 @@
 """Record a demo video of Stone AI chat for marketing."""
 
 import asyncio
+import os
 from playwright.async_api import async_playwright
 
 OUTPUT = "C:/Users/Administrator/stone-ai/marketing/ad-reel/output/chat_demo.webm"
 
 async def main():
+    demo_email = os.getenv("STONE_DEMO_EMAIL", "")
+    demo_password = os.getenv("STONE_DEMO_PASSWORD", "")
+    if not demo_email or not demo_password:
+        raise RuntimeError("Set STONE_DEMO_EMAIL and STONE_DEMO_PASSWORD before recording a demo")
+
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         context = await browser.new_context(
@@ -24,8 +30,8 @@ async def main():
         # Fill login form
         email_input = page.locator('input[type="email"]')
         if await email_input.is_visible(timeout=5000):
-            await email_input.fill("dochstone@gmail.com")
-            await page.locator('input[type="password"]').fill("Asde123asd@")
+            await email_input.fill(demo_email)
+            await page.locator('input[type="password"]').fill(demo_password)
             await page.locator('button[type="submit"]').click()
             await page.wait_for_timeout(3000)
             print("   Logged in")

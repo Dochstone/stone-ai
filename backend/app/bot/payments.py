@@ -60,6 +60,7 @@ async def process_successful_payment(message: Message):
     parts = payload.split(":")
 
     import httpx
+    internal_headers = {"X-Stone-Internal-Key": get_settings().internal_api_key}
 
     # Subscription format: sub:<tier>:<user_id>
     if parts[0] == "sub" and len(parts) == 3:
@@ -72,6 +73,7 @@ async def process_successful_payment(message: Message):
                 resp = await client.post(
                     "http://localhost:8000/api/payment/stars/subscribe",
                     params={"tg_id": user_id, "tier": tier, "payment_id": provider_id},
+                    headers=internal_headers,
                 )
                 if resp.status_code == 200:
                     await message.answer(
@@ -100,6 +102,7 @@ async def process_successful_payment(message: Message):
                 resp = await client.post(
                     "http://localhost:8000/api/payment/stars/confirm",
                     params={"tg_id": user_id, "usd_amount": usd_amount, "payment_id": provider_id},
+                    headers=internal_headers,
                 )
                 if resp.status_code == 200:
                     result = resp.json()

@@ -10,7 +10,7 @@ import httpx
 logger = logging.getLogger(__name__)
 
 EMAIL_PROXY_URL = os.getenv("EMAIL_PROXY_URL", "http://45.11.93.113:5050/send")
-EMAIL_PROXY_KEY = os.getenv("EMAIL_PROXY_KEY", "stoneai-email-secret-2026")
+EMAIL_PROXY_KEY = os.getenv("EMAIL_PROXY_KEY", "")
 
 
 def _send_telegram(tg_id: int, text: str):
@@ -59,6 +59,9 @@ def generate_code() -> str:
 
 def _send_email(to_email: str, subject: str, html_body: str):
     try:
+        if not EMAIL_PROXY_KEY:
+            logger.error("EMAIL_PROXY_KEY is not configured")
+            return False
         r = httpx.post(
             EMAIL_PROXY_URL,
             json={"to": to_email, "subject": subject, "html": html_body},

@@ -1,9 +1,10 @@
 """Payment endpoints — Stars + TON Connect for USD balance top-up."""
 
+import hmac
 import logging
 import math
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, text
@@ -29,6 +30,41 @@ router = APIRouter(prefix="/api/payment", tags=["payment"])
 # Pricing constants
 STAR_PRICE_USD = 0.013          # 1 Telegram Star ~ $0.013
 MIN_TOP_UP_USD = 1.0            # minimum top-up
+
+
+def _require_internal_payment_request(request: Request) -> None:
+    """Protect bot-only payment confirmation endpoints from public access."""
+    settings = get_settings()
+    expected = settings.internal_api_key
+    if not expected:
+        raise HTTPException(status_code=503, detail="Internal payment auth is not configured")
+
+    provided = request.headers.get("X-Stone-Internal-Key", "")
+    if not provided or not hmac.compare_digest(provided, expected):
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+
+async def _get_user_by_external_id(db: AsyncSession, external_id: int, *, lock: bool = False):
+    query = select(User).where(User.telegram_id == external_id)
+    if lock:
+        query = query.with_for_update()
+    result = await db.execute(query)
+    user = result.scalar_one_or_none()
+    if user:
+        return user
+
+    query = select(User).where(User.id == external_id)
+    if lock:
+        query = query.with_for_update()
+    result = await db.execute(query)
+    return result.scalar_one_or_none()
+
+
+async def _increment_total_deposited(db: AsyncSession, external_id: int, amount_usd: float) -> None:
+    user = await _get_user_by_external_id(db, external_id, lock=True)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.total_deposited_usd = round(float(user.total_deposited_usd or 0) + float(amount_usd or 0), 2)
 
 
 class TopUpRequest(BaseModel):
@@ -79,19 +115,40 @@ async def create_stars_invoice(
 
 @router.post("/stars/confirm")
 async def confirm_stars_payment(
+    request: Request,
     tg_id: int,
     usd_amount: float,
     payment_id: str,
     db: AsyncSession = Depends(get_db),
 ):
     """Called by bot after successful_payment. Adds USD to balance."""
-    new_balance = await add_balance(db, tg_id, usd_amount)
+    _require_internal_payment_request(request)
+    if usd_amount <= 0:
+        raise HTTPException(status_code=400, detail="Invalid payment amount")
 
-    # Update total_deposited_usd
-    await db.execute(
-        text("UPDATE users SET total_deposited_usd = COALESCE(total_deposited_usd, 0) + :amt WHERE telegram_id = :tid"),
-        {"amt": usd_amount, "tid": tg_id}
+    result = await db.execute(
+        select(User).where(User.telegram_id == tg_id).with_for_update()
     )
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    existing_result = await db.execute(
+        select(Transaction).where(Transaction.provider_id == payment_id).with_for_update()
+    )
+    existing_tx = existing_result.scalar_one_or_none()
+    if existing_tx:
+        if existing_tx.user_tg_id != tg_id:
+            raise HTTPException(status_code=409, detail="Payment already belongs to another user")
+        return {
+            "status": "already_processed",
+            "added_usd": float(existing_tx.amount_usd or 0),
+            "new_balance_usd": float(user.balance_usd or 0),
+        }
+
+    new_balance = round(float(user.balance_usd or 0) + usd_amount, 6)
+    user.balance_usd = new_balance
+    user.total_deposited_usd = round(float(user.total_deposited_usd or 0) + usd_amount, 2)
 
     tx = Transaction(
         user_tg_id=tg_id,
@@ -170,6 +227,7 @@ async def create_stars_subscription(
 
 @router.post("/stars/subscribe")
 async def confirm_stars_subscription(
+    request: Request,
     tg_id: int,
     tier: str,
     payment_id: str,
@@ -178,13 +236,24 @@ async def confirm_stars_subscription(
     """Called by bot after successful Stars subscription payment."""
     from datetime import timedelta
 
+    _require_internal_payment_request(request)
+
     if tier not in PLAN_PRICES_RUB:
         raise HTTPException(400, "Invalid tier")
 
-    result = await db.execute(select(User).where(User.telegram_id == tg_id))
+    result = await db.execute(select(User).where(User.telegram_id == tg_id).with_for_update())
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(404, "User not found")
+
+    existing_result = await db.execute(
+        select(Transaction).where(Transaction.provider_id == payment_id).with_for_update()
+    )
+    existing_tx = existing_result.scalar_one_or_none()
+    if existing_tx:
+        if existing_tx.user_tg_id != tg_id:
+            raise HTTPException(status_code=409, detail="Payment already belongs to another user")
+        return {"status": "already_processed", "tier": tier}
 
     user.subscription_tier = tier
     user.subscription_started = datetime.utcnow()
@@ -208,11 +277,7 @@ async def confirm_stars_subscription(
         provider_id=payment_id,
     )
     db.add(tx)
-
-    await db.execute(
-        text("UPDATE users SET total_deposited_usd = COALESCE(total_deposited_usd, 0) + :amt WHERE telegram_id = :tid"),
-        {"amt": price_usd, "tid": tg_id}
-    )
+    user.total_deposited_usd = round(float(user.total_deposited_usd or 0) + price_usd, 2)
 
     from app.routers.referral import credit_referrer
     await credit_referrer(db, tg_id, price_usd)
@@ -394,10 +459,7 @@ async def verify_ton_payment(
     new_balance = await add_balance(db, tg_user["id"], usd_amount)
 
     # Update total_deposited_usd
-    await db.execute(
-        text("UPDATE users SET total_deposited_usd = COALESCE(total_deposited_usd, 0) + :amt WHERE telegram_id = :tid"),
-        {"amt": usd_amount, "tid": tg_user["id"]}
-    )
+    await _increment_total_deposited(db, tg_user["id"], usd_amount)
 
     tx = Transaction(
         user_tg_id=tg_user["id"],

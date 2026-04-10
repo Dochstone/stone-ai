@@ -7,7 +7,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import text
+from sqlalchemy import select, text
 
 from app.database import get_db
 from app.middleware.auth import get_current_user
@@ -60,6 +60,100 @@ MIN_TOP_UP_USD = 1.0
 class TopUpRequest(BaseModel):
     usd_amount: float
     tier: str | None = None  # If set, treat as subscription payment
+
+
+async def _get_user_by_external_id(db: AsyncSession, external_id: int, *, lock: bool = False):
+    from app.models.user import User
+
+    query = select(User).where(User.telegram_id == external_id)
+    if lock:
+        query = query.with_for_update()
+    result = await db.execute(query)
+    user = result.scalar_one_or_none()
+    if user:
+        return user
+
+    query = select(User).where(User.id == external_id)
+    if lock:
+        query = query.with_for_update()
+    result = await db.execute(query)
+    return result.scalar_one_or_none()
+
+
+async def _increment_total_deposited(db: AsyncSession, external_id: int, amount_usd: float) -> None:
+    user = await _get_user_by_external_id(db, external_id, lock=True)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.total_deposited_usd = round(float(user.total_deposited_usd or 0) + float(amount_usd or 0), 2)
+
+
+async def _claim_pending_transaction(
+    db: AsyncSession,
+    *,
+    provider_id: str,
+    fallback_tx_hash: str | None = None,
+) -> tuple[Transaction | None, bool]:
+    """Lock and mark a pending transaction as completed exactly once."""
+    query = (
+        select(Transaction)
+        .where(Transaction.provider_id == provider_id, Transaction.status == "pending")
+        .order_by(Transaction.id.desc())
+        .with_for_update()
+    )
+    result = await db.execute(query)
+    tx = result.scalars().first()
+
+    if not tx and fallback_tx_hash:
+        query = (
+            select(Transaction)
+            .where(Transaction.tx_hash == fallback_tx_hash, Transaction.status == "pending")
+            .order_by(Transaction.id.desc())
+            .with_for_update()
+        )
+        result = await db.execute(query)
+        tx = result.scalars().first()
+
+    if tx:
+        tx.status = "completed"
+        await db.flush()
+        return tx, False
+
+    existing = await db.execute(
+        select(Transaction.id)
+        .where(Transaction.provider_id == provider_id)
+        .order_by(Transaction.id.desc())
+        .limit(1)
+    )
+    existing_tx = existing.scalars().first()
+    if existing_tx is None and fallback_tx_hash:
+        existing = await db.execute(
+            select(Transaction.id)
+            .where(Transaction.tx_hash == fallback_tx_hash)
+            .order_by(Transaction.id.desc())
+            .limit(1)
+        )
+        existing_tx = existing.scalars().first()
+
+    return None, existing_tx is not None
+
+
+async def _verify_platega_webhook_payload(transaction_id: str, amount: float | int | None, currency: str) -> bool:
+    """Cross-check webhook data against Platega's API using merchant credentials."""
+    remote = await platega_service.check_status(transaction_id)
+    if not remote:
+        return False
+    if str(remote.get("status", "")).upper() != "CONFIRMED":
+        return False
+    if str(remote.get("currency", "")).upper() != str(currency or "").upper():
+        return False
+
+    if amount is None or remote.get("amount") is None:
+        return False
+
+    try:
+        return int(round(float(remote["amount"]))) == int(round(float(amount)))
+    except (TypeError, ValueError):
+        return False
 
 
 # ═══════════════════════════════════════════════════════════
@@ -124,13 +218,14 @@ async def create_lava_order(
 async def lava_webhook(request: Request, db: AsyncSession = Depends(get_db)):
     """Handle Lava.ru webhook callback after payment."""
     settings = get_settings()
+    if not settings.lava_webhook_key:
+        raise HTTPException(status_code=503, detail="Lava webhook verification is not configured")
+
     body = await request.json()
     signature = request.headers.get("Signature", "")
-
-    if settings.lava_webhook_key:
-        if not lava_service.verify_webhook_signature(body, signature, settings.lava_webhook_key):
-            logger.warning("Lava webhook: invalid signature")
-            raise HTTPException(status_code=403, detail="Invalid signature")
+    if not signature or not lava_service.verify_webhook_signature(body, signature, settings.lava_webhook_key):
+        logger.warning("Lava webhook: invalid signature")
+        raise HTTPException(status_code=403, detail="Invalid signature")
 
     status = body.get("status")
     order_id = body.get("order_id", "")
@@ -141,40 +236,22 @@ async def lava_webhook(request: Request, db: AsyncSession = Depends(get_db)):
     if status != "success":
         return {"ok": True, "message": "Ignored non-success status"}
 
-    result = await db.execute(
-        text("SELECT id, user_tg_id, amount_usd, status FROM transactions "
-             "WHERE provider_id = :pid AND status = 'pending' LIMIT 1"),
-        {"pid": f"lava:{invoice_id}"}
+    tx, already_processed = await _claim_pending_transaction(
+        db,
+        provider_id=f"lava:{invoice_id}",
+        fallback_tx_hash=order_id,
     )
-    row = result.fetchone()
-
-    if not row:
-        result = await db.execute(
-            text("SELECT id, user_tg_id, amount_usd, status FROM transactions "
-                 "WHERE provider_id LIKE :pid AND status = 'pending' LIMIT 1"),
-            {"pid": f"lava:%{order_id}%"}
-        )
-        row = result.fetchone()
-
-    if not row:
+    if already_processed:
+        return {"ok": True, "message": "Already processed"}
+    if not tx:
         logger.warning(f"Lava webhook: transaction not found for order={order_id}")
         return {"ok": True, "message": "Transaction not found"}
 
-    tx_id, user_tg_id, usd_amount, tx_status = row
-
-    if tx_status == "completed":
-        return {"ok": True, "message": "Already processed"}
+    user_tg_id = tx.user_tg_id
+    usd_amount = float(tx.amount_usd or 0)
 
     new_balance = await add_balance(db, user_tg_id, usd_amount)
-
-    await db.execute(
-        text("UPDATE transactions SET status = 'completed' WHERE id = :tid"),
-        {"tid": tx_id}
-    )
-    await db.execute(
-        text("UPDATE users SET total_deposited_usd = COALESCE(total_deposited_usd, 0) + :amt WHERE telegram_id = :tid"),
-        {"amt": usd_amount, "tid": user_tg_id}
-    )
+    await _increment_total_deposited(db, user_tg_id, usd_amount)
 
     from app.routers.referral import credit_referrer
     await credit_referrer(db, user_tg_id, usd_amount)
@@ -232,11 +309,21 @@ async def create_platega_order(
     if not settings.platega_merchant_id or not settings.platega_secret:
         raise HTTPException(status_code=503, detail="Оплата через Platega временно недоступна")
 
-    if req.usd_amount < MIN_TOP_UP_USD:
+    is_subscription = req.tier and req.tier in ("mini", "max", "max-pro")
+    if not is_subscription and req.usd_amount < MIN_TOP_UP_USD:
         raise HTTPException(status_code=400, detail=f"Минимальная сумма ${MIN_TOP_UP_USD:.0f}")
 
-    is_subscription = req.tier and req.tier in ("mini", "max", "max-pro")
-    rub_amount = round(req.usd_amount * USD_TO_RUB, 0)
+    if is_subscription:
+        from app.services.subscription import PLANS
+
+        if req.tier not in PLANS:
+            raise HTTPException(status_code=400, detail="Недопустимый тариф")
+        plan = PLANS[req.tier]
+        rub_amount = round(float(plan["price_rub"]), 0)
+        usd_amount = round(float(plan["price_rub"]) / USD_TO_RUB, 2)
+    else:
+        rub_amount = round(req.usd_amount * USD_TO_RUB, 0)
+        usd_amount = req.usd_amount
     order_id = platega_service.generate_order_id(tg_user["id"])
 
     description = f"Stone AI · Подписка {req.tier}" if is_subscription else f"Stone AI · Пополнение баланса: ${req.usd_amount:.2f}"
@@ -256,9 +343,9 @@ async def create_platega_order(
         user_tg_id=tg_user["id"],
         amount=rub_amount,
         currency="RUB",
-        amount_usd=req.usd_amount,
+        amount_usd=usd_amount,
         product_type="subscription" if is_subscription else "topup",
-        product_id=f"sub:{req.tier}" if is_subscription else f"topup_usd:{req.usd_amount:.2f}",
+        product_id=f"sub:{req.tier}" if is_subscription else f"topup_usd:{usd_amount:.2f}",
         status="pending",
         tx_hash=order_id,
         provider_id=f"platega:{transaction_id}",
@@ -266,13 +353,13 @@ async def create_platega_order(
     db.add(tx)
     await db.commit()
 
-    logger.info(f"Platega order: user={tg_user['id']}, rub={rub_amount}, usd={req.usd_amount}, txn={transaction_id}")
+    logger.info(f"Platega order: user={tg_user['id']}, rub={rub_amount}, usd={usd_amount}, txn={transaction_id}")
 
     return {
         "order_id": order_id,
         "payment_url": payment["redirect_url"],
         "amount_rub": rub_amount,
-        "usd_amount": req.usd_amount,
+        "usd_amount": usd_amount,
     }
 
 
@@ -289,7 +376,7 @@ async def platega_webhook(request: Request, db: AsyncSession = Depends(get_db)):
 
     if not platega_service.verify_webhook(merchant_id, secret):
         logger.warning("Platega webhook: invalid credentials")
-        return {"ok": True}
+        raise HTTPException(status_code=403, detail="Invalid signature")
 
     body = await request.json()
 
@@ -303,24 +390,23 @@ async def platega_webhook(request: Request, db: AsyncSession = Depends(get_db)):
     if status != "CONFIRMED":
         return {"ok": True, "message": f"Ignored status: {status}"}
 
+    if not await _verify_platega_webhook_payload(transaction_id, amount, currency):
+        logger.warning(f"Platega webhook: payload verification failed for id={transaction_id}")
+        raise HTTPException(status_code=403, detail="Invalid webhook payload")
+
     provider_id = f"platega:{transaction_id}"
 
-    result = await db.execute(
-        text("SELECT id, user_tg_id, amount_usd, status, product_type, product_id FROM transactions "
-             "WHERE provider_id = :pid AND status = 'pending' LIMIT 1"),
-        {"pid": provider_id}
-    )
-    row = result.fetchone()
-
-    if not row:
+    tx, already_processed = await _claim_pending_transaction(db, provider_id=provider_id)
+    if already_processed:
+        return {"ok": True, "message": "Already processed"}
+    if not tx:
         logger.warning(f"Platega webhook: transaction not found for id={transaction_id}")
         return {"ok": True, "message": "Transaction not found"}
 
-    tx_id, user_tg_id, usd_amount, tx_status, product_type, product_id = row
-
-    if tx_status == "completed":
-        return {"ok": True, "message": "Already processed"}
-
+    user_tg_id = tx.user_tg_id
+    usd_amount = float(tx.amount_usd or 0)
+    product_type = tx.product_type
+    product_id = tx.product_id
     new_balance = None
 
     # Handle subscription or top-up
@@ -350,14 +436,7 @@ async def platega_webhook(request: Request, db: AsyncSession = Depends(get_db)):
         new_balance = await add_balance(db, user_tg_id, usd_amount)
         logger.info(f"Platega balance top-up: user={user_tg_id}, usd={usd_amount}, balance=${new_balance:.6f}")
 
-    await db.execute(
-        text("UPDATE transactions SET status = 'completed' WHERE id = :tid"),
-        {"tid": tx_id}
-    )
-    await db.execute(
-        text("UPDATE users SET total_deposited_usd = COALESCE(total_deposited_usd, 0) + :amt WHERE telegram_id = :tid"),
-        {"amt": usd_amount, "tid": user_tg_id}
-    )
+    await _increment_total_deposited(db, user_tg_id, usd_amount)
 
     from app.routers.referral import credit_referrer
     await credit_referrer(db, user_tg_id, usd_amount)
@@ -471,16 +550,18 @@ async def create_crypto_order(
 async def heleket_webhook(request: Request, db: AsyncSession = Depends(get_db)):
     """Handle Heleket webhook callback after crypto payment."""
     settings = get_settings()
+    if not settings.heleket_api_key:
+        raise HTTPException(status_code=503, detail="Heleket webhook verification is not configured")
+
     body_bytes = await request.body()
     body = await request.json()
     received_sign = request.headers.get("sign", "")
 
-    if settings.heleket_api_key and received_sign:
-        if not heleket_service.verify_webhook_signature(
-            body_bytes, received_sign, settings.heleket_api_key
-        ):
-            logger.warning("Heleket webhook: invalid signature")
-            raise HTTPException(status_code=403, detail="Invalid signature")
+    if not received_sign or not heleket_service.verify_webhook_signature(
+        body_bytes, received_sign, settings.heleket_api_key
+    ):
+        logger.warning("Heleket webhook: invalid signature")
+        raise HTTPException(status_code=403, detail="Invalid signature")
 
     status = body.get("status")
     payment_uuid = body.get("uuid", "")
@@ -490,31 +571,21 @@ async def heleket_webhook(request: Request, db: AsyncSession = Depends(get_db)):
     if status not in ("paid", "paid_over"):
         return {"ok": True, "message": f"Ignored status: {status}"}
 
-    result = await db.execute(
-        text("SELECT id, user_tg_id, amount_usd, status, product_type, product_id FROM transactions "
-             "WHERE provider_id = :pid AND status = 'pending' LIMIT 1"),
-        {"pid": f"heleket:{payment_uuid}"}
+    tx, already_processed = await _claim_pending_transaction(
+        db,
+        provider_id=f"heleket:{payment_uuid}",
     )
-    row = result.fetchone()
-
-    if not row:
+    if already_processed:
+        return {"ok": True, "message": "Already processed"}
+    if not tx:
         logger.warning(f"Heleket webhook: transaction not found for uuid={payment_uuid}")
         return {"ok": True, "message": "Transaction not found"}
 
-    tx_id, user_tg_id, usd_amount, tx_status, product_type, product_id = row
-
-    if tx_status == "completed":
-        return {"ok": True, "message": "Already processed"}
-
-    # Mark transaction as completed
-    await db.execute(
-        text("UPDATE transactions SET status = 'completed' WHERE id = :tid"),
-        {"tid": tx_id}
-    )
-    await db.execute(
-        text("UPDATE users SET total_deposited_usd = COALESCE(total_deposited_usd, 0) + :amt WHERE telegram_id = :tid"),
-        {"amt": usd_amount, "tid": user_tg_id}
-    )
+    user_tg_id = tx.user_tg_id
+    usd_amount = float(tx.amount_usd or 0)
+    product_type = tx.product_type
+    product_id = tx.product_id
+    await _increment_total_deposited(db, user_tg_id, usd_amount)
 
     if product_type == "subscription" and product_id and product_id.startswith("sub:"):
         # Activate subscription
@@ -675,9 +746,6 @@ import httpx
 
 _ton_orders: dict[str, dict] = {}
 
-TON_MERCHANT_WALLET = "UQBfxl37Bgf7FVaO4prAM5YA0d9pfJdRL7hymmYZX01Skjc7"
-TON_PLAN_PRICES_USD = {"mini": 4.0, "max": 9.0, "max-pro": 20.0}
-
 
 @router.get("/ton-rate")
 async def get_ton_rate():
@@ -695,7 +763,7 @@ async def get_ton_rate():
 
 class TonOrderRequest(BaseModel):
     tier: str
-    amount_ton: float
+    amount_ton: float | None = None
 
 
 @router.post("/ton-order")
@@ -705,20 +773,29 @@ async def create_ton_order(
     db: AsyncSession = Depends(get_db),
 ):
     """Create TON payment order with unique comment."""
-    if req.tier not in TON_PLAN_PRICES_USD:
+    settings = get_settings()
+    if not settings.ton_wallet_address:
+        raise HTTPException(503, "TON wallet is not configured")
+    if req.tier not in PLAN_PRICES_RUB:
         raise HTTPException(400, "Недопустимый тариф")
 
     user_id = tg_user.get("db_id") or tg_user["id"]
     order_id = _uuid.uuid4().hex[:12]
     comment = f"stone_{order_id}"
-    price_usd = TON_PLAN_PRICES_USD[req.tier]
-    price_rub = PLAN_PRICES_RUB.get(req.tier, 0)
+    price_rub = PLAN_PRICES_RUB[req.tier]
+    price_usd = round(price_rub / USD_TO_RUB, 2)
+    ton_rate = await get_ton_rate()
+    ton_usd = float(ton_rate["ton_usd"])
+    if ton_usd <= 0:
+        raise HTTPException(503, "TON rate is unavailable")
+    amount_ton = round(price_usd / ton_usd, 4)
 
     _ton_orders[order_id] = {
         "user_id": user_id, "user_tg_id": tg_user["id"],
-        "tier": req.tier, "amount_ton": req.amount_ton,
+        "tier": req.tier, "amount_ton": amount_ton,
         "amount_usd": price_usd, "comment": comment,
         "status": "pending", "created_at": _time.time(),
+        "confirmed_tx_hash": None,
     }
 
     tx = Transaction(
@@ -734,7 +811,7 @@ async def create_ton_order(
     for k in [k for k, v in _ton_orders.items() if now - v["created_at"] > 3600]:
         _ton_orders.pop(k, None)
 
-    return {"order_id": order_id, "comment": comment, "amount_ton": req.amount_ton, "wallet": TON_MERCHANT_WALLET}
+    return {"order_id": order_id, "comment": comment, "amount_ton": amount_ton, "wallet": settings.ton_wallet_address}
 
 
 @router.get("/ton-check")
@@ -748,16 +825,18 @@ async def check_ton_payment(
     if not order:
         raise HTTPException(404, "Заказ не найден")
     if order["status"] == "confirmed":
-        return {"status": "confirmed"}
+        return {"status": "confirmed", "tx_hash": order.get("confirmed_tx_hash")}
 
     settings = get_settings()
+    if not settings.ton_wallet_address:
+        raise HTTPException(503, "TON wallet is not configured")
     tonapi_key = getattr(settings, 'tonapi_key', None)
 
     try:
         headers = {"Authorization": f"Bearer {tonapi_key}"} if tonapi_key else {}
         async with httpx.AsyncClient(timeout=15) as client:
             resp = await client.get(
-                f"https://tonapi.io/v2/blockchain/accounts/{TON_MERCHANT_WALLET}/transactions?limit=20",
+                f"https://tonapi.io/v2/blockchain/accounts/{settings.ton_wallet_address}/transactions?limit=20",
                 headers=headers,
             )
             if resp.status_code != 200:
@@ -772,17 +851,30 @@ async def check_ton_payment(
                     comment_text = in_msg.get("message", "")
 
                 min_amount = int(order["amount_ton"] * 1e9 * 0.95)
-                if value >= min_amount and order["comment"] in str(comment_text):
-                    order["status"] = "confirmed"
+                if value >= min_amount and str(comment_text) == order["comment"]:
+                    if order["status"] == "confirmed":
+                        return {"status": "confirmed", "tx_hash": order.get("confirmed_tx_hash")}
 
                     from datetime import datetime, timedelta
-                    from sqlalchemy import select
                     from app.models import User
 
-                    result2 = await db.execute(select(User).where(User.id == order["user_id"]))
+                    tx_result = await db.execute(
+                        select(Transaction)
+                        .where(Transaction.provider_id == f"ton:{order_id}", Transaction.status == "pending")
+                        .with_for_update()
+                    )
+                    tx = tx_result.scalar_one_or_none()
+                    if not tx:
+                        order["status"] = "confirmed"
+                        order["confirmed_tx_hash"] = tx_item.get("hash", "")
+                        return {"status": "confirmed", "tx_hash": order.get("confirmed_tx_hash")}
+
+                    result2 = await db.execute(select(User).where(User.id == order["user_id"]).with_for_update())
                     user = result2.scalar_one_or_none()
                     if not user:
-                        result2 = await db.execute(select(User).where(User.telegram_id == order["user_tg_id"]))
+                        result2 = await db.execute(
+                            select(User).where(User.telegram_id == order["user_tg_id"]).with_for_update()
+                        )
                         user = result2.scalar_one_or_none()
                     if user:
                         user.subscription_tier = order["tier"]
@@ -793,15 +885,14 @@ async def check_ton_payment(
                         user.monthly_images_used = 0
                         user.monthly_videos_used = 0
 
-                    await db.execute(
-                        text("UPDATE transactions SET status = 'completed' WHERE provider_id = :pid"),
-                        {"pid": f"ton:{order_id}"}
-                    )
+                    tx.status = "completed"
                     from app.routers.referral import credit_referrer
                     await credit_referrer(db, order["user_tg_id"], order["amount_usd"])
                     await db.commit()
+                    order["status"] = "confirmed"
+                    order["confirmed_tx_hash"] = tx_item.get("hash", "")
                     logger.info(f"TON confirmed: user={order['user_id']}, tier={order['tier']}")
-                    return {"status": "confirmed"}
+                    return {"status": "confirmed", "tx_hash": order.get("confirmed_tx_hash")}
 
     except Exception as e:
         logger.error(f"TON check error: {e}")

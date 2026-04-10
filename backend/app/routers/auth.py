@@ -23,6 +23,7 @@ from app.middleware.web_auth import (
     create_jwt,
     JWT_EXPIRE_DAYS,
 )
+from app.middleware.rate_limit import RateLimiter
 from app.config import get_settings
 from app.services.email_service import generate_code, send_verification_code, send_reset_code
 from app.services.streak import update_login_streak
@@ -34,6 +35,7 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 CODE_TTL = 600  # 10 minutes
 MAX_CODE_ATTEMPTS = 5
+verification_request_limiter = RateLimiter(max_requests=3, window_seconds=300)
 
 
 class RegisterRequest(BaseModel):
@@ -48,6 +50,7 @@ class LoginRequest(BaseModel):
 
 class TelegramLinkRequest(BaseModel):
     init_data: str
+    password: str
 
 
 class GoogleAuthRequest(BaseModel):
@@ -104,6 +107,11 @@ def _validate_password(password: str):
         raise HTTPException(400, "Password must be at least 8 characters")
 
 
+def _throttle_verification_request(request: Request, email: str, purpose: str) -> None:
+    client_ip = request.client.host if request.client else "unknown"
+    verification_request_limiter.check(f"{purpose}:{email}:{client_ip}")
+
+
 def _set_cookie_response(data: dict, token: str) -> JSONResponse:
     response = JSONResponse(content=data)
     response.set_cookie(
@@ -143,6 +151,7 @@ async def register(body: RegisterRequest, request: Request, db: AsyncSession = D
 
     email = _validate_email(body.email)
     _validate_password(body.password)
+    _throttle_verification_request(request, email, "register")
 
     existing = await db.execute(select(User).where(User.email == email))
     if existing.scalar_one_or_none():
@@ -254,9 +263,10 @@ async def verify_email(body: VerifyEmailRequest, request: Request, db: AsyncSess
 
 
 @router.post("/forgot-password")
-async def forgot_password(body: ForgotPasswordRequest, db: AsyncSession = Depends(get_db)):
+async def forgot_password(body: ForgotPasswordRequest, request: Request, db: AsyncSession = Depends(get_db)):
     """Send password reset code to email."""
     email = _validate_email(body.email)
+    _throttle_verification_request(request, email, "reset")
 
     result = await db.execute(select(User).where(User.email == email))
     user = result.scalar_one_or_none()
@@ -561,6 +571,12 @@ async def telegram_link(
     web_user = result.scalar_one_or_none()
     if not web_user:
         raise HTTPException(404, "Web user not found")
+    if not web_user.password_hash or not verify_password(body.password, web_user.password_hash):
+        raise HTTPException(401, "Invalid password")
+
+    joined_at = web_user.joined_at or datetime.utcnow()
+    if (datetime.utcnow() - joined_at).total_seconds() < 3600:
+        raise HTTPException(400, "Wait 1 hour before linking Telegram")
 
     # Check if TG account already exists in DB
     result = await db.execute(select(User).where(User.telegram_id == tg_id))

@@ -55,6 +55,17 @@ GUEST_LIMIT = 2
 _guest_usage: dict[str, int] = {}  # ip -> total requests
 
 
+def _get_request_ip(request: Request) -> str:
+    """Trust forwarding headers only when the caller is a configured proxy."""
+    client_ip = request.client.host if request.client else "unknown"
+    settings = get_settings()
+    if client_ip in settings.trusted_proxy_ips:
+        forwarded = request.headers.get("X-Real-IP") or request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
+        if forwarded:
+            return forwarded
+    return client_ip
+
+
 class ChatRequest(BaseModel):
     model_id: str = DEFAULT_MODEL
     messages: list[dict]
@@ -79,7 +90,7 @@ async def chat_guest(
     db: AsyncSession = Depends(get_db),
 ):
     """Guest chat — no auth required, limited to 10 requests per IP, fast models only."""
-    ip = request.headers.get("X-Real-IP") or request.headers.get("X-Forwarded-For", "").split(",")[0].strip() or (request.client.host if request.client else "unknown")
+    ip = _get_request_ip(request)
 
     used = _guest_usage.get(ip, 0)
     if used >= GUEST_LIMIT:
@@ -140,7 +151,7 @@ async def chat_guest(
 @router.get("/chat/guest/status")
 async def guest_status(request: "Request"):
     """Check guest usage for current IP."""
-    ip = request.headers.get("X-Real-IP") or request.headers.get("X-Forwarded-For", "").split(",")[0].strip() or (request.client.host if request.client else "unknown")
+    ip = _get_request_ip(request)
     used = _guest_usage.get(ip, 0)
     return {"used": used, "limit": GUEST_LIMIT, "remaining": max(0, GUEST_LIMIT - used)}
 

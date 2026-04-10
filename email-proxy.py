@@ -6,14 +6,16 @@ from flask import Flask, request, jsonify
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 
-SMTP_HOST = "smtp.beget.com"
-SMTP_PORT = 465
-SMTP_EMAIL = "noreply@stoneai.ru"
-SMTP_PASSWORD = "u58qbUsva9A@@"
-API_KEY = "stoneai-email-secret-2026"
+SMTP_HOST = os.getenv("SMTP_HOST", "smtp.beget.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "465"))
+SMTP_EMAIL = os.getenv("SMTP_EMAIL", "noreply@stoneai.ru")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
+API_KEY = os.getenv("EMAIL_PROXY_KEY", "")
 
 @app.route("/send", methods=["POST"])
 def send():
+    if not API_KEY or not SMTP_PASSWORD:
+        return jsonify({"error": "email proxy is not configured"}), 503
     if request.headers.get("X-API-Key") != API_KEY:
         return jsonify({"error": "unauthorized"}), 401
     data = request.json

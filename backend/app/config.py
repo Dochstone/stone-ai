@@ -49,6 +49,10 @@ class Settings:
 
         # Security
         self.secret_key = os.getenv("SECRET_KEY", "").strip()
+        self.internal_api_key = os.getenv("INTERNAL_API_KEY", self.secret_key).strip()
+        self.trusted_proxy_ips = {
+            ip.strip() for ip in os.getenv("TRUSTED_PROXY_IPS", "").split(",") if ip.strip()
+        }
 
         # CORS
         self.cors_origins = [
