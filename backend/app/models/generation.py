@@ -22,4 +22,5 @@ class Generation(Base):
     metadata_: Mapped[dict | None] = mapped_column("metadata", JSON, nullable=True)
     is_favorite: Mapped[bool] = mapped_column(Boolean, default=False)
     cost: Mapped[float | None] = mapped_column(Float, nullable=True)
+    provider_cost: Mapped[float | None] = mapped_column(Float, nullable=True, default=0.0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

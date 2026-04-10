@@ -866,3 +866,188 @@ async def web_admin_user_detail(
             for t in tx_rows
         ],
     }
+
+
+# ═══════════════════════════════════════════
+# Cost Analytics — P&L, per-user, per-model
+# ════════════════════════════════���══════════
+
+from app.models.video_task import VideoTask
+from app.models.image_task import ImageTask
+from app.models.threed_task import ThreeDTask
+
+
+@router.get("/costs")
+async def admin_costs(
+    _admin=Depends(require_admin),
+    period: str = Query(default=None, description="YYYY-MM, defaults to current month"),
+    db: AsyncSession = Depends(get_db),
+):
+    """Overall P&L: revenue vs provider costs."""
+    if not period:
+        period = date.today().strftime("%Y-%m")
+    year, month = int(period[:4]), int(period[5:7])
+    start = datetime(year, month, 1)
+    if month == 12:
+        end = datetime(year + 1, 1, 1)
+    else:
+        end = datetime(year, month + 1, 1)
+
+    # Revenue from completed transactions
+    rev_result = await db.execute(
+        select(func.coalesce(func.sum(Transaction.amount_usd), 0))
+        .where(Transaction.status == "completed", Transaction.created_at >= start, Transaction.created_at < end)
+    )
+    total_revenue = float(rev_result.scalar() or 0)
+
+    # Provider costs from usage (chat)
+    chat_result = await db.execute(
+        select(
+            func.coalesce(func.sum(Usage.provider_cost_usd), 0),
+            func.count(),
+        ).where(Usage.created_at >= start, Usage.created_at < end)
+    )
+    chat_row = chat_result.one()
+    chat_cost = float(chat_row[0])
+    chat_count = int(chat_row[1])
+
+    # Video costs
+    video_result = await db.execute(
+        select(
+            func.coalesce(func.sum(VideoTask.provider_cost_usd), 0),
+            func.coalesce(func.sum(VideoTask.cost_usd), 0),
+            func.count(),
+        ).where(VideoTask.created_at >= start, VideoTask.created_at < end, VideoTask.status == "completed")
+    )
+    video_row = video_result.one()
+    video_provider_cost = float(video_row[0])
+    video_revenue = float(video_row[1])
+    video_count = int(video_row[2])
+
+    # Image costs
+    image_result = await db.execute(
+        select(
+            func.coalesce(func.sum(ImageTask.provider_cost_usd), 0),
+            func.coalesce(func.sum(ImageTask.cost_usd), 0),
+            func.count(),
+        ).where(ImageTask.created_at >= start, ImageTask.created_at < end, ImageTask.status == "completed")
+    )
+    image_row = image_result.one()
+    image_provider_cost = float(image_row[0])
+    image_revenue = float(image_row[1])
+    image_count = int(image_row[2])
+
+    total_provider_cost = chat_cost + video_provider_cost + image_provider_cost
+    margin = total_revenue - total_provider_cost
+    margin_pct = round((margin / total_revenue * 100), 1) if total_revenue > 0 else 0
+
+    return {
+        "period": period,
+        "total_revenue_usd": round(total_revenue, 2),
+        "total_provider_cost_usd": round(total_provider_cost, 4),
+        "gross_margin_usd": round(margin, 2),
+        "margin_percent": margin_pct,
+        "breakdown": {
+            "chat": {"provider_cost": round(chat_cost, 4), "requests": chat_count},
+            "video": {"revenue": round(video_revenue, 2), "provider_cost": round(video_provider_cost, 4), "requests": video_count},
+            "image": {"revenue": round(image_revenue, 2), "provider_cost": round(image_provider_cost, 4), "requests": image_count},
+        },
+    }
+
+
+@router.get("/costs/users")
+async def admin_costs_users(
+    _admin=Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Per-user profitability: revenue vs provider cost."""
+    # Revenue per user (from transactions)
+    rev_query = (
+        select(
+            Transaction.user_tg_id,
+            func.sum(Transaction.amount_usd).label("total_paid"),
+        )
+        .where(Transaction.status == "completed")
+        .group_by(Transaction.user_tg_id)
+    )
+    rev_rows = (await db.execute(rev_query)).all()
+    user_revenue = {row[0]: float(row[1] or 0) for row in rev_rows}
+
+    # Provider cost per user (from usage)
+    cost_query = (
+        select(
+            Usage.user_tg_id,
+            func.sum(Usage.provider_cost_usd).label("total_cost"),
+            func.count().label("total_requests"),
+        )
+        .group_by(Usage.user_tg_id)
+    )
+    cost_rows = (await db.execute(cost_query)).all()
+    user_costs = {row[0]: {"cost": float(row[1] or 0), "requests": int(row[2])} for row in cost_rows}
+
+    # Merge with user info
+    all_tg_ids = set(user_revenue.keys()) | set(user_costs.keys())
+    if not all_tg_ids:
+        return {"users": []}
+
+    users_result = await db.execute(
+        select(User.telegram_id, User.username, User.first_name, User.subscription_tier)
+        .where(User.telegram_id.in_(all_tg_ids))
+    )
+    users_map = {row[0]: {"username": row[1], "first_name": row[2], "plan": row[3]} for row in users_result.all()}
+
+    result = []
+    for tg_id in all_tg_ids:
+        paid = user_revenue.get(tg_id, 0)
+        cost_data = user_costs.get(tg_id, {"cost": 0, "requests": 0})
+        provider_cost = cost_data["cost"]
+        margin = paid - provider_cost
+        user_info = users_map.get(tg_id, {})
+        result.append({
+            "tg_id": tg_id,
+            "username": user_info.get("username", ""),
+            "first_name": user_info.get("first_name", ""),
+            "plan": user_info.get("plan", "free"),
+            "total_paid_usd": round(paid, 2),
+            "total_provider_cost_usd": round(provider_cost, 4),
+            "total_requests": cost_data["requests"],
+            "margin_usd": round(margin, 2),
+            "margin_percent": round(margin / paid * 100, 1) if paid > 0 else 0,
+        })
+
+    result.sort(key=lambda x: x["total_provider_cost_usd"], reverse=True)
+    return {"users": result}
+
+
+@router.get("/costs/models")
+async def admin_costs_models(
+    _admin=Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Per-model cost breakdown."""
+    result = await db.execute(
+        select(
+            Usage.model_id,
+            func.count().label("requests"),
+            func.coalesce(func.sum(Usage.provider_cost_usd), 0).label("total_cost"),
+            func.coalesce(func.sum(Usage.tokens_in), 0).label("total_tokens_in"),
+            func.coalesce(func.sum(Usage.tokens_out), 0).label("total_tokens_out"),
+        )
+        .group_by(Usage.model_id)
+        .order_by(func.sum(Usage.provider_cost_usd).desc())
+    )
+    rows = result.all()
+
+    return {
+        "models": [
+            {
+                "model_id": row[0],
+                "requests": int(row[1]),
+                "total_provider_cost_usd": round(float(row[2]), 4),
+                "avg_cost_per_request": round(float(row[2]) / int(row[1]), 6) if int(row[1]) > 0 else 0,
+                "total_tokens_in": int(row[3]),
+                "total_tokens_out": int(row[4]),
+            }
+            for row in rows
+        ],
+    }

@@ -247,6 +247,7 @@ async def record_usage(
     tokens_in: int = 0,
     tokens_out: int = 0,
     cost_usd: float = 0.0,
+    provider_cost_usd: float = 0.0,
 ):
     """Record a usage entry and update user counters."""
     tier = get_model_tier(model_id)
@@ -259,6 +260,7 @@ async def record_usage(
         tokens_in=tokens_in,
         tokens_out=tokens_out,
         cost_usd=cost_usd,
+        provider_cost_usd=provider_cost_usd,
     )
     db.add(usage)
 

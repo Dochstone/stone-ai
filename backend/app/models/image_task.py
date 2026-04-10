@@ -16,5 +16,6 @@ class ImageTask(Base):
     image_url = Column(Text, nullable=True)  # final URL (disk or base64)
     error = Column(String(500), nullable=True)
     cost_usd = Column(Float, default=0)
+    provider_cost_usd = Column(Float, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
     completed_at = Column(DateTime, nullable=True)

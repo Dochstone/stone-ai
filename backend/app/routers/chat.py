@@ -338,8 +338,10 @@ async def chat(
             async def _record_usage_bg(tg_id, model_id, tokens_in, tokens_out, cost_usd):
                 try:
                     from app.database import async_session
+                    from app.services.provider_costs import calculate_chat_provider_cost
+                    provider_cost = calculate_chat_provider_cost(model_id, tokens_in, tokens_out)
                     async with async_session() as bg_db:
-                        await record_usage(bg_db, tg_id, model_id, tokens_in=tokens_in, tokens_out=tokens_out, cost_usd=cost_usd)
+                        await record_usage(bg_db, tg_id, model_id, tokens_in=tokens_in, tokens_out=tokens_out, cost_usd=cost_usd, provider_cost_usd=provider_cost)
                         await bg_db.commit()
                 except Exception as e:
                     logger.error(f"Failed to record usage: {e}")

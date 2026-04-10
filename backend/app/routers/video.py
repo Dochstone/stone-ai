@@ -32,6 +32,11 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/video", tags=["video"])
 
 
+def _get_video_provider_cost(model_id: str) -> float:
+    from app.services.provider_costs import calculate_video_provider_cost
+    return calculate_video_provider_cost(model_id)
+
+
 class GenerateRequest(BaseModel):
     model_id: str
     prompt: str
@@ -109,6 +114,7 @@ async def generate_video(
         source_image_url=req.source_image_url,
         status="pending",
         cost_usd=actual_price,
+        provider_cost_usd=_get_video_provider_cost(req.model_id),
     )
     db.add(task)
     await db.flush()

@@ -140,4 +140,20 @@ async def init_db():
             except Exception:
                 pass
 
+    # Add provider_cost_usd columns for cost tracking
+    async with engine.begin() as conn:
+        for table in ["usage", "video_tasks", "image_tasks", "threed_tasks"]:
+            try:
+                await conn.execute(text(f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS provider_cost_usd FLOAT DEFAULT 0"))
+            except Exception:
+                pass
+        try:
+            await conn.execute(text("ALTER TABLE generations ADD COLUMN IF NOT EXISTS provider_cost FLOAT DEFAULT 0"))
+        except Exception:
+            pass
+        try:
+            await conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS used_promo_codes VARCHAR(512)"))
+        except Exception:
+            pass
+
     logger.info("Database initialization complete")
