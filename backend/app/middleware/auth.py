@@ -74,12 +74,12 @@ async def get_current_user(request: Request) -> dict:
     """
     settings = get_settings()
 
-    # Dev mode: allow fake user
-    if not settings.bot_token or settings.bot_token.startswith("PLACEHOLDER"):
+    # Dev mode: only if explicitly enabled via DEV_AUTH_BYPASS=true
+    if settings.dev_auth_bypass and (not settings.bot_token or settings.bot_token.startswith("PLACEHOLDER")):
         return {
             "id": 123456789,
-            "first_name": "Art",
-            "username": "art_stone",
+            "first_name": "Dev",
+            "username": "dev_user",
             "language_code": "ru",
             "auth_provider": "telegram",
         }
