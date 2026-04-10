@@ -156,7 +156,7 @@ export default function AgentPage() {
         </div>
 
         {/* Input */}
-        <div className="bg-white rounded-2xl border border-text/5 p-5 mb-6">
+        <div className="bg-bg rounded-2xl border border-text/5 p-5 mb-6">
           <textarea value={instruction} onChange={e => { setInstruction(e.target.value); setError(""); }}
             placeholder={"Опишите задачу для агента...\n\nНапример: Проанализируй рынок AI-сервисов в России и составь отчёт"}
             rows={4} className="w-full bg-bg border border-text/10 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-accent/30" />
@@ -189,7 +189,7 @@ export default function AgentPage() {
           {/* Active task */}
           <div className="flex-1 min-w-0">
             {activeTask ? (
-              <div className="bg-white rounded-2xl border border-text/5 p-5">
+              <div className="bg-bg rounded-2xl border border-text/5 p-5">
                 <div className="flex items-center justify-between mb-4 gap-2">
                   <h3 className="text-sm font-bold text-text truncate">{activeTask.title}</h3>
                   <div className="flex items-center gap-2 shrink-0">

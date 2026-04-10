@@ -34,6 +34,7 @@ export const PLAN_DISPLAY = {
 } as const;
 
 export const UPGRADE_CTA_PRICE = PLAN_DISPLAY.mini.price;
+export const FREE_CHAT_MODEL_COUNT = 7;
 
 export const PRICING_PLANS: PricingPlan[] = [
   {
@@ -48,7 +49,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     accent: false,
     features: [
       "10 быстрых + 2 премиум чат-запроса в день",
-      "8 бесплатных моделей для чата",
+      "7 бесплатных моделей для чата",
       "2 картинки + 1 видео на пробу",
       "История чатов сохраняется",
       "Инструменты: шаблоны, презентации, SEO, кампании — с баланса",
@@ -82,7 +83,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     icon: "⚡",
     color: "#22D3EE",
     img: "/plan-mini.jpg?v=2",
-    compactSummary: "20+ моделей · 600 быстрых · 60 картинок · 30 видео",
+    compactSummary: "20+ моделей · 600 быстрых · 90 премиум · 60 картинок · 30 видео",
   },
   {
     id: "max",
@@ -107,7 +108,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     icon: "🔥",
     color: "#A855F7",
     img: "/plan-max.jpg?v=2",
-    compactSummary: "65+ нейросетей · 1 500 быстрых · 140 картинок · 28 видео · Opus",
+    compactSummary: "65+ нейросетей · 1 500 быстрых · 112 премиум · 28 Opus · 140 картинок · 28 видео",
   },
   {
     id: "max-pro",
@@ -133,9 +134,64 @@ export const PRICING_PLANS: PricingPlan[] = [
     icon: "💎",
     color: "#F43F5E",
     img: "/plan-maxpro.jpg?v=3",
-    compactSummary: "65+ нейросетей · 4 500 быстрых · 280 картинок · 84 видео · API",
+    compactSummary: "65+ нейросетей · 4 500 быстрых · 336 премиум · 56 Opus · 280 картинок · 84 видео · API",
   },
 ];
+
+export const PLAN_LIMIT_LABELS = {
+  free: {
+    models: "7",
+    chat: "10/день + 2 премиум",
+    premium: "—",
+    opus: "—",
+    images: "2 на пробу",
+    video: "1 на пробу",
+    threed: "—",
+    audio: "—",
+    api: "—",
+    priority: "—",
+    early: "—",
+  },
+  mini: {
+    models: "20+",
+    chat: "600/мес",
+    premium: "90/мес",
+    opus: "—",
+    images: "60/мес",
+    video: "30/мес",
+    threed: "—",
+    audio: "—",
+    api: "—",
+    priority: "—",
+    early: "—",
+  },
+  max: {
+    models: "65+",
+    chat: "1 500/мес",
+    premium: "112/мес",
+    opus: "28/мес",
+    images: "140/мес",
+    video: "28/мес",
+    threed: "5/мес",
+    audio: "20/мес",
+    api: "—",
+    priority: "—",
+    early: "—",
+  },
+  "max-pro": {
+    models: "65+",
+    chat: "4 500/мес",
+    premium: "336/мес",
+    opus: "56/мес",
+    images: "280/мес",
+    video: "84/мес",
+    threed: "30/мес",
+    audio: "100/мес",
+    api: "✓",
+    priority: "✓",
+    early: "✓",
+  },
+} as const;
 
 export const PLAN_SUMMARY = {
   mini: PRICING_PLANS.find((plan) => plan.id === "mini")?.compactSummary ?? "",

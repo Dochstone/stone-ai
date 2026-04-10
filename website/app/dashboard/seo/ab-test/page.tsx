@@ -111,7 +111,7 @@ export default function ABTestPage() {
         </div>
 
         {/* Input */}
-        <div className="bg-white rounded-2xl border border-text/5 p-5 mb-6">
+        <div className="bg-bg rounded-2xl border border-text/5 p-5 mb-6">
           <label className="text-[10px] font-bold text-text/30 uppercase tracking-wider">Задача / тема текста</label>
           <textarea
             value={topic}
@@ -130,7 +130,7 @@ export default function ABTestPage() {
         {variants.length > 0 && (
           <div className="grid gap-4">
             {variants.map((v, i) => (
-              <div key={i} className={`bg-white rounded-2xl border-2 p-5 transition-all ${winner === i ? "border-teal shadow-lg shadow-teal/10" : "border-text/5"}`}>
+              <div key={i} className={`bg-bg rounded-2xl border-2 p-5 transition-all ${winner === i ? "border-teal shadow-lg shadow-teal/10" : "border-text/5"}`}>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${winner === i ? "bg-teal text-white" : "bg-text/[0.06] text-text/50"}`}>

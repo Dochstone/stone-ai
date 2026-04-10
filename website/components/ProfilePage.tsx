@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { MODELS } from "@/lib/models";
 import { SITE_URL } from "@/lib/constants";
+import { PLAN_SUMMARY } from "@/lib/pricing";
 import dynamic from "next/dynamic";
 
 const TonWalletProfile = dynamic(() => import("./TonWalletProfile"), { ssr: false });
@@ -351,10 +352,16 @@ function BalanceTab({ profile, transactions, auth, onRefresh }: { profile: UserP
   const [subMsg, setSubMsg] = useState("");
 
   const plans = [
-    { tier: "mini", name: "Start", price: 590, features: "20+ моделей, 500 запросов/мес" },
-    { tier: "max", name: "Pro", price: 1290, features: "65+ моделей, 2000 запросов, видео, 3D" },
-    { tier: "max-pro", name: "Elite", price: 2990, features: "10000 запросов, API, приоритет" },
+    { tier: "mini", name: "Start", price: 590, features: PLAN_SUMMARY.mini },
+    { tier: "max", name: "Pro", price: 1290, features: PLAN_SUMMARY.max },
+    { tier: "max-pro", name: "Elite", price: 2990, features: PLAN_SUMMARY["max-pro"] },
   ];
+
+  const planFeaturesByTier = {
+    mini: PLAN_SUMMARY.mini,
+    max: PLAN_SUMMARY.max,
+    "max-pro": PLAN_SUMMARY["max-pro"],
+  } as const;
 
   const buyFromBalance = async (tier: string) => {
     setSubscribing(true);
@@ -443,7 +450,7 @@ function BalanceTab({ profile, transactions, auth, onRefresh }: { profile: UserP
               <div key={p.tier} className="bg-bg rounded-2xl border border-text/[0.06] p-5 text-center">
                 <div className="text-lg font-extrabold text-text mb-1">{p.name}</div>
                 <div className="text-2xl font-extrabold text-accent mb-1">{p.price.toLocaleString()}&thinsp;₽<span className="text-xs font-normal text-text/30">/мес</span></div>
-                <div className="text-[11px] text-text/40 mb-4">{p.features}</div>
+                <div className="text-[11px] text-text/40 mb-4">{planFeaturesByTier[p.tier as keyof typeof planFeaturesByTier] ?? p.features}</div>
                 <button
                   onClick={() => buyFromBalance(p.tier)}
                   disabled={subscribing || profile.balance_usd * 95 < p.price}

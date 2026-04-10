@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import ToolPageHero from "@/components/ToolPageHero";
-import ToolModels from "@/components/ToolModels";
+import ToolCta from "@/components/ToolCta";
 import ToolExamples from "@/components/ToolExamples";
 import ToolFaq from "@/components/ToolFaq";
-import ToolCta from "@/components/ToolCta";
+import ToolModels from "@/components/ToolModels";
+import ToolPageHero from "@/components/ToolPageHero";
 import { SITE_URL } from "@/lib/constants";
+import { FREE_CHAT_MODEL_COUNT, PLAN_DISPLAY, PLAN_SUMMARY } from "@/lib/pricing";
 
 export const metadata: Metadata = {
   title: "ИИ чат-бот — AI-студия нового поколения",
@@ -65,7 +66,7 @@ const faqItems = [
   },
   {
     q: "Сколько запросов включено в подписку?",
-    a: "Free — 10 запросов в день к 7 моделям. Start (590₽/мес) — 500 запросов/мес к быстрым + 20 к премиум. Pro (890₽/мес) — 2 000 + 100. Elite (1990₽/мес) — 10 000 + 500. Все тарифы на странице /pricing.",
+    a: `Free — 10 запросов в день к ${FREE_CHAT_MODEL_COUNT} моделям. ${PLAN_DISPLAY.mini.name} (${PLAN_DISPLAY.mini.price}) — ${PLAN_SUMMARY.mini}. ${PLAN_DISPLAY.max.name} (${PLAN_DISPLAY.max.price}) — ${PLAN_SUMMARY.max}. ${PLAN_DISPLAY["max-pro"].name} (${PLAN_DISPLAY["max-pro"].price}) — ${PLAN_SUMMARY["max-pro"]}.`,
   },
 ];
 
@@ -77,7 +78,8 @@ export default function ChatPage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
-      <ToolPageHero breadcrumb="AI Чат"
+      <ToolPageHero
+        breadcrumb="AI Чат"
         badge="AI-студия нового поколения"
         title="ИИ чат-бот с лучшими"
         highlight="нейросетями мира"
@@ -94,7 +96,7 @@ export default function ChatPage() {
         examples={examples}
       />
       <ToolFaq items={faqItems} />
-      <ToolCta title="Начните общаться с AI" subtitle="5 моделей бесплатно, 10 запросов в день. Бесплатный старт." />
+      <ToolCta title="Начните общаться с AI" subtitle={`${FREE_CHAT_MODEL_COUNT} моделей бесплатно, 10 запросов в день. Бесплатный старт.`} />
     </>
   );
 }

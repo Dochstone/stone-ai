@@ -16,6 +16,7 @@ import { getSavedAvatar } from "@/lib/avatar";
 import { OnboardingFlow } from "@/components/OnboardingFlow";
 import { PROMPT_CATEGORIES, PROMPT_TEMPLATES } from "@/lib/prompt-templates";
 import { DEFAULT_MODEL, PLAN_DISPLAY, UPGRADE_CTA_PRICE } from "@/lib/constants";
+import { PLAN_SUMMARY, PRICING_PLANS } from "@/lib/pricing";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
@@ -31,6 +32,9 @@ const THREED_MODEL_IDS = new Set(["tripo-v2.5", "triposr"]);
 
 // O(1) model lookup
 const MODELS_MAP = new Map(MODELS.map(m => [m.id, m]));
+const MINI_PRICING_PLAN = PRICING_PLANS.find((plan) => plan.id === "mini")!;
+const MAX_PRICING_PLAN = PRICING_PLANS.find((plan) => plan.id === "max")!;
+const MAX_PRO_PRICING_PLAN = PRICING_PLANS.find((plan) => plan.id === "max-pro")!;
 
 // Model access tiers for lock icons
 const FREE_MODEL_IDS = new Set([
@@ -68,7 +72,7 @@ function getModelLockInfo(modelId: string, balance: number, plan?: string): { lo
   // Premium models — free users get 2/day, don't lock on frontend (backend checks)
   if (plan === "free") return null;
   if (MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: PLAN_DISPLAY.mini.name, price: PLAN_DISPLAY.mini.price };
-  return { locked: true, tier: PLAN_DISPLAY.max.name, price: "890₽/мес" };
+  return { locked: true, tier: PLAN_DISPLAY.max.name, price: PLAN_DISPLAY.max.price };
 }
 
 // ─── Helpers ───
@@ -2390,36 +2394,36 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                 {/* 3 pricing cards */}
                 <div className="space-y-2.5">
                   <a href="/pricing?plan=mini" className="flex items-center gap-4 p-3.5 rounded-2xl border-2 border-text/[0.08] hover:border-[#22D3EE]/30 transition-all group">
-                    <div className="text-center min-w-[70px]">
-                      <p className="text-2xl font-extrabold text-text group-hover:text-[#22D3EE] transition-colors">390<span className="text-xs font-bold text-text/30">₽</span></p>
+                    <div className="text-center min-w-[84px]">
+                      <p className="text-2xl font-extrabold text-text group-hover:text-[#22D3EE] transition-colors">{MINI_PRICING_PLAN.price}</p>
                       <p className="text-[9px] text-text/25 font-semibold">в месяц</p>
                     </div>
                     <div className="flex-1 border-l border-text/[0.06] pl-4">
-                      <p className="text-sm font-bold text-text">Start</p>
-                      <p className="text-[11px] text-text/40">20+ моделей · 500 запросов · 15 картинок · 3 видео</p>
+                      <p className="text-sm font-bold text-text">{MINI_PRICING_PLAN.name}</p>
+                      <p className="text-[11px] text-text/40">{PLAN_SUMMARY.mini}</p>
                     </div>
                   </a>
 
                   <a href="/pricing?plan=max" className="flex items-center gap-4 p-3.5 rounded-2xl border-2 border-[#A855F7] bg-[#A855F7]/5 hover:bg-[#A855F7]/10 transition-all relative">
-                    <div className="absolute -top-2 right-4 bg-[#A855F7] text-white text-[9px] font-bold px-3 py-0.5 rounded-full shadow-lg shadow-[#A855F7]/30">ПОПУЛЯРНЫЙ</div>
-                    <div className="text-center min-w-[70px]">
-                      <p className="text-2xl font-extrabold text-[#A855F7]">890<span className="text-xs font-bold text-[#A855F7]/50">₽</span></p>
+                    <div className="absolute -top-2 right-4 bg-[#A855F7] text-white text-[9px] font-bold px-3 py-0.5 rounded-full shadow-lg shadow-[#A855F7]/30">{MAX_PRICING_PLAN.badge.toUpperCase()}</div>
+                    <div className="text-center min-w-[84px]">
+                      <p className="text-2xl font-extrabold text-[#A855F7]">{MAX_PRICING_PLAN.price}</p>
                       <p className="text-[9px] text-text/25 font-semibold">в месяц</p>
                     </div>
                     <div className="flex-1 border-l border-[#A855F7]/20 pl-4">
-                      <p className="text-sm font-bold text-text">Pro</p>
-                      <p className="text-[11px] text-text/40">65+ нейросетей · 2 000 запросов · 50 картинок · 10 видео · 3D</p>
+                      <p className="text-sm font-bold text-text">{MAX_PRICING_PLAN.name}</p>
+                      <p className="text-[11px] text-text/40">{PLAN_SUMMARY.max}</p>
                     </div>
                   </a>
 
                   <a href="/pricing?plan=max-pro" className="flex items-center gap-4 p-3.5 rounded-2xl border-2 border-text/[0.08] hover:border-[#F43F5E]/30 transition-all group">
-                    <div className="text-center min-w-[70px]">
-                      <p className="text-2xl font-extrabold text-text group-hover:text-[#F43F5E] transition-colors">1990<span className="text-xs font-bold text-text/30">₽</span></p>
+                    <div className="text-center min-w-[84px]">
+                      <p className="text-2xl font-extrabold text-text group-hover:text-[#F43F5E] transition-colors">{MAX_PRO_PRICING_PLAN.price}</p>
                       <p className="text-[9px] text-text/25 font-semibold">в месяц</p>
                     </div>
                     <div className="flex-1 border-l border-text/[0.06] pl-4">
-                      <p className="text-sm font-bold text-text">Elite</p>
-                      <p className="text-[11px] text-text/40">65+ нейросетей · 10 000 запросов · 300 картинок · 50 видео · API</p>
+                      <p className="text-sm font-bold text-text">{MAX_PRO_PRICING_PLAN.name}</p>
+                      <p className="text-[11px] text-text/40">{PLAN_SUMMARY["max-pro"]}</p>
                     </div>
                   </a>
                 </div>

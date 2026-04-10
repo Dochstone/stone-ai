@@ -125,7 +125,7 @@ export default function BotsPage() {
 
         {/* Create/Edit form */}
         {creating && (
-          <div className="bg-white rounded-2xl border border-text/5 p-5 mb-6">
+          <div className="bg-bg rounded-2xl border border-text/5 p-5 mb-6">
             <h3 className="text-base font-bold text-text mb-4">{editing ? "Редактировать бота" : "Новый бот"}</h3>
             <div className="space-y-4">
               <div className="flex gap-3">
@@ -206,15 +206,15 @@ export default function BotsPage() {
                 </p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 px-6 mb-5 max-w-lg mx-auto">
-                <div className="bg-white rounded-xl p-3 text-center border border-text/5">
+                <div className="bg-bg rounded-xl p-3 text-center border border-text/5">
                   <span className="text-xl block mb-1">📄</span>
                   <span className="text-[11px] text-text/50">База знаний из PDF</span>
                 </div>
-                <div className="bg-white rounded-xl p-3 text-center border border-text/5">
+                <div className="bg-bg rounded-xl p-3 text-center border border-text/5">
                   <span className="text-xl block mb-1">🤖</span>
                   <span className="text-[11px] text-text/50">Telegram-бот</span>
                 </div>
-                <div className="bg-white rounded-xl p-3 text-center border border-text/5">
+                <div className="bg-bg rounded-xl p-3 text-center border border-text/5">
                   <span className="text-xl block mb-1">🌐</span>
                   <span className="text-[11px] text-text/50">Виджет на сайт</span>
                 </div>
@@ -228,7 +228,7 @@ export default function BotsPage() {
           ) : (
             <div className="grid gap-3">
               {bots.map(bot => (
-                <div key={bot.id} className="bg-white rounded-2xl border border-text/5 p-4 flex items-center gap-4 hover:border-accent/15 transition-colors group">
+                <div key={bot.id} className="bg-bg rounded-2xl border border-text/5 p-4 flex items-center gap-4 hover:border-accent/15 transition-colors group">
                   <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-2xl shrink-0">{bot.avatar_emoji}</div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-sm font-bold text-text truncate">{bot.name}</h3>
@@ -312,7 +312,7 @@ export default function BotsPage() {
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
               {publicBots.map(bot => (
-                <div key={bot.id} className="bg-white rounded-2xl border border-text/5 p-4 hover:border-accent/15 transition-colors cursor-pointer" onClick={() => startChat(bot as Bot)}>
+                <div key={bot.id} className="bg-bg rounded-2xl border border-text/5 p-4 hover:border-accent/15 transition-colors cursor-pointer" onClick={() => startChat(bot as Bot)}>
                   <div className="flex items-center gap-3 mb-2">
                     <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center text-xl">{bot.avatar_emoji}</div>
                     <div className="min-w-0 flex-1">

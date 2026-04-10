@@ -1,22 +1,52 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Pricing from "@/components/Pricing";
+import { useEffect, useState } from "react";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import ModelComparison from "@/components/ModelComparison";
 import ModelsTable from "@/components/ModelsTable";
-import Breadcrumbs from "@/components/Breadcrumbs";
+import Pricing from "@/components/Pricing";
+import {
+  FREE_CHAT_MODEL_COUNT,
+  PLAN_DISPLAY,
+  PLAN_LIMIT_LABELS,
+  PLAN_SUMMARY,
+  PRICING_PLANS,
+} from "@/lib/pricing";
 
+const startPlan = PRICING_PLANS.find((plan) => plan.id === "mini")!;
+const proPlan = PRICING_PLANS.find((plan) => plan.id === "max")!;
+const elitePlan = PRICING_PLANS.find((plan) => plan.id === "max-pro")!;
+
+const comparisonRows = [
+  { icon: "🧠", feature: "AI модели", free: PLAN_LIMIT_LABELS.free.models, mini: PLAN_LIMIT_LABELS.mini.models, max: PLAN_LIMIT_LABELS.max.models, maxpro: PLAN_LIMIT_LABELS["max-pro"].models },
+  { icon: "💬", feature: "Чат", free: PLAN_LIMIT_LABELS.free.chat, mini: PLAN_LIMIT_LABELS.mini.chat, max: PLAN_LIMIT_LABELS.max.chat, maxpro: PLAN_LIMIT_LABELS["max-pro"].chat },
+  { icon: "⭐", feature: "Премиум модели", free: PLAN_LIMIT_LABELS.free.premium, mini: PLAN_LIMIT_LABELS.mini.premium, max: PLAN_LIMIT_LABELS.max.premium, maxpro: PLAN_LIMIT_LABELS["max-pro"].premium },
+  { icon: "🧾", feature: "Claude Opus", free: PLAN_LIMIT_LABELS.free.opus, mini: PLAN_LIMIT_LABELS.mini.opus, max: PLAN_LIMIT_LABELS.max.opus, maxpro: PLAN_LIMIT_LABELS["max-pro"].opus },
+  { icon: "🎨", feature: "Картинки", free: PLAN_LIMIT_LABELS.free.images, mini: PLAN_LIMIT_LABELS.mini.images, max: PLAN_LIMIT_LABELS.max.images, maxpro: PLAN_LIMIT_LABELS["max-pro"].images },
+  { icon: "🎬", feature: "Видео", free: PLAN_LIMIT_LABELS.free.video, mini: PLAN_LIMIT_LABELS.mini.video, max: PLAN_LIMIT_LABELS.max.video, maxpro: PLAN_LIMIT_LABELS["max-pro"].video },
+  { icon: "🧊", feature: "3D модели", free: PLAN_LIMIT_LABELS.free.threed, mini: PLAN_LIMIT_LABELS.mini.threed, max: PLAN_LIMIT_LABELS.max.threed, maxpro: PLAN_LIMIT_LABELS["max-pro"].threed },
+  { icon: "🎤", feature: "Озвучка (TTS)", free: PLAN_LIMIT_LABELS.free.audio, mini: PLAN_LIMIT_LABELS.mini.audio, max: PLAN_LIMIT_LABELS.max.audio, maxpro: PLAN_LIMIT_LABELS["max-pro"].audio },
+  { icon: "🔌", feature: "API доступ", free: PLAN_LIMIT_LABELS.free.api, mini: PLAN_LIMIT_LABELS.mini.api, max: PLAN_LIMIT_LABELS.max.api, maxpro: PLAN_LIMIT_LABELS["max-pro"].api },
+  { icon: "⚡", feature: "Приоритетная скорость", free: PLAN_LIMIT_LABELS.free.priority, mini: PLAN_LIMIT_LABELS.mini.priority, max: PLAN_LIMIT_LABELS.max.priority, maxpro: PLAN_LIMIT_LABELS["max-pro"].priority },
+  { icon: "🚀", feature: "Ранний доступ", free: PLAN_LIMIT_LABELS.free.early, mini: PLAN_LIMIT_LABELS.mini.early, max: PLAN_LIMIT_LABELS.max.early, maxpro: PLAN_LIMIT_LABELS["max-pro"].early },
+];
 
 const pricingJsonLd = {
   "@context": "https://schema.org",
   "@type": "Product",
   name: "Stone AI",
-  description: "AI-студия нового поколения. Подписка от 590₽/мес.",
+  description: `AI-студия нового поколения. Подписка от ${startPlan.price}.`,
   offers: [
-    { "@type": "Offer", name: "Free", price: "0", priceCurrency: "RUB", description: "10 запросов в день, 7 моделей" },
-    { "@type": "Offer", name: "Start", price: "590", priceCurrency: "RUB", description: "500 запросов/мес, 20+ моделей" },
-    { "@type": "Offer", name: "Pro", price: "890", priceCurrency: "RUB", description: "2000 запросов/мес, 65+ нейросетей" },
-    { "@type": "Offer", name: "Elite", price: "1990", priceCurrency: "RUB", description: "10000 запросов/мес, 65+ нейросетей + API" },
+    { "@type": "Offer", name: "Free", price: "0", priceCurrency: "RUB", description: `10 запросов в день, ${FREE_CHAT_MODEL_COUNT} моделей` },
+    ...PRICING_PLANS
+      .filter((plan) => plan.id !== "free")
+      .map((plan) => ({
+        "@type": "Offer",
+        name: plan.name,
+        price: String(plan.priceNum),
+        priceCurrency: "RUB",
+        description: plan.compactSummary ?? plan.desc,
+      })),
   ],
 };
 
@@ -27,15 +57,15 @@ const faqItems = [
   },
   {
     q: "Можно ли попробовать бесплатно?",
-    a: "Да! Тариф Free даёт 10 запросов в день к 7 моделям (GPT-4o mini, Gemini Flash, Claude Haiku и другие). Без оплаты и без регистрации карты.",
+    a: `Да. Тариф Free даёт 10 запросов в день к ${FREE_CHAT_MODEL_COUNT} моделям. Без оплаты и без регистрации карты.`,
   },
   {
     q: "Чем отличается Start от Pro?",
-    a: "Start (590₽) — 20+ моделей и 500 запросов/мес. Pro (890₽) — все 65+ нейросетей, 2000 запросов, видео, 3D, аудио. Для большинства задач хватает Start.",
+    a: `${PLAN_DISPLAY.mini.name} (${PLAN_DISPLAY.mini.price}) — ${PLAN_SUMMARY.mini}. ${PLAN_DISPLAY.max.name} (${PLAN_DISPLAY.max.price}) — ${PLAN_SUMMARY.max}.`,
   },
   {
     q: "Что входит в Elite?",
-    a: "10 000 запросов/мес, 500 к премиум моделям, 300 картинок, 50 видео, 30 3D, API доступ, приоритетная скорость и ранний доступ к новым моделям.",
+    a: `${PLAN_DISPLAY["max-pro"].name} (${PLAN_DISPLAY["max-pro"].price}) — ${PLAN_SUMMARY["max-pro"]}. ${elitePlan.features[4]}. ${elitePlan.features[5]}. ${elitePlan.features[6]}.`,
   },
   {
     q: "Подписка автоматически продлевается?",
@@ -64,7 +94,6 @@ export default function PricingPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingJsonLd) }} />
       <Breadcrumbs items={[{ label: "Тарифы" }]} />
 
-      {/* Hero */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <div className="inline-block bg-accent/10 text-accent px-4 py-1.5 rounded-full text-sm font-semibold mb-4">
@@ -82,17 +111,13 @@ export default function PricingPage() {
         </div>
       </div>
 
-      {/* Pricing cards */}
       <Pricing />
-
-      {/* Model quality comparison */}
       <ModelComparison />
 
-      {/* Payment methods — between cards and comparison */}
       <div className="max-w-4xl mx-auto px-4 mt-12 mb-16">
         <h3 className="font-extrabold text-2xl text-center mb-8">Способы оплаты</h3>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <a href="/topup" className="group bg-white border border-text/5 rounded-2xl p-5 text-center hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5 transition-all cursor-pointer">
+          <a href="/topup" className="group bg-bg border border-text/5 rounded-2xl p-5 text-center hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5 transition-all cursor-pointer">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
               <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
@@ -102,7 +127,7 @@ export default function PricingPage() {
             <p className="text-xs text-text/40">USDT · BTC · ETH</p>
             <p className="text-[10px] text-accent mt-2 font-semibold opacity-0 group-hover:opacity-100 transition-opacity">Пополнить баланс →</p>
           </a>
-          <a href="https://t.me/drifttt55bot" target="_blank" className="group bg-white border border-text/5 rounded-2xl p-5 text-center hover:border-[#2AABEE]/30 hover:shadow-lg hover:shadow-[#2AABEE]/5 transition-all cursor-pointer">
+          <a href="https://t.me/drifttt55bot" target="_blank" className="group bg-bg border border-text/5 rounded-2xl p-5 text-center hover:border-[#2AABEE]/30 hover:shadow-lg hover:shadow-[#2AABEE]/5 transition-all cursor-pointer">
             <div className="w-12 h-12 bg-gradient-to-br from-[#2AABEE] to-[#229ED9] rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
               <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
@@ -112,7 +137,7 @@ export default function PricingPage() {
             <p className="text-xs text-text/40">Оплата в боте</p>
             <p className="text-[10px] text-[#2AABEE] mt-2 font-semibold opacity-0 group-hover:opacity-100 transition-opacity">Открыть бота →</p>
           </a>
-          <a href="#pricing" className="group bg-white border border-text/5 rounded-2xl p-5 text-center hover:border-[#0098EA]/30 hover:shadow-lg hover:shadow-[#0098EA]/5 transition-all cursor-pointer">
+          <a href="#pricing" className="group bg-bg border border-text/5 rounded-2xl p-5 text-center hover:border-[#0098EA]/30 hover:shadow-lg hover:shadow-[#0098EA]/5 transition-all cursor-pointer">
             <div className="w-12 h-12 bg-gradient-to-br from-[#0098EA] to-[#0080C0] rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
               <span className="text-white font-extrabold text-lg">T</span>
             </div>
@@ -120,7 +145,7 @@ export default function PricingPage() {
             <p className="text-xs text-text/40">Через Tonkeeper</p>
             <p className="text-[10px] text-[#0098EA] mt-2 font-semibold opacity-0 group-hover:opacity-100 transition-opacity">Выбрать тариф ↑</p>
           </a>
-          <div className="group bg-white border border-text/5 rounded-2xl p-5 text-center hover:border-teal/30 hover:shadow-lg hover:shadow-teal/5 transition-all cursor-default">
+          <div className="group bg-bg border border-text/5 rounded-2xl p-5 text-center hover:border-teal/30 hover:shadow-lg hover:shadow-teal/5 transition-all cursor-default">
             <div className="w-12 h-12 bg-gradient-to-br from-teal to-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
               <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
@@ -134,7 +159,6 @@ export default function PricingPage() {
         <p className="text-center text-xs text-text/30 mt-4">Без VPN. Оплата в рублях через конвертацию. Подписка активируется мгновенно.</p>
       </div>
 
-      {/* Features comparison */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-2xl md:text-3xl font-extrabold text-center mb-3">Что входит в каждый тариф</h2>
         <p className="text-text/40 text-sm text-center mb-10">Подробное сравнение всех возможностей</p>
@@ -148,35 +172,23 @@ export default function PricingPage() {
                   <p className="text-[10px] text-text/30 mt-0.5">0₽</p>
                 </th>
                 <th className="text-center py-4 px-4 min-w-[90px]">
-                  <span className="text-xs font-bold text-[#22D3EE]">Start</span>
-                  <p className="text-[10px] text-text/30 mt-0.5">590₽</p>
+                  <span className="text-xs font-bold text-[#22D3EE]">{startPlan.name}</span>
+                  <p className="text-[10px] text-text/30 mt-0.5">{startPlan.price}</p>
                 </th>
                 <th className="text-center py-4 px-4 min-w-[90px] bg-[#A855F7]/[0.03]">
-                  <span className="inline-block bg-[#A855F7] text-white text-[8px] font-bold px-2.5 py-0.5 rounded-full mb-1.5">ХИТ</span>
+                  <span className="inline-block bg-[#A855F7] text-white text-[8px] font-bold px-2.5 py-0.5 rounded-full mb-1.5">{proPlan.badge}</span>
                   <br />
-                  <span className="text-xs font-bold text-[#A855F7]">Pro</span>
-                  <p className="text-[10px] text-text/30 mt-0.5">890₽</p>
+                  <span className="text-xs font-bold text-[#A855F7]">{proPlan.name}</span>
+                  <p className="text-[10px] text-text/30 mt-0.5">{proPlan.price}</p>
                 </th>
                 <th className="text-center py-4 px-4 min-w-[90px]">
-                  <span className="text-xs font-bold text-[#F43F5E]">Elite</span>
-                  <p className="text-[10px] text-text/30 mt-0.5">1 990₽</p>
+                  <span className="text-xs font-bold text-[#F43F5E]">{elitePlan.name}</span>
+                  <p className="text-[10px] text-text/30 mt-0.5">{elitePlan.price}</p>
                 </th>
               </tr>
             </thead>
             <tbody>
-              {[
-                { icon: "🧠", feature: "AI модели", free: "7", mini: "20+", max: "65+", maxpro: "65+" },
-                { icon: "💬", feature: "Быстрые запросы", free: "15/день", mini: "500/мес", max: "2 000/мес", maxpro: "10 000/мес" },
-                { icon: "⭐", feature: "Премиум модели", free: "—", mini: "20/мес", max: "100/мес", maxpro: "500/мес" },
-                { icon: "🟣", feature: "Claude Opus", free: "—", mini: "5/мес", max: "20/мес", maxpro: "80/мес" },
-                { icon: "🎨", feature: "Картинки", free: "2/день", mini: "15/мес", max: "50/мес", maxpro: "300/мес" },
-                { icon: "🎬", feature: "Видео", free: "—", mini: "3/мес", max: "10/мес", maxpro: "50/мес" },
-                { icon: "🧊", feature: "3D модели", free: "—", mini: "—", max: "5/мес", maxpro: "30/мес" },
-                { icon: "🎤", feature: "Озвучка (TTS)", free: "—", mini: "—", max: "20/мес", maxpro: "100/мес" },
-                { icon: "🔌", feature: "API доступ", free: "—", mini: "—", max: "—", maxpro: "✓" },
-                { icon: "⚡", feature: "Приоритетная скорость", free: "—", mini: "—", max: "—", maxpro: "✓" },
-                { icon: "🚀", feature: "Ранний доступ", free: "—", mini: "—", max: "—", maxpro: "✓" },
-              ].map((row, i) => (
+              {comparisonRows.map((row, i) => (
                 <tr key={i} className={`border-t border-text/[0.04] ${i % 2 === 0 ? "" : "bg-text/[0.01]"} hover:bg-accent/[0.02] transition-colors`}>
                   <td className="py-3.5 px-5">
                     <div className="flex items-center gap-2.5">
@@ -187,7 +199,7 @@ export default function PricingPage() {
                   <td className="py-3.5 px-4 text-center text-[13px] text-text/50">{row.free === "—" ? <span className="text-text/15">—</span> : row.free}</td>
                   <td className="py-3.5 px-4 text-center text-[13px] text-text/60">{row.mini === "—" ? <span className="text-text/15">—</span> : row.mini}</td>
                   <td className="py-3.5 px-4 text-center text-[13px] font-semibold text-text/80 bg-[#A855F7]/[0.03]">{row.max === "—" ? <span className="text-text/15">—</span> : row.max}</td>
-                  <td className="py-3.5 px-4 text-center text-[13px] font-semibold text-text/80">{row.maxpro === "✓" ? <span className="text-accent text-base">✓</span> : row.maxpro === "—" ? <span className="text-text/15">—</span> : row.maxpro}</td>
+                  <td className="py-3.5 px-4 text-center text-[13px] font-semibold text-text/80">{row.maxpro === "✓" ? <span className="text-accent text-base">✓</span> : row.maxpro}</td>
                 </tr>
               ))}
             </tbody>
@@ -195,10 +207,8 @@ export default function PricingPage() {
         </div>
       </div>
 
-      {/* Models table */}
       <ModelsTable />
 
-      {/* FAQ */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
         <h2 className="text-2xl font-extrabold text-center mb-8">Частые вопросы</h2>
         <div className="space-y-3">
@@ -216,7 +226,6 @@ export default function PricingPage() {
         </div>
       </div>
 
-      {/* Bottom CTA — hidden for paid subscribers */}
       {!hasPaidPlan && (
         <div className="max-w-3xl mx-auto px-4 mt-16">
           <div className="bg-gradient-to-br from-accent/5 to-teal/5 border border-accent/10 rounded-2xl p-8 sm:p-10 text-center">
