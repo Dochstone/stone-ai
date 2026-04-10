@@ -173,7 +173,8 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
     e.preventDefault();
     setError(""); setLoading(true);
     try {
-      const data = await api("/api/auth/verify-email", { email, code });
+      const utm = (() => { try { return JSON.parse(localStorage.getItem("stone_utm") || "{}"); } catch { return {}; } })();
+      const data = await api("/api/auth/verify-email", { email, code, ...utm });
       handleAuthResponse(data, onAuth);
     } catch (err: any) { setError(err.message); } finally { setLoading(false); }
   };

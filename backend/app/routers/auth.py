@@ -62,6 +62,10 @@ class YandexAuthRequest(BaseModel):
 class VerifyEmailRequest(BaseModel):
     email: str
     code: str
+    utm_source: str | None = None
+    utm_medium: str | None = None
+    utm_campaign: str | None = None
+    first_referrer: str | None = None
 
 
 class ForgotPasswordRequest(BaseModel):
@@ -219,6 +223,10 @@ async def verify_email(body: VerifyEmailRequest, request: Request, db: AsyncSess
         username=None,
         joined_at=datetime.utcnow(),
         balance_usd=1.0,  # Welcome bonus ~95₽
+        utm_source=body.utm_source,
+        utm_medium=body.utm_medium,
+        utm_campaign=body.utm_campaign,
+        first_referrer=body.first_referrer,
     )
     db.add(user)
     await db.flush()
@@ -351,6 +359,8 @@ async def logout():
 
 async def _get_or_create_oauth_user(
     db: AsyncSession, email: str, first_name: str, provider: str,
+    utm_source: str | None = None, utm_medium: str | None = None,
+    utm_campaign: str | None = None, first_referrer: str | None = None,
 ) -> tuple:
     """Find existing user by email or create new one. Returns (user, token)."""
     result = await db.execute(select(User).where(User.email == email))
@@ -375,6 +385,10 @@ async def _get_or_create_oauth_user(
         username=None,
         joined_at=datetime.utcnow(),
         balance_usd=1.0,  # Welcome bonus ~95₽
+        utm_source=utm_source,
+        utm_medium=utm_medium,
+        utm_campaign=utm_campaign,
+        first_referrer=first_referrer,
     )
     db.add(user)
     await db.flush()

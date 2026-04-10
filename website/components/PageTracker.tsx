@@ -10,6 +10,25 @@ export default function PageTracker() {
   const startRef = useRef(Date.now());
   const lastPathRef = useRef("");
 
+  // Capture UTM params on first visit
+  useEffect(() => {
+    try {
+      if (localStorage.getItem("stone_utm")) return;
+      const params = new URLSearchParams(window.location.search);
+      const utm: Record<string, string> = {};
+      for (const key of ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"]) {
+        const v = params.get(key);
+        if (v) utm[key] = v;
+      }
+      if (document.referrer && !document.referrer.includes("stoneai.ru")) {
+        utm.first_referrer = document.referrer;
+      }
+      if (Object.keys(utm).length > 0) {
+        localStorage.setItem("stone_utm", JSON.stringify(utm));
+      }
+    } catch {}
+  }, []);
+
   useEffect(() => {
     // Send previous page duration
     if (lastPathRef.current && lastPathRef.current !== pathname) {
