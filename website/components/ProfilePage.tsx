@@ -149,17 +149,16 @@ function AvatarUpload({ email, name }: { email: string; name?: string | null }) 
     if (!file || !file.type.startsWith("image/")) return;
     setUploading(true);
     try {
-      // Resize to 256x256 center crop
       const dataUrl = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => {
           const img = document.createElement("img");
           img.onload = () => {
             const c = document.createElement("canvas");
-            c.width = 256; c.height = 256;
+            c.width = 128; c.height = 128;
             const ctx = c.getContext("2d")!;
             const side = Math.min(img.naturalWidth, img.naturalHeight);
-            ctx.drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, 256, 256);
+            ctx.drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, 128, 128);
             resolve(c.toDataURL("image/webp", 0.85));
           };
           img.onerror = () => resolve(reader.result as string);
@@ -168,25 +167,8 @@ function AvatarUpload({ email, name }: { email: string; name?: string | null }) 
         reader.onerror = () => reject(new Error("read error"));
         reader.readAsDataURL(file);
       });
-      // Upload to server
-      const auth = JSON.parse(localStorage.getItem("stone_auth") || "{}");
-      if (auth.token) {
-        const API = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
-        const res = await fetch(`${API}/api/user/avatar`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
-          body: JSON.stringify({ image_base64: dataUrl }),
-        });
-        if (res.ok) {
-          const data = await res.json();
-          saveAvatar(data.avatar_url ? `${API}${data.avatar_url}` : dataUrl);
-        } else {
-          saveAvatar(dataUrl);
-        }
-      } else {
-        saveAvatar(dataUrl);
-      }
-      setAvatar(getSavedAvatar());
+      saveAvatar(dataUrl);
+      setAvatar(dataUrl);
     } catch {}
     setUploading(false);
     if (fileRef.current) fileRef.current.value = "";
