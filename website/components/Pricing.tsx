@@ -245,7 +245,7 @@ export default function Pricing() {
         const res = await fetch(`${API_URL}/api/payment/platega/create-order`, {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
-          body: JSON.stringify({ usd_amount: usdAmount }),
+          body: JSON.stringify({ usd_amount: usdAmount, tier }),
         });
         const data = await res.json();
         if (res.ok && data.payment_url) {

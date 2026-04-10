@@ -59,6 +59,7 @@ MIN_TOP_UP_USD = 1.0
 
 class TopUpRequest(BaseModel):
     usd_amount: float
+    tier: str | None = None  # If set, treat as subscription payment
 
 
 # ═══════════════════════════════════════════════════════════
@@ -224,7 +225,7 @@ async def create_platega_order(
     tg_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Create a Platega.io SBP QR payment for balance top-up."""
+    """Create a Platega.io SBP QR payment for balance top-up or subscription."""
     settings = get_settings()
 
     if not settings.platega_merchant_id or not settings.platega_secret:
@@ -233,13 +234,16 @@ async def create_platega_order(
     if req.usd_amount < MIN_TOP_UP_USD:
         raise HTTPException(status_code=400, detail=f"Минимальная сумма ${MIN_TOP_UP_USD:.0f}")
 
+    is_subscription = req.tier and req.tier in ("mini", "max", "max-pro")
     rub_amount = round(req.usd_amount * USD_TO_RUB, 0)
     order_id = platega_service.generate_order_id(tg_user["id"])
+
+    description = f"Stone AI · Подписка {req.tier}" if is_subscription else f"Stone AI · Пополнение баланса: ${req.usd_amount:.2f}"
 
     payment = await platega_service.create_payment(
         amount_rub=rub_amount,
         user_id=str(tg_user["id"]),
-        description=f"Stone AI · Пополнение баланса: ${req.usd_amount:.2f}",
+        description=description,
     )
 
     if not payment:
@@ -252,8 +256,8 @@ async def create_platega_order(
         amount=rub_amount,
         currency="RUB",
         amount_usd=req.usd_amount,
-        product_type="topup",
-        product_id=f"topup_usd:{req.usd_amount:.2f}",
+        product_type="subscription" if is_subscription else "topup",
+        product_id=f"sub:{req.tier}" if is_subscription else f"topup_usd:{req.usd_amount:.2f}",
         status="pending",
         provider_id=f"platega:{transaction_id}",
     )
@@ -300,7 +304,7 @@ async def platega_webhook(request: Request, db: AsyncSession = Depends(get_db)):
     provider_id = f"platega:{transaction_id}"
 
     result = await db.execute(
-        text("SELECT id, user_tg_id, amount_usd, status FROM transactions "
+        text("SELECT id, user_tg_id, amount_usd, status, product_type, product_id FROM transactions "
              "WHERE provider_id = :pid AND status = 'pending' LIMIT 1"),
         {"pid": provider_id}
     )
@@ -310,12 +314,37 @@ async def platega_webhook(request: Request, db: AsyncSession = Depends(get_db)):
         logger.warning(f"Platega webhook: transaction not found for id={transaction_id}")
         return {"ok": True, "message": "Transaction not found"}
 
-    tx_id, user_tg_id, usd_amount, tx_status = row
+    tx_id, user_tg_id, usd_amount, tx_status, product_type, product_id = row
 
     if tx_status == "completed":
         return {"ok": True, "message": "Already processed"}
 
-    new_balance = await add_balance(db, user_tg_id, usd_amount)
+    # Handle subscription or top-up
+    if product_type == "subscription" and product_id and product_id.startswith("sub:"):
+        tier = product_id.split(":", 1)[1]
+        from datetime import datetime, timedelta
+        from sqlalchemy import select as sel
+        from app.models.user import User
+        from app.services.subscription import PLANS
+        user_result = await db.execute(sel(User).where(User.telegram_id == user_tg_id))
+        user = user_result.scalar_one_or_none()
+        if user and tier in PLANS:
+            plan = PLANS[tier]
+            user.subscription_tier = tier
+            user.subscription_started = datetime.utcnow()
+            user.credits_reset_date = datetime.utcnow() + timedelta(days=30)
+            user.credits_balance = plan.get("credits", 0)
+            user.monthly_fast_used = 0
+            user.monthly_premium_used = 0
+            user.monthly_images_used = 0
+            user.monthly_videos_used = 0
+            user.monthly_3d_used = 0
+            user.monthly_audio_used = 0
+            user.opus_requests_used = 0
+            logger.info(f"Platega subscription activated: user={user_tg_id}, tier={tier}")
+    else:
+        new_balance = await add_balance(db, user_tg_id, usd_amount)
+        logger.info(f"Platega balance top-up: user={user_tg_id}, usd={usd_amount}, balance=${new_balance:.6f}")
 
     await db.execute(
         text("UPDATE transactions SET status = 'completed' WHERE id = :tid"),
@@ -331,7 +360,7 @@ async def platega_webhook(request: Request, db: AsyncSession = Depends(get_db)):
 
     await db.commit()
 
-    logger.info(f"Platega payment completed: user={user_tg_id}, usd={usd_amount}, balance=${new_balance:.6f}")
+    logger.info(f"Platega payment completed: user={user_tg_id}, type={product_type}, usd={usd_amount}")
 
     # Notify admin via Telegram
     try:
