@@ -8,9 +8,56 @@ const STEPS = ["Анализ ниши", "Ключевые слова", "Груп
 
 interface CampaignItem { id: number; name: string; status: string; step: number; total_keywords: number; total_ads: number; cost_rub: number; created_at: string | null; }
 
+interface CampaignKeyword {
+  keyword: string;
+  wordstat_frequency?: number | null;
+  estimated_cpc?: string | number | null;
+  competition?: "high" | "medium" | "low" | string | null;
+}
+
+interface CampaignKeywordGroup {
+  group_name: string;
+  keywords?: string[];
+}
+
+interface CampaignAd {
+  group?: string;
+  title1?: string;
+  title2?: string;
+  text?: string;
+}
+
+interface CampaignRecommendation {
+  priority?: "high" | "medium" | "low" | string;
+  title: string;
+  description: string;
+}
+
+interface CampaignResult {
+  summary?: {
+    total_keywords?: number;
+    total_groups?: number;
+    total_negative?: number;
+    total_ads?: number;
+  };
+  keywords?: CampaignKeyword[];
+  keyword_groups?: CampaignKeywordGroup[];
+  ads?: CampaignAd[];
+  recommendations?: CampaignRecommendation[];
+}
+
+interface ActiveCampaign {
+  id: number;
+  name?: string;
+  niche?: string;
+  status: string;
+  step: number;
+  result?: CampaignResult | null;
+}
+
 export default function CampaignsPage() {
   const [campaigns, setCampaigns] = useState<CampaignItem[]>([]);
-  const [active, setActive] = useState<any>(null);
+  const [active, setActive] = useState<ActiveCampaign | null>(null);
   const [niche, setNiche] = useState("");
   const [url, setUrl] = useState("");
   const [budget, setBudget] = useState(30000);
@@ -93,6 +140,11 @@ export default function CampaignsPage() {
     }
   };
 
+  const activeKeywords = active?.result?.keywords ?? [];
+  const activeKeywordGroups = active?.result?.keyword_groups ?? [];
+  const activeAds = active?.result?.ads ?? [];
+  const activeRecommendations = active?.result?.recommendations ?? [];
+
   if (!auth) return (
     <div className="max-w-2xl mx-auto px-4 py-20 text-center">
       <p className="text-text/40">Войдите чтобы создавать кампании</p>
@@ -123,7 +175,7 @@ export default function CampaignsPage() {
         )}
 
         {/* Create form */}
-        <div className="bg-white rounded-2xl border border-text/5 p-5 mb-6">
+        <div className="bg-bg rounded-2xl border border-text/5 p-5 mb-6">
           <div className="grid sm:grid-cols-2 gap-4 mb-4">
             <div>
               <label className="text-[10px] font-bold text-text/30 uppercase tracking-wider">Ниша / продукт</label>
@@ -162,7 +214,7 @@ export default function CampaignsPage() {
           {/* Active campaign */}
           <div className="flex-1 min-w-0">
             {active ? (
-              <div className="bg-white rounded-2xl border border-text/5 p-5">
+              <div className="bg-bg rounded-2xl border border-text/5 p-5">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-bold text-text truncate">{active.name || active.niche}</h3>
                   <div className="flex items-center gap-2">
@@ -210,7 +262,7 @@ export default function CampaignsPage() {
                     </div>
 
                     {/* Keywords with Wordstat data */}
-                    {active.result.keywords?.length > 0 && (
+                    {activeKeywords.length > 0 && (
                       <div>
                         <h4 className="text-xs font-bold text-text/50 uppercase mb-2">Ключевые слова (Wordstat)</h4>
                         <div className="max-h-[300px] overflow-y-auto rounded-xl border border-text/5">
@@ -224,7 +276,7 @@ export default function CampaignsPage() {
                               </tr>
                             </thead>
                             <tbody>
-                              {active.result.keywords.slice(0, 50).map((k: any, i: number) => (
+                              {activeKeywords.slice(0, 50).map((k: CampaignKeyword, i: number) => (
                                 <tr key={i} className="border-t border-text/[0.03] hover:bg-text/[0.02]">
                                   <td className="px-3 py-1.5 text-text/70">{k.keyword}</td>
                                   <td className="px-2 py-1.5 text-right font-mono text-text/50">{k.wordstat_frequency?.toLocaleString() || "—"}</td>
@@ -244,12 +296,15 @@ export default function CampaignsPage() {
                     <div>
                       <h4 className="text-xs font-bold text-text/50 uppercase mb-2">Группы ключевых слов</h4>
                       <div className="space-y-2">
-                        {(active.result.keyword_groups || []).slice(0, 8).map((g: any, i: number) => (
-                          <div key={i} className="bg-text/[0.02] rounded-xl p-3">
-                            <p className="text-xs font-bold text-text mb-1">{g.group_name}</p>
-                            <p className="text-[11px] text-text/40">{(g.keywords || []).slice(0, 8).join(", ")}{g.keywords?.length > 8 ? ` +${g.keywords.length - 8}` : ""}</p>
-                          </div>
-                        ))}
+                        {activeKeywordGroups.slice(0, 8).map((g: CampaignKeywordGroup, i: number) => {
+                          const groupKeywords = g.keywords ?? [];
+                          return (
+                            <div key={i} className="bg-text/[0.02] rounded-xl p-3">
+                              <p className="text-xs font-bold text-text mb-1">{g.group_name}</p>
+                              <p className="text-[11px] text-text/40">{groupKeywords.slice(0, 8).join(", ")}{groupKeywords.length > 8 ? ` +${groupKeywords.length - 8}` : ""}</p>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
 
@@ -257,7 +312,7 @@ export default function CampaignsPage() {
                     <div>
                       <h4 className="text-xs font-bold text-text/50 uppercase mb-2">Объявления</h4>
                       <div className="space-y-2">
-                        {(active.result.ads || []).map((ad: any, i: number) => (
+                        {activeAds.map((ad: CampaignAd, i: number) => (
                           <div key={i} className="bg-text/[0.02] rounded-xl p-3">
                             <p className="text-[10px] text-accent font-semibold mb-1">{ad.group}</p>
                             <p className="text-sm font-bold text-accent">{ad.title1}</p>
@@ -289,7 +344,7 @@ export default function CampaignsPage() {
                                     if (res.ok) {
                                       const d = await res.json();
                                       if (d.improved) {
-                                        setActive((prev: any) => {
+                                        setActive((prev) => {
                                           if (!prev?.result?.ads) return prev;
                                           const ads = [...prev.result.ads];
                                           ads[i] = { ...ads[i], ...d.improved };
@@ -317,11 +372,11 @@ export default function CampaignsPage() {
                     </div>
 
                     {/* Recommendations */}
-                    {active.result.recommendations?.length > 0 && (
+                    {activeRecommendations.length > 0 && (
                       <div>
                         <h4 className="text-xs font-bold text-text/50 uppercase mb-2">Рекомендации</h4>
                         <div className="space-y-1.5">
-                          {active.result.recommendations.map((r: any, i: number) => (
+                          {activeRecommendations.map((r: CampaignRecommendation, i: number) => (
                             <div key={i} className="flex items-start gap-2 text-xs">
                               <span className={`shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold ${r.priority === "high" ? "bg-red-500/10 text-red-500" : r.priority === "medium" ? "bg-amber-500/10 text-amber-500" : "bg-text/5 text-text/30"}`}>{r.priority}</span>
                               <div>
