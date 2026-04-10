@@ -197,7 +197,7 @@ function AvatarUpload({ email, name }: { email: string; name?: string | null }) 
         accept="image/*"
         onChange={handleFileChange}
         onInput={handleFileChange as unknown as React.FormEventHandler<HTMLInputElement>}
-        style={{ display: "none" }}
+        style={{ position: "absolute", width: 0, height: 0, overflow: "hidden", opacity: 0 }}
       />
 
       {cropSrc && (
