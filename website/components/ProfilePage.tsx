@@ -76,7 +76,7 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
 
 // ─── Helpers ───
 
-import { getInitials, getAvatarColor } from "@/lib/avatar";
+import { getInitials, getAvatarColor, syncAvatarFromProfile } from "@/lib/avatar";
 import { AvatarUpload } from "./AvatarUpload";
 
 function formatDate(iso: string): string {
