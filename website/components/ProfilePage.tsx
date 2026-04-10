@@ -1265,7 +1265,7 @@ export default function ProfilePage() {
           created_at: u.created_at || new Date().toISOString(),
           stats: data.stats || u.stats || { total_requests: 0, total_tokens: 0 },
         });
-        syncAvatarFromProfile(u.avatar_url || null);
+        syncAvatarFromProfile();
       }
 
       if (usageRes.status === "fulfilled" && usageRes.value.ok) {
