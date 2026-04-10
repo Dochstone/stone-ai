@@ -153,18 +153,25 @@ function AvatarUpload({ email, name }: { email: string; name?: string | null }) 
     return () => window.removeEventListener("avatar-changed", handler);
   }, []);
 
-  const openFilePicker = () => fileInputRef.current?.click();
+  const openFilePicker = () => {
+    const input = fileInputRef.current;
+    if (!input) { alert("ref is null!"); return; }
+    alert("clicking input, tagName=" + input.tagName + ", type=" + input.type);
+    input.click();
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    alert("handleFileChange! files=" + (e.target.files?.length || 0));
     const file = e.target.files?.[0];
     if (!file) return;
-    e.target.value = "";
     setAvatarError(null);
     try {
       const dataUrl = await processAvatarFile(file);
       setCropSrc(dataUrl);
     } catch (err: unknown) {
       setAvatarError(err instanceof Error ? err.message : "Ошибка чтения файла");
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
