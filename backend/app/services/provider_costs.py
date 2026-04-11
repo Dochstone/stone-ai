@@ -65,17 +65,24 @@ OPENROUTER_COSTS: dict[str, dict[str, float]] = {
 }
 
 # ─── FAL.ai costs per generation ───
+# Updated 2026-04-11 from actual fal.ai invoice (Apr 1-30, 2026)
+# Keys match model IDs in VIDEO_MODELS_REGISTRY / THREED_MODELS_REGISTRY
 FAL_COSTS: dict[str, float] = {
     "sora-2": 0.10,
-    "veo-3.1": 0.08,
-    "luma-ray-2": 0.05,
+    "veo-3": 0.40,
+    "luma-ray2": 0.50,
+    "luma-ray2-flash": 0.20,
+    "luma-dream": 0.50,
     "runway-gen3": 0.10,
-    "pixverse-v4.5": 0.04,
-    "hunyuan": 0.03,
+    "pixverse-v5": 0.04,
+    "hunyuan": 0.40,
     "ltx-video": 0.02,
-    "cogvideox-5b": 0.03,
-    "wan-2.1": 0.03,
-    "stable-video": 0.04,
+    "cogvideox": 0.20,
+    "wan-2": 0.03,
+    "stable-video": 0.075,
+    "mochi": 0.40,
+    "minimax": 0.50,
+    "pika-2": 0.05,
 }
 
 # ─── Kling direct API costs per generation ───
