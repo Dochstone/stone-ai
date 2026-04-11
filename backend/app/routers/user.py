@@ -531,6 +531,7 @@ saveBtn.addEventListener('click',function(){
         cropper.style.display='none';
         zoomInput.style.display='none';
         hint.textContent='Готово!';
+        if(isEmbed)parent.postMessage({type:'avatar-uploaded'},'*');
         try{
           fetch('/api/user/me',{headers:{Authorization:'Bearer '+token}})
           .then(function(r){return r.json()})
@@ -556,7 +557,10 @@ saveBtn.addEventListener('click',function(){
 
 // Embed mode
 var u=new URLSearchParams(location.search);
-if(u.get('embed')==='1')document.body.classList.add('embed');
+var isEmbed=u.get('embed')==='1';
+if(isEmbed)document.body.classList.add('embed');
+function notifyHeight(){if(!isEmbed)return;setTimeout(function(){parent.postMessage({type:'avatar-resize',height:document.body.scrollHeight},'*');},50);}
+notifyHeight();new MutationObserver(notifyHeight).observe(document.body,{childList:true,subtree:true,attributes:true});
 
 // Show status from redirect
 if(u.get('avatar_upload')==='ok'){msg.innerHTML='<p class="ok">Аватарка загружена!</p>';hint.textContent='Готово!';}

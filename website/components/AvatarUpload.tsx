@@ -16,6 +16,7 @@ function getToken(): string {
 function AvatarUploadInner({ email, name }: { email: string; name?: string | null }) {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [iframeHeight, setIframeHeight] = useState(160);
 
   useEffect(() => {
     const local = getSavedAvatar();
@@ -33,6 +34,20 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
       window.removeEventListener("avatar-changed", handler);
     };
   }, []);
+
+  useEffect(() => {
+    if (!modalOpen) return;
+    const handler = (e: MessageEvent) => {
+      if (e.data?.type === "avatar-resize") setIframeHeight(e.data.height);
+      if (e.data?.type === "avatar-uploaded") {
+        syncAvatarFromProfile().then((url) => {
+          if (url) { saveAvatar(url); setAvatarUrl(url); }
+        });
+      }
+    };
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, [modalOpen]);
 
   const handleCloseModal = useCallback(() => {
     setModalOpen(false);
@@ -127,8 +142,8 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
             {/* Iframe — embed mode removes inner bg/padding/back link */}
             <iframe
               src={`${API_URL}/api/user/avatar-test?embed=1`}
-              className="w-full border-0"
-              style={{ height: 520 }}
+              className="w-full border-0 transition-[height] duration-300"
+              style={{ height: iframeHeight }}
               title="Загрузить аватарку"
             />
           </div>
