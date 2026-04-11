@@ -47,8 +47,8 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleSelectedFile = async (input: HTMLInputElement) => {
+    const file = input.files?.[0];
     if (!file) return;
 
     setError(null);
@@ -87,8 +87,12 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
       setError(err instanceof Error ? err.message : "Avatar upload failed");
     } finally {
       setUploading(false);
-      e.target.value = "";
+      input.value = "";
     }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    await handleSelectedFile(e.currentTarget);
   };
 
   const handleRemove = async () => {
@@ -108,6 +112,7 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
         type="file"
         accept="image/*"
         onChange={handleFileChange}
+        onInput={(e) => void handleSelectedFile(e.currentTarget)}
         style={{ position: "absolute", width: 0, height: 0, opacity: 0, pointerEvents: "none" }}
       />
 
@@ -152,6 +157,19 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
         </div>
 
         {error && <p className="text-xs text-red-400 max-w-xs leading-relaxed">{error}</p>}
+
+        <div>
+          <label className="block text-[11px] font-semibold text-text/35 uppercase mb-1">
+            Fallback upload
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            onInput={(e) => void handleSelectedFile(e.currentTarget)}
+            className="block w-full max-w-xs text-xs text-text/60 file:mr-3 file:rounded-lg file:border-0 file:bg-accent/10 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-accent hover:file:bg-accent/15"
+          />
+        </div>
       </div>
     </div>
   );
