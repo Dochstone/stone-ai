@@ -434,8 +434,10 @@ function draw(){
 function clamp(){
   if(!img)return;
   var w=img.naturalWidth*scale, h=img.naturalHeight*scale;
-  ox=Math.min(0,Math.max(SIZE-w,ox));
-  oy=Math.min(0,Math.max(SIZE-h,oy));
+  var minX=SIZE/2+R-w, maxX=SIZE/2-R;
+  var minY=SIZE/2+R-h, maxY=SIZE/2-R;
+  ox=Math.min(maxX,Math.max(minX,ox));
+  oy=Math.min(maxY,Math.max(minY,oy));
 }
 
 fileInput.addEventListener('change',function(e){
@@ -444,8 +446,8 @@ fileInput.addEventListener('change',function(e){
   var url=URL.createObjectURL(file);
   img=new Image();
   img.onload=function(){
-    baseScale=Math.max(SIZE/img.naturalWidth,SIZE/img.naturalHeight);
-    scale=baseScale;
+    baseScale=Math.max(R*2/img.naturalWidth,R*2/img.naturalHeight);
+    scale=baseScale*1.2;
     ox=(SIZE-img.naturalWidth*scale)/2;
     oy=(SIZE-img.naturalHeight*scale)/2;
     zoomInput.value='1';
