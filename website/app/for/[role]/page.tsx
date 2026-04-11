@@ -6,6 +6,7 @@ import { MODELS } from "@/lib/models";
 import { PROFESSIONS } from "@/lib/seo-data";
 import { SITE_URL } from "@/lib/constants";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { CrossLinks } from "@/components/CrossLinks";
 
 const ChatWidget = dynamic(() => import("@/components/ChatWidget"), { ssr: false });
 
@@ -138,6 +139,17 @@ export default function ProfessionPage({ params }: Props) {
           </div>
         </section>
 
+        {/* Early CTA */}
+        <div className="mb-14 flex flex-col sm:flex-row items-center gap-4 bg-accent/5 border border-accent/15 rounded-2xl p-6">
+          <div className="flex-1">
+            <p className="font-bold text-text text-sm">Попробуйте бесплатно — 10 запросов/день</p>
+            <p className="text-text/40 text-xs mt-1">65+ моделей. Без VPN. <Link href="/pricing" className="text-accent hover:underline">Подписка от 590₽/мес</Link></p>
+          </div>
+          <Link href="/dashboard/chat" className="shrink-0 bg-accent text-white font-bold px-6 py-3 rounded-xl text-sm hover:bg-accent/90 transition-all">
+            Открыть чат
+          </Link>
+        </div>
+
         {/* Tasks */}
         <section className="mb-14">
           <h2 className="text-2xl font-extrabold text-text mb-6">Задачи которые решает AI</h2>
@@ -158,6 +170,11 @@ export default function ProfessionPage({ params }: Props) {
                       </Link>
                     ) : null;
                   })}
+                  {t.models.some((id) => ["nano-banana", "nano-banana-pro", "gpt-5-image", "gpt-5-image-mini"].includes(id)) && (
+                    <Link href="/tools/image-generation" className="text-[11px] bg-text/5 text-text/40 px-2.5 py-1 rounded-lg font-medium hover:text-accent transition-colors">
+                      Все модели картинок →
+                    </Link>
+                  )}
                 </div>
               </div>
             ))}
@@ -193,6 +210,30 @@ export default function ProfessionPage({ params }: Props) {
           </div>
         </section>
 
+        {/* Comparison */}
+        <section className="mb-14">
+          <h2 className="text-2xl font-extrabold text-text mb-6">Почему Stone AI, а не ChatGPT?</h2>
+          <div className="grid sm:grid-cols-3 gap-3">
+            {[
+              { label: "ChatGPT Plus", price: "$20/мес (~1900₽)", models: "Только OpenAI", features: "Текст, картинки" },
+              { label: "Stone AI", price: "от 590₽/мес", models: "65+ моделей", features: "Текст, картинки, видео, 3D, SEO", accent: true },
+              { label: "Claude Pro", price: "$20/мес (~1900₽)", models: "Только Anthropic", features: "Только текст" },
+            ].map((c) => (
+              <div key={c.label} className={`rounded-2xl border p-5 ${c.accent ? "border-accent/30 bg-accent/5" : "border-text/5 bg-bg"}`}>
+                <div className={`text-sm font-bold mb-3 ${c.accent ? "text-accent" : "text-text/60"}`}>{c.label}</div>
+                <div className="text-lg font-extrabold text-text mb-2">{c.price}</div>
+                <div className="text-xs text-text/50 space-y-1">
+                  <div>{c.models}</div>
+                  <div>{c.features}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 text-center">
+            <Link href="/alternatives/chatgpt" className="text-xs text-accent hover:underline font-medium">Подробное сравнение с ChatGPT →</Link>
+          </div>
+        </section>
+
         {/* Try it */}
         <section className="mb-14">
           <h2 className="text-2xl font-extrabold text-text mb-4">Попробуйте AI для вашей задачи</h2>
@@ -207,6 +248,8 @@ export default function ProfessionPage({ params }: Props) {
             Попробовать бесплатно <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
           </Link>
         </section>
+
+        <CrossLinks exclude={["for", "pricing"]} />
 
         {/* Other */}
         <section className="mt-14">
