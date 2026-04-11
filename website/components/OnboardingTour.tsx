@@ -95,26 +95,36 @@ export function OnboardingTour({ onComplete }: { onComplete: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={handleSkip}
       />
 
-      {/* Card */}
-      <div className="relative bg-bg rounded-2xl p-8 max-w-md w-full shadow-2xl border border-text/5">
+      {/* Card — bottom sheet on mobile, centered on desktop */}
+      <div className="relative bg-bg rounded-t-2xl sm:rounded-2xl p-5 sm:p-8 w-full sm:max-w-md shadow-2xl border border-text/5 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] sm:pb-8">
+        {/* Drag handle — mobile only */}
+        <div className="sm:hidden flex justify-center mb-3">
+          <div className="w-10 h-1 rounded-full bg-text/15" />
+        </div>
+
         {/* Step dots */}
-        <div className="flex items-center justify-center gap-2 mb-6">
+        <div className="flex items-center justify-center gap-2 mb-5 sm:mb-6">
           {STEPS.map((_, i) => (
             <button
               key={i}
               onClick={() => goTo(i, i > step ? "next" : "prev")}
               className={`
-                h-2 rounded-full transition-all duration-300
-                ${i === step ? "w-6 bg-accent" : "w-2 bg-text/15 hover:bg-text/25"}
+                min-h-[28px] min-w-[28px] sm:min-h-0 sm:min-w-0
+                flex items-center justify-center
               `}
-            />
+            >
+              <div className={`
+                h-2 rounded-full transition-all duration-300
+                ${i === step ? "w-6 bg-accent" : "w-2 bg-text/15"}
+              `} />
+            </button>
           ))}
         </div>
 
@@ -123,7 +133,7 @@ export function OnboardingTour({ onComplete }: { onComplete: () => void }) {
           className={`transition-opacity duration-150 ${animating ? "opacity-0" : "opacity-100"}`}
         >
           {/* Icon */}
-          <div className="flex justify-center mb-5">
+          <div className="flex justify-center mb-4 sm:mb-5">
             <div
               className={`w-12 h-12 rounded-full bg-gradient-to-br ${current.gradient} flex items-center justify-center shadow-lg`}
             >
@@ -132,12 +142,12 @@ export function OnboardingTour({ onComplete }: { onComplete: () => void }) {
           </div>
 
           {/* Title */}
-          <h3 className="text-xl font-extrabold text-text text-center mb-2">
+          <h3 className="text-lg sm:text-xl font-extrabold text-text text-center mb-2">
             {current.title}
           </h3>
 
           {/* Description */}
-          <p className="text-sm text-text/50 text-center leading-relaxed mb-8">
+          <p className="text-[13px] sm:text-sm text-text/50 text-center leading-relaxed mb-6 sm:mb-8">
             {current.description}
           </p>
         </div>
@@ -145,7 +155,7 @@ export function OnboardingTour({ onComplete }: { onComplete: () => void }) {
         {/* Action button */}
         <button
           onClick={handleNext}
-          className="w-full py-3 rounded-xl bg-accent text-white text-sm font-bold hover:opacity-90 transition-opacity"
+          className="w-full min-h-[48px] py-3 rounded-xl bg-accent text-white text-sm font-bold hover:opacity-90 transition-opacity"
         >
           {isLast ? "Начать работу" : "Далее"}
         </button>
@@ -153,7 +163,7 @@ export function OnboardingTour({ onComplete }: { onComplete: () => void }) {
         {/* Skip link */}
         <button
           onClick={handleSkip}
-          className="w-full mt-3 text-xs text-text/30 hover:text-text/50 transition-colors text-center"
+          className="w-full mt-2 sm:mt-3 min-h-[40px] text-xs text-text/30 hover:text-text/50 transition-colors text-center"
         >
           Пропустить
         </button>

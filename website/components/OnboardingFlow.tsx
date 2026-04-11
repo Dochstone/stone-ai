@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 
 interface Step {
   mascot: string; title: string; desc: string;
@@ -31,13 +31,33 @@ export function OnboardingFlow({ mode, onComplete }: Props) {
   const [idx, setIdx] = useState(0);
   const [visible, setVisible] = useState(true);
   const [spotRect, setSpotRect] = useState<DOMRect | null>(null);
+  const rafRef = useRef(0);
   const current = steps[idx];
 
-  useEffect(() => {
+  const updateSpot = useCallback(() => {
     if (!current.highlight) { setSpotRect(null); return; }
     const el = document.querySelector(current.highlight);
-    setSpotRect(el ? el.getBoundingClientRect() : null);
-  }, [idx, current.highlight]);
+    if (!el) { setSpotRect(null); return; }
+    el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    requestAnimationFrame(() => {
+      setSpotRect(el.getBoundingClientRect());
+    });
+  }, [current.highlight]);
+
+  useEffect(() => {
+    updateSpot();
+    const onResize = () => {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(updateSpot);
+    };
+    window.addEventListener("resize", onResize);
+    window.addEventListener("scroll", onResize, true);
+    return () => {
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("scroll", onResize, true);
+      cancelAnimationFrame(rafRef.current);
+    };
+  }, [updateSpot]);
 
   const finish = useCallback(() => {
     localStorage.setItem(lsKey, "1");
@@ -90,13 +110,14 @@ export function OnboardingFlow({ mode, onComplete }: Props) {
           "w-full sm:w-[360px] sm:rounded-2xl rounded-t-2xl",
           "bg-bg border border-text/5 shadow-2xl",
           "transition-all duration-200 ease-out",
+          "pb-[env(safe-area-inset-bottom,0px)]",
           visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4",
         ].join(" ")}
         style={{ ...cardStyle, zIndex: 201 }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="h-1 rounded-t-2xl bg-gradient-to-r from-[#C4623D] to-[#E8945A]" />
-        <div className="p-5">
+        <div className="p-4 sm:p-5">
           {/* progress dots */}
           <div className="flex items-center gap-1.5 mb-4">
             {steps.map((_, i) => (
@@ -107,11 +128,11 @@ export function OnboardingFlow({ mode, onComplete }: Props) {
           </div>
 
           {/* mascot + content */}
-          <div className="flex items-start gap-4">
-            <img src={current.mascot} alt="" className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-contain flex-shrink-0 bg-text/[0.03]" />
+          <div className="flex items-start gap-3 sm:gap-4">
+            <img src={current.mascot} alt="" className="w-14 h-14 sm:w-20 sm:h-20 rounded-xl object-contain flex-shrink-0 bg-text/[0.03]" />
             <div className="min-w-0">
-              <h3 className="font-extrabold text-base text-text leading-snug mb-1">{current.title}</h3>
-              <p className="text-sm text-text/50 leading-relaxed">{current.desc}</p>
+              <h3 className="font-extrabold text-[15px] sm:text-base text-text leading-snug mb-1">{current.title}</h3>
+              <p className="text-[13px] sm:text-sm text-text/50 leading-relaxed">{current.desc}</p>
             </div>
           </div>
 
@@ -123,7 +144,7 @@ export function OnboardingFlow({ mode, onComplete }: Props) {
           )}
 
           {/* buttons */}
-          <div className="flex items-center justify-between mt-5 gap-3">
+          <div className="flex items-center justify-between mt-4 sm:mt-5 gap-3">
             <button onClick={finish} className="min-h-[44px] px-3 text-sm text-text/35 hover:text-text/55 transition-colors font-medium">
               Пропустить
             </button>
