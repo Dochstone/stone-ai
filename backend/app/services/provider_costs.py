@@ -87,8 +87,22 @@ FAL_COSTS: dict[str, float] = {
 
 # ─── Kling direct API costs per generation ───
 KLING_COSTS: dict[str, float] = {
+    "kling-v2": 0.07,
+    "kling-v3": 0.10,
     "kling-v2-master": 0.07,
     "kling-v2-5-master": 0.09,
+}
+
+NOVITA_COSTS: dict[str, float] = {
+    "minimax": 0.25,
+    "hunyuan": 0.10,
+    "cogvideox": 0.08,
+    "wan-2": 0.03,
+    "stable-video": 0.05,
+}
+
+VERTEX_COSTS: dict[str, float] = {
+    "veo-3": 0.25,
 }
 
 # ─── Image generation costs (non-OpenRouter) ───
@@ -116,8 +130,13 @@ def calculate_chat_provider_cost(model_id: str, tokens_in: int, tokens_out: int)
 
 
 def calculate_video_provider_cost(model_id: str) -> float:
-    """Calculate what WE pay FAL.ai/Kling for a video generation."""
-    return FAL_COSTS.get(model_id, 0.0) or KLING_COSTS.get(model_id, 0.0)
+    """Calculate what WE pay for a video generation."""
+    return (
+        NOVITA_COSTS.get(model_id, 0.0)
+        or VERTEX_COSTS.get(model_id, 0.0)
+        or FAL_COSTS.get(model_id, 0.0)
+        or KLING_COSTS.get(model_id, 0.0)
+    )
 
 
 def calculate_image_provider_cost(model_id: str, tokens_in: int = 0, tokens_out: int = 0) -> float:

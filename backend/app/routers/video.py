@@ -1,31 +1,32 @@
-"""Video generation endpoints — async generation via fal.ai."""
+"""Video generation endpoints - async generation via multiple providers."""
 
 import asyncio
-import uuid
 import logging
+import uuid
 from datetime import datetime
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-import httpx
 
+from app.config import USD_TO_RUB, get_settings
 from app.database import get_db
 from app.middleware.auth import get_current_user
-from app.config import get_settings, USD_TO_RUB
 from app.models.user import User
 from app.models.video_task import VideoTask
-from app.services.video_router import (
-    get_video_model,
-    get_video_price,
-    get_video_models_list,
-    submit_video_generation,
-    check_video_status,
-)
-from app.services.token_billing import deduct_balance
 from app.routers.achievements import check_and_update
+from app.services.token_billing import deduct_balance
+from app.services.video_router import (
+    check_video_status,
+    get_video_model,
+    get_video_models_list,
+    get_video_price,
+    get_video_provider,
+    submit_video_generation,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,38 @@ router = APIRouter(prefix="/api/video", tags=["video"])
 
 def _get_video_provider_cost(model_id: str) -> float:
     from app.services.provider_costs import calculate_video_provider_cost
+
     return calculate_video_provider_cost(model_id)
+
+
+async def _check_provider_status(task: VideoTask) -> dict:
+    settings = get_settings()
+    request_id = task.fal_request_id or ""
+
+    if request_id.startswith("kling:"):
+        from app.services.kling_client import check_kling_status
+
+        kling_task_id = request_id.split(":", 1)[1]
+        return await check_kling_status(
+            settings.kling_access_key,
+            settings.kling_secret_key,
+            kling_task_id,
+            is_image2video=bool(task.source_image_url),
+        )
+
+    if request_id.startswith("novita:"):
+        from app.services.novita_client import check_novita_status
+
+        novita_task_id = request_id.split(":", 1)[1]
+        return await check_novita_status(settings.novita_api_key, novita_task_id)
+
+    if request_id.startswith("vertex:"):
+        from app.services.vertex_client import check_vertex_status
+
+        vertex_operation = request_id.split(":", 1)[1]
+        return await check_vertex_status(settings.vertex_api_key, vertex_operation)
+
+    return await check_video_status(task.model_id, request_id)
 
 
 class GenerateRequest(BaseModel):
@@ -62,6 +94,7 @@ async def generate_video(
     On failure, balance is refunded.
     """
     from app.services.safety import check_blocked, check_banned, log_violation
+
     tg_id = tg_user["id"]
     if await check_banned(tg_id):
         raise HTTPException(403, "Аккаунт заблокирован")
@@ -71,14 +104,12 @@ async def generate_video(
         raise HTTPException(400, blocked)
     db_id = tg_user.get("db_id")
 
-    # Validate model
     model = get_video_model(req.model_id)
     if not model:
         raise HTTPException(400, "Неизвестная видео-модель")
 
     price = get_video_price(req.model_id)
 
-    # Find user
     if db_id:
         result = await db.execute(select(User).where(User.id == db_id).with_for_update())
     else:
@@ -87,13 +118,13 @@ async def generate_video(
     if not user:
         raise HTTPException(404, "Пользователь не найден")
 
-    # Use daily limits system (same as chat)
-    from app.services.daily_limits import check_daily_limit, increment_usage, check_and_expire_subscription
+    from app.services.daily_limits import check_daily_limit, check_and_expire_subscription, increment_usage
+
     tier = user.subscription_tier or "free"
     if tier != "free":
         tier = await check_and_expire_subscription(db, user)
     balance = float(user.balance_usd or 0)
-    actual_price = 0  # video uses daily limits, not balance
+    actual_price = 0
 
     check = await check_daily_limit(db, tg_id, req.model_id, tier, balance)
     if not check.get("allowed"):
@@ -104,7 +135,6 @@ async def generate_video(
 
     new_balance = balance
 
-    # Create task
     task_id = str(uuid.uuid4())[:12]
     task = VideoTask(
         task_id=task_id,
@@ -119,40 +149,70 @@ async def generate_video(
     db.add(task)
     await db.flush()
 
-    # Submit to Kling direct API or fal.ai
-    is_kling = req.model_id.startswith("kling")
     settings = get_settings()
+    provider = get_video_provider(req.model_id)
 
-    if is_kling and settings.kling_access_key:
+    if provider == "kling" and settings.kling_access_key:
         from app.services.kling_client import create_kling_video
+
         kling_model = "kling-v2-master"
         if "v1" in req.model_id:
             kling_model = "kling-v1-6"
-        kling_result = await create_kling_video(
-            settings.kling_access_key, settings.kling_secret_key,
-            req.prompt, model=kling_model,
+        result = await create_kling_video(
+            settings.kling_access_key,
+            settings.kling_secret_key,
+            req.prompt,
+            model=kling_model,
             source_image_url=req.source_image_url,
         )
-        if "error" in kling_result:
+        if "error" in result:
             task.status = "failed"
-            task.error_message = kling_result["error"]
+            task.error_message = result["error"]
             await db.commit()
-            raise HTTPException(502, f"Ошибка генерации: {kling_result['error']}")
-        task.fal_request_id = f"kling:{kling_result['task_id']}"
+            raise HTTPException(502, f"Ошибка генерации: {result['error']}")
+        task.fal_request_id = f"kling:{result['task_id']}"
+        task.status = "processing"
+    elif provider == "novita" and settings.novita_api_key:
+        from app.services.novita_client import create_novita_video
+
+        result = await create_novita_video(
+            settings.novita_api_key,
+            req.prompt,
+            model=req.model_id,
+            source_image_url=req.source_image_url,
+        )
+        if "error" in result:
+            task.status = "failed"
+            task.error_message = result["error"]
+            await db.commit()
+            raise HTTPException(502, f"Ошибка генерации: {result['error']}")
+        task.fal_request_id = f"novita:{result['task_id']}"
+        task.status = "processing"
+    elif provider == "vertex" and settings.vertex_api_key and not req.source_image_url:
+        from app.services.vertex_client import create_vertex_video
+
+        result = await create_vertex_video(settings.vertex_api_key, req.prompt)
+        if "error" in result:
+            task.status = "failed"
+            task.error_message = result["error"]
+            await db.commit()
+            raise HTTPException(502, f"Ошибка генерации: {result['error']}")
+        task.fal_request_id = f"vertex:{result['task_id']}"
         task.status = "processing"
     else:
-        fal_result = await submit_video_generation(
-            req.model_id, req.prompt, req.source_image_url
+        result = await submit_video_generation(
+            req.model_id,
+            req.prompt,
+            req.source_image_url,
         )
-        if "error" in fal_result:
+        if "error" in result:
             task.status = "failed"
-            task.error_message = fal_result["error"]
+            task.error_message = result["error"]
             await db.commit()
-            raise HTTPException(502, f"Ошибка генерации: {fal_result['error']}")
-        task.fal_request_id = fal_result["request_id"]
+            raise HTTPException(502, f"Ошибка генерации: {result['error']}")
+        task.fal_request_id = result["request_id"]
         task.status = "processing"
 
-    # Increment usage ONLY after successful submit (user doesn't lose generation on error)
     await increment_usage(db, tg_id, req.model_id, tier)
     if user:
         user.total_requests = (user.total_requests or 0) + 1
@@ -188,10 +248,8 @@ async def video_status(
     if not task:
         raise HTTPException(404, "Задача не найдена")
 
-    # If already completed/failed, return cached result
     if task.status in ("completed", "failed"):
         video_url = task.video_url
-        # If video is on our server, use direct URL; otherwise use stream proxy
         if video_url and "stoneai.ru/media/" not in video_url:
             video_url = f"https://stoneai.ru/api/video/stream/{task.task_id}"
         return {
@@ -201,7 +259,6 @@ async def video_status(
             "error": task.error_message,
         }
 
-    # Server-side timeout: 8 minutes since creation
     if task.created_at and (datetime.utcnow() - task.created_at).total_seconds() > 480:
         task.status = "failed"
         task.error_message = "Таймаут генерации (8 мин). Попробуйте другую модель."
@@ -215,33 +272,28 @@ async def video_status(
     if not task.fal_request_id:
         return {"task_id": task.task_id, "status": task.status}
 
-    # Check Kling direct API or fal.ai
-    is_kling_direct = task.fal_request_id.startswith("kling:")
-    if is_kling_direct:
-        from app.services.kling_client import check_kling_status
-        settings = get_settings()
-        kling_task_id = task.fal_request_id.split(":", 1)[1]
-        is_i2v = bool(task.source_image_url)
-        fal_status = await check_kling_status(
-            settings.kling_access_key, settings.kling_secret_key,
-            kling_task_id, is_image2video=is_i2v,
-        )
-    else:
-        fal_status = await check_video_status(task.model_id, task.fal_request_id)
-    status = fal_status.get("status", "UNKNOWN")
+    provider_status = await _check_provider_status(task)
+    status = provider_status.get("status", "UNKNOWN")
 
     if status == "COMPLETED":
-        fal_video_url = fal_status.get("video_url")
+        provider_video_url = provider_status.get("video_url")
         task.status = "completed"
-        task.video_url = fal_video_url
+        task.video_url = provider_video_url
         task.completed_at = datetime.utcnow()
         await db.commit()
 
-        # Download to disk + save to gallery in background (don't block response)
-        asyncio.create_task(_save_video_to_disk(task.task_id, fal_video_url, tg_id, task.model_id, task.prompt, task.cost_usd))
+        asyncio.create_task(
+            _save_video_to_disk(
+                task.task_id,
+                provider_video_url,
+                tg_id,
+                task.model_id,
+                task.prompt,
+                task.cost_usd,
+            )
+        )
         asyncio.create_task(check_and_update(tg_id, "videos", 1))
 
-        # Return stream proxy URL so video works even if fal.ai link expires
         stream_url = f"https://stoneai.ru/api/video/stream/{task.task_id}"
         return {
             "task_id": task.task_id,
@@ -252,7 +304,7 @@ async def video_status(
 
     if status == "FAILED":
         task.status = "failed"
-        task.error_message = fal_status.get("error", "Generation failed")
+        task.error_message = provider_status.get("error", "Generation failed")
         await db.commit()
 
         return {
@@ -261,7 +313,6 @@ async def video_status(
             "error": task.error_message,
         }
 
-    # Still processing
     return {
         "task_id": task.task_id,
         "status": "processing",
@@ -306,10 +357,9 @@ async def stream_video(
     token: str = "",
     db: AsyncSession = Depends(get_db),
 ):
-    """Proxy video stream — bypasses CORS restrictions on fal.ai URLs."""
+    """Proxy video stream - bypasses CORS restrictions on provider URLs."""
     from app.middleware.web_auth import decode_jwt
 
-    # Auth via query param (video src can't send headers)
     if not token:
         raise HTTPException(401, "Token required")
     try:
@@ -332,16 +382,13 @@ async def stream_video(
     if not task or not task.video_url:
         raise HTTPException(404, "Video not found")
 
-    # Try to refresh expired fal.ai URL
     video_url = task.video_url
     async with httpx.AsyncClient(timeout=10.0) as check_client:
         try:
             head = await check_client.head(video_url)
             if head.status_code in (403, 404, 410):
-                # URL expired — try to re-fetch from fal.ai
-                logger.info(f"Video URL expired for {task_id}, re-fetching from fal.ai")
-                from app.services.video_router import check_video_status
-                fresh = await check_video_status(task.model_id, task.fal_request_id)
+                logger.info(f"Video URL expired for {task_id}, re-fetching from provider")
+                fresh = await _check_provider_status(task)
                 if fresh.get("video_url"):
                     video_url = fresh["video_url"]
                     task.video_url = video_url
@@ -350,7 +397,7 @@ async def stream_video(
                 else:
                     raise HTTPException(410, "Видео больше недоступно. Сгенерируйте заново.")
         except httpx.TimeoutException:
-            pass  # proceed with original URL
+            pass
         except HTTPException:
             raise
         except Exception as e:
@@ -374,7 +421,6 @@ async def stream_video(
     )
 
 
-# In-memory thumbnail cache
 _thumb_cache: dict[str, bytes] = {}
 
 
@@ -385,8 +431,8 @@ async def video_thumbnail(
     db: AsyncSession = Depends(get_db),
 ):
     """Extract first frame from video as JPEG thumbnail."""
-    from app.middleware.web_auth import decode_jwt
     from fastapi.responses import Response
+    from app.middleware.web_auth import decode_jwt
 
     if not token:
         raise HTTPException(401, "Token required")
@@ -401,10 +447,12 @@ async def video_thumbnail(
     if not user:
         raise HTTPException(401, "User not found")
 
-    # Check cache
     if task_id in _thumb_cache:
-        return Response(content=_thumb_cache[task_id], media_type="image/jpeg",
-                       headers={"Cache-Control": "public, max-age=86400"})
+        return Response(
+            content=_thumb_cache[task_id],
+            media_type="image/jpeg",
+            headers={"Cache-Control": "public, max-age=86400"},
+        )
 
     tg_id = user.telegram_id or user.id
     result = await db.execute(
@@ -415,21 +463,18 @@ async def video_thumbnail(
         raise HTTPException(404, "Video not found")
 
     try:
-        # Download first ~500KB of video (enough for first frame)
         async with httpx.AsyncClient(timeout=30.0) as client:
             resp = await client.get(task.video_url, headers={"Range": "bytes=0-524287"})
             video_bytes = resp.content
 
-        # Extract first frame using imageio
         import imageio.v3 as iio
         from io import BytesIO
         from PIL import Image
 
         frames = iio.imread(BytesIO(video_bytes), plugin="pyav", format_hint=".mp4")
         if len(frames) > 0:
-            frame = frames[0] if hasattr(frames, '__len__') else frames
+            frame = frames[0] if hasattr(frames, "__len__") else frames
             img = Image.fromarray(frame)
-            # Resize to max 480px wide
             if img.width > 480:
                 ratio = 480 / img.width
                 img = img.resize((480, int(img.height * ratio)), Image.LANCZOS)
@@ -437,16 +482,17 @@ async def video_thumbnail(
             img.save(buf, format="JPEG", quality=80)
             thumb_bytes = buf.getvalue()
 
-            # Cache it
             _thumb_cache[task_id] = thumb_bytes
-            # Keep cache small
             if len(_thumb_cache) > 200:
                 oldest = list(_thumb_cache.keys())[:100]
                 for k in oldest:
                     _thumb_cache.pop(k, None)
 
-            return Response(content=thumb_bytes, media_type="image/jpeg",
-                           headers={"Cache-Control": "public, max-age=86400"})
+            return Response(
+                content=thumb_bytes,
+                media_type="image/jpeg",
+                headers={"Cache-Control": "public, max-age=86400"},
+            )
 
     except Exception as e:
         logger.warning(f"Thumbnail generation failed: {e}")
@@ -454,12 +500,20 @@ async def video_thumbnail(
     raise HTTPException(404, "Could not generate thumbnail")
 
 
-async def _save_video_to_disk(task_id: str, video_url: str | None, tg_id: int, model_id: str, prompt: str | None, cost_usd: float | None):
-    """Background: download video from fal.ai → save to /media/videos/ → update DB."""
+async def _save_video_to_disk(
+    task_id: str,
+    video_url: str | None,
+    tg_id: int,
+    model_id: str,
+    prompt: str | None,
+    cost_usd: float | None,
+):
+    """Background: download video, save to /media/videos/, update DB."""
     if not video_url:
         return
     try:
         import os
+
         media_dir = "/var/www/stone-ai/media/videos"
         os.makedirs(media_dir, exist_ok=True)
         local_path = f"{media_dir}/{task_id}.mp4"
@@ -471,18 +525,19 @@ async def _save_video_to_disk(task_id: str, video_url: str | None, tg_id: int, m
                     f.write(resp.content)
                 local_url = f"https://stoneai.ru/media/videos/{task_id}.mp4"
 
-                # Update task URL in DB
                 from app.database import async_session
+
                 async with async_session() as db:
                     from sqlalchemy import select as sel
+
                     r = await db.execute(sel(VideoTask).where(VideoTask.task_id == task_id))
                     task = r.scalar_one_or_none()
                     if task:
                         task.video_url = local_url
                         await db.commit()
 
-                # Save to gallery
                 from app.models.generation import Generation
+
                 async with async_session() as db:
                     provider_cost = 0.0
                     task_result = await db.execute(sel(VideoTask).where(VideoTask.task_id == task_id))
@@ -503,6 +558,8 @@ async def _save_video_to_disk(task_id: str, video_url: str | None, tg_id: int, m
 
                 logger.info(f"Video saved: {local_path} ({len(resp.content)} bytes)")
             else:
-                logger.warning(f"Video download failed: status={resp.status_code} size={len(resp.content)}")
+                logger.warning(
+                    f"Video download failed: status={resp.status_code} size={len(resp.content)}"
+                )
     except Exception as e:
         logger.warning(f"_save_video_to_disk error: {e}")

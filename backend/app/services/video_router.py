@@ -1,6 +1,5 @@
-"""Video generation service via fal.ai API."""
+"""Video generation service routing across fal.ai and other providers."""
 
-import json
 import logging
 
 import httpx
@@ -13,25 +12,25 @@ FAL_QUEUE_URL = "https://queue.fal.run"
 
 VIDEO_MODELS_REGISTRY = [
     # Tier 1: Premium (best quality)
-    {"id": "kling-v3",    "name": "Kling 3.0 Pro",     "company": "Kuaishou",  "fal_model": "direct-kling",                    "duration": "5-10s", "cost": 0.10, "price": 0.30, "active": False},  # Direct Kling API — disabled
-    {"id": "sora-2",      "name": "Sora 2 Pro",        "company": "OpenAI",    "fal_model": "fal-ai/sora-2/text-to-video/pro", "duration": "5-10s", "cost": 0.10, "price": 0.50, "active": True},
-    {"id": "veo-3",       "name": "Veo 3.1",           "company": "Google",    "fal_model": "fal-ai/veo3.1",                   "duration": "5-10s", "cost": 0.40, "price": 0.65, "active": True},
-    {"id": "luma-ray2",   "name": "Luma Ray 2",        "company": "Luma",      "fal_model": "fal-ai/luma-dream-machine/ray-2", "duration": "5-10s", "cost": 0.50, "price": 0.50, "active": True},
-    {"id": "luma-ray2-flash", "name": "Luma Ray 2 Flash", "company": "Luma",   "fal_model": "fal-ai/luma-dream-machine/ray-2-flash", "duration": "5-10s", "cost": 0.20, "price": 0.30, "active": True},
-    {"id": "runway-gen3", "name": "Runway Gen-3 Alpha", "company": "Runway",   "fal_model": "fal-ai/runway-gen3/turbo/image-to-video", "duration": "5-10s", "cost": 0.25, "price": 0.85, "active": False},
+    {"id": "kling-v3", "name": "Kling 3.0 Pro", "company": "Kuaishou", "provider": "kling", "fal_model": "direct-kling", "duration": "5-10s", "cost": 0.10, "price": 0.30, "active": False},
+    {"id": "sora-2", "name": "Sora 2 Pro", "company": "OpenAI", "provider": "fal", "fal_model": "fal-ai/sora-2/text-to-video/pro", "duration": "5-10s", "cost": 0.10, "price": 0.50, "active": True},
+    {"id": "veo-3", "name": "Veo 3.1", "company": "Google", "provider": "vertex", "fal_model": "fal-ai/veo3.1", "duration": "5-10s", "cost": 0.25, "price": 0.65, "active": True},
+    {"id": "luma-ray2", "name": "Luma Ray 2", "company": "Luma", "provider": "fal", "fal_model": "fal-ai/luma-dream-machine/ray-2", "duration": "5-10s", "cost": 0.50, "price": 0.50, "active": True},
+    {"id": "luma-ray2-flash", "name": "Luma Ray 2 Flash", "company": "Luma", "provider": "fal", "fal_model": "fal-ai/luma-dream-machine/ray-2-flash", "duration": "5-10s", "cost": 0.20, "price": 0.30, "active": True},
+    {"id": "runway-gen3", "name": "Runway Gen-3 Alpha", "company": "Runway", "provider": "fal", "fal_model": "fal-ai/runway-gen3/turbo/image-to-video", "duration": "5-10s", "cost": 0.25, "price": 0.85, "active": False},
     # Tier 2: Working models
-    {"id": "kling-v2",    "name": "Kling v2 Master",   "company": "Kuaishou",  "fal_model": "direct-kling",                    "duration": "5-10s", "cost": 0.07, "price": 0.25, "active": False},  # Direct Kling API — disabled
-    {"id": "minimax",     "name": "MiniMax Hailuo",    "company": "MiniMax",   "fal_model": "fal-ai/minimax-video",            "duration": "5-10s", "cost": 0.50, "price": 0.28, "active": True},
-    {"id": "cogvideox",   "name": "CogVideoX 5B",     "company": "THUDM",     "fal_model": "fal-ai/cogvideox-5b",             "duration": "5s",    "cost": 0.20, "price": 0.20, "active": True},
-    {"id": "mochi",       "name": "Mochi v1",          "company": "Genmo",     "fal_model": "fal-ai/mochi-v1",                 "duration": "5s",    "cost": 0.40, "price": 0.18, "active": False},
-    {"id": "pixverse-v5", "name": "PixVerse v4.5",     "company": "PixVerse",  "fal_model": "fal-ai/pixverse/v4.5",            "duration": "5-10s", "cost": 0.06, "price": 0.22, "active": True},
-    {"id": "luma-dream",  "name": "Luma Dream Machine", "company": "Luma",    "fal_model": "fal-ai/luma-dream-machine",       "duration": "5s",    "cost": 0.50, "price": 0.35, "active": True},
-    {"id": "pika-2",      "name": "Pika 2.0",          "company": "Pika",     "fal_model": "fal-ai/pika/v2",                  "duration": "3-5s",  "cost": 0.05, "price": 0.18, "active": True},
+    {"id": "kling-v2", "name": "Kling v2 Master", "company": "Kuaishou", "provider": "kling", "fal_model": "direct-kling", "duration": "5-10s", "cost": 0.07, "price": 0.25, "active": False},
+    {"id": "minimax", "name": "MiniMax Hailuo", "company": "MiniMax", "provider": "novita", "fal_model": "fal-ai/minimax-video", "duration": "5-10s", "cost": 0.25, "price": 0.28, "active": True},
+    {"id": "cogvideox", "name": "CogVideoX 5B", "company": "THUDM", "provider": "novita", "fal_model": "fal-ai/cogvideox-5b", "duration": "5s", "cost": 0.08, "price": 0.20, "active": True},
+    {"id": "mochi", "name": "Mochi v1", "company": "Genmo", "provider": "fal", "fal_model": "fal-ai/mochi-v1", "duration": "5s", "cost": 0.40, "price": 0.18, "active": False},
+    {"id": "pixverse-v5", "name": "PixVerse v4.5", "company": "PixVerse", "provider": "fal", "fal_model": "fal-ai/pixverse/v4.5", "duration": "5-10s", "cost": 0.06, "price": 0.22, "active": True},
+    {"id": "luma-dream", "name": "Luma Dream Machine", "company": "Luma", "provider": "fal", "fal_model": "fal-ai/luma-dream-machine", "duration": "5s", "cost": 0.50, "price": 0.35, "active": True},
+    {"id": "pika-2", "name": "Pika 2.0", "company": "Pika", "provider": "fal", "fal_model": "fal-ai/pika/v2", "duration": "3-5s", "cost": 0.05, "price": 0.18, "active": True},
     # Tier 3: Budget
-    {"id": "wan-2",       "name": "Wan 2.6",           "company": "Alibaba",   "fal_model": "fal-ai/wan/v2.6/text-to-video",   "duration": "5-10s", "cost": 0.05, "price": 0.15, "active": False},  # disabled — hangs on fal.ai
-    {"id": "hunyuan",     "name": "Hunyuan Video",     "company": "Tencent",   "fal_model": "fal-ai/hunyuan-video",            "duration": "5s",    "cost": 0.40, "price": 0.18, "active": False},  # disabled — hangs on fal.ai
-    {"id": "ltx-video",   "name": "LTX Video 2.3",    "company": "Lightricks", "fal_model": "fal-ai/ltx-2-19b",               "duration": "5s",    "cost": 0.04, "price": 0.12, "active": True},
-    {"id": "stable-video", "name": "Stable Video",     "company": "Stability", "fal_model": "fal-ai/stable-video",             "duration": "4s",    "cost": 0.075, "price": 0.15, "active": True},
+    {"id": "wan-2", "name": "Wan 2.6", "company": "Alibaba", "provider": "novita", "fal_model": "fal-ai/wan/v2.6/text-to-video", "duration": "5-10s", "cost": 0.03, "price": 0.15, "active": True},
+    {"id": "hunyuan", "name": "Hunyuan Video", "company": "Tencent", "provider": "novita", "fal_model": "fal-ai/hunyuan-video", "duration": "5s", "cost": 0.10, "price": 0.18, "active": True},
+    {"id": "ltx-video", "name": "LTX Video 2.3", "company": "Lightricks", "provider": "fal", "fal_model": "fal-ai/ltx-2-19b", "duration": "5s", "cost": 0.04, "price": 0.12, "active": True},
+    {"id": "stable-video", "name": "Stable Video", "company": "Stability", "provider": "novita", "fal_model": "fal-ai/stable-video", "duration": "4s", "cost": 0.05, "price": 0.15, "active": True},
 ]
 
 VIDEO_MODEL_MAP = {m["id"]: m for m in VIDEO_MODELS_REGISTRY}
@@ -47,6 +46,12 @@ def get_video_model(model_id: str) -> dict | None:
 def get_video_price(model_id: str) -> float:
     m = VIDEO_MODEL_MAP.get(model_id)
     return m["price"] if m else 0.0
+
+
+def get_video_provider(model_id: str) -> str:
+    """Return provider name for a model."""
+    m = VIDEO_MODEL_MAP.get(model_id)
+    return m.get("provider", "fal") if m else "fal"
 
 
 def get_video_models_list() -> list[dict]:
@@ -128,10 +133,7 @@ async def check_video_status(model_id: str, fal_request_id: str) -> dict:
         return {"status": "FAILED", "error": "Unknown model"}
 
     fal_model = model["fal_model"]
-    # Base model path for status (strip version suffix like /v3/pro, /v2/master)
-    # e.g. fal-ai/kling-video/v3/pro → fal-ai/kling-video
     fal_base = fal_model.split("/")[0] + "/" + fal_model.split("/")[1] if "/" in fal_model else fal_model
-    # Keep first two path segments: fal-ai/kling-video, fal-ai/minimax-video, etc.
     parts = fal_model.split("/")
     if len(parts) >= 2:
         fal_base = parts[0] + "/" + parts[1]
@@ -141,14 +143,12 @@ async def check_video_status(model_id: str, fal_request_id: str) -> dict:
 
     try:
         async with httpx.AsyncClient(timeout=15.0) as client:
-            # Try full path first, fallback to base path
             resp = await client.get(
                 f"{FAL_QUEUE_URL}/{fal_model}/requests/{fal_request_id}/status",
                 headers=headers,
             )
 
             if resp.status_code not in (200, 202) and fal_base != fal_model:
-                # Retry with base model path (fal.ai quirk for versioned models)
                 resp = await client.get(
                     f"{FAL_QUEUE_URL}/{fal_base}/requests/{fal_request_id}/status",
                     headers=headers,
@@ -159,10 +159,8 @@ async def check_video_status(model_id: str, fal_request_id: str) -> dict:
 
             data = resp.json()
             status = data.get("status", "UNKNOWN")
-            inference_time = data.get("metrics", {}).get("inference_time", 0)
 
             if status == "COMPLETED":
-                # Fetch the actual result — try full path, then base
                 result = None
                 for path in [fal_model, fal_base] if fal_base != fal_model else [fal_model]:
                     try:
@@ -179,7 +177,6 @@ async def check_video_status(model_id: str, fal_request_id: str) -> dict:
 
                 video_url = None
                 if result:
-                    # Try every known response format
                     video_url = (
                         result.get("video", {}).get("url") if isinstance(result.get("video"), dict) else None
                     ) or (
@@ -191,6 +188,7 @@ async def check_video_status(model_id: str, fal_request_id: str) -> dict:
                     )
                     if not video_url:
                         import re
+
                         urls = re.findall(r'https?://[^\s"\']+\.mp4[^\s"\']*', str(result))
                         if not urls:
                             urls = re.findall(r'https?://[^\s"\']+(?:video|\.webm|\.mov|fal\.media)[^\s"\']*', str(result))

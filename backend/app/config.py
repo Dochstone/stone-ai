@@ -109,6 +109,12 @@ class Settings:
         # fal.ai (Video + 3D generation)
         self.fal_api_key = os.getenv("FAL_API_KEY", "")
 
+        # Novita.ai (Video generation — alternative to fal.ai)
+        self.novita_api_key = os.getenv("NOVITA_API_KEY", "")
+
+        # Google Gemini API (Veo 3.1 video generation)
+        self.vertex_api_key = os.getenv("VERTEX_API_KEY", "")
+
         # OpenAI (Whisper STT)
         self.openai_api_key = os.getenv("OPENAI_API_KEY", "")
 
