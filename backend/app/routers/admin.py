@@ -543,10 +543,10 @@ async def web_admin_create_promo(
     promo_data: dict = {
         "type": promo_type,
         "tier": body.get("tier", "mini"),
-        "days": int(body.get("days", 7)),
-        "credits": int(body.get("credits", 0)),
-        "discount_value": int(body.get("discount_value", 0)),
-        "max_uses": int(body.get("max_uses", 1000)),
+        "days": int(body.get("days") or 7),
+        "credits": int(body.get("credits") or 0),
+        "discount_value": int(body.get("discount_value") or 0),
+        "max_uses": int(body.get("max_uses") or 1000),
         "one_per_user": body.get("one_per_user", True),
         "desc": body.get("desc", ""),
     }
