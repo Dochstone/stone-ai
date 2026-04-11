@@ -1,204 +1,127 @@
 "use client";
 
 import { useState, useEffect, useRef, memo } from "react";
-import {
-  canLoadImage,
-  getAvatarColor,
-  getInitials,
-  getSavedAvatar,
-  removeAvatar,
-  saveAvatar,
-  saveServerAvatar,
-  syncAvatarFromProfile,
-  uploadAvatarFileToServer,
-  uploadAvatarToServer,
-  processAvatarFile,
-} from "@/lib/avatar";
+import { getAvatarColor, getInitials, getSavedAvatar, saveAvatar, syncAvatarFromProfile } from "@/lib/avatar";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
+
+function getToken(): string {
+  try {
+    return JSON.parse(localStorage.getItem("stone_auth") || "{}").token || "";
+  } catch {
+    return "";
+  }
+}
 
 function AvatarUploadInner({ email, name }: { email: string; name?: string | null }) {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [formToken, setFormToken] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const previewObjectUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
     const local = getSavedAvatar();
     if (local) setAvatarUrl(local);
-    try {
-      const raw = localStorage.getItem("stone_auth");
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        setFormToken(parsed?.token || "");
-      }
-    } catch {}
-    syncAvatarFromProfile().then((url) => {
-      setAvatarUrl(url);
-    });
+    syncAvatarFromProfile().then((url) => { if (url) setAvatarUrl(url); });
     const handler = (e: Event) => {
       const url = (e as CustomEvent).detail?.url ?? null;
       setAvatarUrl(url);
     };
     window.addEventListener("avatar-changed", handler);
-    return () => {
-      window.removeEventListener("avatar-changed", handler);
-      if (previewObjectUrlRef.current) {
-        URL.revokeObjectURL(previewObjectUrlRef.current);
-        previewObjectUrlRef.current = null;
-      }
-    };
+    return () => window.removeEventListener("avatar-changed", handler);
   }, []);
 
-  const openFilePicker = () => {
-    if (uploading) return;
-    fileInputRef.current?.click();
-  };
-
-  const handleSelectedFile = async (input: HTMLInputElement) => {
-    const file = input.files?.[0];
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
     setError(null);
     setUploading(true);
 
-    if (previewObjectUrlRef.current) {
-      URL.revokeObjectURL(previewObjectUrlRef.current);
-    }
-    previewObjectUrlRef.current = URL.createObjectURL(file);
-    setAvatarUrl(previewObjectUrlRef.current);
-
     try {
-      let fullUrl: string;
-      try {
-        fullUrl = await uploadAvatarFileToServer(file);
-      } catch {
-        const previewUrl = await processAvatarFile(file);
-        saveAvatar(previewUrl);
-        setAvatarUrl(previewUrl);
-        fullUrl = await uploadAvatarToServer(previewUrl);
-      }
-      saveServerAvatar(fullUrl);
+      const fd = new FormData();
+      fd.append("file", file);
 
-      const reachable = await canLoadImage(fullUrl);
-      if (reachable) {
-        saveAvatar(fullUrl);
-        setAvatarUrl(fullUrl);
-        if (previewObjectUrlRef.current) {
-          URL.revokeObjectURL(previewObjectUrlRef.current);
-          previewObjectUrlRef.current = null;
-        }
-      } else {
-        setError("Avatar was processed, but the remote image URL is not opening yet");
+      const res = await fetch(`${API_URL}/api/user/avatar-file`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${getToken()}` },
+        body: fd,
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || `Ошибка ${res.status}`);
       }
+
+      const data = await res.json();
+      const fullUrl = data.avatar_url?.startsWith("http")
+        ? data.avatar_url
+        : `${API_URL}${data.avatar_url}`;
+
+      saveAvatar(fullUrl);
+      setAvatarUrl(fullUrl);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Avatar upload failed");
+      setError(err instanceof Error ? err.message : "Ошибка загрузки");
     } finally {
       setUploading(false);
-      input.value = "";
+      e.target.value = "";
     }
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    await handleSelectedFile(e.currentTarget);
   };
 
   const handleRemove = async () => {
     setError(null);
     try {
-      await removeAvatar();
+      await fetch(`${API_URL}/api/user/avatar`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      localStorage.removeItem("stone_avatar");
+      window.dispatchEvent(new CustomEvent("avatar-changed", { detail: { url: null } }));
       setAvatarUrl(null);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to remove avatar");
+      setError(err instanceof Error ? err.message : "Ошибка удаления");
     }
   };
 
   return (
-    <div style={{ position: "relative" }}>
+    <div>
       <input
         ref={fileInputRef}
         type="file"
         accept="image/*"
         onChange={handleFileChange}
-        onInput={(e) => void handleSelectedFile(e.currentTarget)}
         style={{ position: "absolute", width: 0, height: 0, opacity: 0, pointerEvents: "none" }}
       />
+      <div className="flex items-center gap-4">
+        <button
+          type="button"
+          onClick={() => !uploading && fileInputRef.current?.click()}
+          className="relative group shrink-0 cursor-pointer bg-transparent border-0 p-0"
+        >
+          <div className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center border border-text/10">
+            {uploading ? (
+              <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+            ) : avatarUrl ? (
+              <img src={avatarUrl} alt="Аватарка" className="w-full h-full object-cover" onError={() => setAvatarUrl(null)} />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: getAvatarColor(email) }}>
+                <span className="text-xl font-bold text-white">{getInitials(email, name)}</span>
+              </div>
+            )}
+          </div>
+          <div className="absolute inset-0 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+            </svg>
+          </div>
+        </button>
 
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-4">
-          <button
-            type="button"
-            onClick={openFilePicker}
-            className="relative group shrink-0 cursor-pointer bg-transparent border-0 p-0"
-          >
-            <div className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center border border-text/10">
-              {uploading ? (
-                <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-              ) : avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt="Avatar"
-                  className="w-full h-full object-cover"
-                  onError={() => {
-                    setAvatarUrl(getSavedAvatar());
-                    setError("Avatar image could not be opened");
-                  }}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: getAvatarColor(email) }}>
-                  <span className="text-xl font-bold text-white">{getInitials(email, name)}</span>
-                </div>
-              )}
-            </div>
-            <div className="absolute inset-0 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
-              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
-              </svg>
-            </div>
+        {avatarUrl && !uploading && (
+          <button type="button" onClick={handleRemove} className="text-xs text-red-400 hover:text-red-300 transition-colors">
+            Удалить фото
           </button>
-
-          {avatarUrl && !uploading && (
-            <button type="button" onClick={handleRemove} className="text-xs text-red-400 hover:text-red-300 transition-colors">
-              Delete photo
-            </button>
-          )}
-        </div>
-
-        {error && <p className="text-xs text-red-400 max-w-xs leading-relaxed">{error}</p>}
-
-        <div>
-          <label className="block text-[11px] font-semibold text-text/35 uppercase mb-1">
-            Fallback upload
-          </label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            onInput={(e) => void handleSelectedFile(e.currentTarget)}
-            className="block w-full max-w-xs text-xs text-text/60 file:mr-3 file:rounded-lg file:border-0 file:bg-accent/10 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-accent hover:file:bg-accent/15"
-          />
-        </div>
-
-        {formToken && (
-          <form action="/api/user/avatar-form" method="post" encType="multipart/form-data" className="flex flex-col gap-2 max-w-xs">
-            <input type="hidden" name="token" value={formToken} />
-            <label className="block text-[11px] font-semibold text-text/35 uppercase mb-1">
-              Emergency native form
-            </label>
-            <input
-              type="file"
-              name="file"
-              accept="image/*"
-              className="block w-full text-xs text-text/60 file:mr-3 file:rounded-lg file:border-0 file:bg-teal/10 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-teal hover:file:bg-teal/15"
-            />
-            <button
-              type="submit"
-              className="inline-flex w-fit items-center rounded-lg bg-teal px-3 py-2 text-xs font-semibold text-white hover:bg-teal/90"
-            >
-              Upload via form submit
-            </button>
-          </form>
         )}
+        {error && <p className="text-xs text-red-400">{error}</p>}
       </div>
     </div>
   );
