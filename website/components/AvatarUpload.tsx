@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, memo } from "react";
+import { useState, useEffect, memo } from "react";
 import { getAvatarColor, getInitials, getSavedAvatar, saveAvatar, syncAvatarFromProfile } from "@/lib/avatar";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
@@ -16,8 +16,7 @@ function getToken(): string {
 function AvatarUploadInner({ email, name }: { email: string; name?: string | null }) {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [status, setStatus] = useState<string | null>(null);
 
   useEffect(() => {
     const local = getSavedAvatar();
@@ -31,45 +30,35 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
     return () => window.removeEventListener("avatar-changed", handler);
   }, []);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setError(null);
+  const upload = async (file: File) => {
+    setStatus(null);
     setUploading(true);
-
     try {
       const fd = new FormData();
       fd.append("file", file);
-
       const res = await fetch(`${API_URL}/api/user/avatar-file`, {
         method: "POST",
         headers: { Authorization: `Bearer ${getToken()}` },
         body: fd,
       });
-
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.detail || `Ошибка ${res.status}`);
       }
-
       const data = await res.json();
-      const fullUrl = data.avatar_url?.startsWith("http")
-        ? data.avatar_url
-        : `${API_URL}${data.avatar_url}`;
-
+      const fullUrl = data.avatar_url?.startsWith("http") ? data.avatar_url : `${API_URL}${data.avatar_url}`;
       saveAvatar(fullUrl);
       setAvatarUrl(fullUrl);
+      setStatus("Аватарка загружена!");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Ошибка загрузки");
+      setStatus(err instanceof Error ? err.message : "Ошибка загрузки");
     } finally {
       setUploading(false);
-      e.target.value = "";
     }
   };
 
   const handleRemove = async () => {
-    setError(null);
+    setStatus(null);
     try {
       await fetch(`${API_URL}/api/user/avatar`, {
         method: "DELETE",
@@ -78,50 +67,53 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
       localStorage.removeItem("stone_avatar");
       window.dispatchEvent(new CustomEvent("avatar-changed", { detail: { url: null } }));
       setAvatarUrl(null);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Ошибка удаления");
+      setStatus("Аватарка удалена");
+    } catch {
+      setStatus("Ошибка удаления");
     }
   };
 
   return (
-    <div>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFileChange}
-        style={{ position: "absolute", width: 0, height: 0, opacity: 0, pointerEvents: "none" }}
-      />
-      <div className="flex items-center gap-4">
-        <button
-          type="button"
-          onClick={() => !uploading && fileInputRef.current?.click()}
-          className="relative group shrink-0 cursor-pointer bg-transparent border-0 p-0"
-        >
-          <div className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center border border-text/10">
-            {uploading ? (
-              <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-            ) : avatarUrl ? (
-              <img src={avatarUrl} alt="Аватарка" className="w-full h-full object-cover" onError={() => setAvatarUrl(null)} />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: getAvatarColor(email) }}>
-                <span className="text-xl font-bold text-white">{getInitials(email, name)}</span>
-              </div>
-            )}
+    <div className="flex items-center gap-4">
+      <div className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center border border-text/10 shrink-0">
+        {avatarUrl ? (
+          <img src={avatarUrl} alt="Аватарка" className="w-full h-full object-cover" onError={() => setAvatarUrl(null)} />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: getAvatarColor(email) }}>
+            <span className="text-xl font-bold text-white">{getInitials(email, name)}</span>
           </div>
-          <div className="absolute inset-0 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
-            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+        )}
+      </div>
+      <div className="flex flex-col gap-1.5">
+        {uploading ? (
+          <div className="flex items-center gap-2 text-xs text-text/50">
+            <div className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+            Загрузка...
+          </div>
+        ) : (
+          <label className="cursor-pointer inline-flex items-center gap-1.5 text-xs font-medium text-accent hover:text-accent/80 transition-colors">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
             </svg>
-          </div>
-        </button>
-
+            Загрузить фото
+            <input
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) upload(file);
+                e.target.value = "";
+              }}
+            />
+          </label>
+        )}
         {avatarUrl && !uploading && (
-          <button type="button" onClick={handleRemove} className="text-xs text-red-400 hover:text-red-300 transition-colors">
+          <button type="button" onClick={handleRemove} className="text-xs text-red-400 hover:text-red-300 transition-colors text-left">
             Удалить фото
           </button>
         )}
-        {error && <p className="text-xs text-red-400">{error}</p>}
+        {status && <p className="text-xs text-text/50">{status}</p>}
       </div>
     </div>
   );
