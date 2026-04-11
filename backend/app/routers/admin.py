@@ -504,22 +504,23 @@ async def web_admin_transactions(
 @router.get("/web/promos")
 async def web_admin_promos(
     _admin: dict = Depends(require_web_admin),
+    db: AsyncSession = Depends(get_db),
 ):
     """Promo code usage stats."""
-    from app.services.promo import PROMO_CODES, _promo_usage, _promo_total_uses
+    from app.services.promo import PROMO_CODES, _count_promo_uses
 
     promos = []
     for code, config in PROMO_CODES.items():
+        used = await _count_promo_uses(db, code)
         promos.append({
             "code": code,
             "type": config["type"],
-            "desc": config["desc"],
+            "desc": config.get("desc", ""),
             "tier": config.get("tier", "—"),
             "days": config.get("days", 0),
             "credits": config.get("credits", 0),
-            "used": _promo_total_uses.get(code, 0),
+            "used": used,
             "max_uses": config["max_uses"],
-            "user_ids": list(_promo_usage.get(code, set())),
         })
     return {"promos": promos}
 
@@ -530,7 +531,7 @@ async def web_admin_create_promo(
     _admin: dict = Depends(require_web_admin),
 ):
     """Create or update a promo code."""
-    from app.services.promo import PROMO_CODES, _promo_usage, _promo_total_uses
+    from app.services.promo import PROMO_CODES
 
     body = await request.json()
     code = body.get("code", "").strip().upper()
@@ -546,10 +547,6 @@ async def web_admin_create_promo(
         "one_per_user": body.get("one_per_user", True),
         "desc": body.get("desc", ""),
     }
-    if code not in _promo_usage:
-        _promo_usage[code] = set()
-    if code not in _promo_total_uses:
-        _promo_total_uses[code] = 0
 
     return {"status": "ok", "code": code}
 
@@ -560,15 +557,13 @@ async def web_admin_delete_promo(
     _admin: dict = Depends(require_web_admin),
 ):
     """Delete a promo code."""
-    from app.services.promo import PROMO_CODES, _promo_usage, _promo_total_uses
+    from app.services.promo import PROMO_CODES
 
     code = code.upper()
     if code not in PROMO_CODES:
         raise HTTPException(404, "Промокод не найден")
 
     del PROMO_CODES[code]
-    _promo_usage.pop(code, None)
-    _promo_total_uses.pop(code, None)
     return {"status": "ok", "deleted": code}
 
 
