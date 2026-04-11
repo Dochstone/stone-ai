@@ -794,6 +794,7 @@ export default function AdminPage() {
                     body: JSON.stringify({
                       code: fd.get("code"), type: fd.get("type"), tier: fd.get("tier"),
                       days: fd.get("days"), credits: fd.get("credits"),
+                      discount_value: fd.get("discount_value"),
                       max_uses: fd.get("max_uses"), desc: fd.get("desc"),
                     }),
                   });
@@ -812,6 +813,8 @@ export default function AdminPage() {
                 <select name="type" className="bg-bg border border-text/10 rounded-xl px-3 py-2.5 text-xs">
                   <option value="days">Бесплатные дни</option>
                   <option value="credits">Кредиты</option>
+                  <option value="discount_percent">Скидка %</option>
+                  <option value="discount_rub">Скидка ₽</option>
                 </select>
                 <select name="tier" className="bg-bg border border-text/10 rounded-xl px-3 py-2.5 text-xs">
                   <option value="mini">Start</option>
@@ -820,6 +823,7 @@ export default function AdminPage() {
                 </select>
                 <input name="days" type="number" defaultValue={7} placeholder="Дней" className="bg-bg border border-text/10 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-accent/30" />
                 <input name="credits" type="number" defaultValue={0} placeholder="Кредитов" className="bg-bg border border-text/10 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-accent/30" />
+                <input name="discount_value" type="number" defaultValue={0} placeholder="Скидка (% или ₽)" className="bg-bg border border-text/10 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-accent/30" />
                 <input name="max_uses" type="number" defaultValue={1000} placeholder="Макс. исп." className="bg-bg border border-text/10 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-accent/30" />
                 <input name="desc" placeholder="Описание" className="bg-bg border border-text/10 rounded-xl px-3 py-2.5 text-xs col-span-2 sm:col-span-1 focus:outline-none focus:ring-2 focus:ring-accent/30" />
                 <button type="submit" className="bg-accent text-white rounded-xl px-3 py-2.5 text-xs font-bold hover:bg-accent/90 transition-colors shadow-sm shadow-accent/15">
@@ -862,9 +866,16 @@ export default function AdminPage() {
                     </div>
 
                     <div className="flex items-center gap-4 text-xs text-text/35 mb-3">
-                      <span className="bg-text/[0.04] px-2 py-0.5 rounded">{p.type === "days" ? "дни" : "кредиты"}</span>
+                      <span className="bg-text/[0.04] px-2 py-0.5 rounded">{
+                        p.type === "days" ? "дни" :
+                        p.type === "credits" ? "кредиты" :
+                        p.type === "discount_percent" ? "скидка %" :
+                        p.type === "discount_rub" ? "скидка ₽" : p.type
+                      }</span>
                       {p.days > 0 && <span>{p.days} дн.</span>}
                       {p.credits > 0 && <span>+{p.credits} кр.</span>}
+                      {p.type === "discount_percent" && p.discount_value > 0 && <span>-{p.discount_value}%</span>}
+                      {p.type === "discount_rub" && p.discount_value > 0 && <span>-{p.discount_value}₽</span>}
                     </div>
 
                     <div className="flex items-center justify-between text-xs mb-1.5">

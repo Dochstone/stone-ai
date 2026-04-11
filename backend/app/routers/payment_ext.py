@@ -12,6 +12,7 @@ from sqlalchemy import select, text
 from app.database import get_db
 from app.middleware.auth import get_current_user
 from app.models import Transaction
+from app.models.user import User
 from app.services.token_billing import add_balance
 from app.services import lava as lava_service
 from app.services import heleket as heleket_service
@@ -665,6 +666,8 @@ async def create_subscribe_payment(
     db: AsyncSession = Depends(get_db),
 ):
     """Create Heleket crypto invoice for subscription payment."""
+    from app.services.promo import apply_discount, clear_discount
+
     settings = get_settings()
 
     if req.tier not in PLAN_PRICES_RUB:
@@ -673,7 +676,18 @@ async def create_subscribe_payment(
     if not settings.heleket_api_key or not settings.heleket_merchant:
         raise HTTPException(503, "Крипто-оплата временно недоступна")
 
+    user_id = tg_user.get("db_id") or tg_user["id"]
+    user = await db.execute(select(User).where(User.telegram_id == tg_user["id"]))
+    user = user.scalar_one_or_none()
+
     price_rub = PLAN_PRICES_RUB[req.tier]
+    discount_desc = None
+    if user:
+        price_rub, discount_desc = apply_discount(price_rub, user)
+        if discount_desc:
+            clear_discount(user)
+            await db.flush()
+
     price_usd = round(price_rub / USD_TO_RUB, 2)
 
     user_id = tg_user.get("db_id") or tg_user["id"]
@@ -706,13 +720,17 @@ async def create_subscribe_payment(
 
     logger.info(f"Subscribe order: user={user_id}, tier={req.tier}, usd={price_usd}")
 
-    return {
+    result = {
         "payment_url": invoice.get("url"),
         "payment_uuid": invoice.get("uuid"),
         "tier": req.tier,
         "price_rub": price_rub,
         "price_usd": price_usd,
     }
+    if discount_desc:
+        result["discount"] = discount_desc
+        result["original_price_rub"] = PLAN_PRICES_RUB[req.tier]
+    return result
 
 
 @router.get("/crypto/check/{order_id}")
@@ -786,6 +804,8 @@ async def create_ton_order(
     db: AsyncSession = Depends(get_db),
 ):
     """Create TON payment order with unique comment."""
+    from app.services.promo import apply_discount, clear_discount
+
     settings = get_settings()
     if not settings.ton_wallet_address:
         raise HTTPException(503, "TON wallet is not configured")
@@ -793,9 +813,18 @@ async def create_ton_order(
         raise HTTPException(400, "Недопустимый тариф")
 
     user_id = tg_user.get("db_id") or tg_user["id"]
+    user = await db.execute(select(User).where(User.telegram_id == tg_user["id"]))
+    user = user.scalar_one_or_none()
+
     order_id = _uuid.uuid4().hex[:12]
     comment = f"stone_{order_id}"
     price_rub = PLAN_PRICES_RUB[req.tier]
+    if user:
+        price_rub, _ = apply_discount(price_rub, user)
+        if _ is not None:
+            clear_discount(user)
+            await db.flush()
+
     price_usd = round(price_rub / USD_TO_RUB, 2)
     ton_rate = await get_ton_rate()
     ton_usd = float(ton_rate["ton_usd"])

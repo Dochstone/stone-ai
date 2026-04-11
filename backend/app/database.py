@@ -155,5 +155,9 @@ async def init_db():
             await conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS used_promo_codes VARCHAR(512)"))
         except Exception:
             pass
+        try:
+            await conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS pending_discount VARCHAR(256)"))
+        except Exception:
+            pass
 
     logger.info("Database initialization complete")

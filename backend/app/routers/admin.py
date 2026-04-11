@@ -519,6 +519,7 @@ async def web_admin_promos(
             "tier": config.get("tier", "—"),
             "days": config.get("days", 0),
             "credits": config.get("credits", 0),
+            "discount_value": config.get("discount_value", 0),
             "used": used,
             "max_uses": config["max_uses"],
         })
@@ -538,15 +539,18 @@ async def web_admin_create_promo(
     if not code:
         raise HTTPException(400, "Код обязателен")
 
-    PROMO_CODES[code] = {
-        "type": body.get("type", "days"),
+    promo_type = body.get("type", "days")
+    promo_data: dict = {
+        "type": promo_type,
         "tier": body.get("tier", "mini"),
         "days": int(body.get("days", 7)),
         "credits": int(body.get("credits", 0)),
+        "discount_value": int(body.get("discount_value", 0)),
         "max_uses": int(body.get("max_uses", 1000)),
         "one_per_user": body.get("one_per_user", True),
         "desc": body.get("desc", ""),
     }
+    PROMO_CODES[code] = promo_data
 
     return {"status": "ok", "code": code}
 
