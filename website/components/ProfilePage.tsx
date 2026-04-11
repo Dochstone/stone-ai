@@ -675,9 +675,30 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
     window.location.href = url;
   };
 
-  const hasEmailLogin = profile.linked_providers.includes("email") || profile.auth_provider === "email";
-  const googleLinked = profile.linked_providers.includes("google");
-  const yandexLinked = profile.linked_providers.includes("yandex");
+  const [linkedProviders, setLinkedProviders] = useState(profile.linked_providers);
+  const hasEmailLogin = linkedProviders.includes("email") || profile.auth_provider === "email";
+  const googleLinked = linkedProviders.includes("google");
+  const yandexLinked = linkedProviders.includes("yandex");
+
+  const unlinkProvider = async (provider: string) => {
+    if (!confirm(`Отвязать ${provider === "google" ? "Google" : provider === "yandex" ? "Яндекс" : "Telegram"}?`)) return;
+    try {
+      const res = await fetch(`${API_URL}/api/user/unlink-provider`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
+        body: JSON.stringify({ provider }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setLinkedProviders(data.linked_providers);
+        setMsg("Провайдер отвязан");
+      } else {
+        setMsg(data.detail || "Ошибка");
+      }
+    } catch {
+      setMsg("Сетевая ошибка");
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -804,9 +825,12 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
                 <div className="text-[11px] text-text/30">{googleLinked ? "Привязан" : "Не привязан"}</div>
               </div>
             </div>
-            {!googleLinked && (
+            {!googleLinked ? (
               <button onClick={linkGoogle}
                 className="text-xs font-semibold text-accent hover:underline">Привязать</button>
+            ) : linkedProviders.length > 1 && (
+              <button onClick={() => unlinkProvider("google")}
+                className="text-xs font-semibold text-red-400 hover:underline">Отвязать</button>
             )}
           </div>
           <div className="flex items-center justify-between py-2 border-t border-text/[0.04]">
@@ -819,9 +843,12 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
                 <div className="text-[11px] text-text/30">{yandexLinked ? "Привязан" : "Не привязан"}</div>
               </div>
             </div>
-            {!yandexLinked && (
+            {!yandexLinked ? (
               <button onClick={linkYandex}
                 className="text-xs font-semibold text-accent hover:underline">Привязать</button>
+            ) : linkedProviders.length > 1 && (
+              <button onClick={() => unlinkProvider("yandex")}
+                className="text-xs font-semibold text-red-400 hover:underline">Отвязать</button>
             )}
           </div>
           {/* TON Wallet */}

@@ -628,6 +628,42 @@ async def delete_avatar(
     return {"ok": True}
 
 
+class UnlinkProviderRequest(BaseModel):
+    provider: str
+
+
+@router.post("/user/unlink-provider")
+async def unlink_provider(
+    body: UnlinkProviderRequest,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    """Unlink an auth provider from the user account."""
+    from app.services.linked_providers import get_linked_providers, serialize_linked_providers
+
+    user = await _get_user_from_request(request, db)
+    provider = body.provider.strip().lower()
+
+    current = get_linked_providers(user)
+    if provider not in current:
+        raise HTTPException(400, "Провайдер не привязан")
+
+    remaining = [p for p in current if p != provider]
+    if not remaining:
+        raise HTTPException(400, "Нельзя отвязать последний способ входа")
+
+    user.linked_providers = serialize_linked_providers(remaining)
+
+    if provider == "google" and user.auth_provider == "google":
+        user.auth_provider = remaining[0] if len(remaining) == 1 else "both"
+    elif provider == "yandex" and user.auth_provider == "yandex":
+        user.auth_provider = remaining[0] if len(remaining) == 1 else "both"
+
+    await db.commit()
+
+    return {"ok": True, "linked_providers": remaining}
+
+
 @router.patch("/user/email")
 async def update_email(
     body: UpdateEmailRequest,
