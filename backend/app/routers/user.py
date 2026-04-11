@@ -1,6 +1,7 @@
 """User endpoint — profile, limits, balance info, usage history, subscriptions."""
 
 import json
+import logging
 import os
 import re
 from datetime import datetime, timedelta
@@ -39,6 +40,8 @@ from app.services.limiter import (
 from app.services.subscription import PLANS, get_accessible_models
 from app.services.token_billing import get_user_balance, TOKEN_PRICES
 from app.services.promo import apply_promo
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api", tags=["user"])
 
