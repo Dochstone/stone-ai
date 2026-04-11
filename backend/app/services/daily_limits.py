@@ -171,17 +171,18 @@ async def get_weekly_usage(db: AsyncSession, tg_id: int, category: str) -> int:
 # Core functions
 # ═══════════════════════════════════════════════════════════
 
-async def get_or_create_today(db: AsyncSession, tg_id: int, tier: str) -> DailyUsage:
+async def get_or_create_today(db: AsyncSession, tg_id: int, tier: str, *, lock_for_update: bool = False) -> DailyUsage:
     """Get or create today's DailyUsage row, calculating rollover from yesterday."""
     today = get_msk_today()
 
     # Try to find today's row
-    result = await db.execute(
-        select(DailyUsage).where(
-            DailyUsage.user_tg_id == tg_id,
-            DailyUsage.date == today,
-        )
+    query = select(DailyUsage).where(
+        DailyUsage.user_tg_id == tg_id,
+        DailyUsage.date == today,
     )
+    if lock_for_update:
+        query = query.with_for_update()
+    result = await db.execute(query)
     row = result.scalar_one_or_none()
     if row:
         return row
@@ -232,12 +233,13 @@ async def get_or_create_today(db: AsyncSession, tg_id: int, tier: str) -> DailyU
     except Exception:
         # Race condition — another request created it
         await db.rollback()
-        result = await db.execute(
-            select(DailyUsage).where(
-                DailyUsage.user_tg_id == tg_id,
-                DailyUsage.date == today,
-            )
+        query = select(DailyUsage).where(
+            DailyUsage.user_tg_id == tg_id,
+            DailyUsage.date == today,
         )
+        if lock_for_update:
+            query = query.with_for_update()
+        result = await db.execute(query)
         row = result.scalar_one_or_none()
 
     return row
@@ -277,7 +279,7 @@ async def check_daily_limit(
             "category": category,
         }
 
-    row = await get_or_create_today(db, tg_id, tier)
+    row = await get_or_create_today(db, tg_id, tier, lock_for_update=True)
 
     # Check by category
     if category == "fast":
@@ -400,7 +402,7 @@ def _denied(tier: str, category: str, used: int, effective: int, rollover: int, 
 async def increment_usage(db: AsyncSession, tg_id: int, model_id: str, tier: str) -> None:
     """Increment today's counters after successful request."""
     category = get_model_category(model_id)
-    row = await get_or_create_today(db, tg_id, tier)
+    row = await get_or_create_today(db, tg_id, tier, lock_for_update=True)
 
     if category == "fast":
         row.fast_used = (row.fast_used or 0) + 1

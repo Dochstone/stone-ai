@@ -38,6 +38,12 @@ export function useUser() {
           }
         }
 
+        const apiBase = import.meta.env.VITE_API_URL || 'https://stone-ai-production.up.railway.app'
+        const rawAvatar = userData.user.avatar_url || null
+        const avatarUrl = rawAvatar
+          ? (rawAvatar.startsWith('http') ? rawAvatar : `${apiBase}${rawAvatar}`)
+          : null
+
         setUser({
           tgId: userData.user.tg_id,
           username: userData.user.username || '',
@@ -54,6 +60,7 @@ export function useUser() {
           lastRequestTokens: null,
           sessionCostUsd: 0,
           hasPass: false,
+          avatarUrl,
         })
 
         setModels(modelsData.models)

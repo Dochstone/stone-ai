@@ -1,12 +1,12 @@
 /**
  * ProfileScreen — User info, 2x2 stats, wallet, palette, language, support.
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from '../../i18n/useTranslation'
 import type { Lang } from '../../i18n/translations'
 import { useStore, PALETTES } from '../../store/useStore'
 import { Card, Tag, Divider, GlitchTitle } from '../ui'
-import { apiGet } from '../../api/client'
+import { apiGet, apiPost } from '../../api/client'
 
 const LANGS = [
   { id: 'ru', flag: '🇷🇺', name: 'RU' },
@@ -19,14 +19,14 @@ function fmt(n: number) {
 }
 
 export function ProfileScreen() {
-  const { user, palette, setPaletteId, models, setScreen, lang, setLang } = useStore()
+  const { user, palette, setPaletteId, models, setScreen, lang, setLang, setUser } = useStore()
   const { t } = useTranslation()
   const p = palette
 
-  const safeNum = (n: any) => (typeof n === 'number' && !isNaN(n)) ? n : 0
+  const safeNum = (n: unknown) => (typeof n === 'number' && !isNaN(n)) ? n : 0
 
   const stats = [
-    { icon: '📊', value: fmt(safeNum(user.liteToday) + safeNum(user.premiumToday)), label: 'Сегодня', color: p.primary },
+    { icon: '📊', value: fmt(safeNum(user.liteToday) + safeNum((user as Record<string, unknown>).premiumToday)), label: 'Сегодня', color: p.primary },
     { icon: '⚡', value: fmt(safeNum(user.totalRequests)), label: 'Всего запросов', color: p.secondary || p.primary },
     { icon: '⭐', value: user.plan === 'max-pro' ? 'Elite' : user.plan === 'max' ? 'Pro' : user.plan === 'mini' ? 'Start' : 'Free', label: 'Подписка', color: '#ff9500' },
     { icon: '📉', value: `$${safeNum(user.totalDepositedUsd).toFixed(2)}`, label: 'Внесено', color: '#bf5af2' },
@@ -45,12 +45,13 @@ export function ProfileScreen() {
       {/* User card */}
       <Card accent={p.primary} featured>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{
-            width: 50, height: 50, borderRadius: 14,
-            background: `linear-gradient(135deg, rgba(${p.primaryRgb},0.15), rgba(${p.primaryRgb},0.05))`,
-            border: `1px solid rgba(${p.primaryRgb},0.25)`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24,
-          }}>👤</div>
+          <ProfileAvatar
+            avatarUrl={user.avatarUrl}
+            firstName={user.firstName}
+            username={user.username}
+            palette={p}
+            onAvatarChange={(url) => setUser({ avatarUrl: url })}
+          />
           <div style={{ flex: 1 }}>
             <div style={{ fontFamily: 'sans-serif', fontSize: 16, fontWeight: 700, color: '#e0f0e8' }}>
               {user.firstName || 'User'}
@@ -240,6 +241,219 @@ export function ProfileScreen() {
       </div>
     </div>
   )
+}
+
+
+// ─── Profile Avatar Component ───
+
+const API_BASE = import.meta.env.VITE_API_URL || 'https://stone-ai-production.up.railway.app'
+
+function getAvatarInitials(firstName: string, username: string): string {
+  if (firstName) return firstName.slice(0, 2).toUpperCase()
+  if (username) return username.slice(0, 2).toUpperCase()
+  return 'U'
+}
+
+function getAvatarColor(str: string): string {
+  const colors = ['#C4623D', '#0E9A83', '#4285f4', '#7c3aed', '#ec4899', '#f59e0b', '#06b6d4', '#10a37f']
+  let hash = 0
+  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash)
+  return colors[Math.abs(hash) % colors.length]
+}
+
+interface ProfileAvatarProps {
+  avatarUrl: string | null
+  firstName: string
+  username: string
+  palette: { primary: string; primaryRgb: string }
+  onAvatarChange: (url: string | null) => void
+}
+
+function ProfileAvatar({ avatarUrl, firstName, username, palette: p, onAvatarChange }: ProfileAvatarProps) {
+  const fileRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
+  const [imgError, setImgError] = useState(false)
+
+  const showAvatar = avatarUrl && !imgError
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) return
+    if (file.size > 10 * 1024 * 1024) return
+
+    setUploading(true)
+    try {
+      const dataUrl = await readFileAsBase64(file)
+      const resized = await resizeAvatar(dataUrl, 256)
+      const result = await apiPost<{ ok: boolean; avatar_url: string }>('/api/user/avatar', {
+        image_base64: resized,
+      })
+      const fullUrl = result.avatar_url.startsWith('http')
+        ? result.avatar_url
+        : `${API_BASE}${result.avatar_url}`
+      onAvatarChange(fullUrl)
+      setImgError(false)
+    } catch (err) {
+      console.error('Avatar upload failed:', err)
+    } finally {
+      setUploading(false)
+      if (fileRef.current) fileRef.current.value = ''
+    }
+  }
+
+  const handleRemove = async () => {
+    setUploading(true)
+    try {
+      const { getInitData, getStartParam } = await import('../../utils/telegram')
+      const initData = getInitData()
+      const startParam = getStartParam()
+      await fetch(`${API_BASE}/api/user/avatar`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(initData ? { Authorization: `tma ${initData}` } : {}),
+          ...(startParam ? { 'X-Start-Param': startParam } : {}),
+        },
+      })
+      onAvatarChange(null)
+      setImgError(false)
+    } catch (err) {
+      console.error('Avatar delete failed:', err)
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileSelect}
+        style={{ display: 'none' }}
+      />
+
+      {/* Avatar circle */}
+      <div
+        onClick={() => !uploading && fileRef.current?.click()}
+        style={{
+          width: 56, height: 56, borderRadius: 16,
+          overflow: 'hidden', cursor: 'pointer',
+          border: `2px solid rgba(${p.primaryRgb},0.3)`,
+          background: showAvatar
+            ? '#0a1a10'
+            : getAvatarColor(username || firstName || 'user'),
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          position: 'relative',
+          transition: 'border-color 0.2s',
+        }}
+      >
+        {showAvatar ? (
+          <img
+            src={avatarUrl}
+            alt="avatar"
+            onError={() => setImgError(true)}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        ) : (
+          <span style={{
+            fontFamily: "'Orbitron',sans-serif",
+            fontSize: 18, fontWeight: 900, color: '#fff',
+          }}>
+            {getAvatarInitials(firstName, username)}
+          </span>
+        )}
+
+        {/* Upload spinner */}
+        {uploading && (
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'rgba(0,0,0,0.6)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <div style={{
+              width: 20, height: 20, border: '2px solid transparent',
+              borderTopColor: p.primary, borderRadius: '50%',
+              animation: 'avatar-spin 0.8s linear infinite',
+            }} />
+          </div>
+        )}
+      </div>
+
+      {/* Camera badge */}
+      {!uploading && (
+        <div
+          onClick={(e) => { e.stopPropagation(); fileRef.current?.click() }}
+          style={{
+            position: 'absolute', bottom: -2, right: -2,
+            width: 22, height: 22, borderRadius: '50%',
+            background: p.primary,
+            border: '2px solid #0a1a10',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer',
+          }}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+            stroke="#0a1a10" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
+            <circle cx="12" cy="13" r="4" />
+          </svg>
+        </div>
+      )}
+
+      {/* Remove button */}
+      {showAvatar && !uploading && (
+        <button
+          onClick={(e) => { e.stopPropagation(); handleRemove() }}
+          style={{
+            position: 'absolute', top: -4, left: -4,
+            width: 20, height: 20, borderRadius: '50%',
+            background: 'rgba(255,60,60,0.9)',
+            border: '2px solid #0a1a10',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', padding: 0,
+            fontSize: 11, fontWeight: 900, color: '#fff', lineHeight: 1,
+          }}
+        >
+          ×
+        </button>
+      )}
+
+      <style>{`@keyframes avatar-spin { to { transform: rotate(360deg) } }`}</style>
+    </div>
+  )
+}
+
+function readFileAsBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = () => reject(new Error('Failed to read file'))
+    reader.readAsDataURL(file)
+  })
+}
+
+function resizeAvatar(dataUrl: string, maxSize: number): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = maxSize
+      canvas.height = maxSize
+      const ctx = canvas.getContext('2d')
+      if (!ctx) { resolve(dataUrl); return }
+
+      const side = Math.min(img.width, img.height)
+      const sx = (img.width - side) / 2
+      const sy = (img.height - side) / 2
+      ctx.drawImage(img, sx, sy, side, side, 0, 0, maxSize, maxSize)
+      resolve(canvas.toDataURL('image/webp', 0.85))
+    }
+    img.onerror = () => resolve(dataUrl)
+    img.src = dataUrl
+  })
 }
 
 

@@ -825,7 +825,7 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
                 Светлая
               </button>
               <button onClick={() => toggleTheme("dark")}
-                className={`px-4 py-2 rounded-xl text-xs font-semibold transition-colors ${theme === "dark" ? "bg-text text-white" : "bg-bg text-text/40 hover:text-text/60"}`}>
+                className={`px-4 py-2 rounded-xl text-xs font-semibold transition-colors ${theme === "dark" ? "bg-accent text-white" : "bg-bg text-text/40 hover:text-text/60"}`}>
                 Тёмная
               </button>
             </div>

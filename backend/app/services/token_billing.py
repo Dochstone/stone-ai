@@ -25,6 +25,23 @@ TOKEN_PRICES: dict[str, dict] = {
 AVG_TOKENS_PER_REQUEST = 2000
 
 
+async def _get_user_by_external_id(db: AsyncSession, external_id: int, *, lock: bool = False) -> User | None:
+    """Resolve a user by telegram_id first, then by DB id for web-only accounts."""
+    stmt = select(User).where(User.telegram_id == external_id)
+    if lock:
+        stmt = stmt.with_for_update()
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
+    if user:
+        return user
+
+    stmt = select(User).where(User.id == external_id)
+    if lock:
+        stmt = stmt.with_for_update()
+    result = await db.execute(stmt)
+    return result.scalar_one_or_none()
+
+
 def calculate_cost(model_id: str, tokens_in: int, tokens_out: int) -> float:
     """
     Calculate request cost in USD based on actual token usage.
@@ -53,8 +70,7 @@ def estimate_request_cost(model_id: str) -> float:
 
 async def get_user_balance(db: AsyncSession, tg_id: int) -> float:
     """Get current USD balance for a user."""
-    result = await db.execute(select(User).where(User.telegram_id == tg_id))
-    user = result.scalar_one_or_none()
+    user = await _get_user_by_external_id(db, tg_id)
     return float(user.balance_usd) if user and user.balance_usd else 0.0
 
 
@@ -92,10 +108,7 @@ async def deduct_balance(db: AsyncSession, tg_id: int, amount: float) -> dict:
     Returns:
         {"success": bool, "new_balance": float, "deducted": float}
     """
-    result = await db.execute(
-        select(User).where(User.telegram_id == tg_id).with_for_update()
-    )
-    user = result.scalar_one_or_none()
+    user = await _get_user_by_external_id(db, tg_id, lock=True)
 
     if not user:
         return {"success": False, "new_balance": 0.0, "deducted": 0.0}
@@ -128,10 +141,7 @@ async def deduct_balance(db: AsyncSession, tg_id: int, amount: float) -> dict:
 
 async def add_balance(db: AsyncSession, tg_id: int, amount_usd: float) -> float:
     """Add USD to user balance. Returns new balance."""
-    result = await db.execute(
-        select(User).where(User.telegram_id == tg_id).with_for_update()
-    )
-    user = result.scalar_one_or_none()
+    user = await _get_user_by_external_id(db, tg_id, lock=True)
 
     if not user:
         return 0.0

@@ -129,7 +129,7 @@ class TestHeleket:
 
     def test_webhook_updates_status(self):
         """Webhook updates transaction status to completed."""
-        assert "status = 'completed'" in _payment_ext_src
+        assert 'status = "completed"' in _payment_ext_src or "status = 'completed'" in _payment_ext_src
 
     def test_balance_increase(self):
         balance = 5.0

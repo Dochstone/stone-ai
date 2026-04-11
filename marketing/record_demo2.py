@@ -1,11 +1,17 @@
 """Record two demo clips of Stone AI for marketing."""
 
 import asyncio
+import os
 from playwright.async_api import async_playwright
 
 OUTDIR = "C:/Users/Administrator/stone-ai/marketing/ad-reel/output"
 
 async def main():
+    demo_email = os.getenv("STONE_DEMO_EMAIL", "")
+    demo_password = os.getenv("STONE_DEMO_PASSWORD", "")
+    if not demo_email or not demo_password:
+        raise RuntimeError("Set STONE_DEMO_EMAIL and STONE_DEMO_PASSWORD before recording a demo")
+
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
 
@@ -32,8 +38,8 @@ async def main():
 
         email_input = page.locator('input[type="email"]')
         if await email_input.is_visible(timeout=3000):
-            await email_input.fill("dochstone@gmail.com")
-            await page.locator('input[type="password"]').fill("Asde123asd@")
+            await email_input.fill(demo_email)
+            await page.locator('input[type="password"]').fill(demo_password)
             await page.locator('button[type="submit"]').click()
             await page.wait_for_timeout(4000)
 
@@ -102,8 +108,8 @@ async def main():
 
         email_input2 = page2.locator('input[type="email"]')
         if await email_input2.is_visible(timeout=3000):
-            await email_input2.fill("dochstone@gmail.com")
-            await page2.locator('input[type="password"]').fill("Asde123asd@")
+            await email_input2.fill(demo_email)
+            await page2.locator('input[type="password"]').fill(demo_password)
             await page2.locator('button[type="submit"]').click()
             await page2.wait_for_timeout(4000)
 

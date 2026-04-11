@@ -14,6 +14,7 @@ Env vars needed:
 
 import logging
 import uuid
+import hmac
 
 import httpx
 
@@ -132,9 +133,13 @@ async def check_status(transaction_id: str) -> dict | None:
 def verify_webhook(merchant_id: str, secret: str) -> bool:
     """Verify webhook authenticity by comparing X-MerchantId and X-Secret headers."""
     settings = get_settings()
-    return (
-        merchant_id == settings.platega_merchant_id
-        and secret == settings.platega_secret
+    return bool(
+        merchant_id
+        and secret
+        and settings.platega_merchant_id
+        and settings.platega_secret
+        and hmac.compare_digest(merchant_id, settings.platega_merchant_id)
+        and hmac.compare_digest(secret, settings.platega_secret)
     )
 
 

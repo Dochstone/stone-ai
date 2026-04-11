@@ -20,6 +20,7 @@ class ThreeDTask(Base):
     status: Mapped[str] = mapped_column(String(20), default="pending")
     model_url: Mapped[str | None] = mapped_column(Text, nullable=True)  # GLB file URL
     cost_usd: Mapped[float] = mapped_column(Float, default=0.0)
+    provider_cost_usd: Mapped[float] = mapped_column(Float, default=0.0)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

@@ -47,6 +47,10 @@ export function openInvoice(url: string): Promise<string> {
   })
 }
 
+export function getStartParam(): string | null {
+  return tg?.initDataUnsafe?.start_param || null
+}
+
 export function initTelegramApp() {
   if (tg) {
     tg.ready()

@@ -84,7 +84,7 @@ def create_order(user_tg_id: int, usd_amount: float, ton_amount: float) -> dict:
 
     # Unique comment for matching the transaction
     raw = f"stoneai:{order_id}:{user_tg_id}:{int(time.time())}"
-    comment = hashlib.sha256(raw.encode()).hexdigest()[:12]
+    comment = hashlib.sha256(raw.encode()).hexdigest()[:32]
     payload_comment = f"SA-{comment}"
 
     order = {

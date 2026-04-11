@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { OnboardingTour } from "@/components/OnboardingTour";
 import ThemeToggle from "@/components/ThemeToggle";
-import { getAvatarColor as getAvatarColorFn, getSavedAvatar } from "@/lib/avatar";
+import { getAvatarColor as getAvatarColorFn, getSavedAvatar, syncAvatarFromProfile } from "@/lib/avatar";
 import AchievementToast from "@/components/AchievementToast";
 
 const WebChat = dynamic(() => import("@/components/WebChat"), {
@@ -124,6 +124,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       }
     } catch {}
     setUserAvatar(getSavedAvatar());
+    syncAvatarFromProfile().then((url) => setUserAvatar(url));
     const onAvatarChange = () => setUserAvatar(getSavedAvatar());
     window.addEventListener("avatar-changed", onAvatarChange);
     return () => window.removeEventListener("avatar-changed", onAvatarChange);

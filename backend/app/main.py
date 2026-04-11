@@ -9,6 +9,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
@@ -248,6 +249,10 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
+uploads_dir = os.environ.get("UPLOADS_DIR", os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads"))
+os.makedirs(uploads_dir, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
 
 # CORS — allow Mini App origin
 app.add_middleware(

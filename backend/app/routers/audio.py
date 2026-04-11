@@ -89,7 +89,9 @@ async def tts_generate(
     if cost > 0:
         await deduct_balance(db, tg_id, cost)
 
-    await record_usage(db, tg_id, "gpt-audio-mini", tokens_in=tokens_in, tokens_out=tokens_out, cost_usd=cost)
+    from app.services.provider_costs import calculate_chat_provider_cost
+    provider_cost = calculate_chat_provider_cost("gpt-4o-mini", tokens_in, tokens_out)
+    await record_usage(db, tg_id, "gpt-audio-mini", tokens_in=tokens_in, tokens_out=tokens_out, cost_usd=cost, provider_cost_usd=provider_cost)
     await db.commit()
 
     # Achievement: audio (TTS) used
@@ -140,7 +142,9 @@ async def stt_transcribe(
     if cost > 0:
         await deduct_balance(db, tg_id, cost)
 
-    await record_usage(db, tg_id, "whisper-stt", tokens_in=0, tokens_out=0, cost_usd=cost)
+    from app.services.provider_costs import calculate_audio_provider_cost
+    provider_cost = calculate_audio_provider_cost(stt_result.get("duration_seconds", 0))
+    await record_usage(db, tg_id, "whisper-stt", tokens_in=0, tokens_out=0, cost_usd=cost, provider_cost_usd=provider_cost)
     await db.commit()
 
     return {

@@ -52,7 +52,51 @@ router = APIRouter(prefix="/api", tags=["chat"])
 
 # ─── Guest (anonymous) rate limiting by IP ───
 GUEST_LIMIT = 2
-_guest_usage: dict[str, int] = {}  # ip -> total requests
+_guest_usage: dict[str, tuple[int, float]] = {}  # ip -> (count, first_seen_ts)
+_GUEST_WINDOW = 86400  # 24 hours
+
+
+def _get_guest_usage(ip: str) -> int:
+    """Get guest request count, auto-expire after window."""
+    import time as _t
+    entry = _guest_usage.get(ip)
+    if not entry:
+        return 0
+    count, first_seen = entry
+    if _t.time() - first_seen > _GUEST_WINDOW:
+        _guest_usage.pop(ip, None)
+        return 0
+    return count
+
+
+def _inc_guest_usage(ip: str):
+    import time as _t
+    entry = _guest_usage.get(ip)
+    if entry:
+        count, first_seen = entry
+        if _t.time() - first_seen > _GUEST_WINDOW:
+            _guest_usage[ip] = (1, _t.time())
+        else:
+            _guest_usage[ip] = (count + 1, first_seen)
+    else:
+        _guest_usage[ip] = (1, _t.time())
+    # Periodic cleanup: cap dict size
+    if len(_guest_usage) > 10000:
+        now = _t.time()
+        expired = [k for k, (_, ts) in _guest_usage.items() if now - ts > _GUEST_WINDOW]
+        for k in expired:
+            _guest_usage.pop(k, None)
+
+
+def _get_request_ip(request: Request) -> str:
+    """Trust forwarding headers only when the caller is a configured proxy."""
+    client_ip = request.client.host if request.client else "unknown"
+    settings = get_settings()
+    if client_ip in settings.trusted_proxy_ips:
+        forwarded = request.headers.get("X-Real-IP") or request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
+        if forwarded:
+            return forwarded
+    return client_ip
 
 
 class ChatRequest(BaseModel):
@@ -79,9 +123,9 @@ async def chat_guest(
     db: AsyncSession = Depends(get_db),
 ):
     """Guest chat — no auth required, limited to 10 requests per IP, fast models only."""
-    ip = request.headers.get("X-Real-IP") or request.headers.get("X-Forwarded-For", "").split(",")[0].strip() or (request.client.host if request.client else "unknown")
+    ip = _get_request_ip(request)
 
-    used = _guest_usage.get(ip, 0)
+    used = _get_guest_usage(ip)
     if used >= GUEST_LIMIT:
         raise HTTPException(
             status_code=429,
@@ -114,7 +158,7 @@ async def chat_guest(
     max_tokens = MAX_TOKENS_LITE
 
     async def generate():
-        _guest_usage[ip] = used + 1
+        _inc_guest_usage(ip)
 
         async for chunk in stream_chat_response(req.model_id, req.messages, system_prompt, max_tokens=max_tokens):
             yield chunk
@@ -124,7 +168,7 @@ async def chat_guest(
                 "tokens_in": 0, "tokens_out": 0,
                 "cost_usd": 0, "balance_usd": 0,
                 "billing_mode": "guest",
-                "guest_used": _guest_usage.get(ip, 0),
+                "guest_used": _get_guest_usage(ip),
                 "guest_limit": GUEST_LIMIT,
             }
         }
@@ -140,8 +184,8 @@ async def chat_guest(
 @router.get("/chat/guest/status")
 async def guest_status(request: "Request"):
     """Check guest usage for current IP."""
-    ip = request.headers.get("X-Real-IP") or request.headers.get("X-Forwarded-For", "").split(",")[0].strip() or (request.client.host if request.client else "unknown")
-    used = _guest_usage.get(ip, 0)
+    ip = _get_request_ip(request)
+    used = _get_guest_usage(ip)
     return {"used": used, "limit": GUEST_LIMIT, "remaining": max(0, GUEST_LIMIT - used)}
 
 
@@ -294,8 +338,10 @@ async def chat(
             async def _record_usage_bg(tg_id, model_id, tokens_in, tokens_out, cost_usd):
                 try:
                     from app.database import async_session
+                    from app.services.provider_costs import calculate_chat_provider_cost
+                    provider_cost = calculate_chat_provider_cost(model_id, tokens_in, tokens_out)
                     async with async_session() as bg_db:
-                        await record_usage(bg_db, tg_id, model_id, tokens_in=tokens_in, tokens_out=tokens_out, cost_usd=cost_usd)
+                        await record_usage(bg_db, tg_id, model_id, tokens_in=tokens_in, tokens_out=tokens_out, cost_usd=cost_usd, provider_cost_usd=provider_cost)
                         await bg_db.commit()
                 except Exception as e:
                     logger.error(f"Failed to record usage: {e}")

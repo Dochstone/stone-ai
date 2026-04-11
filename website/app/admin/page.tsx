@@ -145,6 +145,7 @@ const TABS = [
   { id: "stats" as const, label: "Статистика", icon: "M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" },
   { id: "users" as const, label: "Пользователи", icon: ICONS.users },
   { id: "transactions" as const, label: "Платежи", icon: "M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" },
+  { id: "costs" as const, label: "P&L / Costs", icon: "M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" },
   { id: "promos" as const, label: "Промокоды", icon: "M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z M6 6h.008v.008H6V6z" },
   { id: "referrals" as const, label: "Рефералы", icon: "M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" },
   { id: "analytics" as const, label: "Аналитика", icon: "M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z M15 12a3 3 0 11-6 0 3 3 0 016 0z" },
@@ -156,7 +157,11 @@ export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [authed, setAuthed] = useState(false);
-  const [tab, setTab] = useState<"stats" | "users" | "transactions" | "promos" | "referrals" | "analytics">("stats");
+  const [tab, setTab] = useState<"stats" | "users" | "transactions" | "costs" | "promos" | "referrals" | "analytics">("stats");
+  const [costsData, setCostsData] = useState<any>(null);
+  const [costsUsers, setCostsUsers] = useState<any[]>([]);
+  const [costsModels, setCostsModels] = useState<any[]>([]);
+  const [costsSubTab, setCostsSubTab] = useState<"overview" | "users" | "models">("overview");
 
   const [stats, setStats] = useState<Stats | null>(null);
   const [users, setUsers] = useState<UserRow[]>([]);
@@ -264,6 +269,19 @@ export default function AdminPage() {
       fetchData("promos").then((d) => { if (d) setPromos(d.promos); setLoading(false); });
     } else if (tab === "referrals") {
       fetchData("referrals").then((d) => { if (d) setReferrals(d); setLoading(false); });
+    } else if (tab === "costs") {
+      const period = new Date().toISOString().slice(0, 7);
+      const h = { Authorization: `Bearer ${token}` };
+      Promise.all([
+        fetch(`${API_URL}/api/admin/costs?period=${period}`, { headers: h }).then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch(`${API_URL}/api/admin/costs/users`, { headers: h }).then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch(`${API_URL}/api/admin/costs/models`, { headers: h }).then(r => r.ok ? r.json() : null).catch(() => null),
+      ]).then(([o, u, m]) => {
+        setCostsData(o || { period, total_revenue_usd: 0, total_provider_cost_usd: 0, gross_margin_usd: 0, margin_percent: 0, breakdown: { chat: { provider_cost: 0, requests: 0 }, video: { revenue: 0, provider_cost: 0, requests: 0 }, image: { revenue: 0, provider_cost: 0, requests: 0 } } });
+        setCostsUsers(u?.users || []);
+        setCostsModels(m?.models || []);
+        setLoading(false);
+      });
     } else if (tab === "analytics") {
       fetch(`${API_URL}/api/analytics/stats?days=${analyticsDays}&sort_by=${analyticsSortBy}&order=${analyticsSortOrder}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -769,24 +787,34 @@ export default function AdminPage() {
                 const fd = new FormData(form);
                 const auth = localStorage.getItem("admin_token");
                 if (!auth) return;
-                const res = await fetch(`${API_URL}/api/admin/web/promos`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth}` },
-                  body: JSON.stringify({
-                    code: fd.get("code"), type: fd.get("type"), tier: fd.get("tier"),
-                    days: fd.get("days"), credits: fd.get("credits"),
-                    max_uses: fd.get("max_uses"), desc: fd.get("desc"),
-                  }),
-                });
-                if (res.ok) {
-                  form.reset();
-                  fetchData("promos").then((d: any) => { if (d) setPromos(d.promos); });
+                try {
+                  const res = await fetch(`${API_URL}/api/admin/web/promos`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth}` },
+                    body: JSON.stringify({
+                      code: fd.get("code"), type: fd.get("type"), tier: fd.get("tier"),
+                      days: fd.get("days"), credits: fd.get("credits"),
+                      discount_value: fd.get("discount_value"),
+                      max_uses: fd.get("max_uses"), desc: fd.get("desc"),
+                    }),
+                  });
+                  if (res.ok) {
+                    form.reset();
+                    fetchData("promos").then((d: any) => { if (d) setPromos(d.promos); });
+                  } else {
+                    const err = await res.json().catch(() => ({}));
+                    alert(`Ошибка: ${err.detail || res.status}`);
+                  }
+                } catch (err) {
+                  alert(`Сетевая ошибка: ${err}`);
                 }
               }} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <input name="code" placeholder="КОД" required className="bg-bg border border-text/10 rounded-xl px-3 py-2.5 text-xs font-mono uppercase focus:outline-none focus:ring-2 focus:ring-accent/30" />
                 <select name="type" className="bg-bg border border-text/10 rounded-xl px-3 py-2.5 text-xs">
                   <option value="days">Бесплатные дни</option>
                   <option value="credits">Кредиты</option>
+                  <option value="discount_percent">Скидка %</option>
+                  <option value="discount_rub">Скидка ₽</option>
                 </select>
                 <select name="tier" className="bg-bg border border-text/10 rounded-xl px-3 py-2.5 text-xs">
                   <option value="mini">Start</option>
@@ -795,6 +823,7 @@ export default function AdminPage() {
                 </select>
                 <input name="days" type="number" defaultValue={7} placeholder="Дней" className="bg-bg border border-text/10 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-accent/30" />
                 <input name="credits" type="number" defaultValue={0} placeholder="Кредитов" className="bg-bg border border-text/10 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-accent/30" />
+                <input name="discount_value" type="number" defaultValue={0} placeholder="Скидка (% или ₽)" className="bg-bg border border-text/10 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-accent/30" />
                 <input name="max_uses" type="number" defaultValue={1000} placeholder="Макс. исп." className="bg-bg border border-text/10 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-accent/30" />
                 <input name="desc" placeholder="Описание" className="bg-bg border border-text/10 rounded-xl px-3 py-2.5 text-xs col-span-2 sm:col-span-1 focus:outline-none focus:ring-2 focus:ring-accent/30" />
                 <button type="submit" className="bg-accent text-white rounded-xl px-3 py-2.5 text-xs font-bold hover:bg-accent/90 transition-colors shadow-sm shadow-accent/15">
@@ -837,9 +866,16 @@ export default function AdminPage() {
                     </div>
 
                     <div className="flex items-center gap-4 text-xs text-text/35 mb-3">
-                      <span className="bg-text/[0.04] px-2 py-0.5 rounded">{p.type === "days" ? "дни" : "кредиты"}</span>
+                      <span className="bg-text/[0.04] px-2 py-0.5 rounded">{
+                        p.type === "days" ? "дни" :
+                        p.type === "credits" ? "кредиты" :
+                        p.type === "discount_percent" ? "скидка %" :
+                        p.type === "discount_rub" ? "скидка ₽" : p.type
+                      }</span>
                       {p.days > 0 && <span>{p.days} дн.</span>}
                       {p.credits > 0 && <span>+{p.credits} кр.</span>}
+                      {p.type === "discount_percent" && p.discount_value > 0 && <span>-{p.discount_value}%</span>}
+                      {p.type === "discount_rub" && p.discount_value > 0 && <span>-{p.discount_value}₽</span>}
                     </div>
 
                     <div className="flex items-center justify-between text-xs mb-1.5">
@@ -908,6 +944,193 @@ export default function AdminPage() {
           </div>
         )}
         {/* Analytics tab */}
+        {tab === "costs" && !loading && costsData && (
+          <div className="space-y-6">
+            {/* Sub-tabs */}
+            <div className="flex gap-1 bg-surface rounded-xl p-1 w-fit border border-text/5">
+              {(["overview", "users", "models"] as const).map(st => (
+                <button key={st} onClick={() => setCostsSubTab(st)}
+                  className={`px-4 py-1.5 rounded-lg text-xs font-bold transition ${costsSubTab === st ? "bg-accent text-white" : "text-text/40 hover:text-text/70"}`}>
+                  {st === "overview" ? "P&L" : st === "users" ? "По юзерам" : "По моделям"}
+                </button>
+              ))}
+            </div>
+
+            {/* P&L Overview */}
+            {costsSubTab === "overview" && (
+              <div className="space-y-5">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="bg-surface rounded-2xl border border-emerald-500/10 p-5">
+                    <div className="text-[10px] text-text/30 uppercase tracking-wider font-bold">Revenue</div>
+                    <div className="text-2xl font-extrabold text-emerald-500 mt-1">${costsData.total_revenue_usd.toFixed(2)}</div>
+                    <div className="text-[10px] text-text/25 mt-0.5">~{Math.round(costsData.total_revenue_usd * 95)}₽</div>
+                  </div>
+                  <div className="bg-surface rounded-2xl border border-red-500/10 p-5">
+                    <div className="text-[10px] text-text/30 uppercase tracking-wider font-bold">Provider Cost</div>
+                    <div className="text-2xl font-extrabold text-red-400 mt-1">${costsData.total_provider_cost_usd.toFixed(4)}</div>
+                    <div className="text-[10px] text-text/25 mt-0.5">~{Math.round(costsData.total_provider_cost_usd * 95)}₽</div>
+                  </div>
+                  <div className="bg-surface rounded-2xl border border-blue-500/10 p-5">
+                    <div className="text-[10px] text-text/30 uppercase tracking-wider font-bold">Gross Profit</div>
+                    <div className={`text-2xl font-extrabold mt-1 ${costsData.gross_margin_usd >= 0 ? "text-blue-400" : "text-red-400"}`}>${costsData.gross_margin_usd.toFixed(2)}</div>
+                    <div className="text-[10px] text-text/25 mt-0.5">~{Math.round(costsData.gross_margin_usd * 95)}₽</div>
+                  </div>
+                  <div className="bg-surface rounded-2xl border border-purple-500/10 p-5">
+                    <div className="text-[10px] text-text/30 uppercase tracking-wider font-bold">Margin</div>
+                    <div className={`text-2xl font-extrabold mt-1 ${costsData.margin_percent >= 60 ? "text-emerald-400" : costsData.margin_percent >= 30 ? "text-amber-400" : "text-red-400"}`}>
+                      {costsData.margin_percent.toFixed(1)}%
+                    </div>
+                    <div className="text-[10px] text-text/25 mt-0.5">{costsData.margin_percent >= 60 ? "Healthy" : costsData.margin_percent >= 30 ? "OK" : "Low!"}</div>
+                  </div>
+                </div>
+
+                {/* Margin bar */}
+                <div className="bg-surface rounded-2xl border border-text/5 p-5">
+                  <div className="flex justify-between text-xs text-text/40 mb-3">
+                    <span>Revenue vs Cost</span>
+                    <span>{costsData.margin_percent.toFixed(1)}% margin</span>
+                  </div>
+                  <div className="h-6 rounded-full bg-bg overflow-hidden flex">
+                    <div className="h-full bg-emerald-500/80 rounded-l-full transition-all duration-700 flex items-center justify-center text-[10px] font-bold text-white"
+                      style={{ width: `${Math.max(costsData.margin_percent, 8)}%` }}>
+                      {costsData.margin_percent > 25 && "Profit"}
+                    </div>
+                    <div className="h-full bg-red-500/60 rounded-r-full transition-all duration-700 flex items-center justify-center text-[10px] font-bold text-white"
+                      style={{ width: `${Math.max(100 - costsData.margin_percent, 8)}%` }}>
+                      {100 - costsData.margin_percent > 25 && "Cost"}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Category breakdown */}
+                <div className="bg-surface rounded-2xl border border-text/5 p-5">
+                  <h3 className="text-sm font-bold mb-4">Breakdown</h3>
+                  <div className="space-y-3">
+                    {[
+                      { name: "Chat", icon: "💬", reqs: costsData.breakdown.chat.requests, rev: null as number | null, cost: costsData.breakdown.chat.provider_cost },
+                      { name: "Video", icon: "🎬", reqs: costsData.breakdown.video.requests, rev: costsData.breakdown.video.revenue, cost: costsData.breakdown.video.provider_cost },
+                      { name: "Image", icon: "🖼️", reqs: costsData.breakdown.image.requests, rev: costsData.breakdown.image.revenue, cost: costsData.breakdown.image.provider_cost },
+                    ].map(c => (
+                      <div key={c.name} className="flex items-center justify-between py-2 px-3 rounded-xl hover:bg-text/[0.02]">
+                        <div className="flex items-center gap-3">
+                          <span className="text-lg">{c.icon}</span>
+                          <div>
+                            <div className="text-sm font-semibold">{c.name}</div>
+                            <div className="text-[10px] text-text/30">{c.reqs.toLocaleString()} requests</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-5 text-xs">
+                          <div className="text-right">
+                            <div className="text-text/25">Revenue</div>
+                            <div className={c.rev !== null ? "text-emerald-400 font-mono" : "text-text/20"}>{c.rev !== null ? `$${c.rev.toFixed(2)}` : "subscription"}</div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-text/25">Cost</div>
+                            <div className="text-red-400 font-mono">${c.cost.toFixed(4)}</div>
+                          </div>
+                          {c.rev !== null && (
+                            <div className="text-right">
+                              <div className="text-text/25">Margin</div>
+                              <div className={`font-mono font-bold ${c.rev - c.cost >= 0 ? "text-emerald-400" : "text-red-400"}`}>${(c.rev - c.cost).toFixed(2)}</div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Per-user */}
+            {costsSubTab === "users" && (
+              <div className="bg-surface rounded-2xl border border-text/5 overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-text/30 text-[10px] uppercase tracking-wider border-b border-text/5">
+                      <th className="px-4 py-3">User</th>
+                      <th className="px-3 py-3">Plan</th>
+                      <th className="px-3 py-3 text-right">Paid</th>
+                      <th className="px-3 py-3 text-right">Cost</th>
+                      <th className="px-3 py-3 text-right">Margin</th>
+                      <th className="px-3 py-3 text-right">%</th>
+                      <th className="px-4 py-3 text-right">Reqs</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {costsUsers.map((u: any) => (
+                      <tr key={u.tg_id} className="border-b border-text/[0.03] hover:bg-text/[0.02]">
+                        <td className="px-4 py-3">
+                          <div className="font-semibold">{u.first_name || "—"}</div>
+                          <div className="text-[10px] text-text/30">{u.username ? `@${u.username}` : u.tg_id}</div>
+                        </td>
+                        <td className="px-3 py-3"><TierBadge tier={u.plan} /></td>
+                        <td className="px-3 py-3 text-right font-mono text-emerald-400">{u.total_paid_usd > 0 ? `$${u.total_paid_usd.toFixed(2)}` : "—"}</td>
+                        <td className="px-3 py-3 text-right font-mono text-red-400">${u.total_provider_cost_usd.toFixed(4)}</td>
+                        <td className={`px-3 py-3 text-right font-mono font-bold ${u.margin_usd >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                          {u.total_paid_usd > 0 ? `$${u.margin_usd.toFixed(2)}` : "—"}
+                        </td>
+                        <td className="px-3 py-3 text-right text-text/40">{u.total_paid_usd > 0 ? `${u.margin_percent.toFixed(1)}%` : "—"}</td>
+                        <td className="px-4 py-3 text-right text-text/50">{u.total_requests.toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Per-model */}
+            {costsSubTab === "models" && (
+              <div className="space-y-4">
+                {/* Top expensive */}
+                {costsModels.length >= 3 && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {costsModels.slice(0, 3).map((m: any, i: number) => (
+                      <div key={m.model_id} className="bg-surface rounded-2xl border border-text/5 p-4">
+                        <div className="flex justify-between text-[10px] text-text/30 mb-2">
+                          <span>#{i + 1} Most Expensive</span>
+                          <span className="text-red-400 font-mono font-bold">${m.total_provider_cost_usd.toFixed(4)}</span>
+                        </div>
+                        <div className="font-bold text-sm">{m.model_id}</div>
+                        <div className="text-[10px] text-text/30 mt-1">{m.requests.toLocaleString()} requests &middot; ${m.avg_cost_per_request.toFixed(6)}/req</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="bg-surface rounded-2xl border border-text/5 overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-left text-text/30 text-[10px] uppercase tracking-wider border-b border-text/5">
+                        <th className="px-4 py-3">Model</th>
+                        <th className="px-3 py-3 text-right">Requests</th>
+                        <th className="px-3 py-3 text-right">Total Cost</th>
+                        <th className="px-3 py-3 text-right">Avg/Req</th>
+                        <th className="px-3 py-3 text-right">Tokens In</th>
+                        <th className="px-4 py-3 text-right">Tokens Out</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {costsModels.map((m: any) => {
+                        const lvl = m.avg_cost_per_request > 0.01 ? "text-red-400" : m.avg_cost_per_request > 0.001 ? "text-amber-400" : "text-emerald-400";
+                        return (
+                          <tr key={m.model_id} className="border-b border-text/[0.03] hover:bg-text/[0.02]">
+                            <td className="px-4 py-3 font-mono text-xs">{m.model_id}</td>
+                            <td className="px-3 py-3 text-right text-text/50">{m.requests.toLocaleString()}</td>
+                            <td className="px-3 py-3 text-right text-red-400 font-mono">${m.total_provider_cost_usd.toFixed(4)}</td>
+                            <td className={`px-3 py-3 text-right font-mono ${lvl}`}>${m.avg_cost_per_request.toFixed(6)}</td>
+                            <td className="px-3 py-3 text-right text-text/25">{m.total_tokens_in > 0 ? `${(m.total_tokens_in / 1000).toFixed(1)}K` : "—"}</td>
+                            <td className="px-4 py-3 text-right text-text/25">{m.total_tokens_out > 0 ? `${(m.total_tokens_out / 1000).toFixed(1)}K` : "—"}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {tab === "analytics" && (
           <div>
             <div className="flex flex-wrap items-center gap-3 mb-6">

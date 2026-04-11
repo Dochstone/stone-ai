@@ -1,17 +1,25 @@
 "use client";
 
-import { useState, useEffect, memo } from "react";
-import { getAvatarColor, getInitials, processAvatarFile, uploadAvatarToServer, saveAvatar, removeAvatar, syncAvatarFromProfile } from "@/lib/avatar";
-import AvatarCropper from "./AvatarCropper";
+import { useState, useEffect, useCallback, memo } from "react";
+import { getAvatarColor, getInitials, getSavedAvatar, saveAvatar, syncAvatarFromProfile } from "@/lib/avatar";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
+
+function getToken(): string {
+  try {
+    return JSON.parse(localStorage.getItem("stone_auth") || "{}").token || "";
+  } catch {
+    return "";
+  }
+}
 
 function AvatarUploadInner({ email, name }: { email: string; name?: string | null }) {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [cropSrc, setCropSrc] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [iframeHeight, setIframeHeight] = useState(160);
 
   useEffect(() => {
-    const local = localStorage.getItem("stone_avatar");
+    const local = getSavedAvatar();
     if (local) setAvatarUrl(local);
     syncAvatarFromProfile().then((url) => { if (url) setAvatarUrl(url); });
     const handler = (e: Event) => {
@@ -19,96 +27,130 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
       setAvatarUrl(url);
     };
     window.addEventListener("avatar-changed", handler);
-    return () => window.removeEventListener("avatar-changed", handler);
+    window.addEventListener("focus", () => {
+      syncAvatarFromProfile().then((url) => { if (url) setAvatarUrl(url); });
+    });
+    return () => {
+      window.removeEventListener("avatar-changed", handler);
+    };
   }, []);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setError(null);
-    try {
-      const dataUrl = await processAvatarFile(file);
-      setCropSrc(dataUrl);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Ошибка чтения файла");
-    }
-  };
+  useEffect(() => {
+    if (!modalOpen) return;
+    const handler = (e: MessageEvent) => {
+      if (e.data?.type === "avatar-resize") setIframeHeight(e.data.height);
+      if (e.data?.type === "avatar-uploaded") {
+        syncAvatarFromProfile().then((url) => {
+          if (url) { saveAvatar(url); setAvatarUrl(url); }
+        });
+      }
+    };
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, [modalOpen]);
 
-  const handleCropSave = async (croppedDataUrl: string) => {
-    setCropSrc(null);
-    setUploading(true);
-    setError(null);
-    try {
-      const fullUrl = await uploadAvatarToServer(croppedDataUrl);
-      saveAvatar(fullUrl);
-      setAvatarUrl(fullUrl);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Ошибка загрузки");
-    } finally {
-      setUploading(false);
-    }
-  };
+  const handleCloseModal = useCallback(() => {
+    setModalOpen(false);
+    syncAvatarFromProfile().then((url) => {
+      if (url) {
+        saveAvatar(url);
+        setAvatarUrl(url);
+      }
+    });
+  }, []);
 
-  const handleRemove = async () => {
-    setError(null);
+  const handleRemove = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     try {
-      await removeAvatar();
+      await fetch(`${API_URL}/api/user/avatar`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      localStorage.removeItem("stone_avatar");
+      window.dispatchEvent(new CustomEvent("avatar-changed", { detail: { url: null } }));
       setAvatarUrl(null);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Ошибка удаления");
-    }
+    } catch {}
   };
 
   return (
-    <div style={{ position: "relative" }}>
-      <input
-        id="avatar-file-input"
-        type="file"
-        accept="image/*"
-        onChange={handleFileChange}
-        style={{ display: "none" }}
-      />
+    <>
+      <div className="relative shrink-0">
+        {/* Avatar circle */}
+        <div className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center border border-text/10">
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="Аватарка" className="w-full h-full object-cover" onError={() => setAvatarUrl(null)} />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: getAvatarColor(email) }}>
+              <span className="text-xl font-bold text-white">{getInitials(email, name)}</span>
+            </div>
+          )}
+        </div>
 
-      {cropSrc && (
-        <AvatarCropper
-          imageSrc={cropSrc}
-          onSave={handleCropSave}
-          onCancel={() => setCropSrc(null)}
-        />
-      )}
-
-      <div className="flex items-center gap-4">
-        <label
-          htmlFor={uploading ? undefined : "avatar-file-input"}
-          className="relative group shrink-0 cursor-pointer"
-          style={{ display: "block" }}
-        >
-          <div className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center border border-text/10">
-            {uploading ? (
-              <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-            ) : avatarUrl ? (
-              <img src={avatarUrl} alt="Аватарка" className="w-full h-full object-cover" onError={() => setAvatarUrl(null)} />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: getAvatarColor(email) }}>
-                <span className="text-xl font-bold text-white">{getInitials(email, name)}</span>
-              </div>
-            )}
-          </div>
-          <div className="absolute inset-0 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
-            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+        {/* Camera badge — only when no avatar */}
+        {!avatarUrl && (
+          <button
+            type="button"
+            onClick={() => setModalOpen(true)}
+            className="absolute -bottom-0.5 -right-0.5 w-6 h-6 rounded-full bg-accent border-2 border-bg flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
+          >
+            <svg className="w-3 h-3 text-bg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
             </svg>
-          </div>
-        </label>
-
-        {avatarUrl && !uploading && (
-          <button type="button" onClick={handleRemove} className="text-xs text-red-400 hover:text-red-300 transition-colors">
-            Удалить фото
           </button>
         )}
-        {error && <p className="text-xs text-red-400">{error}</p>}
+
+        {/* Remove button — only when avatar exists */}
+        {avatarUrl && (
+          <button
+            type="button"
+            onClick={handleRemove}
+            className="absolute -top-1 -left-1 w-5 h-5 rounded-full bg-red-500 border-2 border-bg flex items-center justify-center cursor-pointer hover:scale-110 transition-transform"
+          >
+            <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
       </div>
-    </div>
+
+      {/* Modal with iframe */}
+      {modalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md"
+          onClick={handleCloseModal}
+        >
+          <div
+            className="relative bg-bg rounded-2xl overflow-hidden w-[95vw] max-w-[440px] shadow-[0_0_60px_rgba(196,98,61,0.12)] border border-white/[0.06]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Accent top line */}
+            <div className="h-[2px] bg-gradient-to-r from-transparent via-accent to-transparent" />
+
+            {/* Close button */}
+            <button
+              type="button"
+              onClick={handleCloseModal}
+              className="absolute top-4 right-4 z-10 w-7 h-7 rounded-full bg-white/[0.06] hover:bg-white/[0.12] flex items-center justify-center transition-colors"
+            >
+              <svg className="w-3.5 h-3.5 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Iframe — embed mode removes inner bg/padding/back link */}
+            <iframe
+              src={`${API_URL}/api/user/avatar-test?embed=1`}
+              className="w-full border-0 transition-[height] duration-300"
+              scrolling="no"
+              style={{ height: iframeHeight, overflow: "hidden" }}
+              title="Загрузить аватарку"
+            />
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
