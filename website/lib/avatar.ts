@@ -10,6 +10,11 @@ function getAuthToken(): string {
   }
 }
 
+function toAbsoluteUrl(url: string): string {
+  if (/^https?:\/\//i.test(url)) return url;
+  return `${API_URL}${url.startsWith("/") ? url : `/${url}`}`;
+}
+
 export function getAvatarColor(email: string): string {
   const colors = ["#C4623D", "#0E9A83", "#4285f4", "#7c3aed", "#ec4899", "#f59e0b", "#06b6d4", "#10a37f"];
   const str = email || "user";
@@ -26,6 +31,12 @@ export function getInitials(email: string, name?: string | null): string {
 export function getSavedAvatar(): string | null {
   if (typeof window === "undefined") return null;
   return localStorage.getItem(AVATAR_KEY);
+}
+
+export function clearSavedAvatar(): void {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(AVATAR_KEY);
+  window.dispatchEvent(new CustomEvent("avatar-changed", { detail: { url: null } }));
 }
 
 export function processAvatarFile(file: File): Promise<string> {
@@ -61,7 +72,7 @@ export async function uploadAvatarToServer(base64DataUrl: string): Promise<strin
   }
   const data = await res.json();
   if (!data.ok || !data.avatar_url) throw new Error("Сервер не вернул URL аватарки");
-  return `${API_URL}${data.avatar_url}`;
+  return toAbsoluteUrl(data.avatar_url);
 }
 
 export function saveAvatar(fullUrl: string): void {
@@ -75,8 +86,7 @@ export async function removeAvatar(): Promise<void> {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   }).catch(() => {});
-  localStorage.removeItem(AVATAR_KEY);
-  window.dispatchEvent(new CustomEvent("avatar-changed", { detail: { url: null } }));
+  clearSavedAvatar();
 }
 
 export async function syncAvatarFromProfile(): Promise<string | null> {
@@ -89,13 +99,16 @@ export async function syncAvatarFromProfile(): Promise<string | null> {
     if (!res.ok) return null;
     const data = await res.json();
     const u = data.user || data;
-    const serverUrl = u?.avatar_url ? `${API_URL}${u.avatar_url}` : null;
+    const serverUrl = u?.avatar_url ? toAbsoluteUrl(u.avatar_url) : null;
     const localUrl = localStorage.getItem(AVATAR_KEY);
-    if (serverUrl && serverUrl !== localUrl) {
-      saveAvatar(serverUrl);
-      return serverUrl;
+    if (!serverUrl) {
+      if (localUrl) clearSavedAvatar();
+      return null;
     }
-    return localUrl;
+    if (serverUrl !== localUrl) {
+      saveAvatar(serverUrl);
+    }
+    return serverUrl;
   } catch {
     return localStorage.getItem(AVATAR_KEY);
   }

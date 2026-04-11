@@ -12,7 +12,7 @@ const WelcomeScreen = dynamic(() => import("@/components/chat/WelcomeScreen"), {
 const VoiceButton = dynamic(() => import("@/components/chat/VoiceButton"), { ssr: false });
 const MessageContent = dynamic(() => import("@/components/chat/MessageContent"), { ssr: false });
 import { VideoPlayer, getVideoUrl } from "@/components/chat/MessageContent";
-import { getSavedAvatar } from "@/lib/avatar";
+import { getSavedAvatar, syncAvatarFromProfile } from "@/lib/avatar";
 import { OnboardingFlow } from "@/components/OnboardingFlow";
 import { PROMPT_CATEGORIES, PROMPT_TEMPLATES } from "@/lib/prompt-templates";
 import { DEFAULT_MODEL, PLAN_DISPLAY, UPGRADE_CTA_PRICE } from "@/lib/constants";
@@ -766,6 +766,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
     }
     // Avatar
     setUserAvatar(getSavedAvatar());
+    syncAvatarFromProfile().then((url) => setUserAvatar(url));
     const avatarHandler = () => setUserAvatar(getSavedAvatar());
     window.addEventListener("avatar-changed", avatarHandler);
     // Allow dashboard top bar to toggle chat history sidebar and create new chat

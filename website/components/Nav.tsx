@@ -8,7 +8,7 @@ import dynamic from "next/dynamic";
 
 const TonWalletBadge = dynamic(() => import("./TonWalletBadge"), { ssr: false });
 
-import { getAvatarColor, getSavedAvatar } from "@/lib/avatar";
+import { getAvatarColor, getSavedAvatar, syncAvatarFromProfile } from "@/lib/avatar";
 
 const tools = [
   { href: "/dashboard/chat", label: "AI Чат" },
@@ -43,6 +43,7 @@ export default function Nav() {
       }
     } catch {}
     setAvatar(getSavedAvatar());
+    syncAvatarFromProfile().then((url) => setAvatar(url));
     const handler = () => setAvatar(getSavedAvatar());
     window.addEventListener("avatar-changed", handler);
     return () => window.removeEventListener("avatar-changed", handler);

@@ -1,7 +1,10 @@
 """User endpoint — profile, limits, balance info, usage history, subscriptions."""
 
 import json
+import os
+import re
 from datetime import datetime, timedelta
+from pathlib import Path
 from fastapi import APIRouter, Depends, Query, Request, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import select, func
@@ -37,6 +40,30 @@ from app.services.token_billing import get_user_balance, TOKEN_PRICES
 from app.services.promo import apply_promo
 
 router = APIRouter(prefix="/api", tags=["user"])
+
+UPLOADS_DIR = Path(os.environ.get("UPLOADS_DIR", Path(__file__).resolve().parents[2] / "uploads"))
+AVATARS_DIR = UPLOADS_DIR / "avatars"
+DATA_URL_RE = re.compile(r"^data:(image/[a-zA-Z0-9.+-]+);base64,")
+IMAGE_EXTENSIONS = {
+    "image/jpeg": "jpg",
+    "image/jpg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+    "image/gif": "gif",
+}
+
+
+def _guess_image_extension(img_bytes: bytes) -> str | None:
+    """Infer image format from magic bytes when the data URL header is missing."""
+    if img_bytes.startswith(b"\xff\xd8\xff"):
+        return "jpg"
+    if img_bytes.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "png"
+    if img_bytes.startswith((b"GIF87a", b"GIF89a")):
+        return "gif"
+    if img_bytes.startswith(b"RIFF") and img_bytes[8:12] == b"WEBP":
+        return "webp"
+    return None
 
 
 class UpdateProfileRequest(BaseModel):
@@ -216,12 +243,17 @@ async def upload_avatar(
 ):
     """Upload user avatar (base64 -> saved to disk, URL stored in DB)."""
     import base64 as b64mod
-    import os
     import uuid as uuid_mod
 
     user = await _get_user_from_request(request, db)
 
-    raw = body.image_base64
+    raw_input = body.image_base64.strip()
+    mime_match = DATA_URL_RE.match(raw_input)
+    mime_type = mime_match.group(1).lower() if mime_match else None
+    if mime_type and mime_type not in IMAGE_EXTENSIONS:
+        raise HTTPException(400, "Unsupported avatar format")
+
+    raw = raw_input
     if "," in raw:
         raw = raw.split(",", 1)[1]
     if len(raw) > 5_000_000:
@@ -232,18 +264,21 @@ async def upload_avatar(
     except Exception:
         raise HTTPException(400, "Невалидный base64")
 
-    upload_dir = "/var/www/stone-ai/backend/uploads/avatars"
-    os.makedirs(upload_dir, exist_ok=True)
+    extension = IMAGE_EXTENSIONS.get(mime_type or "", _guess_image_extension(img_bytes))
+    if not extension:
+        raise HTTPException(400, "Unsupported avatar format")
+
+    AVATARS_DIR.mkdir(parents=True, exist_ok=True)
 
     # Delete old avatar file if exists
     if user.avatar_url and "/uploads/avatars/" in user.avatar_url:
-        old_file = os.path.join(upload_dir, os.path.basename(user.avatar_url))
-        if os.path.exists(old_file):
-            os.remove(old_file)
+        old_file = AVATARS_DIR / os.path.basename(user.avatar_url)
+        if old_file.exists():
+            old_file.unlink()
 
-    filename = f"{user.id}_{uuid_mod.uuid4().hex[:8]}.webp"
-    filepath = os.path.join(upload_dir, filename)
-    with open(filepath, "wb") as f:
+    filename = f"{user.id}_{uuid_mod.uuid4().hex[:8]}.{extension}"
+    filepath = AVATARS_DIR / filename
+    with filepath.open("wb") as f:
         f.write(img_bytes)
 
     user.avatar_url = f"/uploads/avatars/{filename}"
@@ -258,15 +293,13 @@ async def delete_avatar(
     db: AsyncSession = Depends(get_db),
 ):
     """Delete user avatar."""
-    import os
 
     user = await _get_user_from_request(request, db)
 
     if user.avatar_url and "/uploads/avatars/" in user.avatar_url:
-        upload_dir = "/var/www/stone-ai/backend/uploads/avatars"
-        old_file = os.path.join(upload_dir, os.path.basename(user.avatar_url))
-        if os.path.exists(old_file):
-            os.remove(old_file)
+        old_file = AVATARS_DIR / os.path.basename(user.avatar_url)
+        if old_file.exists():
+            old_file.unlink()
 
     user.avatar_url = None
     await db.commit()
