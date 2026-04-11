@@ -348,6 +348,28 @@ async def upload_avatar_file(
     return {"ok": True, "avatar_url": avatar_url}
 
 
+@router.get("/user/avatar-test")
+async def avatar_test_page():
+    """Pure HTML avatar upload test — no JS, no React."""
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse("""<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Avatar Test</title></head>
+<body style="padding:40px;font-family:sans-serif;background:#111;color:#fff">
+<h1>Avatar Upload Test</h1>
+<p>1. Enter your JWT token (from localStorage stone_auth → token)</p>
+<p>2. Pick a file</p>
+<p>3. Click Upload</p>
+<form id="f" action="/api/user/avatar-form" method="POST" enctype="multipart/form-data">
+<input name="token" placeholder="paste JWT token here" style="width:100%;padding:8px;margin:8px 0;background:#222;color:#fff;border:1px solid #444"><br>
+<input name="file" type="file" accept="image/*" style="margin:8px 0"><br>
+<button type="submit" style="padding:12px 24px;background:#C4623D;color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer;margin-top:8px">Upload</button>
+</form>
+<script>
+try{var a=JSON.parse(localStorage.getItem('stone_auth')||'{}');if(a.token)document.querySelector('[name=token]').value=a.token;}catch(e){}
+</script>
+</body></html>""")
+
+
 @router.post("/user/avatar-form")
 async def upload_avatar_form(
     token: str = Form(...),
