@@ -6,7 +6,7 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
-VERTEX_API_BASE = "https://generativelanguage.googleapis.com/v1beta"
+VERTEX_API_BASE = "https://gemini-proxy.dochstone.workers.dev/v1beta"
 
 
 def _headers(api_key: str) -> dict:

@@ -14,7 +14,7 @@ VIDEO_MODELS_REGISTRY = [
     # Tier 1: Premium (best quality)
     {"id": "kling-v3", "name": "Kling 3.0 Pro", "company": "Kuaishou", "provider": "kling", "fal_model": "direct-kling", "duration": "5-10s", "cost": 0.10, "price": 0.30, "active": False},
     {"id": "sora-2", "name": "Sora 2 Pro", "company": "OpenAI", "provider": "fal", "fal_model": "fal-ai/sora-2/text-to-video/pro", "duration": "5-10s", "cost": 0.10, "price": 0.50, "active": True},
-    {"id": "veo-3", "name": "Veo 3.1", "company": "Google", "provider": "vertex", "fal_model": "fal-ai/veo3.1", "duration": "5-10s", "cost": 0.25, "price": 0.65, "active": True},
+    {"id": "veo-3", "name": "Veo 3.1", "company": "Google", "provider": "fal", "fal_model": "fal-ai/veo3.1", "duration": "5-10s", "cost": 0.40, "price": 0.65, "active": True},
     {"id": "luma-ray2", "name": "Luma Ray 2", "company": "Luma", "provider": "fal", "fal_model": "fal-ai/luma-dream-machine/ray-2", "duration": "5-10s", "cost": 0.50, "price": 0.50, "active": True},
     {"id": "luma-ray2-flash", "name": "Luma Ray 2 Flash", "company": "Luma", "provider": "fal", "fal_model": "fal-ai/luma-dream-machine/ray-2-flash", "duration": "5-10s", "cost": 0.20, "price": 0.30, "active": True},
     {"id": "runway-gen3", "name": "Runway Gen-3 Alpha", "company": "Runway", "provider": "fal", "fal_model": "fal-ai/runway-gen3/turbo/image-to-video", "duration": "5-10s", "cost": 0.25, "price": 0.85, "active": False},
