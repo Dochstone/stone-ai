@@ -350,43 +350,209 @@ async def upload_avatar_file(
 
 @router.get("/user/avatar-test")
 async def avatar_test_page():
-    """Pure HTML avatar upload page — no JS frameworks."""
+    """Pure HTML avatar upload page with cropper — no JS frameworks."""
     from fastapi.responses import HTMLResponse
     return HTMLResponse("""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Загрузить аватарку — Stone AI</title>
 <style>
 *{box-sizing:border-box;margin:0}
 body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0f0f12;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-.card{background:#1a1a22;border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:32px;max-width:400px;width:100%}
+.card{background:#1a1a22;border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:32px;max-width:420px;width:100%}
 h1{font-size:20px;font-weight:700;margin-bottom:8px}
-p{font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:20px}
-input[type=file]{display:block;width:100%;margin:12px 0;font-size:14px;color:rgba(255,255,255,0.6)}
-input[type=file]::file-selector-button{background:#C4623D;color:#fff;border:none;padding:10px 20px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;margin-right:12px}
-input[type=file]::file-selector-button:hover{background:#b5553a}
-.btn{display:block;width:100%;padding:14px;background:#C4623D;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-top:16px}
+p.sub{font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:20px}
+.pick-label{display:inline-flex;align-items:center;gap:8px;background:#C4623D;color:#fff;padding:10px 20px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer}
+.pick-label:hover{background:#b5553a}
+.cropper{position:relative;width:300px;height:300px;margin:16px auto;overflow:hidden;border-radius:16px;background:#000;touch-action:none;cursor:grab;display:none}
+.cropper canvas{display:block}
+.cropper .circle{position:absolute;top:50%;left:50%;width:240px;height:240px;transform:translate(-50%,-50%);border-radius:50%;border:2px solid rgba(255,255,255,0.8);box-shadow:0 0 0 9999px rgba(0,0,0,0.55);pointer-events:none}
+.zoom{width:100%;margin:8px 0;display:none}
+.btn{display:block;width:100%;padding:14px;background:#C4623D;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-top:12px}
 .btn:hover{background:#b5553a}
 .btn:disabled{opacity:0.5;cursor:not-allowed}
+.btn-cancel{background:transparent;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);margin-top:8px}
+.btn-cancel:hover{background:rgba(255,255,255,0.05)}
 .back{display:inline-block;margin-top:16px;color:#C4623D;text-decoration:none;font-size:13px}
 .ok{color:#22c55e;font-size:14px;margin-top:12px}
 .err{color:#ef4444;font-size:14px;margin-top:12px}
+.hidden{display:none!important}
+.spinner{width:20px;height:20px;border:3px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:inline-block;vertical-align:middle;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style></head>
 <body>
 <div class="card">
 <h1>Загрузить аватарку</h1>
-<p>Выберите фото и нажмите «Загрузить»</p>
-<form id="f" action="/api/user/avatar-form" method="POST" enctype="multipart/form-data">
-<input type="hidden" name="token" id="tok">
-<input name="file" type="file" accept="image/*" required>
-<button type="submit" class="btn" id="btn">Загрузить</button>
-</form>
+<p class="sub" id="hint">Выберите фото</p>
+
+<div id="step1">
+<label class="pick-label">
+<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+Выбрать фото
+<input type="file" accept="image/*" id="fileInput" style="display:none">
+</label>
+</div>
+
+<div id="step2" class="hidden">
+<div class="cropper" id="cropper">
+<canvas id="canvas" width="300" height="300"></canvas>
+<div class="circle"></div>
+</div>
+<input type="range" min="1" max="3" step="0.02" value="1" class="zoom" id="zoom">
+<button class="btn" id="saveBtn">Сохранить</button>
+<button class="btn btn-cancel" id="cancelBtn">Отмена</button>
+</div>
+
 <div id="msg"></div>
 <a href="/profile" class="back">← Вернуться в профиль</a>
 </div>
+
 <script>
-try{var a=JSON.parse(localStorage.getItem('stone_auth')||'{}');document.getElementById('tok').value=a.token||'';}catch(e){}
+var token='';
+try{token=JSON.parse(localStorage.getItem('stone_auth')||'{}').token||'';}catch(e){}
+
+var fileInput=document.getElementById('fileInput');
+var cropper=document.getElementById('cropper');
+var canvas=document.getElementById('canvas');
+var ctx=canvas.getContext('2d');
+var zoomInput=document.getElementById('zoom');
+var step1=document.getElementById('step1');
+var step2=document.getElementById('step2');
+var hint=document.getElementById('hint');
+var msg=document.getElementById('msg');
+var saveBtn=document.getElementById('saveBtn');
+var cancelBtn=document.getElementById('cancelBtn');
+
+var img=null, scale=1, baseScale=1, ox=0, oy=0, dragging=false, lx=0, ly=0;
+var SIZE=300, R=120;
+
+function draw(){
+  ctx.clearRect(0,0,SIZE,SIZE);
+  if(!img)return;
+  var w=img.naturalWidth*scale, h=img.naturalHeight*scale;
+  ctx.drawImage(img,ox,oy,w,h);
+}
+
+function clamp(){
+  if(!img)return;
+  var w=img.naturalWidth*scale, h=img.naturalHeight*scale;
+  ox=Math.min(0,Math.max(SIZE-w,ox));
+  oy=Math.min(0,Math.max(SIZE-h,oy));
+}
+
+fileInput.addEventListener('change',function(e){
+  var file=e.target.files&&e.target.files[0];
+  if(!file)return;
+  var url=URL.createObjectURL(file);
+  img=new Image();
+  img.onload=function(){
+    baseScale=Math.max(SIZE/img.naturalWidth,SIZE/img.naturalHeight);
+    scale=baseScale;
+    ox=(SIZE-img.naturalWidth*scale)/2;
+    oy=(SIZE-img.naturalHeight*scale)/2;
+    zoomInput.value='1';
+    draw();
+    step1.classList.add('hidden');
+    step2.classList.remove('hidden');
+    cropper.style.display='block';
+    zoomInput.style.display='block';
+    hint.textContent='Перетащите фото и выберите область';
+  };
+  img.src=url;
+});
+
+zoomInput.addEventListener('input',function(){
+  var z=parseFloat(this.value);
+  var prev=scale;
+  scale=baseScale*z;
+  var cx=SIZE/2,cy=SIZE/2;
+  ox=cx-(cx-ox)*(scale/prev);
+  oy=cy-(cy-oy)*(scale/prev);
+  clamp();draw();
+});
+
+// Mouse drag
+canvas.addEventListener('mousedown',function(e){e.preventDefault();dragging=true;lx=e.clientX;ly=e.clientY;canvas.style.cursor='grabbing';});
+window.addEventListener('mousemove',function(e){if(!dragging)return;ox+=e.clientX-lx;oy+=e.clientY-ly;lx=e.clientX;ly=e.clientY;clamp();draw();});
+window.addEventListener('mouseup',function(){dragging=false;canvas.style.cursor='grab';});
+
+// Touch drag
+canvas.addEventListener('touchstart',function(e){if(e.touches.length===1){e.preventDefault();dragging=true;lx=e.touches[0].clientX;ly=e.touches[0].clientY;}},{passive:false});
+window.addEventListener('touchmove',function(e){if(!dragging||!e.touches.length)return;ox+=e.touches[0].clientX-lx;oy+=e.touches[0].clientY-ly;lx=e.touches[0].clientX;ly=e.touches[0].clientY;clamp();draw();},{passive:true});
+window.addEventListener('touchend',function(){dragging=false;});
+
+// Wheel zoom
+canvas.addEventListener('wheel',function(e){
+  e.preventDefault();
+  var d=e.deltaY>0?-0.05:0.05;
+  var z=Math.min(3,Math.max(1,parseFloat(zoomInput.value)+d));
+  zoomInput.value=z;
+  var prev=scale;scale=baseScale*z;
+  var cx=SIZE/2,cy=SIZE/2;
+  ox=cx-(cx-ox)*(scale/prev);oy=cy-(cy-oy)*(scale/prev);
+  clamp();draw();
+},{passive:false});
+
+cancelBtn.addEventListener('click',function(){
+  step2.classList.add('hidden');
+  step1.classList.remove('hidden');
+  cropper.style.display='none';
+  zoomInput.style.display='none';
+  hint.textContent='Выберите фото';
+  fileInput.value='';
+  img=null;
+});
+
+saveBtn.addEventListener('click',function(){
+  if(!img)return;
+  saveBtn.disabled=true;
+  saveBtn.innerHTML='<span class="spinner"></span>Загрузка...';
+
+  var out=document.createElement('canvas');
+  out.width=256;out.height=256;
+  var oc=out.getContext('2d');
+  var srcX=(SIZE/2-R-ox)/scale;
+  var srcY=(SIZE/2-R-oy)/scale;
+  var srcS=(R*2)/scale;
+  oc.drawImage(img,srcX,srcY,srcS,srcS,0,0,256,256);
+
+  out.toBlob(function(blob){
+    var fd=new FormData();
+    fd.append('file',blob,'avatar.jpg');
+    fd.append('token',token);
+    fetch('/api/user/avatar-form',{method:'POST',body:fd})
+    .then(function(r){
+      if(r.redirected||r.ok){
+        msg.innerHTML='<p class="ok">Аватарка загружена!</p>';
+        step2.classList.add('hidden');
+        cropper.style.display='none';
+        zoomInput.style.display='none';
+        hint.textContent='Готово!';
+        try{
+          fetch('/api/user/me',{headers:{Authorization:'Bearer '+token}})
+          .then(function(r){return r.json()})
+          .then(function(d){
+            var u=d.user||d;
+            if(u&&u.avatar_url){
+              var url=u.avatar_url.startsWith('http')?u.avatar_url:'https://stoneai.ru'+u.avatar_url;
+              localStorage.setItem('stone_avatar',url);
+            }
+          });
+        }catch(e){}
+      }else{
+        msg.innerHTML='<p class="err">Ошибка загрузки</p>';
+      }
+      saveBtn.disabled=false;saveBtn.textContent='Сохранить';
+    })
+    .catch(function(){
+      msg.innerHTML='<p class="err">Сетевая ошибка</p>';
+      saveBtn.disabled=false;saveBtn.textContent='Сохранить';
+    });
+  },'image/jpeg',0.85);
+});
+
+// Show status from redirect
 var u=new URLSearchParams(location.search);
-if(u.get('avatar_upload')==='ok')document.getElementById('msg').innerHTML='<p class="ok">Аватарка загружена! Вернитесь в профиль.</p>';
-else if(u.get('avatar_upload'))document.getElementById('msg').innerHTML='<p class="err">Ошибка: '+u.get('avatar_upload')+'</p>';
+if(u.get('avatar_upload')==='ok'){msg.innerHTML='<p class="ok">Аватарка загружена! Вернитесь в профиль.</p>';hint.textContent='Готово!';}
+else if(u.get('avatar_upload'))msg.innerHTML='<p class="err">Ошибка: '+u.get('avatar_upload')+'</p>';
 </script>
 </body></html>""")
 
