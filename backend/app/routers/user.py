@@ -5,7 +5,8 @@ import os
 import re
 from datetime import datetime, timedelta
 from pathlib import Path
-from fastapi import APIRouter, Depends, Query, Request, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, Query, Request, HTTPException, UploadFile, File, Form
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -141,6 +142,16 @@ async def _get_user_from_request(request: Request, db: AsyncSession) -> User:
     except Exception:
         pass
     raise HTTPException(401, "Not authenticated")
+
+
+async def _get_user_from_token(token: str, db: AsyncSession) -> User:
+    payload = decode_jwt(token)
+    user_id = int(payload["sub"])
+    result = await db.execute(select(User).where(User.id == user_id).with_for_update())
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(404, "User not found")
+    return user
 
 
 @router.get("/user/me")
@@ -332,6 +343,34 @@ async def upload_avatar_file(
 
     avatar_url = await _store_avatar_bytes(user, db, img_bytes, extension)
     return {"ok": True, "avatar_url": avatar_url}
+
+
+@router.post("/user/avatar-form")
+async def upload_avatar_form(
+    token: str = Form(...),
+    file: UploadFile = File(...),
+    db: AsyncSession = Depends(get_db),
+):
+    """Emergency avatar upload path using plain browser form submission."""
+    user = await _get_user_from_token(token, db)
+
+    content_type = (file.content_type or "").lower()
+    filename = file.filename or ""
+    extension = IMAGE_EXTENSIONS.get(content_type) or _guess_extension_from_filename(filename)
+
+    img_bytes = await file.read()
+    if not img_bytes:
+        return RedirectResponse(url="/profile?avatar_upload=empty", status_code=303)
+    if len(img_bytes) > 10 * 1024 * 1024:
+        return RedirectResponse(url="/profile?avatar_upload=too_large", status_code=303)
+
+    if not extension:
+        extension = _guess_image_extension(img_bytes)
+    if not extension:
+        return RedirectResponse(url="/profile?avatar_upload=bad_format", status_code=303)
+
+    await _store_avatar_bytes(user, db, img_bytes, extension)
+    return RedirectResponse(url="/profile?avatar_upload=ok", status_code=303)
 
 
 @router.delete("/user/avatar")

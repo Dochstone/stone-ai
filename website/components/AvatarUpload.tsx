@@ -19,12 +19,20 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [formToken, setFormToken] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previewObjectUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
     const local = getSavedAvatar();
     if (local) setAvatarUrl(local);
+    try {
+      const raw = localStorage.getItem("stone_auth");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        setFormToken(parsed?.token || "");
+      }
+    } catch {}
     syncAvatarFromProfile().then((url) => {
       setAvatarUrl(url);
     });
@@ -170,6 +178,27 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
             className="block w-full max-w-xs text-xs text-text/60 file:mr-3 file:rounded-lg file:border-0 file:bg-accent/10 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-accent hover:file:bg-accent/15"
           />
         </div>
+
+        {formToken && (
+          <form action="/api/user/avatar-form" method="post" encType="multipart/form-data" className="flex flex-col gap-2 max-w-xs">
+            <input type="hidden" name="token" value={formToken} />
+            <label className="block text-[11px] font-semibold text-text/35 uppercase mb-1">
+              Emergency native form
+            </label>
+            <input
+              type="file"
+              name="file"
+              accept="image/*"
+              className="block w-full text-xs text-text/60 file:mr-3 file:rounded-lg file:border-0 file:bg-teal/10 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-teal hover:file:bg-teal/15"
+            />
+            <button
+              type="submit"
+              className="inline-flex w-fit items-center rounded-lg bg-teal px-3 py-2 text-xs font-semibold text-white hover:bg-teal/90"
+            >
+              Upload via form submit
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );
