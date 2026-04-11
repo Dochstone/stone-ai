@@ -10,6 +10,8 @@ const TonWalletProfile = dynamic(() => import("./TonWalletProfile"), { ssr: fals
 import AuthForm, { AuthState as AuthFormState } from "./AuthForm";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+const YANDEX_CLIENT_ID = process.env.NEXT_PUBLIC_YANDEX_CLIENT_ID || "";
 
 // ─── Types ───
 
@@ -28,6 +30,7 @@ interface UserProfile {
   balance_usd: number;
   plan: string;
   auth_provider: string;
+  linked_providers: string[];
   total_deposited_usd: number;
   created_at: string;
   stats: { total_requests: number; total_tokens: number };
@@ -87,7 +90,16 @@ function formatDateTime(iso: string): string {
   return new Date(iso).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 }
 
-function authProviderLabel(p: string): string {
+function authProviderLabel(p: string, linkedProviders: string[] = []): string {
+  if (linkedProviders.length > 0) {
+    const labels: Record<string, string> = {
+      email: "Email",
+      google: "Google",
+      yandex: "Яндекс",
+      telegram: "Telegram",
+    };
+    return linkedProviders.map((provider) => labels[provider] || provider).join(" + ");
+  }
   if (p === "google") return "Google";
   if (p === "yandex") return "Яндекс";
   if (p === "telegram") return "Telegram";
@@ -191,7 +203,7 @@ function OverviewTab({ profile, usage, limits }: { profile: UserProfile; usage: 
           <p className="text-sm text-text/40">{profile.email || "Telegram-аккаунт"}</p>
           <div className="flex items-center gap-3 mt-1.5">
             <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-accent/10 text-accent">
-              {authProviderLabel(profile.auth_provider)}
+              {authProviderLabel(profile.auth_provider, profile.linked_providers)}
             </span>
             <span className="text-[10px] text-text/25">
               С {formatDate(profile.created_at)}
@@ -644,12 +656,28 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
   };
 
   const linkGoogle = () => {
-    window.location.href = `/auth/google/callback?link=true`;
+    if (!GOOGLE_CLIENT_ID) {
+      setMsg("Google auth не настроен");
+      return;
+    }
+    const redirectUri = `${window.location.origin}/auth/google/callback`;
+    const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=email%20profile&prompt=select_account&state=link`;
+    window.location.href = url;
   };
 
   const linkYandex = () => {
-    window.location.href = `/auth/yandex/callback?link=true`;
+    if (!YANDEX_CLIENT_ID) {
+      setMsg("Яндекс auth не настроен");
+      return;
+    }
+    const redirectUri = `${window.location.origin}/auth/yandex/callback`;
+    const url = `https://oauth.yandex.ru/authorize?response_type=code&client_id=${YANDEX_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&state=link`;
+    window.location.href = url;
   };
+
+  const hasEmailLogin = profile.linked_providers.includes("email") || profile.auth_provider === "email";
+  const googleLinked = profile.linked_providers.includes("google");
+  const yandexLinked = profile.linked_providers.includes("yandex");
 
   return (
     <div className="space-y-6">
@@ -731,7 +759,7 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
       </div>
 
       {/* Password (only for email auth) */}
-      {(profile.auth_provider === "email" || profile.auth_provider === "both") && (
+      {hasEmailLogin && (
         <div className="bg-bg rounded-2xl border border-text/[0.06] p-6">
           <h3 className="text-sm font-bold text-text mb-4">Смена пароля</h3>
           <div className="space-y-3 max-w-sm">
@@ -773,10 +801,10 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
               </div>
               <div>
                 <div className="text-sm font-medium text-text">Google</div>
-                <div className="text-[11px] text-text/30">{profile.auth_provider === "google" ? "Привязан" : "Не привязан"}</div>
+                <div className="text-[11px] text-text/30">{googleLinked ? "Привязан" : "Не привязан"}</div>
               </div>
             </div>
-            {profile.auth_provider !== "google" && (
+            {!googleLinked && (
               <button onClick={linkGoogle}
                 className="text-xs font-semibold text-accent hover:underline">Привязать</button>
             )}
@@ -788,10 +816,10 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
               </div>
               <div>
                 <div className="text-sm font-medium text-text">Яндекс</div>
-                <div className="text-[11px] text-text/30">{profile.auth_provider === "yandex" ? "Привязан" : "Не привязан"}</div>
+                <div className="text-[11px] text-text/30">{yandexLinked ? "Привязан" : "Не привязан"}</div>
               </div>
             </div>
-            {profile.auth_provider !== "yandex" && (
+            {!yandexLinked && (
               <button onClick={linkYandex}
                 className="text-xs font-semibold text-accent hover:underline">Привязать</button>
             )}
@@ -1154,6 +1182,7 @@ export default function ProfilePage() {
           balance_usd: u.balance_usd || 0,
           plan: u.plan || "free",
           auth_provider: u.auth_provider || "email",
+          linked_providers: Array.isArray(u.linked_providers) ? u.linked_providers : (Array.isArray(data.linked_providers) ? data.linked_providers : []),
           total_deposited_usd: data.total_deposited_usd || u.total_deposited_usd || 0,
           created_at: u.created_at || new Date().toISOString(),
           stats: data.stats || u.stats || { total_requests: 0, total_tokens: 0 },

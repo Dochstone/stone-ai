@@ -24,6 +24,7 @@ async def cmd_start(message: Message):
                 from app.database import async_session
                 from sqlalchemy import select
                 from app.models import User
+                from app.services.linked_providers import add_linked_providers
 
                 tg_id = message.from_user.id
                 async with async_session() as db:
@@ -44,7 +45,7 @@ async def cmd_start(message: Message):
                         web_user.telegram_id = tg_id
                         web_user.username = message.from_user.username or web_user.username
                         web_user.first_name = message.from_user.first_name or web_user.first_name
-                        web_user.auth_provider = "both"
+                        add_linked_providers(web_user, "telegram")
                         await db.commit()
 
                         await message.answer(

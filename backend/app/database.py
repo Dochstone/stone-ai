@@ -51,6 +51,7 @@ async def migrate_users_table():
         ("email", "VARCHAR(256) UNIQUE"),
         ("password_hash", "VARCHAR(256)"),
         ("auth_provider", "VARCHAR(16) DEFAULT 'telegram'"),
+        ("linked_providers", "VARCHAR(128) DEFAULT ''"),
         # Free Plan: streaks & granular usage tracking
         ("login_streak", "INTEGER DEFAULT 0"),
         ("last_login_date", "DATE"),

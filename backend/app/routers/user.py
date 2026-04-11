@@ -40,6 +40,7 @@ from app.services.limiter import (
 from app.services.subscription import PLANS, get_accessible_models
 from app.services.token_billing import get_user_balance, TOKEN_PRICES
 from app.services.promo import apply_promo
+from app.services.linked_providers import get_linked_providers
 
 logger = logging.getLogger(__name__)
 
@@ -194,7 +195,10 @@ async def get_me(
             "weighted_per_m": prices["weighted"],
         }
 
+    linked_providers = get_linked_providers(user)
+
     return {
+        "linked_providers": linked_providers,
         "user": {
             "id": user.id,
             "tg_id": user.telegram_id,
@@ -204,6 +208,7 @@ async def get_me(
             "language": user.language,
             "avatar_url": user.avatar_url,
             "auth_provider": user.auth_provider or "email",
+            "linked_providers": linked_providers,
             "created_at": user.joined_at.isoformat() if user.joined_at else None,
             "balance_usd": balance,
             "plan": user.subscription_tier or "free",
