@@ -42,7 +42,6 @@ def _get_video_provider_cost(model_id: str) -> float:
 async def _check_provider_status(task: VideoTask) -> dict:
     settings = get_settings()
     request_id = task.fal_request_id or ""
-
     if request_id.startswith("kling:"):
         from app.services.kling_client import check_kling_status
 

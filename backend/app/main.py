@@ -192,14 +192,22 @@ async def lifespan(app: FastAPI):
                             continue
 
                         try:
-                            is_kling = task.fal_request_id.startswith("kling:")
-                            if is_kling:
+                            rid = task.fal_request_id
+                            if rid.startswith("kling:"):
                                 from app.services.kling_client import check_kling_status
                                 s = get_settings()
-                                kling_id = task.fal_request_id.split(":", 1)[1]
+                                kling_id = rid.split(":", 1)[1]
                                 fal_status = await check_kling_status(s.kling_access_key, s.kling_secret_key, kling_id, is_image2video=bool(task.source_image_url))
+                            elif rid.startswith("novita:"):
+                                from app.services.novita_client import check_novita_status
+                                s = get_settings()
+                                fal_status = await check_novita_status(s.novita_api_key, rid.split(":", 1)[1])
+                            elif rid.startswith("vertex:"):
+                                from app.services.vertex_client import check_vertex_status
+                                s = get_settings()
+                                fal_status = await check_vertex_status(s.vertex_api_key, rid.split(":", 1)[1])
                             else:
-                                fal_status = await fal_check(task.model_id, task.fal_request_id)
+                                fal_status = await fal_check(task.model_id, rid)
 
                             status = fal_status.get("status", "UNKNOWN")
 
