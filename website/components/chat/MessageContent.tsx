@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
@@ -200,6 +200,25 @@ function getVideoUrl(url: string, directUrl?: string, taskId?: string, token?: s
 function VideoPlayer({ url, directUrl, taskId, token, thumbnailUrl, isFree }: { url: string; directUrl?: string; taskId?: string; token?: string; thumbnailUrl?: string; isFree?: boolean }) {
   const videoUrl = getVideoUrl(url, directUrl, taskId, token);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(false);
+    const timeout = setTimeout(() => setLoading(false), 8000);
+    return () => clearTimeout(timeout);
+  }, [videoUrl]);
+
+  if (error) {
+    return (
+      <div className="rounded-2xl overflow-hidden" style={{ maxWidth: 400 }}>
+        <div className="bg-text/[0.04] rounded-2xl flex flex-col items-center justify-center gap-3 p-8" style={{ minHeight: 200 }}>
+          <span className="text-[11px] text-text/30">Не удалось загрузить видео</span>
+          <a href={videoUrl} download="stone-ai-video.mp4" className="text-[11px] font-bold text-accent hover:underline">Скачать файл</a>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-2xl overflow-hidden relative" style={{ maxWidth: 400 }}>
@@ -219,12 +238,13 @@ function VideoPlayer({ url, directUrl, taskId, token, thumbnailUrl, isFree }: { 
         src={videoUrl}
         controls
         playsInline
-        preload="metadata"
+        preload="auto"
         controlsList="nodownload"
         className={`w-full rounded-t-2xl bg-black ${loading ? "opacity-0" : "opacity-100"} transition-opacity`}
         style={{ maxHeight: 300 }}
         onLoadedData={() => setLoading(false)}
         onCanPlay={() => setLoading(false)}
+        onError={() => { setLoading(false); setError(true); }}
       />
       <div className="bg-text/[0.06] px-4 py-2 flex items-center justify-between">
         <span className="text-[11px] font-semibold text-text/40">{loading ? "Загружается..." : isFree ? "С водяным знаком" : "Видео готово"}</span>
