@@ -825,7 +825,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
             const s = await r.json();
             if (s.status === "completed" && s.video_url) {
               setMessages(prev => prev.map(m =>
-                m.content?.includes("Генерация видео") ? { ...m, content: "", video: { url: s.video_url, taskId: pending.task_id, cost_usd: pending.cost_usd } } : m
+                m.content?.includes("Генерация видео") ? { ...m, content: "", video: { url: s.video_url, directUrl: s.direct_url || s.video_url, taskId: pending.task_id, cost_usd: pending.cost_usd } } : m
               ));
               setVideoGenerating(false);
               return;

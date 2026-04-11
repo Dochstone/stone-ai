@@ -190,10 +190,14 @@ async def video_status(
 
     # If already completed/failed, return cached result
     if task.status in ("completed", "failed"):
+        video_url = task.video_url
+        # If video is on our server, use direct URL; otherwise use stream proxy
+        if video_url and "stoneai.ru/media/" not in video_url:
+            video_url = f"https://stoneai.ru/api/video/stream/{task.task_id}"
         return {
             "task_id": task.task_id,
             "status": task.status,
-            "video_url": task.video_url,
+            "video_url": video_url,
             "error": task.error_message,
         }
 
@@ -237,11 +241,13 @@ async def video_status(
         asyncio.create_task(_save_video_to_disk(task.task_id, fal_video_url, tg_id, task.model_id, task.prompt, task.cost_usd))
         asyncio.create_task(check_and_update(tg_id, "videos", 1))
 
+        # Return stream proxy URL so video works even if fal.ai link expires
+        stream_url = f"https://stoneai.ru/api/video/stream/{task.task_id}"
         return {
             "task_id": task.task_id,
             "status": "completed",
-            "video_url": fal_video_url or "",
-            "direct_url": fal_video_url or "",
+            "video_url": stream_url,
+            "direct_url": stream_url,
         }
 
     if status == "FAILED":
