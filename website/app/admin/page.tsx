@@ -787,18 +787,25 @@ export default function AdminPage() {
                 const fd = new FormData(form);
                 const auth = localStorage.getItem("admin_token");
                 if (!auth) return;
-                const res = await fetch(`${API_URL}/api/admin/web/promos`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth}` },
-                  body: JSON.stringify({
-                    code: fd.get("code"), type: fd.get("type"), tier: fd.get("tier"),
-                    days: fd.get("days"), credits: fd.get("credits"),
-                    max_uses: fd.get("max_uses"), desc: fd.get("desc"),
-                  }),
-                });
-                if (res.ok) {
-                  form.reset();
-                  fetchData("promos").then((d: any) => { if (d) setPromos(d.promos); });
+                try {
+                  const res = await fetch(`${API_URL}/api/admin/web/promos`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth}` },
+                    body: JSON.stringify({
+                      code: fd.get("code"), type: fd.get("type"), tier: fd.get("tier"),
+                      days: fd.get("days"), credits: fd.get("credits"),
+                      max_uses: fd.get("max_uses"), desc: fd.get("desc"),
+                    }),
+                  });
+                  if (res.ok) {
+                    form.reset();
+                    fetchData("promos").then((d: any) => { if (d) setPromos(d.promos); });
+                  } else {
+                    const err = await res.json().catch(() => ({}));
+                    alert(`Ошибка: ${err.detail || res.status}`);
+                  }
+                } catch (err) {
+                  alert(`Сетевая ошибка: ${err}`);
                 }
               }} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <input name="code" placeholder="КОД" required className="bg-bg border border-text/10 rounded-xl px-3 py-2.5 text-xs font-mono uppercase focus:outline-none focus:ring-2 focus:ring-accent/30" />
