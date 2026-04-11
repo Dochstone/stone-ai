@@ -352,14 +352,21 @@ async def upload_avatar_form(
     db: AsyncSession = Depends(get_db),
 ):
     """Emergency avatar upload path using plain browser form submission."""
-    user = await _get_user_from_token(token, db)
+    try:
+        user = await _get_user_from_token(token, db)
+    except Exception as e:
+        logger.error(f"avatar-form auth failed: {e}")
+        return RedirectResponse(url=f"/profile?avatar_upload=auth_error", status_code=303)
 
     content_type = (file.content_type or "").lower()
     filename = file.filename or ""
     extension = IMAGE_EXTENSIONS.get(content_type) or _guess_extension_from_filename(filename)
 
+    logger.info(f"avatar-form: user={user.id}, file={filename}, type={content_type}, ext={extension}")
+
     img_bytes = await file.read()
     if not img_bytes:
+        logger.error("avatar-form: empty file")
         return RedirectResponse(url="/profile?avatar_upload=empty", status_code=303)
     if len(img_bytes) > 10 * 1024 * 1024:
         return RedirectResponse(url="/profile?avatar_upload=too_large", status_code=303)
@@ -367,9 +374,11 @@ async def upload_avatar_form(
     if not extension:
         extension = _guess_image_extension(img_bytes)
     if not extension:
+        logger.error(f"avatar-form: unsupported format, content_type={content_type}, magic={img_bytes[:8]}")
         return RedirectResponse(url="/profile?avatar_upload=bad_format", status_code=303)
 
     await _store_avatar_bytes(user, db, img_bytes, extension)
+    logger.info(f"avatar-form: saved avatar for user {user.id}")
     return RedirectResponse(url="/profile?avatar_upload=ok", status_code=303)
 
 
