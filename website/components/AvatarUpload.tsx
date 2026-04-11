@@ -2,11 +2,9 @@
 
 import { useState, useEffect, useRef, memo } from "react";
 import { getAvatarColor, getInitials, processAvatarFile, uploadAvatarToServer, saveAvatar, removeAvatar, syncAvatarFromProfile } from "@/lib/avatar";
-import AvatarCropper from "./AvatarCropper";
 
 function AvatarUploadInner({ email, name }: { email: string; name?: string | null }) {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -32,21 +30,10 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
     const file = e.target.files?.[0];
     if (!file) return;
     setError(null);
+    setUploading(true);
     try {
       const dataUrl = await processAvatarFile(file);
-      setCropSrc(dataUrl);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Ошибка чтения файла");
-    }
-    e.target.value = "";
-  };
-
-  const handleCropSave = async (croppedDataUrl: string) => {
-    setCropSrc(null);
-    setUploading(true);
-    setError(null);
-    try {
-      const fullUrl = await uploadAvatarToServer(croppedDataUrl);
+      const fullUrl = await uploadAvatarToServer(dataUrl);
       saveAvatar(fullUrl);
       setAvatarUrl(fullUrl);
     } catch (err: unknown) {
@@ -54,6 +41,7 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
     } finally {
       setUploading(false);
     }
+    e.target.value = "";
   };
 
   const handleRemove = async () => {
@@ -75,14 +63,6 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
         onChange={handleFileChange}
         style={{ position: "absolute", width: 0, height: 0, opacity: 0, pointerEvents: "none" }}
       />
-
-      {cropSrc && (
-        <AvatarCropper
-          imageSrc={cropSrc}
-          onSave={handleCropSave}
-          onCancel={() => setCropSrc(null)}
-        />
-      )}
 
       <div className="flex items-center gap-4">
         <button
