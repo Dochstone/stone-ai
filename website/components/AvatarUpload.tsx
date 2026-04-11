@@ -24,14 +24,18 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    console.log("[AvatarUpload] file selected:", file?.name, file?.type, file?.size);
     if (!file) return;
     setError(null);
     try {
       const dataUrl = await processAvatarFile(file);
+      console.log("[AvatarUpload] dataUrl ready, length:", dataUrl.length);
       setCropSrc(dataUrl);
     } catch (err: unknown) {
+      console.error("[AvatarUpload] processAvatarFile error:", err);
       setError(err instanceof Error ? err.message : "Ошибка чтения файла");
     }
+    e.target.value = "";
   };
 
   const handleCropSave = async (croppedDataUrl: string) => {
