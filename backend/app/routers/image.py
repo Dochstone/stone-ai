@@ -17,6 +17,7 @@ from app.models.user import User
 from app.models.image_task import ImageTask
 from app.models.generation import Generation
 from app.config import get_settings
+from app.services.provider_costs import calculate_image_provider_cost
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/image", tags=["image"])
@@ -204,19 +205,22 @@ async def _generate_image_bg(task_id: int, tg_id: int, model_id: str, prompt: st
         async with async_session() as db:
             result = await db.execute(select(ImageTask).where(ImageTask.id == task_id))
             task = result.scalar_one_or_none()
+            provider_cost = calculate_image_provider_cost(model_id)
             if task:
                 task.status = "completed"
                 task.image_url = disk_url
                 task.completed_at = datetime.utcnow()
+                task.provider_cost_usd = provider_cost
 
             # Record usage
             from app.services.limiter import record_usage
-            await record_usage(db, tg_id, model_id, cost_usd=0)
+            await record_usage(db, tg_id, model_id, cost_usd=0, provider_cost_usd=provider_cost)
 
             # Save generation record
             gen = Generation(
                 user_tg_id=tg_id, type="image", model=model_id,
                 prompt=prompt[:2000], result_url=disk_url,
+                cost=0.0, provider_cost=provider_cost,
             )
             db.add(gen)
             await db.commit()

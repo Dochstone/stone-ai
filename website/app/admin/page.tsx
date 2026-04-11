@@ -162,6 +162,7 @@ export default function AdminPage() {
   const [costsUsers, setCostsUsers] = useState<any[]>([]);
   const [costsModels, setCostsModels] = useState<any[]>([]);
   const [costsSubTab, setCostsSubTab] = useState<"overview" | "users" | "models">("overview");
+  const [costsPeriodMode, setCostsPeriodMode] = useState<"today" | "month">("today");
 
   const [stats, setStats] = useState<Stats | null>(null);
   const [users, setUsers] = useState<UserRow[]>([]);
@@ -270,12 +271,12 @@ export default function AdminPage() {
     } else if (tab === "referrals") {
       fetchData("referrals").then((d) => { if (d) setReferrals(d); setLoading(false); });
     } else if (tab === "costs") {
-      const period = new Date().toISOString().slice(0, 7);
+      const period = costsPeriodMode === "today" ? "today" : new Date().toISOString().slice(0, 7);
       const h = { Authorization: `Bearer ${token}` };
       Promise.all([
         fetch(`${API_URL}/api/admin/costs?period=${period}`, { headers: h }).then(r => r.ok ? r.json() : null).catch(() => null),
-        fetch(`${API_URL}/api/admin/costs/users`, { headers: h }).then(r => r.ok ? r.json() : null).catch(() => null),
-        fetch(`${API_URL}/api/admin/costs/models`, { headers: h }).then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch(`${API_URL}/api/admin/costs/users?period=${period}`, { headers: h }).then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch(`${API_URL}/api/admin/costs/models?period=${period}`, { headers: h }).then(r => r.ok ? r.json() : null).catch(() => null),
       ]).then(([o, u, m]) => {
         setCostsData(o || { period, total_revenue_usd: 0, total_provider_cost_usd: 0, gross_margin_usd: 0, margin_percent: 0, breakdown: { chat: { provider_cost: 0, requests: 0 }, video: { revenue: 0, provider_cost: 0, requests: 0 }, image: { revenue: 0, provider_cost: 0, requests: 0 } } });
         setCostsUsers(u?.users || []);
@@ -290,7 +291,7 @@ export default function AdminPage() {
       const txParams = new URLSearchParams({ limit: String(TX_PER_PAGE), offset: String(txPage * TX_PER_PAGE) });
       fetchData(`transactions?${txParams}`).then((d) => { if (d) { setTransactions(d.transactions); setTxTotal(d.total); } setLoading(false); });
     }
-  }, [authed, token, tab, fetchData, debouncedSearch, debouncedTier, debouncedDateFrom, debouncedDateTo, usersPage, txPage, chartDays, analyticsDays, analyticsSortBy, analyticsSortOrder]);
+  }, [authed, token, tab, fetchData, debouncedSearch, debouncedTier, debouncedDateFrom, debouncedDateTo, usersPage, txPage, chartDays, analyticsDays, analyticsSortBy, analyticsSortOrder, costsPeriodMode]);
 
   useEffect(() => { loadTab(); }, [loadTab]);
 
@@ -947,13 +948,28 @@ export default function AdminPage() {
         {tab === "costs" && !loading && costsData && (
           <div className="space-y-6">
             {/* Sub-tabs */}
-            <div className="flex gap-1 bg-surface rounded-xl p-1 w-fit border border-text/5">
-              {(["overview", "users", "models"] as const).map(st => (
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex gap-1 bg-surface rounded-xl p-1 w-fit border border-text/5">
+                {(["overview", "users", "models"] as const).map(st => (
                 <button key={st} onClick={() => setCostsSubTab(st)}
                   className={`px-4 py-1.5 rounded-lg text-xs font-bold transition ${costsSubTab === st ? "bg-accent text-white" : "text-text/40 hover:text-text/70"}`}>
                   {st === "overview" ? "P&L" : st === "users" ? "По юзерам" : "По моделям"}
                 </button>
-              ))}
+                ))}
+            </div>
+
+              <div className="flex gap-1 bg-surface rounded-xl p-1 w-fit border border-text/5">
+                {([
+                  { id: "today" as const, label: "Сегодня" },
+                  { id: "month" as const, label: "Месяц" },
+                ]).map(opt => (
+                  <button key={opt.id} onClick={() => setCostsPeriodMode(opt.id)}
+                    className={`px-4 py-1.5 rounded-lg text-xs font-bold transition ${costsPeriodMode === opt.id ? "bg-accent text-white" : "text-text/40 hover:text-text/70"}`}>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              <div className="text-[11px] text-text/30">Период: {costsData.period}</div>
             </div>
 
             {/* P&L Overview */}

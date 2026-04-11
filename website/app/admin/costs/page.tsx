@@ -106,8 +106,8 @@ export default function CostsPage() {
     setError(false);
     Promise.all([
       fetchAdmin<CostsOverview>(`/api/admin/costs?period=${period}`),
-      fetchAdmin<{ users: UserCost[] }>("/api/admin/costs/users"),
-      fetchAdmin<{ models: ModelCost[] }>("/api/admin/costs/models"),
+      fetchAdmin<{ users: UserCost[] }>(`/api/admin/costs/users?period=${period}`),
+      fetchAdmin<{ models: ModelCost[] }>(`/api/admin/costs/models?period=${period}`),
     ]).then(([o, u, m]) => {
       if (!o && !u && !m) setError(true);
       if (o) setOverview(o);

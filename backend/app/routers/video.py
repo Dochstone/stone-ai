@@ -484,7 +484,20 @@ async def _save_video_to_disk(task_id: str, video_url: str | None, tg_id: int, m
                 # Save to gallery
                 from app.models.generation import Generation
                 async with async_session() as db:
-                    gen = Generation(user_tg_id=tg_id, type="video", model=model_id, prompt=prompt or "", result_url=local_url, cost=float(cost_usd or 0))
+                    provider_cost = 0.0
+                    task_result = await db.execute(sel(VideoTask).where(VideoTask.task_id == task_id))
+                    task = task_result.scalar_one_or_none()
+                    if task:
+                        provider_cost = float(task.provider_cost_usd or 0)
+                    gen = Generation(
+                        user_tg_id=tg_id,
+                        type="video",
+                        model=model_id,
+                        prompt=prompt or "",
+                        result_url=local_url,
+                        cost=float(cost_usd or 0),
+                        provider_cost=provider_cost,
+                    )
                     db.add(gen)
                     await db.commit()
 

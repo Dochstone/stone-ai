@@ -14,8 +14,42 @@ from app.middleware.web_auth import extract_jwt_from_request, decode_jwt
 from app.models import User
 from app.models.usage import Usage
 from app.models.transaction import Transaction
+from app.models.video_task import VideoTask
+from app.models.image_task import ImageTask
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
+
+
+def _period_bounds(period: str | None) -> tuple[datetime | None, datetime | None, str]:
+    if not period:
+        period = date.today().strftime("%Y-%m")
+
+    if period == "today":
+        today = date.today()
+        start = datetime(today.year, today.month, today.day)
+        return start, start + timedelta(days=1), today.isoformat()
+
+    if len(period) == 10:
+        try:
+            day = date.fromisoformat(period)
+        except ValueError as exc:
+            raise HTTPException(400, "Invalid period format. Use today, YYYY-MM, or YYYY-MM-DD.") from exc
+        start = datetime(day.year, day.month, day.day)
+        return start, start + timedelta(days=1), period
+
+    if len(period) == 7:
+        try:
+            year, month = int(period[:4]), int(period[5:7])
+            start = datetime(year, month, 1)
+        except ValueError as exc:
+            raise HTTPException(400, "Invalid period format. Use today, YYYY-MM, or YYYY-MM-DD.") from exc
+        if month == 12:
+            end = datetime(year + 1, 1, 1)
+        else:
+            end = datetime(year, month + 1, 1)
+        return start, end, period
+
+    raise HTTPException(400, "Invalid period format. Use today, YYYY-MM, or YYYY-MM-DD.")
 
 
 def _admin_ids() -> set[int]:
@@ -884,14 +918,7 @@ async def admin_costs(
     db: AsyncSession = Depends(get_db),
 ):
     """Overall P&L: revenue vs provider costs."""
-    if not period:
-        period = date.today().strftime("%Y-%m")
-    year, month = int(period[:4]), int(period[5:7])
-    start = datetime(year, month, 1)
-    if month == 12:
-        end = datetime(year + 1, 1, 1)
-    else:
-        end = datetime(year, month + 1, 1)
+    start, end, normalized_period = _period_bounds(period)
 
     # Revenue from completed transactions
     rev_result = await db.execute(
@@ -917,7 +944,11 @@ async def admin_costs(
             func.coalesce(func.sum(VideoTask.provider_cost_usd), 0),
             func.coalesce(func.sum(VideoTask.cost_usd), 0),
             func.count(),
-        ).where(VideoTask.created_at >= start, VideoTask.created_at < end, VideoTask.status == "completed")
+        ).where(
+            VideoTask.created_at >= start,
+            VideoTask.created_at < end,
+            VideoTask.fal_request_id.isnot(None),
+        )
     )
     video_row = video_result.one()
     video_provider_cost = float(video_row[0])
@@ -930,7 +961,11 @@ async def admin_costs(
             func.coalesce(func.sum(ImageTask.provider_cost_usd), 0),
             func.coalesce(func.sum(ImageTask.cost_usd), 0),
             func.count(),
-        ).where(ImageTask.created_at >= start, ImageTask.created_at < end, ImageTask.status == "completed")
+        ).where(
+            ImageTask.created_at >= start,
+            ImageTask.created_at < end,
+            ImageTask.provider_cost_usd > 0,
+        )
     )
     image_row = image_result.one()
     image_provider_cost = float(image_row[0])
@@ -942,7 +977,7 @@ async def admin_costs(
     margin_pct = round((margin / total_revenue * 100), 1) if total_revenue > 0 else 0
 
     return {
-        "period": period,
+        "period": normalized_period,
         "total_revenue_usd": round(total_revenue, 2),
         "total_provider_cost_usd": round(total_provider_cost, 4),
         "gross_margin_usd": round(margin, 2),
@@ -959,9 +994,12 @@ async def admin_costs(
 async def admin_costs_users(
     request: Request,
     _admin=Depends(require_web_admin),
+    period: str | None = Query(default=None, description="Optional: today, YYYY-MM, or YYYY-MM-DD"),
     db: AsyncSession = Depends(get_db),
 ):
     """Per-user profitability: revenue vs provider cost."""
+    start, end, _ = _period_bounds(period) if period else (None, None, "")
+
     # Revenue per user (from transactions)
     rev_query = (
         select(
@@ -971,11 +1009,13 @@ async def admin_costs_users(
         .where(Transaction.status == "completed")
         .group_by(Transaction.user_tg_id)
     )
+    if start and end:
+        rev_query = rev_query.where(Transaction.created_at >= start, Transaction.created_at < end)
     rev_rows = (await db.execute(rev_query)).all()
     user_revenue = {row[0]: float(row[1] or 0) for row in rev_rows}
 
-    # Provider cost per user (from usage)
-    cost_query = (
+    # Provider cost per user from chat/audio usage
+    usage_cost_query = (
         select(
             Usage.user_tg_id,
             func.sum(Usage.provider_cost_usd).label("total_cost"),
@@ -983,8 +1023,48 @@ async def admin_costs_users(
         )
         .group_by(Usage.user_tg_id)
     )
-    cost_rows = (await db.execute(cost_query)).all()
-    user_costs = {row[0]: {"cost": float(row[1] or 0), "requests": int(row[2])} for row in cost_rows}
+    if start and end:
+        usage_cost_query = usage_cost_query.where(Usage.created_at >= start, Usage.created_at < end)
+    usage_rows = (await db.execute(usage_cost_query)).all()
+
+    video_cost_query = (
+        select(
+            VideoTask.user_tg_id,
+            func.sum(VideoTask.provider_cost_usd).label("total_cost"),
+            func.count().label("total_requests"),
+        )
+        .where(VideoTask.fal_request_id.isnot(None))
+        .group_by(VideoTask.user_tg_id)
+    )
+    if start and end:
+        video_cost_query = video_cost_query.where(VideoTask.created_at >= start, VideoTask.created_at < end)
+    video_rows = (await db.execute(video_cost_query)).all()
+
+    image_cost_query = (
+        select(
+            ImageTask.user_tg_id,
+            func.sum(ImageTask.provider_cost_usd).label("total_cost"),
+            func.count().label("total_requests"),
+        )
+        .where(ImageTask.provider_cost_usd > 0)
+        .group_by(ImageTask.user_tg_id)
+    )
+    if start and end:
+        image_cost_query = image_cost_query.where(ImageTask.created_at >= start, ImageTask.created_at < end)
+    image_rows = (await db.execute(image_cost_query)).all()
+
+    user_costs: dict[int, dict[str, float | int]] = {}
+
+    def _merge_cost_rows(rows):
+        for row in rows:
+            tg_id = int(row[0])
+            bucket = user_costs.setdefault(tg_id, {"cost": 0.0, "requests": 0})
+            bucket["cost"] = float(bucket["cost"]) + float(row[1] or 0)
+            bucket["requests"] = int(bucket["requests"]) + int(row[2] or 0)
+
+    _merge_cost_rows(usage_rows)
+    _merge_cost_rows(video_rows)
+    _merge_cost_rows(image_rows)
 
     # Merge with user info
     all_tg_ids = set(user_revenue.keys()) | set(user_costs.keys())
@@ -1024,10 +1104,13 @@ async def admin_costs_users(
 async def admin_costs_models(
     request: Request,
     _admin=Depends(require_web_admin),
+    period: str | None = Query(default=None, description="Optional: today, YYYY-MM, or YYYY-MM-DD"),
     db: AsyncSession = Depends(get_db),
 ):
     """Per-model cost breakdown."""
-    result = await db.execute(
+    start, end, _ = _period_bounds(period) if period else (None, None, "")
+
+    usage_query = (
         select(
             Usage.model_id,
             func.count().label("requests"),
@@ -1036,20 +1119,77 @@ async def admin_costs_models(
             func.coalesce(func.sum(Usage.tokens_out), 0).label("total_tokens_out"),
         )
         .group_by(Usage.model_id)
-        .order_by(func.sum(Usage.provider_cost_usd).desc())
     )
-    rows = result.all()
+    if start and end:
+        usage_query = usage_query.where(Usage.created_at >= start, Usage.created_at < end)
+    usage_rows = (await db.execute(usage_query)).all()
+
+    video_query = (
+        select(
+            VideoTask.model_id,
+            func.count().label("requests"),
+            func.coalesce(func.sum(VideoTask.provider_cost_usd), 0).label("total_cost"),
+        )
+        .where(VideoTask.fal_request_id.isnot(None))
+        .group_by(VideoTask.model_id)
+    )
+    if start and end:
+        video_query = video_query.where(VideoTask.created_at >= start, VideoTask.created_at < end)
+    video_rows = (await db.execute(video_query)).all()
+
+    image_query = (
+        select(
+            ImageTask.model_id,
+            func.count().label("requests"),
+            func.coalesce(func.sum(ImageTask.provider_cost_usd), 0).label("total_cost"),
+        )
+        .where(ImageTask.provider_cost_usd > 0)
+        .group_by(ImageTask.model_id)
+    )
+    if start and end:
+        image_query = image_query.where(ImageTask.created_at >= start, ImageTask.created_at < end)
+    image_rows = (await db.execute(image_query)).all()
+
+    models: dict[str, dict[str, float | int]] = {}
+
+    for row in usage_rows:
+        models[row[0]] = {
+            "requests": int(row[1] or 0),
+            "total_provider_cost_usd": float(row[2] or 0),
+            "total_tokens_in": int(row[3] or 0),
+            "total_tokens_out": int(row[4] or 0),
+        }
+
+    def _merge_model_rows(rows):
+        for row in rows:
+            model_id = row[0]
+            bucket = models.setdefault(
+                model_id,
+                {
+                    "requests": 0,
+                    "total_provider_cost_usd": 0.0,
+                    "total_tokens_in": 0,
+                    "total_tokens_out": 0,
+                },
+            )
+            bucket["requests"] = int(bucket["requests"]) + int(row[1] or 0)
+            bucket["total_provider_cost_usd"] = float(bucket["total_provider_cost_usd"]) + float(row[2] or 0)
+
+    _merge_model_rows(video_rows)
+    _merge_model_rows(image_rows)
+
+    rows = sorted(models.items(), key=lambda item: float(item[1]["total_provider_cost_usd"]), reverse=True)
 
     return {
         "models": [
             {
-                "model_id": row[0],
-                "requests": int(row[1]),
-                "total_provider_cost_usd": round(float(row[2]), 4),
-                "avg_cost_per_request": round(float(row[2]) / int(row[1]), 6) if int(row[1]) > 0 else 0,
-                "total_tokens_in": int(row[3]),
-                "total_tokens_out": int(row[4]),
+                "model_id": model_id,
+                "requests": int(data["requests"]),
+                "total_provider_cost_usd": round(float(data["total_provider_cost_usd"]), 4),
+                "avg_cost_per_request": round(float(data["total_provider_cost_usd"]) / int(data["requests"]), 6) if int(data["requests"]) > 0 else 0,
+                "total_tokens_in": int(data["total_tokens_in"]),
+                "total_tokens_out": int(data["total_tokens_out"]),
             }
-            for row in rows
+            for model_id, data in rows
         ],
     }
