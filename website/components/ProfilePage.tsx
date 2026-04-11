@@ -784,10 +784,10 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
         <div className="bg-bg rounded-2xl border border-text/[0.06] p-6">
           <h3 className="text-sm font-bold text-text mb-4">Смена пароля</h3>
           <div className="space-y-3 max-w-sm">
-            <input type="password" placeholder="Текущий пароль" value={oldPass} onChange={(e) => setOldPass(e.target.value)}
-              className="w-full bg-bg border border-text/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent" />
-            <input type="password" placeholder="Новый пароль (мин. 8 символов)" value={newPass} onChange={(e) => setNewPass(e.target.value)}
-              className="w-full bg-bg border border-text/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent" />
+            <input type="password" placeholder="Текущий пароль" value={oldPass} onChange={(e) => setOldPass(e.target.value)} autoComplete="current-password"
+              className="w-full bg-bg border border-text/10 rounded-xl px-4 py-2.5 text-sm text-text focus:outline-none focus:border-accent [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_50px_var(--color-bg)_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:var(--color-text)]" />
+            <input type="password" placeholder="Новый пароль (мин. 8 символов)" value={newPass} onChange={(e) => setNewPass(e.target.value)} autoComplete="new-password"
+              className="w-full bg-bg border border-text/10 rounded-xl px-4 py-2.5 text-sm text-text focus:outline-none focus:border-accent [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_50px_var(--color-bg)_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:var(--color-text)]" />
             <button onClick={changePassword} disabled={saving}
               className="bg-accent text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-accent/90 transition-colors disabled:opacity-50">
               Сменить пароль
