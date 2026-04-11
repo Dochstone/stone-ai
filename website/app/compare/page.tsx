@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { COMPARISONS } from "@/lib/seo-data";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { CrossLinks } from "@/components/CrossLinks";
 
 export const metadata: Metadata = {
   title: "Сравнения AI-сервисов и нейросетей 2026",
@@ -29,6 +30,7 @@ export default function ComparePage() {
             </Link>
           ))}
         </div>
+        <CrossLinks exclude={["compare"]} />
       </div>
     </div>
   );

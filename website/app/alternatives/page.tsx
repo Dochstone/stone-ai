@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ALTERNATIVES } from "@/lib/seo-data";
+import { CrossLinks } from "@/components/CrossLinks";
 import { SITE_URL } from "@/lib/constants";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
@@ -58,6 +59,8 @@ export default function AlternativesHubPage() {
             </Link>
           ))}
         </div>
+
+        <CrossLinks exclude={["alternatives"]} />
 
         <section className="mt-12 bg-dark text-white rounded-2xl p-8 sm:p-10 text-center">
           <h2 className="text-xl font-extrabold mb-3">65+ нейросетей в одном месте</h2>

@@ -14,6 +14,7 @@ export const metadata: Metadata = {
 };
 
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { CrossLinks } from "@/components/CrossLinks";
 import { SITE_URL } from "@/lib/constants";
 
 const faqItems = [
@@ -69,6 +70,8 @@ export default function ModelsPage() {
             ))}
           </div>
         </section>
+
+        <CrossLinks exclude={["models"]} />
 
         {/* CTA */}
         <div className="mt-16 text-center">

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { TOOL_HUBS } from "@/lib/seo-data";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { CrossLinks } from "@/components/CrossLinks";
 
 export const metadata: Metadata = {
   title: "AI-инструменты Stone AI — генерация, анализ, автоматизация",
@@ -29,6 +30,7 @@ export default function ToolsPage() {
             </Link>
           ))}
         </div>
+        <CrossLinks exclude={["tools"]} />
       </div>
     </div>
   );
