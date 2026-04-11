@@ -1609,19 +1609,22 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
   // Auto-send after suggestion card click — switches model first
   const pendingSend = useRef(false);
+  const pendingModel = useRef("");
   const sendingRef = useRef(false);
   const handleSuggestionClick = useCallback((text: string, modelId: string) => {
+    pendingModel.current = modelId || "";
     if (modelId) setSelectedModel(modelId);
     setInput(text);
     pendingSend.current = true;
   }, []);
 
   useEffect(() => {
-    if (pendingSend.current && input.trim()) {
+    if (pendingSend.current && input.trim() && (!pendingModel.current || selectedModel === pendingModel.current)) {
       pendingSend.current = false;
+      pendingModel.current = "";
       sendMessage();
     }
-  }, [input, sendMessage]);
+  }, [input, sendMessage, selectedModel]);
 
   const handleKey = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
