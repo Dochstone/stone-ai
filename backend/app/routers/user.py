@@ -357,7 +357,10 @@ async def avatar_test_page():
 <style>
 *{box-sizing:border-box;margin:0}
 body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0f0f12;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+body.embed{background:transparent;padding:0;min-height:auto}
 .card{background:#1a1a22;border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:32px;max-width:420px;width:100%}
+body.embed .card{background:transparent;border:none;border-radius:0;padding:24px;max-width:100%}
+body.embed .back{display:none}
 h1{font-size:20px;font-weight:700;margin-bottom:8px}
 p.sub{font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:20px}
 .pick-label{display:inline-flex;align-items:center;gap:8px;background:#C4623D;color:#fff;padding:10px 20px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer}
@@ -551,9 +554,12 @@ saveBtn.addEventListener('click',function(){
   },'image/jpeg',0.85);
 });
 
-// Show status from redirect
+// Embed mode
 var u=new URLSearchParams(location.search);
-if(u.get('avatar_upload')==='ok'){msg.innerHTML='<p class="ok">Аватарка загружена! Вернитесь в профиль.</p>';hint.textContent='Готово!';}
+if(u.get('embed')==='1')document.body.classList.add('embed');
+
+// Show status from redirect
+if(u.get('avatar_upload')==='ok'){msg.innerHTML='<p class="ok">Аватарка загружена!</p>';hint.textContent='Готово!';}
 else if(u.get('avatar_upload'))msg.innerHTML='<p class="err">Ошибка: '+u.get('avatar_upload')+'</p>';
 </script>
 </body></html>""")
