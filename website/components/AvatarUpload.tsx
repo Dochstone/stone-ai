@@ -103,27 +103,43 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
       {/* Modal with iframe */}
       {modalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md"
           onClick={handleCloseModal}
         >
           <div
-            className="relative bg-bg border border-text/10 rounded-2xl overflow-hidden w-[95vw] max-w-md h-[80vh] max-h-[600px] shadow-2xl"
+            className="relative rounded-2xl overflow-hidden w-[95vw] max-w-md h-[80vh] max-h-[600px] shadow-[0_0_60px_rgba(196,98,61,0.15)]"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close button */}
-            <button
-              type="button"
-              onClick={handleCloseModal}
-              className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-text/10 hover:bg-text/20 flex items-center justify-center transition-colors"
-            >
-              <svg className="w-4 h-4 text-text" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+            {/* Accent top border */}
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent to-transparent z-10" />
 
+            {/* Header */}
+            <div className="relative z-10 flex items-center justify-between px-5 py-4 bg-[#1a1a22] border-b border-white/[0.06]">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+                  </svg>
+                </div>
+                <span className="text-sm font-bold text-white">Загрузить аватарку</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleCloseModal}
+                className="w-8 h-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] flex items-center justify-center transition-colors"
+              >
+                <svg className="w-4 h-4 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Iframe */}
             <iframe
               src={`${API_URL}/api/user/avatar-test`}
-              className="w-full h-full border-0"
+              className="w-full border-0 bg-[#0f0f12]"
+              style={{ height: "calc(100% - 57px)" }}
               title="Загрузить аватарку"
             />
           </div>
