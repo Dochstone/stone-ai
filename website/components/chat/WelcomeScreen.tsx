@@ -39,7 +39,7 @@ export default function WelcomeScreen({ onSuggestion, activeTab, plan }: { onSug
                 { id: "llama-4-maverick", name: "Llama 4", icon: "🦙", desc: "Креативная модель от Meta. Хороша для мозговых штурмов и идей.", best: "Креатив и брейншторм", prompt: "Придумай 5 креативных идей для Telegram-канала о путешествиях" },
                 { id: "mistral-large-25", name: "Mistral Large", icon: "🌊", desc: "Европейская модель. Хорошо работает с русским и другими языками.", best: "Мультиязычные задачи", prompt: "Переведи на английский сохранив стиль: Добро пожаловать в Stone AI — AI-студию нового поколения" },
                 { id: "nano-banana", name: "Nano Banana", icon: "🎨", desc: "Генерация картинок из текста. Бесплатная модель для изображений.", best: "2 бесплатно", prompt: "Нарисуй уютную кофейню в стиле Pixar с тёплым освещением" },
-                { id: "veo-3", name: "Veo 3", icon: "🎬", desc: "Генерация видео от Google. 4K, lip-sync, звуковой дизайн.", best: "1 бесплатно", prompt: "Создай 5-секундное видео: закат на океане, волны бьются о скалы" },
+                { id: "veo-3", name: "Veo 3", icon: "🎬", desc: "Генерация видео от Google. 4K, lip-sync, звуковой дизайн.", best: "1 бесплатно/день", prompt: "Создай 5-секундное видео: закат на океане, волны бьются о скалы" },
               ].map((m) => (
                 <button key={m.id} onClick={() => onSuggestion(m.prompt, m.id)}
                   className="w-full flex items-center gap-3 p-3 rounded-xl border border-text/[0.06] bg-bg hover:border-accent/30 hover:shadow-sm transition-all group">
