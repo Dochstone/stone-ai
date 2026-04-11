@@ -49,6 +49,7 @@ export interface UserState {
   lastRequestTokens: number | null
   sessionCostUsd: number
   hasPass: boolean
+  avatarUrl: string | null
 }
 
 type Screen = 'home' | 'chat' | 'plans' | 'profile' | 'faq' | 'model_detail'
@@ -253,6 +254,7 @@ export const useStore = create<AppState>((set, get) => ({
     lastRequestTokens: null,
     sessionCostUsd: 0,
     hasPass: false,
+    avatarUrl: null,
   },
   setUser: (u) => set((s) => ({ user: { ...s.user, ...u } })),
 
