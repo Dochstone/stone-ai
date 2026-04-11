@@ -23,10 +23,12 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
 
   const openFilePicker = () => {
     if (uploading) return;
+    console.log("[AvatarUpload] openFilePicker called, ref:", !!fileInputRef.current);
     fileInputRef.current?.click();
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("[AvatarUpload] handleFileChange fired, files:", e.target.files?.length);
     const file = e.target.files?.[0];
     if (!file) return;
     setError(null);
