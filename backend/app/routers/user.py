@@ -350,22 +350,43 @@ async def upload_avatar_file(
 
 @router.get("/user/avatar-test")
 async def avatar_test_page():
-    """Pure HTML avatar upload test — no JS, no React."""
+    """Pure HTML avatar upload page — no JS frameworks."""
     from fastapi.responses import HTMLResponse
     return HTMLResponse("""<!DOCTYPE html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Avatar Test</title></head>
-<body style="padding:40px;font-family:sans-serif;background:#111;color:#fff">
-<h1>Avatar Upload Test</h1>
-<p>1. Enter your JWT token (from localStorage stone_auth → token)</p>
-<p>2. Pick a file</p>
-<p>3. Click Upload</p>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Загрузить аватарку — Stone AI</title>
+<style>
+*{box-sizing:border-box;margin:0}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0f0f12;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:#1a1a22;border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:32px;max-width:400px;width:100%}
+h1{font-size:20px;font-weight:700;margin-bottom:8px}
+p{font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:20px}
+input[type=file]{display:block;width:100%;margin:12px 0;font-size:14px;color:rgba(255,255,255,0.6)}
+input[type=file]::file-selector-button{background:#C4623D;color:#fff;border:none;padding:10px 20px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;margin-right:12px}
+input[type=file]::file-selector-button:hover{background:#b5553a}
+.btn{display:block;width:100%;padding:14px;background:#C4623D;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-top:16px}
+.btn:hover{background:#b5553a}
+.btn:disabled{opacity:0.5;cursor:not-allowed}
+.back{display:inline-block;margin-top:16px;color:#C4623D;text-decoration:none;font-size:13px}
+.ok{color:#22c55e;font-size:14px;margin-top:12px}
+.err{color:#ef4444;font-size:14px;margin-top:12px}
+</style></head>
+<body>
+<div class="card">
+<h1>Загрузить аватарку</h1>
+<p>Выберите фото и нажмите «Загрузить»</p>
 <form id="f" action="/api/user/avatar-form" method="POST" enctype="multipart/form-data">
-<input name="token" placeholder="paste JWT token here" style="width:100%;padding:8px;margin:8px 0;background:#222;color:#fff;border:1px solid #444"><br>
-<input name="file" type="file" accept="image/*" style="margin:8px 0"><br>
-<button type="submit" style="padding:12px 24px;background:#C4623D;color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer;margin-top:8px">Upload</button>
+<input type="hidden" name="token" id="tok">
+<input name="file" type="file" accept="image/*" required>
+<button type="submit" class="btn" id="btn">Загрузить</button>
 </form>
+<div id="msg"></div>
+<a href="/profile" class="back">← Вернуться в профиль</a>
+</div>
 <script>
-try{var a=JSON.parse(localStorage.getItem('stone_auth')||'{}');if(a.token)document.querySelector('[name=token]').value=a.token;}catch(e){}
+try{var a=JSON.parse(localStorage.getItem('stone_auth')||'{}');document.getElementById('tok').value=a.token||'';}catch(e){}
+var u=new URLSearchParams(location.search);
+if(u.get('avatar_upload')==='ok')document.getElementById('msg').innerHTML='<p class="ok">Аватарка загружена! Вернитесь в профиль.</p>';
+else if(u.get('avatar_upload'))document.getElementById('msg').innerHTML='<p class="err">Ошибка: '+u.get('avatar_upload')+'</p>';
 </script>
 </body></html>""")
 
@@ -381,7 +402,7 @@ async def upload_avatar_form(
         user = await _get_user_from_token(token, db)
     except Exception as e:
         logger.error(f"avatar-form auth failed: {e}")
-        return RedirectResponse(url=f"/profile?avatar_upload=auth_error", status_code=303)
+        return RedirectResponse(url=f"/api/user/avatar-test?avatar_upload=auth_error", status_code=303)
 
     content_type = (file.content_type or "").lower()
     filename = file.filename or ""
@@ -392,19 +413,19 @@ async def upload_avatar_form(
     img_bytes = await file.read()
     if not img_bytes:
         logger.error("avatar-form: empty file")
-        return RedirectResponse(url="/profile?avatar_upload=empty", status_code=303)
+        return RedirectResponse(url="/api/user/avatar-test?avatar_upload=empty", status_code=303)
     if len(img_bytes) > 10 * 1024 * 1024:
-        return RedirectResponse(url="/profile?avatar_upload=too_large", status_code=303)
+        return RedirectResponse(url="/api/user/avatar-test?avatar_upload=too_large", status_code=303)
 
     if not extension:
         extension = _guess_image_extension(img_bytes)
     if not extension:
         logger.error(f"avatar-form: unsupported format, content_type={content_type}, magic={img_bytes[:8]}")
-        return RedirectResponse(url="/profile?avatar_upload=bad_format", status_code=303)
+        return RedirectResponse(url="/api/user/avatar-test?avatar_upload=bad_format", status_code=303)
 
     await _store_avatar_bytes(user, db, img_bytes, extension)
     logger.info(f"avatar-form: saved avatar for user {user.id}")
-    return RedirectResponse(url="/profile?avatar_upload=ok", status_code=303)
+    return RedirectResponse(url="/api/user/avatar-test?avatar_upload=ok", status_code=303)
 
 
 @router.delete("/user/avatar")
