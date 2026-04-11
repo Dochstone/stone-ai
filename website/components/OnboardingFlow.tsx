@@ -104,60 +104,71 @@ export function OnboardingFlow({ mode, onComplete, onRegister }: Props) {
             width: spotRect.width + 12, height: spotRect.height + 12 }} />
       )}
 
-      {/* card */}
+      {/* card — centered on mobile, positioned near spotlight on desktop */}
       <div
         className={[
-          "sm:absolute fixed bottom-0 sm:bottom-auto left-0 right-0 sm:left-auto sm:right-auto",
-          "w-full sm:w-[360px] sm:rounded-2xl rounded-t-2xl",
-          "bg-bg border border-text/5 shadow-2xl",
+          "sm:absolute fixed inset-0 sm:inset-auto flex items-center justify-center sm:block",
+          "sm:w-[360px] pointer-events-none",
           "transition-all duration-200 ease-out",
-          "pb-[env(safe-area-inset-bottom,0px)]",
-          visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4",
+          visible ? "opacity-100" : "opacity-0",
         ].join(" ")}
         style={{ ...cardStyle, zIndex: 201 }}
-        onClick={(e) => e.stopPropagation()}
       >
-        <div className="h-1 rounded-t-2xl bg-gradient-to-r from-[#C4623D] to-[#E8945A]" />
-        <div className="p-4 sm:p-5">
-          {/* progress dots */}
-          <div className="flex items-center gap-1.5 mb-4">
-            {steps.map((_, i) => (
-              <div key={i} className={`h-1.5 rounded-full transition-all duration-300 ${
-                i === idx ? "w-7 bg-accent" : i < idx ? "w-3.5 bg-accent/40" : "w-3.5 bg-text/10"
-              }`} />
-            ))}
-          </div>
-
-          {/* mascot + content */}
-          <div className="flex items-start gap-3 sm:gap-4">
-            <img src={current.mascot} alt="" className="w-14 h-14 sm:w-20 sm:h-20 rounded-xl object-contain flex-shrink-0 bg-text/[0.03]" />
-            <div className="min-w-0">
-              <h3 className="font-extrabold text-[15px] sm:text-base text-text leading-snug mb-1">{current.title}</h3>
-              <p className="text-[13px] sm:text-sm text-text/50 leading-relaxed">{current.desc}</p>
+        <div
+          className={[
+            "pointer-events-auto w-[90vw] max-w-[360px] sm:w-full rounded-2xl",
+            "bg-bg border border-text/5 shadow-2xl",
+            "transition-transform duration-200 ease-out",
+            visible ? "translate-y-0 scale-100" : "translate-y-4 scale-95",
+          ].join(" ")}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="h-1 rounded-t-2xl bg-gradient-to-r from-[#C4623D] to-[#E8945A]" />
+          <div className="p-5">
+            {/* progress dots */}
+            <div className="flex items-center justify-center gap-2 mb-5">
+              {steps.map((_, i) => (
+                <div key={i} className={`h-2 rounded-full transition-all duration-300 ${
+                  i === idx ? "w-8 bg-accent" : i < idx ? "w-4 bg-accent/40" : "w-4 bg-text/10"
+                }`} />
+              ))}
             </div>
-          </div>
 
-          {current.cta && (
-            <a href={current.cta.href} onClick={finish}
-              className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-accent hover:underline">
-              {current.cta.label} <span className="text-[10px]">&rarr;</span>
-            </a>
-          )}
+            {/* mascot — large and centered on mobile */}
+            <div className="flex justify-center mb-4">
+              <img src={current.mascot} alt="" className="w-24 h-24 sm:w-20 sm:h-20 rounded-2xl object-contain bg-text/[0.03]" />
+            </div>
 
-          {/* buttons */}
-          <div className="flex items-center justify-between mt-4 sm:mt-5 gap-3">
-            <button onClick={finish} className="min-h-[44px] px-3 text-sm text-text/35 hover:text-text/55 transition-colors font-medium">
-              {current.registerCta ? "Позже" : "Пропустить"}
-            </button>
-            {current.registerCta && onRegister ? (
-              <button onClick={() => { finish(); onRegister(); }} className="min-h-[44px] bg-accent text-white px-6 rounded-xl text-sm font-bold hover:bg-accent/90 transition-colors flex-1 max-w-[200px]">
-                Создать аккаунт
-              </button>
-            ) : (
-              <button onClick={next} className="min-h-[44px] bg-accent text-white px-6 rounded-xl text-sm font-bold hover:bg-accent/90 transition-colors flex-1 max-w-[160px]">
-                {idx < steps.length - 1 ? "Далее" : "Начать"}
-              </button>
+            {/* content — centered */}
+            <div className="text-center">
+              <h3 className="font-extrabold text-lg sm:text-base text-text leading-snug mb-2">{current.title}</h3>
+              <p className="text-sm sm:text-sm text-text/50 leading-relaxed">{current.desc}</p>
+            </div>
+
+            {current.cta && (
+              <div className="flex justify-center mt-3">
+                <a href={current.cta.href} onClick={finish}
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-accent hover:underline">
+                  {current.cta.label} <span className="text-[10px]">&rarr;</span>
+                </a>
+              </div>
             )}
+
+            {/* buttons */}
+            <div className="flex items-center justify-between mt-5 gap-3">
+              <button onClick={finish} className="min-h-[48px] px-3 text-sm text-text/35 hover:text-text/55 transition-colors font-medium">
+                {current.registerCta ? "Позже" : "Пропустить"}
+              </button>
+              {current.registerCta && onRegister ? (
+                <button onClick={() => { finish(); onRegister(); }} className="min-h-[48px] bg-accent text-white px-6 rounded-xl text-sm font-bold hover:bg-accent/90 transition-colors flex-1 max-w-[200px]">
+                  Создать аккаунт
+                </button>
+              ) : (
+                <button onClick={next} className="min-h-[48px] bg-accent text-white px-6 rounded-xl text-sm font-bold hover:bg-accent/90 transition-colors flex-1 max-w-[160px]">
+                  {idx < steps.length - 1 ? "Далее" : "Начать"}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
