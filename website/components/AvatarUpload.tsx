@@ -6,12 +6,13 @@ import {
   getAvatarColor,
   getInitials,
   getSavedAvatar,
-  processAvatarFile,
   removeAvatar,
   saveAvatar,
   saveServerAvatar,
   syncAvatarFromProfile,
+  uploadAvatarFileToServer,
   uploadAvatarToServer,
+  processAvatarFile,
 } from "@/lib/avatar";
 
 function AvatarUploadInner({ email, name }: { email: string; name?: string | null }) {
@@ -60,11 +61,15 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
     setAvatarUrl(previewObjectUrlRef.current);
 
     try {
-      const previewUrl = await processAvatarFile(file);
-      saveAvatar(previewUrl);
-      setAvatarUrl(previewUrl);
-
-      const fullUrl = await uploadAvatarToServer(previewUrl);
+      let fullUrl: string;
+      try {
+        fullUrl = await uploadAvatarFileToServer(file);
+      } catch {
+        const previewUrl = await processAvatarFile(file);
+        saveAvatar(previewUrl);
+        setAvatarUrl(previewUrl);
+        fullUrl = await uploadAvatarToServer(previewUrl);
+      }
       saveServerAvatar(fullUrl);
 
       const reachable = await canLoadImage(fullUrl);

@@ -5,7 +5,7 @@ import os
 import re
 from datetime import datetime, timedelta
 from pathlib import Path
-from fastapi import APIRouter, Depends, Query, Request, HTTPException
+from fastapi import APIRouter, Depends, Query, Request, HTTPException, UploadFile, File
 from pydantic import BaseModel
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -50,6 +50,9 @@ IMAGE_EXTENSIONS = {
     "image/png": "png",
     "image/webp": "webp",
     "image/gif": "gif",
+    "image/avif": "avif",
+    "image/heic": "heic",
+    "image/heif": "heif",
 }
 
 
@@ -64,6 +67,40 @@ def _guess_image_extension(img_bytes: bytes) -> str | None:
     if img_bytes.startswith(b"RIFF") and img_bytes[8:12] == b"WEBP":
         return "webp"
     return None
+
+
+def _guess_extension_from_filename(filename: str | None) -> str | None:
+    if not filename or "." not in filename:
+        return None
+    ext = filename.rsplit(".", 1)[1].strip().lower()
+    if ext in {"jpg", "jpeg"}:
+        return "jpg"
+    if ext in {"png", "webp", "gif", "avif", "heic", "heif"}:
+        return ext
+    return None
+
+
+def _delete_old_avatar_file(user: User) -> None:
+    if user.avatar_url and "/uploads/avatars/" in user.avatar_url:
+        old_file = AVATARS_DIR / os.path.basename(user.avatar_url)
+        if old_file.exists():
+            old_file.unlink()
+
+
+async def _store_avatar_bytes(user: User, db: AsyncSession, img_bytes: bytes, extension: str) -> str:
+    import uuid as uuid_mod
+
+    AVATARS_DIR.mkdir(parents=True, exist_ok=True)
+    _delete_old_avatar_file(user)
+
+    filename = f"{user.id}_{uuid_mod.uuid4().hex[:8]}.{extension}"
+    filepath = AVATARS_DIR / filename
+    with filepath.open("wb") as f:
+        f.write(img_bytes)
+
+    user.avatar_url = f"/uploads/avatars/{filename}"
+    await db.commit()
+    return user.avatar_url
 
 
 class UpdateProfileRequest(BaseModel):
@@ -243,8 +280,6 @@ async def upload_avatar(
 ):
     """Upload user avatar (base64 -> saved to disk, URL stored in DB)."""
     import base64 as b64mod
-    import uuid as uuid_mod
-
     user = await _get_user_from_request(request, db)
 
     raw_input = body.image_base64.strip()
@@ -267,24 +302,36 @@ async def upload_avatar(
     extension = IMAGE_EXTENSIONS.get(mime_type or "", _guess_image_extension(img_bytes))
     if not extension:
         raise HTTPException(400, "Unsupported avatar format")
+    avatar_url = await _store_avatar_bytes(user, db, img_bytes, extension)
+    return {"ok": True, "avatar_url": avatar_url}
 
-    AVATARS_DIR.mkdir(parents=True, exist_ok=True)
 
-    # Delete old avatar file if exists
-    if user.avatar_url and "/uploads/avatars/" in user.avatar_url:
-        old_file = AVATARS_DIR / os.path.basename(user.avatar_url)
-        if old_file.exists():
-            old_file.unlink()
+@router.post("/user/avatar-file")
+async def upload_avatar_file(
+    request: Request,
+    file: UploadFile = File(...),
+    db: AsyncSession = Depends(get_db),
+):
+    """Upload user avatar directly as multipart/form-data."""
+    user = await _get_user_from_request(request, db)
 
-    filename = f"{user.id}_{uuid_mod.uuid4().hex[:8]}.{extension}"
-    filepath = AVATARS_DIR / filename
-    with filepath.open("wb") as f:
-        f.write(img_bytes)
+    content_type = (file.content_type or "").lower()
+    filename = file.filename or ""
+    extension = IMAGE_EXTENSIONS.get(content_type) or _guess_extension_from_filename(filename)
 
-    user.avatar_url = f"/uploads/avatars/{filename}"
-    await db.commit()
+    img_bytes = await file.read()
+    if not img_bytes:
+        raise HTTPException(400, "Empty avatar file")
+    if len(img_bytes) > 10 * 1024 * 1024:
+        raise HTTPException(413, "Avatar file is too large")
 
-    return {"ok": True, "avatar_url": user.avatar_url}
+    if not extension:
+        extension = _guess_image_extension(img_bytes)
+    if not extension:
+        raise HTTPException(400, "Unsupported avatar format")
+
+    avatar_url = await _store_avatar_bytes(user, db, img_bytes, extension)
+    return {"ok": True, "avatar_url": avatar_url}
 
 
 @router.delete("/user/avatar")
@@ -296,10 +343,7 @@ async def delete_avatar(
 
     user = await _get_user_from_request(request, db)
 
-    if user.avatar_url and "/uploads/avatars/" in user.avatar_url:
-        old_file = AVATARS_DIR / os.path.basename(user.avatar_url)
-        if old_file.exists():
-            old_file.unlink()
+    _delete_old_avatar_file(user)
 
     user.avatar_url = None
     await db.commit()

@@ -163,6 +163,27 @@ export async function uploadAvatarToServer(base64DataUrl: string): Promise<strin
   return toAbsoluteUrl(data.avatar_url);
 }
 
+export async function uploadAvatarFileToServer(file: File): Promise<string> {
+  const token = getAuthToken();
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch(`${API_URL}/api/user/avatar-file`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.message || `Server error: ${res.status}`);
+  }
+  const data = await res.json();
+  if (!data.ok || !data.avatar_url) throw new Error("Server did not return avatar URL");
+  return toAbsoluteUrl(data.avatar_url);
+}
+
 export async function removeAvatar(): Promise<void> {
   const token = getAuthToken();
   await fetch(`${API_URL}/api/user/avatar`, {
