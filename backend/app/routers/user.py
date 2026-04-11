@@ -357,7 +357,7 @@ async def avatar_test_page():
 <style>
 *{box-sizing:border-box;margin:0}
 body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0f0f12;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-body.embed{background:transparent;padding:0;min-height:auto}
+body.embed{background:transparent;padding:0;min-height:auto;overflow:hidden}
 .card{background:#1a1a22;border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:32px;max-width:420px;width:100%}
 body.embed .card{background:transparent;border:none;border-radius:0;padding:24px;max-width:100%}
 body.embed .back{display:none}

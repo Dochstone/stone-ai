@@ -143,7 +143,8 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
             <iframe
               src={`${API_URL}/api/user/avatar-test?embed=1`}
               className="w-full border-0 transition-[height] duration-300"
-              style={{ height: iframeHeight }}
+              scrolling="no"
+              style={{ height: iframeHeight, overflow: "hidden" }}
               title="Загрузить аватарку"
             />
           </div>
