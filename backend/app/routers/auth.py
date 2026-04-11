@@ -26,6 +26,7 @@ from app.middleware.web_auth import (
 from app.middleware.rate_limit import RateLimiter
 from app.config import get_settings
 from app.services.email_service import generate_code, send_verification_code, send_reset_code
+from app.services.linked_providers import add_linked_providers, get_linked_providers
 from app.services.streak import update_login_streak
 from app.routers.achievements import check_and_update
 
@@ -126,6 +127,7 @@ def _set_cookie_response(data: dict, token: str) -> JSONResponse:
 
 
 def _user_response(user: User, token: str) -> JSONResponse:
+    linked_providers = get_linked_providers(user)
     return _set_cookie_response(
         {
             "status": "ok",
@@ -136,6 +138,7 @@ def _user_response(user: User, token: str) -> JSONResponse:
                 "balance_usd": round(float(user.balance_usd or 0), 4),
                 "total_requests": user.total_requests or 0,
                 "auth_provider": user.auth_provider,
+                "linked_providers": linked_providers,
             },
             "token": token,
         },
@@ -228,6 +231,7 @@ async def verify_email(body: VerifyEmailRequest, request: Request, db: AsyncSess
         email=email,
         password_hash=saved_password_hash,
         auth_provider="email",
+        linked_providers="email",
         first_name=email.split("@")[0],
         username=None,
         joined_at=datetime.utcnow(),
@@ -378,9 +382,8 @@ async def _get_or_create_oauth_user(
 
     if user:
         # Existing user — update provider if needed
-        if user.auth_provider not in (provider, "both"):
-            user.auth_provider = "both"
-            await db.flush()
+        add_linked_providers(user, provider)
+        await db.flush()
         token = create_jwt(user.id, email)
         return user, token
 
@@ -391,6 +394,7 @@ async def _get_or_create_oauth_user(
         email=email,
         password_hash=None,
         auth_provider=provider,
+        linked_providers=provider,
         first_name=first_name,
         username=None,
         joined_at=datetime.utcnow(),
@@ -611,7 +615,7 @@ async def telegram_link(
     web_user.telegram_id = tg_id
     web_user.username = tg_data.get("username") or web_user.username
     web_user.first_name = tg_data.get("first_name") or web_user.first_name
-    web_user.auth_provider = "both"
+    add_linked_providers(web_user, "telegram")
 
     await db.flush()
 
@@ -629,6 +633,7 @@ async def telegram_link(
                 "username": web_user.username,
                 "balance_usd": round(float(web_user.balance_usd or 0), 4),
                 "auth_provider": web_user.auth_provider,
+                "linked_providers": get_linked_providers(web_user),
             },
         },
         token,
@@ -766,6 +771,7 @@ async def confirm_tg_web_session(session_id: str, tg_id: int, tg_user_data: dict
                 first_name=tg_user_data.get("first_name"),
                 language=tg_user_data.get("language_code", "ru"),
                 auth_provider="telegram",
+                linked_providers="telegram",
                 balance_usd=1.0,  # Welcome bonus ~95₽
             )
             db.add(user)
@@ -840,6 +846,7 @@ async def telegram_webapp_login(
             first_name=tg_user.get("first_name"),
             language=tg_user.get("language_code", "ru"),
             auth_provider="telegram",
+            linked_providers="telegram",
             balance_usd=1.0,
         )
         db.add(user)

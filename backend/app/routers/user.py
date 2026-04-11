@@ -40,6 +40,7 @@ from app.services.limiter import (
 from app.services.subscription import PLANS, get_accessible_models
 from app.services.token_billing import get_user_balance, TOKEN_PRICES
 from app.services.promo import apply_promo
+from app.services.linked_providers import get_linked_providers
 
 logger = logging.getLogger(__name__)
 
@@ -194,7 +195,10 @@ async def get_me(
             "weighted_per_m": prices["weighted"],
         }
 
+    linked_providers = get_linked_providers(user)
+
     return {
+        "linked_providers": linked_providers,
         "user": {
             "id": user.id,
             "tg_id": user.telegram_id,
@@ -204,6 +208,7 @@ async def get_me(
             "language": user.language,
             "avatar_url": user.avatar_url,
             "auth_provider": user.auth_provider or "email",
+            "linked_providers": linked_providers,
             "created_at": user.joined_at.isoformat() if user.joined_at else None,
             "balance_usd": balance,
             "plan": user.subscription_tier or "free",
@@ -621,6 +626,42 @@ async def delete_avatar(
     await db.commit()
 
     return {"ok": True}
+
+
+class UnlinkProviderRequest(BaseModel):
+    provider: str
+
+
+@router.post("/user/unlink-provider")
+async def unlink_provider(
+    body: UnlinkProviderRequest,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    """Unlink an auth provider from the user account."""
+    from app.services.linked_providers import get_linked_providers, serialize_linked_providers
+
+    user = await _get_user_from_request(request, db)
+    provider = body.provider.strip().lower()
+
+    current = get_linked_providers(user)
+    if provider not in current:
+        raise HTTPException(400, "Провайдер не привязан")
+
+    remaining = [p for p in current if p != provider]
+    if not remaining:
+        raise HTTPException(400, "Нельзя отвязать последний способ входа")
+
+    user.linked_providers = serialize_linked_providers(remaining)
+
+    if provider == "google" and user.auth_provider == "google":
+        user.auth_provider = remaining[0] if len(remaining) == 1 else "both"
+    elif provider == "yandex" and user.auth_provider == "yandex":
+        user.auth_provider = remaining[0] if len(remaining) == 1 else "both"
+
+    await db.commit()
+
+    return {"ok": True, "linked_providers": remaining}
 
 
 @router.patch("/user/email")

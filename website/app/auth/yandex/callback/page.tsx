@@ -6,10 +6,13 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
 export default function YandexCallback() {
   const [error, setError] = useState("");
+  const [returnHref, setReturnHref] = useState("/dashboard/chat");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const code = params.get("code");
+    const isLinkFlow = params.get("link") === "true" || params.get("state") === "link";
+    setReturnHref(isLinkFlow ? "/profile" : "/dashboard/chat");
 
     if (!code) {
       setError("No authorization code");
@@ -32,7 +35,7 @@ export default function YandexCallback() {
               balanceUsd: data.user.balance_usd || 0,
             })
           );
-          window.location.href = "/dashboard/chat";
+          window.location.href = isLinkFlow ? "/profile" : "/dashboard/chat";
         } else {
           setError(data.detail || "Auth failed");
         }
@@ -52,7 +55,7 @@ export default function YandexCallback() {
   }
 
   return (
-    <div className="min-h-screen bg-bg flex items-center justify-center">
+    <div className="min-h-screen bg-bg flex items-center justify-center" data-return-href={returnHref}>
       <p className="text-text/50">Авторизация через Яндекс...</p>
     </div>
   );

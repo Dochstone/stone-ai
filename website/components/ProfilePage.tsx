@@ -10,6 +10,8 @@ const TonWalletProfile = dynamic(() => import("./TonWalletProfile"), { ssr: fals
 import AuthForm, { AuthState as AuthFormState } from "./AuthForm";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+const YANDEX_CLIENT_ID = process.env.NEXT_PUBLIC_YANDEX_CLIENT_ID || "";
 
 // ─── Types ───
 
@@ -28,6 +30,7 @@ interface UserProfile {
   balance_usd: number;
   plan: string;
   auth_provider: string;
+  linked_providers: string[];
   total_deposited_usd: number;
   created_at: string;
   stats: { total_requests: number; total_tokens: number };
@@ -87,7 +90,16 @@ function formatDateTime(iso: string): string {
   return new Date(iso).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 }
 
-function authProviderLabel(p: string): string {
+function authProviderLabel(p: string, linkedProviders: string[] = []): string {
+  if (linkedProviders.length > 0) {
+    const labels: Record<string, string> = {
+      email: "Email",
+      google: "Google",
+      yandex: "Яндекс",
+      telegram: "Telegram",
+    };
+    return linkedProviders.map((provider) => labels[provider] || provider).join(" + ");
+  }
   if (p === "google") return "Google";
   if (p === "yandex") return "Яндекс";
   if (p === "telegram") return "Telegram";
@@ -191,7 +203,7 @@ function OverviewTab({ profile, usage, limits }: { profile: UserProfile; usage: 
           <p className="text-sm text-text/40">{profile.email || "Telegram-аккаунт"}</p>
           <div className="flex items-center gap-3 mt-1.5">
             <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-accent/10 text-accent">
-              {authProviderLabel(profile.auth_provider)}
+              {authProviderLabel(profile.auth_provider, profile.linked_providers)}
             </span>
             <span className="text-[10px] text-text/25">
               С {formatDate(profile.created_at)}
@@ -644,11 +656,48 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
   };
 
   const linkGoogle = () => {
-    window.location.href = `/auth/google/callback?link=true`;
+    if (!GOOGLE_CLIENT_ID) {
+      setMsg("Google auth не настроен");
+      return;
+    }
+    const redirectUri = `${window.location.origin}/auth/google/callback`;
+    const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=email%20profile&prompt=select_account&state=link`;
+    window.location.href = url;
   };
 
   const linkYandex = () => {
-    window.location.href = `/auth/yandex/callback?link=true`;
+    if (!YANDEX_CLIENT_ID) {
+      setMsg("Яндекс auth не настроен");
+      return;
+    }
+    const redirectUri = `${window.location.origin}/auth/yandex/callback`;
+    const url = `https://oauth.yandex.ru/authorize?response_type=code&client_id=${YANDEX_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&state=link`;
+    window.location.href = url;
+  };
+
+  const [linkedProviders, setLinkedProviders] = useState(profile.linked_providers);
+  const hasEmailLogin = linkedProviders.includes("email") || profile.auth_provider === "email";
+  const googleLinked = linkedProviders.includes("google");
+  const yandexLinked = linkedProviders.includes("yandex");
+
+  const unlinkProvider = async (provider: string) => {
+    if (!confirm(`Отвязать ${provider === "google" ? "Google" : provider === "yandex" ? "Яндекс" : "Telegram"}?`)) return;
+    try {
+      const res = await fetch(`${API_URL}/api/user/unlink-provider`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
+        body: JSON.stringify({ provider }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setLinkedProviders(data.linked_providers);
+        setMsg("Провайдер отвязан");
+      } else {
+        setMsg(data.detail || "Ошибка");
+      }
+    } catch {
+      setMsg("Сетевая ошибка");
+    }
   };
 
   return (
@@ -731,14 +780,14 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
       </div>
 
       {/* Password (only for email auth) */}
-      {(profile.auth_provider === "email" || profile.auth_provider === "both") && (
+      {hasEmailLogin && (
         <div className="bg-bg rounded-2xl border border-text/[0.06] p-6">
           <h3 className="text-sm font-bold text-text mb-4">Смена пароля</h3>
           <div className="space-y-3 max-w-sm">
-            <input type="password" placeholder="Текущий пароль" value={oldPass} onChange={(e) => setOldPass(e.target.value)}
-              className="w-full bg-bg border border-text/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent" />
-            <input type="password" placeholder="Новый пароль (мин. 8 символов)" value={newPass} onChange={(e) => setNewPass(e.target.value)}
-              className="w-full bg-bg border border-text/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent" />
+            <input type="password" placeholder="Текущий пароль" value={oldPass} onChange={(e) => setOldPass(e.target.value)} autoComplete="current-password"
+              className="w-full bg-bg border border-text/10 rounded-xl px-4 py-2.5 text-sm text-text focus:outline-none focus:border-accent [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_50px_var(--color-bg)_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:var(--color-text)]" />
+            <input type="password" placeholder="Новый пароль (мин. 8 символов)" value={newPass} onChange={(e) => setNewPass(e.target.value)} autoComplete="new-password"
+              className="w-full bg-bg border border-text/10 rounded-xl px-4 py-2.5 text-sm text-text focus:outline-none focus:border-accent [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_50px_var(--color-bg)_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:var(--color-text)]" />
             <button onClick={changePassword} disabled={saving}
               className="bg-accent text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-accent/90 transition-colors disabled:opacity-50">
               Сменить пароль
@@ -773,12 +822,15 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
               </div>
               <div>
                 <div className="text-sm font-medium text-text">Google</div>
-                <div className="text-[11px] text-text/30">{profile.auth_provider === "google" ? "Привязан" : "Не привязан"}</div>
+                <div className="text-[11px] text-text/30">{googleLinked ? "Привязан" : "Не привязан"}</div>
               </div>
             </div>
-            {profile.auth_provider !== "google" && (
+            {!googleLinked ? (
               <button onClick={linkGoogle}
                 className="text-xs font-semibold text-accent hover:underline">Привязать</button>
+            ) : linkedProviders.length > 1 && (
+              <button onClick={() => unlinkProvider("google")}
+                className="text-xs font-semibold text-red-400 hover:underline">Отвязать</button>
             )}
           </div>
           <div className="flex items-center justify-between py-2 border-t border-text/[0.04]">
@@ -788,12 +840,15 @@ function SettingsTab({ profile, auth }: { profile: UserProfile; auth: AuthState 
               </div>
               <div>
                 <div className="text-sm font-medium text-text">Яндекс</div>
-                <div className="text-[11px] text-text/30">{profile.auth_provider === "yandex" ? "Привязан" : "Не привязан"}</div>
+                <div className="text-[11px] text-text/30">{yandexLinked ? "Привязан" : "Не привязан"}</div>
               </div>
             </div>
-            {profile.auth_provider !== "yandex" && (
+            {!yandexLinked ? (
               <button onClick={linkYandex}
                 className="text-xs font-semibold text-accent hover:underline">Привязать</button>
+            ) : linkedProviders.length > 1 && (
+              <button onClick={() => unlinkProvider("yandex")}
+                className="text-xs font-semibold text-red-400 hover:underline">Отвязать</button>
             )}
           </div>
           {/* TON Wallet */}
@@ -1154,6 +1209,7 @@ export default function ProfilePage() {
           balance_usd: u.balance_usd || 0,
           plan: u.plan || "free",
           auth_provider: u.auth_provider || "email",
+          linked_providers: Array.isArray(u.linked_providers) ? u.linked_providers : (Array.isArray(data.linked_providers) ? data.linked_providers : []),
           total_deposited_usd: data.total_deposited_usd || u.total_deposited_usd || 0,
           created_at: u.created_at || new Date().toISOString(),
           stats: data.stats || u.stats || { total_requests: 0, total_tokens: 0 },
