@@ -19,6 +19,7 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewObjectUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
     const local = getSavedAvatar();
@@ -31,7 +32,13 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
       setAvatarUrl(url);
     };
     window.addEventListener("avatar-changed", handler);
-    return () => window.removeEventListener("avatar-changed", handler);
+    return () => {
+      window.removeEventListener("avatar-changed", handler);
+      if (previewObjectUrlRef.current) {
+        URL.revokeObjectURL(previewObjectUrlRef.current);
+        previewObjectUrlRef.current = null;
+      }
+    };
   }, []);
 
   const openFilePicker = () => {
@@ -45,6 +52,13 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
 
     setError(null);
     setUploading(true);
+
+    if (previewObjectUrlRef.current) {
+      URL.revokeObjectURL(previewObjectUrlRef.current);
+    }
+    previewObjectUrlRef.current = URL.createObjectURL(file);
+    setAvatarUrl(previewObjectUrlRef.current);
+
     try {
       const previewUrl = await processAvatarFile(file);
       saveAvatar(previewUrl);
@@ -57,6 +71,10 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
       if (reachable) {
         saveAvatar(fullUrl);
         setAvatarUrl(fullUrl);
+        if (previewObjectUrlRef.current) {
+          URL.revokeObjectURL(previewObjectUrlRef.current);
+          previewObjectUrlRef.current = null;
+        }
       } else {
         setError("Avatar was processed, but the remote image URL is not opening yet");
       }

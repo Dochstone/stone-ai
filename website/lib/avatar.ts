@@ -2,6 +2,39 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 const AVATAR_KEY = "stone_avatar";
 const AVATAR_SERVER_KEY = "stone_avatar_server";
 const MAX_AVATAR_SIZE = 256;
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
+function safeGetLocalStorageItem(key: string): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function safeSetLocalStorageItem(key: string, value: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // Storage failures should not block avatar upload/rendering.
+  }
+}
+
+function safeRemoveLocalStorageItem(key: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // Ignore storage cleanup failures.
+  }
+}
+
+function isImageLikeFile(file: File): boolean {
+  if (file.type.startsWith("image/")) return true;
+  return /\.(avif|gif|heic|heif|jpe?g|png|svg|webp)$/i.test(file.name);
+}
 
 function getAuthToken(): string {
   try {
@@ -31,28 +64,28 @@ export function getInitials(email: string, name?: string | null): string {
 }
 
 export function getSavedAvatar(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(AVATAR_KEY);
+  return safeGetLocalStorageItem(AVATAR_KEY);
 }
 
 export function getSavedServerAvatar(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(AVATAR_SERVER_KEY);
+  return safeGetLocalStorageItem(AVATAR_SERVER_KEY);
 }
 
 export function saveAvatar(url: string): void {
-  localStorage.setItem(AVATAR_KEY, url);
-  window.dispatchEvent(new CustomEvent("avatar-changed", { detail: { url } }));
+  safeSetLocalStorageItem(AVATAR_KEY, url);
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("avatar-changed", { detail: { url } }));
+  }
 }
 
 export function saveServerAvatar(url: string): void {
-  localStorage.setItem(AVATAR_SERVER_KEY, url);
+  safeSetLocalStorageItem(AVATAR_SERVER_KEY, url);
 }
 
 export function clearSavedAvatar(): void {
   if (typeof window === "undefined") return;
-  localStorage.removeItem(AVATAR_KEY);
-  localStorage.removeItem(AVATAR_SERVER_KEY);
+  safeRemoveLocalStorageItem(AVATAR_KEY);
+  safeRemoveLocalStorageItem(AVATAR_SERVER_KEY);
   window.dispatchEvent(new CustomEvent("avatar-changed", { detail: { url: null } }));
 }
 
@@ -65,19 +98,28 @@ export function canLoadImage(url: string): Promise<boolean> {
   });
 }
 
+export function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve((reader.result as string) || "");
+    reader.onerror = () => reject(new Error("Failed to read file"));
+    reader.readAsDataURL(file);
+  });
+}
+
 export function processAvatarFile(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
-    if (!file.type.startsWith("image/")) {
+    if (!isImageLikeFile(file)) {
       reject(new Error("File must be an image"));
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
+    if (file.size > MAX_FILE_SIZE) {
       reject(new Error("File is too large (max 10 MB)"));
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
+    readFileAsDataUrl(file)
+      .then((dataUrl) => {
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement("canvas");
@@ -85,7 +127,7 @@ export function processAvatarFile(file: File): Promise<string> {
         canvas.height = MAX_AVATAR_SIZE;
         const ctx = canvas.getContext("2d");
         if (!ctx) {
-          reject(new Error("Failed to process image"));
+          resolve(dataUrl);
           return;
         }
 
@@ -95,11 +137,10 @@ export function processAvatarFile(file: File): Promise<string> {
         ctx.drawImage(img, sx, sy, side, side, 0, 0, MAX_AVATAR_SIZE, MAX_AVATAR_SIZE);
         resolve(canvas.toDataURL("image/webp", 0.85));
       };
-      img.onerror = () => reject(new Error("Failed to load image"));
-      img.src = reader.result as string;
-    };
-    reader.onerror = () => reject(new Error("Failed to read file"));
-    reader.readAsDataURL(file);
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+      })
+      .catch(reject);
   });
 }
 
@@ -135,7 +176,7 @@ export async function syncAvatarFromProfile(): Promise<string | null> {
   const token = getAuthToken();
   if (!token) return null;
 
-  const localAvatar = localStorage.getItem(AVATAR_KEY);
+  const localAvatar = getSavedAvatar();
 
   try {
     const res = await fetch(`${API_URL}/api/user/me`, {
