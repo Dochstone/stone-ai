@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, memo } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import { getAvatarColor, getInitials, processAvatarFile, uploadAvatarToServer, saveAvatar, removeAvatar, syncAvatarFromProfile } from "@/lib/avatar";
 import AvatarCropper from "./AvatarCropper";
 
@@ -9,6 +9,7 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const local = localStorage.getItem("stone_avatar");
@@ -22,17 +23,19 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
     return () => window.removeEventListener("avatar-changed", handler);
   }, []);
 
+  const openFilePicker = () => {
+    if (uploading) return;
+    fileInputRef.current?.click();
+  };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    console.log("[AvatarUpload] file selected:", file?.name, file?.type, file?.size);
     if (!file) return;
     setError(null);
     try {
       const dataUrl = await processAvatarFile(file);
-      console.log("[AvatarUpload] dataUrl ready, length:", dataUrl.length);
       setCropSrc(dataUrl);
     } catch (err: unknown) {
-      console.error("[AvatarUpload] processAvatarFile error:", err);
       setError(err instanceof Error ? err.message : "Ошибка чтения файла");
     }
     e.target.value = "";
@@ -66,11 +69,11 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
   return (
     <div style={{ position: "relative" }}>
       <input
-        id="avatar-file-input"
+        ref={fileInputRef}
         type="file"
         accept="image/*"
         onChange={handleFileChange}
-        style={{ display: "none" }}
+        style={{ position: "absolute", width: 0, height: 0, opacity: 0, pointerEvents: "none" }}
       />
 
       {cropSrc && (
@@ -82,10 +85,10 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
       )}
 
       <div className="flex items-center gap-4">
-        <label
-          htmlFor={uploading ? undefined : "avatar-file-input"}
-          className="relative group shrink-0 cursor-pointer"
-          style={{ display: "block" }}
+        <button
+          type="button"
+          onClick={openFilePicker}
+          className="relative group shrink-0 cursor-pointer bg-transparent border-0 p-0"
         >
           <div className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center border border-text/10">
             {uploading ? (
@@ -103,7 +106,7 @@ function AvatarUploadInner({ email, name }: { email: string; name?: string | nul
               <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
             </svg>
           </div>
-        </label>
+        </button>
 
         {avatarUrl && !uploading && (
           <button type="button" onClick={handleRemove} className="text-xs text-red-400 hover:text-red-300 transition-colors">
