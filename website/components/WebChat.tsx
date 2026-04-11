@@ -2356,6 +2356,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
             if (auth) localStorage.setItem("stone_user_onboarded", "1");
             else localStorage.setItem("stone_guest_onboarded", "1");
           }}
+          onRegister={() => setShowGuestLimit(true)}
         />
       )}
 

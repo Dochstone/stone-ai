@@ -5,6 +5,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 interface Step {
   mascot: string; title: string; desc: string;
   highlight?: string; cta?: { label: string; href: string };
+  registerCta?: boolean;
 }
 
 const M = "/mascots/stone-mascot-";
@@ -12,7 +13,7 @@ const M = "/mascots/stone-mascot-";
 const GUEST_STEPS: Step[] = [
   { mascot: `${M}idle.png`, title: "Привет! Я Stone — твой AI-помощник", desc: "Помогу с текстами, картинками, видео и рекламой. 65+ нейросетей в одном месте — бесплатно." },
   { mascot: `${M}chat.png`, title: "Попробуй написать что-нибудь", desc: "Просто напиши вопрос в поле ввода внизу. Первые 10 запросов в день — бесплатно!", highlight: "[data-onboard='chat-input']" },
-  { mascot: `${M}success.png`, title: "Понравилось? Создай аккаунт", desc: "Регистрация за 10 секунд — и все инструменты твои. Плюс 100\u20BD на баланс в подарок." },
+  { mascot: `${M}success.png`, title: "Понравилось? Создай аккаунт", desc: "Регистрация за 10 секунд — и все инструменты твои. Плюс 100\u20BD на баланс в подарок.", registerCta: true },
 ];
 
 const USER_STEPS: Step[] = [
@@ -23,9 +24,9 @@ const USER_STEPS: Step[] = [
   { mascot: `${M}idle.png`, title: "Твоя AI-студия готова!", desc: "Всё настроено. Начни с чата, шаблонов или создай рекламную кампанию.", cta: { label: "Начать работу", href: "/dashboard" } },
 ];
 
-interface Props { mode: "guest" | "user"; onComplete: () => void }
+interface Props { mode: "guest" | "user"; onComplete: () => void; onRegister?: () => void }
 
-export function OnboardingFlow({ mode, onComplete }: Props) {
+export function OnboardingFlow({ mode, onComplete, onRegister }: Props) {
   const steps = mode === "guest" ? GUEST_STEPS : USER_STEPS;
   const lsKey = mode === "guest" ? "stone_guest_onboarded" : "stone_user_onboarded";
   const [idx, setIdx] = useState(0);
@@ -146,11 +147,17 @@ export function OnboardingFlow({ mode, onComplete }: Props) {
           {/* buttons */}
           <div className="flex items-center justify-between mt-4 sm:mt-5 gap-3">
             <button onClick={finish} className="min-h-[44px] px-3 text-sm text-text/35 hover:text-text/55 transition-colors font-medium">
-              Пропустить
+              {current.registerCta ? "Позже" : "Пропустить"}
             </button>
-            <button onClick={next} className="min-h-[44px] bg-accent text-white px-6 rounded-xl text-sm font-bold hover:bg-accent/90 transition-colors flex-1 max-w-[160px]">
-              {idx < steps.length - 1 ? "Далее" : "Начать"}
-            </button>
+            {current.registerCta && onRegister ? (
+              <button onClick={() => { finish(); onRegister(); }} className="min-h-[44px] bg-accent text-white px-6 rounded-xl text-sm font-bold hover:bg-accent/90 transition-colors flex-1 max-w-[200px]">
+                Создать аккаунт
+              </button>
+            ) : (
+              <button onClick={next} className="min-h-[44px] bg-accent text-white px-6 rounded-xl text-sm font-bold hover:bg-accent/90 transition-colors flex-1 max-w-[160px]">
+                {idx < steps.length - 1 ? "Далее" : "Начать"}
+              </button>
+            )}
           </div>
         </div>
       </div>
