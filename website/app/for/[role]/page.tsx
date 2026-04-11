@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: prof.title, description: prof.description,
     alternates: { canonical: `${SITE_URL}/for/${prof.slug}` },
-    openGraph: { title: prof.title, description: prof.description, url: `${SITE_URL}/for/${prof.slug}`, type: "article", siteName: "Stone AI" },
+    openGraph: { title: prof.title, description: prof.description, url: `${SITE_URL}/for/${prof.slug}`, type: "article", siteName: "Stone AI", images: [{ url: `${SITE_URL}/og-for-${prof.slug}.png`, width: 1200, height: 630, alt: prof.title }] },
   };
 }
 
@@ -33,6 +33,9 @@ export default function ProfessionPage({ params }: Props) {
     copywriter: ["Черновик статьи на 2000 слов за 5 минут", "Рерайт и уникализация текстов", "Адаптация тона под бренд и аудиторию", "SEO-оптимизация без специальных знаний", "Генерация контент-планов на месяц", "Работа с 65+ моделями для разных задач"],
     designer: ["Генерация 10+ вариантов за минуту", "Продуктовые фото без фотостудии", "Поддержка любых стилей и направлений", "Экономия на фотостоках и фрилансерах", "Быстрое прототипирование идей", "Создание видео и 3D из текста"],
     student: ["10 бесплатных запросов каждый день", "Пошаговое объяснение сложных тем", "Помощь с математикой и программированием", "Генерация конспектов и планов работ", "Подготовка к экзаменам с AI-тренажёром", "Перевод и работа с иностранными текстами"],
+    business: ["Экономия 15-20 часов в неделю на рутине", "Генерация КП и презентаций за минуты", "Анализ конкурентов и рынка с AI", "Автоматизация поддержки клиентов", "Создание визуала без дизайнера", "Документы и договоры по шаблонам"],
+    teacher: ["Экономия 5-8 часов на подготовке к урокам", "Генерация тестов и контрольных за минуты", "Дифференцированные задания по уровням", "Проверка сочинений с обратной связью", "Интерактивные задания и квизы", "10 бесплатных запросов каждый день"],
+    smm: ["Контент-план на месяц за 10 минут", "Генерация постов для всех площадок", "Сценарии Reels и коротких видео", "Уникальные изображения без фотостоков", "Анализ эффективности контента", "Ответы на комментарии в тоне бренда"],
   };
   const benefits = benefitsMap[prof.slug] || benefitsMap.student;
 
@@ -77,6 +80,30 @@ export default function ProfessionPage({ params }: Props) {
       { q: "Можно ли загружать PDF и документы?", a: "Да, в Stone AI можно загрузить документ и задать вопросы по его содержимому. AI проанализирует текст и даст ответы на основе загруженного материала." },
       { q: "Работает ли без VPN?", a: "Да, Stone AI полностью работает из России без VPN. Сайт, Telegram-бот и все 65+ нейросетей доступны без ограничений." },
     ],
+    business: [
+      { q: "Какие AI модели лучше для бизнеса?", a: "Для аналитики и отчётов — DeepSeek R1 и Claude Opus 4. Для текстов и КП — GPT-5 и Claude Sonnet 4. Для изображений — GPT-5 Image. Для быстрых задач — GPT-4o mini (бесплатно)." },
+      { q: "Можно ли использовать бесплатно?", a: "Да, 10 бесплатных запросов в день к 8 моделям. Для малого бизнеса этого может хватить для базовых задач. Подписка от 590₽/мес." },
+      { q: "AI безопасен для бизнес-данных?", a: "Stone AI не хранит и не использует ваши данные для обучения. Передача по HTTPS. Не отправляйте пароли, ключи API и персональные данные клиентов." },
+      { q: "Чем Stone AI лучше ChatGPT для бизнеса?", a: "Stone AI даёт 65+ моделей от всех провайдеров за одну подписку. ChatGPT Plus — только OpenAI за $20/мес (~1900₽). Stone AI от 590₽/мес + генерация картинок, видео, SEO." },
+      { q: "Можно ли использовать AI для автоматизации продаж?", a: "Да. AI генерирует скрипты продаж, обрабатывает возражения, создаёт цепочки email-рассылок и шаблоны для чат-ботов. Экономия на отделе продаж." },
+      { q: "Подходит ли для создания контента?", a: "Да. AI создаёт посты для соцсетей, статьи для блога, описания товаров, рекламные тексты и email-рассылки. Плюс генерация изображений для маркетинга." },
+    ],
+    teacher: [
+      { q: "Какие AI модели лучше для учителя?", a: "Для планов уроков и тестов — GPT-5 и Claude Sonnet 4. Для проверки работ — Claude Opus 4. Для математики — DeepSeek R1. Бесплатные: GPT-4o mini, Claude Haiku." },
+      { q: "Это бесплатно для учителей?", a: "Да, 10 бесплатных запросов каждый день к 8 моделям. Без регистрации карты. Для интенсивной работы — подписка от 590₽/мес." },
+      { q: "AI создаёт задания по ФГОС?", a: "Да, AI понимает структуру ФГОС и генерирует планы уроков с целями, этапами и хронометражем. Укажите класс, предмет и тему в промпте." },
+      { q: "Можно ли проверять сочинения через AI?", a: "Да. AI анализирует грамматику, логику, аргументацию и стиль. Даёт развёрнутую обратную связь в поддерживающем тоне. Claude Opus 4 лучше всего подходит для этой задачи." },
+      { q: "AI заменит учителя?", a: "Нет. AI автоматизирует рутину: создание тестов, планов, проверка работ. Но педагогика, воспитание и индивидуальный подход — исключительно работа учителя." },
+      { q: "Работает ли без VPN?", a: "Да, Stone AI полностью работает из России без VPN. Все 65+ нейросетей доступны без ограничений." },
+    ],
+    smm: [
+      { q: "Какие AI модели лучше для SMM?", a: "Для текстов — GPT-5 и Claude Sonnet 4. Для контент-планов — GPT-4.1. Для Reels-сценариев — GPT-5 и Grok 3. Для картинок — Nano Banana (бесплатно) и GPT-5 Image." },
+      { q: "Можно ли использовать бесплатно?", a: "Да, 10 бесплатных запросов в день к 8 моделям + 2 бесплатные генерации изображений. Для активной работы — подписка от 590₽/мес." },
+      { q: "AI создаёт контент для всех соцсетей?", a: "Да. AI адаптирует контент под VK, Telegram, Instagram, TikTok, YouTube. Укажите площадку в промпте — AI учтёт формат, длину и тон." },
+      { q: "Можно ли генерировать картинки для постов?", a: "Да, 4 модели для генерации изображений. Nano Banana бесплатна для быстрых иллюстраций. GPT-5 Image — для профессионального маркетингового визуала." },
+      { q: "AI заменит SMM-специалиста?", a: "Нет. AI ускоряет работу в 3-5 раз, генерируя черновики постов и контент-планы. Стратегия, tone of voice и работа с комьюнити — за специалистом." },
+      { q: "Можно ли создавать видео для Reels?", a: "AI генерирует сценарии для Reels с hook, основной частью и CTA. Также доступны 12+ видео-моделей для генерации коротких промо-роликов из текстового описания." },
+    ],
   };
 
   const faqItems = faqItemsMap[prof.slug] || [
@@ -85,7 +112,7 @@ export default function ProfessionPage({ params }: Props) {
     { q: "AI заменит мою работу?", a: `Нет. AI ускоряет работу ${prof.role.toLowerCase()}а в 3-10 раз, автоматизируя рутину. Творческие решения — за вами.` },
   ];
 
-  const jsonLd = { "@context": "https://schema.org", "@type": "Article", headline: prof.h1, description: prof.description, datePublished: "2026-04-07", author: { "@type": "Organization", name: "Stone AI", url: SITE_URL } };
+  const jsonLd = { "@context": "https://schema.org", "@type": "Article", headline: prof.h1, description: prof.description, datePublished: "2026-04-11", dateModified: "2026-04-11", author: { "@type": "Organization", name: "Stone AI", url: SITE_URL }, publisher: { "@type": "Organization", name: "Stone AI", url: SITE_URL } };
   const faqJsonLd = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqItems.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) };
 
   return (
@@ -104,7 +131,7 @@ export default function ProfessionPage({ params }: Props) {
           <div className="grid sm:grid-cols-2 gap-3">
             {benefits.map((b) => (
               <div key={b} className="flex items-start gap-3 bg-bg rounded-xl border border-text/5 p-4">
-                <svg className="w-5 h-5 text-accent shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                <svg className="w-5 h-5 text-accent shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                 <span className="text-sm text-text/70 font-medium">{b}</span>
               </div>
             ))}
@@ -146,7 +173,7 @@ export default function ProfessionPage({ params }: Props) {
                 <h3 className="font-bold text-text mb-2">{p.title}</h3>
                 <pre className="text-sm text-text/50 bg-text/[0.03] rounded-xl p-4 whitespace-pre-wrap font-sans leading-relaxed">{p.prompt}</pre>
                 <Link href="/dashboard/chat" className="inline-flex items-center gap-1.5 mt-3 text-xs font-bold text-accent hover:underline">
-                  Попробовать в чате <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                  Попробовать в чате <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                 </Link>
               </div>
             ))}
@@ -159,7 +186,7 @@ export default function ProfessionPage({ params }: Props) {
           <div className="space-y-3">
             {faqItems.map((f) => (
               <details key={f.q} className="bg-bg rounded-xl border border-text/5 group">
-                <summary className="px-5 py-4 cursor-pointer text-sm font-semibold text-text/80 list-none flex items-center justify-between">{f.q}<svg className="w-4 h-4 text-text/20 group-open:rotate-180 transition-transform shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg></summary>
+                <summary className="px-5 py-4 cursor-pointer text-sm font-semibold text-text/80 list-none flex items-center justify-between">{f.q}<svg className="w-4 h-4 text-text/20 group-open:rotate-180 transition-transform shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg></summary>
                 <p className="px-5 pb-4 text-sm text-text/50 leading-relaxed">{f.a}</p>
               </details>
             ))}
@@ -177,7 +204,7 @@ export default function ProfessionPage({ params }: Props) {
           <h2 className="text-xl font-extrabold mb-3">Начните использовать AI в работе</h2>
           <p className="text-white/40 text-sm mb-6">10 бесплатных запросов/день. 65+ нейросетей. Без VPN.</p>
           <Link href="/dashboard/chat" className="inline-flex items-center gap-2 bg-accent text-white font-bold px-8 py-4 rounded-xl hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25">
-            Попробовать бесплатно <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+            Попробовать бесплатно <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
           </Link>
         </section>
 

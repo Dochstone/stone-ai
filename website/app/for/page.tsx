@@ -1,15 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PROFESSIONS } from "@/lib/seo-data";
+import { SITE_URL } from "@/lib/constants";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
 export const metadata: Metadata = {
   title: "AI для профессионалов — нейросети по профессиям 2026",
   description: "AI-инструменты для маркетологов, программистов, копирайтеров, дизайнеров и студентов. Лучшие нейросети для каждой профессии.",
-  alternates: { canonical: "/for" },
+  alternates: { canonical: `${SITE_URL}/for` },
   openGraph: {
     title: "AI для профессионалов | Stone AI",
     description: "Нейросети по профессиям: маркетинг, разработка, копирайтинг, дизайн, учёба.",
+    url: `${SITE_URL}/for`,
+    type: "website",
+    siteName: "Stone AI",
+    images: [{ url: `${SITE_URL}/og-for.png`, width: 1200, height: 630, alt: "AI для профессионалов — Stone AI" }],
   },
 };
 
