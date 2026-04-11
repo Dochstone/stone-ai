@@ -120,7 +120,7 @@ def _set_cookie_response(data: dict, token: str) -> JSONResponse:
         value=token,
         httponly=True,
         secure=True,
-        samesite="strict",
+        samesite="lax",
         max_age=JWT_EXPIRE_DAYS * 86400,
     )
     return response
