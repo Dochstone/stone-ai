@@ -65,4 +65,5 @@ def test_admin_ui_links_to_audit_log_page():
     assert 'href="/admin/audit-log"' in ADMIN_PAGE_SRC
     assert "export default function AuditLogPage()" in AUDIT_PAGE_SRC
     assert 'fetch(`${API_URL}/api/admin/audit-log?' in AUDIT_PAGE_SRC
-    assert 'JSON.stringify(selected.payload || {}, null, 2)' in AUDIT_PAGE_SRC
+    assert "function PayloadBlock(" in AUDIT_PAGE_SRC
+    assert "ACTION_META" in AUDIT_PAGE_SRC
