@@ -2368,7 +2368,8 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                 pendingImageName={pendingFile?.file_type === "image" ? pendingFile.file_name : null}
               />
             )}
-            {pendingFile && (
+            {/* Hide generic file preview when VideoOptionsPanel is already showing it for i2v mode */}
+            {pendingFile && !(isVideoModel && videoOptions.mode === "i2v" && pendingFile.file_type === "image") && (
               <div className="flex items-center gap-2 mb-2.5 px-3 py-2 bg-bg rounded-xl">
                 {pendingFile.file_type === "image" ? (
                   <img src={pendingFile.content} alt="" className="w-10 h-10 rounded-lg object-cover" />
