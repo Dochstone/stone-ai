@@ -1,5 +1,6 @@
 """Admin API — stats and user management. Protected by ADMIN_TG_IDS or ADMIN_EMAILS."""
 
+import logging
 import os
 from datetime import date, datetime, timedelta
 
@@ -16,8 +17,10 @@ from app.models.usage import Usage
 from app.models.transaction import Transaction
 from app.models.video_task import VideoTask
 from app.models.image_task import ImageTask
+from app.services.audit import log_admin_action
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
+logger = logging.getLogger(__name__)
 
 
 def _period_bounds(period: str | None) -> tuple[datetime | None, datetime | None, str]:
@@ -89,6 +92,19 @@ async def require_web_admin(request: Request) -> dict:
     if email not in admin_emails:
         raise HTTPException(403, "Admin access denied")
     return payload
+
+
+def _audit_actor(admin: dict) -> tuple[int, str | None]:
+    return int(admin.get("sub") or 0), admin.get("email")
+
+
+def _client_ip(request: Request) -> str | None:
+    return request.client.host if request.client else None
+
+
+def _user_agent(request: Request) -> str | None:
+    value = request.headers.get("user-agent", "").strip()
+    return value[:500] if value else None
 
 
 @router.get("/stats")
@@ -422,6 +438,7 @@ class UpdateSubscriptionRequest(BaseModel):
 async def web_admin_update_subscription(
     user_id: int,
     body: UpdateSubscriptionRequest,
+    request: Request,
     _admin: dict = Depends(require_web_admin),
     db: AsyncSession = Depends(get_db),
 ):
@@ -433,6 +450,21 @@ async def web_admin_update_subscription(
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
     if not user:
+        admin_user_id, admin_email = _audit_actor(_admin)
+        await log_admin_action(
+            db,
+            admin_user_id=admin_user_id,
+            admin_email=admin_email,
+            action="subscription_set",
+            target_type="user",
+            target_id=str(user_id),
+            payload={"tier": body.tier},
+            result="error",
+            error_message="user not found",
+            ip_address=_client_ip(request),
+            user_agent=_user_agent(request),
+        )
+        await db.commit()
         raise HTTPException(404, "User not found")
 
     from datetime import datetime, timedelta
@@ -453,7 +485,20 @@ async def web_admin_update_subscription(
         user.credits_reset_date = None
         user.subscription_started = None
 
+    admin_user_id, admin_email = _audit_actor(_admin)
+    await log_admin_action(
+        db,
+        admin_user_id=admin_user_id,
+        admin_email=admin_email,
+        action="subscription_set",
+        target_type="user",
+        target_id=str(user.id),
+        payload={"old_tier": old_tier, "new_tier": body.tier},
+        ip_address=_client_ip(request),
+        user_agent=_user_agent(request),
+    )
     await db.flush()
+    await db.commit()
 
     return {
         "status": "ok",
@@ -474,6 +519,7 @@ class UpdateBalanceRequest(BaseModel):
 async def web_admin_update_balance(
     user_id: int,
     body: UpdateBalanceRequest,
+    request: Request,
     _admin: dict = Depends(require_web_admin),
     db: AsyncSession = Depends(get_db),
 ):
@@ -481,10 +527,41 @@ async def web_admin_update_balance(
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
     if not user:
+        admin_user_id, admin_email = _audit_actor(_admin)
+        await log_admin_action(
+            db,
+            admin_user_id=admin_user_id,
+            admin_email=admin_email,
+            action="balance_changed",
+            target_type="user",
+            target_id=str(user_id),
+            payload={"new_balance_usd": round(body.balance_usd, 6), "reason": body.reason},
+            result="error",
+            error_message="user not found",
+            ip_address=_client_ip(request),
+            user_agent=_user_agent(request),
+        )
+        await db.commit()
         raise HTTPException(404, "User not found")
 
     old_balance = float(user.balance_usd or 0)
     user.balance_usd = round(body.balance_usd, 6)
+    admin_user_id, admin_email = _audit_actor(_admin)
+    await log_admin_action(
+        db,
+        admin_user_id=admin_user_id,
+        admin_email=admin_email,
+        action="balance_changed",
+        target_type="user",
+        target_id=str(user.id),
+        payload={
+            "old_balance_usd": round(old_balance, 6),
+            "new_balance_usd": round(body.balance_usd, 6),
+            "reason": body.reason,
+        },
+        ip_address=_client_ip(request),
+        user_agent=_user_agent(request),
+    )
     await db.commit()
 
     return {
@@ -564,6 +641,7 @@ async def web_admin_promos(
 async def web_admin_create_promo(
     request: Request,
     _admin: dict = Depends(require_web_admin),
+    db: AsyncSession = Depends(get_db),
 ):
     """Create or update a promo code."""
     from app.services.promo import PROMO_CODES
@@ -585,6 +663,19 @@ async def web_admin_create_promo(
         "desc": body.get("desc", ""),
     }
     PROMO_CODES[code] = promo_data
+    admin_user_id, admin_email = _audit_actor(_admin)
+    await log_admin_action(
+        db,
+        admin_user_id=admin_user_id,
+        admin_email=admin_email,
+        action="promo_created",
+        target_type="promo_code",
+        target_id=code,
+        payload=promo_data,
+        ip_address=_client_ip(request),
+        user_agent=_user_agent(request),
+    )
+    await db.commit()
 
     return {"status": "ok", "code": code}
 
@@ -592,16 +683,44 @@ async def web_admin_create_promo(
 @router.delete("/web/promos/{code}")
 async def web_admin_delete_promo(
     code: str,
+    request: Request,
     _admin: dict = Depends(require_web_admin),
+    db: AsyncSession = Depends(get_db),
 ):
     """Delete a promo code."""
     from app.services.promo import PROMO_CODES
 
     code = code.upper()
     if code not in PROMO_CODES:
+        admin_user_id, admin_email = _audit_actor(_admin)
+        await log_admin_action(
+            db,
+            admin_user_id=admin_user_id,
+            admin_email=admin_email,
+            action="promo_deleted",
+            target_type="promo_code",
+            target_id=code,
+            result="error",
+            error_message="promo not found",
+            ip_address=_client_ip(request),
+            user_agent=_user_agent(request),
+        )
+        await db.commit()
         raise HTTPException(404, "Промокод не найден")
 
     del PROMO_CODES[code]
+    admin_user_id, admin_email = _audit_actor(_admin)
+    await log_admin_action(
+        db,
+        admin_user_id=admin_user_id,
+        admin_email=admin_email,
+        action="promo_deleted",
+        target_type="promo_code",
+        target_id=code,
+        ip_address=_client_ip(request),
+        user_agent=_user_agent(request),
+    )
+    await db.commit()
     return {"status": "ok", "deleted": code}
 
 
@@ -742,6 +861,7 @@ class BanRequest(BaseModel):
 async def web_admin_ban_user(
     user_id: int,
     body: BanRequest,
+    request: Request,
     _admin: dict = Depends(require_web_admin),
     db: AsyncSession = Depends(get_db),
 ):
@@ -749,10 +869,37 @@ async def web_admin_ban_user(
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
     if not user:
+        admin_user_id, admin_email = _audit_actor(_admin)
+        await log_admin_action(
+            db,
+            admin_user_id=admin_user_id,
+            admin_email=admin_email,
+            action="user_banned",
+            target_type="user",
+            target_id=str(user_id),
+            payload={"reason": body.reason[:256]},
+            result="error",
+            error_message="user not found",
+            ip_address=_client_ip(request),
+            user_agent=_user_agent(request),
+        )
+        await db.commit()
         raise HTTPException(404, "User not found")
 
     user.is_banned = True
     user.ban_reason = body.reason[:256]
+    admin_user_id, admin_email = _audit_actor(_admin)
+    await log_admin_action(
+        db,
+        admin_user_id=admin_user_id,
+        admin_email=admin_email,
+        action="user_banned",
+        target_type="user",
+        target_id=str(user.id),
+        payload={"reason": user.ban_reason},
+        ip_address=_client_ip(request),
+        user_agent=_user_agent(request),
+    )
     await db.commit()
 
     return {
@@ -767,6 +914,7 @@ async def web_admin_ban_user(
 @router.post("/web/users/{user_id}/unban")
 async def web_admin_unban_user(
     user_id: int,
+    request: Request,
     _admin: dict = Depends(require_web_admin),
     db: AsyncSession = Depends(get_db),
 ):
@@ -774,10 +922,35 @@ async def web_admin_unban_user(
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
     if not user:
+        admin_user_id, admin_email = _audit_actor(_admin)
+        await log_admin_action(
+            db,
+            admin_user_id=admin_user_id,
+            admin_email=admin_email,
+            action="user_unbanned",
+            target_type="user",
+            target_id=str(user_id),
+            result="error",
+            error_message="user not found",
+            ip_address=_client_ip(request),
+            user_agent=_user_agent(request),
+        )
+        await db.commit()
         raise HTTPException(404, "User not found")
 
     user.is_banned = False
     user.ban_reason = None
+    admin_user_id, admin_email = _audit_actor(_admin)
+    await log_admin_action(
+        db,
+        admin_user_id=admin_user_id,
+        admin_email=admin_email,
+        action="user_unbanned",
+        target_type="user",
+        target_id=str(user.id),
+        ip_address=_client_ip(request),
+        user_agent=_user_agent(request),
+    )
     await db.commit()
 
     return {
