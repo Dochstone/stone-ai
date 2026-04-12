@@ -97,35 +97,51 @@ export default function ReconciliationPage() {
   }, [load]);
 
   const submitManual = async () => {
-    if (!token) return;
+    setMsg("");
+    if (!token) {
+      setMsg("⚠️ Нет токена. Сначала залогиньтесь на /admin");
+      return;
+    }
+    if (!balance.trim()) {
+      setMsg("⚠️ Введите баланс в USD");
+      return;
+    }
     const num = parseFloat(balance.replace(",", "."));
     if (!Number.isFinite(num) || num < 0) {
-      setMsg("⚠️ Введите корректный баланс в USD");
+      setMsg(`⚠️ "${balance}" — не похоже на число. Введите типа 32.50`);
       return;
     }
     setSubmitting(true);
-    setMsg("");
     try {
-      const res = await fetch(`${API_URL}/api/admin/reconciliation/snapshot/manual`, {
+      const url = `${API_URL}/api/admin/reconciliation/snapshot/manual`;
+      const body = { provider, balance_usd: num, note: note || null };
+      console.log("[reconciliation] POST", url, body);
+      const res = await fetch(url, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ provider, balance_usd: num, note: note || null }),
+        body: JSON.stringify(body),
       });
-      const data = await res.json();
+      const text = await res.text();
+      console.log("[reconciliation] response", res.status, text);
+      let data: { detail?: string; delta_pct?: number | null } = {};
+      try { data = JSON.parse(text); } catch { /* keep raw */ }
       if (res.ok) {
-        const delta = data.delta_pct !== null ? ` · дельта ${fmtPct(data.delta_pct)}` : "";
+        const delta = data.delta_pct !== null && data.delta_pct !== undefined
+          ? ` · дельта ${fmtPct(data.delta_pct)}`
+          : " (первый snapshot — baseline)";
         setMsg(`✅ Snapshot сохранён${delta}`);
         setBalance("");
         setNote("");
         await load();
       } else {
-        setMsg(`❌ ${data.detail || "Ошибка"}`);
+        setMsg(`❌ ${res.status}: ${data.detail || text.slice(0, 200) || "Ошибка"}`);
       }
-    } catch {
-      setMsg("❌ Сетевая ошибка");
+    } catch (e) {
+      console.error("[reconciliation] error", e);
+      setMsg(`❌ Сетевая ошибка: ${e instanceof Error ? e.message : String(e)}`);
     } finally {
       setSubmitting(false);
-      setTimeout(() => setMsg(""), 6000);
+      setTimeout(() => setMsg(""), 12000);
     }
   };
 
@@ -263,10 +279,10 @@ export default function ReconciliationPage() {
 
           <button
             onClick={submitManual}
-            disabled={submitting || !balance}
+            disabled={submitting}
             className="px-4 py-2 rounded-xl bg-accent text-white font-semibold text-sm hover:bg-accent/90 disabled:opacity-50"
           >
-            {submitting ? "..." : "Сохранить snapshot"}
+            {submitting ? "Сохраняем..." : "Сохранить snapshot"}
           </button>
         </div>
 
