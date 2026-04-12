@@ -13,6 +13,7 @@ from app.database import get_db
 from app.middleware.auth import get_current_user
 from app.middleware.web_auth import extract_jwt_from_request, decode_jwt
 from app.models import User
+from app.models.admin_audit_log import AdminAuditLog
 from app.models.usage import Usage
 from app.models.transaction import Transaction
 from app.models.video_task import VideoTask
@@ -761,6 +762,64 @@ async def web_admin_referrals(
     return {
         "referrers": data,
         "total_referred_users": total_referred,
+    }
+
+
+@router.get("/audit-log")
+async def web_admin_audit_log(
+    _admin: dict = Depends(require_web_admin),
+    db: AsyncSession = Depends(get_db),
+    admin_id: int | None = Query(default=None),
+    action: str | None = Query(default=None),
+    from_date: datetime | None = Query(default=None, alias="from"),
+    to_date: datetime | None = Query(default=None, alias="to"),
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+):
+    filters = []
+    if admin_id is not None:
+        filters.append(AdminAuditLog.admin_user_id == admin_id)
+    if action:
+        filters.append(AdminAuditLog.action == action)
+    if from_date is not None:
+        filters.append(AdminAuditLog.created_at >= from_date)
+    if to_date is not None:
+        filters.append(AdminAuditLog.created_at <= to_date)
+
+    total = await db.scalar(
+        select(func.count()).select_from(AdminAuditLog).where(*filters)
+    ) or 0
+
+    result = await db.execute(
+        select(AdminAuditLog)
+        .where(*filters)
+        .order_by(AdminAuditLog.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+    )
+    items = result.scalars().all()
+
+    return {
+        "items": [
+            {
+                "id": item.id,
+                "admin_user_id": item.admin_user_id,
+                "admin_email": item.admin_email,
+                "action": item.action,
+                "target_type": item.target_type,
+                "target_id": item.target_id,
+                "payload": item.payload,
+                "result": item.result,
+                "error_message": item.error_message,
+                "ip_address": item.ip_address,
+                "user_agent": item.user_agent,
+                "created_at": item.created_at.isoformat() if item.created_at else None,
+            }
+            for item in items
+        ],
+        "total": total,
+        "offset": offset,
+        "limit": limit,
     }
 
 
