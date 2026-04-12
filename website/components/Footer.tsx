@@ -74,7 +74,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="font-bold text-xs uppercase tracking-wider text-text/30 mb-4">AI по задачам</h4>
+            <h4 className="font-bold text-xs uppercase tracking-wider text-text/30 mb-4">Решения</h4>
             <ul className="space-y-2.5 text-[13px] text-text/50">
               <li><a href="/for/marketer" className="hover:text-text transition-colors">Для маркетолога</a></li>
               <li><a href="/for/developer" className="hover:text-text transition-colors">Для программиста</a></li>

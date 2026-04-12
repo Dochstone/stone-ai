@@ -106,7 +106,7 @@ export default function Nav() {
             Цены
           </a>
           <a href="/for/marketer" className="hidden lg:block text-text/70 hover:text-text font-medium text-sm transition-colors">
-            AI по задачам
+            Решения
           </a>
           <a href="/blog" className="hidden lg:block text-text/70 hover:text-text font-medium text-sm transition-colors">
             Блог
