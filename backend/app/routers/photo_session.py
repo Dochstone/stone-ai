@@ -26,7 +26,8 @@ from app.services.limiter import record_usage
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/photo-session", tags=["photo-session"])
 
-photo_session_limiter = RateLimiter(max_requests=5, window_seconds=60)
+photo_session_minute_limiter = RateLimiter(max_requests=5, window_seconds=60)
+photo_session_hour_limiter = RateLimiter(max_requests=20, window_seconds=3600)
 
 # ─── Costs per model (RUB → USD via USD_TO_RUB=95) ───
 PRICING = {
@@ -307,7 +308,7 @@ async def change_background(
 ):
     """Generate a product photo with a new background."""
     tg_id = tg_user["id"]
-    photo_session_limiter.check(str(tg_id))
+    _check_photo_session_rate_limit(str(tg_id))
     from app.services.safety import check_banned
     if await check_banned(tg_id):
         raise HTTPException(403, "Аккаунт заблокирован")
@@ -375,7 +376,7 @@ async def product_on_model(
 ):
     """Generate a fashion/lifestyle photo of a product worn or held by a model."""
     tg_id = tg_user["id"]
-    photo_session_limiter.check(str(tg_id))
+    _check_photo_session_rate_limit(str(tg_id))
     from app.services.safety import check_banned
     if await check_banned(tg_id):
         raise HTTPException(403, "Аккаунт заблокирован")
@@ -442,7 +443,7 @@ async def marketplace_card(
 ):
     """Generate a clean product card for a marketplace platform."""
     tg_id = tg_user["id"]
-    photo_session_limiter.check(str(tg_id))
+    _check_photo_session_rate_limit(str(tg_id))
     from app.services.safety import check_banned
     if await check_banned(tg_id):
         raise HTTPException(403, "Аккаунт заблокирован")
@@ -510,6 +511,11 @@ class BatchBackgroundRequest(BaseModel):
     model_id: str | None = None
 
 
+def _check_photo_session_rate_limit(user_key: str):
+    photo_session_minute_limiter.check(user_key)
+    photo_session_hour_limiter.check(user_key)
+
+
 def get_per_image_cost(tier: str | None, model_id: str | None = None) -> float:
     """Per-image cost with tier discount applied."""
     base_cost = _cost_usd("background", model_id or DEFAULT_IMAGE_MODEL)
@@ -524,7 +530,7 @@ async def batch_process(
 ):
     """Process multiple product photos with the same background. Max 10 images."""
     tg_id = tg_user["id"]
-    photo_session_limiter.check(str(tg_id))
+    _check_photo_session_rate_limit(str(tg_id))
     from app.services.safety import check_banned
     if await check_banned(tg_id):
         raise HTTPException(403, "Аккаунт заблокирован")
