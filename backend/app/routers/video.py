@@ -151,7 +151,12 @@ async def generate_video(
     settings = get_settings()
     provider = get_video_provider(req.model_id)
 
-    if provider == "kling" and settings.kling_access_key:
+    if provider == "kling":
+        if not settings.kling_access_key or not settings.kling_secret_key:
+            task.status = "failed"
+            task.error_message = "Kling API credentials are not configured"
+            await db.commit()
+            raise HTTPException(502, "Kling API credentials are not configured")
         from app.services.kling_client import create_kling_video
 
         kling_model = "kling-v2-master"
@@ -171,7 +176,12 @@ async def generate_video(
             raise HTTPException(502, f"Ошибка генерации: {result['error']}")
         task.fal_request_id = f"kling:{result['task_id']}"
         task.status = "processing"
-    elif provider == "novita" and settings.novita_api_key:
+    elif provider == "novita":
+        if not settings.novita_api_key:
+            task.status = "failed"
+            task.error_message = "Novita API key is not configured"
+            await db.commit()
+            raise HTTPException(502, "Novita API key is not configured")
         from app.services.novita_client import create_novita_video
 
         result = await create_novita_video(
@@ -187,7 +197,17 @@ async def generate_video(
             raise HTTPException(502, f"Ошибка генерации: {result['error']}")
         task.fal_request_id = f"novita:{result['task_id']}"
         task.status = "processing"
-    elif provider == "vertex" and settings.vertex_api_key and not req.source_image_url:
+    elif provider == "vertex":
+        if not settings.vertex_api_key:
+            task.status = "failed"
+            task.error_message = "Vertex API key is not configured"
+            await db.commit()
+            raise HTTPException(502, "Vertex API key is not configured")
+        if req.source_image_url:
+            task.status = "failed"
+            task.error_message = "Vertex image-to-video is not configured"
+            await db.commit()
+            raise HTTPException(502, "Vertex image-to-video is not configured")
         from app.services.vertex_client import create_vertex_video
 
         result = await create_vertex_video(settings.vertex_api_key, req.prompt)
@@ -198,7 +218,7 @@ async def generate_video(
             raise HTTPException(502, f"Ошибка генерации: {result['error']}")
         task.fal_request_id = f"vertex:{result['task_id']}"
         task.status = "processing"
-    else:
+    elif provider == "fal":
         result = await submit_video_generation(
             req.model_id,
             req.prompt,
@@ -211,6 +231,11 @@ async def generate_video(
             raise HTTPException(502, f"Ошибка генерации: {result['error']}")
         task.fal_request_id = result["request_id"]
         task.status = "processing"
+    else:
+        task.status = "failed"
+        task.error_message = f"Unsupported video provider: {provider}"
+        await db.commit()
+        raise HTTPException(502, f"Unsupported video provider: {provider}")
 
     await increment_usage(db, tg_id, req.model_id, tier)
     if user:

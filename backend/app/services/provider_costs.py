@@ -94,11 +94,19 @@ KLING_COSTS: dict[str, float] = {
 }
 
 NOVITA_COSTS: dict[str, float] = {
+    "sora-2": 0.25,
+    "veo-3": 0.25,
+    "luma-ray2": 0.18,
+    "luma-ray2-flash": 0.10,
     "minimax": 0.25,
-    "hunyuan": 0.10,
     "cogvideox": 0.08,
-    "wan-2": 0.03,
-    "stable-video": 0.05,
+    "pixverse-v5": 0.07,
+    "luma-dream": 0.18,
+    "pika-2": 0.07,
+    "wan-2": 0.12,
+    "hunyuan": 0.10,
+    "ltx-video": 0.18,
+    "stable-video": 0.024,
 }
 
 VERTEX_COSTS: dict[str, float] = {

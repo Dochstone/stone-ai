@@ -13,24 +13,24 @@ FAL_QUEUE_URL = "https://queue.fal.run"
 VIDEO_MODELS_REGISTRY = [
     # Tier 1: Premium (best quality)
     {"id": "kling-v3", "name": "Kling 3.0 Pro", "company": "Kuaishou", "provider": "kling", "fal_model": "direct-kling", "duration": "5-10s", "cost": 0.10, "price": 0.30, "active": False},
-    {"id": "sora-2", "name": "Sora 2 Pro", "company": "OpenAI", "provider": "fal", "fal_model": "fal-ai/sora-2/text-to-video/pro", "duration": "5-10s", "cost": 0.10, "price": 0.50, "active": True},
-    {"id": "veo-3", "name": "Veo 3.1", "company": "Google", "provider": "fal", "fal_model": "fal-ai/veo3.1", "duration": "5-10s", "cost": 0.40, "price": 0.65, "active": True},
-    {"id": "luma-ray2", "name": "Luma Ray 2", "company": "Luma", "provider": "fal", "fal_model": "fal-ai/luma-dream-machine/ray-2", "duration": "5-10s", "cost": 0.50, "price": 0.50, "active": True},
-    {"id": "luma-ray2-flash", "name": "Luma Ray 2 Flash", "company": "Luma", "provider": "fal", "fal_model": "fal-ai/luma-dream-machine/ray-2-flash", "duration": "5-10s", "cost": 0.20, "price": 0.30, "active": True},
+    {"id": "sora-2", "name": "Sora 2 Pro", "company": "OpenAI", "provider": "novita", "fal_model": "fal-ai/sora-2/text-to-video/pro", "duration": "5-10s", "cost": 0.25, "price": 0.50, "active": True},
+    {"id": "veo-3", "name": "Veo 3.1", "company": "Google", "provider": "novita", "fal_model": "fal-ai/veo3.1", "duration": "5-10s", "cost": 0.25, "price": 0.65, "active": True},
+    {"id": "luma-ray2", "name": "Luma Ray 2", "company": "Luma", "provider": "novita", "fal_model": "fal-ai/luma-dream-machine/ray-2", "duration": "5-10s", "cost": 0.18, "price": 0.50, "active": True},
+    {"id": "luma-ray2-flash", "name": "Luma Ray 2 Flash", "company": "Luma", "provider": "novita", "fal_model": "fal-ai/luma-dream-machine/ray-2-flash", "duration": "5-10s", "cost": 0.10, "price": 0.30, "active": True},
     {"id": "runway-gen3", "name": "Runway Gen-3 Alpha", "company": "Runway", "provider": "fal", "fal_model": "fal-ai/runway-gen3/turbo/image-to-video", "duration": "5-10s", "cost": 0.25, "price": 0.85, "active": False},
     # Tier 2: Working models
     {"id": "kling-v2", "name": "Kling v2 Master", "company": "Kuaishou", "provider": "kling", "fal_model": "direct-kling", "duration": "5-10s", "cost": 0.07, "price": 0.25, "active": False},
     {"id": "minimax", "name": "MiniMax Hailuo", "company": "MiniMax", "provider": "novita", "fal_model": "fal-ai/minimax-video", "duration": "5-10s", "cost": 0.25, "price": 0.28, "active": True},
     {"id": "cogvideox", "name": "CogVideoX 5B", "company": "THUDM", "provider": "novita", "fal_model": "fal-ai/cogvideox-5b", "duration": "5s", "cost": 0.08, "price": 0.20, "active": True},
     {"id": "mochi", "name": "Mochi v1", "company": "Genmo", "provider": "fal", "fal_model": "fal-ai/mochi-v1", "duration": "5s", "cost": 0.40, "price": 0.18, "active": False},
-    {"id": "pixverse-v5", "name": "PixVerse v4.5", "company": "PixVerse", "provider": "fal", "fal_model": "fal-ai/pixverse/v4.5", "duration": "5-10s", "cost": 0.06, "price": 0.22, "active": True},
-    {"id": "luma-dream", "name": "Luma Dream Machine", "company": "Luma", "provider": "fal", "fal_model": "fal-ai/luma-dream-machine", "duration": "5s", "cost": 0.50, "price": 0.35, "active": True},
-    {"id": "pika-2", "name": "Pika 2.0", "company": "Pika", "provider": "fal", "fal_model": "fal-ai/pika/v2", "duration": "3-5s", "cost": 0.05, "price": 0.18, "active": True},
+    {"id": "pixverse-v5", "name": "PixVerse v4.5", "company": "PixVerse", "provider": "novita", "fal_model": "fal-ai/pixverse/v4.5", "duration": "5-10s", "cost": 0.07, "price": 0.22, "active": True},
+    {"id": "luma-dream", "name": "Luma Dream Machine", "company": "Luma", "provider": "novita", "fal_model": "fal-ai/luma-dream-machine", "duration": "5s", "cost": 0.18, "price": 0.35, "active": True},
+    {"id": "pika-2", "name": "Pika 2.0", "company": "Pika", "provider": "novita", "fal_model": "fal-ai/pika/v2", "duration": "3-5s", "cost": 0.07, "price": 0.18, "active": True},
     # Tier 3: Budget
-    {"id": "wan-2", "name": "Wan 2.6", "company": "Alibaba", "provider": "novita", "fal_model": "fal-ai/wan/v2.6/text-to-video", "duration": "5-10s", "cost": 0.03, "price": 0.15, "active": True},
+    {"id": "wan-2", "name": "Wan 2.6", "company": "Alibaba", "provider": "novita", "fal_model": "fal-ai/wan/v2.6/text-to-video", "duration": "5-10s", "cost": 0.12, "price": 0.15, "active": True},
     {"id": "hunyuan", "name": "Hunyuan Video", "company": "Tencent", "provider": "novita", "fal_model": "fal-ai/hunyuan-video", "duration": "5s", "cost": 0.10, "price": 0.18, "active": True},
-    {"id": "ltx-video", "name": "LTX Video 2.3", "company": "Lightricks", "provider": "fal", "fal_model": "fal-ai/ltx-2-19b", "duration": "5s", "cost": 0.04, "price": 0.12, "active": True},
-    {"id": "stable-video", "name": "Stable Video", "company": "Stability", "provider": "novita", "fal_model": "fal-ai/stable-video", "duration": "4s", "cost": 0.05, "price": 0.15, "active": True},
+    {"id": "ltx-video", "name": "LTX Video 2.3", "company": "Lightricks", "provider": "novita", "fal_model": "fal-ai/ltx-2-19b", "duration": "5s", "cost": 0.18, "price": 0.12, "active": True},
+    {"id": "stable-video", "name": "Stable Video", "company": "Stability", "provider": "novita", "fal_model": "fal-ai/stable-video", "duration": "4s", "cost": 0.024, "price": 0.15, "active": True},
 ]
 
 VIDEO_MODEL_MAP = {m["id"]: m for m in VIDEO_MODELS_REGISTRY}
