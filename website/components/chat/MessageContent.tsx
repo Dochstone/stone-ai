@@ -266,6 +266,7 @@ function VideoPlayer({ url, directUrl, taskId, token, thumbnailUrl, isFree }: { 
 
 function ImageWithDownload({ url, caption, genId }: { url: string; caption?: string; genId?: number }) {
   const [copied, setCopied] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const shareText = caption
     ? `${caption.slice(0, 100)} — создано в Stone AI`
@@ -292,8 +293,9 @@ function ImageWithDownload({ url, caption, genId }: { url: string; caption?: str
       <img
         src={url}
         alt="Generated image"
-        className="max-w-full rounded-xl mb-2"
+        className="max-w-full rounded-xl mb-2 cursor-zoom-in"
         style={{ maxHeight: 400 }}
+        onClick={() => setPreviewOpen(true)}
         onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
       />
       {caption && <div className="whitespace-pre-wrap text-sm mb-2">{caption}</div>}
@@ -322,6 +324,27 @@ function ImageWithDownload({ url, caption, genId }: { url: string; caption?: str
           <span className="hidden sm:inline">{copied ? "Скопировано!" : "Ссылка"}</span>
         </button>
       </div>
+
+      {previewOpen && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/85 p-4 flex items-center justify-center"
+          onClick={() => setPreviewOpen(false)}
+        >
+          <button
+            type="button"
+            onClick={() => setPreviewOpen(false)}
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 text-white hover:bg-white/15 transition-colors"
+            aria-label="Close image preview"
+          >
+            <svg className="w-5 h-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <div className="max-w-6xl max-h-full" onClick={(e) => e.stopPropagation()}>
+            <img src={url} alt="Generated image preview" className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl" />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

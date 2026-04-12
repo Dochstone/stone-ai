@@ -185,6 +185,7 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
   const [limits, setLimits] = useState<UserLimits | null>(null);
   const [videoModels, setVideoModels] = useState<VideoModelMeta[]>([]);
   const [videoOptions, setVideoOptions] = useState<VideoGenerationOptions>({ duration: 5, resolution: "720P", mode: "t2v", quality: "standard" });
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -873,7 +874,13 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
                     {/* Generated image */}
                     {msg.imageResult && (
                       <div className="mb-2">
-                        <img src={msg.imageResult} alt="AI-generated" className="max-w-full rounded-xl" style={{ maxHeight: 400 }} />
+                        <img
+                          src={msg.imageResult}
+                          alt="AI-generated"
+                          className="max-w-full rounded-xl cursor-zoom-in"
+                          style={{ maxHeight: 400 }}
+                          onClick={() => setPreviewImageUrl(msg.imageResult || null)}
+                        />
                         <a href={msg.imageResult} download={`stone-ai-${Date.now()}.png`}
                           className="flex items-center gap-1.5 text-[11px] text-accent font-semibold hover:underline mt-2">
                           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V3" /></svg>
@@ -1025,6 +1032,27 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
           </div>
         </div>
       </div>
+
+      {previewImageUrl && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/85 p-4 flex items-center justify-center"
+          onClick={() => setPreviewImageUrl(null)}
+        >
+          <button
+            type="button"
+            onClick={() => setPreviewImageUrl(null)}
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 text-white hover:bg-white/15 transition-colors"
+            aria-label="Close image preview"
+          >
+            <svg className="w-5 h-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <div className="max-w-6xl max-h-full" onClick={(e) => e.stopPropagation()}>
+            <img src={previewImageUrl} alt="Generated image preview" className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl" />
+          </div>
+        </div>
+      )}
       </div>{/* end main content */}
     </div>
   );
