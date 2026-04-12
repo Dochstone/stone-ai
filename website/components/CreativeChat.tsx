@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import AuthFormComponent, { type AuthState } from "@/components/AuthForm";
-import { MODELS } from "@/lib/models";
+import VideoOptionsPanel from "@/components/VideoOptionsPanel";
+import { MODELS, type UserLimits, type VideoGenerationOptions, type VideoModelMeta } from "@/lib/models";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
@@ -165,6 +166,10 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
       for (const [mk, models] of Object.entries(MODE_MODELS)) {
         if (models.some(x => x.id === urlModel)) return { m: mk as Mode, mdl: urlModel };
       }
+      const knownModel = MODELS.find((item) => item.id === urlModel);
+      if (knownModel?.category === "video") return { m: "video", mdl: urlModel };
+      if (knownModel?.category === "image") return { m: "photo", mdl: urlModel };
+      if (knownModel?.category === "3d") return { m: "3d", mdl: urlModel };
       return { m: "chat", mdl: urlModel };
     }
     return { m, mdl: MODE_MODELS[m][0].id };
@@ -181,6 +186,9 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sessions, setSessions] = useState<{ id: number; model_id: string; title: string; updated_at: string | null }[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
+  const [limits, setLimits] = useState<UserLimits | null>(null);
+  const [videoModels, setVideoModels] = useState<VideoModelMeta[]>([]);
+  const [videoOptions, setVideoOptions] = useState<VideoGenerationOptions>({ duration: 5, resolution: "720P", mode: "t2v", quality: "standard" });
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -197,6 +205,46 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, generating]);
 
   useEffect(() => { return () => { if (pollRef.current) clearTimeout(pollRef.current); }; }, []);
+
+  const videoChipModels = useMemo(
+    () => videoModels.length ? videoModels.map((item) => ({ id: item.id, name: item.name })) : MODE_MODELS.video,
+    [videoModels]
+  );
+  const currentVideoModel = useMemo(
+    () => videoModels.find((item) => item.id === selectedModel) || null,
+    [selectedModel, videoModels]
+  );
+
+  useEffect(() => {
+    if (!auth?.token) return;
+    fetch(`${API_URL}/api/user/limits`, { headers: { Authorization: `Bearer ${auth.token}` } })
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => { if (data) setLimits(data); })
+      .catch(() => {});
+  }, [auth?.token, messages.length]);
+
+  useEffect(() => {
+    fetch(`${API_URL}/api/video/models`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => { if (data?.models) setVideoModels(data.models); })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!currentVideoModel) return;
+    const defaults = currentVideoModel.default_options;
+    setVideoOptions((prev) => {
+      if (
+        prev.duration === defaults.duration &&
+        prev.resolution === defaults.resolution &&
+        prev.mode === defaults.mode &&
+        prev.quality === defaults.quality
+      ) {
+        return prev;
+      }
+      return defaults;
+    });
+  }, [currentVideoModel]);
 
   // ─── Session management ───
   const fetchSessions = useCallback(async () => {
@@ -221,6 +269,10 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
         for (const [mk, models] of Object.entries(MODE_MODELS)) {
           if (models.some(m => m.id === data.session.model_id)) { setMode(mk as Mode); break; }
         }
+        const knownModel = MODELS.find((item) => item.id === data.session.model_id);
+        if (knownModel?.category === "video") setMode("video");
+        if (knownModel?.category === "image") setMode("photo");
+        if (knownModel?.category === "3d") setMode("3d");
         setMessages(data.messages.map((m: any) => ({ role: m.role, content: m.content })));
         if (window.innerWidth < 768) setSidebarOpen(false);
       }
@@ -271,11 +323,19 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
   // Switch mode → reset model to first in that mode
   const switchMode = useCallback((m: Mode) => {
     setMode(m);
-    setSelectedModel(MODE_MODELS[m][0].id);
+    const nextModels = m === "video" ? videoChipModels : MODE_MODELS[m];
+    setSelectedModel(nextModels[0].id);
     setActiveSessionId(null);
     setMessages([]);
     setPendingImage(null);
-  }, []);
+  }, [videoChipModels]);
+
+  useEffect(() => {
+    if (mode !== "video" || !videoChipModels.length) return;
+    if (!videoChipModels.some((item) => item.id === selectedModel)) {
+      setSelectedModel(videoChipModels[0].id);
+    }
+  }, [mode, selectedModel, videoChipModels]);
 
   const handleFileSelect = useCallback(async (file: File) => {
     if (!file.type.startsWith("image/")) { alert("Только изображения"); return; }
@@ -351,12 +411,22 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
 
   // ─── Video generation ───
   const generateVideo = useCallback(async () => {
-    if (!auth || !input.trim() || generating) return;
+    if (!auth || generating) return;
     const prompt = input.trim();
-    const userMsg: Message = { role: "user", content: prompt };
+    const imageUrl = videoOptions.mode === "i2v" ? pendingImage || undefined : undefined;
+    if (videoOptions.mode === "i2v" && !imageUrl) return;
+    if (videoOptions.mode !== "i2v" && !prompt) return;
+
+    const userMsg: Message = {
+      role: "user",
+      content: prompt || "[Видео из изображения]",
+      image: imageUrl,
+    };
     const history = [...messages, userMsg];
     setMessages(history);
     setInput("");
+    setPendingImage(null);
+    setPendingFileName("");
     setGenerating(true);
     if (textareaRef.current) textareaRef.current.style.height = "auto";
 
@@ -364,7 +434,12 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
       const res = await fetch(`${API_URL}/api/video/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
-        body: JSON.stringify({ model_id: selectedModel, prompt }),
+        body: JSON.stringify({
+          model_id: selectedModel,
+          prompt: prompt || "Animate this image",
+          source_image_url: imageUrl,
+          options: videoOptions,
+        }),
       });
 
       if (!res.ok) {
@@ -376,6 +451,16 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
 
       const data = await res.json();
       const taskId = data.task_id;
+      if (data.resolved_options) {
+        setVideoOptions(data.resolved_options);
+      }
+      if (data.video_points_left !== undefined) {
+        setLimits((prev) => prev ? {
+          ...prev,
+          video_points_available: data.video_points_left,
+          video_points_used: Math.max(0, (prev.video_points_total || 0) - data.video_points_left),
+        } : prev);
+      }
       setMessages([...history, { role: "assistant", content: `Генерация видео... (~${data.estimated_seconds || 60}с)` }]);
 
       let attempts = 0;
@@ -402,7 +487,7 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
       setMessages([...history, { role: "assistant", content: "Ошибка соединения" }]);
       setGenerating(false);
     }
-  }, [auth, input, generating, messages, selectedModel]);
+  }, [auth, input, generating, messages, selectedModel, videoOptions, pendingImage]);
 
   // ─── 3D generation ───
   const generate3D = useCallback(async () => {
@@ -557,6 +642,9 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
   }, [mode, generateChat, generateImage, generateVideo, generate3D]);
 
   const modeConfig = MODES.find(m => m.id === mode)!;
+  const canSend = mode === "video"
+    ? (videoOptions.mode === "i2v" ? !!pendingImage : !!input.trim())
+    : !!input.trim() || !!pendingImage;
 
   if (!loaded) return null;
   if (!auth) return (
@@ -676,7 +764,7 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
         </div>
         {/* Model chips — horizontal scroll */}
         <div className="max-w-3xl mx-auto px-3 sm:px-4 py-1.5 flex items-center gap-1.5 overflow-x-auto">
-          {MODE_MODELS[mode].map((m) => (
+          {(mode === "video" ? videoChipModels : MODE_MODELS[mode]).map((m) => (
             <button
               key={m.id}
               onClick={() => setSelectedModel(m.id)}
@@ -866,6 +954,23 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
       {/* Input */}
       <div className="border-t border-text/[0.06] bg-bg px-4 py-2 shrink-0">
         <div className="max-w-3xl mx-auto">
+          {mode === "video" && currentVideoModel && (
+            <VideoOptionsPanel
+              model={currentVideoModel}
+              selectedOptions={videoOptions}
+              onChange={setVideoOptions}
+              userTier={limits?.plan || "free"}
+              pointsLeft={limits?.video_points_available || 0}
+              pointsTotal={limits?.video_points_total || 0}
+              trialStandardAvailable={!!limits?.trial_standard_available}
+              trialPremiumAvailable={!!limits?.trial_premium_available}
+              onPickImage={() => fileInputRef.current?.click()}
+              onClearImage={() => { setPendingImage(null); setPendingFileName(""); }}
+              pendingImageUrl={pendingImage}
+              pendingImageName={pendingFileName || null}
+            />
+          )}
+
           {pendingImage && (
             <div className="flex items-center gap-3 mb-2 px-3 py-2 bg-text/[0.03] rounded-xl border border-text/[0.06]">
               <img src={pendingImage} alt="" className="w-12 h-12 rounded-lg object-cover" />
@@ -880,7 +985,7 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
             onChange={(e) => { if (e.target.files?.[0]) handleFileSelect(e.target.files[0]); e.target.value = ""; }} />
 
           <div className="flex items-center gap-2 bg-bg border border-text/[0.08] rounded-xl focus-within:border-accent/30 focus-within:ring-2 focus-within:ring-accent/10 transition-all px-2 py-1">
-            {(mode === "3d" || mode === "health" || mode === "chat") && (
+            {(mode === "3d" || mode === "health" || mode === "chat" || (mode === "video" && videoOptions.mode === "i2v")) && (
               <button onClick={() => fileInputRef.current?.click()} disabled={generating}
                 className="flex items-center justify-center w-10 h-10 text-text/25 hover:text-accent transition-colors disabled:opacity-30 shrink-0">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -902,7 +1007,7 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
 
             <button
               onClick={send}
-              disabled={generating || (!input.trim() && !pendingImage)}
+              disabled={generating || !canSend}
               className={`w-10 h-10 rounded-lg text-white flex items-center justify-center transition-colors disabled:opacity-30 shrink-0 ${modeConfig.bg} hover:opacity-90`}
             >
               {generating ? (

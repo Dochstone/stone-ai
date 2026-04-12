@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { MODELS, type AIModel } from "@/lib/models";
+import { MODELS, type AIModel, type UserLimits, type VideoGenerationOptions, type VideoModelMeta } from "@/lib/models";
 import AuthFormComponent, { type AuthState } from "@/components/AuthForm";
 import PromptLibrary from "@/components/prompts/PromptLibrary";
 import DualChatView from "@/components/chat/DualChatView";
 import ProjectSelector from "@/components/projects/ProjectSelector";
+import VideoOptionsPanel from "@/components/VideoOptionsPanel";
 import dynamic from "next/dynamic";
 const GenerationOverlay = dynamic(() => import("@/components/GenerationOverlay"), { ssr: false });
 const WelcomeScreen = dynamic(() => import("@/components/chat/WelcomeScreen"), { ssr: false });
@@ -55,7 +56,8 @@ function getModelLockInfo(modelId: string, balance: number, plan?: string): { lo
   if (plan === "mini" && MINI_MODEL_IDS.has(modelId)) return null;
   if (FREE_MODEL_IDS.has(modelId)) return null;
   // Video/3D — need at least Mini
-  if (VIDEO_MODEL_IDS.has(modelId) || THREED_MODEL_IDS.has(modelId)) {
+  if (VIDEO_MODEL_IDS.has(modelId)) return null;
+  if (THREED_MODEL_IDS.has(modelId)) {
     if (!plan || plan === "free") return { locked: true, tier: PLAN_DISPLAY.mini.name, price: PLAN_DISPLAY.mini.price };
     return null;
   }
@@ -576,7 +578,9 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
   const [modelSearchRaw, setModelSearchRaw] = useState("");
   const [modelSearch, setModelSearch] = useState("");
   const [showTemplates, setShowTemplates] = useState(false);
-  const [limits, setLimits] = useState<{ plan?: string; text?: { used: number; limit: number }; image?: { used: number; limit: number }; streak?: { days: number } } | null>(null);
+  const [limits, setLimits] = useState<UserLimits | null>(null);
+  const [videoModels, setVideoModels] = useState<VideoModelMeta[]>([]);
+  const [videoOptions, setVideoOptions] = useState<VideoGenerationOptions>({ duration: 5, resolution: "720P", mode: "t2v", quality: "standard" });
   const [messages, setMessages] = useState<Message[]>(() => {
     try {
       const saved = sessionStorage.getItem("stone_chat_messages");
@@ -700,6 +704,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
   const model = useMemo(() => MODELS_MAP.get(selectedModel), [selectedModel]);
   const isVideoModel = VIDEO_MODEL_IDS.has(selectedModel);
   const is3DModel = THREED_MODEL_IDS.has(selectedModel);
+  const currentVideoModel = useMemo(() => videoModels.find((item) => item.id === selectedModel) || null, [selectedModel, videoModels]);
 
   // Pick model from URL ?model= param or custom event
   useEffect(() => {
@@ -797,6 +802,31 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
       .then(data => { if (data) setLimits(data); })
       .catch(() => {});
   }, [auth?.token, messages.length]); // refetch after each message
+
+  useEffect(() => {
+    fetch(`${API_URL}/api/video/models`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (data?.models) setVideoModels(data.models);
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!currentVideoModel) return;
+    const defaults = currentVideoModel.default_options;
+    setVideoOptions((prev) => {
+      if (
+        prev.duration === defaults.duration &&
+        prev.resolution === defaults.resolution &&
+        prev.mode === defaults.mode &&
+        prev.quality === defaults.quality
+      ) {
+        return prev;
+      }
+      return defaults;
+    });
+  }, [currentVideoModel]);
 
   // Resume pending video generation on page load (server-side worker completes them)
   useEffect(() => {
@@ -1227,12 +1257,17 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
   // Video generation
   const sendVideoMessage = useCallback(async () => {
-    if (!auth || (!input.trim() && !pendingFile) || videoGenerating) return;
+    if (!auth || videoGenerating) return;
     const vidLock = getModelLockInfo(selectedModel, auth.balanceUsd || 0, limits?.plan);
     if (vidLock) { setUpsellModal({ type: "locked", model: MODELS_MAP.get(selectedModel)?.name, tier: vidLock.tier }); return; }
 
     const prompt = input.trim();
-    const imageUrl = pendingFile?.file_type === "image" ? pendingFile.content : undefined;
+    const imageUrl = videoOptions.mode === "i2v" && pendingFile?.file_type === "image" ? pendingFile.content : undefined;
+    if (videoOptions.mode === "i2v" && !imageUrl) {
+      setToast({ msg: "Для режима image-to-video сначала загрузите изображение", type: "error" });
+      return;
+    }
+    if (videoOptions.mode !== "i2v" && !prompt) return;
     const userMsg: Message = { role: "user", content: prompt || "[Видео из изображения]", ts: Date.now(), file: pendingFile || undefined };
     const history = [...messages, userMsg];
     setMessages(history);
@@ -1246,7 +1281,12 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
       const res = await fetch(`${API_URL}/api/video/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
-        body: JSON.stringify({ model_id: selectedModel, prompt: prompt || "Animate this image", source_image_url: imageUrl }),
+        body: JSON.stringify({
+          model_id: selectedModel,
+          prompt: prompt || "Animate this image",
+          source_image_url: imageUrl,
+          options: isVideoModel ? videoOptions : undefined,
+        }),
       });
 
       if (!res.ok) {
@@ -1267,6 +1307,10 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
       const data = await res.json();
       const taskId = data.task_id;
 
+      if (data.resolved_options) {
+        setVideoOptions(data.resolved_options);
+      }
+
       // Update balance
       if (data.balance_usd !== undefined) {
         setAuth((prev) => prev ? { ...prev, balanceUsd: data.balance_usd } : prev);
@@ -1274,6 +1318,14 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
           const saved = localStorage.getItem("stone_auth");
           if (saved) { const p = JSON.parse(saved); p.balanceUsd = data.balance_usd; localStorage.setItem("stone_auth", JSON.stringify(p)); }
         } catch {}
+      }
+
+      if (data.video_points_left !== undefined) {
+        setLimits((prev) => prev ? {
+          ...prev,
+          video_points_available: data.video_points_left,
+          video_points_used: Math.max(0, (prev.video_points_total || 0) - data.video_points_left),
+        } : prev);
       }
 
       // Show processing message
@@ -1320,7 +1372,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
       setMessages([...history, { role: "assistant", content: "Ошибка соединения" }]);
       setVideoGenerating(false);
     }
-  }, [auth, input, videoGenerating, messages, selectedModel, pendingFile, resetTextarea, saveToSession]);
+  }, [auth, input, videoGenerating, messages, selectedModel, pendingFile, resetTextarea, saveToSession, limits?.plan, videoOptions, isVideoModel]);
 
   // Stop generation
   const stopGeneration = useCallback(() => {
@@ -2145,6 +2197,22 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         {/* Input area — pinned bottom */}
         <div className="border-t border-text/[0.06] bg-bg px-3 sm:px-4 py-1.5 sm:py-2.5 shrink-0 chat-input-safe shadow-[0_-4px_16px_rgba(0,0,0,0.04)]">
           <div className="max-w-3xl mx-auto">
+            {isVideoModel && currentVideoModel && (
+              <VideoOptionsPanel
+                model={currentVideoModel}
+                selectedOptions={videoOptions}
+                onChange={setVideoOptions}
+                userTier={limits?.plan || "free"}
+                pointsLeft={limits?.video_points_available || 0}
+                pointsTotal={limits?.video_points_total || 0}
+                trialStandardAvailable={!!limits?.trial_standard_available}
+                trialPremiumAvailable={!!limits?.trial_premium_available}
+                onPickImage={() => fileInputRef.current?.click()}
+                onClearImage={() => setPendingFile(null)}
+                pendingImageUrl={pendingFile?.file_type === "image" ? pendingFile.content : null}
+                pendingImageName={pendingFile?.file_type === "image" ? pendingFile.file_name : null}
+              />
+            )}
             {pendingFile && (
               <div className="flex items-center gap-2 mb-2.5 px-3 py-2 bg-bg rounded-xl">
                 {pendingFile.file_type === "image" ? (
@@ -2184,7 +2252,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
             <div className="flex items-center bg-text/[0.03] border border-text/[0.10] rounded-2xl focus-within:border-accent/30 focus-within:ring-2 focus-within:ring-accent/10 focus-within:bg-bg transition-all min-w-0" style={{ padding: "4px 8px", gap: 6 }}>
               {/* File attach */}
-              <input ref={fileInputRef} type="file" accept="image/*,.pdf" className="hidden"
+              <input ref={fileInputRef} type="file" accept={isVideoModel ? "image/*" : "image/*,.pdf"} className="hidden"
                 onChange={(e) => { if (e.target.files?.[0]) handleFileSelect(e.target.files[0]); e.target.value = ""; }}
               />
               <button

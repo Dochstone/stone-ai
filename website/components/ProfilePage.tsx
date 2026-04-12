@@ -191,6 +191,21 @@ function OverviewTab({ profile, usage, limits }: { profile: UserProfile; usage: 
     days.push({ label: dayLabel, value: daySpend });
   }
 
+  const hasVideoPoints = Boolean(
+    limits && (
+      Number(limits.video_points_total || 0) > 0 ||
+      Number(limits.trial_video_points_total || 0) > 0
+    )
+  );
+  const displayedVideoPointsTotal = Number(limits?.video_points_total || 0);
+  const displayedVideoPointsUsed = displayedVideoPointsTotal > 0
+    ? Math.max(0, displayedVideoPointsTotal - Number(limits?.video_points_available || 0))
+    : 0;
+  const trialVideosLeft = Math.max(
+    0,
+    Number(limits?.trial_video_points_total || 0) - Number(limits?.trial_video_points_used || 0)
+  );
+
   return (
     <div className="space-y-6">
       {/* Profile card */}
@@ -253,6 +268,42 @@ function OverviewTab({ profile, usage, limits }: { profile: UserProfile; usage: 
             <div className="mt-3 pt-3 border-t border-text/[0.04] flex items-center gap-2">
               <span className="text-amber-500">🔥</span>
               <span className="text-xs text-text/50">Стрик: <b className="text-text/70">{limits.streak.days} дней подряд</b></span>
+            </div>
+          )}
+          {hasVideoPoints && (
+            <div className="mt-4 pt-4 border-t border-text/[0.04]">
+              <div className="flex items-center justify-between gap-3 mb-2">
+                <div>
+                  <div className="text-xs font-bold text-text">Видео-поинты</div>
+                  <div className="text-[10px] text-text/35 mt-0.5">Сброс: {limits.video_points_reset || "—"}</div>
+                </div>
+                <div className="text-sm font-extrabold text-accent">
+                  {displayedVideoPointsUsed}/{displayedVideoPointsTotal}
+                </div>
+              </div>
+              <div className="w-full h-2 bg-text/[0.06] rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-accent transition-all"
+                  style={{ width: `${displayedVideoPointsTotal > 0 ? (displayedVideoPointsUsed / displayedVideoPointsTotal) * 100 : 0}%` }}
+                />
+              </div>
+              <div className="flex flex-wrap gap-2 mt-3">
+                {limits.trial_standard_available && (
+                  <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-600">
+                    🎁 Standard trial
+                  </span>
+                )}
+                {limits.trial_premium_available && (
+                  <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-sky-500/10 text-sky-600">
+                    🎁 Premium trial
+                  </span>
+                )}
+                {Number(limits.trial_video_points_total || 0) > 0 && trialVideosLeft > 0 && (
+                  <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-accent/10 text-accent">
+                    Бесплатные пробные видео: {trialVideosLeft}/{limits.trial_video_points_total}
+                  </span>
+                )}
+              </div>
             </div>
           )}
         </div>

@@ -1,5 +1,59 @@
 export type ModelTier = "free" | "pro";
 export type ModelCategory = "chat" | "image" | "reason" | "search" | "code" | "video" | "3d";
+export type VideoMode = "t2v" | "i2v";
+
+export interface VideoGenerationOptions {
+  duration: number;
+  resolution: string;
+  mode: VideoMode;
+  quality: string;
+}
+
+export interface VideoVariant extends VideoGenerationOptions {
+  cost_usd: number;
+  points: number;
+}
+
+export interface VideoModelMeta {
+  id: string;
+  name: string;
+  company: string;
+  provider: string;
+  supports_text: boolean;
+  supports_image: boolean;
+  default_options: VideoGenerationOptions;
+  variants: VideoVariant[];
+}
+
+export interface UsageLimitBucket {
+  used: number;
+  limit: number;
+  base?: number;
+  rollover?: number;
+  available?: number;
+  period?: string;
+}
+
+export interface UserLimits {
+  plan?: string;
+  date?: string;
+  reset_at?: string;
+  fast?: UsageLimitBucket;
+  premium?: UsageLimitBucket;
+  opus?: UsageLimitBucket;
+  image?: UsageLimitBucket;
+  video?: UsageLimitBucket;
+  text?: UsageLimitBucket;
+  streak?: { days: number };
+  video_points_used: number;
+  video_points_total: number;
+  video_points_available: number;
+  video_points_reset?: string;
+  trial_standard_available?: boolean;
+  trial_premium_available?: boolean;
+  trial_video_points_used?: number;
+  trial_video_points_total?: number;
+}
 
 export interface AIModel {
   id: string;
