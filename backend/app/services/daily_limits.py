@@ -35,6 +35,10 @@ async def check_and_expire_subscription(db: AsyncSession, user: User) -> str:
         user.monthly_3d_used = 0
         user.monthly_audio_used = 0
         user.opus_requests_used = 0
+        user.video_points_used = 0
+        user.trial_start_standard_used = False
+        user.trial_start_premium_used = False
+        user.video_points_reset_date = get_video_points_reset_date()
         await db.flush()
 
         # Notify user
@@ -115,7 +119,6 @@ VIDEO_MODELS = {
     "kling-v3", "sora-2", "veo-3", "luma-ray2", "luma-ray2-flash",
     "kling-v2", "runway-gen3", "pika-2", "minimax", "pixverse-v5",
     "luma-dream", "stable-video", "wan-2", "hunyuan", "ltx-video",
-    "cogvideox",
 }
 
 # Models available on free plan — only 7 models (everything else is locked)
@@ -124,6 +127,14 @@ FREE_PLAN_MODELS = {
     "deepseek-v3", "llama-4-maverick", "mistral-large-25",
     "nano-banana",  # 2 free images
     "veo-3",        # 1 free video
+}
+
+
+TIER_MAX_POINTS = {
+    "free": 1,
+    "mini": 1,
+    "max": 4,
+    "max-pro": 6,
 }
 
 
@@ -150,6 +161,172 @@ def get_msk_reset_at() -> str:
     now = datetime.now(MSK)
     tomorrow = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
     return tomorrow.isoformat()
+
+
+def get_video_points_reset_date(now_utc: datetime | None = None) -> date:
+    now = now_utc or datetime.now(timezone.utc)
+    year = now.year + (1 if now.month == 12 else 0)
+    month = 1 if now.month == 12 else now.month + 1
+    return date(year, month, 1)
+
+
+def reset_video_points_if_needed(user: User, now_utc: datetime | None = None) -> bool:
+    """Reset monthly video point state when UTC month rolls over."""
+    now = now_utc or datetime.now(timezone.utc)
+    next_reset = get_video_points_reset_date(now)
+    current_reset = user.video_points_reset_date
+
+    if current_reset is None:
+        user.video_points_reset_date = next_reset
+        return False
+
+    if current_reset > now.date():
+        return False
+
+    user.video_points_used = 0
+    user.trial_start_standard_used = False
+    user.trial_start_premium_used = False
+    user.video_points_reset_date = next_reset
+    return True
+
+
+def _required_tier_for_points(points_needed: int) -> str:
+    if points_needed <= 1:
+        return "mini"
+    if points_needed <= 4:
+        return "max"
+    return "max-pro"
+
+
+def get_video_points_snapshot(user: User) -> dict:
+    from app.services.subscription import get_video_points_plan
+
+    tier = user.subscription_tier or "free"
+    plan = get_video_points_plan(tier)
+    used = int(user.video_points_used or 0)
+    total = int(plan.get("points_per_month", 0))
+    trial_total = int(plan.get("trial_points_lifetime", 0))
+    free_trial_used = int(user.trial_video_points_used or 0)
+
+    return {
+        "video_points_used": used,
+        "video_points_total": total if total > 0 else trial_total,
+        "video_points_available": max(0, total - used) if total > 0 else max(0, trial_total - free_trial_used),
+        "video_points_reset": (user.video_points_reset_date or get_video_points_reset_date()).isoformat(),
+        "trial_standard_available": tier == "mini" and not bool(user.trial_start_standard_used),
+        "trial_premium_available": tier == "mini" and not bool(user.trial_start_premium_used),
+        "trial_video_points_used": free_trial_used,
+        "trial_video_points_total": trial_total,
+    }
+
+
+async def check_video_points(db: AsyncSession, user: User, model_id: str, options: dict) -> dict:
+    """Check monthly video points and tariff gate for a requested video variant."""
+    from app.services.provider_costs import get_novita_video_cost_and_points
+    from app.services.subscription import get_video_points_plan
+
+    reset_video_points_if_needed(user)
+
+    tier = user.subscription_tier or "free"
+    plan = get_video_points_plan(tier)
+
+    cost_usd, points_needed = get_novita_video_cost_and_points(
+        model_id=model_id,
+        duration=int(options.get("duration", 5) or 5),
+        resolution=str(options.get("resolution", "720P")),
+        mode=str(options.get("mode", "t2v")),
+        quality=str(options.get("quality", "standard")),
+    )
+
+    current_used = int(user.video_points_used or 0)
+    points_total = int(plan.get("points_per_month", 0))
+    points_left = max(0, points_total - current_used)
+    snapshot = get_video_points_snapshot(user)
+
+    if tier == "free":
+        if points_needed > TIER_MAX_POINTS["free"]:
+            return {
+                "allowed": False,
+                "reason": "Этот вариант недоступен на бесплатном тарифе",
+                "required_tier": _required_tier_for_points(points_needed),
+                "points_needed": points_needed,
+                "points_left": snapshot["video_points_available"],
+                "cost_usd": cost_usd,
+            }
+        trial_total = int(plan.get("trial_points_lifetime", 0))
+        trial_used = int(user.trial_video_points_used or 0)
+        if trial_used + points_needed > trial_total:
+            return {
+                "allowed": False,
+                "reason": "Бесплатный lifetime trial на видео исчерпан",
+                "required_tier": "mini",
+                "points_needed": points_needed,
+                "points_left": max(0, trial_total - trial_used),
+                "cost_usd": cost_usd,
+            }
+        return {
+            "allowed": True,
+            "tier": tier,
+            "cost_usd": cost_usd,
+            "points_needed": points_needed,
+            "points_left": max(0, trial_total - trial_used),
+            "charge_target": "free_trial",
+        }
+
+    trial_kind = None
+    tier_cap = TIER_MAX_POINTS.get(tier, TIER_MAX_POINTS["free"])
+    if points_needed > tier_cap:
+        if tier == "mini" and points_needed == 2 and not user.trial_start_standard_used:
+            trial_kind = "standard"
+        elif tier == "mini" and points_needed == 4 and not user.trial_start_premium_used:
+            trial_kind = "premium"
+        else:
+            return {
+                "allowed": False,
+                "reason": "Этот вариант недоступен на вашем тарифе",
+                "required_tier": _required_tier_for_points(points_needed),
+                "points_needed": points_needed,
+                "points_left": points_left,
+                "cost_usd": cost_usd,
+            }
+
+    if current_used + points_needed > points_total:
+        return {
+            "allowed": False,
+            "reason": "Недостаточно video points на этот месяц",
+            "required_tier": tier,
+            "points_needed": points_needed,
+            "points_left": points_left,
+            "cost_usd": cost_usd,
+        }
+
+    return {
+        "allowed": True,
+        "tier": tier,
+        "cost_usd": cost_usd,
+        "points_needed": points_needed,
+        "points_left": points_left,
+        "charge_target": "monthly_points",
+        "trial_kind": trial_kind,
+    }
+
+
+def apply_video_points_charge(user: User, charge: dict) -> None:
+    """Mutate user counters after provider accepted the video request."""
+    reset_video_points_if_needed(user)
+
+    points_needed = int(charge.get("points_needed", 0) or 0)
+    target = charge.get("charge_target")
+
+    if target == "free_trial":
+        user.trial_video_points_used = int(user.trial_video_points_used or 0) + points_needed
+        return
+
+    user.video_points_used = int(user.video_points_used or 0) + points_needed
+    if charge.get("trial_kind") == "standard":
+        user.trial_start_standard_used = True
+    elif charge.get("trial_kind") == "premium":
+        user.trial_start_premium_used = True
 
 
 async def get_weekly_usage(db: AsyncSession, tg_id: int, category: str) -> int:
@@ -424,6 +601,7 @@ async def get_limits_info(db: AsyncSession, user: User) -> dict:
     tier = user.subscription_tier or "free"
     tg_id = user.telegram_id or user.id
     limits = DAILY_LIMITS.get(tier, DAILY_LIMITS["free"])
+    reset_video_points_if_needed(user)
 
     row = await get_or_create_today(db, tg_id, tier)
 
@@ -460,6 +638,8 @@ async def get_limits_info(db: AsyncSession, user: User) -> dict:
             "period": "daily",
         }
 
+    video_points = get_video_points_snapshot(user)
+
     return {
         "plan": tier,
         "date": get_msk_today().isoformat(),
@@ -477,6 +657,7 @@ async def get_limits_info(db: AsyncSession, user: User) -> dict:
         "streak": {
             "days": user.login_streak or 0,
         },
+        **video_points,
     }
 
 

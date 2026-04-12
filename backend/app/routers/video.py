@@ -1,6 +1,7 @@
-"""Video generation endpoints - async generation via multiple providers."""
+"""Video generation endpoints with monthly video points accounting."""
 
 import asyncio
+import json
 import logging
 import uuid
 from datetime import datetime
@@ -12,18 +13,16 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import USD_TO_RUB, get_settings
+from app.config import get_settings
 from app.database import get_db
 from app.middleware.auth import get_current_user
 from app.models.user import User
 from app.models.video_task import VideoTask
 from app.routers.achievements import check_and_update
-from app.services.token_billing import deduct_balance
 from app.services.video_router import (
     check_video_status,
     get_video_model,
     get_video_models_list,
-    get_video_price,
     get_video_provider,
     submit_video_generation,
 )
@@ -68,15 +67,41 @@ async def _check_provider_status(task: VideoTask) -> dict:
     return await check_video_status(task.model_id, request_id)
 
 
+def _resolve_generate_options(req: "GenerateRequest") -> dict[str, str | int]:
+    mode = "i2v" if req.source_image_url else "t2v"
+    if req.options:
+        mode = (req.options.mode or mode).strip().lower()
+        return {
+            "duration": int(req.options.duration or 5),
+            "resolution": (req.options.resolution or "720P").strip().upper(),
+            "mode": "i2v" if req.source_image_url else mode,
+            "quality": (req.options.quality or "standard").strip().lower(),
+        }
+    return {
+        "duration": 5,
+        "resolution": "720P",
+        "mode": mode,
+        "quality": "standard",
+    }
+
+
+class GenerateOptions(BaseModel):
+    duration: int = 5
+    resolution: str = "720P"
+    mode: str = "t2v"
+    quality: str = "standard"
+
+
 class GenerateRequest(BaseModel):
     model_id: str
     prompt: str
     source_image_url: str | None = None
+    options: GenerateOptions | None = None
 
 
 @router.get("/models")
 async def list_video_models():
-    """List available video generation models with pricing."""
+    """List available video generation models with backend-driven variants."""
     return {"models": get_video_models_list()}
 
 
@@ -86,28 +111,29 @@ async def generate_video(
     tg_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """
-    Start async video generation.
-
-    Charges balance BEFORE generation. Returns task_id for polling.
-    On failure, balance is refunded.
-    """
+    """Start async video generation and charge video points after accepted submit."""
+    from app.services.daily_limits import (
+        apply_video_points_charge,
+        check_and_expire_subscription,
+        check_video_points,
+        increment_usage,
+    )
+    from app.services.provider_costs import get_default_video_options
     from app.services.safety import check_blocked, check_banned, log_violation
 
     tg_id = tg_user["id"]
     if await check_banned(tg_id):
         raise HTTPException(403, "Аккаунт заблокирован")
+
     blocked = check_blocked(req.prompt)
     if blocked:
         asyncio.create_task(log_violation(tg_id, "video", req.prompt, blocked))
         raise HTTPException(400, blocked)
-    db_id = tg_user.get("db_id")
 
+    db_id = tg_user.get("db_id")
     model = get_video_model(req.model_id)
     if not model:
         raise HTTPException(400, "Неизвестная видео-модель")
-
-    price = get_video_price(req.model_id)
 
     if db_id:
         result = await db.execute(select(User).where(User.id == db_id).with_for_update())
@@ -117,22 +143,91 @@ async def generate_video(
     if not user:
         raise HTTPException(404, "Пользователь не найден")
 
-    from app.services.daily_limits import check_daily_limit, check_and_expire_subscription, increment_usage
-
     tier = user.subscription_tier or "free"
     if tier != "free":
         tier = await check_and_expire_subscription(db, user)
-    balance = float(user.balance_usd or 0)
-    actual_price = 0
+    user.subscription_tier = tier
 
-    check = await check_daily_limit(db, tg_id, req.model_id, tier, balance)
-    if not check.get("allowed"):
-        raise HTTPException(
-            429 if check.get("error") == "daily_limit_exceeded" else 403,
-            check,
+    resolved_options = _resolve_generate_options(req)
+    if req.options is None:
+        defaults = get_default_video_options(req.model_id, mode=resolved_options["mode"])
+        resolved_options = {
+            "duration": int(defaults["duration"]),
+            "resolution": str(defaults["resolution"]),
+            "mode": "i2v" if req.source_image_url else str(defaults["mode"]),
+            "quality": str(defaults["quality"]),
+        }
+
+    points_check = await check_video_points(db, user, req.model_id, resolved_options)
+    if not points_check.get("allowed"):
+        reason = str(points_check.get("reason", "")).lower()
+        raise HTTPException(429 if "points" in reason else 403, points_check)
+
+    settings = get_settings()
+    provider = get_video_provider(req.model_id)
+    provider_request_id = ""
+
+    if provider == "kling":
+        if not settings.kling_access_key or not settings.kling_secret_key:
+            raise HTTPException(502, "Kling API credentials are not configured")
+        from app.services.kling_client import create_kling_video
+
+        kling_model = "kling-v2-master"
+        if "v1" in req.model_id:
+            kling_model = "kling-v1-6"
+        submit_result = await create_kling_video(
+            settings.kling_access_key,
+            settings.kling_secret_key,
+            req.prompt,
+            model=kling_model,
+            source_image_url=req.source_image_url,
         )
+        if "error" in submit_result:
+            raise HTTPException(502, f"Ошибка генерации: {submit_result['error']}")
+        provider_request_id = f"kling:{submit_result['task_id']}"
+    elif provider == "novita":
+        if not settings.novita_api_key:
+            raise HTTPException(502, "Novita API key is not configured")
+        from app.services.novita_client import create_novita_video
 
-    new_balance = balance
+        submit_result = await create_novita_video(
+            settings.novita_api_key,
+            req.prompt,
+            model=req.model_id,
+            source_image_url=req.source_image_url,
+            duration=int(resolved_options["duration"]),
+            resolution=str(resolved_options["resolution"]),
+            quality=str(resolved_options["quality"]),
+            mode=str(resolved_options["mode"]),
+        )
+        if "error" in submit_result:
+            raise HTTPException(502, f"Ошибка генерации: {submit_result['error']}")
+        provider_request_id = f"novita:{submit_result['task_id']}"
+        if submit_result.get("resolved_options"):
+            resolved_options = {
+                "duration": int(submit_result["resolved_options"]["duration"]),
+                "resolution": str(submit_result["resolved_options"]["resolution"]),
+                "mode": str(submit_result["resolved_options"]["mode"]),
+                "quality": str(submit_result["resolved_options"]["quality"]),
+            }
+    elif provider == "vertex":
+        if not settings.vertex_api_key:
+            raise HTTPException(502, "Vertex API key is not configured")
+        if req.source_image_url:
+            raise HTTPException(502, "Vertex image-to-video is not configured")
+        from app.services.vertex_client import create_vertex_video
+
+        submit_result = await create_vertex_video(settings.vertex_api_key, req.prompt)
+        if "error" in submit_result:
+            raise HTTPException(502, f"Ошибка генерации: {submit_result['error']}")
+        provider_request_id = f"vertex:{submit_result['task_id']}"
+    elif provider == "fal":
+        submit_result = await submit_video_generation(req.model_id, req.prompt, req.source_image_url)
+        if "error" in submit_result:
+            raise HTTPException(502, f"Ошибка генерации: {submit_result['error']}")
+        provider_request_id = submit_result["request_id"]
+    else:
+        raise HTTPException(502, f"Unsupported video provider: {provider}")
 
     task_id = str(uuid.uuid4())[:12]
     task = VideoTask(
@@ -141,113 +236,34 @@ async def generate_video(
         model_id=req.model_id,
         prompt=req.prompt,
         source_image_url=req.source_image_url,
-        status="pending",
-        cost_usd=actual_price,
-        provider_cost_usd=_get_video_provider_cost(req.model_id),
+        status="processing",
+        fal_request_id=provider_request_id,
+        cost_usd=0.0,
+        provider_cost_usd=float(points_check.get("cost_usd", _get_video_provider_cost(req.model_id)) or 0.0),
+        options_json=json.dumps(resolved_options, ensure_ascii=True),
+        points_charged=int(points_check.get("points_needed", 0) or 0),
     )
     db.add(task)
-    await db.flush()
 
-    settings = get_settings()
-    provider = get_video_provider(req.model_id)
-
-    if provider == "kling":
-        if not settings.kling_access_key or not settings.kling_secret_key:
-            task.status = "failed"
-            task.error_message = "Kling API credentials are not configured"
-            await db.commit()
-            raise HTTPException(502, "Kling API credentials are not configured")
-        from app.services.kling_client import create_kling_video
-
-        kling_model = "kling-v2-master"
-        if "v1" in req.model_id:
-            kling_model = "kling-v1-6"
-        result = await create_kling_video(
-            settings.kling_access_key,
-            settings.kling_secret_key,
-            req.prompt,
-            model=kling_model,
-            source_image_url=req.source_image_url,
-        )
-        if "error" in result:
-            task.status = "failed"
-            task.error_message = result["error"]
-            await db.commit()
-            raise HTTPException(502, f"Ошибка генерации: {result['error']}")
-        task.fal_request_id = f"kling:{result['task_id']}"
-        task.status = "processing"
-    elif provider == "novita":
-        if not settings.novita_api_key:
-            task.status = "failed"
-            task.error_message = "Novita API key is not configured"
-            await db.commit()
-            raise HTTPException(502, "Novita API key is not configured")
-        from app.services.novita_client import create_novita_video
-
-        result = await create_novita_video(
-            settings.novita_api_key,
-            req.prompt,
-            model=req.model_id,
-            source_image_url=req.source_image_url,
-        )
-        if "error" in result:
-            task.status = "failed"
-            task.error_message = result["error"]
-            await db.commit()
-            raise HTTPException(502, f"Ошибка генерации: {result['error']}")
-        task.fal_request_id = f"novita:{result['task_id']}"
-        task.status = "processing"
-    elif provider == "vertex":
-        if not settings.vertex_api_key:
-            task.status = "failed"
-            task.error_message = "Vertex API key is not configured"
-            await db.commit()
-            raise HTTPException(502, "Vertex API key is not configured")
-        if req.source_image_url:
-            task.status = "failed"
-            task.error_message = "Vertex image-to-video is not configured"
-            await db.commit()
-            raise HTTPException(502, "Vertex image-to-video is not configured")
-        from app.services.vertex_client import create_vertex_video
-
-        result = await create_vertex_video(settings.vertex_api_key, req.prompt)
-        if "error" in result:
-            task.status = "failed"
-            task.error_message = result["error"]
-            await db.commit()
-            raise HTTPException(502, f"Ошибка генерации: {result['error']}")
-        task.fal_request_id = f"vertex:{result['task_id']}"
-        task.status = "processing"
-    elif provider == "fal":
-        result = await submit_video_generation(
-            req.model_id,
-            req.prompt,
-            req.source_image_url,
-        )
-        if "error" in result:
-            task.status = "failed"
-            task.error_message = result["error"]
-            await db.commit()
-            raise HTTPException(502, f"Ошибка генерации: {result['error']}")
-        task.fal_request_id = result["request_id"]
-        task.status = "processing"
-    else:
-        task.status = "failed"
-        task.error_message = f"Unsupported video provider: {provider}"
-        await db.commit()
-        raise HTTPException(502, f"Unsupported video provider: {provider}")
-
+    apply_video_points_charge(user, points_check)
     await increment_usage(db, tg_id, req.model_id, tier)
-    if user:
-        user.total_requests = (user.total_requests or 0) + 1
+    user.total_requests = (user.total_requests or 0) + 1
     await db.commit()
+
+    points_left_after = max(
+        0,
+        int(points_check.get("points_left", 0) or 0) - int(points_check.get("points_needed", 0) or 0),
+    )
 
     return {
         "task_id": task_id,
         "status": "processing",
         "model": model["name"],
-        "cost_usd": price,
-        "balance_usd": new_balance,
+        "cost_usd": float(points_check.get("cost_usd", 0) or 0),
+        "points_charged": int(points_check.get("points_needed", 0) or 0),
+        "video_points_left": points_left_after,
+        "resolved_options": resolved_options,
+        "balance_usd": float(user.balance_usd or 0),
         "estimated_seconds": 60,
     }
 
@@ -330,7 +346,6 @@ async def video_status(
         task.status = "failed"
         task.error_message = provider_status.get("error", "Generation failed")
         await db.commit()
-
         return {
             "task_id": task.task_id,
             "status": "failed",
@@ -368,6 +383,9 @@ async def video_history(
                 "status": t.status,
                 "video_url": t.video_url,
                 "cost_usd": t.cost_usd,
+                "provider_cost_usd": t.provider_cost_usd,
+                "points_charged": t.points_charged,
+                "options": json.loads(t.options_json) if t.options_json else None,
                 "created_at": t.created_at.isoformat() if t.created_at else None,
             }
             for t in tasks
@@ -509,8 +527,8 @@ async def video_thumbnail(
             _thumb_cache[task_id] = thumb_bytes
             if len(_thumb_cache) > 200:
                 oldest = list(_thumb_cache.keys())[:100]
-                for k in oldest:
-                    _thumb_cache.pop(k, None)
+                for key in oldest:
+                    _thumb_cache.pop(key, None)
 
             return Response(
                 content=thumb_bytes,
@@ -552,10 +570,8 @@ async def _save_video_to_disk(
                 from app.database import async_session
 
                 async with async_session() as db:
-                    from sqlalchemy import select as sel
-
-                    r = await db.execute(sel(VideoTask).where(VideoTask.task_id == task_id))
-                    task = r.scalar_one_or_none()
+                    task_result = await db.execute(select(VideoTask).where(VideoTask.task_id == task_id))
+                    task = task_result.scalar_one_or_none()
                     if task:
                         task.video_url = local_url
                         await db.commit()
@@ -564,7 +580,7 @@ async def _save_video_to_disk(
 
                 async with async_session() as db:
                     provider_cost = 0.0
-                    task_result = await db.execute(sel(VideoTask).where(VideoTask.task_id == task_id))
+                    task_result = await db.execute(select(VideoTask).where(VideoTask.task_id == task_id))
                     task = task_result.scalar_one_or_none()
                     if task:
                         provider_cost = float(task.provider_cost_usd or 0)

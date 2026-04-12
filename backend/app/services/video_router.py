@@ -1,4 +1,4 @@
-"""Video generation service routing across fal.ai and other providers."""
+"""Video generation service routing and public video model metadata."""
 
 import logging
 
@@ -21,7 +21,7 @@ VIDEO_MODELS_REGISTRY = [
     # Tier 2: Working models
     {"id": "kling-v2", "name": "Kling v2 Master", "company": "Kuaishou", "provider": "kling", "fal_model": "direct-kling", "duration": "5-10s", "cost": 0.07, "price": 0.25, "active": False},
     {"id": "minimax", "name": "MiniMax Hailuo", "company": "MiniMax", "provider": "novita", "fal_model": "fal-ai/minimax-video", "duration": "5-10s", "cost": 0.25, "price": 0.28, "active": True},
-    {"id": "cogvideox", "name": "CogVideoX 5B", "company": "THUDM", "provider": "novita", "fal_model": "fal-ai/cogvideox-5b", "duration": "5s", "cost": 0.10, "price": 0.20, "active": True},
+    {"id": "cogvideox", "name": "CogVideoX 5B", "company": "THUDM", "provider": "novita", "fal_model": "fal-ai/cogvideox-5b", "duration": "5s", "cost": 0.10, "price": 0.20, "active": False},
     {"id": "mochi", "name": "Mochi v1", "company": "Genmo", "provider": "fal", "fal_model": "fal-ai/mochi-v1", "duration": "5s", "cost": 0.40, "price": 0.18, "active": False},
     {"id": "pixverse-v5", "name": "PixVerse v4.5", "company": "PixVerse", "provider": "novita", "fal_model": "fal-ai/pixverse/v4.5", "duration": "5-10s", "cost": 0.07, "price": 0.22, "active": True},
     {"id": "luma-dream", "name": "Luma Dream Machine", "company": "Luma", "provider": "novita", "fal_model": "fal-ai/luma-dream-machine", "duration": "5s", "cost": 0.18, "price": 0.35, "active": True},
@@ -55,6 +55,8 @@ def get_video_provider(model_id: str) -> str:
 
 
 def get_video_models_list() -> list[dict]:
+    from app.services.provider_costs import get_default_video_options, get_novita_video_variants
+
     return [
         {
             "id": m["id"],
@@ -62,7 +64,12 @@ def get_video_models_list() -> list[dict]:
             "company": m["company"],
             "duration": m["duration"],
             "price_usd": m["price"],
+            "provider": m.get("provider", "novita"),
             "category": "video",
+            "supports_text": any(v["mode"] == "t2v" for v in get_novita_video_variants(m["id"])),
+            "supports_image": any(v["mode"] == "i2v" for v in get_novita_video_variants(m["id"])),
+            "default_options": get_default_video_options(m["id"]),
+            "variants": get_novita_video_variants(m["id"]),
         }
         for m in VIDEO_MODELS_REGISTRY
         if m.get("active", True)

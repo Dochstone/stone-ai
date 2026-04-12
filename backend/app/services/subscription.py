@@ -92,6 +92,14 @@ PLANS = {
 }
 
 
+VIDEO_POINTS_PLANS = {
+    "free": {"points_per_month": 0, "trial_points_lifetime": 2},
+    "mini": {"points_per_month": 13, "trial_standard": 1, "trial_premium": 1},
+    "max": {"points_per_month": 33},
+    "max-pro": {"points_per_month": 80},
+}
+
+
 # Note: old credit-based system (CREDIT_COSTS) removed — billing is now
 # per-token for chat (free via daily limits) and fixed-price for tools.
 
@@ -147,3 +155,8 @@ def is_opus_model(model_id: str) -> bool:
 def get_plan(tier: str) -> dict:
     """Return plan definition."""
     return PLANS.get(tier, PLANS["free"])
+
+
+def get_video_points_plan(tier: str) -> dict:
+    """Return video points plan for a subscription tier."""
+    return VIDEO_POINTS_PLANS.get(tier, VIDEO_POINTS_PLANS["free"])

@@ -1,9 +1,14 @@
-"""Novita.ai video generation client for all active Stone video SKUs."""
+"""Novita.ai video generation client for active Stone video SKUs."""
 
 import json
 import logging
 
 import httpx
+
+from app.services.provider_costs import (
+    get_default_video_options,
+    get_novita_variant_metadata,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -89,18 +94,15 @@ def _headers(api_key: str) -> dict:
     }
 
 
-def _build_simple_body(prompt: str, source_image_url: str | None) -> dict:
-    body: dict = {"prompt": prompt}
-    if source_image_url:
-        body["image"] = source_image_url
-    return body
+def _wan_size(resolution: str) -> str:
+    return "1920*1080" if resolution == "1080P" else "1280*720"
 
 
-def _build_minimax_body(prompt: str, source_image_url: str | None) -> dict:
+def _build_minimax_body(prompt: str, source_image_url: str | None, *, duration: int, resolution: str) -> dict:
     body: dict = {
         "prompt": prompt,
-        "duration": 6,
-        "resolution": "768P",
+        "duration": duration,
+        "resolution": resolution,
         "enable_prompt_expansion": True,
     }
     if source_image_url:
@@ -108,12 +110,12 @@ def _build_minimax_body(prompt: str, source_image_url: str | None) -> dict:
     return body
 
 
-def _build_wan_body(prompt: str, source_image_url: str | None) -> dict:
+def _build_wan_body(prompt: str, source_image_url: str | None, *, duration: int, resolution: str) -> dict:
     body: dict = {
         "input": {"prompt": prompt},
         "parameters": {
-            "size": "1920*1080",
-            "duration": 5,
+            "size": _wan_size(resolution),
+            "duration": duration,
             "prompt_extend": True,
             "watermark": False,
         },
@@ -123,12 +125,12 @@ def _build_wan_body(prompt: str, source_image_url: str | None) -> dict:
     return body
 
 
-def _build_vidu_body(prompt: str, source_image_url: str | None) -> dict:
+def _build_vidu_body(prompt: str, source_image_url: str | None, *, duration: int, resolution: str) -> dict:
     body: dict = {
         "prompt": prompt,
-        "duration": 5,
+        "duration": duration,
         "aspect_ratio": "16:9",
-        "resolution": "1080p",
+        "resolution": resolution.lower(),
         "movement_amplitude": "medium",
     }
     if source_image_url:
@@ -136,49 +138,82 @@ def _build_vidu_body(prompt: str, source_image_url: str | None) -> dict:
     return body
 
 
-def _build_pixverse_body(prompt: str, source_image_url: str | None) -> dict:
+def _build_pixverse_body(
+    prompt: str,
+    source_image_url: str | None,
+    *,
+    resolution: str,
+    quality: str,
+) -> dict:
     body: dict = {
         "prompt": prompt,
         "aspect_ratio": "16:9",
-        "resolution": "540p",
-        "fast_mode": True,
+        "resolution": resolution.lower(),
+        "fast_mode": quality == "fast",
     }
     if source_image_url:
         body["image"] = source_image_url
     return body
 
 
-def _build_hunyuan_fast_body(prompt: str, source_image_url: str | None) -> dict:
-    body: dict = {
+def _build_hunyuan_fast_body(prompt: str, *, width: int = 1280, height: int = 720) -> dict:
+    return {
         "model_name": "hunyuan-video-fast",
         "prompt": prompt,
-        "width": 1280,
-        "height": 720,
+        "width": width,
+        "height": height,
         "steps": 30,
         "seed": -1,
     }
-    if source_image_url:
-        body["image"] = source_image_url
-    return body
 
 
-def _build_body(config: dict, prompt: str, source_image_url: str | None) -> tuple[str, dict]:
+def _build_body(
+    config: dict,
+    prompt: str,
+    source_image_url: str | None,
+    *,
+    duration: int,
+    resolution: str,
+    quality: str,
+) -> tuple[str, dict]:
     use_image = bool(source_image_url)
     endpoint = config["image_endpoint"] if use_image else config["text_endpoint"]
     family = config.get("image_family") if use_image and config.get("image_family") else config["family"]
 
     if family == "minimax":
-        body = _build_minimax_body(prompt, source_image_url)
+        body = _build_minimax_body(
+            prompt,
+            source_image_url,
+            duration=duration,
+            resolution=resolution,
+        )
     elif family == "wan":
-        body = _build_wan_body(prompt, source_image_url)
+        body = _build_wan_body(
+            prompt,
+            source_image_url,
+            duration=duration,
+            resolution=resolution,
+        )
     elif family == "vidu":
-        body = _build_vidu_body(prompt, source_image_url)
+        body = _build_vidu_body(
+            prompt,
+            source_image_url,
+            duration=duration,
+            resolution=resolution,
+        )
     elif family == "pixverse":
-        body = _build_pixverse_body(prompt, source_image_url)
+        body = _build_pixverse_body(
+            prompt,
+            source_image_url,
+            resolution=resolution,
+            quality=quality,
+        )
     elif family == "hunyuan_fast":
-        body = _build_hunyuan_fast_body(prompt, source_image_url)
+        body = _build_hunyuan_fast_body(prompt)
     else:
-        body = _build_simple_body(prompt, source_image_url)
+        body = {"prompt": prompt}
+        if source_image_url:
+            body["image"] = source_image_url
 
     return endpoint, body
 
@@ -190,19 +225,16 @@ def _extract_video_url(data: dict) -> str | None:
     if isinstance(videos, list) and videos:
         first = videos[0]
         if isinstance(first, dict):
-            return (
-                first.get("video_url")
-                or first.get("url")
-                or first.get("media_url")
-            )
+            return first.get("video_url") or first.get("url") or first.get("media_url")
         if isinstance(first, str) and first.startswith("http"):
             return first
 
+    output = data.get("output") or {}
     return (
         data.get("video_url")
         or task.get("video_url")
-        or data.get("output", {}).get("video_url")
-        or data.get("output", {}).get("url")
+        or output.get("video_url")
+        or output.get("url")
     )
 
 
@@ -211,13 +243,50 @@ async def create_novita_video(
     prompt: str,
     model: str = "minimax",
     source_image_url: str | None = None,
+    duration: int | None = None,
+    resolution: str | None = None,
+    quality: str | None = None,
+    mode: str | None = None,
 ) -> dict:
-    """Submit video generation to Novita.ai. Returns {"task_id": str} or {"error": str}."""
+    """Submit video generation to Novita.ai."""
     config = NOVITA_MODEL_MAP.get(model)
     if not config:
         return {"error": f"Unknown Novita model: {model}"}
 
-    endpoint, body = _build_body(config, prompt, source_image_url)
+    requested_mode = mode or ("i2v" if source_image_url else "t2v")
+    selected = get_default_video_options(model, mode=requested_mode)
+    if duration is not None:
+        selected["duration"] = duration
+    if resolution is not None:
+        selected["resolution"] = resolution
+    if quality is not None:
+        selected["quality"] = quality
+    selected["mode"] = requested_mode
+
+    try:
+        variant = get_novita_variant_metadata(
+            model_id=model,
+            duration=int(selected["duration"]),
+            resolution=str(selected["resolution"]),
+            mode=str(selected["mode"]),
+            quality=str(selected["quality"]),
+        )
+    except ValueError as e:
+        return {"error": str(e)}
+
+    if source_image_url and str(variant["mode"]) != "i2v":
+        return {"error": f"Model {model} does not support image-to-video for this variant"}
+    if not source_image_url and str(variant["mode"]) != "t2v":
+        return {"error": f"Model {model} requires a source image for this variant"}
+
+    endpoint, body = _build_body(
+        config,
+        prompt,
+        source_image_url,
+        duration=int(variant["duration"]),
+        resolution=str(variant["resolution"]),
+        quality=str(variant["quality"]),
+    )
 
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
@@ -244,7 +313,15 @@ async def create_novita_video(
                 logger.error(f"Novita no task_id in response for {model}: {data}")
                 return {"error": "Novita did not return task_id"}
 
-            return {"task_id": task_id}
+            return {
+                "task_id": task_id,
+                "resolved_options": {
+                    "duration": int(variant["duration"]),
+                    "resolution": str(variant["resolution"]),
+                    "mode": str(variant["mode"]),
+                    "quality": str(variant["quality"]),
+                },
+            }
 
     except httpx.TimeoutException:
         return {"error": "Novita timeout"}
@@ -254,7 +331,7 @@ async def create_novita_video(
 
 
 async def check_novita_status(api_key: str, task_id: str) -> dict:
-    """Check Novita.ai video status. Returns {"status": ..., "video_url"?: str}."""
+    """Check Novita.ai video status."""
     try:
         async with httpx.AsyncClient(timeout=15.0) as client:
             resp = await client.get(

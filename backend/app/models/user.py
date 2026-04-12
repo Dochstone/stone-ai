@@ -98,6 +98,11 @@ class User(Base):
     monthly_3d_used: Mapped[int] = mapped_column(Integer, server_default=text("0"))
     monthly_audio_used: Mapped[int] = mapped_column(Integer, server_default=text("0"))
     opus_requests_used: Mapped[int] = mapped_column(Integer, server_default=text("0"))
+    video_points_used: Mapped[int] = mapped_column(Integer, server_default=text("0"))
+    video_points_reset_date = mapped_column(Date, nullable=True)
+    trial_video_points_used: Mapped[int] = mapped_column(Integer, server_default=text("0"))
+    trial_start_standard_used: Mapped[bool] = mapped_column(Boolean, server_default=text("false"))
+    trial_start_premium_used: Mapped[bool] = mapped_column(Boolean, server_default=text("false"))
 
     def __repr__(self):
         return f"<User telegram_id={self.telegram_id} username={self.username}>"

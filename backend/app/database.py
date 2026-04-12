@@ -77,6 +77,11 @@ async def migrate_users_table():
         ("monthly_3d_used", "INTEGER DEFAULT 0"),
         ("monthly_audio_used", "INTEGER DEFAULT 0"),
         ("opus_requests_used", "INTEGER DEFAULT 0"),
+        ("video_points_used", "INTEGER DEFAULT 0"),
+        ("video_points_reset_date", "DATE"),
+        ("trial_video_points_used", "INTEGER DEFAULT 0"),
+        ("trial_start_standard_used", "BOOLEAN DEFAULT false"),
+        ("trial_start_premium_used", "BOOLEAN DEFAULT false"),
         # Banning
         ("is_banned", "BOOLEAN DEFAULT false"),
         ("ban_reason", "VARCHAR(256)"),
@@ -160,5 +165,13 @@ async def init_db():
             await conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS pending_discount VARCHAR(256)"))
         except Exception:
             pass
+        for sql in [
+            "ALTER TABLE video_tasks ADD COLUMN IF NOT EXISTS options_json TEXT",
+            "ALTER TABLE video_tasks ADD COLUMN IF NOT EXISTS points_charged INTEGER DEFAULT 0",
+        ]:
+            try:
+                await conn.execute(text(sql))
+            except Exception:
+                pass
 
     logger.info("Database initialization complete")

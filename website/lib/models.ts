@@ -78,7 +78,7 @@ export const MODELS: AIModel[] = [
   { id: "perplexity-sonar", name: "Perplexity Sonar", company: "Perplexity", tier: "pro", category: "search", context: "127K", speed: "fast", description: "AI поиск с актуальными данными из интернета. Ссылки на источники.", strengths: ["Поиск", "Актуальные данные", "Быстрый"] },
   { id: "perplexity-sonar-deep", name: "Sonar Deep Research", company: "Perplexity", tier: "pro", category: "search", context: "127K", speed: "slow", description: "Глубокое исследование с мультишаговым поиском. Для аналитики и research.", strengths: ["Deep Research", "Мультишаговый", "Аналитика"] },
 
-  // TIER 7: VIDEO GENERATION (12 models)
+  // TIER 7: VIDEO GENERATION
   { id: "sora-2", name: "Sora 2 Pro", company: "OpenAI", tier: "pro", category: "video", context: "5-10s", speed: "slow", description: "Видео-модель от OpenAI. Лучшая физика, сложные сцены, точное следование промптам.", strengths: ["OpenAI", "Физика", "Сложные сцены"] },
   { id: "veo-3", name: "Veo 3.1", company: "Google", tier: "pro", category: "video", context: "5-10s", speed: "medium", description: "Видео от Google. Нативное 4K, лучший lip-sync и диалоги, звуковой дизайн.", strengths: ["4K", "Lip-sync", "Звук"] },
   { id: "luma-ray2", name: "Luma Ray 2", company: "Luma", tier: "pro", category: "video", context: "5-10s", speed: "medium", description: "Новейшая модель от Luma. Кинематографичное качество, отличная физика и детализация.", strengths: ["Топ качество", "Физика", "Кинематографичное"] },
@@ -87,8 +87,9 @@ export const MODELS: AIModel[] = [
   { id: "pixverse-v5", name: "PixVerse v5", company: "PixVerse", tier: "pro", category: "video", context: "5-10s", speed: "medium", description: "Кинематографичная камера, плавное движение, хороший контроль сцены.", strengths: ["Камера", "Плавное", "Контроль"] },
   { id: "luma-dream", name: "Luma Dream", company: "Luma", tier: "pro", category: "video", context: "5s", speed: "medium", description: "Dream Machine от Luma. Реалистичная физика и кинематичные переходы.", strengths: ["Физика", "Переходы", "5с"] },
   { id: "pika-2", name: "Pika 2.0", company: "Pika", tier: "pro", category: "video", context: "3-5s", speed: "fast", description: "Самая быстрая генерация (<90 сек). Идеальна для соцсетей и коротких клипов.", strengths: ["Самая быстрая", "Соцсети", "3-5с"] },
+  { id: "wan-2", name: "Wan 2.6", company: "Alibaba", tier: "pro", category: "video", context: "5-15s", speed: "medium", description: "Гибкая видео-модель с выбором длительности и 720P/1080P. Подходит для длинных кинематографичных сцен.", strengths: ["5-15с", "720P/1080P", "Гибкая"] },
+  { id: "hunyuan", name: "Hunyuan Video Fast", company: "Tencent", tier: "pro", category: "video", context: "5s", speed: "fast", description: "Быстрый text-to-video вариант для черновиков и простых сцен.", strengths: ["Быстрая", "Черновики", "5с"] },
   { id: "ltx-video", name: "LTX Video 2.3", company: "Lightricks", tier: "pro", category: "video", context: "5s", speed: "fast", description: "Open source видео-модель. Быстрая генерация с поддержкой аудио.", strengths: ["Быстрая", "Open source", "Аудио"] },
-  { id: "cogvideox", name: "CogVideoX", company: "Zhipu", tier: "pro", category: "video", context: "5s", speed: "medium", description: "Модель от Zhipu AI. Хорошая детализация и плавные движения.", strengths: ["Детализация", "Плавное", "Качественная"] },
   { id: "stable-video", name: "Stable Video", company: "Stability", tier: "pro", category: "video", context: "4s", speed: "medium", description: "Стабильное качество от Stability AI. Надёжная и предсказуемая.", strengths: ["Стабильная", "Надёжная", "4с"] },
 
   // TIER 8: 3D GENERATION (2 models)

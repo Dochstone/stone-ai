@@ -1,7 +1,7 @@
 """VideoTask model — tracks async video generation jobs."""
 
 from datetime import datetime
-from sqlalchemy import BigInteger, String, Text, DateTime, Float, func
+from sqlalchemy import BigInteger, String, Text, DateTime, Float, Integer, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
@@ -23,6 +23,8 @@ class VideoTask(Base):
     duration_seconds: Mapped[float | None] = mapped_column(Float, nullable=True)
     cost_usd: Mapped[float] = mapped_column(Float, default=0.0)
     provider_cost_usd: Mapped[float] = mapped_column(Float, default=0.0)
+    options_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    points_charged: Mapped[int] = mapped_column(Integer, default=0)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

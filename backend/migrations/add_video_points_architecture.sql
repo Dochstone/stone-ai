@@ -1,0 +1,8 @@
+ALTER TABLE users ADD COLUMN IF NOT EXISTS video_points_used INTEGER DEFAULT 0;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS video_points_reset_date DATE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS trial_video_points_used INTEGER DEFAULT 0;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS trial_start_standard_used BOOLEAN DEFAULT false;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS trial_start_premium_used BOOLEAN DEFAULT false;
+
+ALTER TABLE video_tasks ADD COLUMN IF NOT EXISTS options_json TEXT;
+ALTER TABLE video_tasks ADD COLUMN IF NOT EXISTS points_charged INTEGER DEFAULT 0;
