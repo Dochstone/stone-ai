@@ -161,15 +161,29 @@ export default function PricingPage() {
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-2xl md:text-3xl font-extrabold text-center mb-3">Что входит в каждый тариф</h2>
-        <p className="text-text/40 text-sm text-center mb-10">Подробное сравнение всех возможностей</p>
+        <p className="text-text/40 text-sm text-center mb-6">Подробное сравнение всех возможностей</p>
+
+        <div className="bg-accent/[0.03] border border-accent/15 rounded-2xl p-4 sm:p-5 mb-8 max-w-3xl mx-auto">
+          <div className="text-[13px] text-text/70 leading-relaxed">
+            <span className="font-bold text-accent">Как считается лимит:</span>{" "}
+            один запрос к обычной модели = 1 единица. Тяжёлые модели тратят больше:
+            <span className="inline-block bg-amber-500/15 text-amber-700 font-semibold px-1.5 py-0.5 rounded text-[11px] mx-1">×2</span>
+            Sonnet, GPT-5.1, Mistral Large;
+            <span className="inline-block bg-rose-500/15 text-rose-700 font-semibold px-1.5 py-0.5 rounded text-[11px] mx-1">×5</span>
+            Claude Opus, Nano Banana Pro.
+            <br />
+            <span className="font-bold">Видео-поинты</span> отдельный счётчик: дешёвое видео = 1 поинт, премиум 1080P/10 сек = 2-4 поинта.
+          </div>
+        </div>
+
         <div className="overflow-x-auto rounded-2xl border border-text/[0.06] bg-bg shadow-sm">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-text/[0.02]">
                 <th className="text-left py-4 px-5 text-text/50 font-semibold text-xs uppercase tracking-wider">Функция</th>
                 <th className="text-center py-4 px-4 min-w-[90px]">
-                  <span className="text-xs font-bold text-[#14B8A6]">Free</span>
-                  <p className="text-[10px] text-text/30 mt-0.5">0₽</p>
+                  <span className="text-xs font-bold text-[#14B8A6]">Pay-per-Use</span>
+                  <p className="text-[10px] text-text/30 mt-0.5">от 3₽/запрос</p>
                 </th>
                 <th className="text-center py-4 px-4 min-w-[90px]">
                   <span className="text-xs font-bold text-[#22D3EE]">{startPlan.name}</span>
