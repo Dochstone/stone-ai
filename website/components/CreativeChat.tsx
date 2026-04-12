@@ -64,6 +64,7 @@ const MODE_MODELS: Record<Mode, { id: string; name: string }[]> = {
   video: [
     { id: "sora-2", name: "Sora 2 Pro" },
     { id: "veo-3", name: "Veo 3.1" },
+    { id: "kling-v2", name: "Kling v2.1 Master" },
     { id: "minimax", name: "MiniMax Hailuo" },
     { id: "pika-2", name: "Pika 2" },
     { id: "wan-2", name: "Wan 2.6" },
