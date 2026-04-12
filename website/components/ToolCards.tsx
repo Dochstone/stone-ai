@@ -508,7 +508,7 @@ export default function ToolCards() {
             <div className="relative z-10 p-6 flex flex-col justify-end h-full pointer-events-none">
               <span className="inline-block bg-red-500/30 text-red-300 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-2 w-fit">5 моделей</span>
               <h3 className="font-bold text-lg text-white mb-1">ИИ Видео</h3>
-              <p className="text-white/70 text-[13px]">Sora, Runway, Pika — нейросеть создаёт видео из текста или фото. От $0.15</p>
+              <p className="text-white/70 text-[13px]">Sora, Veo 3, Kling, Pika — нейросеть создаёт видео из текста или фото. От $0.15</p>
             </div>
           </a>
 

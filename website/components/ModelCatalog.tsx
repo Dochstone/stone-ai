@@ -39,7 +39,6 @@ const companyColors: Record<string, string> = {
   NVIDIA: "bg-lime-500/10 text-lime-600",
   Gryphe: "bg-red-500/10 text-red-600",
   Kuaishou: "bg-red-500/10 text-red-600",
-  Runway: "bg-slate-500/10 text-slate-600",
   Pika: "bg-pink-500/10 text-pink-600",
   Luma: "bg-indigo-500/10 text-indigo-600",
   Tripo3D: "bg-cyan-500/10 text-cyan-600",

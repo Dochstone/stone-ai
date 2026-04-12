@@ -8,11 +8,11 @@ import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Генерация видео нейросетью — ИИ из текста в видео",
-  description: "Нейросеть для генерации видео из текста и фото. ИИ-модели Sora 2, Veo 3, Runway Gen-3, Pika 2.0. От $0.15 за видео.",
+  description: "Нейросеть для генерации видео из текста и фото. ИИ-модели Sora 2, Veo 3, Kling 3.0, Pika 2.0. От $0.15 за видео.",
   alternates: { canonical: "/video" },
   openGraph: {
     title: "Генерация видео нейросетью — ИИ из текста в видео",
-    description: "Нейросеть для генерации видео из текста и фото. ИИ-модели Sora 2, Veo 3, Runway Gen-3, Pika 2.0. От $0.15 за видео.",
+    description: "Нейросеть для генерации видео из текста и фото. ИИ-модели Sora 2, Veo 3, Kling 3.0, Pika 2.0. От $0.15 за видео.",
   },
 };
 
@@ -39,8 +39,8 @@ const examples = [
 ];
 
 const faqItems = [
-  { q: "Сколько времени занимает генерация?", a: "От 4 до 30 секунд в зависимости от модели. Pika и Stable Video — быстрее всех. Sora и Runway — дольше, но качественнее." },
-  { q: "Можно ли анимировать свою фотографию?", a: "Да! Загрузите фото и опишите движение. Поддерживают image-to-video: Runway, Stable Video, Luma." },
+  { q: "Сколько времени занимает генерация?", a: "От 4 до 30 секунд в зависимости от модели. Pika и Stable Video — быстрее всех. Sora и Veo 3 — дольше, но качественнее." },
+  { q: "Можно ли анимировать свою фотографию?", a: "Да! Загрузите фото и опишите движение. Поддерживают image-to-video: Stable Video, Luma, Kling, PixVerse." },
   { q: "Какой формат видео?", a: "MP4 файл, который можно скачать и использовать где угодно. Длительность: 3-10 секунд." },
   { q: "Сколько видео включено в подписку?", a: "Start — 3 видео/мес, Pro — 10 видео/мес, Elite — 50 видео/мес. Если генерация не удалась — попытка не засчитывается." },
 ];
@@ -53,12 +53,12 @@ export default function VideoPage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bcJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Stone AI — AI Видео", applicationCategory: "MultimediaApplication", description: "Генерация видео из текста и фото. Sora 2, Veo 3, Runway Gen-3, Pika 2.0.", offers: { "@type": "Offer", price: "0.15", priceCurrency: "USD" } }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Stone AI — AI Видео", applicationCategory: "MultimediaApplication", description: "Генерация видео из текста и фото. Sora 2, Veo 3, Kling 3.0, Pika 2.0.", offers: { "@type": "Offer", price: "0.15", priceCurrency: "USD" } }) }} />
       <ToolPageHero breadcrumb="AI Видео"
         badge="5 нейросетей для видео"
         title="Генерация видео нейросетью"
         highlight="из текста и фото"
-        description="ИИ-генератор видео: Sora 2, Veo 3, Runway Gen-3, Pika 2.0, Luma. Нейросеть создаёт видео за секунды. От $0.15 за клип."
+        description="ИИ-генератор видео: Sora 2, Veo 3, Kling 3.0, Pika 2.0, Luma. Нейросеть создаёт видео за секунды. От $0.15 за клип."
       />
       <ToolModels
         title="Видео-модели"

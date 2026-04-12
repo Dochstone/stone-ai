@@ -128,7 +128,7 @@ export default function PrivacyPage() {
               <li>OpenAI — модели GPT-5, GPT-4o, DALL-E, Whisper (текст, картинки, аудио);</li>
               <li>Anthropic — модели Claude (текст, анализ);</li>
               <li>Google — модели Gemini, Veo (текст, картинки, видео);</li>
-              <li>FAL.ai — генерация видео и 3D (Sora, Runway, Kling, Tripo);</li>
+              <li>FAL.ai — генерация видео и 3D (Sora, Kling, Tripo);</li>
               <li>Kling (Kuaishou) — генерация видео через прямой API;</li>
               <li>Platega — обработка платежей картами РФ и СБП;</li>
               <li>Heleket — обработка платежей в криптовалюте;</li>

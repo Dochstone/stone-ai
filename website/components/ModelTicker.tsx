@@ -8,7 +8,7 @@ const PROVIDERS = [
   { name: "Mistral", weight: "400", style: "" },
   { name: "Stability AI", weight: "300", style: "" },
   { name: "ElevenLabs", weight: "500", style: "" },
-  { name: "Runway", weight: "700", style: "" },
+  { name: "Kuaishou", weight: "700", style: "" },
   { name: "OpenAI", weight: "800", style: "" },
   { name: "Anthropic", weight: "500", style: "" },
   { name: "Google", weight: "500", style: "" },
@@ -17,7 +17,7 @@ const PROVIDERS = [
   { name: "Meta", weight: "700", style: "" },
   { name: "Stability AI", weight: "300", style: "" },
   { name: "ElevenLabs", weight: "500", style: "" },
-  { name: "Runway", weight: "700", style: "" },
+  { name: "Luma", weight: "700", style: "" },
   { name: "Mistral", weight: "400", style: "" },
 ];
 

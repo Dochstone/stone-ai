@@ -81,7 +81,7 @@ export default function DemoShowcase() {
                 <span className="text-sm">🎬</span>
                 <span className="text-sm font-bold text-text">AI Видео</span>
               </div>
-              <p className="text-xs text-text/40 mb-2">5-10 секунд видео из текста. Sora, Runway, Pika.</p>
+              <p className="text-xs text-text/40 mb-2">5-10 секунд видео из текста. Sora, Veo 3, Kling, Pika.</p>
               <a href="/webchat?category=video" className="text-xs text-accent font-semibold hover:underline">Попробовать →</a>
             </div>
           </div>

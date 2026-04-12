@@ -268,10 +268,6 @@ function TrustMarquee() {
       <ProviderLogo>
         <span style={{ fontSize: 18, fontWeight: 600, color: "#6366F1" }}>Perplexity</span>
       </ProviderLogo>
-      {/* Runway */}
-      <ProviderLogo>
-        <span className="text-xl font-extrabold text-text/70" style={{ letterSpacing: "-0.02em" }}>Runway</span>
-      </ProviderLogo>
       {/* ElevenLabs */}
       <ProviderLogo>
         <span className="text-lg font-semibold text-text/70">ElevenLabs</span>
