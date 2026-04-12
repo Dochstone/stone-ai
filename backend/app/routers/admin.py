@@ -781,9 +781,15 @@ async def web_admin_audit_log(
         filters.append(AdminAuditLog.admin_user_id == admin_id)
     if action:
         filters.append(AdminAuditLog.action == action)
+    # admin_audit_log.created_at is TIMESTAMP WITHOUT TIME ZONE — strip tz from inputs
+    # to avoid asyncpg "can't subtract offset-naive and offset-aware datetimes" error.
     if from_date is not None:
+        if from_date.tzinfo is not None:
+            from_date = from_date.astimezone(tz=None).replace(tzinfo=None)
         filters.append(AdminAuditLog.created_at >= from_date)
     if to_date is not None:
+        if to_date.tzinfo is not None:
+            to_date = to_date.astimezone(tz=None).replace(tzinfo=None)
         filters.append(AdminAuditLog.created_at <= to_date)
 
     total = await db.scalar(
