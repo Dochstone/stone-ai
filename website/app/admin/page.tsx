@@ -375,6 +375,12 @@ export default function AdminPage() {
             <p className="text-text/40 text-sm mt-0.5">Stone AI — панель управления</p>
           </div>
           <div className="flex items-center gap-2">
+            <a
+              href="/admin/audit-log"
+              className="px-3 py-2 rounded-xl text-sm font-semibold text-text/60 hover:text-text hover:bg-text/[0.04] transition-colors"
+            >
+              Audit Log
+            </a>
             <button onClick={loadTab} className="p-2.5 rounded-xl text-text/30 hover:text-text/60 hover:bg-text/[0.04] transition-colors" title="Обновить">
               <Icon d={ICONS.refresh} />
             </button>
