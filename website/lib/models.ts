@@ -67,6 +67,27 @@ export interface AIModel {
   description?: string;
   strengths?: string[];
   speed?: string;
+  weight?: number; // how many limit units this model consumes per call (default 1)
+}
+
+// Weight = how many requests this model consumes from the daily/weekly limit.
+// Mirrors backend MODEL_WEIGHTS in daily_limits.py.
+export const MODEL_WEIGHTS: Record<string, number> = {
+  "claude-opus-4": 5,
+  "claude-opus-4.5": 5,
+  "mistral-large-25": 3,
+  "claude-sonnet-4": 2,
+  "claude-sonnet-4.5": 2,
+  "gpt-5.1": 2,
+  "gpt-5.4": 2,
+  "grok-3": 2,
+  "perplexity-sonar-pro": 2,
+  "nano-banana-pro": 5,
+  "gpt-5-image": 3,
+};
+
+export function getModelWeight(modelId: string): number {
+  return MODEL_WEIGHTS[modelId] || 1;
 }
 
 export const TELEGRAM_BOT_URL = "https://t.me/drifttt55bot";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { MODELS, type AIModel, type UserLimits, type VideoGenerationOptions, type VideoModelMeta } from "@/lib/models";
+import { MODELS, getModelWeight, type AIModel, type UserLimits, type VideoGenerationOptions, type VideoModelMeta } from "@/lib/models";
 import AuthFormComponent, { type AuthState } from "@/components/AuthForm";
 import PromptLibrary from "@/components/prompts/PromptLibrary";
 import DualChatView from "@/components/chat/DualChatView";
@@ -1861,6 +1861,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                     return (speedOrder[a.speed || "medium"] || 2) - (speedOrder[b.speed || "medium"] || 2);
                   }).map(m => {
                     const lock = getModelLockInfo(m.id, bal, limits?.plan);
+                    const weight = getModelWeight(m.id);
                     return (
                       <button key={m.id} onClick={() => {
                         if (lock) { setLockModal({ model: m.name, tier: lock.tier, price: lock.price }); setModelPickerOpen(false); return; }
@@ -1869,7 +1870,19 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                         selectedModel === m.id ? "bg-accent/5 border border-accent/20" : "hover:bg-text/[0.03] active:bg-text/[0.06]"
                       } ${lock ? "opacity-50" : ""}`}>
                         <div className="flex-1 min-w-0">
-                          <span className="text-[14px] sm:text-sm font-semibold truncate block">{lock ? "🔒 " : ""}{m.name}</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[14px] sm:text-sm font-semibold truncate">{lock ? "🔒 " : ""}{m.name}</span>
+                            {weight > 1 && !lock && (
+                              <span
+                                title={`Тяжёлая модель: 1 запрос = ${weight} единицы лимита`}
+                                className={`text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
+                                  weight >= 5 ? "bg-rose-500/15 text-rose-600" : "bg-amber-500/15 text-amber-600"
+                                }`}
+                              >
+                                ×{weight}
+                              </span>
+                            )}
+                          </div>
                           <span className="text-[11px] sm:text-[10px] text-text/30">{m.company} · {m.category === "image" ? "🎨 Фото" : m.category === "video" ? "🎬 Видео" : m.category === "search" ? "🔍 Поиск" : m.category === "reason" ? "🧠 Анализ" : m.category === "code" ? "💻 Код" : m.category === "3d" ? "🧊 3D" : "📝 Текст"}</span>
                           {m.strengths && m.strengths.length > 0 && (
                             <div className="flex flex-wrap gap-1 mt-1">
@@ -1877,7 +1890,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                                 <span key={si} className="text-[9px] bg-text/[0.04] text-text/40 px-1.5 py-0.5 rounded">{s}</span>
                               ))}
                               {m.id === "veo-3" && (
-                                <span className="text-[9px] bg-teal/10 text-teal font-bold px-1.5 py-0.5 rounded">1 бесплатно</span>
+                                <span className="text-[9px] bg-teal/10 text-teal font-bold px-1.5 py-0.5 rounded">2 пробных</span>
                               )}
                               {m.id === "nano-banana" && (
                                 <span className="text-[9px] bg-teal/10 text-teal font-bold px-1.5 py-0.5 rounded">2 бесплатно</span>
@@ -2271,9 +2284,14 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                 onClick={() => setModelPickerOpen(!modelPickerOpen)}
                 data-onboard="model-picker"
                 className="shrink-0 flex items-center gap-1 px-2 py-1.5 rounded-lg bg-text/[0.04] hover:bg-text/[0.08] text-[11px] font-semibold text-text/60 transition-colors max-w-[120px] sm:max-w-[160px]"
-                title={model?.name}
+                title={model ? `${model.name}${getModelWeight(model.id) > 1 ? ` · 1 запрос = ${getModelWeight(model.id)} единиц лимита` : ""}` : undefined}
               >
                 <span className="truncate">{model?.name?.split(" ").slice(0, 2).join(" ") || "Модель"}</span>
+                {model && getModelWeight(model.id) > 1 && (
+                  <span className={`text-[9px] font-bold px-1 py-0 rounded shrink-0 ${
+                    getModelWeight(model.id) >= 5 ? "bg-rose-500/15 text-rose-600" : "bg-amber-500/15 text-amber-600"
+                  }`}>×{getModelWeight(model.id)}</span>
+                )}
                 <svg className="w-3 h-3 shrink-0 text-text/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" d="M19 9l-7 7-7-7" />
                 </svg>

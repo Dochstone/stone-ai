@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import AuthFormComponent, { type AuthState } from "@/components/AuthForm";
 import VideoOptionsPanel from "@/components/VideoOptionsPanel";
-import { MODELS, type UserLimits, type VideoGenerationOptions, type VideoModelMeta } from "@/lib/models";
+import { MODELS, getModelWeight, type UserLimits, type VideoGenerationOptions, type VideoModelMeta } from "@/lib/models";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
@@ -760,19 +760,29 @@ export default function CreativeChat({ initialMode }: { initialMode?: Mode } = {
         </div>
         {/* Model chips — horizontal scroll */}
         <div className="max-w-3xl mx-auto px-3 sm:px-4 py-1.5 flex items-center gap-1.5 overflow-x-auto">
-          {(mode === "video" ? videoChipModels : MODE_MODELS[mode]).map((m) => (
+          {(mode === "video" ? videoChipModels : MODE_MODELS[mode]).map((m) => {
+            const w = getModelWeight(m.id);
+            return (
             <button
               key={m.id}
               onClick={() => setSelectedModel(m.id)}
-              className={`px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-semibold whitespace-nowrap transition-colors shrink-0 ${
+              title={w > 1 ? `1 запрос = ${w} единиц лимита` : undefined}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-semibold whitespace-nowrap transition-colors shrink-0 ${
                 selectedModel === m.id
                   ? `${modeConfig.bg} text-white`
                   : "bg-text/[0.04] text-text/35 hover:text-text/60"
               }`}
             >
               {m.name}
-            </button>
-          ))}
+              {w > 1 && (
+                <span className={`text-[8px] font-bold px-1 py-0 rounded ${
+                  selectedModel === m.id
+                    ? "bg-white/20 text-white"
+                    : w >= 5 ? "bg-rose-500/15 text-rose-600" : "bg-amber-500/15 text-amber-600"
+                }`}>×{w}</span>
+              )}
+            </button>);
+          })}
         </div>
       </div>
 
