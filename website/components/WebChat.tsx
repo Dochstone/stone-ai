@@ -414,14 +414,33 @@ function Sidebar({
         </div>}
 
         {/* Current model badge — chats list is filtered to this model */}
-        {selectedModel && sessions.length > 0 && (
-          <div className="px-4 pt-2 pb-1.5 flex items-center gap-1.5">
-            <span className="text-[9px] font-bold text-text/35 uppercase tracking-[1.5px]">Чаты с</span>
-            <span className="text-[10px] font-bold text-accent truncate">
-              {MODELS_MAP.get(selectedModel)?.name || selectedModel}
-            </span>
-          </div>
-        )}
+        {selectedModel && (() => {
+          const m = MODELS_MAP.get(selectedModel);
+          if (!m) return null;
+          const color = companyColors[m.company] || "#C4623D";
+          return (
+            <div className="px-3 pt-3 pb-2">
+              <div
+                className="flex items-center gap-2.5 px-3 py-2 rounded-xl border"
+                style={{
+                  background: `linear-gradient(135deg, ${color}10, ${color}05)`,
+                  borderColor: `${color}25`,
+                }}
+              >
+                <div
+                  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-white text-[11px] font-extrabold shadow-sm"
+                  style={{ background: color }}
+                >
+                  {(companyIcons[m.company] || m.company[0] || "A").toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[9px] font-bold uppercase tracking-[1.5px]" style={{ color }}>История</div>
+                  <div className="text-[12px] font-bold text-text truncate leading-tight">{m.name}</div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Chat sessions list */}
         <div className="flex-1 overflow-y-auto px-2">
