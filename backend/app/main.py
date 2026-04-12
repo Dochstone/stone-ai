@@ -240,12 +240,25 @@ async def lifespan(app: FastAPI):
 
     video_worker_task = asyncio.create_task(video_worker_loop())
 
+    async def ton_cleanup_loop():
+        """Mark expired TON orders every 5 minutes."""
+        while True:
+            await asyncio.sleep(300)
+            try:
+                from app.services.ton import cleanup_expired_orders
+                cleanup_expired_orders()
+            except Exception as e:
+                logger.error(f"TON cleanup error: {e}")
+
+    ton_cleanup_task = asyncio.create_task(ton_cleanup_loop())
+
     yield
 
     # Shutdown
     rollover_task.cancel()
     cleanup_task.cancel()
     video_worker_task.cancel()
+    ton_cleanup_task.cancel()
     if bot:
         await bot.session.close()
     logger.info("👋 Stone AI shut down")
