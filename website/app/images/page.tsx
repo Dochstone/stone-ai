@@ -22,8 +22,6 @@ const modelIds = [
   "nano-banana-pro",
   "gpt-5-image",
   "gpt-5-image-mini",
-  "flux-schnell",
-  "stable-diffusion-xl",
   "nano-banana",
 ];
 
@@ -31,8 +29,6 @@ const modelDescriptions: Record<string, string> = {
   "nano-banana-pro": "Лучшее качество. Генерация и редактирование через Gemini 3 Pro. Фотореализм.",
   "gpt-5-image": "Топовая генерация от OpenAI. Понимает сложные промпты, точно следует инструкциям.",
   "gpt-5-image-mini": "Быстрая генерация от OpenAI. Хорошее качество за меньшую цену.",
-  "flux-schnell": "Самая дешёвая генерация — $0.012 за картинку. Быстро, стильно, креативно.",
-  "stable-diffusion-xl": "Классика AI-арта. $0.04 за картинку. Огромное количество стилей.",
   "nano-banana": "Редактирование существующих изображений через Gemini Flash. Дёшево и быстро.",
 };
 

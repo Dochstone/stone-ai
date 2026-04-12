@@ -16,12 +16,11 @@ export const metadata: Metadata = {
   },
 };
 
-const modelIds = ["sora-2", "veo-3", "runway-gen3", "minimax", "pixverse-v5", "luma-dream", "pika-2", "wan-2", "hunyuan", "ltx-video", "stable-video"];
+const modelIds = ["sora-2", "veo-3", "minimax", "pixverse-v5", "luma-dream", "pika-2", "wan-2", "hunyuan", "ltx-video", "stable-video"];
 
 const modelDescriptions: Record<string, string> = {
   "sora-2": "Видео от OpenAI. Лучшая физика и точное следование промптам.",
   "veo-3": "Google Veo 3.1. Нативное 4K, лучший lip-sync и звуковой дизайн.",
-  "runway-gen3": "Индустриальный стандарт. Кинематографическое качество для профи.",
   "minimax": "Быстрая генерация. Анимация персонажей, плавное движение.",
   "pixverse-v5": "Кинематографичная камера, контроль сцены, плавные переходы.",
   "luma-dream": "Dream Machine от Luma. Реалистичная физика и переходы.",

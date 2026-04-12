@@ -60,8 +60,6 @@ const MODE_MODELS: Record<Mode, { id: string; name: string }[]> = {
     { id: "nano-banana", name: "Nano Banana" },
     { id: "gpt-5-image", name: "GPT-5 Image" },
     { id: "gpt-5-image-mini", name: "GPT-5 Image mini" },
-    { id: "flux-schnell", name: "Flux Schnell" },
-    { id: "stable-diffusion-xl", name: "Stable Diffusion XL" },
   ],
   video: [
     { id: "sora-2", name: "Sora 2 Pro" },
@@ -73,10 +71,7 @@ const MODE_MODELS: Record<Mode, { id: string; name: string }[]> = {
     { id: "stable-video", name: "Stable Video" },
     { id: "luma-dream", name: "Luma Dream" },
   ],
-  "3d": [
-    { id: "tripo-v2.5", name: "Tripo v2.5" },
-    { id: "triposr", name: "TripoSR" },
-  ],
+  "3d": [],
 };
 
 const MODE_PLACEHOLDERS: Record<Mode, string> = {
