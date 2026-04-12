@@ -99,14 +99,14 @@ NOVITA_COSTS: dict[str, float] = {
     "luma-ray2": 0.18,
     "luma-ray2-flash": 0.10,
     "minimax": 0.25,
-    "cogvideox": 0.08,
+    "cogvideox": 0.10,
     "pixverse-v5": 0.07,
     "luma-dream": 0.18,
     "pika-2": 0.07,
     "wan-2": 0.12,
     "hunyuan": 0.10,
     "ltx-video": 0.18,
-    "stable-video": 0.024,
+    "stable-video": 0.12,
 }
 
 VERTEX_COSTS: dict[str, float] = {

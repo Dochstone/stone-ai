@@ -21,7 +21,7 @@ VIDEO_MODELS_REGISTRY = [
     # Tier 2: Working models
     {"id": "kling-v2", "name": "Kling v2 Master", "company": "Kuaishou", "provider": "kling", "fal_model": "direct-kling", "duration": "5-10s", "cost": 0.07, "price": 0.25, "active": False},
     {"id": "minimax", "name": "MiniMax Hailuo", "company": "MiniMax", "provider": "novita", "fal_model": "fal-ai/minimax-video", "duration": "5-10s", "cost": 0.25, "price": 0.28, "active": True},
-    {"id": "cogvideox", "name": "CogVideoX 5B", "company": "THUDM", "provider": "novita", "fal_model": "fal-ai/cogvideox-5b", "duration": "5s", "cost": 0.08, "price": 0.20, "active": True},
+    {"id": "cogvideox", "name": "CogVideoX 5B", "company": "THUDM", "provider": "novita", "fal_model": "fal-ai/cogvideox-5b", "duration": "5s", "cost": 0.10, "price": 0.20, "active": True},
     {"id": "mochi", "name": "Mochi v1", "company": "Genmo", "provider": "fal", "fal_model": "fal-ai/mochi-v1", "duration": "5s", "cost": 0.40, "price": 0.18, "active": False},
     {"id": "pixverse-v5", "name": "PixVerse v4.5", "company": "PixVerse", "provider": "novita", "fal_model": "fal-ai/pixverse/v4.5", "duration": "5-10s", "cost": 0.07, "price": 0.22, "active": True},
     {"id": "luma-dream", "name": "Luma Dream Machine", "company": "Luma", "provider": "novita", "fal_model": "fal-ai/luma-dream-machine", "duration": "5s", "cost": 0.18, "price": 0.35, "active": True},
@@ -30,7 +30,7 @@ VIDEO_MODELS_REGISTRY = [
     {"id": "wan-2", "name": "Wan 2.6", "company": "Alibaba", "provider": "novita", "fal_model": "fal-ai/wan/v2.6/text-to-video", "duration": "5-10s", "cost": 0.12, "price": 0.15, "active": True},
     {"id": "hunyuan", "name": "Hunyuan Video", "company": "Tencent", "provider": "novita", "fal_model": "fal-ai/hunyuan-video", "duration": "5s", "cost": 0.10, "price": 0.18, "active": True},
     {"id": "ltx-video", "name": "LTX Video 2.3", "company": "Lightricks", "provider": "novita", "fal_model": "fal-ai/ltx-2-19b", "duration": "5s", "cost": 0.18, "price": 0.12, "active": True},
-    {"id": "stable-video", "name": "Stable Video", "company": "Stability", "provider": "novita", "fal_model": "fal-ai/stable-video", "duration": "4s", "cost": 0.024, "price": 0.15, "active": True},
+    {"id": "stable-video", "name": "Stable Video", "company": "Stability", "provider": "novita", "fal_model": "fal-ai/stable-video", "duration": "4s", "cost": 0.12, "price": 0.15, "active": True},
 ]
 
 VIDEO_MODEL_MAP = {m["id"]: m for m in VIDEO_MODELS_REGISTRY}

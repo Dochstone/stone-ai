@@ -17,8 +17,8 @@ NOVITA_MODEL_MAP: dict[str, dict] = {
         "family": "wan",
     },
     "veo-3": {
-        "text_endpoint": "minimax-hailuo-02",
-        "image_endpoint": "minimax-hailuo-02",
+        "text_endpoint": "minimax-video-01",
+        "image_endpoint": "minimax-video-01",
         "family": "minimax",
     },
     "luma-ray2": {
@@ -33,14 +33,15 @@ NOVITA_MODEL_MAP: dict[str, dict] = {
         "image_family": "pixverse",
     },
     "minimax": {
-        "text_endpoint": "minimax-hailuo-02",
-        "image_endpoint": "minimax-hailuo-02",
+        "text_endpoint": "minimax-video-01",
+        "image_endpoint": "minimax-video-01",
         "family": "minimax",
     },
     "cogvideox": {
-        "text_endpoint": "cogvideox-3",
-        "image_endpoint": "cogvideox-3",
-        "family": "simple",
+        "text_endpoint": "hunyuan-video-fast",
+        "image_endpoint": "pixverse-v4.5-i2v",
+        "family": "hunyuan_fast",
+        "image_family": "pixverse",
     },
     "pixverse-v5": {
         "text_endpoint": "pixverse-v4.5-t2v",
@@ -74,9 +75,9 @@ NOVITA_MODEL_MAP: dict[str, dict] = {
         "family": "vidu",
     },
     "stable-video": {
-        "text_endpoint": "stable-video-diffusion",
-        "image_endpoint": "stable-video-diffusion",
-        "family": "simple",
+        "text_endpoint": "wan2.6-t2v",
+        "image_endpoint": "wan2.6-i2v",
+        "family": "wan",
     },
 }
 
@@ -127,7 +128,7 @@ def _build_vidu_body(prompt: str, source_image_url: str | None) -> dict:
         "prompt": prompt,
         "duration": 5,
         "aspect_ratio": "16:9",
-        "resolution": "720p",
+        "resolution": "1080p",
         "movement_amplitude": "medium",
     }
     if source_image_url:
