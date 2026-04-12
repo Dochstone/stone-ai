@@ -167,6 +167,7 @@ export const MODELS: AIModel[] = [
   { id: "ltx-video", name: "LTX Video 2.3", company: "Lightricks", tier: "pro", category: "video", context: "5s", speed: "fast", description: "Open source видео-модель. Быстрая генерация с поддержкой аудио.", strengths: ["Быстрая", "Open source", "Аудио"] },
   { id: "stable-video", name: "Stable Video", company: "Stability", tier: "pro", category: "video", context: "4s", speed: "medium", description: "Стабильное качество от Stability AI. Надёжная и предсказуемая.", strengths: ["Стабильная", "Надёжная", "4с"] },
   { id: "kling-v2", name: "Kling v2.1 Master", company: "Kuaishou", tier: "pro", category: "video", context: "5-10s", speed: "medium", description: "Топовая китайская модель. Лучшие лица, lip-sync и кинематографичные сцены. 1080p.", strengths: ["1080P", "Лица", "Lip-sync"] },
+  { id: "runway-gen3", name: "Runway Gen-3 Alpha", company: "Runway", tier: "pro", category: "video", context: "5-10s", speed: "medium", description: "Image-to-video от Runway. Продвинутое управление камерой и движением, баланс скорости и качества.", strengths: ["Image-to-video", "Камера", "Runway"] },
 
   // TIER 8: 3D GENERATION (2 models)
   { id: "tripo-v2.5", name: "Tripo v2.5", company: "Tripo3D", tier: "pro", category: "3d", context: "25-100s", speed: "slow", description: "Text/Image → 3D с PBR текстурами. Высокое качество для игр и визуализации.", strengths: ["PBR текстуры", "Text-to-3D", "Game-ready"] },

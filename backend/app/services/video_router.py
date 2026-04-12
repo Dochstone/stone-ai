@@ -17,7 +17,7 @@ VIDEO_MODELS_REGISTRY = [
     {"id": "veo-3", "name": "Veo 3.1", "company": "Google", "provider": "novita", "fal_model": "fal-ai/veo3.1", "duration": "5-10s", "cost": 0.25, "price": 0.65, "active": True},
     {"id": "luma-ray2", "name": "Luma Ray 2", "company": "Luma", "provider": "novita", "fal_model": "fal-ai/luma-dream-machine/ray-2", "duration": "5-10s", "cost": 0.18, "price": 0.50, "active": True},
     {"id": "luma-ray2-flash", "name": "Luma Ray 2 Flash", "company": "Luma", "provider": "novita", "fal_model": "fal-ai/luma-dream-machine/ray-2-flash", "duration": "5-10s", "cost": 0.10, "price": 0.30, "active": True},
-    {"id": "runway-gen3", "name": "Runway Gen-3 Alpha", "company": "Runway", "provider": "fal", "fal_model": "fal-ai/runway-gen3/turbo/image-to-video", "duration": "5-10s", "cost": 0.25, "price": 0.85, "active": False},
+    {"id": "runway-gen3", "name": "Runway Gen-3 Alpha", "company": "Runway", "provider": "fal", "fal_model": "fal-ai/runway-gen3/turbo/image-to-video", "duration": "5-10s", "cost": 0.25, "price": 0.85, "active": True},
     # Tier 2: Working models
     {"id": "kling-v2", "name": "Kling v2.1 Master", "company": "Kuaishou", "provider": "novita", "fal_model": "direct-kling", "duration": "5-10s", "cost": 0.35, "price": 0.55, "active": True},
     {"id": "minimax", "name": "MiniMax Hailuo", "company": "MiniMax", "provider": "novita", "fal_model": "fal-ai/minimax-video", "duration": "5-10s", "cost": 0.25, "price": 0.28, "active": True},
