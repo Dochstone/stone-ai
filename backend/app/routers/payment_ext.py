@@ -7,7 +7,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, text
+from sqlalchemy import select, text, update
 
 from app.database import get_db
 from app.middleware.auth import get_current_user
@@ -566,15 +566,42 @@ async def heleket_webhook(request: Request, db: AsyncSession = Depends(get_db)):
 
     status = body.get("status")
     payment_uuid = body.get("uuid", "")
+    provider_id = f"heleket:{payment_uuid}"
 
     logger.info(f"Heleket webhook: status={status}, uuid={payment_uuid}")
 
+    terminal_failure_statuses = {"fail", "cancel", "system_fail", "wrong_amount"}
+    terminal_refund_statuses = {"refund_paid"}
+
+    if status in terminal_failure_statuses:
+        await db.execute(
+            update(Transaction)
+            .where(
+                Transaction.provider_id == provider_id,
+                Transaction.status == "pending",
+            )
+            .values(status="failed")
+        )
+        await db.commit()
+        logger.info(f"Heleket: marked as failed, uuid={payment_uuid}, status={status}")
+        return {"ok": True, "message": f"Marked failed: {status}"}
+
+    if status in terminal_refund_statuses:
+        await db.execute(
+            update(Transaction)
+            .where(Transaction.provider_id == provider_id)
+            .values(status="refunded")
+        )
+        await db.commit()
+        logger.info(f"Heleket: marked as refunded, uuid={payment_uuid}")
+        return {"ok": True, "message": "Marked refunded"}
+
     if status not in ("paid", "paid_over"):
-        return {"ok": True, "message": f"Ignored status: {status}"}
+        return {"ok": True, "message": f"Intermediate status: {status}"}
 
     tx, already_processed = await _claim_pending_transaction(
         db,
-        provider_id=f"heleket:{payment_uuid}",
+        provider_id=provider_id,
     )
     if already_processed:
         return {"ok": True, "message": "Already processed"}
