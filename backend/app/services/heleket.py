@@ -27,16 +27,25 @@ logger = logging.getLogger(__name__)
 HELEKET_API_BASE = "https://api.heleket.com/v1"
 
 
+def _serialize_heleket_body(data: dict) -> str:
+    return json.dumps(data, sort_keys=True, separators=(",", ":"))
+
+
+def _heleket_sign_body(api_key: str, body_str: str) -> str:
+    """Sign an already-serialized Heleket JSON body."""
+    import base64
+
+    b64 = base64.b64encode(body_str.encode("utf-8")).decode("utf-8")
+    raw = b64 + api_key
+    return hashlib.md5(raw.encode("utf-8")).hexdigest()
+
+
 def _heleket_sign(api_key: str, data: dict) -> str:
     """Generate MD5 signature for Heleket API.
 
     Heleket uses: md5(base64(json_body) + api_key) — passed in 'sign' header.
     """
-    import base64
-    json_str = json.dumps(data)
-    b64 = base64.b64encode(json_str.encode("utf-8")).decode("utf-8")
-    raw = b64 + api_key
-    return hashlib.md5(raw.encode("utf-8")).hexdigest()
+    return _heleket_sign_body(api_key, _serialize_heleket_body(data))
 
 
 def verify_webhook_signature(body: bytes, received_sign: str, api_key: str) -> bool:
@@ -92,8 +101,8 @@ async def create_invoice(
         data["url_success"] = url_success
 
     # Must use same json string for sign and body
-    body_str = json.dumps(data)
-    sign = _heleket_sign(settings.heleket_api_key, data)
+    body_str = _serialize_heleket_body(data)
+    sign = _heleket_sign_body(settings.heleket_api_key, body_str)
 
     headers = {
         "Content-Type": "application/json",
@@ -145,8 +154,8 @@ async def check_invoice_status(payment_uuid: str) -> dict | None:
         "uuid": payment_uuid,
     }
 
-    body_str = json.dumps(data)
-    sign = _heleket_sign(settings.heleket_api_key, data)
+    body_str = _serialize_heleket_body(data)
+    sign = _heleket_sign_body(settings.heleket_api_key, body_str)
 
     headers = {
         "Content-Type": "application/json",
