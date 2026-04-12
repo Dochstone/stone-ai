@@ -48,12 +48,6 @@ OPENROUTER_IMAGE_MODELS = {"nano-banana", "nano-banana-pro"}
 MAX_IMAGE_BASE64_LEN = 14_000_000  # ~10 MB decoded
 
 
-def _validate_image_size(b64: str):
-    """Reject base64 images larger than ~10 MB."""
-    raw = b64.split(",", 1)[-1] if "," in b64 else b64
-    if len(raw) > MAX_IMAGE_BASE64_LEN:
-        raise HTTPException(413, "Изображение слишком большое. Максимум 10 МБ.")
-
 
 class BackgroundRequest(BaseModel):
     image_base64: str = Field(..., max_length=MAX_IMAGE_BASE64_LEN, description="Base64-encoded product image (for reference in prompt)")
@@ -130,13 +124,6 @@ async def _find_user(db: AsyncSession, tg_user: dict) -> User:
         raise HTTPException(404, "Пользователь не найден")
     return user
 
-
-def _resolve_model(model_id: str | None) -> str:
-    """Resolve model_id to an OpenRouter model identifier."""
-    mid = model_id or DEFAULT_IMAGE_MODEL
-    if mid not in OPENROUTER_IMAGE_MODELS:
-        mid = DEFAULT_IMAGE_MODEL
-    return get_openrouter_model(mid)
 
 
 async def _check_and_deduct(db: AsyncSession, user: User, cost_usd: float) -> tuple[float, bool]:
@@ -563,3 +550,4 @@ async def batch_process(
         "processed": sum(1 for r in results if r["status"] == "ok"),
         "failed": sum(1 for r in results if r["status"] == "error"),
     }
+
