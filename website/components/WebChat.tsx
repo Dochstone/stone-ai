@@ -273,6 +273,7 @@ function Sidebar({
   plan,
   activeCategory,
   onCategoryChange,
+  selectedModel,
   embedded,
 }: {
   open: boolean;
@@ -289,6 +290,7 @@ function Sidebar({
   plan?: string;
   activeCategory: string;
   onCategoryChange: (id: string) => void;
+  selectedModel?: string;
   embedded?: boolean;
 }) {
   const [sidebarSearch, setSidebarSearch] = useState("");
@@ -411,6 +413,16 @@ function Sidebar({
           </div>
         </div>}
 
+        {/* Current model badge — chats list is filtered to this model */}
+        {selectedModel && sessions.length > 0 && (
+          <div className="px-4 pt-2 pb-1.5 flex items-center gap-1.5">
+            <span className="text-[9px] font-bold text-text/35 uppercase tracking-[1.5px]">Чаты с</span>
+            <span className="text-[10px] font-bold text-accent truncate">
+              {MODELS_MAP.get(selectedModel)?.name || selectedModel}
+            </span>
+          </div>
+        )}
+
         {/* Chat sessions list */}
         <div className="flex-1 overflow-y-auto px-2">
           {sessionsLoading && sessions.length === 0 ? (
@@ -442,8 +454,23 @@ function Sidebar({
                   const m = MODELS_MAP.get(s.model_id);
                   // If model is unknown — keep visible (legacy/deleted models). Otherwise filter by category.
                   if (m && allowedCats.length > 0 && !allowedCats.includes(m.category)) return false;
+                  // Show only sessions matching the currently selected model — each model has its own chat list
+                  if (selectedModel && s.model_id !== selectedModel) return false;
                   return true;
                 });
+
+                if (filtered.length === 0) {
+                  const modelName = selectedModel ? (MODELS_MAP.get(selectedModel)?.name || selectedModel) : "этой моделью";
+                  return (
+                    <div className="px-3 py-8 text-center">
+                      <img src="/mascots/stone-mascot-chat.webp" alt="Stone" width="56" height="56" className="mx-auto mb-2 opacity-50" />
+                      <p className="text-[11px] text-text/40 leading-snug">
+                        Нет чатов с <span className="font-semibold text-text/60">{modelName}</span>.<br />
+                        Напишите сообщение, чтобы начать.
+                      </p>
+                    </div>
+                  );
+                }
                 const now = new Date();
                 const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
                 const yesterday = new Date(today.getTime() - 86400000);
@@ -1050,6 +1077,28 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
     setActiveSessionId(null);
     setMessages([]);
   }, []);
+
+  // Switch model — load latest chat with this model, or start fresh empty one.
+  // Each model has its own independent chat history.
+  const switchToModelChat = useCallback((newModelId: string) => {
+    setSelectedModel(newModelId);
+    if (selectedModel === newModelId) return;
+
+    const existingChat = sessions
+      .filter(s => s.model_id === newModelId)
+      .sort((a, b) => {
+        const ta = a.updated_at ? new Date(a.updated_at).getTime() : 0;
+        const tb = b.updated_at ? new Date(b.updated_at).getTime() : 0;
+        return tb - ta;
+      })[0];
+
+    if (existingChat) {
+      loadSession(existingChat.id);
+    } else {
+      setMessages([]);
+      setActiveSessionId(null);
+    }
+  }, [sessions, selectedModel, loadSession]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -1784,17 +1833,29 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         onShareSession={shareSession}
         plan={limits?.plan}
         activeCategory={modelCatFilter}
+        selectedModel={selectedModel}
         embedded={embedded}
         onCategoryChange={(id) => {
           if (modelCatFilter !== id) {
             tabMessagesRef.current[modelCatFilter] = messages;
             tabSessionRef.current[modelCatFilter] = activeSessionId;
-            const savedMessages = tabMessagesRef.current[id] || [];
-            const savedSession = tabSessionRef.current[id] ?? null;
             setModelCatFilter(id);
-            setActiveSessionId(savedSession);
-            setMessages(savedMessages);
-            if (id === "health" || id === "free") setSelectedModel(DEFAULT_MODEL);
+            // Pick a sensible default model for this category, then jump to its latest chat
+            const catCats: Record<string, string[]> = { image: ["image"], video: ["video"], "3d": ["3d"], all: ["chat", "search", "reason", "code"], free: ["chat", "search", "reason", "code"], health: ["chat"] };
+            const allowedCats = catCats[id] || [];
+            let nextModel = selectedModel;
+            const currentModel = MODELS_MAP.get(selectedModel);
+            const currentFits = currentModel && allowedCats.includes(currentModel.category);
+            if (!currentFits) {
+              if (id === "free" || id === "health") {
+                nextModel = DEFAULT_MODEL;
+              } else if (allowedCats.length > 0) {
+                const match = MODELS.find(m => allowedCats.includes(m.category) && FREE_MODEL_IDS.has(m.id))
+                  || MODELS.find(m => allowedCats.includes(m.category));
+                if (match) nextModel = match.id;
+              }
+            }
+            switchToModelChat(nextModel);
           }
         }}
       />
@@ -1909,7 +1970,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                     return (
                       <button key={m.id} onClick={() => {
                         if (lock) { setLockModal({ model: m.name, tier: lock.tier, price: lock.price }); setModelPickerOpen(false); return; }
-                        setSelectedModel(m.id); setModelPickerOpen(false); setModelSearchRaw(""); setModelSearch("");
+                        switchToModelChat(m.id); setModelPickerOpen(false); setModelSearchRaw(""); setModelSearch("");
                       }} className={`w-full flex items-start gap-3 px-3 py-3 sm:py-2.5 rounded-xl text-left transition-colors ${
                         selectedModel === m.id ? "bg-accent/5 border border-accent/20" : "hover:bg-text/[0.03] active:bg-text/[0.06]"
                       } ${lock ? "opacity-50" : ""}`}>
