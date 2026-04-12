@@ -284,30 +284,32 @@ export default function AuditLogPage() {
 
   return (
     <div className="min-h-screen bg-bg text-text">
-      {/* Header */}
-      <div className="sticky top-0 z-20 bg-bg/95 backdrop-blur-sm border-b border-text/5">
+      {/* Header (non-sticky to avoid overlap with admin nav) */}
+      <div className="border-b border-text/5">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-4">
-          <div className="flex items-center justify-between gap-4 mb-4">
-            <div>
-              <div className="flex items-center gap-2 text-xs text-text/50 mb-1">
-                <a href="/admin" className="hover:text-text transition">Админка</a>
-                <span>/</span>
-                <span>Журнал действий</span>
+          <div className="flex items-center justify-between gap-4 mb-3">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 text-xs text-text/50 mb-0.5">
+                <a href="/admin" className="hover:text-text transition">← Админка</a>
               </div>
-              <h1 className="text-2xl font-bold">Журнал действий администраторов</h1>
-              <p className="text-sm text-text/50 mt-1">
-                {total === 0 ? "Записей пока нет" : `Всего записей: ${total.toLocaleString("ru-RU")}`}
-              </p>
+              <h1 className="text-xl md:text-2xl font-bold truncate">
+                Журнал действий
+                {total > 0 && (
+                  <span className="ml-2 text-sm font-normal text-text/50">
+                    · {total.toLocaleString("ru-RU")}
+                  </span>
+                )}
+              </h1>
             </div>
             <button
               onClick={() => {
                 setPage(0);
                 load();
               }}
-              className="px-3 py-2 rounded-xl bg-surface border border-text/10 hover:border-text/20 text-sm font-semibold transition"
+              className="flex-shrink-0 px-3 py-2 rounded-xl bg-surface border border-text/10 hover:border-text/20 text-sm font-semibold transition"
               disabled={loading}
             >
-              {loading ? "Загрузка…" : "Обновить"}
+              {loading ? "…" : "Обновить"}
             </button>
           </div>
 
