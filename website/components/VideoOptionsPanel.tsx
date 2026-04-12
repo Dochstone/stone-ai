@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { VideoGenerationOptions, VideoMode, VideoModelMeta, VideoVariant } from "@/lib/models";
 
 const TIER_MAX_POINTS: Record<string, number> = {
@@ -193,17 +193,67 @@ export default function VideoOptionsPanel({
 
   const enoughPoints = currentVariant ? pointsLeft >= currentVariant.points : true;
 
+  const [expanded, setExpanded] = useState(false);
+
+  // Compact mode — collapsed view
+  if (!expanded) {
+    return (
+      <div className="mb-2.5 rounded-2xl border border-text/[0.08] bg-gradient-to-br from-text/[0.02] to-text/[0.04] backdrop-blur-sm">
+        <button
+          type="button"
+          onClick={() => setExpanded(true)}
+          className="w-full flex items-center justify-between gap-3 px-3 py-2.5 hover:bg-text/[0.02] rounded-2xl transition-colors"
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-7 h-7 rounded-lg bg-accent/15 flex items-center justify-center text-sm shrink-0">🎬</div>
+            <div className="flex items-center gap-1.5 text-[11px] text-text/65 truncate">
+              <span className="font-semibold text-text/85">{model.name}</span>
+              <span className="text-text/30">·</span>
+              <span>{formatModeIcon(effectiveOptions.mode)} {formatDurationLabel(effectiveOptions.duration)}</span>
+              <span className="text-text/30">·</span>
+              <span>{formatResolutionLabel(effectiveOptions.resolution)}</span>
+              {currentVariant && (
+                <>
+                  <span className="text-text/30">·</span>
+                  <span className={`font-semibold ${
+                    lockedReason ? "text-amber-600" : !enoughPoints ? "text-rose-600" : "text-accent"
+                  }`}>
+                    {currentVariant.points}пт
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="text-[10px] text-text/40">
+              {pointsLeft}/{pointsTotal || pointsLeft}
+            </span>
+            <span className="text-text/40 text-xs">▼</span>
+          </div>
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="mb-2.5 rounded-2xl border border-text/[0.08] bg-gradient-to-br from-text/[0.02] to-text/[0.04] p-4 backdrop-blur-sm">
       {/* Header */}
       <div className="flex items-start justify-between gap-3 mb-4 pb-3 border-b border-text/[0.06]">
-        <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setExpanded(false)}
+          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          title="Свернуть"
+        >
           <div className="w-8 h-8 rounded-xl bg-accent/15 flex items-center justify-center text-base">🎬</div>
-          <div>
-            <div className="text-[12px] font-bold text-text/85">Параметры видео</div>
+          <div className="text-left">
+            <div className="text-[12px] font-bold text-text/85 flex items-center gap-1">
+              Параметры видео
+              <span className="text-text/40 text-[10px]">▲</span>
+            </div>
             <div className="text-[10px] text-text/40 mt-0.5">{model.name}</div>
           </div>
-        </div>
+        </button>
         <div className="text-right min-w-[110px]">
           <div className="flex items-center justify-end gap-1.5">
             <span className="text-[10px]">🪙</span>
