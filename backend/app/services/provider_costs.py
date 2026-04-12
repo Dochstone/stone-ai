@@ -186,6 +186,7 @@ NOVITA_PUBLIC_MODEL_FAMILY: dict[str, str] = {
     "hunyuan": "hunyuan-video-fast",
     "luma-ray2-flash": "hunyuan-video-fast",
     "stable-video": "stable-video",
+    "kling-v2": "kling-v2.1",
 }
 
 
@@ -241,6 +242,12 @@ NOVITA_PRICING_TABLE: dict[str, list[dict[str, str | int | float]]] = {
     "stable-video": [
         _variant(4, "1024X576", "i2v", "standard", 0.0134),
         _variant(4, "1024X576", "i2v", "xt", 0.0240),
+    ],
+    "kling-v2.1": [
+        _variant(5, "1080P", "t2v", "standard", 0.35),
+        _variant(10, "1080P", "t2v", "standard", 0.70),
+        _variant(5, "1080P", "i2v", "standard", 0.35),
+        _variant(10, "1080P", "i2v", "standard", 0.70),
     ],
 }
 

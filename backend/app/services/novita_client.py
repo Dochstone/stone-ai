@@ -84,6 +84,11 @@ NOVITA_MODEL_MAP: dict[str, dict] = {
         "image_endpoint": "wan2.6-i2v",
         "family": "wan",
     },
+    "kling-v2": {
+        "text_endpoint": "kling-v2.1-t2v-master",
+        "image_endpoint": "kling-v2.1-i2v-master",
+        "family": "kling",
+    },
 }
 
 
@@ -167,6 +172,16 @@ def _build_hunyuan_fast_body(prompt: str, *, width: int = 1280, height: int = 72
     }
 
 
+def _build_kling_body(prompt: str, source_image_url: str | None, *, duration: int) -> dict:
+    body: dict = {
+        "prompt": prompt,
+        "duration": str(duration),
+    }
+    if source_image_url:
+        body["image"] = source_image_url
+    return body
+
+
 def _build_body(
     config: dict,
     prompt: str,
@@ -210,6 +225,8 @@ def _build_body(
         )
     elif family == "hunyuan_fast":
         body = _build_hunyuan_fast_body(prompt)
+    elif family == "kling":
+        body = _build_kling_body(prompt, source_image_url, duration=duration)
     else:
         body = {"prompt": prompt}
         if source_image_url:
