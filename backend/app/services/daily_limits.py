@@ -130,6 +130,36 @@ FREE_PLAN_MODELS = {
 }
 
 
+# Per-model request weight — how many "units" each call consumes from the daily/weekly limit.
+# Default = 1. Expensive models cost more so heavy use does not blow margin.
+# Calibrated against OPENROUTER_COSTS to keep worst-case spend within tariff price.
+MODEL_WEIGHTS: dict[str, int] = {
+    # FAST tier — most cost weight 1, mistral-large is 15x flash so weight 3
+    "mistral-large-25": 3,
+
+    # PREMIUM tier — Sonnet ($3/$15) and gpt-5.1 ($2/$16) are 2x of typical premium
+    "claude-sonnet-4": 2,
+    "claude-sonnet-4.5": 2,
+    "gpt-5.1": 2,
+    "gpt-5.4": 2,
+    "grok-3": 2,
+    "perplexity-sonar-pro": 2,
+
+    # OPUS tier — $15/$75 is ~5x of typical premium models
+    "claude-opus-4": 5,
+    "claude-opus-4.5": 5,
+
+    # IMAGE — nano-banana-pro and gpt-5-image are most expensive
+    "gpt-5-image": 3,
+    "nano-banana-pro": 5,
+}
+
+
+def get_model_weight(model_id: str) -> int:
+    """Return how many limit units a single call to this model consumes."""
+    return MODEL_WEIGHTS.get(model_id, 1)
+
+
 TIER_MAX_POINTS = {
     "free": 1,
     "mini": 1,
@@ -457,22 +487,23 @@ async def check_daily_limit(
         }
 
     row = await get_or_create_today(db, tg_id, tier, lock_for_update=True)
+    weight = get_model_weight(model_id)
 
-    # Check by category
+    # Check by category — must have ENOUGH room for the model's weight, not just any room
     if category == "fast":
         effective = limits["fast"] + row.rollover_fast
-        if row.fast_used >= effective:
+        if row.fast_used + weight > effective:
             return _denied(tier, "fast", row.fast_used, effective, row.rollover_fast, limits["fast"])
 
     elif category == "premium":
         if tier in WEEKLY_TIERS:
             weekly_limit = WEEKLY_LIMITS[tier]["premium"]
             weekly_used = await get_weekly_usage(db, tg_id, "premium")
-            if weekly_used >= weekly_limit:
+            if weekly_used + weight > weekly_limit:
                 return _denied(tier, "premium", weekly_used, weekly_limit, 0, weekly_limit, weekly=True)
         else:
             effective = limits["premium"] + row.rollover_premium
-            if row.premium_used >= effective:
+            if row.premium_used + weight > effective:
                 return _denied(tier, "premium", row.premium_used, effective, row.rollover_premium, limits["premium"])
 
     elif category == "opus":
@@ -481,26 +512,26 @@ async def check_daily_limit(
             premium_weekly = WEEKLY_LIMITS[tier]["premium"]
             opus_used = await get_weekly_usage(db, tg_id, "opus")
             premium_used = await get_weekly_usage(db, tg_id, "premium")
-            if opus_used >= opus_weekly:
+            if opus_used + weight > opus_weekly:
                 return _denied(tier, "opus", opus_used, opus_weekly, 0, opus_weekly, weekly=True)
-            if premium_used >= premium_weekly:
+            if premium_used + weight > premium_weekly:
                 return _denied(tier, "premium", premium_used, premium_weekly, 0, premium_weekly, weekly=True)
         else:
             opus_effective = limits["opus"] + row.rollover_opus
             premium_effective = limits["premium"] + row.rollover_premium
-            if row.opus_used >= opus_effective:
+            if row.opus_used + weight > opus_effective:
                 return _denied(tier, "opus", row.opus_used, opus_effective, row.rollover_opus, limits["opus"])
-            if row.premium_used >= premium_effective:
+            if row.premium_used + weight > premium_effective:
                 return _denied(tier, "premium", row.premium_used, premium_effective, row.rollover_premium, limits["premium"])
 
     elif category == "image":
         if tier in WEEKLY_TIERS:
             weekly_limit = WEEKLY_LIMITS[tier]["image"]
             weekly_used = await get_weekly_usage(db, tg_id, "image")
-            if weekly_used >= weekly_limit:
+            if weekly_used + weight > weekly_limit:
                 return _denied(tier, "image", weekly_used, weekly_limit, 0, weekly_limit, weekly=True)
         else:
-            if row.image_used >= limits["image"]:
+            if row.image_used + weight > limits["image"]:
                 return _denied(tier, "image", row.image_used, limits["image"], 0, limits["image"])
 
     elif category == "video":
@@ -577,21 +608,23 @@ def _denied(tier: str, category: str, used: int, effective: int, rollover: int, 
 
 
 async def increment_usage(db: AsyncSession, tg_id: int, model_id: str, tier: str) -> None:
-    """Increment today's counters after successful request."""
+    """Increment today's counters after successful request, respecting model weight."""
     category = get_model_category(model_id)
+    weight = get_model_weight(model_id)
     row = await get_or_create_today(db, tg_id, tier, lock_for_update=True)
 
     if category == "fast":
-        row.fast_used = (row.fast_used or 0) + 1
+        row.fast_used = (row.fast_used or 0) + weight
     elif category == "premium":
-        row.premium_used = (row.premium_used or 0) + 1
+        row.premium_used = (row.premium_used or 0) + weight
     elif category == "opus":
-        row.premium_used = (row.premium_used or 0) + 1
-        row.opus_used = (row.opus_used or 0) + 1
+        # Opus consumes from BOTH premium pool and opus pool with same weight
+        row.premium_used = (row.premium_used or 0) + weight
+        row.opus_used = (row.opus_used or 0) + weight
     elif category == "image":
-        row.image_used = (row.image_used or 0) + 1
+        row.image_used = (row.image_used or 0) + weight
     elif category == "video":
-        row.video_used = (row.video_used or 0) + 1
+        row.video_used = (row.video_used or 0) + 1  # video uses points system, weight not applied here
 
     await db.flush()
 

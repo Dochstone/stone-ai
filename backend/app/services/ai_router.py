@@ -86,6 +86,16 @@ MODEL_MAP = {m["id"]: m["openrouter_id"] for m in MODELS_REGISTRY if m.get("acti
 
 TIER_MAP = {m["id"]: ("lite" if m["tier"] == 1 else "premium") for m in MODELS_REGISTRY if m.get("active", True)}
 
+
+def _model_weight(model_id: str) -> int:
+    """Lazy import to avoid circular dep with daily_limits."""
+    try:
+        from app.services.daily_limits import get_model_weight
+        return get_model_weight(model_id)
+    except Exception:
+        return 1
+
+
 MODELS_INFO = [
     {
         "id": m["id"],
@@ -99,6 +109,7 @@ MODELS_INFO = [
         "price_output": m["price_output"],
         "context_length": m["context_length"],
         "category": m["category"],
+        "weight": _model_weight(m["id"]),
         **({"price_per_image": m["price_per_image"]} if "price_per_image" in m else {}),
     }
     for m in MODELS_REGISTRY
