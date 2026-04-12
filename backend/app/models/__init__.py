@@ -16,5 +16,6 @@ from app.models.violation import Violation
 from app.models.verification_code import VerificationCode
 from app.models.image_task import ImageTask
 from app.models.provider_snapshot import ProviderSnapshot
+from app.models.admin_audit_log import AdminAuditLog
 
-__all__ = ["User", "Subscription", "Usage", "Pass", "Transaction", "AdBanner", "AdEvent", "ChatSession", "ChatMessage", "VideoTask", "ThreeDTask", "DailyUsage", "PromptTemplate", "SavedPrompt", "ImageTask", "ProviderSnapshot"]
+__all__ = ["User", "Subscription", "Usage", "Pass", "Transaction", "AdBanner", "AdEvent", "ChatSession", "ChatMessage", "VideoTask", "ThreeDTask", "DailyUsage", "PromptTemplate", "SavedPrompt", "ImageTask", "ProviderSnapshot", "AdminAuditLog"]
