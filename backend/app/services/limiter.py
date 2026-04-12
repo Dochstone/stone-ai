@@ -35,6 +35,28 @@ REWARDED_BONUS = 5
 MAX_TOKENS_LITE = 4096
 MAX_TOKENS_PREMIUM = 8192
 
+
+# Per-category output cap to protect margin on expensive models.
+# Cheap fast models can generate longer answers since their tokens cost ~$0.001 per 1K.
+# Expensive models (Sonnet/GPT-5 ~$15/M, Opus ~$75/M) must be capped tighter
+# or one long answer can cost more than the user paid for a whole month.
+MAX_TOKENS_BY_CATEGORY = {
+    "fast":    {"free": 2000, "paid": 4096},
+    "premium": {"free": 1500, "paid": 2500},
+    "opus":    {"free": 0,    "paid": 2000},  # opus locked on free
+}
+
+
+def get_max_tokens_for(model_id: str, tier: str) -> int:
+    """Return safe output token cap based on model category and user tier."""
+    from app.services.daily_limits import get_model_category
+    category = get_model_category(model_id)
+    if category not in MAX_TOKENS_BY_CATEGORY:
+        # image/video/3d — handled by their own routers, fall back to lite
+        return MAX_TOKENS_LITE
+    is_paid = tier in ("max", "max-pro")
+    return MAX_TOKENS_BY_CATEGORY[category]["paid" if is_paid else "free"]
+
 # Subscription plan limits (legacy, kept for PLUS/MAX subscribers)
 LIMITS = {
     "free": {"lite": FREE_DAILY_LIMIT, "premium": 0},

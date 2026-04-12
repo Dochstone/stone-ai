@@ -24,6 +24,7 @@ from app.services.limiter import (
     record_usage,
     MAX_TOKENS_LITE,
     MAX_TOKENS_PREMIUM,
+    get_max_tokens_for,
 )
 from app.services.token_billing import calculate_cost, deduct_balance, get_weighted_price
 from app.config import get_settings
@@ -155,7 +156,8 @@ async def chat_guest(
         return StreamingResponse(blocked_gen(), media_type="text/event-stream")
     default_system = "Always respond in the same language as the user's message. Match the user's language exactly."
     system_prompt = inject_safety(req.system_prompt if req.system_prompt else default_system)
-    max_tokens = MAX_TOKENS_LITE
+    # Guest endpoint — always cap by category as if free tier
+    max_tokens = get_max_tokens_for(req.model_id, "free")
 
     async def generate():
         _inc_guest_usage(ip)
@@ -284,9 +286,9 @@ async def chat(
             brand_ctx = build_project_context(proj)
             system_prompt = brand_ctx + "\n\n" + (system_prompt or "")
 
-    # Dynamic max_tokens based on subscription tier
+    # Dynamic max_tokens based on model category + subscription tier
     user_tier = (db_user.subscription_tier or "free") if db_user else "free"
-    max_tokens = MAX_TOKENS_PREMIUM if user_tier in ("max", "max-pro") else MAX_TOKENS_LITE
+    max_tokens = get_max_tokens_for(req.model_id, user_tier)
 
     # Stream response
     async def generate():
