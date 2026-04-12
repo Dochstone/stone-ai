@@ -1109,7 +1109,9 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
   const saveToSession = useCallback(async (userContent: string, assistantContent: string, billing: any) => {
     if (!auth) return;
     try {
-      let sessionId = activeSessionId;
+      // Allow caller to pin the target session (used when long-running video generation
+      // completes after the user has switched to a different chat).
+      let sessionId = (billing && billing.target_session_id) || activeSessionId;
       if (!sessionId) {
         const res = await fetch(`${API_URL}/api/chats`, {
           method: "POST",
@@ -1277,6 +1279,10 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
     if (videoOptions.mode !== "i2v" && !prompt) return;
     const userMsg: Message = { role: "user", content: prompt || "[Видео из изображения]", ts: Date.now(), file: pendingFile || undefined };
     const history = [...messages, userMsg];
+    // Snapshot session at the moment user submitted — generation may take 1-3 minutes
+    // and user may switch chats during that. Without this snapshot, completion would
+    // overwrite the currently visible messages with stale `history` from another chat.
+    const submitSessionId = activeSessionId;
     setMessages(history);
     setInput("");
     setPendingFile(null);
@@ -1350,14 +1356,24 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
           if (!statusRes.ok) throw new Error("Status check failed");
           const status = await statusRes.json();
 
+          // Helper: only update visible messages if user hasn't switched chat sessions
+          const updateMessagesIfStillHere = (newMsg: Message) => {
+            if (activeSessionId !== submitSessionId) {
+              // User switched chats — don't overwrite their current view
+              return;
+            }
+            setMessages([...history, newMsg]);
+          };
+
           if (status.status === "completed" && status.video_url) {
-            setMessages([...history, { role: "assistant", content: "", video: { url: status.video_url, directUrl: status.direct_url || status.video_url, taskId: data.task_id, thumbnailUrl: status.thumbnail_url, cost_usd: data.cost_usd } }]);
-            saveToSession(prompt || "[Видео из изображения]", `[video:${status.video_url}]`, { cost_usd: data.cost_usd });
+            updateMessagesIfStillHere({ role: "assistant", content: "", video: { url: status.video_url, directUrl: status.direct_url || status.video_url, taskId: data.task_id, thumbnailUrl: status.thumbnail_url, cost_usd: data.cost_usd } });
+            // Save to the original session, not the currently-active one
+            saveToSession(prompt || "[Видео из изображения]", `[video:${status.video_url}]`, { cost_usd: data.cost_usd, target_session_id: submitSessionId });
             setVideoGenerating(false);
             return;
           }
           if (status.status === "failed") {
-            setMessages([...history, { role: "assistant", content: `Ошибка: ${status.error || "Генерация не удалась"}` }]);
+            updateMessagesIfStillHere({ role: "assistant", content: `Ошибка: ${status.error || "Генерация не удалась"}` });
             setVideoGenerating(false);
             return;
           }
@@ -1365,18 +1381,22 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
           if (attempts < maxAttempts) {
             pollTimerRef.current = setTimeout(poll, 3000);
           } else {
-            setMessages([...history, { role: "assistant", content: "Таймаут генерации. Попробуйте снова." }]);
+            updateMessagesIfStillHere({ role: "assistant", content: "Таймаут генерации. Попробуйте снова." });
             setVideoGenerating(false);
           }
         } catch {
-          setMessages([...history, { role: "assistant", content: "Ошибка проверки статуса" }]);
+          if (activeSessionId === submitSessionId) {
+            setMessages([...history, { role: "assistant", content: "Ошибка проверки статуса" }]);
+          }
           setVideoGenerating(false);
         }
       };
       pollTimerRef.current = setTimeout(poll, 3000);
 
     } catch {
-      setMessages([...history, { role: "assistant", content: "Ошибка соединения" }]);
+      if (activeSessionId === submitSessionId) {
+        setMessages([...history, { role: "assistant", content: "Ошибка соединения" }]);
+      }
       setVideoGenerating(false);
     }
   }, [auth, input, videoGenerating, messages, selectedModel, pendingFile, resetTextarea, saveToSession, limits?.plan, videoOptions, isVideoModel]);
