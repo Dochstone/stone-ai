@@ -427,7 +427,23 @@ function Sidebar({
           ) : (
             <div>
               {(() => {
-                const filtered = sessions.filter(s => !sidebarSearch || s.title?.toLowerCase().includes(sidebarSearch.toLowerCase()));
+                // Filter sessions by current category — show only chats with models matching the tab
+                const catModels: Record<string, string[]> = {
+                  all: ["chat", "search", "reason", "code"],
+                  free: ["chat", "search", "reason", "code"],
+                  image: ["image"],
+                  video: ["video"],
+                  "3d": ["3d"],
+                  health: ["chat"],
+                };
+                const allowedCats = catModels[activeCategory] || [];
+                const filtered = sessions.filter(s => {
+                  if (sidebarSearch && !s.title?.toLowerCase().includes(sidebarSearch.toLowerCase())) return false;
+                  const m = MODELS_MAP.get(s.model_id);
+                  // If model is unknown — keep visible (legacy/deleted models). Otherwise filter by category.
+                  if (m && allowedCats.length > 0 && !allowedCats.includes(m.category)) return false;
+                  return true;
+                });
                 const now = new Date();
                 const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
                 const yesterday = new Date(today.getTime() - 86400000);
