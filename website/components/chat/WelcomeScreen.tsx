@@ -7,8 +7,8 @@ const WELCOME_CONFIG: Record<string, { icon: string; bg: string; title: string; 
   all: { icon: "💬", bg: "bg-accent", title: "Чем могу помочь?", subtitle: "Выберите шаблон или напишите свой запрос" },
   free: { icon: "✨", bg: "bg-teal", title: "Бесплатные модели", subtitle: "8 моделей без ограничений — 10 запросов в день" },
   image: { icon: "🎨", bg: "bg-pink-500", title: "Генерация изображений", subtitle: "2 бесплатные картинки · Опишите — AI создаст за секунды" },
-  video: { icon: "🎬", bg: "bg-red-500", title: "Генерация видео", subtitle: "1 бесплатное видео через Veo 3 · Опишите сцену — AI создаст видео" },
-  "3d": { icon: "🧊", bg: "bg-cyan-500", title: "Генерация 3D", subtitle: "Опишите объект или загрузите фото" },
+  video: { icon: "🎬", bg: "bg-red-500", title: "Генерация видео", subtitle: "Опишите сцену — AI создаст видео. Качество и длительность настраиваются" },
+  "3d": { icon: "🧊", bg: "bg-cyan-500", title: "Генерация 3D", subtitle: "Скоро — подключаем нового провайдера" },
   health: { icon: "🏥", bg: "bg-emerald-500", title: "AI Консультант", subtitle: "Загрузите фото или опишите симптомы" },
 };
 
@@ -39,7 +39,7 @@ export default function WelcomeScreen({ onSuggestion, activeTab, plan }: { onSug
                 { id: "llama-4-maverick", name: "Llama 4", icon: "🦙", desc: "Креативная модель от Meta. Хороша для мозговых штурмов и идей.", best: "Креатив и брейншторм", prompt: "Придумай 5 креативных идей для Telegram-канала о путешествиях" },
                 { id: "mistral-large-25", name: "Mistral Large", icon: "🌊", desc: "Европейская модель. Хорошо работает с русским и другими языками.", best: "Мультиязычные задачи", prompt: "Переведи на английский сохранив стиль: Добро пожаловать в Stone AI — AI-студию нового поколения" },
                 { id: "nano-banana", name: "Nano Banana", icon: "🎨", desc: "Генерация картинок из текста. Бесплатная модель для изображений.", best: "2 бесплатно", prompt: "Нарисуй уютную кофейню в стиле Pixar с тёплым освещением" },
-                { id: "veo-3", name: "Veo 3", icon: "🎬", desc: "Генерация видео от Google. 4K, lip-sync, звуковой дизайн.", best: "1 бесплатно/день", prompt: "Создай 5-секундное видео: закат на океане, волны бьются о скалы" },
+                { id: "veo-3", name: "Veo 3", icon: "🎬", desc: "Генерация видео от Google. 4K, lip-sync, звуковой дизайн.", best: "2 пробных", prompt: "Создай 5-секундное видео: закат на океане, волны бьются о скалы" },
               ].map((m) => (
                 <button key={m.id} onClick={() => onSuggestion(m.prompt, m.id)}
                   className="w-full flex items-center gap-3 p-3 rounded-xl border border-text/[0.06] bg-bg hover:border-accent/30 hover:shadow-sm transition-all group">
@@ -92,15 +92,12 @@ export default function WelcomeScreen({ onSuggestion, activeTab, plan }: { onSug
               { text: "Космическая станция на орбите Юпитера", model: "nano-banana-pro" },
               { text: "Милый кот в костюме астронавта", model: "nano-banana" },
             ] : activeTab === "video" ? [
-              { text: "Камера пролетает над зелёным лесом на рассвете", model: "sora-2" },
+              { text: "Камера пролетает над зелёным лесом на рассвете", model: "minimax" },
               { text: "Девушка идёт по пляжу, закат, кинематографично", model: "veo-3" },
-              { text: "Таймлапс ночного города, огни, 4K", model: "runway-gen3" },
+              { text: "Таймлапс ночного города, огни, 4K", model: "pika-2" },
               { text: "Золотая рыбка в коралловом рифе", model: "luma-ray2" },
             ] : activeTab === "3d" ? [
-              { text: "Средневековый замок, low-poly стиль", model: "tripo-v2.5" },
-              { text: "Спортивная машина, фотореалистичная", model: "tripo-v2.5" },
-              { text: "Стилизованное дерево для игры", model: "triposr" },
-              { text: "Фигурка робота для 3D-печати", model: "tripo-v2.5" },
+              { text: "3D-генерация временно недоступна — подключаем нового провайдера", model: "" },
             ] : /* health */ [
               { text: "Покраснение и раздражение глаза", model: "gpt-4o-mini" },
               { text: "Высыпания на коже рук, 3 дня назад", model: "gpt-4o-mini" },
