@@ -196,9 +196,9 @@ async def verify_transaction(
                 if msg_comment != expected_comment:
                     continue
 
-                # Check amount (allow 1% tolerance for network fees)
+                # Allow a wider tolerance for network fees and rounding.
                 received_ton = msg_value / NANOTON
-                expected_min = expected_amount_ton * 0.98
+                expected_min = expected_amount_ton * 0.95
 
                 if received_ton < expected_min:
                     logger.warning(
