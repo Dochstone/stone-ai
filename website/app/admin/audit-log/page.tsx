@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 25;
 
 interface AuditItem {
   id: number;
@@ -18,6 +18,26 @@ interface AuditItem {
   ip_address: string | null;
   user_agent: string | null;
   created_at: string | null;
+}
+
+interface ActionMeta {
+  label: string;
+  icon: string;
+  group: string;
+  tone: "info" | "warn" | "danger" | "success";
+}
+
+const ACTION_META: Record<string, ActionMeta> = {
+  user_banned: { label: "Блокировка пользователя", icon: "🚫", group: "Пользователи", tone: "danger" },
+  user_unbanned: { label: "Разблокировка пользователя", icon: "✅", group: "Пользователи", tone: "success" },
+  balance_changed: { label: "Изменение баланса", icon: "💰", group: "Биллинг", tone: "warn" },
+  subscription_set: { label: "Изменение тарифа", icon: "⭐", group: "Биллинг", tone: "info" },
+  promo_created: { label: "Создан промокод", icon: "🎁", group: "Промокоды", tone: "info" },
+  promo_deleted: { label: "Удалён промокод", icon: "🗑", group: "Промокоды", tone: "warn" },
+};
+
+function actionMeta(action: string): ActionMeta {
+  return ACTION_META[action] || { label: action, icon: "•", group: "Прочее", tone: "info" };
 }
 
 function getAdminToken() {
@@ -35,6 +55,126 @@ function toIsoOrEmpty(value: string) {
   return parsed.toISOString();
 }
 
+function formatRelative(iso: string | null): string {
+  if (!iso) return "—";
+  const now = Date.now();
+  const then = new Date(iso).getTime();
+  const diff = Math.floor((now - then) / 1000);
+  if (diff < 60) return `${diff} сек. назад`;
+  if (diff < 3600) return `${Math.floor(diff / 60)} мин. назад`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} ч. назад`;
+  if (diff < 86400 * 7) return `${Math.floor(diff / 86400)} дн. назад`;
+  return new Date(iso).toLocaleDateString("ru-RU", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+function formatAbsolute(iso: string | null): string {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleString("ru-RU", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
+
+type QuickRange = "all" | "today" | "7d" | "30d";
+
+function rangeBounds(range: QuickRange): { from: string; to: string } {
+  const now = new Date();
+  const endOfDay = new Date(now);
+  endOfDay.setHours(23, 59, 59, 999);
+  if (range === "today") {
+    const start = new Date(now);
+    start.setHours(0, 0, 0, 0);
+    return { from: start.toISOString(), to: endOfDay.toISOString() };
+  }
+  if (range === "7d") {
+    const start = new Date(now);
+    start.setDate(start.getDate() - 6);
+    start.setHours(0, 0, 0, 0);
+    return { from: start.toISOString(), to: endOfDay.toISOString() };
+  }
+  if (range === "30d") {
+    const start = new Date(now);
+    start.setDate(start.getDate() - 29);
+    start.setHours(0, 0, 0, 0);
+    return { from: start.toISOString(), to: endOfDay.toISOString() };
+  }
+  return { from: "", to: "" };
+}
+
+function toneClasses(tone: ActionMeta["tone"]): string {
+  switch (tone) {
+    case "success":
+      return "bg-emerald-500/15 text-emerald-300 border-emerald-500/20";
+    case "warn":
+      return "bg-amber-500/15 text-amber-300 border-amber-500/20";
+    case "danger":
+      return "bg-red-500/15 text-red-300 border-red-500/20";
+    default:
+      return "bg-sky-500/15 text-sky-300 border-sky-500/20";
+  }
+}
+
+function resultBadge(result: string): { label: string; cls: string } {
+  if (result === "ok") return { label: "Успешно", cls: "bg-emerald-500/15 text-emerald-300" };
+  if (result === "denied") return { label: "Отклонено", cls: "bg-amber-500/15 text-amber-300" };
+  return { label: "Ошибка", cls: "bg-red-500/15 text-red-300" };
+}
+
+function PayloadBlock({ payload }: { payload: Record<string, unknown> | null }) {
+  if (!payload || Object.keys(payload).length === 0) {
+    return <div className="text-sm text-zinc-500 italic">Без дополнительных данных</div>;
+  }
+  const entries = Object.entries(payload);
+  return (
+    <div className="rounded-2xl bg-black/30 border border-white/5 divide-y divide-white/5 overflow-hidden">
+      {entries.map(([key, value]) => {
+        const label = FIELD_LABELS[key] || key;
+        const display = formatValue(value);
+        return (
+          <div key={key} className="flex flex-col sm:flex-row gap-2 px-4 py-3 text-sm">
+            <div className="sm:w-48 flex-shrink-0 text-zinc-500">{label}</div>
+            <div className="text-zinc-200 break-words font-mono text-xs">{display}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+const FIELD_LABELS: Record<string, string> = {
+  old_tier: "Старый тариф",
+  new_tier: "Новый тариф",
+  tier: "Тариф",
+  old_balance_usd: "Баланс до ($)",
+  new_balance_usd: "Баланс после ($)",
+  amount_usd: "Сумма ($)",
+  reason: "Причина",
+  code: "Код",
+  amount: "Сумма",
+  discount_percent: "Скидка (%)",
+  expires_at: "Истекает",
+  plan: "План",
+  user_id: "ID пользователя",
+  promo_id: "ID промокода",
+  ban_reason: "Причина блокировки",
+};
+
+function formatValue(value: unknown): string {
+  if (value === null || value === undefined) return "—";
+  if (typeof value === "string") return value;
+  if (typeof value === "number") return String(value);
+  if (typeof value === "boolean") return value ? "да" : "нет";
+  try {
+    return JSON.stringify(value, null, 2);
+  } catch {
+    return String(value);
+  }
+}
+
 export default function AuditLogPage() {
   const [token, setToken] = useState("");
   const [authed, setAuthed] = useState(false);
@@ -43,10 +183,11 @@ export default function AuditLogPage() {
   const [items, setItems] = useState<AuditItem[]>([]);
   const [total, setTotal] = useState(0);
   const [selected, setSelected] = useState<AuditItem | null>(null);
-  const [adminId, setAdminId] = useState("");
-  const [action, setAction] = useState("");
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
+
+  const [adminEmail, setAdminEmail] = useState("");
+  const [actionFilter, setActionFilter] = useState("");
+  const [resultFilter, setResultFilter] = useState<"all" | "ok" | "denied" | "error">("all");
+  const [range, setRange] = useState<QuickRange>("7d");
   const [page, setPage] = useState(0);
 
   useEffect(() => {
@@ -59,61 +200,82 @@ export default function AuditLogPage() {
     setAuthed(true);
   }, []);
 
-  useEffect(() => {
-    if (!authed || !token) return;
-
+  const load = useCallback(async () => {
+    if (!token) return;
+    const bounds = rangeBounds(range);
     const params = new URLSearchParams({
       limit: String(PAGE_SIZE),
       offset: String(page * PAGE_SIZE),
     });
-    if (adminId.trim()) params.set("admin_id", adminId.trim());
-    if (action.trim()) params.set("action", action.trim());
-    if (fromDate) params.set("from", toIsoOrEmpty(fromDate));
-    if (toDate) params.set("to", toIsoOrEmpty(toDate));
+    if (actionFilter) params.set("action", actionFilter);
+    if (bounds.from) params.set("from", toIsoOrEmpty(bounds.from));
+    if (bounds.to) params.set("to", toIsoOrEmpty(bounds.to));
 
     setLoading(true);
     setError("");
 
-    fetch(`${API_URL}/api/admin/audit-log?${params.toString()}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(async (res) => {
-        if (res.status === 401 || res.status === 403) {
-          localStorage.removeItem("admin_token");
-          setAuthed(false);
-          setToken("");
-          setError("Access denied. Login again via /admin.");
-          return null;
-        }
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          throw new Error(data.detail || "Failed to load audit log");
-        }
-        return res.json();
-      })
-      .then((data) => {
-        if (!data) return;
-        setItems(data.items || []);
-        setTotal(data.total || 0);
-      })
-      .catch((err: Error) => {
-        setError(err.message || "Failed to load audit log");
-      })
-      .finally(() => {
-        setLoading(false);
+    try {
+      const res = await fetch(`${API_URL}/api/admin/audit-log?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-  }, [action, adminId, authed, fromDate, page, toDate, token]);
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem("admin_token");
+        setAuthed(false);
+        setToken("");
+        setError("Сессия истекла. Войди снова через /admin.");
+        return;
+      }
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.detail || "Не удалось загрузить журнал");
+      }
+      const data = await res.json();
+      setItems(data.items || []);
+      setTotal(data.total || 0);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Ошибка загрузки";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  }, [token, range, actionFilter, page]);
+
+  useEffect(() => {
+    if (authed && token) load();
+  }, [authed, token, load]);
+
+  const filtered = useMemo(() => {
+    return items.filter((item) => {
+      if (resultFilter !== "all" && item.result !== resultFilter) return false;
+      if (adminEmail && !(item.admin_email || "").toLowerCase().includes(adminEmail.toLowerCase())) return false;
+      return true;
+    });
+  }, [items, resultFilter, adminEmail]);
 
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const showingFrom = items.length ? page * PAGE_SIZE + 1 : 0;
+  const showingTo = page * PAGE_SIZE + items.length;
+
+  const groupedActions = useMemo(() => {
+    const groups: Record<string, { key: string; label: string; icon: string }[]> = {};
+    Object.entries(ACTION_META).forEach(([key, meta]) => {
+      if (!groups[meta.group]) groups[meta.group] = [];
+      groups[meta.group].push({ key, label: meta.label, icon: meta.icon });
+    });
+    return groups;
+  }, []);
 
   if (!authed) {
     return (
-      <div className="min-h-screen bg-[#0f0f12] text-white flex items-center justify-center px-4">
+      <div className="min-h-screen bg-bg text-text flex items-center justify-center px-4">
         <div className="max-w-md text-center">
-          <h1 className="text-2xl font-bold mb-3">Audit Log</h1>
-          <p className="text-zinc-400 mb-6">Admin token not found or expired.</p>
-          <a href="/admin" className="inline-flex px-4 py-2 rounded-xl bg-[#C4623D] text-white font-semibold hover:opacity-90 transition-opacity">
-            Go to Admin Login
+          <h1 className="text-2xl font-bold mb-3">Журнал действий</h1>
+          <p className="text-text/60 mb-6">Сессия администратора истекла или отсутствует.</p>
+          <a
+            href="/admin"
+            className="inline-flex px-4 py-2 rounded-xl bg-accent text-white font-semibold hover:opacity-90 transition"
+          >
+            Войти в админку
           </a>
         </div>
       </div>
@@ -121,72 +283,97 @@ export default function AuditLogPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f0f12] text-white">
-      <div className="sticky top-0 z-10 bg-[#0f0f12]/95 backdrop-blur-sm border-b border-white/5 px-4 md:px-6 py-4">
-        <div className="max-w-7xl mx-auto flex flex-col gap-4">
-          <div className="flex items-center justify-between gap-4">
+    <div className="min-h-screen bg-bg text-text">
+      {/* Header */}
+      <div className="sticky top-0 z-20 bg-bg/95 backdrop-blur-sm border-b border-text/5">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4">
+          <div className="flex items-center justify-between gap-4 mb-4">
             <div>
-              <div className="flex items-center gap-3 mb-1">
-                <a href="/admin" className="text-zinc-500 hover:text-white transition text-sm">← Admin</a>
-                <span className="text-zinc-700">/</span>
-                <span className="text-sm text-zinc-400">Audit Log</span>
+              <div className="flex items-center gap-2 text-xs text-text/50 mb-1">
+                <a href="/admin" className="hover:text-text transition">Админка</a>
+                <span>/</span>
+                <span>Журнал действий</span>
               </div>
-              <h1 className="text-2xl font-bold">Журнал действий</h1>
+              <h1 className="text-2xl font-bold">Журнал действий администраторов</h1>
+              <p className="text-sm text-text/50 mt-1">
+                {total === 0 ? "Записей пока нет" : `Всего записей: ${total.toLocaleString("ru-RU")}`}
+              </p>
             </div>
             <button
               onClick={() => {
                 setPage(0);
-                setLoading(true);
-                setItems([]);
-                setTotal(0);
-                setSelected(null);
-                setError("");
-                const currentToken = getAdminToken();
-                setToken(currentToken);
-                setAuthed(Boolean(currentToken));
+                load();
               }}
-              className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-sm font-semibold transition-colors"
+              className="px-3 py-2 rounded-xl bg-surface border border-text/10 hover:border-text/20 text-sm font-semibold transition"
+              disabled={loading}
             >
-              Refresh
+              {loading ? "Загрузка…" : "Обновить"}
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-            <input
-              value={adminId}
+          {/* Quick date ranges */}
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            {([
+              ["today", "Сегодня"],
+              ["7d", "7 дней"],
+              ["30d", "30 дней"],
+              ["all", "Всё время"],
+            ] as [QuickRange, string][]).map(([key, label]) => (
+              <button
+                key={key}
+                onClick={() => {
+                  setRange(key);
+                  setPage(0);
+                }}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
+                  range === key
+                    ? "bg-accent text-white"
+                    : "bg-surface border border-text/10 text-text/70 hover:text-text"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {/* Filters */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <select
+              value={actionFilter}
               onChange={(e) => {
-                setAdminId(e.target.value);
+                setActionFilter(e.target.value);
                 setPage(0);
               }}
-              placeholder="Admin ID"
-              className="px-3 py-2 rounded-xl bg-[#1a1a22] border border-white/10 text-sm focus:outline-none focus:border-[#C4623D]/50"
-            />
+              className="px-3 py-2 rounded-xl bg-surface border border-text/10 text-sm focus:outline-none focus:border-accent/50"
+            >
+              <option value="">Все действия</option>
+              {Object.entries(groupedActions).map(([group, actions]) => (
+                <optgroup key={group} label={group}>
+                  {actions.map((a) => (
+                    <option key={a.key} value={a.key}>
+                      {a.icon} {a.label}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+
+            <select
+              value={resultFilter}
+              onChange={(e) => setResultFilter(e.target.value as "all" | "ok" | "denied" | "error")}
+              className="px-3 py-2 rounded-xl bg-surface border border-text/10 text-sm focus:outline-none focus:border-accent/50"
+            >
+              <option value="all">Любой результат</option>
+              <option value="ok">Только успешные</option>
+              <option value="denied">Только отклонённые</option>
+              <option value="error">Только ошибки</option>
+            </select>
+
             <input
-              value={action}
-              onChange={(e) => {
-                setAction(e.target.value);
-                setPage(0);
-              }}
-              placeholder="Action"
-              className="px-3 py-2 rounded-xl bg-[#1a1a22] border border-white/10 text-sm focus:outline-none focus:border-[#C4623D]/50"
-            />
-            <input
-              type="datetime-local"
-              value={fromDate}
-              onChange={(e) => {
-                setFromDate(e.target.value);
-                setPage(0);
-              }}
-              className="px-3 py-2 rounded-xl bg-[#1a1a22] border border-white/10 text-sm focus:outline-none focus:border-[#C4623D]/50"
-            />
-            <input
-              type="datetime-local"
-              value={toDate}
-              onChange={(e) => {
-                setToDate(e.target.value);
-                setPage(0);
-              }}
-              className="px-3 py-2 rounded-xl bg-[#1a1a22] border border-white/10 text-sm focus:outline-none focus:border-[#C4623D]/50"
+              value={adminEmail}
+              onChange={(e) => setAdminEmail(e.target.value)}
+              placeholder="Email администратора"
+              className="px-3 py-2 rounded-xl bg-surface border border-text/10 text-sm focus:outline-none focus:border-accent/50"
             />
           </div>
         </div>
@@ -199,144 +386,188 @@ export default function AuditLogPage() {
           </div>
         )}
 
-        <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#15151c]">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[980px] text-sm">
-              <thead className="bg-white/[0.03] text-zinc-400">
-                <tr>
-                  <th className="px-4 py-3 text-left font-medium">Time</th>
-                  <th className="px-4 py-3 text-left font-medium">Admin</th>
-                  <th className="px-4 py-3 text-left font-medium">Action</th>
-                  <th className="px-4 py-3 text-left font-medium">Target</th>
-                  <th className="px-4 py-3 text-left font-medium">Result</th>
-                  <th className="px-4 py-3 text-left font-medium">IP</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading && (
-                  <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-zinc-500">Loading audit log...</td>
-                  </tr>
-                )}
-                {!loading && items.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-zinc-500">No records found.</td>
-                  </tr>
-                )}
-                {!loading && items.map((item) => (
-                  <tr
-                    key={item.id}
-                    onClick={() => setSelected(item)}
-                    className="border-t border-white/5 cursor-pointer hover:bg-white/[0.03] transition-colors"
-                  >
-                    <td className="px-4 py-3 whitespace-nowrap text-zinc-300">
-                      {item.created_at ? new Date(item.created_at).toLocaleString("ru-RU") : "—"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="font-medium text-white">{item.admin_email || "Unknown"}</div>
-                      <div className="text-xs text-zinc-500">ID {item.admin_user_id}</div>
-                    </td>
-                    <td className="px-4 py-3 font-mono text-xs text-[#d8a892]">{item.action}</td>
-                    <td className="px-4 py-3 text-zinc-300">
-                      {[item.target_type, item.target_id].filter(Boolean).join(": ") || "—"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex px-2 py-1 rounded-lg text-xs font-semibold ${
-                        item.result === "ok"
-                          ? "bg-emerald-500/15 text-emerald-300"
-                          : item.result === "denied"
-                            ? "bg-amber-500/15 text-amber-300"
-                            : "bg-red-500/15 text-red-300"
-                      }`}>
-                        {item.result}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-zinc-400">{item.ip_address || "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {loading && items.length === 0 ? (
+          <div className="space-y-2">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-20 rounded-2xl bg-surface animate-pulse" />
+            ))}
           </div>
-        </div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-16 text-text/50">
+            <div className="text-4xl mb-3">📋</div>
+            <div className="font-semibold text-text/70 mb-1">Записей не найдено</div>
+            <div className="text-sm">
+              {total === 0
+                ? "Журнал пуст. Начнёт заполняться при первом действии администратора."
+                : "Попробуй снять фильтры или расширить диапазон дат."}
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {filtered.map((item) => {
+              const meta = actionMeta(item.action);
+              const result = resultBadge(item.result);
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setSelected(item)}
+                  className="w-full text-left rounded-2xl bg-surface border border-text/5 hover:border-accent/30 transition overflow-hidden group"
+                >
+                  <div className="p-4 flex items-start gap-4">
+                    <div className={`flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center text-xl border ${toneClasses(meta.tone)}`}>
+                      {meta.icon}
+                    </div>
 
-        <div className="mt-4 flex items-center justify-between gap-4 text-sm text-zinc-400">
-          <div>
-            Showing {items.length ? page * PAGE_SIZE + 1 : 0}-{page * PAGE_SIZE + items.length} of {total}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-4 mb-1">
+                        <div className="font-semibold">{meta.label}</div>
+                        <div className={`flex-shrink-0 px-2 py-0.5 rounded-md text-xs font-semibold ${result.cls}`}>
+                          {result.label}
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text/60">
+                        <span>{item.admin_email || `ID ${item.admin_user_id}`}</span>
+                        {item.target_type && item.target_id && (
+                          <>
+                            <span>•</span>
+                            <span>
+                              {item.target_type}: <span className="font-mono text-text/80">{item.target_id}</span>
+                            </span>
+                          </>
+                        )}
+                        <span>•</span>
+                        <span title={formatAbsolute(item.created_at)}>{formatRelative(item.created_at)}</span>
+                      </div>
+                      {item.error_message && (
+                        <div className="mt-2 text-xs text-red-300/80 line-clamp-1">⚠ {item.error_message}</div>
+                      )}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPage((prev) => Math.max(0, prev - 1))}
-              disabled={page === 0}
-              className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              Prev
-            </button>
-            <span>Page {page + 1} / {pages}</span>
-            <button
-              onClick={() => setPage((prev) => (prev + 1 < pages ? prev + 1 : prev))}
-              disabled={page + 1 >= pages}
-              className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      </div>
+        )}
 
-      {selected && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setSelected(null)}>
-          <div
-            className="w-full max-w-3xl max-h-[85vh] overflow-auto rounded-2xl border border-white/10 bg-[#121219] p-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-4 mb-4">
-              <div>
-                <h2 className="text-xl font-bold mb-1">{selected.action}</h2>
-                <p className="text-sm text-zinc-400">
-                  {selected.created_at ? new Date(selected.created_at).toLocaleString("ru-RU") : "—"}
-                </p>
-              </div>
+        {/* Pagination */}
+        {total > PAGE_SIZE && (
+          <div className="mt-6 flex items-center justify-between gap-4 text-sm text-text/60">
+            <div>
+              Показано {showingFrom}–{showingTo} из {total.toLocaleString("ru-RU")}
+            </div>
+            <div className="flex items-center gap-2">
               <button
-                onClick={() => setSelected(null)}
-                className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-sm font-semibold transition-colors"
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={page === 0 || loading}
+                className="px-3 py-2 rounded-xl bg-surface border border-text/10 hover:border-text/20 disabled:opacity-40 disabled:cursor-not-allowed transition"
               >
-                Close
+                ← Предыдущая
+              </button>
+              <span className="px-2">
+                {page + 1} / {pages}
+              </span>
+              <button
+                onClick={() => setPage((p) => (p + 1 < pages ? p + 1 : p))}
+                disabled={page + 1 >= pages || loading}
+                className="px-3 py-2 rounded-xl bg-surface border border-text/10 hover:border-text/20 disabled:opacity-40 disabled:cursor-not-allowed transition"
+              >
+                Следующая →
               </button>
             </div>
+          </div>
+        )}
+      </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 text-sm">
-              <div className="rounded-xl bg-white/[0.03] p-4">
-                <div className="text-zinc-500 mb-1">Admin</div>
-                <div>{selected.admin_email || "Unknown"}</div>
-                <div className="text-zinc-400 text-xs mt-1">ID {selected.admin_user_id}</div>
-              </div>
-              <div className="rounded-xl bg-white/[0.03] p-4">
-                <div className="text-zinc-500 mb-1">Target</div>
-                <div>{[selected.target_type, selected.target_id].filter(Boolean).join(": ") || "—"}</div>
-                <div className="text-zinc-400 text-xs mt-1">Result: {selected.result}</div>
-              </div>
-              <div className="rounded-xl bg-white/[0.03] p-4">
-                <div className="text-zinc-500 mb-1">IP</div>
-                <div>{selected.ip_address || "—"}</div>
-              </div>
-              <div className="rounded-xl bg-white/[0.03] p-4">
-                <div className="text-zinc-500 mb-1">User Agent</div>
-                <div className="break-all">{selected.user_agent || "—"}</div>
-              </div>
-            </div>
+      {/* Detail modal */}
+      {selected && (
+        <div
+          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setSelected(null)}
+        >
+          <div
+            className="w-full max-w-2xl max-h-[90vh] overflow-auto rounded-2xl border border-text/10 bg-surface"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {(() => {
+              const meta = actionMeta(selected.action);
+              const result = resultBadge(selected.result);
+              return (
+                <>
+                  <div className="sticky top-0 bg-surface border-b border-text/5 px-6 py-4 flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-3 min-w-0">
+                      <div className={`flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center text-xl border ${toneClasses(meta.tone)}`}>
+                        {meta.icon}
+                      </div>
+                      <div className="min-w-0">
+                        <h2 className="text-lg font-bold truncate">{meta.label}</h2>
+                        <div className="text-xs text-text/60 mt-0.5">
+                          <span className="font-mono">{selected.action}</span>
+                          <span className="mx-2">•</span>
+                          <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold ${result.cls}`}>
+                            {result.label}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setSelected(null)}
+                      className="flex-shrink-0 w-9 h-9 rounded-lg bg-bg/50 hover:bg-bg text-text/60 hover:text-text transition"
+                      aria-label="Закрыть"
+                    >
+                      ✕
+                    </button>
+                  </div>
 
-            {selected.error_message && (
-              <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
-                {selected.error_message}
-              </div>
-            )}
+                  <div className="p-6 space-y-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <div className="text-xs text-text/50 mb-1">Администратор</div>
+                        <div className="font-semibold">{selected.admin_email || "Без email"}</div>
+                        <div className="text-xs text-text/50 mt-0.5">ID {selected.admin_user_id}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-text/50 mb-1">Когда</div>
+                        <div className="font-semibold">{formatAbsolute(selected.created_at)}</div>
+                        <div className="text-xs text-text/50 mt-0.5">{formatRelative(selected.created_at)}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-text/50 mb-1">Цель</div>
+                        <div className="font-semibold">
+                          {selected.target_type && selected.target_id
+                            ? `${selected.target_type}: ${selected.target_id}`
+                            : "—"}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-text/50 mb-1">IP</div>
+                        <div className="font-mono text-sm">{selected.ip_address || "—"}</div>
+                      </div>
+                    </div>
 
-            <div>
-              <div className="text-sm font-semibold text-zinc-300 mb-2">Payload</div>
-              <pre className="rounded-2xl bg-black/30 border border-white/5 p-4 text-xs text-zinc-200 overflow-x-auto whitespace-pre-wrap break-words">
-                {JSON.stringify(selected.payload || {}, null, 2)}
-              </pre>
-            </div>
+                    {selected.error_message && (
+                      <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+                        <div className="font-semibold mb-1">Ошибка</div>
+                        <div>{selected.error_message}</div>
+                      </div>
+                    )}
+
+                    <div>
+                      <div className="text-xs text-text/50 mb-2 uppercase tracking-wider">Данные</div>
+                      <PayloadBlock payload={selected.payload} />
+                    </div>
+
+                    {selected.user_agent && (
+                      <div>
+                        <div className="text-xs text-text/50 mb-2 uppercase tracking-wider">User Agent</div>
+                        <div className="rounded-xl bg-bg/50 border border-text/5 px-4 py-3 text-xs font-mono text-text/70 break-all">
+                          {selected.user_agent}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
+              );
+            })()}
           </div>
         </div>
       )}
