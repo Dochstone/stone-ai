@@ -2,11 +2,14 @@
 
 from app.config import USD_TO_RUB
 import base64
+import binascii
+import io
 import logging
 import re
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException
+from PIL import Image
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -45,7 +48,36 @@ OPENROUTER_IMAGE_MODELS = {"nano-banana", "nano-banana-pro"}
 
 # ─── Schemas ───
 
-MAX_IMAGE_BASE64_LEN = 14_000_000  # ~10 MB decoded
+MAX_IMAGE_BYTES = 10 * 1024 * 1024
+MAX_IMAGE_BASE64_LEN = ((MAX_IMAGE_BYTES + 2) // 3) * 4
+
+
+def _extract_base64_payload(b64: str) -> str:
+    return b64.split(",", 1)[-1].strip() if "," in b64 else b64.strip()
+
+
+def _validate_base64_image(b64: str) -> bytes:
+    """Validate a base64 payload as an image no larger than 10 MB decoded."""
+    raw = _extract_base64_payload(b64)
+    if len(raw) > MAX_IMAGE_BASE64_LEN:
+        raise HTTPException(413, "Изображение слишком большое (макс 10 МБ)")
+
+    try:
+        padded = raw + "=" * (-len(raw) % 4)
+        data = base64.b64decode(padded, validate=True)
+    except (ValueError, binascii.Error):
+        raise HTTPException(400, "Некорректный base64")
+
+    if len(data) > MAX_IMAGE_BYTES:
+        raise HTTPException(413, "Изображение слишком большое (макс 10 МБ)")
+
+    try:
+        with Image.open(io.BytesIO(data)) as image:
+            image.verify()
+    except Exception:
+        raise HTTPException(400, "Файл не является изображением")
+
+    return data
 
 
 
@@ -158,8 +190,6 @@ async def _refund(db: AsyncSession, user: User, new_balance: float, cost_usd: fl
 
 async def _remove_background(image_bytes: bytes) -> bytes:
     """Remove background from image using rembg (runs locally, no API cost)."""
-    import io
-    from PIL import Image
     from rembg import remove
     result = remove(image_bytes)
     # Ensure PNG with alpha
@@ -171,8 +201,6 @@ async def _remove_background(image_bytes: bytes) -> bytes:
 
 async def _composite_on_background(foreground_bytes: bytes, background_b64: str) -> str:
     """Composite foreground (with alpha) onto generated background. Returns data URL."""
-    import io
-    from PIL import Image
     fg = Image.open(io.BytesIO(foreground_bytes)).convert("RGBA")
     bg_data = background_b64.split(",", 1)[-1] if "," in background_b64 else background_b64
     bg = Image.open(io.BytesIO(base64.b64decode(bg_data))).convert("RGBA")
@@ -283,7 +311,7 @@ async def change_background(
     from app.services.safety import check_banned
     if await check_banned(tg_id):
         raise HTTPException(403, "Аккаунт заблокирован")
-    _validate_image_size(req.image_base64)
+    _validate_base64_image(req.image_base64)
     user = await _find_user(db, tg_user)
     model_id_used = req.model_id or DEFAULT_IMAGE_MODEL
     cost_usd = _cost_usd("background", model_id_used)
@@ -351,7 +379,7 @@ async def product_on_model(
     from app.services.safety import check_banned
     if await check_banned(tg_id):
         raise HTTPException(403, "Аккаунт заблокирован")
-    _validate_image_size(req.product_image_base64)
+    _validate_base64_image(req.product_image_base64)
     user = await _find_user(db, tg_user)
     model_id_used = req.model_id or DEFAULT_IMAGE_MODEL
     cost_usd = _cost_usd("on-model", model_id_used)
@@ -418,7 +446,7 @@ async def marketplace_card(
     from app.services.safety import check_banned
     if await check_banned(tg_id):
         raise HTTPException(403, "Аккаунт заблокирован")
-    _validate_image_size(req.image_base64)
+    _validate_base64_image(req.image_base64)
     user = await _find_user(db, tg_user)
     model_id_used = req.model_id or DEFAULT_IMAGE_MODEL
     cost_usd = _cost_usd("marketplace", model_id_used)
@@ -501,7 +529,7 @@ async def batch_process(
     if await check_banned(tg_id):
         raise HTTPException(403, "Аккаунт заблокирован")
     for img in req.images:
-        _validate_image_size(img)
+        _validate_base64_image(img)
     user = await _find_user(db, tg_user)
 
     tier = user.subscription_tier or "free"
