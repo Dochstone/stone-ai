@@ -105,10 +105,7 @@ async def get_messages(
     if not session:
         raise HTTPException(404, "Chat not found")
 
-    # Get last N messages via subquery (ordered desc, then reversed)
-    total = await db.scalar(
-        select(func.count()).select_from(ChatMessage).where(ChatMessage.session_id == session_id)
-    )
+    # Get last N messages — chronological order via subquery
     result = await db.execute(
         select(ChatMessage)
         .where(ChatMessage.session_id == session_id)
@@ -123,7 +120,7 @@ async def get_messages(
             "model_id": session.model_id,
             "title": session.title,
         },
-        "total_messages": total,
+        "total_messages": len(messages),
         "messages": [
             {
                 "id": m.id,

@@ -1041,6 +1041,19 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
   const loadSession = useCallback(async (sessionId: number) => {
     if (!auth) return;
+
+    // Optimistic render from sessionStorage cache — switching is instant for already-opened chats.
+    // Background fetch then updates with fresh data.
+    try {
+      const cached = sessionStorage.getItem(`stone_chat_msgs_${sessionId}`);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        setActiveSessionId(sessionId);
+        if (parsed.model_id) setSelectedModel(parsed.model_id);
+        if (Array.isArray(parsed.messages)) setMessages(parsed.messages);
+      }
+    } catch { /* ignore cache parse errors */ }
+
     try {
       const res = await fetch(`${API_URL}/api/chats/${sessionId}/messages`, {
         headers: { Authorization: `Bearer ${auth.token}` },
@@ -1049,7 +1062,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
         const data = await res.json();
         setActiveSessionId(sessionId);
         setSelectedModel(data.session.model_id);
-        setMessages(data.messages.map((m: any) => {
+        const parsedMessages = data.messages.map((m: any) => {
           const msg: any = {
             role: m.role,
             content: m.content,
@@ -1082,7 +1095,15 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
             msg.content = m.content; // ImageShareCard renders from content URL
           }
           return msg;
-        }));
+        });
+        setMessages(parsedMessages);
+        // Cache for instant load next time. Limit to last 30 messages to keep storage small.
+        try {
+          sessionStorage.setItem(
+            `stone_chat_msgs_${sessionId}`,
+            JSON.stringify({ model_id: data.session.model_id, messages: parsedMessages.slice(-30) })
+          );
+        } catch { /* quota or SSR */ }
       }
     } catch (err) {
       console.warn("Failed to load session:", err);
