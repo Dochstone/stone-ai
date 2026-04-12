@@ -1003,7 +1003,14 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
           const videoMatch = m.content?.match(/^\[video:(https?:\/\/.+)\]$/);
           if (videoMatch) {
             msg.content = "";
-            msg.video = { url: videoMatch[1], directUrl: videoMatch[1] };
+            const vUrl = videoMatch[1];
+            // Extract task_id from stream-proxy URLs so player can append fresh token
+            const taskIdMatch = vUrl.match(/\/api\/video\/stream\/([^?/]+)/);
+            msg.video = {
+              url: vUrl,
+              directUrl: vUrl,
+              taskId: taskIdMatch ? taskIdMatch[1] : undefined,
+            };
           }
           // Parse [3d:url] from saved content
           const threedMatch = m.content?.match(/^\[3d:(https?:\/\/.+)\]$/);
