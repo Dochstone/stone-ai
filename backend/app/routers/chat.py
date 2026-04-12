@@ -25,6 +25,7 @@ from app.services.limiter import (
     MAX_TOKENS_LITE,
     MAX_TOKENS_PREMIUM,
     get_max_tokens_for,
+    get_max_input_tokens_for,
 )
 from app.services.token_billing import calculate_cost, deduct_balance, get_weighted_price
 from app.config import get_settings
@@ -158,11 +159,12 @@ async def chat_guest(
     system_prompt = inject_safety(req.system_prompt if req.system_prompt else default_system)
     # Guest endpoint — always cap by category as if free tier
     max_tokens = get_max_tokens_for(req.model_id, "free")
+    max_input_tokens = get_max_input_tokens_for(req.model_id, "free")
 
     async def generate():
         _inc_guest_usage(ip)
 
-        async for chunk in stream_chat_response(req.model_id, req.messages, system_prompt, max_tokens=max_tokens):
+        async for chunk in stream_chat_response(req.model_id, req.messages, system_prompt, max_tokens=max_tokens, max_input_tokens=max_input_tokens):
             yield chunk
 
         billing_data = {
@@ -286,16 +288,17 @@ async def chat(
             brand_ctx = build_project_context(proj)
             system_prompt = brand_ctx + "\n\n" + (system_prompt or "")
 
-    # Dynamic max_tokens based on model category + subscription tier
+    # Dynamic max_tokens + max_input based on model category + subscription tier
     user_tier = (db_user.subscription_tier or "free") if db_user else "free"
     max_tokens = get_max_tokens_for(req.model_id, user_tier)
+    max_input_tokens = get_max_input_tokens_for(req.model_id, user_tier)
 
     # Stream response
     async def generate():
         usage_data = {"tokens_in": 0, "tokens_out": 0}
         had_error = False
 
-        async for chunk in stream_chat_response(req.model_id, req.messages, system_prompt, byok_key=byok_key, max_tokens=max_tokens):
+        async for chunk in stream_chat_response(req.model_id, req.messages, system_prompt, byok_key=byok_key, max_tokens=max_tokens, max_input_tokens=max_input_tokens):
             yield chunk
 
             # Check for error in stream

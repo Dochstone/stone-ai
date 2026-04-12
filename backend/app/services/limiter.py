@@ -46,6 +46,15 @@ MAX_TOKENS_BY_CATEGORY = {
     "opus":    {"free": 0,    "paid": 2000},  # opus locked on free
 }
 
+# Per-category INPUT cap (in tokens). Models technically support 128K-1M context
+# but charging input at $15/M means a user could paste 100K tokens for $1.50
+# of just-input cost — wiping subscription margin in one call.
+MAX_INPUT_BY_CATEGORY = {
+    "fast":    {"free": 8000,  "paid": 16000},
+    "premium": {"free": 8000,  "paid": 16000},
+    "opus":    {"free": 0,     "paid": 8000},
+}
+
 
 def get_max_tokens_for(model_id: str, tier: str) -> int:
     """Return safe output token cap based on model category and user tier."""
@@ -56,6 +65,16 @@ def get_max_tokens_for(model_id: str, tier: str) -> int:
         return MAX_TOKENS_LITE
     is_paid = tier in ("max", "max-pro")
     return MAX_TOKENS_BY_CATEGORY[category]["paid" if is_paid else "free"]
+
+
+def get_max_input_tokens_for(model_id: str, tier: str) -> int:
+    """Return safe input context cap based on model category and user tier."""
+    from app.services.daily_limits import get_model_category
+    category = get_model_category(model_id)
+    if category not in MAX_INPUT_BY_CATEGORY:
+        return 8000
+    is_paid = tier in ("max", "max-pro")
+    return MAX_INPUT_BY_CATEGORY[category]["paid" if is_paid else "free"]
 
 # Subscription plan limits (legacy, kept for PLUS/MAX subscribers)
 LIMITS = {

@@ -166,6 +166,7 @@ async def stream_chat_response(
     system_prompt: str | None = None,
     byok_key: str | None = None,
     max_tokens: int = 4096,
+    max_input_tokens: int | None = None,
 ):
     """
     Stream chat completion from OpenRouter.
@@ -186,6 +187,9 @@ async def stream_chat_response(
         max_ctx = int(ctx_str.replace("K", "000").replace("M", "000000")) if isinstance(ctx_str, str) else 128000
     except (ValueError, AttributeError):
         max_ctx = 8000  # safe default for image/special models
+    # Apply margin-protection cap on input — never exceed it even if model supports more context
+    if max_input_tokens is not None:
+        max_ctx = min(max_ctx, max_input_tokens + max_tokens + 2000)
     # Reserve tokens for output and system prompt
     max_input_chars = (max_ctx - max_tokens - 2000) * 3  # ~3 chars per token average
 
