@@ -17,3 +17,7 @@ CREATE INDEX idx_audit_admin ON admin_audit_log(admin_user_id, created_at DESC);
 CREATE INDEX idx_audit_action ON admin_audit_log(action, created_at DESC);
 CREATE INDEX idx_audit_target ON admin_audit_log(target_type, target_id);
 CREATE INDEX idx_audit_created ON admin_audit_log(created_at DESC);
+
+-- App user needs full DML + sequence access (migrations are run as postgres superuser).
+GRANT ALL PRIVILEGES ON TABLE admin_audit_log TO stoneai;
+GRANT USAGE, SELECT ON SEQUENCE admin_audit_log_id_seq TO stoneai;
