@@ -473,18 +473,15 @@ function Sidebar({
                   const m = MODELS_MAP.get(s.model_id);
                   // If model is unknown — keep visible (legacy/deleted models). Otherwise filter by category.
                   if (m && allowedCats.length > 0 && !allowedCats.includes(m.category)) return false;
-                  // Show only sessions matching the currently selected model — each model has its own chat list
-                  if (selectedModel && s.model_id !== selectedModel) return false;
                   return true;
                 });
 
                 if (filtered.length === 0) {
-                  const modelName = selectedModel ? (MODELS_MAP.get(selectedModel)?.name || selectedModel) : "этой моделью";
                   return (
                     <div className="px-3 py-8 text-center">
                       <img src="/mascots/stone-mascot-chat.webp" alt="Stone" width="56" height="56" className="mx-auto mb-2 opacity-50" />
                       <p className="text-[11px] text-text/40 leading-snug">
-                        Нет чатов с <span className="font-semibold text-text/60">{modelName}</span>.<br />
+                        В этой категории ещё нет чатов.<br />
                         Напишите сообщение, чтобы начать.
                       </p>
                     </div>
