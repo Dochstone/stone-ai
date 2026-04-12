@@ -186,7 +186,7 @@ async def chat(request: Request):
                     OPENROUTER_URL,
                     headers={
                         "Authorization": "Bearer " + OPENROUTER_API_KEY,
-                        "HTTP-Referer": "https://stone-ai-1.vercel.app",
+                        "HTTP-Referer": "https://stoneai.ru",
                         "X-Title": "Stone AI",
                         "Content-Type": "application/json",
                     },

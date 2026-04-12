@@ -91,7 +91,7 @@ export default function App() {
 
   return (
     <TonConnectUIProvider
-      manifestUrl="https://stone-ai-1.vercel.app/tonconnect-manifest.json"
+      manifestUrl="https://stoneai.ru/tonconnect-manifest.json"
       actionsConfiguration={{
         twaReturnUrl: 'https://t.me/StoneAI_bot'
       }}
