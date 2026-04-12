@@ -115,6 +115,26 @@ export default function WelcomeScreen({ onSuggestion, activeTab, plan }: { onSug
           </div>
         )}
 
+        {/* Limit-system explainer — shown on text/image/video tabs */}
+        {(activeTab === "all" || activeTab === "image" || activeTab === "video") && (
+          <div className="mt-5 max-w-lg mx-auto bg-accent/[0.04] border border-accent/15 rounded-2xl p-3.5 text-left">
+            <div className="flex items-start gap-2">
+              <span className="text-base shrink-0 mt-0.5">💡</span>
+              <div className="text-[11.5px] text-text/65 leading-relaxed">
+                <span className="font-bold text-accent">Как считается лимит:</span> один запрос = 1 единица.
+                Дорогие модели тратят больше:
+                <span className="inline-block bg-amber-500/15 text-amber-700 font-semibold px-1.5 py-0.5 rounded text-[10px] mx-0.5">×2</span>
+                Sonnet, GPT-5.1 ·
+                <span className="inline-block bg-rose-500/15 text-rose-700 font-semibold px-1.5 py-0.5 rounded text-[10px] mx-0.5">×5</span>
+                Opus, Nano Banana Pro.
+                {activeTab === "video" && (
+                  <> <span className="font-semibold">Видео-поинты</span> — отдельный счётчик: дешёвое видео = 1 пт, премиум 1080P/10 сек = 2-4 пт.</>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Upgrade CTA — only for free/mini */}
         {activeTab === "all" && plan !== "max" && plan !== "max-pro" && (
           <div className="mt-6 max-w-lg mx-auto">

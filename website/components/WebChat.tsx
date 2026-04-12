@@ -1849,9 +1849,10 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
               {/* List */}
               <div className="overflow-y-auto flex-1 p-2">
                 {(() => {
-                  const catMap: Record<string, string[]> = { all: [], free: [], chat: ["chat", "search", "reason", "code"], image: ["image"], video: ["video"], "3d": ["3d"], health: ["chat"] };
+                  // "all" tab now shows only TEXT models (chat/search/reason/code), not images/video/3d
+                  const catMap: Record<string, string[]> = { all: ["chat", "search", "reason", "code"], free: [], chat: ["chat", "search", "reason", "code"], image: ["image"], video: ["video"], "3d": ["3d"], health: ["chat"] };
                   const cats = catMap[modelCatFilter] || [];
-                  let list = modelCatFilter === "all" ? MODELS : modelCatFilter === "free" ? MODELS.filter(m => FREE_MODEL_IDS.has(m.id)) : MODELS.filter(m => cats.includes(m.category));
+                  let list = modelCatFilter === "free" ? MODELS.filter(m => FREE_MODEL_IDS.has(m.id)) : MODELS.filter(m => cats.includes(m.category));
                   if (modelSearch) list = list.filter(m => m.name.toLowerCase().includes(modelSearch.toLowerCase()) || m.company.toLowerCase().includes(modelSearch.toLowerCase()));
                   const bal = auth?.balanceUsd || 0;
                   return [...list].sort((a, b) => {
