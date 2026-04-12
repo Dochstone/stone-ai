@@ -169,7 +169,10 @@ async def auto_openrouter_snapshot(
             data = resp.json().get("data", {})
             usage_total = float(data.get("usage", 0.0))
             limit = data.get("limit")
-            balance_proxy = -usage_total if limit is None else float(limit) - usage_total
+            # If a spending limit is set: balance_usd = remaining = limit - usage (positive, depletes).
+            # If no limit (most common): balance_usd = total spent so far (positive, grows).
+            balance_for_storage = float(limit) - usage_total if limit is not None else usage_total
+            spend_grows = limit is None  # usage_total only grows; remaining only depletes
     except HTTPException:
         raise
     except Exception as e:
@@ -191,7 +194,11 @@ async def auto_openrouter_snapshot(
     delta_pct = None
 
     if prev:
-        actual_spend = round(prev.balance_usd - balance_proxy, 4)
+        # Direction depends on whether balance grows (cumulative spend) or depletes (remaining)
+        if spend_grows:
+            actual_spend = round(balance_for_storage - prev.balance_usd, 4)
+        else:
+            actual_spend = round(prev.balance_usd - balance_for_storage, 4)
         since = datetime.combine(prev.snapshot_date, datetime.min.time())
         until = datetime.combine(today, datetime.min.time()) + timedelta(days=1)
         tracked_spend = round(await _tracked_spend_for_period(db, "openrouter", since, until), 4)
@@ -202,14 +209,14 @@ async def auto_openrouter_snapshot(
     snap = ProviderSnapshot(
         provider="openrouter",
         snapshot_date=today,
-        balance_usd=balance_proxy,
+        balance_usd=balance_for_storage,
         previous_balance_usd=prev.balance_usd if prev else None,
         actual_spend_usd=actual_spend,
         tracked_spend_usd=tracked_spend,
         delta_usd=delta,
         delta_pct=delta_pct,
         source="auto",
-        note=f"OpenRouter usage_total={usage_total}",
+        note=f"OpenRouter usage_total=${usage_total:.4f}" + (f" limit=${float(limit):.2f}" if limit else " (no limit)"),
     )
     db.add(snap)
     await db.commit()
@@ -217,7 +224,7 @@ async def auto_openrouter_snapshot(
     return {
         "id": snap.id,
         "provider": "openrouter",
-        "balance_usd": balance_proxy,
+        "balance_usd": balance_for_storage,
         "actual_spend_usd": actual_spend,
         "tracked_spend_usd": tracked_spend,
         "delta_usd": delta,
