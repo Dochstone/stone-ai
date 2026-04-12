@@ -1,7 +1,7 @@
 export const homeFaqData = [
   {
     q: "Как начать пользоваться Stone AI?",
-    a: 'Откройте <a href="/dashboard/chat" class="text-accent hover:underline font-semibold">AI-чат</a> или <a href="/dashboard" class="text-accent hover:underline font-semibold">панель инструментов</a>. 10 бесплатных запросов каждый день к 8 моделям — GPT-4o mini, Claude Haiku 4.5, Gemini 2.0 Flash, DeepSeek V3, Llama 4 Maverick, Mistral Large и Nano Banana и Veo 3 (1 бесплатное видео). Регистрация не обязательна для чата. Для полного доступа к инструментам создайте аккаунт за 30 секунд через Google, Яндекс или email.',
+    a: 'Откройте <a href="/dashboard/chat" class="text-accent hover:underline font-semibold">AI-чат</a> или <a href="/dashboard" class="text-accent hover:underline font-semibold">панель инструментов</a>. 10 бесплатных запросов каждый день к 8 моделям — GPT-4o mini, Claude Haiku 4.5, Gemini 2.0 Flash, DeepSeek V3, Llama 4 Maverick, Mistral Large, Nano Banana и Veo 3 (2 пробных видео). Регистрация не обязательна для чата. Для полного доступа к инструментам создайте аккаунт за 30 секунд через Google, Яндекс или email.',
   },
   {
     q: "Что такое панель инструментов и какие инструменты доступны?",
@@ -9,7 +9,7 @@ export const homeFaqData = [
   },
   {
     q: "Сколько стоят инструменты и подписка?",
-    a: '4 тарифа на <a href="/pricing" class="text-accent hover:underline font-semibold">странице цен</a>: <strong>Free</strong> — 15 чат-запросов/день, 7 моделей, 2 картинки + 1 видео навсегда. <strong>Start (590₽/мес)</strong> — 20+ моделей, 1 500 быстрых + 90 премиум запросов/мес, 240 картинок, 60 видео. <strong>Pro (1 290₽/мес)</strong> — все 65+ нейросетей вкл. Opus, 2 100 + 120 запросов, 450 картинок, 90 видео. <strong>Elite (2 990₽/мес)</strong> — 10 500 запросов, API, приоритет. Чат бесплатный по лимитам, инструменты с баланса: шаблоны от 3₽, SEO-статьи 15₽, презентации 40₽, фотосессия 15-40₽, кампании 29₽. Бонус 100₽ при регистрации.',
+    a: '4 тарифа на <a href="/pricing" class="text-accent hover:underline font-semibold">странице цен</a>: <strong>Free</strong> — 10 чат-запросов/день, 7 моделей, 2 картинки + 2 пробных видео-поинта навсегда. <strong>Start (590₽/мес)</strong> — 20+ моделей, 600 быстрых + 90 премиум запросов/мес, 60 картинок, 13 видео-поинтов + триалы. <strong>Pro (1 290₽/мес)</strong> — все 65+ нейросетей вкл. Opus, 1 500 + 112 запросов, 140 картинок, 33 видео-поинта (Opus считается ×5). <strong>Elite (2 990₽/мес)</strong> — 4 500 запросов, 80 видео-поинтов, API, приоритет. Чат бесплатный по лимитам, инструменты с баланса. Бонус 100₽ при регистрации.',
   },
   {
     q: "Какие способы оплаты поддерживаются?",
@@ -17,7 +17,7 @@ export const homeFaqData = [
   },
   {
     q: "Какие модели доступны бесплатно?",
-    a: 'Бесплатно 8 моделей: GPT-4o mini (OpenAI), Claude Haiku 4.5 (Anthropic), Gemini 2.0 Flash (Google), DeepSeek V3, Llama 4 Maverick (Meta), Mistral Large и Nano Banana (картинки) и Veo 3 (1 бесплатное видео). 15 чат-запросов в день — баланс не тратится. Плюс trial: 2 картинки и 1 видео (Veo 3) навсегда. Инструменты (шаблоны, презентации, SEO, кампании) — с баланса, бонус 100₽ при регистрации. Полный список 65+ нейросетей — на <a href="/models" class="text-accent hover:underline font-semibold">странице моделей</a>.',
+    a: 'Бесплатно 8 моделей: GPT-4o mini (OpenAI), Claude Haiku 4.5 (Anthropic), Gemini 2.0 Flash (Google), DeepSeek V3, Llama 4 Maverick (Meta), Mistral Large, Nano Banana (картинки), Veo 3 (2 пробных видео). 10 чат-запросов + 2 премиум в день — баланс не тратится. Плюс пробные видео-поинты: 2 поинта на любое видео навсегда. Инструменты (шаблоны, презентации, SEO, кампании) — с баланса, бонус 100₽ при регистрации. Полный список 65+ нейросетей — на <a href="/models" class="text-accent hover:underline font-semibold">странице моделей</a>.',
   },
   {
     q: "Чем Stone AI отличается от ChatGPT Plus?",

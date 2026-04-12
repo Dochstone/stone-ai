@@ -8,29 +8,21 @@ import ModelViewerScript from "@/components/ModelViewerScript";
 import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "3D генерация нейросетью — ИИ из текста в 3D модель",
-  description: "Нейросеть для 3D генерации из текста и фото. ИИ-модели Tripo v2.5, TripoSR. GLB для игр, печати. От $0.21.",
+  title: "3D генерация нейросетью — Скоро",
+  description: "Подключаем новый провайдер 3D-генерации. Скоро Tripo через прямой API.",
   alternates: { canonical: "/3d" },
 };
 
-const modelIds = ["tripo-v2.5", "triposr"];
+const modelIds: string[] = [];
 
-const modelDescriptions: Record<string, string> = {
-  "tripo-v2.5": "Text/Image → 3D с PBR текстурами. Высокое качество, 25-100 секунд.",
-  "triposr": "Image → 3D мгновенно (<1 секунда). Идеален для быстрого прототипа.",
-};
+const modelDescriptions: Record<string, string> = {};
 
-const examples = [
-  { prompt: "Загрузите фото кроссовки → получите 3D модель для маркетплейса", tag: "Product" },
-  { prompt: "Средневековый замок на холме с башнями и мостом", tag: "Game Asset" },
-  { prompt: "Фигурка персонажа из фото для 3D печати", tag: "3D Печать" },
-];
+const examples: { prompt: string; tag: string }[] = [];
 
 const faqItems = [
-  { q: "Какой формат 3D модели?", a: "GLB (glTF Binary) — универсальный формат. Открывается в Blender, Unity, Unreal Engine, браузерах. Можно сразу использовать в играх или отправить на 3D печать." },
-  { q: "Можно ли создать 3D из текста?", a: "Да! Tripo v2.5 поддерживает text-to-3D. Опишите объект текстом — AI сгенерирует полноценную 3D модель. TripoSR работает только с изображениями." },
-  { q: "Сколько времени занимает генерация?", a: "TripoSR — менее 1 секунды (мгновенно). Tripo v2.5 — от 25 до 100 секунд в зависимости от сложности." },
-  { q: "Можно ли посмотреть 3D модель в браузере?", a: "Да! После генерации модель отображается прямо в чате с возможностью вращения, зума и скачивания GLB файла." },
+  { q: "Когда заработает 3D?", a: "Подключаем Tripo напрямую через их платформу. Раньше работало через посредника (fal.ai), но они убрали Tripo из каталога. Сейчас восстанавливаем интеграцию." },
+  { q: "Что будет в обновлении?", a: "Text/Image → 3D, GLB формат, прямой API Tripo. Цены ниже, качество тоже же." },
+  { q: "Как узнать когда запустится?", a: "Подпишитесь на наш Telegram @stoneai — анонсируем там." },
 ];
 
 const faqJsonLd = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqItems.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) };
