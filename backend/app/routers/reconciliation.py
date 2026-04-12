@@ -160,19 +160,20 @@ async def auto_openrouter_snapshot(
 
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
+            # /credits gives true remaining balance: total_credits - total_usage
             resp = await client.get(
-                "https://openrouter.ai/api/v1/key",
+                "https://openrouter.ai/api/v1/credits",
                 headers={"Authorization": f"Bearer {api_key}"},
             )
             if resp.status_code != 200:
                 raise HTTPException(502, f"OpenRouter API: {resp.status_code} {resp.text[:200]}")
             data = resp.json().get("data", {})
-            usage_total = float(data.get("usage", 0.0))
-            limit = data.get("limit")
-            # If a spending limit is set: balance_usd = remaining = limit - usage (positive, depletes).
-            # If no limit (most common): balance_usd = total spent so far (positive, grows).
-            balance_for_storage = float(limit) - usage_total if limit is not None else usage_total
-            spend_grows = limit is None  # usage_total only grows; remaining only depletes
+            total_credits = float(data.get("total_credits", 0.0))
+            total_usage = float(data.get("total_usage", 0.0))
+            # balance = remaining money in account (matches what user sees on dashboard)
+            balance_for_storage = round(total_credits - total_usage, 4)
+            spend_grows = False  # balance depletes as we spend
+            note_extra = f"credits=${total_credits:.2f} usage=${total_usage:.4f}"
     except HTTPException:
         raise
     except Exception as e:
@@ -216,7 +217,7 @@ async def auto_openrouter_snapshot(
         delta_usd=delta,
         delta_pct=delta_pct,
         source="auto",
-        note=f"OpenRouter usage_total=${usage_total:.4f}" + (f" limit=${float(limit):.2f}" if limit else " (no limit)"),
+        note=f"OpenRouter {note_extra}",
     )
     db.add(snap)
     await db.commit()
