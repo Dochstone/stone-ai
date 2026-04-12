@@ -22,6 +22,7 @@ from app.database import init_db
 # Routers
 from app.routers import chat, user, models, payment, byok, ads, admin, auth, referral, chats, video, threed, audio, prompts, projects, generations, games, achievements, presentations, photo_session, image
 from app.routers import payment_ext
+from app.routers import reconciliation
 
 # Bot handlers
 from app.bot import handlers as bot_handlers
@@ -290,6 +291,7 @@ app.include_router(payment_ext.router)
 app.include_router(ads.router)
 app.include_router(byok.router)
 app.include_router(admin.router)
+app.include_router(reconciliation.router)
 app.include_router(auth.router)
 app.include_router(referral.router)
 app.include_router(chats.router)
