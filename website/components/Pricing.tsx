@@ -338,6 +338,11 @@ export default function Pricing() {
                   )}
                 </div>
                 <p className={`text-xs mt-1 ${plan.premium ? "text-white/50" : "text-text/50"}`}>{plan.desc}</p>
+                {plan.modalIntro && (
+                  <p className={`text-[11px] mt-2 leading-relaxed ${plan.premium ? "text-white/40" : "text-text/40"}`}>
+                    {plan.modalIntro}
+                  </p>
+                )}
               </div>
 
               <ul className="space-y-2.5 text-sm mb-4 flex-1">
