@@ -56,7 +56,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob: https: http:",
-              "connect-src 'self' https://www.google-analytics.com https://mc.yandex.ru wss://mc.yandex.ru https://ajax.googleapis.com https://*.ton.org wss://*.ton.org https://bridge.tonapi.io wss://bridge.tonapi.io https://*.tonapi.io https://connect.tonhubx.com wss://connect.tonhubx.com https://bridge.ton.space wss://bridge.ton.space https://api.coingecko.com https://tonkeeper.com https://raw.githubusercontent.com https://analytics.ton.org https://config.ton.org",
+              "connect-src 'self' https://www.google-analytics.com https://mc.yandex.ru wss://mc.yandex.ru https://ajax.googleapis.com https://*.ton.org wss://*.ton.org https://bridge.tonapi.io wss://bridge.tonapi.io https://*.tonapi.io https://connect.tonhubx.com wss://connect.tonhubx.com https://bridge.ton.space wss://bridge.ton.space https://walletbot.me https://tonconnectbridge.mytonwallet.org https://api.coingecko.com https://tonkeeper.com https://raw.githubusercontent.com https://analytics.ton.org https://config.ton.org",
               "media-src 'self' blob:",
               "frame-src 'self' https://t.me",
               "worker-src 'self' blob:",
