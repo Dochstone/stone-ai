@@ -124,6 +124,33 @@ function formatValue(value: unknown): string {
   try { return JSON.stringify(value, null, 2); } catch { return String(value); }
 }
 
+// Build a short human-readable summary of a payload, e.g. "$1.50 → $5.00" for balance change
+function payloadSummary(action: string, payload: Record<string, unknown> | null): string | null {
+  if (!payload) return null;
+  if (action === "balance_changed") {
+    const o = payload.old_balance_usd, n = payload.new_balance_usd;
+    if (typeof o === "number" && typeof n === "number") {
+      const diff = n - o;
+      const sign = diff > 0 ? "+" : "";
+      return `$${o.toFixed(2)} → $${n.toFixed(2)} (${sign}$${diff.toFixed(2)})`;
+    }
+  }
+  if (action === "subscription_set") {
+    const o = payload.old_tier, n = payload.new_tier || payload.tier;
+    if (n) return `${o || "—"} → ${n}`;
+  }
+  if (action === "user_banned" && payload.ban_reason) return String(payload.ban_reason);
+  if (action === "promo_created") {
+    const c = payload.code, d = payload.discount_percent, a = payload.amount;
+    return [c && `код ${c}`, d && `${d}%`, a && `$${a}`].filter(Boolean).join(" · ") || null;
+  }
+  if (payload.reason) return String(payload.reason);
+  // Fallback: show first 2 fields compactly
+  const entries = Object.entries(payload).slice(0, 2);
+  if (entries.length === 0) return null;
+  return entries.map(([k, v]) => `${FIELD_LABELS[k] || k}: ${formatValue(v).slice(0, 30)}`).join(" · ");
+}
+
 function PayloadBlock({ payload }: { payload: Record<string, unknown> | null }) {
   if (!payload || Object.keys(payload).length === 0) {
     return <div className="text-sm text-text/40 italic">Без дополнительных данных</div>;
@@ -334,8 +361,19 @@ export default function AuditLogTab({ token }: { token: string }) {
                       <span className="text-text/25">·</span>
                       <span title={formatAbsolute(item.created_at)}>{formatRelative(item.created_at)}</span>
                     </div>
+                    {(() => {
+                      const summary = payloadSummary(item.action, item.payload);
+                      return summary ? (
+                        <div className="mt-1.5 text-[11px] text-text/65 leading-snug line-clamp-1">
+                          <span className="text-text/35">→</span> {summary}
+                        </div>
+                      ) : null;
+                    })()}
                     {item.error_message && (
                       <div className="mt-1.5 text-[11px] text-rose-600 line-clamp-1">⚠ {item.error_message}</div>
+                    )}
+                    {item.ip_address && (
+                      <div className="mt-1 text-[10px] text-text/30 font-mono">IP: {item.ip_address}</div>
                     )}
                   </div>
                 </div>

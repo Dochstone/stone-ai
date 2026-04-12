@@ -819,7 +819,9 @@ async def web_admin_audit_log(
                 "error_message": item.error_message,
                 "ip_address": item.ip_address,
                 "user_agent": item.user_agent,
-                "created_at": item.created_at.isoformat() if item.created_at else None,
+                # created_at column is TIMESTAMP WITHOUT TIME ZONE but stores UTC. Append "Z"
+                # so frontend parses as UTC instead of local time (was off by server TZ offset).
+                "created_at": (item.created_at.isoformat() + "Z") if item.created_at else None,
             }
             for item in items
         ],
