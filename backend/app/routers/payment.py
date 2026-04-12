@@ -13,6 +13,7 @@ from app.database import get_db
 from app.middleware.auth import get_current_user
 from app.models.user import User
 from app.models import Transaction
+from app.routers.payment_ext import _claim_pending_transaction
 from app.services.token_billing import add_balance, get_user_balance, TOKEN_PRICES, get_weighted_price
 from app.services.ton import (
     get_ton_price_usd,
@@ -407,6 +408,19 @@ async def create_ton_order(
         ton_amount=ton_amount,
     )
 
+    tx = Transaction(
+        user_tg_id=tg_user["id"],
+        amount=ton_amount,
+        currency="TON",
+        amount_usd=req.usd_amount,
+        product_type="balance_topup",
+        product_id="usd_topup",
+        status="pending",
+        provider_id=f"tonconnect:{order['order_id']}",
+    )
+    db.add(tx)
+    await db.commit()
+
     logger.info(
         f"TON order: user={tg_user['id']}, usd={req.usd_amount}, "
         f"ton={ton_amount}, comment={order['payload_comment']}"
@@ -430,10 +444,25 @@ async def verify_ton_payment(
     db: AsyncSession = Depends(get_db),
 ):
     """Verify a TON payment and add USD to balance."""
+    return await _verify_ton_payment_impl(req, tg_user, db)
+
+
+async def _verify_ton_payment_impl(req: TonVerifyRequest, tg_user: dict, db: AsyncSession):
     order = get_order(req.order_id)
 
     if not order:
-        raise HTTPException(status_code=404, detail="Заказ не найден")
+        result = await db.execute(
+            select(Transaction).where(
+                Transaction.provider_id == f"tonconnect:{req.order_id}"
+            ).with_for_update()
+        )
+        db_tx = result.scalar_one_or_none()
+        if not db_tx:
+            raise HTTPException(status_code=404, detail="Заказ не найден")
+        if db_tx.status == "completed":
+            return {"status": "already_completed"}
+        raise HTTPException(status_code=410, detail="Сессия заказа истекла. Создайте новый.")
+
     if order["status"] == "completed":
         return {"status": "already_completed"}
     if order["status"] == "expired":
@@ -454,27 +483,27 @@ async def verify_ton_payment(
             "message": "Транзакция ещё не найдена. Подождите 1-2 минуты и попробуйте снова.",
         }
 
-    # Transaction found — add USD to balance
-    usd_amount = order["usd_amount"]
-    new_balance = await add_balance(db, tg_user["id"], usd_amount)
+    tx, already_processed = await _claim_pending_transaction(
+        db,
+        provider_id=f"tonconnect:{req.order_id}",
+        fallback_tx_hash=tx_info["tx_hash"],
+    )
+    if already_processed:
+        return {"status": "already_completed"}
+    if not tx:
+        logger.error(f"TON: pending transaction not found for order={req.order_id}")
+        raise HTTPException(status_code=500, detail="Внутренняя ошибка, обратитесь в поддержку")
 
-    # Update total_deposited_usd
+    tx.tx_hash = tx_info["tx_hash"]
+    usd_amount = float(tx.amount_usd or 0)
+
+    new_balance = await add_balance(db, tg_user["id"], usd_amount)
     await _increment_total_deposited(db, tg_user["id"], usd_amount)
 
-    tx = Transaction(
-        user_tg_id=tg_user["id"],
-        amount=tx_info["amount_ton"],
-        currency="TON",
-        amount_usd=usd_amount,
-        product_type="balance_topup",
-        product_id="usd_topup",
-        status="completed",
-        tx_hash=tx_info["tx_hash"],
-        provider_id=f"tonconnect:{req.order_id}",
-    )
-    db.add(tx)
-    await db.commit()
+    from app.routers.referral import credit_referrer
+    await credit_referrer(db, tg_user["id"], usd_amount)
 
+    await db.commit()
     complete_order(req.order_id, tx_info["tx_hash"])
 
     logger.info(
