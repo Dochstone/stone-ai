@@ -546,6 +546,14 @@ export default function Pricing() {
 
                 {/* Features */}
                 <div className="px-6 pt-3 sm:pt-1 pb-2">
+                  {modal.modalIntro && (
+                    <p
+                      className="text-[12px] text-text/55 leading-relaxed mb-3"
+                      style={{ animation: "pricingStagger 0.35s ease both 0.18s" }}
+                    >
+                      {modal.modalIntro}
+                    </p>
+                  )}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
                     {modal.features.slice(0, 6).map((f: string, i: number) => (
                       <div
@@ -561,6 +569,47 @@ export default function Pricing() {
                       </div>
                     ))}
                   </div>
+
+                  {modal.modalIncludes && modal.modalIncludes.length > 0 && (
+                    <details
+                      className="mt-3 group"
+                      style={{ animation: "pricingStagger 0.4s ease both 0.45s" }}
+                    >
+                      <summary
+                        className="cursor-pointer flex items-center gap-2 text-[11px] font-semibold text-text/55 hover:text-text/80 transition-colors py-2 select-none list-none"
+                      >
+                        <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] transition-transform group-open:rotate-45"
+                          style={{ background: `${modal.color}15`, color: modal.color }}>
+                          +
+                        </span>
+                        Что входит подробно ({modal.modalIncludes.length} пунктов)
+                      </summary>
+                      <ul className="mt-2 space-y-1.5 pl-1">
+                        {modal.modalIncludes.map((item: string, i: number) => (
+                          <li key={i} className="text-[11px] text-text/55 leading-relaxed">{item}</li>
+                        ))}
+                      </ul>
+                    </details>
+                  )}
+
+                  {modal.modalAudience && (
+                    <div
+                      className="mt-3 rounded-xl p-3 text-[11px] leading-relaxed"
+                      style={{ background: `${modal.color}0A`, border: `1px solid ${modal.color}20`, animation: "pricingStagger 0.4s ease both 0.5s" }}
+                    >
+                      <div className="font-bold text-text/70 mb-1">Кому подходит</div>
+                      <div className="text-text/55">{modal.modalAudience}</div>
+                    </div>
+                  )}
+
+                  {modal.modalGuarantee && (
+                    <div
+                      className="mt-2 rounded-xl bg-text/[0.03] border border-text/[0.06] p-3 text-[10.5px] leading-relaxed text-text/50"
+                      style={{ animation: "pricingStagger 0.4s ease both 0.55s" }}
+                    >
+                      <span className="font-bold text-text/70">🛡 Гарантия:</span> {modal.modalGuarantee}
+                    </div>
+                  )}
                 </div>
 
                 {/* Payment section */}
