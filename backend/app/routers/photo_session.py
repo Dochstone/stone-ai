@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import get_settings
+from app.config import apply_discount, get_settings
 from app.database import get_db
 from app.middleware.auth import get_current_user
 from app.models.generation import Generation
@@ -128,7 +128,6 @@ async def _find_user(db: AsyncSession, tg_user: dict) -> User:
 
 async def _check_and_deduct(db: AsyncSession, user: User, cost_usd: float) -> tuple[float, bool]:
     """Check balance and deduct. Subscribers get 20% discount. Returns (new_balance, is_subscriber)."""
-    from app.config import apply_discount
     balance = float(user.balance_usd or 0)
     tier = user.subscription_tier or "free"
     is_sub = tier in ("mini", "max", "max-pro")
@@ -483,6 +482,12 @@ class BatchBackgroundRequest(BaseModel):
     model_id: str | None = None
 
 
+def get_per_image_cost(tier: str | None, model_id: str | None = None) -> float:
+    """Per-image cost with tier discount applied."""
+    base_cost = _cost_usd("background", model_id or DEFAULT_IMAGE_MODEL)
+    return apply_discount(base_cost, tier or "free")
+
+
 @router.post("/batch")
 async def batch_process(
     req: BatchBackgroundRequest,
@@ -499,10 +504,9 @@ async def batch_process(
         _validate_image_size(img)
     user = await _find_user(db, tg_user)
 
-    from app.config import apply_discount
     tier = user.subscription_tier or "free"
     model_id_used = req.model_id or DEFAULT_IMAGE_MODEL
-    per_image_cost = apply_discount(_cost_usd("background", model_id_used), tier)
+    per_image_cost = get_per_image_cost(tier, model_id_used)
     total_cost = per_image_cost * len(req.images)
     balance = float(user.balance_usd or 0)
 
@@ -550,4 +554,5 @@ async def batch_process(
         "processed": sum(1 for r in results if r["status"] == "ok"),
         "failed": sum(1 for r in results if r["status"] == "error"),
     }
+
 
