@@ -179,9 +179,6 @@ export default function VideoOptionsPanel({
           <div className="text-[11px] font-semibold text-accent">
             {pointsLeft}/{pointsTotal || pointsLeft} pt left
           </div>
-          {currentVariant && (
-            <div className="text-[10px] text-text/40">~${currentVariant.cost_usd.toFixed(2)}</div>
-          )}
         </div>
       </div>
 
@@ -268,7 +265,7 @@ export default function VideoOptionsPanel({
         <div className="flex items-center justify-between gap-3 text-[11px]">
           <span className="font-semibold text-text/70">Current cost</span>
           <span className="font-bold text-accent">
-            {currentVariant ? `${currentVariant.points} pt · ~$${currentVariant.cost_usd.toFixed(2)}` : "Unavailable"}
+            {currentVariant ? `${currentVariant.points} pt` : "Unavailable"}
           </span>
         </div>
         {lockedReason && (
