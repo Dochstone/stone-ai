@@ -187,6 +187,7 @@ NOVITA_PUBLIC_MODEL_FAMILY: dict[str, str] = {
     "luma-ray2-flash": "hunyuan-video-fast",
     "stable-video": "stable-video",
     "kling-v2": "kling-v2.1",
+    "runway-gen3": "runway-gen3",
 }
 
 
@@ -248,6 +249,11 @@ NOVITA_PRICING_TABLE: dict[str, list[dict[str, str | int | float]]] = {
         _variant(10, "1080P", "t2v", "standard", 0.70),
         _variant(5, "1080P", "i2v", "standard", 0.35),
         _variant(10, "1080P", "i2v", "standard", 0.70),
+    ],
+    # Runway Gen-3 via fal.ai — image-to-video only, fixed settings.
+    "runway-gen3": [
+        _variant(5, "720P", "i2v", "standard", 0.25),
+        _variant(10, "720P", "i2v", "standard", 0.50),
     ],
 }
 
