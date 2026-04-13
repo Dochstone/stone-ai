@@ -47,3 +47,9 @@ video-originals/
 
 # User uploads
 media/
+
+# Session handoff docs and TZ drafts (work-in-progress notes, not tracked)
+CLAUDE_CODE_*.md
+CODEX_TASK_*.md
+TZ_*.md
+PLAN_INFO_UPDATE.md
