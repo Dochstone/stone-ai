@@ -6,6 +6,18 @@ from flask import Flask, request, jsonify
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 
+BACKEND_ENV_PATH = os.getenv("BACKEND_ENV_PATH", "/var/www/stone-ai/backend/.env")
+if os.path.isfile(BACKEND_ENV_PATH):
+    with open(BACKEND_ENV_PATH, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, _, value = line.partition("=")
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            os.environ.setdefault(key, value)
+
 SMTP_HOST = os.getenv("SMTP_HOST", "smtp.beget.com")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "465"))
 SMTP_EMAIL = os.getenv("SMTP_EMAIL", "noreply@stoneai.ru")
