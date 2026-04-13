@@ -102,7 +102,7 @@ export function generateMetadata({ params }: Props): Metadata {
   const cat = categoryLabels[model.category] || model.category;
   const isFree = model.tier === "free";
   return {
-    title: `${model.name} онлайн ${isFree ? "бесплатно" : ""} — ${cat} нейросеть | Stone AI`,
+    title: `${model.name} онлайн${isFree ? " бесплатно" : ""} — ${cat} нейросеть`,
     description: `${model.name} от ${model.company} — попробуйте ${isFree ? "бесплатно" : "по подписке от 590₽"} в Stone AI. ${model.description || ""} Контекст ${model.context}. На русском языке, без VPN.`,
     alternates: { canonical: `/models/${params.id}` },
     openGraph: {

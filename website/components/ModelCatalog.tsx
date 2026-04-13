@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   MODELS,
   COMPANIES,
@@ -197,7 +198,17 @@ export default function ModelCatalog() {
                           <div className="flex items-center gap-1.5">
                             <span className="text-[10px] text-text/40">{categoryLabels[model.category]}</span>
                             {model.context && <span className="text-[10px] text-text/30">{model.context}</span>}
-                            <span className="text-[10px] text-accent font-semibold ml-auto">{isOpen ? "Свернуть" : "Подробнее →"}</span>
+                            {isOpen ? (
+                              <span className="text-[10px] text-accent font-semibold ml-auto">Свернуть</span>
+                            ) : (
+                              <Link
+                                href={`/models/${model.id}`}
+                                className="text-[10px] text-accent font-semibold ml-auto hover:underline"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                Открыть {model.name} →
+                              </Link>
+                            )}
                           </div>
                         </div>
                         {/* Mobile inline expand */}
@@ -281,6 +292,13 @@ export default function ModelCatalog() {
                         >
                           Попробовать {exp.name}
                         </a>
+                        <Link
+                          href={`/models/${exp.id}`}
+                          className="block text-center text-xs text-text/60 hover:text-accent transition-colors py-1"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          Подробнее о {exp.name} →
+                        </Link>
                         {getTierLabel(exp.id).label !== "Free" && (
                           <a href="/pricing" className="block text-center text-[11px] text-text/40 hover:text-accent transition-colors" onClick={(e) => e.stopPropagation()}>
                             Смотреть тарифы →
