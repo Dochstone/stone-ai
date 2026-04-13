@@ -44,6 +44,70 @@ function formatDate(iso: string) {
   });
 }
 
+// Ordered longest-first so "Claude Opus 4" wins over "Claude Opus".
+const INTERNAL_LINKS: { phrase: string; href: string }[] = [
+  { phrase: "Claude Opus 4", href: "/models/claude-opus-4" },
+  { phrase: "Claude Sonnet 4", href: "/models/claude-sonnet-4" },
+  { phrase: "Claude Haiku 4.5", href: "/models/claude-haiku-4.5" },
+  { phrase: "GPT-4o mini", href: "/models/gpt-4o-mini" },
+  { phrase: "GPT-5.1", href: "/models/gpt-5.1" },
+  { phrase: "GPT-5.4", href: "/models/gpt-5.4" },
+  { phrase: "Gemini 2.5 Pro", href: "/models/gemini-2.5-pro" },
+  { phrase: "Gemini 2.0 Flash", href: "/models/gemini-2.0-flash" },
+  { phrase: "DeepSeek R1", href: "/models/deepseek-r1" },
+  { phrase: "DeepSeek V3", href: "/models/deepseek-v3" },
+  { phrase: "Llama 4", href: "/models/llama-4-maverick" },
+  { phrase: "Mistral Large", href: "/models/mistral-large-25" },
+  { phrase: "Grok 3", href: "/models/grok-3" },
+  { phrase: "Perplexity Sonar", href: "/models/perplexity-sonar" },
+  { phrase: "тариф Elite", href: "/pricing" },
+  { phrase: "тариф Pro", href: "/pricing" },
+  { phrase: "тариф Start", href: "/pricing" },
+  { phrase: "подписку Stone AI", href: "/pricing" },
+];
+
+/**
+ * Replace first occurrence of each configured phrase in a paragraph
+ * with an internal link. Returns React fragments. Case-sensitive to
+ * preserve the author's original casing in link text.
+ */
+function autoLink(text: string): (string | JSX.Element)[] {
+  let parts: (string | JSX.Element)[] = [text];
+  const used = new Set<string>();
+  for (const { phrase, href } of INTERNAL_LINKS) {
+    if (used.has(phrase)) continue;
+    const newParts: (string | JSX.Element)[] = [];
+    let replaced = false;
+    for (const part of parts) {
+      if (typeof part !== "string" || replaced) {
+        newParts.push(part);
+        continue;
+      }
+      const idx = part.indexOf(phrase);
+      if (idx < 0) {
+        newParts.push(part);
+        continue;
+      }
+      if (idx > 0) newParts.push(part.slice(0, idx));
+      newParts.push(
+        <a
+          key={`${phrase}-${idx}`}
+          href={href}
+          className="text-accent hover:underline underline-offset-2"
+        >
+          {phrase}
+        </a>
+      );
+      const tail = part.slice(idx + phrase.length);
+      if (tail) newParts.push(tail);
+      replaced = true;
+      used.add(phrase);
+    }
+    parts = newParts;
+  }
+  return parts;
+}
+
 export default function BlogPostPage({ params }: Props) {
   const post = getPost(params.slug);
   if (!post) return notFound();
@@ -149,7 +213,11 @@ export default function BlogPostPage({ params }: Props) {
             if (typeof block === "object" && "h2" in block) {
               return <h2 key={i} className="text-xl md:text-2xl font-extrabold mt-10 mb-2">{block.h2}</h2>;
             }
-            return <p key={i} className="text-text/70 text-[15px] leading-[1.8]">{String(block)}</p>;
+            return (
+              <p key={i} className="text-text/70 text-[15px] leading-[1.8]">
+                {autoLink(String(block))}
+              </p>
+            );
           })}
         </div>
 

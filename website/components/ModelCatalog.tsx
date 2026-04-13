@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   MODELS,
   COMPANIES,
@@ -80,6 +80,13 @@ export default function ModelCatalog() {
   const [sort, setSort] = useState<SortKey>("name");
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState<string | null>(null);
+
+  // Accept ?q= from URL so SearchAction in JSON-LD resolves to real results
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const q = new URLSearchParams(window.location.search).get("q");
+    if (q) setSearch(q);
+  }, []);
 
   let filtered = MODELS.filter((m) => {
     if (company !== "all" && m.company !== company) return false;
