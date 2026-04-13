@@ -48,16 +48,35 @@ export default function BlogPostPage({ params }: Props) {
   const post = getPost(params.slug);
   if (!post) return notFound();
 
+  const ogUrl = `${SITE_URL}/blog/${post.slug}/opengraph-image`;
   const articleJsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: post.title,
     description: post.description,
+    image: [ogUrl],
     datePublished: post.date,
     dateModified: post.dateModified,
-    author: { "@type": "Organization", name: "Stone AI" },
-    publisher: { "@type": "Organization", name: "Stone AI", logo: { "@type": "ImageObject", url: `${SITE_URL}/og-image.png` } },
-    mainEntityOfPage: `${SITE_URL}/blog/${post.slug}`,
+    author: {
+      "@type": "Organization",
+      name: "Stone AI",
+      url: SITE_URL,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Stone AI",
+      url: SITE_URL,
+      logo: {
+        "@type": "ImageObject",
+        url: `${SITE_URL}/og-image.png`,
+        width: 1200,
+        height: 630,
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${SITE_URL}/blog/${post.slug}`,
+    },
   };
 
   const faq = getFaq(post.slug);
