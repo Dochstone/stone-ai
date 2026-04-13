@@ -319,7 +319,7 @@ app.include_router(achievements.router)
 app.include_router(presentations.router)
 app.include_router(photo_session.router)
 app.include_router(image.router)
-from app.routers import bots, agent, analytics, knowledge, campaigns, wordpress, telegram_bots
+from app.routers import bots, agent, analytics, knowledge, campaigns, wordpress, telegram_bots, admin_seo
 app.include_router(bots.router)
 app.include_router(agent.router)
 app.include_router(analytics.router)
@@ -327,6 +327,7 @@ app.include_router(knowledge.router)
 app.include_router(campaigns.router)
 app.include_router(wordpress.router)
 app.include_router(telegram_bots.router)
+app.include_router(admin_seo.router)
 
 
 @app.get("/")
