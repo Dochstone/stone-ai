@@ -128,8 +128,8 @@ async def cmd_start(message: Message):
     await message.answer(
         "<b>Stone AI — 65+ нейросетей в одном окне</b>\n\n"
         "GPT-5.4, Claude Opus, Gemini Pro, DeepSeek, Sora 2 — "
-        "текст, картинки, видео, 3D и аудио.\n\n"
-        "✅ <b>Бесплатно</b> — 10 запросов/день, 7 моделей\n"
+        "текст, картинки, видео и аудио.\n\n"
+        "✅ <b>Бесплатно</b> — 10 быстрых + 2 премиум запроса/день, 2 пробных видео\n"
         "⭐ <b>Подписка от 590₽/мес</b> — все 65+ моделей\n\n"
         "Нажми кнопку ниже, чтобы начать 👇",
         parse_mode="HTML",
@@ -150,13 +150,14 @@ async def cmd_help(message: Message):
         "/start — Главное меню\n"
         "/plan — Текущий тариф\n"
         "/help — Эта справка\n\n"
-        "<b>Бесплатные модели (10 запросов/день):</b>\n"
+        "<b>Бесплатные модели (10/день + 2 премиум):</b>\n"
         "GPT-4o mini, Claude Haiku, Gemini Flash, "
-        "Llama 4, Mistral Large, DeepSeek V3, Nano Banana\n\n"
+        "Llama 4, Mistral Large, DeepSeek V3, Nano Banana, Veo 3\n\n"
         "<b>Подписка от 590₽/мес:</b>\n"
-        "Start — 20+ моделей, 500 запросов\n"
-        "Pro — 65+ моделей, 2000 запросов, видео\n"
-        "Elite — 10000 запросов, API\n\n"
+        "Start — 20+ моделей, 600 запросов, 13 видео-поинтов\n"
+        "Pro — 65+ моделей + Opus, 1 500 запросов, 33 видео-поинта\n"
+        "Elite — 4 500 запросов, 80 видео-поинтов, API\n\n"
+        "💡 Тяжёлые модели тратят больше единиц: Sonnet/GPT-5.1 = ×2, Opus = ×5\n\n"
         "<b>Оплата:</b> Telegram Stars, крипто (USDT/BTC/ETH), TON\n\n"
         "🌐 Сайт: stoneai.ru\n"
         "💬 Поддержка: @stoneaisupport",
@@ -181,7 +182,7 @@ async def cmd_plan(message: Message):
             if not user:
                 text = (
                     "<b>Тариф: FREE</b>\n\n"
-                    "7 моделей, 10 запросов/день\n\n"
+                    "7 моделей, 10 запросов/день + 2 премиум\n\n"
                     "Подписка от 590₽/мес открывает 65+ моделей."
                 )
             else:
@@ -240,10 +241,11 @@ async def callback_plans(callback):
 
     await callback.message.answer(
         "<b>Тарифы Stone AI</b>\n\n"
-        "🆓 <b>Free</b> — 0₽, 7 моделей, 10 запросов/день\n"
-        "💙 <b>Start</b> — 590₽/мес, 20+ моделей, 500 запросов\n"
-        "🧡 <b>Pro</b> — 1 290₽/мес, 65+ моделей, видео, 3D\n"
-        "⭐ <b>Elite</b> — 2 990₽/мес, безлимит, API\n\n"
+        "🆓 <b>Pay-per-Use</b> — от 3₽, 10/день + 2 премиум, инструменты с баланса\n"
+        "💙 <b>Start</b> — 590₽/мес, 20+ моделей, 600 запросов, 13 видео-поинтов\n"
+        "🧡 <b>Pro</b> — 1 290₽/мес, 65+ моделей + Opus, 33 видео-поинта\n"
+        "⭐ <b>Elite</b> — 2 990₽/мес, 4 500 запросов, 80 видео-поинтов, API\n\n"
+        "💡 Дорогие модели (Opus, Nano Banana Pro) тратят больше единиц.\n"
         "Оплата: Stars, крипто, TON",
         parse_mode="HTML",
         reply_markup=keyboard,

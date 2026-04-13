@@ -132,7 +132,7 @@ def send_welcome(to_email: str, name: str = "", tg_id: int | None = None):
             <table style="width:100%;font-size:13px;color:#555">
                 <tr><td style="padding:6px 0">💬</td><td style="padding:6px 8px"><b>10 бесплатных запросов</b> каждый день к 8 моделям</td></tr>
                 <tr><td style="padding:6px 0">🧠</td><td style="padding:6px 8px"><b>2 запроса к премиум</b> моделям (GPT-5, Claude) в день</td></tr>
-                <tr><td style="padding:6px 0">🎨</td><td style="padding:6px 8px"><b>2 картинки + 1 видео</b> для начала</td></tr>
+                <tr><td style="padding:6px 0">🎨</td><td style="padding:6px 8px"><b>2 картинки + 2 пробных видео-поинта</b> для начала</td></tr>
                 <tr><td style="padding:6px 0">🎁</td><td style="padding:6px 8px"><b>100₽ на баланс</b> — подарок за регистрацию</td></tr>
                 <tr><td style="padding:6px 0">🏆</td><td style="padding:6px 8px"><b>27 достижений</b> с денежными наградами до 360₽</td></tr>
             </table>
@@ -157,7 +157,7 @@ def send_welcome(to_email: str, name: str = "", tg_id: int | None = None):
             f"Ваш аккаунт в Stone AI создан!\n\n"
             f"💬 10 бесплатных запросов/день\n"
             f"🧠 2 премиум запроса/день\n"
-            f"🎨 2 картинки + 1 видео\n"
+            f"🎨 2 картинки + 2 пробных видео\n"
             f"🎁 100₽ на баланс\n"
             f"🏆 27 достижений до 360₽\n\n"
             f"👉 <a href='https://stoneai.ru/dashboard/chat'>Начать</a>"
@@ -201,9 +201,9 @@ def send_subscription_activated(to_email: str, tier: str, price_rub: float, tg_i
     tier_names = {"mini": "Start", "max": "Pro", "max-pro": "Elite"}
     tier_label = tier_names.get(tier, tier)
     tier_features = {
-        "mini": ["20+ моделей включая GPT-5 и Claude Sonnet", "600 запросов к быстрым моделям/мес", "3 премиум запроса в день", "60 картинок + 30 видео в месяц"],
-        "max": ["Все 65+ нейросетей включая Opus", "1 500 быстрых запросов/мес", "28 премиум + 7 Opus в неделю", "35 картинок + 7 видео в неделю"],
-        "max-pro": ["Все 65+ нейросетей + API", "4 500 быстрых запросов/мес", "84 премиум + 14 Opus в неделю", "70 картинок + 21 видео в неделю", "Приоритетная скорость"],
+        "mini": ["20+ моделей включая GPT-5 и Claude Sonnet", "600 быстрых + 90 премиум/мес", "60 картинок, 13 видео-поинтов + триалы"],
+        "max": ["Все 65+ нейросетей включая Opus", "1 500 быстрых + 112 премиум/мес", "140 картинок, 33 видео-поинта/мес", "Дорогие модели ×2-×5"],
+        "max-pro": ["Все 65+ нейросетей + API", "4 500 быстрых + 336 премиум/мес", "280 картинок, 80 видео-поинтов/мес", "Приоритет + ранний доступ"],
     }
     features = tier_features.get(tier, tier_features["mini"])
     features_html = "".join(f'<li style="margin:6px 0;color:#555">{f}</li>' for f in features)
