@@ -71,10 +71,11 @@ const STAT_CONFIGS: Record<string, { icon: string; color: string; bgColor: strin
   revenue_month: { icon: ICONS.revenue, color: "text-green-500", bgColor: "bg-green-500/10" },
 };
 
-function StatCard({ id, label, value, sub }: { id: string; label: string; value: string; sub?: string }) {
+function StatCard({ id, label, value, sub, onClick }: { id: string; label: string; value: string; sub?: string; onClick?: () => void }) {
   const cfg = STAT_CONFIGS[id] || STAT_CONFIGS.users;
-  return (
-    <div className="bg-surface rounded-2xl border border-text/5 p-5 hover:shadow-md transition-shadow">
+  const base = "bg-surface rounded-2xl border border-text/5 p-5 hover:shadow-md transition-shadow text-left w-full";
+  const inner = (
+    <>
       <div className="flex items-center justify-between mb-3">
         <div className={`w-10 h-10 rounded-xl ${cfg.bgColor} flex items-center justify-center ${cfg.color}`}>
           <Icon d={cfg.icon} />
@@ -83,8 +84,16 @@ function StatCard({ id, label, value, sub }: { id: string; label: string; value:
       <div className="text-2xl font-extrabold tracking-tight">{value}</div>
       <div className="text-text/40 text-xs font-medium mt-1">{label}</div>
       {sub && <div className="text-text/25 text-[10px] mt-0.5">{sub}</div>}
-    </div>
+    </>
   );
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className={`${base} cursor-pointer hover:border-accent/40`}>
+        {inner}
+      </button>
+    );
+  }
+  return <div className={base}>{inner}</div>;
 }
 
 /* ── Horizontal bar chart ── */
@@ -173,7 +182,22 @@ export default function AdminPage() {
   const [usersTotal, setUsersTotal] = useState(0);
   const [sortCol, setSortCol] = useState<string>("");
   const [sortAsc, setSortAsc] = useState(false);
+  const [usersServerSort, setUsersServerSort] = useState<"recent" | "balance" | "requests" | "today">("recent");
+  const [activeTodayOnly, setActiveTodayOnly] = useState(false);
+  const SERVER_SORT_COLS: Record<string, "balance" | "requests" | "today"> = {
+    balance: "balance",
+    total: "requests",
+    today: "today",
+  };
   const toggleSort = (col: string, getter: (u: UserRow) => number | string) => {
+    const serverKey = SERVER_SORT_COLS[col];
+    if (serverKey) {
+      setSortCol(col);
+      setSortAsc(false);
+      setUsersServerSort(serverKey);
+      setUsersPage(0);
+      return;
+    }
     const asc = sortCol === col ? !sortAsc : false;
     setSortCol(col);
     setSortAsc(asc);
@@ -265,6 +289,8 @@ export default function AdminPage() {
     } else if (tab === "users") {
       const params = new URLSearchParams({ limit: String(USERS_PER_PAGE) });
       params.set("offset", String(usersPage * USERS_PER_PAGE));
+      params.set("sort", usersServerSort);
+      if (activeTodayOnly) params.set("active_today", "true");
       if (debouncedSearch) params.set("search", debouncedSearch);
       if (debouncedTier) params.set("tier", debouncedTier);
       if (debouncedDateFrom) params.set("date_from", debouncedDateFrom);
@@ -295,7 +321,7 @@ export default function AdminPage() {
       const txParams = new URLSearchParams({ limit: String(TX_PER_PAGE), offset: String(txPage * TX_PER_PAGE) });
       fetchData(`transactions?${txParams}`).then((d) => { if (d) { setTransactions(d.transactions); setTxTotal(d.total); } setLoading(false); });
     }
-  }, [authed, token, tab, fetchData, debouncedSearch, debouncedTier, debouncedDateFrom, debouncedDateTo, usersPage, txPage, chartDays, analyticsDays, analyticsSortBy, analyticsSortOrder, costsPeriodMode]);
+  }, [authed, token, tab, fetchData, debouncedSearch, debouncedTier, debouncedDateFrom, debouncedDateTo, usersPage, txPage, chartDays, analyticsDays, analyticsSortBy, analyticsSortOrder, costsPeriodMode, usersServerSort, activeTodayOnly]);
 
   useEffect(() => { loadTab(); }, [loadTab]);
 
@@ -424,7 +450,18 @@ export default function AdminPage() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               <StatCard id="users" label="Всего пользователей" value={stats.total_users.toLocaleString()} />
               <StatCard id="dau" label="DAU сегодня" value={stats.dau.toLocaleString()} />
-              <StatCard id="requests_today" label="Запросов сегодня" value={stats.requests_today.toLocaleString()} />
+              <StatCard
+                id="requests_today"
+                label="Запросов сегодня"
+                value={stats.requests_today.toLocaleString()}
+                sub={stats.requests_today > 0 ? "Нажмите, чтобы увидеть активных" : undefined}
+                onClick={stats.requests_today > 0 ? () => {
+                  setActiveTodayOnly(true);
+                  setUsersServerSort("today");
+                  setUsersPage(0);
+                  setTab("users");
+                } : undefined}
+              />
               <StatCard id="requests_month" label="Запросов за месяц" value={stats.requests_month.toLocaleString()} />
               <StatCard id="revenue_today" label="Выручка сегодня" value={`$${stats.revenue_today_usd}`} />
               <StatCard id="revenue_month" label="Выручка за месяц" value={`$${stats.revenue_month_usd}`} />
@@ -526,12 +563,30 @@ export default function AdminPage() {
                 <input type="date" value={userDateTo} onChange={(e) => setUserDateTo(e.target.value)}
                   className="bg-bg border border-text/10 rounded-xl px-3 py-2.5 text-sm" title="Дата до" />
               </div>
-              {(userSearch || userTier || userDateFrom || userDateTo) && (
-                <button onClick={() => { setUserSearch(""); setUserTier(""); setUserDateFrom(""); setUserDateTo(""); }}
-                  className="mt-2 text-xs text-accent hover:underline font-medium">
-                  Сбросить фильтры
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => { setActiveTodayOnly(v => !v); setUsersPage(0); }}
+                  className={`text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors ${
+                    activeTodayOnly
+                      ? "bg-accent/10 text-accent border-accent/30"
+                      : "bg-text/[0.03] text-text/50 border-text/[0.06] hover:bg-text/[0.06]"
+                  }`}
+                >
+                  {activeTodayOnly ? "✓ Только активные сегодня" : "Только активные сегодня"}
                 </button>
-              )}
+                {(userSearch || userTier || userDateFrom || userDateTo || activeTodayOnly || usersServerSort !== "recent") && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUserSearch(""); setUserTier(""); setUserDateFrom(""); setUserDateTo("");
+                      setActiveTodayOnly(false); setUsersServerSort("recent"); setSortCol(""); setUsersPage(0);
+                    }}
+                    className="text-xs text-accent hover:underline font-medium">
+                    Сбросить фильтры
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="bg-surface rounded-2xl border border-text/5 overflow-hidden">

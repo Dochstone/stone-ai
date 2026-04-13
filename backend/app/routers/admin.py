@@ -315,13 +315,17 @@ async def web_admin_users(
     db: AsyncSession = Depends(get_db),
     limit: int = Query(50, ge=1, le=500),
     offset: int = Query(0, ge=0),
-    sort: str = Query("recent", regex="^(recent|balance|requests)$"),
+    sort: str = Query("recent", regex="^(recent|balance|requests|today)$"),
     search: str = Query("", description="Search by email, name, or username"),
     tier: str = Query("", description="Filter by subscription tier"),
     date_from: str = Query("", description="Filter joined after (YYYY-MM-DD)"),
     date_to: str = Query("", description="Filter joined before (YYYY-MM-DD)"),
+    active_today: bool = Query(False, description="Return only users with requests today"),
 ):
     """List users for web admin with search and filters."""
+    from app.models.daily_usage import DailyUsage
+    today = date.today()
+
     q = select(User)
     count_q = select(func.count(User.id))
 
@@ -361,10 +365,36 @@ async def web_admin_users(
         except ValueError:
             pass
 
+    # Filter by active-today: require a DailyUsage row today with sum > 0
+    if active_today:
+        user_key = func.coalesce(User.telegram_id, User.id)
+        active_ids_subq = (
+            select(DailyUsage.user_tg_id)
+            .where(
+                DailyUsage.date == today,
+                (DailyUsage.fast_used + DailyUsage.premium_used + DailyUsage.image_used + DailyUsage.video_used) > 0,
+            )
+        )
+        q = q.where(user_key.in_(active_ids_subq))
+        count_q = count_q.where(user_key.in_(active_ids_subq))
+
     if sort == "balance":
         q = q.order_by(User.balance_usd.desc())
     elif sort == "requests":
         q = q.order_by(User.total_requests.desc())
+    elif sort == "today":
+        today_sum_subq = (
+            select(
+                DailyUsage.user_tg_id.label("uid"),
+                (DailyUsage.fast_used + DailyUsage.premium_used + DailyUsage.image_used + DailyUsage.video_used).label("total"),
+            )
+            .where(DailyUsage.date == today)
+            .subquery()
+        )
+        user_key = func.coalesce(User.telegram_id, User.id)
+        q = q.outerjoin(today_sum_subq, today_sum_subq.c.uid == user_key).order_by(
+            func.coalesce(today_sum_subq.c.total, 0).desc(), User.id.desc()
+        )
     else:
         q = q.order_by(User.id.desc())
 
@@ -375,8 +405,6 @@ async def web_admin_users(
     total_count = await db.scalar(count_q) or 0
 
     # Get request counts and last activity from daily_usage
-    from app.models.daily_usage import DailyUsage
-    today = date.today()
     user_ids = [u.telegram_id or u.id for u in users]
     user_requests = {}
     user_today = {}
