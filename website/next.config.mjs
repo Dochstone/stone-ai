@@ -19,6 +19,14 @@ const nextConfig = {
     }
     return config;
   },
+  async redirects() {
+    return [
+      { source: "/models/kling-v3", destination: "/models/kling-v2", permanent: true },
+      { source: "/models/runway-gen3", destination: "/video", permanent: true },
+      { source: "/models/flux-schnell", destination: "/models", permanent: true },
+      { source: "/models/stable-diffusion-xl", destination: "/models", permanent: true },
+    ];
+  },
   async headers() {
     return [
       {
