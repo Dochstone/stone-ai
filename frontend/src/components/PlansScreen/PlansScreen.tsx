@@ -13,6 +13,9 @@ import { useTonPayment } from '../../hooks/useTonPayment'
 import { haptic } from '../../utils/telegram'
 import { apiGet, apiPost } from '../../api/client'
 
+// Keep in sync with backend `USD_TO_RUB` in app/config.py and website lib/constants.ts.
+const USD_TO_RUB = 84
+
 const STAR_PRICE_USD = 0.013
 
 /* ═══════════════════════════════════════════
@@ -588,7 +591,7 @@ export function PlansScreen() {
                 },
                 {
                   id: 'card', icon: '💳', title: 'Карта РФ / СБП',
-                  subtitle: `≈ ${Math.round(usd * 95).toLocaleString()}₽`,
+                  subtitle: `≈ ${Math.round(usd * USD_TO_RUB).toLocaleString()}₽`,
                   tag: 'Platega', tagColor: '#4a90d9',
                 },
                 {

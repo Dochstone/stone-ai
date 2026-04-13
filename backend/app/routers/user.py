@@ -12,6 +12,7 @@ from pydantic import BaseModel
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import USD_TO_RUB
 from app.database import get_db
 from app.middleware.auth import get_current_user
 from app.middleware.web_auth import extract_jwt_from_request, decode_jwt
@@ -806,8 +807,7 @@ async def subscribe(req: SubscribeRequest, request: Request, db: AsyncSession = 
 
     plan = PLANS[req.tier]
     price_rub = plan["price_rub"]
-    usd_rate = 95.0  # ~95 RUB/USD
-    price_usd = round(price_rub / usd_rate, 2)
+    price_usd = round(price_rub / USD_TO_RUB, 2)
 
     # Auth — JWT or TG
     token = extract_jwt_from_request(request)
@@ -843,7 +843,7 @@ async def subscribe(req: SubscribeRequest, request: Request, db: AsyncSession = 
     # Deduct balance
     user.balance_usd = round(balance - price_usd, 6)
 
-    # Activate subscription
+    # Activate subscription (resets monthly counters and syncs video points reset date)
     from app.services.subscription import activate_subscription
     activate_subscription(user, req.tier)
 

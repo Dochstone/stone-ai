@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { SkeletonGrid } from "@/components/Skeleton";
 import { getAuth, API_URL } from "@/lib/auth";
+import { USD_TO_RUB } from "@/lib/constants";
 
 interface Gen {
   id: string; type: string; model: string; prompt: string;
@@ -291,7 +292,7 @@ export default function GalleryPage() {
               <div className="flex items-center gap-2 mb-3 flex-wrap">
                 <span className="text-xs font-bold bg-text/[0.04] text-text/50 px-2 py-0.5 rounded">{selected.model}</span>
                 <span className="text-xs text-text/25">{selected.type}</span>
-                {selected.cost ? <span className="text-xs text-text/25">{Math.round(selected.cost * 95)}₽</span> : null}
+                {selected.cost ? <span className="text-xs text-text/25">{Math.round(selected.cost * USD_TO_RUB)}₽</span> : null}
                 <span className="text-xs text-text/25 ml-auto">{timeAgo(selected.created_at)}</span>
               </div>
               <p className="text-sm text-text/60 mb-4">{selected.prompt}</p>

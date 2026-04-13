@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { getAuth } from "@/lib/auth";
 import { CHAT_MODELS } from "@/lib/models-config";
+import { USD_TO_RUB } from "@/lib/constants";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
@@ -174,13 +175,13 @@ export default function AgentPage() {
                   {[3, 5, 7, 10].map(n => <option key={n} value={n}>{n}</option>)}
                 </select>
               </div>
-              <span className="text-[10px] text-text/25">~{Math.round(maxSteps * 0.005 * 95)}\u20bd</span>
+              <span className="text-[10px] text-text/25">~{Math.round(maxSteps * 0.005 * USD_TO_RUB)}\u20bd</span>
             </div>
             <button onClick={runAgent} disabled={running || !instruction.trim()}
               className="bg-accent text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-accent/90 transition-colors disabled:opacity-40 flex items-center gap-2">
               {running ? (
                 <><svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>Выполняется...</>
-              ) : `Запустить \u00b7 ~${Math.round(maxSteps * 0.005 * 95)}\u20bd`}
+              ) : `Запустить \u00b7 ~${Math.round(maxSteps * 0.005 * USD_TO_RUB)}\u20bd`}
             </button>
           </div>
         </div>
@@ -245,7 +246,7 @@ export default function AgentPage() {
 
                 {activeTask.total_cost_usd > 0 && (
                   <p className="text-[10px] text-text/20 mt-4 pt-3 border-t border-text/5">
-                    {activeTask.total_steps} шагов · {Math.round(activeTask.total_cost_usd * 95)}\u20bd
+                    {activeTask.total_steps} шагов · {Math.round(activeTask.total_cost_usd * USD_TO_RUB)}\u20bd
                   </p>
                 )}
               </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { PLAN_PRICES_RUB, PRICING_PLANS, type PaidPlanId, type PricingPlan } from "@/lib/pricing";
+import { USD_TO_RUB } from "@/lib/constants";
 
 const TonPayButton = dynamic(() => import("./TonPayButton"), { ssr: false });
 
@@ -221,7 +222,7 @@ export default function Pricing() {
       const res = await fetch(`${API_URL}/api/payment/platega/create-order`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
-        body: JSON.stringify({ usd_amount: amountRub / 95 }),
+        body: JSON.stringify({ usd_amount: amountRub / USD_TO_RUB }),
       });
       const data = await res.json();
       if (res.ok && data.payment_url) {
@@ -239,7 +240,7 @@ export default function Pricing() {
     setLoading(true);
     setResult(null);
     try {
-      const usdAmount = PLAN_PRICES_RUB[tier] / 95;
+      const usdAmount = PLAN_PRICES_RUB[tier] / USD_TO_RUB;
 
       if (method === "platega") {
         const res = await fetch(`${API_URL}/api/payment/platega/create-order`, {

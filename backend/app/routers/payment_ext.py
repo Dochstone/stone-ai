@@ -266,7 +266,7 @@ async def lava_webhook(request: Request, db: AsyncSession = Depends(get_db)):
         user_email = user_row.scalar()
         if user_email and new_balance is not None:
             from app.services.email_service import send_payment_confirmation
-            send_payment_confirmation(user_email, round(usd_amount * 95), round(new_balance * 95), "Карта РФ / СБП")
+            send_payment_confirmation(user_email, round(usd_amount * USD_TO_RUB), round(new_balance * USD_TO_RUB), "Карта РФ / СБП")
     except Exception as e:
         logger.warning(f"Failed to send payment email: {e}")
 
@@ -441,7 +441,7 @@ async def platega_webhook(request: Request, db: AsyncSession = Depends(get_db)):
         user_row2 = await db.execute(text("SELECT email FROM users WHERE telegram_id = :tid OR id = :tid LIMIT 1"), {"tid": user_tg_id})
         admin_email = user_row2.scalar() or str(user_tg_id)
         import asyncio
-        asyncio.create_task(notify_admin_payment(admin_email, round(usd_amount * 95), "Platega (карта/СБП)"))
+        asyncio.create_task(notify_admin_payment(admin_email, round(usd_amount * USD_TO_RUB), "Platega (карта/СБП)"))
     except Exception:
         pass
 
@@ -451,8 +451,8 @@ async def platega_webhook(request: Request, db: AsyncSession = Depends(get_db)):
         user_email = user_row.scalar()
         if user_email and new_balance is not None:
             from app.services.email_service import send_payment_confirmation
-            amount_rub = round(usd_amount * 95)
-            balance_rub = round(new_balance * 95)
+            amount_rub = round(usd_amount * USD_TO_RUB)
+            balance_rub = round(new_balance * USD_TO_RUB)
             send_payment_confirmation(user_email, amount_rub, balance_rub, "Карта РФ / СБП")
     except Exception as e:
         logger.warning(f"Failed to send payment email: {e}")
@@ -617,13 +617,8 @@ async def heleket_webhook(request: Request, db: AsyncSession = Depends(get_db)):
             result = await db.execute(select(User).where(User.id == user_tg_id))
             user = result.scalar_one_or_none()
         if user:
-            user.subscription_tier = tier
-            user.subscription_started = datetime.utcnow()
-            user.credits_reset_date = datetime.utcnow() + timedelta(days=30)
-            user.monthly_fast_used = 0
-            user.monthly_premium_used = 0
-            user.monthly_images_used = 0
-            user.monthly_videos_used = 0
+            from app.services.subscription import activate_subscription
+            activate_subscription(user, tier)
             logger.info(f"Subscription activated: user={user_tg_id}, tier={tier}")
             # Email: subscription activated
             try:
@@ -631,7 +626,7 @@ async def heleket_webhook(request: Request, db: AsyncSession = Depends(get_db)):
                 uemail = user_row2.scalar()
                 if uemail:
                     from app.services.email_service import send_subscription_activated
-                    send_subscription_activated(uemail, tier, round(usd_amount * 95))
+                    send_subscription_activated(uemail, tier, round(usd_amount * USD_TO_RUB))
             except Exception as e:
                 logger.warning(f"Failed to send subscription email: {e}")
     else:
@@ -644,7 +639,7 @@ async def heleket_webhook(request: Request, db: AsyncSession = Depends(get_db)):
             uemail = user_row3.scalar()
             if uemail:
                 from app.services.email_service import send_payment_confirmation
-                send_payment_confirmation(uemail, round(usd_amount * 95), round(new_balance * 95), "Криптовалюта")
+                send_payment_confirmation(uemail, round(usd_amount * USD_TO_RUB), round(new_balance * USD_TO_RUB), "Криптовалюта")
         except Exception as e:
             logger.warning(f"Failed to send payment email: {e}")
 
@@ -659,7 +654,7 @@ async def heleket_webhook(request: Request, db: AsyncSession = Depends(get_db)):
         admin_email = user_row4.scalar() or str(user_tg_id)
         import asyncio
         method = f"Крипто ({product_type})" if product_type == "subscription" else "Heleket (крипто)"
-        asyncio.create_task(notify_admin_payment(admin_email, round(usd_amount * 95), method))
+        asyncio.create_task(notify_admin_payment(admin_email, round(usd_amount * USD_TO_RUB), method))
     except Exception:
         pass
 
@@ -937,13 +932,8 @@ async def check_ton_payment(
                         )
                         user = result2.scalar_one_or_none()
                     if user:
-                        user.subscription_tier = order["tier"]
-                        user.subscription_started = datetime.utcnow()
-                        user.credits_reset_date = datetime.utcnow() + timedelta(days=30)
-                        user.monthly_fast_used = 0
-                        user.monthly_premium_used = 0
-                        user.monthly_images_used = 0
-                        user.monthly_videos_used = 0
+                        from app.services.subscription import activate_subscription
+                        activate_subscription(user, order["tier"])
 
                     tx.status = "completed"
                     from app.routers.referral import credit_referrer

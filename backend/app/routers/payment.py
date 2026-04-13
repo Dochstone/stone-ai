@@ -22,7 +22,7 @@ from app.services.ton import (
     complete_order,
     verify_transaction,
 )
-from app.config import get_settings
+from app.config import USD_TO_RUB, get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -260,7 +260,7 @@ async def confirm_stars_subscription(
     activate_subscription(user, tier)
 
     price_rub = PLAN_PRICES_RUB[tier]
-    price_usd = round(price_rub / 95.0, 2)
+    price_usd = round(price_rub / USD_TO_RUB, 2)
 
     tx = Transaction(
         user_tg_id=tg_id,

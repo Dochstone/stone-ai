@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select, func as sqlfunc
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import USD_TO_RUB
 from app.database import get_db, async_session
 from app.middleware.auth import get_current_user
 from app.models.achievement import Achievement, UserAchievement
@@ -117,7 +118,7 @@ async def claim_reward(slug: str, user: dict = Depends(get_current_user), db: As
     # Credit reward — load user and mutate attribute so the ORM flushes
     # via primary key. Avoids asyncpg int32 overflow on bigint telegram_id
     # for OAuth users (synthetic ids exceed 2.1B int4 range).
-    reward_usd = ach.reward_rub / 95.0
+    reward_usd = ach.reward_rub / USD_TO_RUB
     result = await db.execute(select(User).where(User.telegram_id == tg_id))
     user_row = result.scalar_one_or_none()
     if not user_row:

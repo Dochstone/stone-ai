@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import { USD_TO_RUB } from "@/lib/constants";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
@@ -66,7 +67,7 @@ function usd(n: number, decimals = 2) {
 }
 
 function rub(n: number) {
-  return `${Math.round(n * 95)}₽`;
+  return `${Math.round(n * USD_TO_RUB)}₽`;
 }
 
 function pct(n: number) {

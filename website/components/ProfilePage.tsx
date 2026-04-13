@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { MODELS } from "@/lib/models";
-import { SITE_URL } from "@/lib/constants";
+import { SITE_URL, USD_TO_RUB } from "@/lib/constants";
 import { PLAN_SUMMARY } from "@/lib/pricing";
 import dynamic from "next/dynamic";
 
@@ -240,7 +240,7 @@ function OverviewTab({ profile, usage, limits }: { profile: UserProfile; usage: 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard label="Тариф" value={profile.plan === "max-pro" ? "Elite" : profile.plan === "max" ? "Pro" : profile.plan === "mini" ? "Start" : "Free"} accent />
         <StatCard label="Запросов" value={profile.stats.total_requests.toLocaleString()} />
-        <StatCard label="Баланс" value={`${Math.round(profile.balance_usd * 95)}\u2009\u20BD`} accent />
+        <StatCard label="Баланс" value={`${Math.round(profile.balance_usd * USD_TO_RUB)}\u2009\u20BD`} accent />
         <StatCard label="Любимая модель" value={favModel?.name || "—"} sub={favModel?.company} />
       </div>
 
@@ -436,7 +436,7 @@ function BalanceTab({ profile, transactions, auth, onRefresh }: { profile: UserP
           </a>
         )}
         <div className="text-[11px] text-text/25 mt-2">
-          Баланс: {Math.round(profile.balance_usd * 95)}&thinsp;₽ (${profile.balance_usd.toFixed(2)})
+          Баланс: {Math.round(profile.balance_usd * USD_TO_RUB)}&thinsp;₽ (${profile.balance_usd.toFixed(2)})
         </div>
       </div>
 
@@ -459,10 +459,10 @@ function BalanceTab({ profile, transactions, auth, onRefresh }: { profile: UserP
                 <div className="text-[11px] text-text/40 mb-4">{planFeaturesByTier[p.tier as keyof typeof planFeaturesByTier] ?? p.features}</div>
                 <button
                   onClick={() => buyFromBalance(p.tier)}
-                  disabled={subscribing || profile.balance_usd * 95 < p.price}
+                  disabled={subscribing || profile.balance_usd * USD_TO_RUB < p.price}
                   className="w-full bg-accent text-white py-2.5 rounded-xl text-sm font-bold hover:bg-accent/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  {subscribing ? "..." : profile.balance_usd * 95 >= p.price ? "Купить с баланса" : `Нужно ${p.price}₽`}
+                  {subscribing ? "..." : profile.balance_usd * USD_TO_RUB >= p.price ? "Купить с баланса" : `Нужно ${p.price}₽`}
                 </button>
               </div>
             ))}

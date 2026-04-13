@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ─── Global constants ───
-USD_TO_RUB = 95.0  # Exchange rate for all price conversions
+USD_TO_RUB = 84.0  # Exchange rate for all price conversions
 SUBSCRIBER_DISCOUNT = 0.0  # No discount for now
 
 # Free tier lifetime trial limits (total, not per day)
