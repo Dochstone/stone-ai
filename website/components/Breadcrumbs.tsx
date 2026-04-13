@@ -14,7 +14,7 @@ export function breadcrumbJsonLd(items: { label: string; href: string }[]) {
   };
 }
 
-export default function Breadcrumbs({ items }: { items: { label: string; href?: string }[] }) {
+export default function Breadcrumbs({ items }: { items: { label: string; href: string }[] }) {
   // Visual breadcrumbs hidden — navbar already provides navigation.
   // JSON-LD preserved for SEO (Google rich results).
   return (
