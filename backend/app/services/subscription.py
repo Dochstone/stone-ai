@@ -160,3 +160,37 @@ def get_plan(tier: str) -> dict:
 def get_video_points_plan(tier: str) -> dict:
     """Return video points plan for a subscription tier."""
     return VIDEO_POINTS_PLANS.get(tier, VIDEO_POINTS_PLANS["free"])
+
+
+def activate_subscription(user, tier: str, days: int = 30) -> None:
+    """Activate or renew a paid subscription on the User row.
+
+    Sets tier, expiration date, and resets all monthly counters including video
+    points. Video points reset date is synced with subscription expiration so
+    points refresh together with subscription renewal — not on the calendar 1st.
+    """
+    from datetime import datetime, timedelta
+
+    now = datetime.utcnow()
+    plan = PLANS.get(tier, PLANS["mini"])
+    new_reset = now + timedelta(days=days)
+
+    user.subscription_tier = tier
+    user.subscription_started = now
+    user.credits_reset_date = new_reset
+    user.credits_balance = plan.get("credits", 0)
+
+    # Reset monthly usage counters
+    user.monthly_fast_used = 0
+    user.monthly_premium_used = 0
+    user.monthly_images_used = 0
+    user.monthly_videos_used = 0
+    user.monthly_3d_used = 0
+    user.monthly_audio_used = 0
+    user.opus_requests_used = 0
+
+    # Reset video points and sync reset date with subscription end
+    user.video_points_used = 0
+    user.video_points_reset_date = new_reset.date()
+    user.trial_start_standard_used = False
+    user.trial_start_premium_used = False

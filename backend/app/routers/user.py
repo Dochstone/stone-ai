@@ -844,20 +844,8 @@ async def subscribe(req: SubscribeRequest, request: Request, db: AsyncSession = 
     user.balance_usd = round(balance - price_usd, 6)
 
     # Activate subscription
-    now = datetime.utcnow()
-    user.subscription_tier = req.tier
-    user.credits_balance = plan["credits"]
-    user.subscription_started = now
-    user.credits_reset_date = now + timedelta(days=30)
-
-    # Reset monthly counters
-    user.monthly_fast_used = 0
-    user.monthly_premium_used = 0
-    user.monthly_images_used = 0
-    user.monthly_videos_used = 0
-    user.monthly_3d_used = 0
-    user.monthly_audio_used = 0
-    user.opus_requests_used = 0
+    from app.services.subscription import activate_subscription
+    activate_subscription(user, req.tier)
 
     await db.flush()
     await db.commit()

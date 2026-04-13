@@ -193,17 +193,26 @@ def get_msk_reset_at() -> str:
     return tomorrow.isoformat()
 
 
-def get_video_points_reset_date(now_utc: datetime | None = None) -> date:
+def get_video_points_reset_date(now_utc: datetime | None = None, user: User | None = None) -> date:
+    """Next video-points reset date.
+
+    Paid users: synced with their subscription expiration (credits_reset_date)
+    so points refresh together with auto-renewal, not on the calendar 1st.
+    Free users: 1st of the following calendar month (legacy behaviour).
+    """
     now = now_utc or datetime.now(timezone.utc)
+    if user is not None and user.subscription_tier and user.subscription_tier != "free":
+        if user.credits_reset_date and user.credits_reset_date.date() > now.date():
+            return user.credits_reset_date.date()
     year = now.year + (1 if now.month == 12 else 0)
     month = 1 if now.month == 12 else now.month + 1
     return date(year, month, 1)
 
 
 def reset_video_points_if_needed(user: User, now_utc: datetime | None = None) -> bool:
-    """Reset monthly video point state when UTC month rolls over."""
+    """Reset monthly video point state when reset date is reached."""
     now = now_utc or datetime.now(timezone.utc)
-    next_reset = get_video_points_reset_date(now)
+    next_reset = get_video_points_reset_date(now, user)
     current_reset = user.video_points_reset_date
 
     if current_reset is None:
@@ -242,7 +251,7 @@ def get_video_points_snapshot(user: User) -> dict:
         "video_points_used": used,
         "video_points_total": total if total > 0 else trial_total,
         "video_points_available": max(0, total - used) if total > 0 else max(0, trial_total - free_trial_used),
-        "video_points_reset": (user.video_points_reset_date or get_video_points_reset_date()).isoformat(),
+        "video_points_reset": (user.video_points_reset_date or get_video_points_reset_date(user=user)).isoformat(),
         "trial_standard_available": tier == "mini" and not bool(user.trial_start_standard_used),
         "trial_premium_available": tier == "mini" and not bool(user.trial_start_premium_used),
         "trial_video_points_used": free_trial_used,

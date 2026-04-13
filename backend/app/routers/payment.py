@@ -256,13 +256,8 @@ async def confirm_stars_subscription(
             raise HTTPException(status_code=409, detail="Payment already belongs to another user")
         return {"status": "already_processed", "tier": tier}
 
-    user.subscription_tier = tier
-    user.subscription_started = datetime.utcnow()
-    user.credits_reset_date = datetime.utcnow() + timedelta(days=30)
-    user.monthly_fast_used = 0
-    user.monthly_premium_used = 0
-    user.monthly_images_used = 0
-    user.monthly_videos_used = 0
+    from app.services.subscription import activate_subscription
+    activate_subscription(user, tier)
 
     price_rub = PLAN_PRICES_RUB[tier]
     price_usd = round(price_rub / 95.0, 2)

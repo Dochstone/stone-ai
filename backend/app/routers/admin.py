@@ -499,20 +499,16 @@ async def web_admin_update_subscription(
     from datetime import datetime, timedelta
 
     old_tier = user.subscription_tier or "free"
-    user.subscription_tier = body.tier if body.tier != "free" else None
 
-    # Set subscription dates when upgrading from admin
-    if body.tier != "free" and body.tier != old_tier:
-        now = datetime.utcnow()
-        user.subscription_started = now
-        user.credits_reset_date = now + timedelta(days=30)
-        user.monthly_fast_used = 0
-        user.monthly_premium_used = 0
-        user.monthly_images_used = 0
-        user.monthly_videos_used = 0
-    elif body.tier == "free":
+    if body.tier == "free":
+        user.subscription_tier = None
         user.credits_reset_date = None
         user.subscription_started = None
+    elif body.tier != old_tier:
+        from app.services.subscription import activate_subscription
+        activate_subscription(user, body.tier)
+    else:
+        user.subscription_tier = body.tier
 
     admin_user_id, admin_email = _audit_actor(_admin)
     await log_admin_action(

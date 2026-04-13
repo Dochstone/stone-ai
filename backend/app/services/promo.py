@@ -117,21 +117,8 @@ async def apply_promo(db: AsyncSession, user: User, code: str) -> dict:
         # Give free days of a subscription tier
         tier = promo["tier"]
         days = promo["days"]
-        plan = PLANS.get(tier, PLANS["mini"])
-
-        user.subscription_tier = tier
-        user.credits_balance = int(user.credits_balance or 0) + plan["credits"]
-        user.subscription_started = now
-        user.credits_reset_date = now + timedelta(days=days)
-
-        # Reset counters
-        user.monthly_fast_used = 0
-        user.monthly_premium_used = 0
-        user.monthly_images_used = 0
-        user.monthly_videos_used = 0
-        user.monthly_3d_used = 0
-        user.monthly_audio_used = 0
-        user.opus_requests_used = 0
+        from app.services.subscription import activate_subscription
+        activate_subscription(user, tier, days=days)
 
         message = f"Тариф {plan['name']} активирован на {days} дней бесплатно!"
 

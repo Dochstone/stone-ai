@@ -420,18 +420,8 @@ async def platega_webhook(request: Request, db: AsyncSession = Depends(get_db)):
         user_result = await db.execute(sel(User).where(User.telegram_id == user_tg_id))
         user = user_result.scalar_one_or_none()
         if user and tier in PLANS:
-            plan = PLANS[tier]
-            user.subscription_tier = tier
-            user.subscription_started = datetime.utcnow()
-            user.credits_reset_date = datetime.utcnow() + timedelta(days=30)
-            user.credits_balance = plan.get("credits", 0)
-            user.monthly_fast_used = 0
-            user.monthly_premium_used = 0
-            user.monthly_images_used = 0
-            user.monthly_videos_used = 0
-            user.monthly_3d_used = 0
-            user.monthly_audio_used = 0
-            user.opus_requests_used = 0
+            from app.services.subscription import activate_subscription
+            activate_subscription(user, tier)
             logger.info(f"Platega subscription activated: user={user_tg_id}, tier={tier}")
     else:
         new_balance = await add_balance(db, user_tg_id, usd_amount)
