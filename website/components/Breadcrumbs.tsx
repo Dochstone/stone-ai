@@ -1,6 +1,6 @@
 import { SITE_URL } from "@/lib/constants";
 
-export function breadcrumbJsonLd(items: { label: string; href?: string }[]) {
+export function breadcrumbJsonLd(items: { label: string; href: string }[]) {
   const all = [{ label: "Главная", href: "/" }, ...items];
   return {
     "@context": "https://schema.org",
@@ -9,7 +9,7 @@ export function breadcrumbJsonLd(items: { label: string; href?: string }[]) {
       "@type": "ListItem",
       position: i + 1,
       name: item.label,
-      item: item.href ? `${SITE_URL}${item.href}` : undefined,
+      item: `${SITE_URL}${item.href}`,
     })),
   };
 }

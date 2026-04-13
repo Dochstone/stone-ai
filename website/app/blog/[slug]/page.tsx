@@ -60,7 +60,7 @@ export default function BlogPostPage({ params }: Props) {
     mainEntityOfPage: `${SITE_URL}/blog/${post.slug}`,
   };
 
-  const bcItems = [{ label: "Блог", href: "/blog" }, { label: post.title }];
+  const bcItems = [{ label: "Блог", href: "/blog" }, { label: post.title, href: `/blog/${post.slug}` }];
 
   return (
     <div className="pt-28 pb-20 min-h-screen">

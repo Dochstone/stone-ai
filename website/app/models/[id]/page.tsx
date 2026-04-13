@@ -118,7 +118,7 @@ export default function ModelPage({ params }: Props) {
 
   const cat = categoryLabels[model.category] || model.category;
   const isFree = model.tier === "free";
-  const bcItems = [{ label: "Модели", href: "/models" }, { label: model.name }];
+  const bcItems = [{ label: "Модели", href: "/models" }, { label: model.name, href: `/models/${model.id}` }];
   const useCases = USE_CASES[model.category] || USE_CASES.chat;
   const prompts = MODEL_PROMPTS[model.id] || MODEL_PROMPTS["gpt-4o-mini"];
   const faqs = CATEGORY_FAQ[model.category] || CATEGORY_FAQ.chat;
