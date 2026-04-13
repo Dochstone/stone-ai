@@ -114,14 +114,15 @@ async def claim_reward(slug: str, user: dict = Depends(get_current_user), db: As
     if ach.reward_rub <= 0:
         raise HTTPException(400, "У этого достижения нет награды")
 
-    # Credit reward
+    # Credit reward — load user and mutate attribute so the ORM flushes
+    # via primary key. Avoids asyncpg int32 overflow on bigint telegram_id
+    # for OAuth users (synthetic ids exceed 2.1B int4 range).
     reward_usd = ach.reward_rub / 95.0
-    from sqlalchemy import update as sql_update
-    await db.execute(
-        sql_update(User).where(
-            User.telegram_id == tg_id
-        ).values(balance_usd=User.balance_usd + reward_usd)
-    )
+    result = await db.execute(select(User).where(User.telegram_id == tg_id))
+    user_row = result.scalar_one_or_none()
+    if not user_row:
+        raise HTTPException(404, "Пользователь не найден")
+    user_row.balance_usd = float(user_row.balance_usd or 0) + reward_usd
 
     ua.reward_claimed = True
     await db.commit()
