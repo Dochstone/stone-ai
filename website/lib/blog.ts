@@ -6,6 +6,10 @@ export interface BlogPost {
   dateModified: string;
   readTime: string;
   content: (string | { h2: string })[];
+  /** Optional Q&A for FAQPage JSON-LD + visual FAQ section at bottom. */
+  faq?: { q: string; a: string }[];
+  /** Slugs of related articles shown below content. */
+  related?: string[];
 }
 
 export const POSTS: BlogPost[] = [
@@ -717,6 +721,97 @@ export const POSTS: BlogPost[] = [
 
 /** Posts sorted by date (newest first) */
 export const SORTED_POSTS = [...POSTS].sort((a, b) => b.date.localeCompare(a.date));
+
+/**
+ * Curated FAQ blocks for top articles — emitted as FAQPage JSON-LD and
+ * rendered as an expandable accordion at the bottom of the post. Only
+ * defined for articles that benefit from rich results in search.
+ */
+const FAQ_BY_SLUG: Record<string, { q: string; a: string }[]> = {
+  "guide-50-ai-models": [
+    { q: "Сколько нейросетей доступно в Stone AI?", a: "65+ моделей от OpenAI, Anthropic, Google, Meta, Mistral, xAI, DeepSeek и других. Text, image, video, 3D, audio, search, code — всё в одном интерфейсе." },
+    { q: "Какие модели бесплатные?", a: "GPT-4o mini, Claude Haiku 4.5, Gemini 2.0 Flash, Llama 4 Maverick, Mistral Large — 10 запросов в день без оплаты." },
+    { q: "Какую модель выбрать для кода?", a: "Claude Opus 4 — для сложных задач, архитектуры и рефакторинга. Claude Sonnet 4 — оптимальный баланс качества и цены. Devstral — бюджетный вариант." },
+    { q: "Какая модель лучше для русского языка?", a: "GPT-5.1, Claude Opus 4 и Gemini 2.5 Pro одинаково хорошо работают на русском. Для творческих задач — Llama 4 и Mistral." },
+    { q: "Сколько стоит подписка?", a: "Start — 590₽/мес (20+ моделей), Pro — 1 290₽/мес (все 65+ моделей), Elite — 1 990₽/мес (максимальные лимиты + API)." },
+  ],
+  "chatgpt-bez-vpn-rossiya": [
+    { q: "Как пользоваться ChatGPT без VPN в России?", a: "Через Stone AI: 65+ нейросетей включая GPT-5 и GPT-4o mini работают без VPN. Оплата в рублях — карты РФ, СБП, крипто, Telegram Stars." },
+    { q: "Это легально?", a: "Да. Stone AI — российский сервис, который легально интегрирует OpenAI API и других провайдеров. Юзер не нарушает никаких правил." },
+    { q: "Какие модели GPT доступны?", a: "GPT-4o mini (бесплатно), GPT-5.1, GPT-5.4, o3, o4-mini, GPT-4.1, GPT-5 Image — все модели OpenAI работают." },
+    { q: "Можно попробовать бесплатно?", a: "Да. 10 запросов в день к GPT-4o mini и другим моделям без оплаты и без карты." },
+  ],
+  "gpt5-vs-claude-sonnet-vs-gemini": [
+    { q: "Какая модель лучше — GPT-5, Claude Sonnet или Gemini 2.5?", a: "GPT-5 — универсал, лучшая для сложных задач с многозначными смыслами. Claude Sonnet 4 — для кода и длинных текстов (200K контекст). Gemini 2.5 Pro — для мультимодальных задач и анализа данных." },
+    { q: "Какая модель дешевле?", a: "Gemini 2.5 Flash самая дешёвая на тарифе Start. GPT-5 и Claude Sonnet — на Pro (1 290₽/мес)." },
+    { q: "Все три доступны без VPN?", a: "Да, все три модели доступны в Stone AI без VPN, с оплатой в рублях." },
+  ],
+  "claude-opus-vs-gpt-5": [
+    { q: "Что лучше — Claude Opus 4 или GPT-5.1?", a: "Claude Opus 4 лучше для длинных текстов, юридических документов, детального анализа — контекст 200K. GPT-5.1 — для креативных задач, многоязычных переводов, общих вопросов." },
+    { q: "Какой контекст у Claude Opus 4?", a: "200 000 токенов — примерно 150 000 слов или 300 страниц текста. Можно загрузить целый контракт или документацию." },
+    { q: "Сколько стоит Claude Opus в Stone AI?", a: "Тариф Pro (1 290₽/мес) даёт доступ к Claude Opus 4. На Elite (1 990₽) — увеличенные еженедельные лимиты." },
+  ],
+  "luchshie-nejroseti-2026-rejting": [
+    { q: "Какая нейросеть лучшая в 2026?", a: "Зависит от задачи. GPT-5 — универсал. Claude Opus 4 — для текстов и кода. Gemini 3 — для мультимодального анализа. Kling 3.0 — для видео. Midjourney/Flux — для картинок." },
+    { q: "Сколько стоит доступ ко всем моделям?", a: "В Stone AI от 1 290₽/мес (тариф Pro) — все 65+ моделей. Отдельные подписки на ChatGPT, Claude, Midjourney, Kling суммарно стоят $60+/мес (≈5 500₽)." },
+    { q: "Какую модель выбрать новичку?", a: "Начните с бесплатных: GPT-4o mini или Claude Haiku. Если задач больше — Start за 590₽/мес даёт 20+ моделей." },
+  ],
+  "kak-napisat-prompt-dlya-nejroseti": [
+    { q: "Как правильно писать промпт для нейросети?", a: "Формула: [роль] + [задача] + [контекст] + [формат]. Пример: «Ты SEO-специалист. Напиши мета-описание для страницы о тарифах. Сайт — AI-студия. 140-160 символов, с ключом 'подписка на нейросети'»." },
+    { q: "На каком языке писать промпты?", a: "Для текстовых моделей — русский отлично работает. Для генерации видео и картинок лучше английский — обучающие данные на нём полнее." },
+    { q: "Что делать если модель отвечает плохо?", a: "Разбейте задачу на шаги. Дайте пример желаемого ответа. Укажите ограничения (длина, тон, формат). Если не помогает — попробуйте другую модель." },
+  ],
+  "kak-oplatit-chatgpt-iz-rossii-2026": [
+    { q: "Как оплатить ChatGPT из России в 2026?", a: "Прямая оплата через OpenAI невозможна из-за блокировок. Легальный путь — Stone AI: GPT-5, GPT-4o и все модели OpenAI доступны с оплатой картами РФ, СБП, криптой, TON или Telegram Stars." },
+    { q: "Сколько стоит по сравнению с ChatGPT Plus?", a: "ChatGPT Plus — $20/мес (≈1 800₽) только модели OpenAI. Stone AI Start — 590₽/мес (65+ моделей включая OpenAI) или Pro — 1 290₽/мес (все модели с расширенными лимитами)." },
+    { q: "Нужна ли иностранная карта?", a: "Нет. Все способы оплаты — локальные: Visa/MC/МИР, СБП, криптовалюта, TON-кошелёк, Telegram Stars." },
+  ],
+  "nejroset-dlya-generacii-kartinok": [
+    { q: "Какая нейросеть лучшая для генерации картинок?", a: "Midjourney v7 — эталон качества и стиля. GPT-5 Image — лучший фотореализм. Flux — бюджетный с хорошим качеством. Nano Banana Pro — для редактирования (удаление фона, замена объектов)." },
+    { q: "Можно ли генерировать картинки бесплатно?", a: "В Stone AI — 2 картинки в день на тарифе Free. На Start (590₽) — 15 в месяц с выбором модели. На Pro — 50/мес." },
+    { q: "Как получить качественный результат?", a: "Пишите детальные промпты на английском. Укажите стиль (photorealistic, anime, 3d render), освещение (cinematic, soft light), ракурс (close-up, wide shot). Негативный промпт исключает нежелательные элементы." },
+  ],
+  "4-ways-to-pay-ai-russia": [
+    { q: "Как оплатить подписку на AI в рублях?", a: "Stone AI принимает: карты РФ (Visa/MC/МИР), СБП, Telegram Stars, криптовалюту (USDT, BTC, ETH), TON-кошелёк. Все способы — без комиссии сервиса." },
+    { q: "Какой способ самый быстрый?", a: "Telegram Stars — мгновенно из бота @drifttt55bot. СБП — 10 секунд. Карта РФ через Lava — 30-60 секунд. Крипто — 2-10 минут (время блока)." },
+    { q: "Подписка автоматически продлевается?", a: "Нет. Подписка действует 30 дней, для продления нужно оплатить заново. Автосписаний нет." },
+  ],
+  "stone-ai-vs-chatgpt-plus": [
+    { q: "Чем Stone AI лучше ChatGPT Plus?", a: "65+ моделей vs одна линейка OpenAI. Оплата в рублях vs иностранная карта. Без VPN. От 590₽/мес vs $20 (≈1 800₽). Доступны Claude, Gemini, Midjourney, Kling и другие, которых нет в ChatGPT Plus." },
+    { q: "Есть ли минусы Stone AI?", a: "Для некоторых моделей (GPT-5, Claude Opus) лимиты меньше чем безлимит в ChatGPT Plus. Но на тарифе Elite (1 990₽) лимиты сопоставимы с Plus." },
+    { q: "Можно попробовать бесплатно?", a: "Да. Free: 10 запросов в день к 8 моделям. Без карты, без регистрации в иностранных сервисах." },
+  ],
+};
+
+/**
+ * Curated related-post mapping. If undefined, blog page falls back to
+ * showing the 4 most recent other posts.
+ */
+const RELATED_BY_SLUG: Record<string, string[]> = {
+  "guide-50-ai-models": ["gpt5-vs-claude-sonnet-vs-gemini", "luchshie-nejroseti-2026-rejting", "claude-opus-vs-gpt-5"],
+  "chatgpt-bez-vpn-rossiya": ["kak-oplatit-chatgpt-iz-rossii-2026", "stone-ai-vs-chatgpt-plus", "chatgpt-plus-vs-analogi-rossiya"],
+  "gpt5-vs-claude-sonnet-vs-gemini": ["claude-opus-vs-gpt-5", "guide-50-ai-models", "luchshie-nejroseti-2026-rejting"],
+  "claude-opus-vs-gpt-5": ["gpt5-vs-claude-sonnet-vs-gemini", "claude-opus-online-na-russkom", "guide-50-ai-models"],
+  "luchshie-nejroseti-2026-rejting": ["guide-50-ai-models", "gpt5-vs-claude-sonnet-vs-gemini", "best-neural-networks-2026"],
+  "kak-napisat-prompt-dlya-nejroseti": ["best-ai-prompts", "guide-50-ai-models", "ii-dlya-biznesa-v-rossii"],
+  "kak-oplatit-chatgpt-iz-rossii-2026": ["4-ways-to-pay-ai-russia", "chatgpt-bez-vpn-rossiya", "stone-ai-vs-chatgpt-plus"],
+  "nejroset-dlya-generacii-kartinok": ["midjourney-analogi-besplatno-rossiya", "generate-images-ai-free", "guide-50-ai-models"],
+  "4-ways-to-pay-ai-russia": ["kak-oplatit-chatgpt-iz-rossii-2026", "stone-ai-vs-chatgpt-plus", "chatgpt-bez-vpn-rossiya"],
+  "stone-ai-vs-chatgpt-plus": ["chatgpt-plus-vs-analogi-rossiya", "guide-50-ai-models", "kak-oplatit-chatgpt-iz-rossii-2026"],
+};
+
+export function getFaq(slug: string): { q: string; a: string }[] | undefined {
+  return FAQ_BY_SLUG[slug];
+}
+
+export function getRelated(slug: string): BlogPost[] {
+  const slugs = RELATED_BY_SLUG[slug];
+  if (slugs) {
+    return slugs.map((s) => POSTS.find((p) => p.slug === s)).filter((p): p is BlogPost => !!p);
+  }
+  // Fallback: 4 most recent other posts
+  return SORTED_POSTS.filter((p) => p.slug !== slug).slice(0, 4);
+}
 
 export function getPost(slug: string): BlogPost | undefined {
   return POSTS.find((p) => p.slug === slug);

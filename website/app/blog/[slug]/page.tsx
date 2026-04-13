@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import dynamic from "next/dynamic";
-import { POSTS, getPost } from "@/lib/blog";
+import { POSTS, getFaq, getPost, getRelated } from "@/lib/blog";
 import { breadcrumbJsonLd } from "@/components/Breadcrumbs";
 
 import { SITE_URL } from "@/lib/constants";
@@ -60,12 +60,30 @@ export default function BlogPostPage({ params }: Props) {
     mainEntityOfPage: `${SITE_URL}/blog/${post.slug}`,
   };
 
+  const faq = getFaq(post.slug);
+  const faqJsonLd = faq
+    ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faq.map((item) => ({
+          "@type": "Question",
+          name: item.q,
+          acceptedAnswer: { "@type": "Answer", text: item.a },
+        })),
+      }
+    : null;
+
+  const related = getRelated(post.slug);
+
   const bcItems = [{ label: "Блог", href: "/blog" }, { label: post.title, href: `/blog/${post.slug}` }];
 
   return (
     <div className="pt-28 pb-20 min-h-screen">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(bcItems)) }} />
+      {faqJsonLd && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      )}
       <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-10">
@@ -105,26 +123,59 @@ export default function BlogPostPage({ params }: Props) {
           </div>
         </div>
 
-        {/* More articles */}
-        <div className="mt-14">
-          <h3 className="font-bold text-lg mb-6">Другие статьи</h3>
-          <div className="space-y-4">
-            {POSTS.filter((p) => p.slug !== post.slug).map((p) => (
-              <a
-                key={p.slug}
-                href={`/blog/${p.slug}`}
-                className="block bg-white rounded-xl border border-text/5 p-5 card-hover"
-              >
-                <div className="flex items-center gap-3 mb-1">
-                  <span className="text-xs text-text/35">{formatDate(p.date)}</span>
-                  <span className="w-1 h-1 bg-text/15 rounded-full" />
-                  <span className="text-xs text-text/35">{p.readTime}</span>
-                </div>
-                <h4 className="font-semibold text-sm">{p.title}</h4>
-              </a>
-            ))}
+        {/* FAQ section — rendered if curated for this article */}
+        {faq && faq.length > 0 && (
+          <div className="mt-14">
+            <h2 className="text-xl md:text-2xl font-extrabold mb-6">Частые вопросы</h2>
+            <div className="space-y-3">
+              {faq.map((item, i) => (
+                <details
+                  key={i}
+                  className="bg-surface rounded-xl border border-text/5 overflow-hidden group"
+                >
+                  <summary className="p-4 sm:p-5 cursor-pointer font-semibold text-sm text-text/80 list-none flex items-center justify-between gap-3">
+                    <span>{item.q}</span>
+                    <svg
+                      className="w-4 h-4 text-text/30 shrink-0 transition-transform group-open:rotate-180"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  <div className="px-4 sm:px-5 pb-4 sm:pb-5 text-text/60 text-sm leading-relaxed">
+                    {item.a}
+                  </div>
+                </details>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Related articles — curated or fallback to recent */}
+        {related.length > 0 && (
+          <div className="mt-14">
+            <h3 className="font-bold text-lg mb-6">Похожие статьи</h3>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {related.map((p) => (
+                <a
+                  key={p.slug}
+                  href={`/blog/${p.slug}`}
+                  className="block bg-surface rounded-xl border border-text/5 p-5 hover:border-accent/30 transition-colors"
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-xs text-text/35">{formatDate(p.date)}</span>
+                    <span className="w-1 h-1 bg-text/15 rounded-full" />
+                    <span className="text-xs text-text/35">{p.readTime}</span>
+                  </div>
+                  <h4 className="font-semibold text-sm leading-snug">{p.title}</h4>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
       </article>
       <ChatWidget />
     </div>

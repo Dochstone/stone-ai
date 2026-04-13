@@ -36,8 +36,10 @@ const pricingJsonLd = {
   "@type": "Product",
   name: "Stone AI",
   description: `AI-студия нового поколения. Подписка от ${startPlan.price}.`,
+  brand: { "@type": "Brand", name: "Stone AI" },
+  category: "AI Software Subscription",
   offers: [
-    { "@type": "Offer", name: "Free", price: "0", priceCurrency: "RUB", description: `10 запросов в день, ${FREE_CHAT_MODEL_COUNT} моделей` },
+    { "@type": "Offer", name: "Free", price: "0", priceCurrency: "RUB", availability: "https://schema.org/InStock", description: `10 запросов в день, ${FREE_CHAT_MODEL_COUNT} моделей` },
     ...PRICING_PLANS
       .filter((plan) => plan.id !== "free")
       .map((plan) => ({
@@ -45,10 +47,12 @@ const pricingJsonLd = {
         name: plan.name,
         price: String(plan.priceNum),
         priceCurrency: "RUB",
+        availability: "https://schema.org/InStock",
         description: plan.compactSummary ?? plan.desc,
       })),
   ],
 };
+
 
 const faqItems = [
   {
@@ -77,6 +81,16 @@ const faqItems = [
   },
 ];
 
+const pricingFaqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqItems.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
+};
+
 export default function PricingPage() {
   const [hasPaidPlan, setHasPaidPlan] = useState(false);
 
@@ -92,6 +106,7 @@ export default function PricingPage() {
   return (
     <div className="pt-24 pb-20 min-h-screen">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingFaqJsonLd) }} />
       <Breadcrumbs items={[{ label: "Тарифы", href: "/pricing" }]} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
