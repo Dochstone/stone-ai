@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { SkeletonStats, SkeletonTable } from "@/components/Skeleton";
 import ReconciliationTab from "@/components/admin/ReconciliationTab";
 import AuditLogTab from "@/components/admin/AuditLogTab";
+import { USD_TO_RUB } from "@/lib/constants";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
@@ -665,11 +666,11 @@ export default function AdminPage() {
                           <div className="inline-flex items-center gap-1">
                             <input
                               type="number"
-                              defaultValue={Math.round(u.balance_usd * 95)}
+                              defaultValue={Math.round(u.balance_usd * USD_TO_RUB)}
                               onBlur={async (e) => {
                                 const rub = Number(e.target.value);
-                                if (isNaN(rub) || rub === Math.round(u.balance_usd * 95)) return;
-                                const usd = rub / 95;
+                                if (isNaN(rub) || rub === Math.round(u.balance_usd * USD_TO_RUB)) return;
+                                const usd = rub / USD_TO_RUB;
                                 const res = await fetch(`${API_URL}/api/admin/web/users/${u.id}/balance`, {
                                   method: "PATCH",
                                   headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -1038,17 +1039,17 @@ export default function AdminPage() {
                   <div className="bg-surface rounded-2xl border border-emerald-500/10 p-5">
                     <div className="text-[10px] text-text/30 uppercase tracking-wider font-bold">Revenue</div>
                     <div className="text-2xl font-extrabold text-emerald-500 mt-1">${costsData.total_revenue_usd.toFixed(2)}</div>
-                    <div className="text-[10px] text-text/25 mt-0.5">~{Math.round(costsData.total_revenue_usd * 95)}₽</div>
+                    <div className="text-[10px] text-text/25 mt-0.5">~{Math.round(costsData.total_revenue_usd * USD_TO_RUB)}₽</div>
                   </div>
                   <div className="bg-surface rounded-2xl border border-red-500/10 p-5">
                     <div className="text-[10px] text-text/30 uppercase tracking-wider font-bold">Provider Cost</div>
                     <div className="text-2xl font-extrabold text-red-400 mt-1">${costsData.total_provider_cost_usd.toFixed(4)}</div>
-                    <div className="text-[10px] text-text/25 mt-0.5">~{Math.round(costsData.total_provider_cost_usd * 95)}₽</div>
+                    <div className="text-[10px] text-text/25 mt-0.5">~{Math.round(costsData.total_provider_cost_usd * USD_TO_RUB)}₽</div>
                   </div>
                   <div className="bg-surface rounded-2xl border border-blue-500/10 p-5">
                     <div className="text-[10px] text-text/30 uppercase tracking-wider font-bold">Gross Profit</div>
                     <div className={`text-2xl font-extrabold mt-1 ${costsData.gross_margin_usd >= 0 ? "text-blue-400" : "text-red-400"}`}>${costsData.gross_margin_usd.toFixed(2)}</div>
-                    <div className="text-[10px] text-text/25 mt-0.5">~{Math.round(costsData.gross_margin_usd * 95)}₽</div>
+                    <div className="text-[10px] text-text/25 mt-0.5">~{Math.round(costsData.gross_margin_usd * USD_TO_RUB)}₽</div>
                   </div>
                   <div className="bg-surface rounded-2xl border border-purple-500/10 p-5">
                     <div className="text-[10px] text-text/30 uppercase tracking-wider font-bold">Margin</div>
