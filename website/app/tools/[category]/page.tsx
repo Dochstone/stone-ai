@@ -74,7 +74,7 @@ export default function ToolHubPage({ params }: Props) {
     <div className="min-h-screen bg-bg">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
-      <Breadcrumbs items={[{ label: "Инструменты" }, { label: hub.category }]} />
+      <Breadcrumbs items={[{ label: "Инструменты", href: "/tools" }, { label: hub.category, href: `/tools/${hub.slug}` }]} />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-28 pb-20">
         <h1 className="text-3xl md:text-5xl font-extrabold text-text mb-4 leading-tight">{hub.h1}</h1>

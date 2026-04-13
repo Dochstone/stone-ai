@@ -92,7 +92,7 @@ export default function PricingPage() {
   return (
     <div className="pt-24 pb-20 min-h-screen">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingJsonLd) }} />
-      <Breadcrumbs items={[{ label: "Тарифы" }]} />
+      <Breadcrumbs items={[{ label: "Тарифы", href: "/pricing" }]} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">

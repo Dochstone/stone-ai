@@ -224,7 +224,7 @@ export default function ProfessionPage({ params }: Props) {
     <div className="min-h-screen bg-bg">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
-      <Breadcrumbs items={[{ label: "AI по профессиям" }, { label: `AI для ${prof.role.toLowerCase()}а` }]} />
+      <Breadcrumbs items={[{ label: "AI по профессиям", href: "/for" }, { label: `AI для ${prof.role.toLowerCase()}а`, href: `/for/${prof.slug}` }]} />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-28 pb-20">
         <h1 className="text-3xl md:text-5xl font-extrabold text-text mb-4 leading-tight">{prof.h1}</h1>

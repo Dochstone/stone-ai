@@ -46,7 +46,7 @@ export default function UseCasesPage() {
   return (
     <div className="pt-24 pb-20 min-h-screen bg-bg">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        <Breadcrumbs items={[{ label: "AI-задачи" }]} />
+        <Breadcrumbs items={[{ label: "AI-задачи", href: "/use-cases" }]} />
         <h1 className="text-3xl font-extrabold text-text mt-6 mb-2">
           AI-задачи — что умеет нейросеть
         </h1>

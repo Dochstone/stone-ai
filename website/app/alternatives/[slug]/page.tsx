@@ -79,7 +79,7 @@ export default function AlternativesPage({ params }: Props) {
     <div className="min-h-screen bg-bg">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
-      <Breadcrumbs items={[{ label: "Альтернативы" }, { label: alt.service }]} />
+      <Breadcrumbs items={[{ label: "Альтернативы", href: "/alternatives" }, { label: alt.service, href: `/alternatives/${alt.slug}` }]} />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-28 pb-20">
         <h1 className="text-3xl md:text-5xl font-extrabold text-text mb-4 leading-tight">{alt.h1}</h1>

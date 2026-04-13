@@ -22,7 +22,7 @@ export default function ForPage() {
   return (
     <div className="pt-24 pb-20 min-h-screen bg-bg">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        <Breadcrumbs items={[{ label: "AI по профессиям" }]} />
+        <Breadcrumbs items={[{ label: "AI по профессиям", href: "/for" }]} />
         <h1 className="text-3xl font-extrabold text-text mt-6 mb-2">AI для профессионалов — нейросети по профессиям</h1>
         <p className="text-text/50 mb-8">Подборки лучших AI-моделей и промптов для каждой профессии. Узнайте, как нейросети ускоряют вашу работу.</p>
         <div className="grid gap-4">

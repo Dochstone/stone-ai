@@ -27,7 +27,7 @@ export default function Page() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
-      <Breadcrumbs items={[{ label: "Реферальная программа" }]} />
+      <Breadcrumbs items={[{ label: "Реферальная программа", href: "/referral" }]} />
       <h1 className="sr-only">Реферальная программа Stone AI</h1>
       <ReferralPage />
 

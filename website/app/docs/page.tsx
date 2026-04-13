@@ -79,7 +79,7 @@ const NAV_ITEMS = [
 export default function DocsPage() {
   return (
     <div className="pt-24 pb-20 min-h-screen">
-      <Breadcrumbs items={[{ label: "Документация" }]} />
+      <Breadcrumbs items={[{ label: "Документация", href: "/docs" }]} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToJsonLd) }} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex gap-10">

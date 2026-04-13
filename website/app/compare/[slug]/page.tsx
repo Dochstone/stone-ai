@@ -161,7 +161,7 @@ export default function ComparePage({ params }: Props) {
     <div className="min-h-screen bg-bg">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
-      <Breadcrumbs items={[{ label: "Сравнения", href: "/compare" }, { label: comp.h1 }]} />
+      <Breadcrumbs items={[{ label: "Сравнения", href: "/compare" }, { label: comp.h1, href: `/compare/${comp.slug}` }]} />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-28 pb-20">
         <h1 className="text-3xl md:text-5xl font-extrabold text-text mb-4 leading-tight">{comp.h1}</h1>

@@ -12,7 +12,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 export default function Page() {
   return (
     <>
-      <Breadcrumbs items={[{ label: "Пополнение" }]} />
+      <Breadcrumbs items={[{ label: "Пополнение", href: "/topup" }]} />
       <TopUpPage />
     </>
   );

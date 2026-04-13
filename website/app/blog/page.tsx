@@ -35,7 +35,7 @@ function formatDate(iso: string) {
 export default function BlogPage() {
   return (
     <div className="pt-28 pb-20 min-h-screen">
-      <Breadcrumbs items={[{ label: "Блог" }]} />
+      <Breadcrumbs items={[{ label: "Блог", href: "/blog" }]} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogFaqJsonLd) }} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-14">

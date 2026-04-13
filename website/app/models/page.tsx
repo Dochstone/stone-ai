@@ -39,7 +39,7 @@ export default function ModelsPage() {
     <div className="pt-24 pb-20 min-h-screen">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "ItemList", name: "AI модели Stone AI", description: "Каталог 65+ нейросетей: чат, картинки, видео, 3D, аудио, поиск", numberOfItems: 57, itemListElement: [{ "@type": "ListItem", position: 1, name: "GPT-5.4", url: `${SITE_URL}/dashboard/chat?model=gpt-5.4` }, { "@type": "ListItem", position: 2, name: "Claude Opus 4", url: `${SITE_URL}/dashboard/chat?model=claude-opus-4` }, { "@type": "ListItem", position: 3, name: "Gemini 2.5 Pro", url: `${SITE_URL}/dashboard/chat?model=gemini-2.5-pro` }] }) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
-      <Breadcrumbs items={[{ label: "Модели" }]} />
+      <Breadcrumbs items={[{ label: "Модели", href: "/models" }]} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <div className="inline-block bg-accent/10 text-accent px-4 py-1.5 rounded-full text-sm font-semibold mb-4">

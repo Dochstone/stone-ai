@@ -17,7 +17,7 @@ export default function GlossaryPage() {
   return (
     <div className="pt-24 pb-20 min-h-screen bg-bg">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        <Breadcrumbs items={[{ label: "Глоссарий" }]} />
+        <Breadcrumbs items={[{ label: "Глоссарий", href: "/glossary" }]} />
         <h1 className="text-3xl font-extrabold text-text mt-6 mb-2">AI-глоссарий</h1>
         <p className="text-text/50 mb-8">50+ терминов про нейросети и искусственный интеллект. Простые объяснения на русском языке.</p>
 

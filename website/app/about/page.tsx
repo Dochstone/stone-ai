@@ -81,7 +81,7 @@ const tools = [
 export default function AboutPage() {
   return (
     <div className="pt-28 pb-20 min-h-screen">
-      <Breadcrumbs items={[{ label: "О нас" }]} />
+      <Breadcrumbs items={[{ label: "О нас", href: "/about" }]} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "AboutPage",

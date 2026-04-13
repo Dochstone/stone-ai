@@ -42,7 +42,7 @@ export default function GlossaryTermPage({ params }: { params: { slug: string } 
     <div className="pt-24 pb-20 min-h-screen bg-bg">
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-        <Breadcrumbs items={[{ label: "Глоссарий", href: "/glossary" }, { label: term.term }]} />
+        <Breadcrumbs items={[{ label: "Глоссарий", href: "/glossary" }, { label: term.term, href: `/glossary/${term.slug}` }]} />
 
         <h1 className="text-3xl font-extrabold text-text mt-6 mb-4">{term.title}</h1>
 

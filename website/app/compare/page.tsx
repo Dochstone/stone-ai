@@ -18,7 +18,7 @@ export default function ComparePage() {
   return (
     <div className="pt-24 pb-20 min-h-screen bg-bg">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        <Breadcrumbs items={[{ label: "Сравнения" }]} />
+        <Breadcrumbs items={[{ label: "Сравнения", href: "/compare" }]} />
         <h1 className="text-3xl font-extrabold text-text mt-6 mb-2">Сравнения AI-сервисов и нейросетей</h1>
         <p className="text-text/50 mb-8">Детальные сравнения моделей, платформ и тарифов. Помогаем выбрать лучший AI-инструмент.</p>
         <div className="grid gap-4">

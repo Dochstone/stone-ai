@@ -41,7 +41,7 @@ export default function AlternativesHubPage() {
     <div className="pt-24 pb-20 min-h-screen bg-bg">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        <Breadcrumbs items={[{ label: "Альтернативы" }]} />
+        <Breadcrumbs items={[{ label: "Альтернативы", href: "/alternatives" }]} />
         <h1 className="text-3xl md:text-5xl font-extrabold text-text mt-6 mb-2">Альтернативы популярным AI-сервисам</h1>
         <p className="text-text/50 mb-8 max-w-2xl">ChatGPT, Midjourney, Sora — все они дорогие или недоступны в России. Stone AI объединяет 65+ нейросетей в одном интерфейсе от 590₽/мес без VPN.</p>
 
