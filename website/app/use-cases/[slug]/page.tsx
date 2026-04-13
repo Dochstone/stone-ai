@@ -73,7 +73,7 @@ export default function UseCasePage({ params }: { params: { slug: string } }) {
         <Breadcrumbs
           items={[
             { label: "AI-задачи", href: "/use-cases" },
-            { label: categoryLabels[uc.category] || uc.category },
+            { label: categoryLabels[uc.category] || uc.category, href: `/use-cases/${uc.slug}` },
           ]}
         />
 
