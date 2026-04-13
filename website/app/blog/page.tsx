@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SORTED_POSTS as POSTS } from "@/lib/blog";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { SITE_URL } from "@/lib/constants";
 
 export const revalidate = 3600;
 
@@ -24,6 +25,20 @@ const blogFaqItems = [
 
 const blogFaqJsonLd = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: blogFaqItems.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) };
 
+const blogItemListJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: "Блог Stone AI",
+  description: "Статьи про AI-модели, сравнения, гайды и советы",
+  numberOfItems: POSTS.length,
+  itemListElement: POSTS.map((p, i) => ({
+    "@type": "ListItem",
+    position: i + 1,
+    url: `${SITE_URL}/blog/${p.slug}`,
+    name: p.title,
+  })),
+};
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("ru-RU", {
     day: "numeric",
@@ -36,6 +51,7 @@ export default function BlogPage() {
   return (
     <div className="pt-28 pb-20 min-h-screen">
       <Breadcrumbs items={[{ label: "Блог", href: "/blog" }]} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogItemListJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogFaqJsonLd) }} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-14">

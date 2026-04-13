@@ -127,16 +127,28 @@ export default function ModelPage({ params }: Props) {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     name: model.name,
+    url: `${SITE_URL}/models/${model.id}`,
+    image: [`${SITE_URL}/models/${model.id}/opengraph-image`],
     applicationCategory: "BusinessApplication",
-    operatingSystem: "Android, iOS, Web",
+    applicationSubCategory: cat,
+    operatingSystem: "Web, Android, iOS",
     description: model.description || `${model.name} — нейросеть от ${model.company}`,
+    featureList: model.strengths?.join(", ") || undefined,
     offers: {
       "@type": "Offer",
       price: isFree ? "0" : "590",
-      priceCurrency: isFree ? "USD" : "RUB",
+      priceCurrency: "RUB",
+      availability: "https://schema.org/InStock",
+      url: `${SITE_URL}/pricing`,
       description: isFree ? "10 бесплатных запросов в день" : "Подписка от 590₽/мес",
     },
-    author: { "@type": "Organization", name: model.company },
+    creator: { "@type": "Organization", name: model.company },
+    publisher: {
+      "@type": "Organization",
+      name: "Stone AI",
+      url: SITE_URL,
+      logo: { "@type": "ImageObject", url: `${SITE_URL}/og-image.png`, width: 1200, height: 630 },
+    },
   };
 
   const faqJsonLd = {

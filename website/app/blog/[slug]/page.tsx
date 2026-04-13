@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import dynamic from "next/dynamic";
-import { POSTS, getFaq, getPost, getRelated } from "@/lib/blog";
+import { POSTS, getFaq, getHowTo, getPost, getRelated } from "@/lib/blog";
 import { breadcrumbJsonLd } from "@/components/Breadcrumbs";
 
 import { SITE_URL } from "@/lib/constants";
@@ -92,6 +92,24 @@ export default function BlogPostPage({ params }: Props) {
       }
     : null;
 
+  const howto = getHowTo(post.slug);
+  const howtoJsonLd = howto
+    ? {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        name: howto.name,
+        description: howto.description,
+        image: [ogUrl],
+        ...(howto.totalTime ? { totalTime: howto.totalTime } : {}),
+        step: howto.steps.map((s, i) => ({
+          "@type": "HowToStep",
+          position: i + 1,
+          name: s.name,
+          text: s.text,
+        })),
+      }
+    : null;
+
   const related = getRelated(post.slug);
 
   const bcItems = [{ label: "Блог", href: "/blog" }, { label: post.title, href: `/blog/${post.slug}` }];
@@ -102,6 +120,9 @@ export default function BlogPostPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(bcItems)) }} />
       {faqJsonLd && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      )}
+      {howtoJsonLd && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howtoJsonLd) }} />
       )}
       <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}

@@ -16,6 +16,7 @@ export const metadata: Metadata = {
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { CrossLinks } from "@/components/CrossLinks";
 import { SITE_URL } from "@/lib/constants";
+import { MODELS } from "@/lib/models";
 
 const faqItems = [
   { q: "Сколько моделей доступно бесплатно?", a: "8 моделей бесплатно: GPT-4o mini, Claude Haiku, Gemini Flash, DeepSeek V3, Llama 4, Mistral Large, Nano Banana и другие. 10 запросов в день." },
@@ -34,10 +35,24 @@ const faqJsonLd = {
   })),
 };
 
+const itemListJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: "AI модели Stone AI",
+  description: "Каталог 65+ нейросетей: чат, картинки, видео, 3D, аудио, поиск",
+  numberOfItems: MODELS.length,
+  itemListElement: MODELS.map((m, i) => ({
+    "@type": "ListItem",
+    position: i + 1,
+    url: `${SITE_URL}/models/${m.id}`,
+    name: m.name,
+  })),
+};
+
 export default function ModelsPage() {
   return (
     <div className="pt-24 pb-20 min-h-screen">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "ItemList", name: "AI модели Stone AI", description: "Каталог 65+ нейросетей: чат, картинки, видео, 3D, аудио, поиск", numberOfItems: 57, itemListElement: [{ "@type": "ListItem", position: 1, name: "GPT-5.4", url: `${SITE_URL}/dashboard/chat?model=gpt-5.4` }, { "@type": "ListItem", position: 2, name: "Claude Opus 4", url: `${SITE_URL}/dashboard/chat?model=claude-opus-4` }, { "@type": "ListItem", position: 3, name: "Gemini 2.5 Pro", url: `${SITE_URL}/dashboard/chat?model=gemini-2.5-pro` }] }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <Breadcrumbs items={[{ label: "Модели", href: "/models" }]} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

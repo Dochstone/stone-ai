@@ -804,6 +804,66 @@ export function getFaq(slug: string): { q: string; a: string }[] | undefined {
   return FAQ_BY_SLUG[slug];
 }
 
+/**
+ * HowTo structured data for step-by-step guides. Only articles whose
+ * content truly follows a sequential procedure are listed — Google
+ * penalises fake HowTo markup.
+ */
+interface HowToStep {
+  name: string;
+  text: string;
+}
+
+interface HowToMeta {
+  name: string;
+  description: string;
+  totalTime?: string; // ISO 8601 duration, e.g. "PT5M"
+  steps: HowToStep[];
+}
+
+const HOWTO_BY_SLUG: Record<string, HowToMeta> = {
+  "kak-napisat-prompt-dlya-nejroseti": {
+    name: "Как написать промпт для нейросети",
+    description: "Пошаговая инструкция по составлению эффективного промпта: роль, задача, контекст, формат.",
+    totalTime: "PT5M",
+    steps: [
+      { name: "Задайте роль", text: "Начните промпт с указания, кем должна быть нейросеть: «Ты SEO-специалист», «Ты преподаватель математики», «Ты редактор». Это задаёт тон и фокус ответа." },
+      { name: "Сформулируйте задачу", text: "Коротко опишите что нужно сделать: «напиши мета-описание», «объясни теорему», «переведи текст». Глагол + объект, без воды." },
+      { name: "Добавьте контекст", text: "Расскажите про аудиторию, сайт, проект, ограничения. Чем больше релевантного контекста, тем точнее ответ." },
+      { name: "Укажите формат", text: "Опишите что вы хотите получить: длину, структуру, стиль, примеры. «Список из 5 пунктов по 15 слов каждый» лучше чем «напиши список»." },
+      { name: "Проверьте и итерируйте", text: "Не устраивает ответ — уточните промпт, добавьте пример желаемого, укажите что исключить. Нейросети отлично реагируют на правки." },
+    ],
+  },
+  "kak-oplatit-chatgpt-iz-rossii-2026": {
+    name: "Как оплатить доступ к GPT-моделям из России",
+    description: "5 рабочих способов оплаты подписки на AI-модели OpenAI из России в 2026 году.",
+    totalTime: "PT3M",
+    steps: [
+      { name: "Зарегистрируйтесь в Stone AI", text: "Откройте stoneai.ru или бот @drifttt55bot, войдите через Telegram или email. GPT-5, GPT-4o и другие модели OpenAI доступны сразу." },
+      { name: "Выберите тариф", text: "Start (590₽/мес) — 20+ моделей. Pro (1 290₽/мес) — все 65+ моделей включая Claude Opus. Elite (1 990₽/мес) — максимальные лимиты." },
+      { name: "Выберите способ оплаты", text: "Картой РФ через Lava. СБП моментально. Криптовалюта (USDT/BTC/ETH) через Heleket. TON-кошелёк. Telegram Stars в боте." },
+      { name: "Оплатите и активируйте", text: "После оплаты подписка активируется за 1-10 минут в зависимости от способа. Карты и СБП — моментально. Крипта — за время блока сети." },
+      { name: "Начните работу", text: "Откройте stoneai.ru/dashboard/chat, выберите нужную модель OpenAI. Пользуйтесь без VPN и без иностранных карт." },
+    ],
+  },
+  "4-ways-to-pay-ai-russia": {
+    name: "Как оплатить AI-подписку в рублях",
+    description: "Четыре рабочих способа оплаты подписки на нейросети в рублях из России.",
+    totalTime: "PT2M",
+    steps: [
+      { name: "Выберите тариф", text: "На stoneai.ru/pricing выберите подходящий тариф: Start (590₽), Pro (1 290₽) или Elite (1 990₽)." },
+      { name: "Карты РФ через Lava", text: "Нажмите «Оплатить картой» → введите данные Visa/MC/МИР → подтвердите 3-D Secure. Зачисление — 30-60 секунд." },
+      { name: "СБП", text: "Выберите «СБП» → отсканируйте QR банковским приложением → подтвердите перевод. Моментальное зачисление." },
+      { name: "Telegram Stars", text: "В боте @drifttt55bot команда /pricing → выберите тариф → оплатите звёздами. Подписка активируется мгновенно." },
+      { name: "Криптовалюта", text: "Выберите крипто-оплату → получите адрес USDT/BTC/ETH → переведите. Зачисление за 2-10 минут после подтверждения сети." },
+    ],
+  },
+};
+
+export function getHowTo(slug: string): HowToMeta | undefined {
+  return HOWTO_BY_SLUG[slug];
+}
+
 export function getRelated(slug: string): BlogPost[] {
   const slugs = RELATED_BY_SLUG[slug];
   if (slugs) {
