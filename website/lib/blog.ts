@@ -78,7 +78,7 @@ export const POSTS: BlogPost[] = [
     description:
       "Разбираем, почему подписка Stone AI от 590₽/мес выгоднее ChatGPT Plus за $20/мес. 4 тарифа, 65+ нейросетей, оплата в рублях.",
     date: "2026-03-15",
-    dateModified: "2026-03-25",
+    dateModified: "2026-04-13",
     readTime: "7 мин",
     content: [
       { h2: "Сколько на самом деле стоит ChatGPT Plus" },
@@ -108,7 +108,7 @@ export const POSTS: BlogPost[] = [
     description:
       "Подробный разбор всех моделей Stone AI: от бесплатных до премиум. Какая модель лучше для текстов, кода, картинок и поиска.",
     date: "2026-03-12",
-    dateModified: "2026-03-25",
+    dateModified: "2026-04-13",
     readTime: "10 мин",
     content: [
       { h2: "Зачем нужно 65 нейросетей и как выбрать свою" },
@@ -141,7 +141,7 @@ export const POSTS: BlogPost[] = [
     description:
       "Telegram Stars, криптовалюта и TON — как оплатить подписку Stone AI в рублях.",
     date: "2026-03-10",
-    dateModified: "2026-03-25",
+    dateModified: "2026-04-13",
     readTime: "8 мин",
     content: [
       { h2: "Удобная оплата AI в рублях" },
@@ -169,7 +169,7 @@ export const POSTS: BlogPost[] = [
     title: "Альтернатива ChatGPT — как пользоваться нейросетями в 2026 году",
     description: "Как удобно пользоваться GPT-5 и другими нейросетями с оплатой в рублях. 3 рабочих способа в 2026 году.",
     date: "2026-03-18",
-    dateModified: "2026-03-25",
+    dateModified: "2026-04-13",
     readTime: "6 мин",
     content: [
       { h2: "Почему пользователи ищут альтернативу ChatGPT" },
@@ -189,7 +189,7 @@ export const POSTS: BlogPost[] = [
     title: "Нейросеть для генерации картинок бесплатно — топ-6 моделей 2026",
     description: "Обзор лучших нейросетей для генерации картинок: Flux, GPT-5 Image, SDXL, Nano Banana Pro. Примеры и цены.",
     date: "2026-03-17",
-    dateModified: "2026-03-25",
+    dateModified: "2026-04-13",
     readTime: "8 мин",
     content: [
       { h2: "Какие нейросети генерируют картинки в 2026 году" },
@@ -211,7 +211,7 @@ export const POSTS: BlogPost[] = [
     title: "Claude Opus 4 vs GPT-5.1 — какая нейросеть лучше в 2026",
     description: "Детальное сравнение двух топовых нейросетей: Claude Opus 4 и GPT-5.1. Тесты, цены, для каких задач подходят.",
     date: "2026-03-16",
-    dateModified: "2026-03-25",
+    dateModified: "2026-04-13",
     readTime: "9 мин",
     content: [
       { h2: "Два флагмана: Anthropic vs OpenAI" },
@@ -233,7 +233,7 @@ export const POSTS: BlogPost[] = [
     title: "Как написать промпт для нейросети — гайд с примерами",
     description: "Пошаговый гайд по написанию промптов для нейросетей. 20 примеров для текста, картинок, кода и анализа.",
     date: "2026-03-14",
-    dateModified: "2026-03-25",
+    dateModified: "2026-04-13",
     readTime: "10 мин",
     content: [
       { h2: "Что такое промпт и почему он важен" },
@@ -257,7 +257,7 @@ export const POSTS: BlogPost[] = [
     title: "DeepSeek R1 — обзор reasoning-нейросети из Китая",
     description: "Обзор нейросети DeepSeek R1: как работает reasoning, для каких задач подходит, сравнение с o3 и Claude.",
     date: "2026-03-13",
-    dateModified: "2026-03-25",
+    dateModified: "2026-04-13",
     readTime: "7 мин",
     content: [
       { h2: "Что такое reasoning-нейросеть" },
@@ -275,7 +275,7 @@ export const POSTS: BlogPost[] = [
     title: "ИИ для бизнеса в России — 7 способов применения нейросетей",
     description: "Как использовать нейросети для бизнеса: маркетинг, продажи, HR, юриспруденция, аналитика. Конкретные примеры и ROI.",
     date: "2026-03-11",
-    dateModified: "2026-03-25",
+    dateModified: "2026-04-13",
     readTime: "9 мин",
     content: [
       { h2: "Почему бизнесу в России нужны нейросети" },
@@ -301,7 +301,7 @@ export const POSTS: BlogPost[] = [
     title: "Perplexity — поиск нейросетью вместо Google",
     description: "Как Perplexity ищет в интернете с помощью ИИ. Deep Research, источники, сравнение с Google. Доступно всем.",
     date: "2026-03-09",
-    dateModified: "2026-03-25",
+    dateModified: "2026-04-13",
     readTime: "6 мин",
     content: [
       { h2: "Почему нейросеть лучше Google для сложных запросов" },
@@ -321,7 +321,7 @@ export const POSTS: BlogPost[] = [
     title: "Как оплатить ChatGPT из России в 2026 году — 5 способов",
     description: "Все способы оплатить ChatGPT Plus из России: через Stone AI от 590₽, криптовалюта, иностранные карты. Пошаговая инструкция.",
     date: "2026-03-24",
-    dateModified: "2026-03-25",
+    dateModified: "2026-04-13",
     readTime: "8 мин",
     content: [
       { h2: "Проблема: ChatGPT не принимает российские карты" },
@@ -355,7 +355,7 @@ export const POSTS: BlogPost[] = [
     title: "ChatGPT Plus vs аналоги в России — сравнение 7 сервисов",
     description: "Сравниваем ChatGPT Plus, Claude Pro, BotHub, MashaGPT, Stone AI и другие. Цены, модели, качество. Кто лучше для русскоязычного пользователя?",
     date: "2026-03-24",
-    dateModified: "2026-03-25",
+    dateModified: "2026-04-13",
     readTime: "10 мин",
     content: [
       { h2: "7 сервисов для доступа к AI из России" },
@@ -389,7 +389,7 @@ export const POSTS: BlogPost[] = [
     title: "Лучшие нейросети 2026 года — рейтинг 15 моделей",
     description: "Рейтинг 15 лучших нейросетей 2026: GPT-5.4, Claude Opus 4, Gemini 2.5 Pro, DeepSeek R1. Сравнение по задачам: тексты, код, картинки.",
     date: "2026-03-25",
-    dateModified: "2026-03-25",
+    dateModified: "2026-04-13",
     readTime: "12 мин",
     content: [
       { h2: "Как мы выбирали лучшие нейросети" },
@@ -420,7 +420,7 @@ export const POSTS: BlogPost[] = [
     title: "Claude Opus 4 онлайн на русском — как пользоваться бесплатно",
     description: "Как использовать Claude Opus 4 на русском языке без VPN. Инструкция: Stone AI даёт доступ к Claude Opus с оплатой в рублях от 590₽/мес.",
     date: "2026-03-25",
-    dateModified: "2026-03-25",
+    dateModified: "2026-04-13",
     readTime: "6 мин",
     content: [
       { h2: "Что такое Claude Opus 4" },
@@ -448,7 +448,7 @@ export const POSTS: BlogPost[] = [
     title: "GPT-5 бесплатно — как пользоваться без оплаты и VPN",
     description: "Как использовать GPT-5 бесплатно в 2026 году. Stone AI даёт доступ к GPT-4o mini бесплатно (10 запросов/день) и GPT-5.4 по подписке от 590₽.",
     date: "2026-03-25",
-    dateModified: "2026-03-25",
+    dateModified: "2026-04-13",
     readTime: "5 мин",
     content: [
       { h2: "Можно ли пользоваться GPT-5 бесплатно?" },
