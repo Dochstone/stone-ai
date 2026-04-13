@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: prof.title, description: prof.description,
     alternates: { canonical: `${SITE_URL}/for/${prof.slug}` },
-    openGraph: { title: prof.title, description: prof.description, url: `${SITE_URL}/for/${prof.slug}`, type: "article", siteName: "Stone AI", images: [{ url: `${SITE_URL}/og-for-${prof.slug}.png`, width: 1200, height: 630, alt: prof.title }] },
+    openGraph: { title: prof.title, description: prof.description, url: `${SITE_URL}/for/${prof.slug}`, type: "article", siteName: "Stone AI" },
   };
 }
 
