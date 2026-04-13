@@ -143,8 +143,10 @@ async def stt_transcribe(
         await deduct_balance(db, tg_id, cost)
 
     from app.services.provider_costs import calculate_audio_provider_cost
-    provider_cost = calculate_audio_provider_cost(stt_result.get("duration_seconds", 0))
-    await record_usage(db, tg_id, "whisper-stt", tokens_in=0, tokens_out=0, cost_usd=cost, provider_cost_usd=provider_cost)
+    provider = stt_result.get("provider", "groq")
+    provider_cost = calculate_audio_provider_cost(stt_result.get("duration_seconds", 0), provider)
+    model_id = "whisper-groq" if provider == "groq" else "whisper-openai"
+    await record_usage(db, tg_id, model_id, tokens_in=0, tokens_out=0, cost_usd=cost, provider_cost_usd=provider_cost)
     await db.commit()
 
     return {

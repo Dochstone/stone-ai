@@ -110,7 +110,8 @@ IMAGE_GEN_COSTS: dict[str, float] = {
 }
 
 
-WHISPER_COST_PER_MINUTE = 0.006
+WHISPER_COST_PER_MINUTE = 0.006  # OpenAI Whisper-1 (fallback)
+GROQ_WHISPER_COST_PER_MINUTE = 0.000667  # Groq whisper-large-v3-turbo (primary)
 
 
 THREED_COSTS: dict[str, float] = {
@@ -369,9 +370,10 @@ def calculate_image_provider_cost(model_id: str, tokens_in: int = 0, tokens_out:
     return 0.0
 
 
-def calculate_audio_provider_cost(duration_seconds: float) -> float:
+def calculate_audio_provider_cost(duration_seconds: float, provider: str = "groq") -> float:
     minutes = duration_seconds / 60.0
-    return round(minutes * WHISPER_COST_PER_MINUTE, 6)
+    rate = GROQ_WHISPER_COST_PER_MINUTE if provider == "groq" else WHISPER_COST_PER_MINUTE
+    return round(minutes * rate, 6)
 
 
 def calculate_threed_provider_cost(model_id: str) -> float:

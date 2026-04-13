@@ -115,8 +115,11 @@ class Settings:
         # Google Gemini API (Veo 3.1 video generation)
         self.vertex_api_key = os.getenv("VERTEX_API_KEY", "")
 
-        # OpenAI (Whisper STT)
+        # OpenAI (Whisper STT — fallback)
         self.openai_api_key = os.getenv("OPENAI_API_KEY", "")
+
+        # Groq (Whisper STT — primary, ~9× cheaper than OpenAI)
+        self.groq_api_key = os.getenv("GROQ_API_KEY", "")
 
         # Admin
         self.admin_tg_ids = os.getenv("ADMIN_TG_IDS", "")  # comma-separated Telegram IDs
