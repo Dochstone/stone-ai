@@ -45,7 +45,7 @@ export interface BlogPost {
 export const POSTS: BlogPost[] = [
   {
     slug: "how-to-create-ai-bot",
-    author: "dochstone",
+    author: "tech-lead",
     title: "Как создать AI-бота за 5 минут в Stone AI",
     description:
       "Пошаговый гайд: создайте персонального AI-бота с собственными инструкциями, выберите модель и поделитесь с другими.",
@@ -76,7 +76,7 @@ export const POSTS: BlogPost[] = [
   },
   {
     slug: "gpt5-vs-claude-sonnet-vs-gemini",
-    author: "ai-editor",
+    author: "tech-lead",
     title: "GPT-5 vs Claude Sonnet 4 vs Gemini 2.5: какую модель выбрать в 2026",
     description:
       "Детальное сравнение трёх флагманских моделей по качеству текста, кода, скорости и цене. Тесты на реальных задачах.",
@@ -141,7 +141,7 @@ export const POSTS: BlogPost[] = [
   },
   {
     slug: "guide-50-ai-models",
-    author: "ai-editor",
+    author: "ai-researcher",
     title: "Гайд по 65+ нейросетям: какую выбрать под вашу задачу",
     description:
       "Подробный разбор всех моделей Stone AI: от бесплатных до премиум. Какая модель лучше для текстов, кода, картинок и поиска.",
@@ -175,7 +175,7 @@ export const POSTS: BlogPost[] = [
   },
   {
     slug: "4-ways-to-pay-ai-russia",
-    author: "dochstone",
+    author: "support-lead",
     title: "3 способа оплатить AI в рублях",
     description:
       "Telegram Stars, криптовалюта и TON — как оплатить подписку Stone AI в рублях.",
@@ -205,7 +205,7 @@ export const POSTS: BlogPost[] = [
   },
   {
     slug: "chatgpt-bez-vpn-rossiya",
-    author: "ai-editor",
+    author: "support-lead",
     title: "Альтернатива ChatGPT — как пользоваться нейросетями в 2026 году",
     description: "Как удобно пользоваться GPT-5 и другими нейросетями с оплатой в рублях. 3 рабочих способа в 2026 году.",
     date: "2026-03-18",
@@ -226,7 +226,7 @@ export const POSTS: BlogPost[] = [
   },
   {
     slug: "nejroset-dlya-generacii-kartinok",
-    author: "marketing-expert",
+    author: "designer",
     title: "Нейросеть для генерации картинок бесплатно — топ-6 моделей 2026",
     description: "Обзор лучших нейросетей для генерации картинок: Flux, GPT-5 Image, SDXL, Nano Banana Pro. Примеры и цены.",
     date: "2026-03-17",
@@ -249,7 +249,7 @@ export const POSTS: BlogPost[] = [
   },
   {
     slug: "claude-opus-vs-gpt-5",
-    author: "ai-editor",
+    author: "tech-lead",
     title: "Claude Opus 4 vs GPT-5.1 — какая нейросеть лучше в 2026",
     description: "Детальное сравнение двух топовых нейросетей: Claude Opus 4 и GPT-5.1. Тесты, цены, для каких задач подходят.",
     date: "2026-03-16",
@@ -272,7 +272,7 @@ export const POSTS: BlogPost[] = [
   },
   {
     slug: "kak-napisat-prompt-dlya-nejroseti",
-    author: "marketing-expert",
+    author: "copywriter",
     title: "Как написать промпт для нейросети — гайд с примерами",
     description: "Пошаговый гайд по написанию промптов для нейросетей. 20 примеров для текста, картинок, кода и анализа.",
     date: "2026-03-14",
@@ -297,7 +297,7 @@ export const POSTS: BlogPost[] = [
   },
   {
     slug: "deepseek-r1-obzor",
-    author: "ai-editor",
+    author: "ai-researcher",
     title: "DeepSeek R1 — обзор reasoning-нейросети из Китая",
     description: "Обзор нейросети DeepSeek R1: как работает reasoning, для каких задач подходит, сравнение с o3 и Claude.",
     date: "2026-03-13",
@@ -343,7 +343,7 @@ export const POSTS: BlogPost[] = [
   },
   {
     slug: "perplexity-poisk-nejrosetyu",
-    author: "ai-editor",
+    author: "ai-researcher",
     title: "Perplexity — поиск нейросетью вместо Google",
     description: "Как Perplexity ищет в интернете с помощью ИИ. Deep Research, источники, сравнение с Google. Доступно всем.",
     date: "2026-03-09",
@@ -364,7 +364,7 @@ export const POSTS: BlogPost[] = [
 
   {
     slug: "kak-oplatit-chatgpt-iz-rossii-2026",
-    author: "dochstone",
+    author: "support-lead",
     title: "Как оплатить ChatGPT из России в 2026 году — 5 способов",
     description: "Все способы оплатить ChatGPT Plus из России: через Stone AI от 590₽, криптовалюта, иностранные карты. Пошаговая инструкция.",
     date: "2026-03-24",
@@ -434,7 +434,7 @@ export const POSTS: BlogPost[] = [
 
   {
     slug: "luchshie-nejroseti-2026-rejting",
-    author: "ai-editor",
+    author: "ai-researcher",
     title: "Лучшие нейросети 2026 года — рейтинг 15 моделей",
     description: "Рейтинг 15 лучших нейросетей 2026: GPT-5.4, Claude Opus 4, Gemini 2.5 Pro, DeepSeek R1. Сравнение по задачам: тексты, код, картинки.",
     date: "2026-03-25",
@@ -466,7 +466,7 @@ export const POSTS: BlogPost[] = [
 
   {
     slug: "claude-opus-online-na-russkom",
-    author: "ai-editor",
+    author: "tech-lead",
     title: "Claude Opus 4 онлайн на русском — как пользоваться бесплатно",
     description: "Как использовать Claude Opus 4 на русском языке без VPN. Инструкция: Stone AI даёт доступ к Claude Opus с оплатой в рублях от 590₽/мес.",
     date: "2026-03-25",
@@ -546,7 +546,7 @@ export const POSTS: BlogPost[] = [
   },
   {
     slug: "midjourney-analogi-besplatno-rossiya",
-    author: "marketing-expert",
+    author: "designer",
     title: "Аналоги Midjourney бесплатно в России: 6 нейросетей для картинок",
     description:
       "Бесплатные аналоги Midjourney для генерации картинок в России без VPN. Flux, DALL-E, Stable Diffusion и другие нейросети.",
@@ -595,13 +595,13 @@ export const POSTS: BlogPost[] = [
 
   {
     slug: "best-neural-networks-2026",
+    author: "ai-researcher",
     title: "Лучшие нейросети 2026 — ТОП-15 для работы и учёбы",
     description:
       "Рейтинг 15 лучших нейросетей 2026 года: GPT-5.4, Claude Opus 4.5, Gemini 3 Pro, DeepSeek R1. Бесплатные и платные модели для текста, кода, картинок, видео и учёбы. С реальными тестами, сравнительной таблицей и FAQ.",
     date: "2026-04-07",
     dateModified: "2026-04-14",
     readTime: "18 мин",
-    author: "marketing-expert",
     content: [
       // TLDR — первые 200 слов = готовый ответ для AI-систем (GEO-фактор)
       `<b>Краткий ответ:</b> в 2026 году топ-5 универсальных нейросетей — это GPT-5.4 (OpenAI), Claude Opus 4.5 (Anthropic), Gemini 3 Pro (Google), Grok 3 (xAI) и DeepSeek V3 для экономного сегмента. Для программирования лучшие — Claude Sonnet 4.5 и DeepSeek R1, для генерации картинок — Midjourney V7 и Nano Banana Pro, для видео — Sora 2 и Kling v2. Все 15 моделей из этого рейтинга доступны в одном интерфейсе Stone AI с оплатой в рублях и без VPN — от 590₽/мес за тариф Start или бесплатно (10 запросов/день). Ниже — детальный разбор каждой модели, сравнительная таблица, рекомендации по бюджету и ответы на 10+ типовых вопросов.`,
@@ -758,7 +758,7 @@ export const POSTS: BlogPost[] = [
 
   {
     slug: "generate-images-ai-free",
-    author: "marketing-expert",
+    author: "designer",
     title: "Генерация картинок нейросетью бесплатно — гайд 2026",
     description:
       "Как генерировать картинки нейросетью бесплатно в 2026 году. Лучшие модели: Flux, GPT-5 Image, Nano Banana. Примеры промптов и пошаговая инструкция.",
@@ -793,7 +793,7 @@ export const POSTS: BlogPost[] = [
 
   {
     slug: "best-ai-prompts",
-    author: "marketing-expert",
+    author: "copywriter",
     title: "AI промпты — 50 лучших промптов для работы и учёбы",
     description:
       "50 готовых промптов для нейросетей: маркетинг, программирование, копирайтинг, учёба, анализ данных. Скопируйте и используйте в ChatGPT, Claude, Gemini.",
