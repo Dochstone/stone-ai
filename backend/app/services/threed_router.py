@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 FAL_QUEUE_URL = "https://queue.fal.run"
 
 THREED_MODELS_REGISTRY = [
-    {"id": "tripo-v2.5", "name": "Tripo v2.5", "company": "Tripo3D", "fal_model": "fal-ai/tripo/v2.5/image-to-3d", "time": "25-100s", "cost": 0.20, "price": 0.60, "supports_text": True, "supports_image": True, "active": True},
+    {"id": "tripo-v2.5", "name": "Tripo v2.5", "company": "Tripo3D", "fal_model": "tripo3d/tripo/v2.5/image-to-3d", "time": "25-100s", "cost": 0.20, "price": 0.60, "supports_text": True, "supports_image": True, "active": True},
     {"id": "triposr",    "name": "TripoSR",    "company": "Stability", "fal_model": "fal-ai/triposr",                "time": "<1s",    "cost": 0.07, "price": 0.21, "supports_text": False, "supports_image": True, "active": True},
 ]
 
