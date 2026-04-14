@@ -244,17 +244,17 @@ export const PILLARS = {
   },
   "coding-ai": {
     title: "AI для программирования",
-    modelCategories: ["code"] as ModelCategory[],
+    modelCategories: ["code", "reason"] as ModelCategory[],
     alternatives: [],
     useCases: [],
-    relatedBlogs: [],
+    relatedBlogs: ["guide-50-ai-models", "claude-opus-vs-gpt-5"],
   },
   "business-ai": {
     title: "AI для бизнеса и автоматизации",
-    modelCategories: ["chat"] as ModelCategory[],
+    modelCategories: ["chat", "reason"] as ModelCategory[],
     alternatives: [],
     useCases: [],
-    relatedBlogs: ["ii-dlya-biznesa-v-rossii"],
+    relatedBlogs: ["ii-dlya-biznesa-v-rossii", "guide-50-ai-models", "stone-ai-vs-chatgpt-plus"],
   },
 } as const;
 
