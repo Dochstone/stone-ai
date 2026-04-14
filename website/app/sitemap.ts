@@ -104,7 +104,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   // Pillar topics — update list when new pillars are added to PILLAR_CONTENT.
-  const pillarPages: MetadataRoute.Sitemap = ["image-ai", "chat-models"].map((topic) => ({
+  const pillarPages: MetadataRoute.Sitemap = ["image-ai", "chat-models", "video-ai"].map((topic) => ({
     url: `${SITE_URL}/hub/${topic}`,
     lastModified: now,
     changeFrequency: "monthly",
