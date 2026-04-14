@@ -5,6 +5,9 @@ import { MODELS } from "@/lib/models";
 import { COMPARISONS } from "@/lib/seo-data";
 import { SITE_URL } from "@/lib/constants";
 import { breadcrumbJsonLd } from "@/components/Breadcrumbs";
+import RelatedModels from "@/components/RelatedModels";
+import { CrossLinks } from "@/components/CrossLinks";
+import { relatedModels } from "@/lib/content-graph";
 
 interface Props {
   params: { id: string };
@@ -122,6 +125,7 @@ export default function ModelPage({ params }: Props) {
   const useCases = USE_CASES[model.category] || USE_CASES.chat;
   const prompts = MODEL_PROMPTS[model.id] || MODEL_PROMPTS["gpt-4o-mini"];
   const faqs = CATEGORY_FAQ[model.category] || CATEGORY_FAQ.chat;
+  const related = relatedModels(model.id, 6);
 
   const modelJsonLd = {
     "@context": "https://schema.org",
@@ -363,6 +367,19 @@ export default function ModelPage({ params }: Props) {
               ))}
           </div>
         </div>
+
+        {/* Related Models */}
+        <RelatedModels
+          models={related}
+          title="Похожие модели"
+          description={`Другие нейросети для задач категории «${cat}»`}
+        />
+
+        {/* Cross-links to other sections */}
+        <CrossLinks
+          prefer={["models", "compare", "pricing"]}
+          exclude={["models"]}
+        />
       </div>
     </div>
   );

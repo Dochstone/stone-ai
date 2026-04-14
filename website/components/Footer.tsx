@@ -46,30 +46,31 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Links grid — 5 even columns */}
+        {/* Links grid — 5 even columns with H4 hierarchy */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8">
           <div>
-            <h4 className="font-bold text-xs uppercase tracking-wider text-text/30 mb-4">Инструменты</h4>
+            <h4 className="font-bold text-xs uppercase tracking-wider text-text/30 mb-4">Нейросети</h4>
             <ul className="space-y-2.5 text-[13px] text-text/50">
-              <li><a href="/chat" className="hover:text-text transition-colors">AI Чат</a></li>
-              <li><a href="/images" className="hover:text-text transition-colors">Картинки</a></li>
-              <li><a href="/video" className="hover:text-text transition-colors">Видео</a></li>
-              <li><a href="/code" className="hover:text-text transition-colors">Код</a></li>
-              <li><a href="/search" className="hover:text-text transition-colors">AI Поиск</a></li>
-              <li><a href="/translate" className="hover:text-text transition-colors">Переводчик</a></li>
-              <li><a href="/documents" className="hover:text-text transition-colors">Документы</a></li>
+              <li><a href="/models" className="hover:text-text transition-colors">Каталог 65+ моделей</a></li>
+              <li><a href="/tools/image-generation" className="hover:text-text transition-colors">Генерация картинок</a></li>
+              <li><a href="/tools/video-generation" className="hover:text-text transition-colors">Генерация видео</a></li>
+              <li><a href="/tools/text-generation" className="hover:text-text transition-colors">Генерация текста</a></li>
+              <li><a href="/tools/code-generation" className="hover:text-text transition-colors">Генерация кода</a></li>
+              <li><a href="/compare" className="hover:text-text transition-colors">Сравнение моделей</a></li>
+              <li><a href="/hub/image-ai" className="hover:text-text transition-colors">Pillar: AI для картинок</a></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-bold text-xs uppercase tracking-wider text-text/30 mb-4">Сравнения</h4>
+            <h4 className="font-bold text-xs uppercase tracking-wider text-text/30 mb-4">Альтернативы</h4>
             <ul className="space-y-2.5 text-[13px] text-text/50">
-              <li><a href="/compare/gpt-5-vs-claude-opus-4" className="hover:text-text transition-colors">GPT-5 vs Claude Opus</a></li>
-              <li><a href="/compare/gpt-5-vs-gemini-3-pro" className="hover:text-text transition-colors">GPT-5 vs Gemini 3</a></li>
-              <li><a href="/compare/gpt-4o-mini-vs-claude-haiku" className="hover:text-text transition-colors">GPT-4o vs Haiku</a></li>
-              <li><a href="/compare/stone-ai-vs-chatgpt-plus" className="hover:text-text transition-colors">Stone AI vs ChatGPT</a></li>
               <li><a href="/alternatives/chatgpt" className="hover:text-text transition-colors">Альтернативы ChatGPT</a></li>
+              <li><a href="/alternatives/claude" className="hover:text-text transition-colors">Альтернативы Claude</a></li>
               <li><a href="/alternatives/midjourney" className="hover:text-text transition-colors">Альтернативы Midjourney</a></li>
+              <li><a href="/alternatives/sora" className="hover:text-text transition-colors">Альтернативы Sora</a></li>
+              <li><a href="/alternatives/perplexity" className="hover:text-text transition-colors">Альтернативы Perplexity</a></li>
+              <li><a href="/compare/gpt-5-vs-claude-opus-4" className="hover:text-text transition-colors">GPT-5 vs Claude Opus</a></li>
+              <li><a href="/compare/stone-ai-vs-chatgpt-plus" className="hover:text-text transition-colors">Stone AI vs ChatGPT</a></li>
             </ul>
           </div>
 
@@ -77,33 +78,36 @@ export default function Footer() {
             <h4 className="font-bold text-xs uppercase tracking-wider text-text/30 mb-4">Решения</h4>
             <ul className="space-y-2.5 text-[13px] text-text/50">
               <li><a href="/for/marketer" className="hover:text-text transition-colors">Для маркетолога</a></li>
-              <li><a href="/for/developer" className="hover:text-text transition-colors">Для программиста</a></li>
+              <li><a href="/for/smm" className="hover:text-text transition-colors">Для SMM</a></li>
               <li><a href="/for/copywriter" className="hover:text-text transition-colors">Для копирайтера</a></li>
+              <li><a href="/for/developer" className="hover:text-text transition-colors">Для программиста</a></li>
               <li><a href="/for/designer" className="hover:text-text transition-colors">Для дизайнера</a></li>
+              <li><a href="/for/business" className="hover:text-text transition-colors">Для бизнеса</a></li>
               <li><a href="/for/student" className="hover:text-text transition-colors">Для студента</a></li>
-              <li><a href="/tools/image-generation" className="hover:text-text transition-colors">Генерация картинок</a></li>
-              <li><a href="/tools/video-generation" className="hover:text-text transition-colors">Генерация видео</a></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-bold text-xs uppercase tracking-wider text-text/30 mb-4">Навигация</h4>
+            <h4 className="font-bold text-xs uppercase tracking-wider text-text/30 mb-4">Компания</h4>
             <ul className="space-y-2.5 text-[13px] text-text/50">
-              <li><a href="/models" className="hover:text-text transition-colors">Каталог моделей</a></li>
+              <li><a href="/about" className="hover:text-text transition-colors">О Stone AI</a></li>
               <li><a href="/pricing" className="hover:text-text transition-colors">Тарифы</a></li>
               <li><a href="/blog" className="hover:text-text transition-colors">Блог</a></li>
+              <li><a href="/authors" className="hover:text-text transition-colors">Авторы блога</a></li>
               <li><a href="/referral" className="hover:text-text transition-colors">Рефералы</a></li>
               <li><a href="/docs" className="hover:text-text transition-colors">API Docs</a></li>
-              <li><a href="/about" className="hover:text-text transition-colors">О нас</a></li>
+              <li><a href="https://t.me/StoneAIsupport" target="_blank" rel="noopener noreferrer" className="hover:text-text transition-colors">Поддержка</a></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-bold text-xs uppercase tracking-wider text-text/30 mb-4">Правовая информация</h4>
+            <h4 className="font-bold text-xs uppercase tracking-wider text-text/30 mb-4">Правовая</h4>
             <ul className="space-y-2.5 text-[13px] text-text/50">
-              <li><a href="/terms" className="hover:text-text transition-colors">Оферта</a></li>
+              <li><a href="/terms" className="hover:text-text transition-colors">Публичная оферта</a></li>
               <li><a href="/privacy" className="hover:text-text transition-colors">Конфиденциальность</a></li>
               <li><a href="/refund" className="hover:text-text transition-colors">Возврат средств</a></li>
+              <li><a href="/llms.txt" className="hover:text-text transition-colors" target="_blank" rel="noopener">llms.txt</a></li>
+              <li><a href="/sitemap.xml" className="hover:text-text transition-colors" target="_blank" rel="noopener">Sitemap</a></li>
             </ul>
           </div>
         </div>

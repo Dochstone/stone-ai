@@ -6,6 +6,8 @@ import { MODELS } from "@/lib/models";
 import { ALTERNATIVES } from "@/lib/seo-data";
 import { SITE_URL } from "@/lib/constants";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { CrossLinks } from "@/components/CrossLinks";
+import { relatedAlternatives } from "@/lib/content-graph";
 
 const ChatWidget = dynamic(() => import("@/components/ChatWidget"), { ssr: false });
 
@@ -158,17 +160,49 @@ export default function AlternativesPage({ params }: Props) {
           </Link>
         </section>
 
-        {/* Other */}
-        <section className="mt-14">
-          <h2 className="text-lg font-bold text-text mb-4">Альтернативы другим сервисам</h2>
-          <div className="grid sm:grid-cols-2 gap-3">
-            {ALTERNATIVES.filter((a) => a.slug !== alt.slug).map((a) => (
-              <Link key={a.slug} href={`/alternatives/${a.slug}`} className="bg-bg rounded-xl border border-text/5 px-4 py-3 text-sm font-medium text-text/60 hover:border-accent/20 hover:text-accent transition-colors">
-                Альтернативы {a.service}
-              </Link>
-            ))}
-          </div>
-        </section>
+        {/* Related alternatives — prioritised by shared model set */}
+        {(() => {
+          const related = relatedAlternatives(alt.slug, 4);
+          const extras = ALTERNATIVES.filter(
+            (a) => a.slug !== alt.slug && !related.some((r) => r.slug === a.slug),
+          );
+          return (
+            <section className="mt-14">
+              <h2 className="text-lg font-bold text-text mb-4">Похожие альтернативы</h2>
+              <div className="grid sm:grid-cols-2 gap-3 mb-4">
+                {related.map((a) => (
+                  <Link
+                    key={a.slug}
+                    href={`/alternatives/${a.slug}`}
+                    className="bg-bg rounded-xl border border-accent/20 px-4 py-3 text-sm font-semibold text-text hover:border-accent/50 hover:bg-accent/5 transition-colors"
+                  >
+                    Альтернативы {a.service}
+                  </Link>
+                ))}
+              </div>
+              {extras.length > 0 && (
+                <details className="group">
+                  <summary className="cursor-pointer text-xs font-semibold text-text/40 hover:text-accent">
+                    Ещё альтернативы ({extras.length})
+                  </summary>
+                  <div className="grid sm:grid-cols-2 gap-3 mt-3">
+                    {extras.map((a) => (
+                      <Link
+                        key={a.slug}
+                        href={`/alternatives/${a.slug}`}
+                        className="bg-bg rounded-xl border border-text/5 px-4 py-3 text-sm font-medium text-text/60 hover:border-accent/20 hover:text-accent transition-colors"
+                      >
+                        Альтернативы {a.service}
+                      </Link>
+                    ))}
+                  </div>
+                </details>
+              )}
+            </section>
+          );
+        })()}
+
+        <CrossLinks prefer={["models", "compare", "tools"]} exclude={["alternatives"]} />
       </div>
     </div>
   );

@@ -6,6 +6,9 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import dynamic from "next/dynamic";
 import { buildHowTo } from "@/lib/schema";
 import { getAuthor, DEFAULT_AUTHOR_SLUG } from "@/lib/authors";
+import RelatedModels from "@/components/RelatedModels";
+import { CrossLinks } from "@/components/CrossLinks";
+import { relatedUseCases, modelsForUseCase } from "@/lib/content-graph";
 
 const ChatWidget = dynamic(() => import("@/components/ChatWidget"), { ssr: false });
 
@@ -177,6 +180,39 @@ export default function UseCasePage({ params }: { params: { slug: string } }) {
             Открыть AI-чат →
           </Link>
         </div>
+
+        {/* Related models for this use-case */}
+        <RelatedModels
+          models={modelsForUseCase(uc.slug, 4)}
+          title="Рекомендованные модели для этой задачи"
+          description={`Из каталога Stone AI — лучшие нейросети для «${uc.h1}»`}
+        />
+
+        {/* Related use-cases */}
+        {(() => {
+          const related = relatedUseCases(uc.slug, 4);
+          if (related.length === 0) return null;
+          return (
+            <section className="mt-14">
+              <h2 className="text-xl md:text-2xl font-extrabold mb-1">Похожие задачи</h2>
+              <p className="text-sm text-text/50 mb-6">Другие сценарии в категории «{categoryLabels[uc.category] ?? uc.category}»</p>
+              <div className="grid sm:grid-cols-2 gap-3">
+                {related.map((r) => (
+                  <Link
+                    key={r.slug}
+                    href={`/use-cases/${r.slug}`}
+                    className="block bg-bg rounded-xl border border-text/5 px-5 py-4 hover:border-accent/30 hover:shadow-sm transition-all group"
+                  >
+                    <h3 className="font-bold text-sm mb-1 group-hover:text-accent transition-colors">{r.h1}</h3>
+                    <p className="text-xs text-text/50 line-clamp-2">{r.description}</p>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          );
+        })()}
+
+        <CrossLinks prefer={["tools", "professions", "models"]} exclude={["use-cases"]} />
 
         <ChatWidget />
       </div>
