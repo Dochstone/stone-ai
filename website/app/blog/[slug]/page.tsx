@@ -3,6 +3,13 @@ import { notFound } from "next/navigation";
 import dynamic from "next/dynamic";
 import { POSTS, getFaq, getHowTo, getPost, getRelated } from "@/lib/blog";
 import { breadcrumbJsonLd } from "@/components/Breadcrumbs";
+import Callout from "@/components/content/Callout";
+import ComparisonTable from "@/components/content/ComparisonTable";
+import Quote from "@/components/content/Quote";
+import StatBlock from "@/components/content/StatBlock";
+import TableOfContents from "@/components/content/TableOfContents";
+import { toAnchor, type TocItem } from "@/lib/toc";
+import { getAuthor, DEFAULT_AUTHOR_SLUG } from "@/lib/authors";
 
 import { SITE_URL } from "@/lib/constants";
 
@@ -113,6 +120,7 @@ export default function BlogPostPage({ params }: Props) {
   if (!post) return notFound();
 
   const ogUrl = `${SITE_URL}/blog/${post.slug}/opengraph-image`;
+  const author = getAuthor(post.author ?? DEFAULT_AUTHOR_SLUG) ?? getAuthor(DEFAULT_AUTHOR_SLUG)!;
   const articleJsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -121,13 +129,17 @@ export default function BlogPostPage({ params }: Props) {
     image: [ogUrl],
     datePublished: post.date,
     dateModified: post.dateModified,
+    inLanguage: "ru-RU",
     author: {
-      "@type": "Organization",
-      name: "Stone AI",
-      url: SITE_URL,
+      "@type": "Person",
+      name: author.name,
+      url: `${SITE_URL}/authors/${author.slug}`,
+      jobTitle: author.jobTitle,
+      ...(author.sameAs && author.sameAs.length ? { sameAs: author.sameAs } : {}),
     },
     publisher: {
       "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
       name: "Stone AI",
       url: SITE_URL,
       logo: {
@@ -142,6 +154,16 @@ export default function BlogPostPage({ params }: Props) {
       "@id": `${SITE_URL}/blog/${post.slug}`,
     },
   };
+
+  // Collect H2 headings for TOC
+  const tocItems: TocItem[] = [];
+  for (const block of post.content) {
+    if (typeof block === "object" && "h2" in block) {
+      tocItems.push({ id: toAnchor(block.h2), text: block.h2, level: 2 });
+    } else if (typeof block === "object" && "h3" in block) {
+      tocItems.push({ id: toAnchor(block.h3), text: block.h3, level: 3 });
+    }
+  }
 
   const faq = getFaq(post.slug);
   const faqJsonLd = faq
@@ -188,38 +210,149 @@ export default function BlogPostPage({ params }: Props) {
       {howtoJsonLd && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howtoJsonLd) }} />
       )}
-      <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-10">
-          <a
-            href="/blog"
-            className="text-sm text-text/40 hover:text-accent transition-colors mb-6 inline-block"
-          >
-            &larr; Все статьи
-          </a>
-          <h1 className="text-3xl md:text-4xl font-extrabold leading-tight mb-4">
-            {post.title}
-          </h1>
-          <div className="flex items-center gap-3 text-sm text-text/40">
-            <time dateTime={post.date}>{formatDate(post.date)}</time>
-            <span className="w-1 h-1 bg-text/15 rounded-full" />
-            <span>{post.readTime}</span>
-          </div>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <a
+          href="/blog"
+          className="text-sm text-text/40 hover:text-accent transition-colors mb-6 inline-block"
+        >
+          &larr; Все статьи
+        </a>
+
+        <div className="lg:grid lg:grid-cols-[1fr_16rem] lg:gap-10">
+          <article className="min-w-0 max-w-3xl">
+            {/* Header */}
+            <div className="mb-8">
+              <h1 className="text-3xl md:text-4xl font-extrabold leading-tight mb-5">
+                {post.title}
+              </h1>
+
+              {/* Author + meta */}
+              <div className="flex flex-wrap items-center gap-3 text-sm text-text/50 mb-2">
+                <a
+                  href={`/authors/${author.slug}`}
+                  className="flex items-center gap-2 font-semibold text-text/70 hover:text-accent transition-colors"
+                >
+                  <span className="w-7 h-7 rounded-full bg-gradient-to-br from-accent to-teal text-white font-bold flex items-center justify-center text-[11px]">
+                    {author.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
+                  </span>
+                  <span>{author.name}</span>
+                </a>
+                <span className="w-1 h-1 bg-text/15 rounded-full" aria-hidden="true" />
+                <time dateTime={post.date}>Опубликовано {formatDate(post.date)}</time>
+                {post.dateModified && post.dateModified !== post.date && (
+                  <>
+                    <span className="w-1 h-1 bg-text/15 rounded-full" aria-hidden="true" />
+                    <time dateTime={post.dateModified} className="text-accent/70">
+                      Обновлено {formatDate(post.dateModified)}
+                    </time>
+                  </>
+                )}
+                <span className="w-1 h-1 bg-text/15 rounded-full" aria-hidden="true" />
+                <span>{post.readTime}</span>
+              </div>
+            </div>
+
+            {/* Mobile TOC */}
+            <div className="lg:hidden">
+              <TableOfContents items={tocItems} />
+            </div>
+
+            {/* Content */}
+            <div className="space-y-6">
+              {post.content.map((block, i) => {
+                if (typeof block === "object" && "h2" in block) {
+                  return (
+                    <h2
+                      key={i}
+                      id={toAnchor(block.h2)}
+                      className="text-xl md:text-2xl font-extrabold mt-10 mb-2 scroll-mt-28"
+                    >
+                      {block.h2}
+                    </h2>
+                  );
+                }
+                if (typeof block === "object" && "h3" in block) {
+                  return (
+                    <h3
+                      key={i}
+                      id={toAnchor(block.h3)}
+                      className="text-lg md:text-xl font-bold mt-6 mb-2 scroll-mt-28"
+                    >
+                      {block.h3}
+                    </h3>
+                  );
+                }
+                if (typeof block === "object" && "callout" in block) {
+                  const c = block.callout;
+                  return (
+                    <Callout key={i} variant={c.variant} title={c.title}>
+                      <span dangerouslySetInnerHTML={{ __html: c.body }} />
+                    </Callout>
+                  );
+                }
+                if (typeof block === "object" && "quote" in block) {
+                  return (
+                    <Quote
+                      key={i}
+                      text={block.quote.text}
+                      author={block.quote.author}
+                      role={block.quote.role}
+                      url={block.quote.url}
+                      accent={block.quote.accent}
+                    />
+                  );
+                }
+                if (typeof block === "object" && "stats" in block) {
+                  return (
+                    <StatBlock
+                      key={i}
+                      stats={block.stats.items}
+                      source={block.stats.source}
+                      sourceUrl={block.stats.sourceUrl}
+                    />
+                  );
+                }
+                if (typeof block === "object" && "comparison" in block) {
+                  return (
+                    <ComparisonTable
+                      key={i}
+                      columns={block.comparison.columns}
+                      rows={block.comparison.rows.map((r) => ({
+                        criterion: r.criterion,
+                        values: r.values,
+                        highlight: r.highlight,
+                      }))}
+                      caption={block.comparison.caption}
+                      footnote={block.comparison.footnote}
+                    />
+                  );
+                }
+                if (typeof block === "object" && "code" in block) {
+                  return (
+                    <pre
+                      key={i}
+                      className="my-4 bg-text/[0.05] border border-text/10 rounded-xl p-4 overflow-x-auto text-sm"
+                    >
+                      <code>{block.code.content}</code>
+                    </pre>
+                  );
+                }
+                return (
+                  <p key={i} className="text-text/70 text-[15px] leading-[1.8]">
+                    {autoLink(String(block))}
+                  </p>
+                );
+              })}
+            </div>
+          </article>
+
+          {/* Desktop TOC sidebar */}
+          <aside className="hidden lg:block">
+            <TableOfContents items={tocItems} />
+          </aside>
         </div>
 
-        {/* Content */}
-        <div className="space-y-6">
-          {post.content.map((block, i) => {
-            if (typeof block === "object" && "h2" in block) {
-              return <h2 key={i} className="text-xl md:text-2xl font-extrabold mt-10 mb-2">{block.h2}</h2>;
-            }
-            return (
-              <p key={i} className="text-text/70 text-[15px] leading-[1.8]">
-                {autoLink(String(block))}
-              </p>
-            );
-          })}
-        </div>
+        <div className="max-w-3xl">
 
         {/* CTA */}
         <div className="mt-10 bg-accent/5 border border-accent/10 rounded-2xl p-6 sm:p-8 text-center">
@@ -284,8 +417,10 @@ export default function BlogPostPage({ params }: Props) {
             </div>
           </div>
         )}
-      </article>
+        </div>
+      </div>
       <ChatWidget />
     </div>
   );
 }
+
