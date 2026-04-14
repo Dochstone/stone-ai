@@ -136,6 +136,15 @@ export const COMPARISONS: Comparison[] = [
     verdict: "Grok 3 креативнее и смелее в ответах. GPT-5 точнее и универсальнее. Для творчества — Grok, для работы — GPT.",
     useCases: { model1: ["Креатив", "Юмор", "Нестандартные ответы"], model2: ["Точность", "Универсальность", "Мультимодальность"] },
   },
+  {
+    slug: "sora-2-vs-kling-v2",
+    model1: "sora-2", model2: "kling-v2",
+    title: "Sora 2 vs Kling v2: сравнение видео-нейросетей 2026",
+    description: "Sora 2 Pro от OpenAI против Kling v2.1 Master от Kuaishou. Физика, лица, lip-sync, цена — какую выбрать для генерации видео в 2026?",
+    h1: "Sora 2 vs Kling v2 — какая видео-нейросеть лучше в 2026",
+    verdict: "Sora 2 выигрывает в физике и сложных сценах. Kling v2.1 точнее рисует лица, lip-sync и кинематографичные кадры в 1080p. Для реалистичных съёмочных планов — Sora, для персонажей и влогов — Kling.",
+    useCases: { model1: ["Физика движения", "Сложные сцены", "OpenAI качество"], model2: ["Лица крупным планом", "Lip-sync", "1080p кинематограф"] },
+  },
 ];
 
 // ─── Alternatives ───
@@ -231,6 +240,36 @@ export const ALTERNATIVES: Alternative[] = [
     intro: "Grok от xAI доступен только через подписку X Premium ($16/мес) или SuperGrok ($30/мес). В Stone AI Grok 3 доступен наряду с 64 другими моделями от 590₽/мес — дешевле и функциональнее.",
     reasons: ["Нужна подписка X Premium ($16/мес)", "Привязан к Twitter/X", "Нет генерации видео и 3D", "Ограниченный API", "Недоступен в России без VPN"],
     models: ["gpt-5.1", "claude-opus-4", "gemini-3-pro", "deepseek-r1", "llama-4-maverick", "grok-3"],
+  },
+  {
+    slug: "kandinsky",
+    service: "Kandinsky (Сбер)",
+    title: "Аналог Kandinsky 2026 — лучшие нейросети для картинок на русском",
+    description: "Лучшие аналоги Kandinsky от Сбера 2026: Nano Banana Pro, GPT-5 Image, Midjourney-style генерация. Без VPN, с русскими промптами, оплата картой РФ.",
+    h1: "Аналоги Kandinsky — генерация картинок на русском в 2026",
+    intro: "Kandinsky от Сбера — неплохой старт, но качество отстаёт от мировых моделей, а детализация и текст на картинках слабее. В Stone AI 6 image-моделей включая Nano Banana Pro (4K, фотореализм) и GPT-5 Image — с русскими промптами, без VPN и с оплатой картой РФ.",
+    reasons: ["Среднее качество детализации", "Слабый рендер текста на картинках", "Нет 4K и профессионального фотореализма", "Ограниченный выбор стилей", "Медленная генерация в пиковые часы"],
+    models: ["nano-banana-pro", "nano-banana", "gpt-5-image", "gpt-5-image-mini"],
+  },
+  {
+    slug: "gigachat",
+    service: "GigaChat (Сбер)",
+    title: "Аналог GigaChat 2026 — лучшие нейросети на русском без VPN",
+    description: "Лучшие аналоги GigaChat от Сбера 2026: GPT-5, Claude Opus 4.5, Gemini 3 Pro, DeepSeek. Все работают на русском, без VPN, оплата картой РФ.",
+    h1: "Аналоги GigaChat — 10 лучших AI-моделей на русском в 2026",
+    intro: "GigaChat от Сбера — российский аналог ChatGPT, но качество ответов и возможности мультимодальности заметно отстают от топовых моделей. В Stone AI доступны GPT-5, Claude Opus 4.5, Gemini 3 Pro и 62 других модели — все на русском, без VPN и с оплатой картой РФ.",
+    reasons: ["Уступает GPT-5 и Claude по качеству ответов", "Ограниченная мультимодальность", "Нет генерации видео и 3D", "Закрытая экосистема Сбера", "Нет гибкого выбора модели под задачу"],
+    models: ["gpt-5.1", "claude-opus-4.5", "gemini-3-pro", "deepseek-r1", "claude-sonnet-4.5", "gpt-4o-mini"],
+  },
+  {
+    slug: "yandexgpt",
+    service: "YandexGPT (Алиса)",
+    title: "Аналог YandexGPT 2026 — нейросети на русском лучше Алисы",
+    description: "Лучшие аналоги YandexGPT и Алисы AI 2026: GPT-5, Claude Opus 4.5, Gemini 3 Pro, DeepSeek R1. На русском, без VPN, оплата картой РФ.",
+    h1: "Аналоги YandexGPT — лучше Алисы AI в 2026",
+    intro: "YandexGPT (Алиса AI Pro) удобен внутри экосистемы Яндекса, но по качеству и глубине ответов уступает мировым моделям. В Stone AI доступны GPT-5, Claude Opus 4.5, Gemini 3 Pro, DeepSeek R1 — все на русском, без VPN, без привязки к экосистеме Яндекса.",
+    reasons: ["Уступает GPT-5 и Claude по качеству", "Привязка к экосистеме Яндекса", "Ограниченная мультимодальность", "Нет генерации видео и 3D", "Нет гибкого выбора модели"],
+    models: ["gpt-5.1", "claude-opus-4.5", "gemini-3-pro", "deepseek-r1", "claude-sonnet-4.5", "llama-4-maverick"],
   },
 ];
 
