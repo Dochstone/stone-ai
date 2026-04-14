@@ -20,7 +20,7 @@ interface Props {
   visualHidden?: boolean;
 }
 
-export default function Breadcrumbs({ items, visualHidden = false }: Props) {
+export default function Breadcrumbs({ items, visualHidden = true }: Props) {
   const all = [{ label: "Главная", href: "/" }, ...items];
 
   return (
