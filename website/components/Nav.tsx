@@ -67,7 +67,7 @@ export default function Nav() {
 
         {/* Desktop nav — md and up */}
         <div className="hidden md:flex items-center gap-4 lg:gap-6">
-          <a href="/" className="text-text/90 hover:text-accent font-medium text-sm transition-colors">
+          <a href="/" className="text-text/70 hover:text-text font-medium text-sm transition-colors">
             Главная
           </a>
           {/* Tools dropdown */}
@@ -76,7 +76,7 @@ export default function Nav() {
             onMouseEnter={() => setToolsOpen(true)}
             onMouseLeave={() => setToolsOpen(false)}
           >
-            <button className="text-text/90 hover:text-accent font-medium text-sm transition-colors flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-accent/30 rounded-lg px-1 -mx-1" aria-haspopup="menu" aria-expanded={toolsOpen}>
+            <button className="text-text/70 hover:text-text font-medium text-sm transition-colors flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-accent/30 rounded-lg px-1 -mx-1" aria-haspopup="menu" aria-expanded={toolsOpen}>
               Инструменты
               <svg className={`w-3.5 h-3.5 transition-transform ${toolsOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -99,22 +99,22 @@ export default function Nav() {
             )}
           </div>
 
-          <a href="/models" className="text-text/90 hover:text-accent font-medium text-sm transition-colors">
+          <a href="/models" className="text-text/70 hover:text-text font-medium text-sm transition-colors">
             Модели
           </a>
-          <a href="/pricing" className="text-text/90 hover:text-accent font-medium text-sm transition-colors">
+          <a href="/pricing" className="text-text/70 hover:text-text font-medium text-sm transition-colors">
             Цены
           </a>
-          <a href="/for/marketer" className="hidden lg:block text-text/90 hover:text-accent font-medium text-sm transition-colors">
+          <a href="/for/marketer" className="hidden lg:block text-text/70 hover:text-text font-medium text-sm transition-colors">
             Решения
           </a>
-          <a href="/blog" className="hidden lg:block text-text/90 hover:text-accent font-medium text-sm transition-colors">
+          <a href="/blog" className="hidden lg:block text-text/70 hover:text-text font-medium text-sm transition-colors">
             Блог
           </a>
-          <a href="/#faq" className="hidden lg:block text-text/90 hover:text-accent font-medium text-sm transition-colors">
+          <a href="/#faq" className="hidden lg:block text-text/70 hover:text-text font-medium text-sm transition-colors">
             FAQ
           </a>
-          <a href="/docs" className="hidden lg:block text-text/90 hover:text-accent font-medium text-sm transition-colors">
+          <a href="/docs" className="hidden lg:block text-text/70 hover:text-text font-medium text-sm transition-colors">
             API
           </a>
         </div>
@@ -192,7 +192,7 @@ export default function Nav() {
             {/* Основные инструменты */}
             <p className="text-xs text-text/30 font-semibold uppercase tracking-wider px-2 pt-1 pb-1">Инструменты</p>
             {tools.slice(0, 3).map((t) => (
-              <a key={t.href} href={t.href} onClick={() => setMenuOpen(false)} className="text-text/90 hover:text-accent font-medium py-2.5 px-2 min-h-[44px] flex items-center">
+              <a key={t.href} href={t.href} onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
                 {t.label}
               </a>
             ))}
@@ -207,22 +207,22 @@ export default function Nav() {
               </svg>
             </button>
             {toolsOpen && tools.slice(3).map((t) => (
-              <a key={t.href} href={t.href} onClick={() => setMenuOpen(false)} className="text-text/90 hover:text-accent font-medium py-2.5 px-2 pl-4 min-h-[44px] flex items-center">
+              <a key={t.href} href={t.href} onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 pl-4 min-h-[44px] flex items-center">
                 {t.label}
               </a>
             ))}
 
             <div className="border-t border-text/5 my-2" />
-            <a href="/models" onClick={() => setMenuOpen(false)} className="text-text/90 hover:text-accent font-medium py-2.5 px-2 min-h-[44px] flex items-center">
+            <a href="/models" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
               Модели
             </a>
-            <a href="/pricing" onClick={() => setMenuOpen(false)} className="text-text/90 hover:text-accent font-medium py-2.5 px-2 min-h-[44px] flex items-center">
+            <a href="/pricing" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
               Тарифы
             </a>
-            <a href="/blog" onClick={() => setMenuOpen(false)} className="text-text/90 hover:text-accent font-medium py-2.5 px-2 min-h-[44px] flex items-center">
+            <a href="/blog" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
               Блог
             </a>
-            <a href="/docs" onClick={() => setMenuOpen(false)} className="text-text/90 hover:text-accent font-medium py-2.5 px-2 min-h-[44px] flex items-center">
+            <a href="/docs" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
               API Docs
             </a>
 
@@ -243,7 +243,7 @@ export default function Nav() {
                   Панель управления
                 </a>
                 <a href="/profile" onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-3 py-2.5 px-2 min-h-[44px] text-text/90 hover:text-accent font-medium">
+                  className="flex items-center gap-3 py-2.5 px-2 min-h-[44px] text-text/70 hover:text-text font-medium">
                   {avatar ? (
                     <img src={avatar} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
                   ) : (
