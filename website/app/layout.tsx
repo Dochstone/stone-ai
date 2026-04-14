@@ -83,6 +83,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
     languages: { "ru": "/" },
+    types: {
+      "text/markdown": "/llms.txt",
+    },
   },
   manifest: "/manifest.json",
   appleWebApp: {

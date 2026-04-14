@@ -1,28 +1,150 @@
 # Stone AI
-> AI-студия нового поколения. 65+ нейросетей в одном интерфейсе.
 
-Stone AI — российская платформа для работы с искусственным интеллектом. Доступ к 65+ AI моделям от OpenAI, Anthropic, Google, Meta, xAI, DeepSeek и других провайдеров через единый интерфейс. Чат, генерация изображений, видео, 3D, SEO-инструменты, AI-агент, презентации.
+> Российская платформа-агрегатор для работы с 65+ нейросетями в одном интерфейсе. Доступ без VPN, оплата в рублях через СБП. Платформа объединяет модели OpenAI, Anthropic, Google, Meta, xAI, DeepSeek, Midjourney, Kling, Suno и других провайдеров.
 
-## Ссылки
+Stone AI решает проблему фрагментации AI-стека российского пользователя: вместо 5-6 отдельных подписок на ChatGPT Plus, Claude Pro, Midjourney, Runway, Perplexity (совокупно ~8 900₽/мес + VPN + иностранные карты) — одна подписка от 590₽/мес к полному стеку моделей. На платформе 15 305 активных пользователей (на апрель 2026).
 
-- [Главная](https://stoneai.ru/)
-- [Каталог моделей](https://stoneai.ru/models)
-- [Тарифы](https://stoneai.ru/pricing)
-- [Блог](https://stoneai.ru/blog)
-- [Документация](https://stoneai.ru/docs)
-- [AI Чат](https://stoneai.ru/chat)
-- [Генерация изображений](https://stoneai.ru/images)
-- [Генерация видео](https://stoneai.ru/video)
+Ключевые отличия:
+- 65+ нейросетей в одном окне: текст, изображения, видео, 3D, аудио, поиск
+- Оплата российской картой через СБП (Сбербанк, Тинькофф, Альфа) или Telegram Stars
+- Единая история чатов, общая галерея генераций
+- Веб-интерфейс (stoneai.ru) + Telegram-бот
+- Uptime 99.5% за последний год
+- Поддержка в Telegram-чате с ответом в пределах часа
+
+## Основные страницы
+
+- [Главная](https://stoneai.ru/): обзор платформы, демо, тарифы, отзывы
+- [Каталог моделей](https://stoneai.ru/models): 65+ нейросетей с фильтрами по компании/категории/тарифу
+- [Тарифы](https://stoneai.ru/pricing): Free, Start 590₽, Pro 1290₽, Elite 2990₽
+- [Блог](https://stoneai.ru/blog): 25+ статей про AI-модели, сравнения, гайды
+- [О нас](https://stoneai.ru/about): команда, миссия, цифры
+- [Документация](https://stoneai.ru/docs): API, интеграции, разработчикам
+
+## Модели по категориям
+
+### Чат и текстовые модели (~25)
+- [GPT-5.4](https://stoneai.ru/models/gpt-5.4) — флагман OpenAI с computer-use
+- [GPT-5.1](https://stoneai.ru/models/gpt-5.1) — стандартная GPT-5
+- [GPT-4.1](https://stoneai.ru/models/gpt-4.1) — быстрая и дешёвая
+- [GPT-4o mini](https://stoneai.ru/models/gpt-4o-mini) — в бесплатном тарифе
+- [Claude Opus 4.5](https://stoneai.ru/models/claude-opus-4.5) — для сложных задач и кода
+- [Claude Opus 4](https://stoneai.ru/models/claude-opus-4)
+- [Claude Sonnet 4.5](https://stoneai.ru/models/claude-sonnet-4.5) — основная рабочая
+- [Claude Haiku 4.5](https://stoneai.ru/models/claude-haiku-4.5) — быстрая
+- [Gemini 2.5 Pro](https://stoneai.ru/models/gemini-2.5-flash) — 1M контекст
+- [Gemini 3 Pro](https://stoneai.ru/models/gemini-3-pro) — новейшая Google
+- [DeepSeek V3](https://stoneai.ru/models/deepseek-v3) — открытый аналог GPT-4
+- [DeepSeek R1](https://stoneai.ru/models/deepseek-r1) — reasoning-модель
+- [Kimi K2.5](https://stoneai.ru/models/kimi-k2.5) — длинный контекст
+- [Qwen 3 235B](https://stoneai.ru/models/qwen-3-235b) — открытая от Alibaba
+- [Llama 4 Maverick](https://stoneai.ru/models/llama-4-maverick) — 400B открытая Meta
+- [Grok 3](https://stoneai.ru/models/grok-3) — от xAI
+- [Mistral Large 25](https://stoneai.ru/models/mistral-large-25) — французская
+
+### Изображения (~12)
+- [Midjourney V7](https://stoneai.ru/models/midjourney-v7) — топ для арта
+- [Nano Banana](https://stoneai.ru/models/nano-banana) — Gemini быстрая
+- [Nano Banana Pro](https://stoneai.ru/models/nano-banana-pro) — улучшенная
+- [Flux 1.1 Pro](https://stoneai.ru/models/flux-schnell) — реализм
+- [GPT-5 Image](https://stoneai.ru/models/gpt-5-image) — от OpenAI
+- [Stable Diffusion XL](https://stoneai.ru/models/stable-diffusion-xl) — открытая
+
+### Видео (~10)
+- [Sora 2](https://stoneai.ru/models/sora-2) — от OpenAI
+- [Kling v2](https://stoneai.ru/models/kling-v2) — китайский лидер
+- [Pika 2](https://stoneai.ru/models/pika-2) — динамичное видео
+- [Luma Ray2](https://stoneai.ru/models/luma-ray2) — кинематографичное
+- [LTX Video](https://stoneai.ru/models/ltx-video) — быстрое
+- [Veo 3](https://stoneai.ru/models/veo-3) — от Google
+- [Hunyuan](https://stoneai.ru/models/hunyuan) — открытое
+- [Pixverse V5](https://stoneai.ru/models/pixverse-v5)
+- [Wan 2](https://stoneai.ru/models/wan-2)
+
+### 3D и аудио
+- [Tripo v2.5](https://stoneai.ru/models/tripo-v2.5) — text/image-to-3D
+- [TripoSR](https://stoneai.ru/models/triposr) — быстрое 3D
+
+### Поиск
+- [Perplexity Sonar](https://stoneai.ru/models/perplexity-sonar) — базовый
+- [Perplexity Sonar Pro](https://stoneai.ru/models/perplexity-sonar-pro)
+
+## Альтернативы популярным сервисам
+
+- [Аналог ChatGPT в России](https://stoneai.ru/alternatives/chatgpt)
+- [Аналог Claude](https://stoneai.ru/alternatives/claude)
+- [Аналог Gemini](https://stoneai.ru/alternatives/gemini)
+- [Аналог DeepSeek](https://stoneai.ru/alternatives/deepseek)
+- [Аналог Grok](https://stoneai.ru/alternatives/grok)
+- [Аналог Midjourney](https://stoneai.ru/alternatives/midjourney)
+- [Аналог Perplexity](https://stoneai.ru/alternatives/perplexity)
+- [Аналог Runway](https://stoneai.ru/alternatives/runway)
+- [Аналог Suno](https://stoneai.ru/alternatives/suno)
+
+## Решения по профессиям
+
+- [AI для маркетолога](https://stoneai.ru/for/marketer) — контент, аналитика, реклама
+- [AI для SMM-специалиста](https://stoneai.ru/for/smm) — посты, визуалы, рилсы
+- [AI для копирайтера](https://stoneai.ru/for/copywriter) — тексты, заголовки, email
+- [AI для разработчика](https://stoneai.ru/for/developer) — код, ревью, документация
+- [AI для дизайнера](https://stoneai.ru/for/designer) — визуалы, мокапы, концепт-арт
+- [AI для бизнеса](https://stoneai.ru/for/business) — автоматизация, аналитика
+- [AI для учителя](https://stoneai.ru/for/teacher) — планы уроков, материалы
+- [AI для студента](https://stoneai.ru/for/student) — курсовые, рефераты
+- [AI для фрилансера](https://stoneai.ru/for/freelancer) — ускорение работы
+
+## Инструменты-хабы
+
+- [Генерация изображений](https://stoneai.ru/tools/image-generation)
+- [Генерация видео](https://stoneai.ru/tools/video-generation)
+- [Генерация текстов](https://stoneai.ru/tools/text-generation)
+- [Генерация кода](https://stoneai.ru/tools/code-generation)
+
+## Блог (основные статьи)
+
+- [Лучшие нейросети 2026 — ТОП-15](https://stoneai.ru/blog/best-neural-networks-2026)
+- [Гайд по 65+ нейросетям: какую выбрать](https://stoneai.ru/blog/guide-50-ai-models)
+- [Как пользоваться ChatGPT без VPN в России](https://stoneai.ru/blog/chatgpt-bez-vpn-rossiya)
+- [Как оплатить ChatGPT из России в 2026](https://stoneai.ru/blog/kak-oplatit-chatgpt-iz-rossii-2026)
+- [4 способа оплатить AI в России](https://stoneai.ru/blog/4-ways-to-pay-ai-russia)
+- [GPT-5 vs Claude Sonnet vs Gemini](https://stoneai.ru/blog/gpt5-vs-claude-sonnet-vs-gemini)
+- [Claude Opus vs GPT-5](https://stoneai.ru/blog/claude-opus-vs-gpt-5)
+- [DeepSeek R1 — обзор](https://stoneai.ru/blog/deepseek-r1-obzor)
+- [Как использовать Claude в России](https://stoneai.ru/blog/kak-ispolzovat-claude-v-rossii)
+- [Нейросеть для генерации картинок](https://stoneai.ru/blog/nejroset-dlya-generacii-kartinok)
+- [Генерация видео: Sora, Veo, Luma в 2026](https://stoneai.ru/blog/ai-video-generation-2026)
+- [Как написать промпт для нейросети](https://stoneai.ru/blog/kak-napisat-prompt-dlya-nejroseti)
+- [Perplexity — поиск нейросетью вместо Google](https://stoneai.ru/blog/perplexity-poisk-nejrosetyu)
+- [Stone AI vs ChatGPT Plus](https://stoneai.ru/blog/stone-ai-vs-chatgpt-plus)
+
+## Сравнения моделей
+
+- [GPT-5 vs Claude Opus 4](https://stoneai.ru/compare/gpt-5-vs-claude-opus-4)
+- [GPT-5 vs Gemini 2.5 Pro](https://stoneai.ru/compare/gpt-5-vs-gemini-2.5-pro)
+- [Claude Opus vs Gemini 2.5 Pro](https://stoneai.ru/compare/claude-opus-4-vs-gemini-2.5-pro)
+- [DeepSeek V3 vs GPT-5](https://stoneai.ru/compare/deepseek-v3-vs-gpt-5)
+- [Midjourney V7 vs Flux 1.1](https://stoneai.ru/compare/midjourney-v7-vs-flux-1.1)
 
 ## Тарифы
 
-- Pay-per-Use: бесплатно, 10 запросов/день к 8 моделям
-- Start: 390 руб/мес, 20+ моделей, 50 картинок, 15 видео
-- Pro: 890 руб/мес, 65+ нейросетей, 150 картинок, 30 видео
-- Elite: 1990 руб/мес, все модели + API, 300 картинок, 60 видео
+- **Pay-per-Use (бесплатно)**: 10 запросов/день к 8 моделям + 100₽ приветственный бонус
+- **Start (590₽/мес)**: 20+ моделей, 500 запросов, 60 картинок, 15 видео-поинтов
+- **Pro (1 290₽/мес)**: все 65+ моделей, 1 500 быстрых + 112 премиум запросов, 140 картинок, 33 видео-поинта
+- **Elite (2 990₽/мес)**: увеличенные квоты, приоритет, ранний доступ к новым моделям
 
-## Контакты
+Все тарифы без автопродления по умолчанию — разовое списание раз в месяц. Оплата через СБП Сбербанка, Visa/Mastercard российских банков, Telegram Stars.
+
+## Как использовать платформу
+
+1. Регистрация на [stoneai.ru](https://stoneai.ru) или через [Telegram-бота](https://t.me/stonetgbot)
+2. Бесплатно доступны 10 запросов в день + 100₽ на баланс как приветственный бонус
+3. Для доступа ко всем моделям — выбрать подписку на [/pricing](https://stoneai.ru/pricing)
+4. Баланс и подписка сохраняются между веб-версией и Telegram-ботом
+
+## Контакты и поддержка
 
 - Сайт: https://stoneai.ru
-- Telegram: https://t.me/drifttt55bot
-- Поддержка: https://t.me/stoneai_support
+- Telegram-бот: https://t.me/stonetgbot
+- Поддержка: https://t.me/StoneAIsupport
+- Блог: https://stoneai.ru/blog
+- О проекте: https://stoneai.ru/about
