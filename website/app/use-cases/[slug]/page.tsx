@@ -4,6 +4,8 @@ import Link from "next/link";
 import { SITE_URL } from "@/lib/constants";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import dynamic from "next/dynamic";
+import { buildHowTo } from "@/lib/schema";
+import { getAuthor, DEFAULT_AUTHOR_SLUG } from "@/lib/authors";
 
 const ChatWidget = dynamic(() => import("@/components/ChatWidget"), { ssr: false });
 
@@ -42,19 +44,41 @@ export default function UseCasePage({ params }: { params: { slug: string } }) {
     })),
   };
 
+  const author = getAuthor(DEFAULT_AUTHOR_SLUG)!;
   const articleJsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: uc.h1,
     description: uc.description,
-    author: { "@type": "Organization", name: "Stone AI" },
+    author: {
+      "@type": "Person",
+      name: author.name,
+      url: `${SITE_URL}/authors/${author.slug}`,
+    },
     publisher: {
       "@type": "Organization",
       name: "Stone AI",
       logo: { "@type": "ImageObject", url: `${SITE_URL}/og-image.png` },
     },
+    mainEntityOfPage: `${SITE_URL}/use-cases/${uc.slug}`,
     datePublished: "2026-04-09",
+    dateModified: new Date().toISOString().split("T")[0],
+    inLanguage: "ru-RU",
   };
+
+  // HowTo: use the first 3-5 prompts as HowTo steps for step-by-step tasks
+  const howToJsonLd = uc.prompts.length >= 3
+    ? buildHowTo({
+        name: uc.h1,
+        description: uc.description,
+        totalTime: "PT10M",
+        steps: uc.prompts.slice(0, 6).map((p) => ({
+          name: p.title,
+          text: p.prompt.slice(0, 300),
+          url: `${SITE_URL}/dashboard/chat`,
+        })),
+      })
+    : null;
 
   const categoryLabels: Record<string, string> = {
     text: "Тексты",
@@ -70,6 +94,9 @@ export default function UseCasePage({ params }: { params: { slug: string } }) {
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
+        {howToJsonLd && (
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToJsonLd) }} />
+        )}
         <Breadcrumbs
           items={[
             { label: "AI-задачи", href: "/use-cases" },

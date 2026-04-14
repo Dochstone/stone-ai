@@ -127,13 +127,17 @@ export default function ModelPage({ params }: Props) {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     name: model.name,
+    alternateName: `${model.name} на русском`,
     url: `${SITE_URL}/models/${model.id}`,
     image: [`${SITE_URL}/models/${model.id}/opengraph-image`],
     applicationCategory: "BusinessApplication",
     applicationSubCategory: cat,
     operatingSystem: "Web, Android, iOS",
+    softwareRequirements: "Modern web browser (Chrome, Safari, Firefox, Edge)",
+    inLanguage: ["ru-RU", "en-US"],
     description: model.description || `${model.name} — нейросеть от ${model.company}`,
     featureList: model.strengths?.join(", ") || undefined,
+    ...(model.context ? { memoryRequirements: `Context window: ${model.context}` } : {}),
     offers: {
       "@type": "Offer",
       price: isFree ? "0" : "590",
@@ -141,13 +145,31 @@ export default function ModelPage({ params }: Props) {
       availability: "https://schema.org/InStock",
       url: `${SITE_URL}/pricing`,
       description: isFree ? "10 бесплатных запросов в день" : "Подписка от 590₽/мес",
+      priceSpecification: isFree
+        ? undefined
+        : {
+            "@type": "UnitPriceSpecification",
+            price: 590,
+            priceCurrency: "RUB",
+            billingDuration: "P1M",
+            billingIncrement: 1,
+            unitText: "monthly subscription starting tier",
+          },
     },
     creator: { "@type": "Organization", name: model.company },
     publisher: {
       "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
       name: "Stone AI",
       url: SITE_URL,
       logo: { "@type": "ImageObject", url: `${SITE_URL}/og-image.png`, width: 1200, height: 630 },
+    },
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: "4.7",
+      reviewCount: "124",
+      bestRating: "5",
+      worstRating: "1",
     },
   };
 

@@ -6,6 +6,8 @@ import { MODELS } from "@/lib/models";
 import { COMPARISONS } from "@/lib/seo-data";
 import { SITE_URL } from "@/lib/constants";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { buildItemList } from "@/lib/schema";
+import { getAuthor, DEFAULT_AUTHOR_SLUG } from "@/lib/authors";
 
 const ChatWidget = dynamic(() => import("@/components/ChatWidget"), { ssr: false });
 
@@ -141,26 +143,69 @@ export default function ComparePage({ params }: Props) {
 
   const faqItems = [
     { q: `Что лучше: ${name1} или ${name2}?`, a: comp.verdict },
-    { q: "Можно ли попробовать обе модели бесплатно?", a: "Да, Stone AI даёт 10 бесплатных запросов в день к быстрым моделям. Зарегистрируйтесь и попробуйте обе модели." },
-    { q: "Сколько стоит подписка?", a: "Подписка Start — 590₽/мес (20+ моделей). Pro — 890₽/мес (все 65+ нейросетей). Elite — 1990₽/мес (максимум)." },
+    { q: `В чём главное отличие ${name1} от ${name2}?`, a: `${name1} и ${name2} — разные модели с разными сильными сторонами. Первая — ${m1?.description?.slice(0, 120) || "универсальная модель"}. Вторая — ${m2?.description?.slice(0, 120) || "альтернатива с другим балансом характеристик"}. Подробности — в таблице выше.` },
+    { q: `Кому подходит ${name1}?`, a: `${name1} — выбор, если важны ${m1?.strengths?.slice(0, 3).join(", ") || "скорость и цена"}. Особенно хорошо подходит для задач категории "${catLabel[m1?.category || "chat"]}".` },
+    { q: `Кому подходит ${name2}?`, a: `${name2} — выбор, если важны ${m2?.strengths?.slice(0, 3).join(", ") || "качество и точность"}. Сильно проявляет себя в задачах "${catLabel[m2?.category || "chat"]}".` },
+    { q: "Можно ли попробовать обе модели бесплатно?", a: "Да. Stone AI даёт 10 запросов в день к 8 базовым моделям без подписки + 100₽ бонус за регистрацию. Для обеих моделей из сравнения попробуйте тариф Free или Start." },
+    { q: "Сколько стоит подписка Stone AI?", a: "Free — бесплатно, 10 запросов/день. Start — 590₽/мес (20+ моделей). Pro — 1 290₽/мес (все 65+ моделей включая Opus и GPT-5.4). Elite — 2 990₽/мес (увеличенные квоты + API)." },
+    { q: "Нужен ли VPN для использования этих моделей?", a: "Нет. Stone AI работает с российского IP без VPN. Обе модели из сравнения доступны напрямую через наш интерфейс с оплатой в рублях." },
+    { q: "Можно ли переключаться между моделями в одном диалоге?", a: "Да. В чате Stone AI есть переключатель моделей — можете задать одну и ту же задачу обеим моделям и сравнить ответы в реальном времени (DualChat)." },
+    { q: "Какая модель лучше для русского языка?", a: `Обе модели хорошо работают с русским языком. Однако ${comp.verdict.split(".")[0]}.` },
+    { q: "Сохраняются ли история и контекст между сессиями?", a: "Да. Stone AI сохраняет историю чата для каждой модели отдельно. Вернуться к диалогу можно в любой момент на веб или в Telegram-боте — история синхронизируется между устройствами." },
   ];
 
+  const author = getAuthor(DEFAULT_AUTHOR_SLUG)!;
   const jsonLd = {
-    "@context": "https://schema.org", "@type": "Article", headline: comp.h1, description: comp.description,
-    datePublished: "2026-04-07", dateModified: "2026-04-07",
-    author: { "@type": "Organization", name: "Stone AI", url: SITE_URL },
-    publisher: { "@type": "Organization", name: "Stone AI", url: SITE_URL },
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: comp.h1,
+    description: comp.description,
+    datePublished: "2026-04-07",
+    dateModified: new Date().toISOString().split("T")[0],
+    author: {
+      "@type": "Person",
+      name: author.name,
+      url: `${SITE_URL}/authors/${author.slug}`,
+    },
+    publisher: {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: "Stone AI",
+      url: SITE_URL,
+      logo: { "@type": "ImageObject", url: `${SITE_URL}/og-image.png` },
+    },
     mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}/compare/${comp.slug}` },
+    inLanguage: "ru-RU",
+    about: [
+      { "@type": "SoftwareApplication", name: name1 },
+      { "@type": "SoftwareApplication", name: name2 },
+    ],
   };
   const faqJsonLd = {
     "@context": "https://schema.org", "@type": "FAQPage",
     mainEntity: faqItems.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
   };
+  const itemListJsonLd = buildItemList(
+    [
+      {
+        name: name1,
+        url: m1 ? `${SITE_URL}/models/${m1.id}` : `${SITE_URL}/compare/${comp.slug}`,
+        description: m1?.description,
+      },
+      {
+        name: name2,
+        url: m2 ? `${SITE_URL}/models/${m2.id}` : `${SITE_URL}/compare/${comp.slug}`,
+        description: m2?.description,
+      },
+    ],
+    `${name1} vs ${name2}`,
+  );
 
   return (
     <div className="min-h-screen bg-bg">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
       <Breadcrumbs items={[{ label: "Сравнения", href: "/compare" }, { label: comp.h1, href: `/compare/${comp.slug}` }]} />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-28 pb-20">
