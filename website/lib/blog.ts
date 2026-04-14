@@ -45,6 +45,7 @@ export interface BlogPost {
 export const POSTS: BlogPost[] = [
   {
     slug: "how-to-create-ai-bot",
+    author: "dochstone",
     title: "Как создать AI-бота за 5 минут в Stone AI",
     description:
       "Пошаговый гайд: создайте персонального AI-бота с собственными инструкциями, выберите модель и поделитесь с другими.",
@@ -75,6 +76,7 @@ export const POSTS: BlogPost[] = [
   },
   {
     slug: "gpt5-vs-claude-sonnet-vs-gemini",
+    author: "ai-editor",
     title: "GPT-5 vs Claude Sonnet 4 vs Gemini 2.5: какую модель выбрать в 2026",
     description:
       "Детальное сравнение трёх флагманских моделей по качеству текста, кода, скорости и цене. Тесты на реальных задачах.",
@@ -108,6 +110,7 @@ export const POSTS: BlogPost[] = [
   },
   {
     slug: "stone-ai-vs-chatgpt-plus",
+    author: "dochstone",
     title: "Stone AI vs ChatGPT Plus: почему подписка от 590₽ выгоднее",
     description:
       "Разбираем, почему подписка Stone AI от 590₽/мес выгоднее ChatGPT Plus за $20/мес. 4 тарифа, 65+ нейросетей, оплата в рублях.",
@@ -138,6 +141,7 @@ export const POSTS: BlogPost[] = [
   },
   {
     slug: "guide-50-ai-models",
+    author: "ai-editor",
     title: "Гайд по 65+ нейросетям: какую выбрать под вашу задачу",
     description:
       "Подробный разбор всех моделей Stone AI: от бесплатных до премиум. Какая модель лучше для текстов, кода, картинок и поиска.",
@@ -171,6 +175,7 @@ export const POSTS: BlogPost[] = [
   },
   {
     slug: "4-ways-to-pay-ai-russia",
+    author: "dochstone",
     title: "3 способа оплатить AI в рублях",
     description:
       "Telegram Stars, криптовалюта и TON — как оплатить подписку Stone AI в рублях.",
@@ -200,6 +205,7 @@ export const POSTS: BlogPost[] = [
   },
   {
     slug: "chatgpt-bez-vpn-rossiya",
+    author: "ai-editor",
     title: "Альтернатива ChatGPT — как пользоваться нейросетями в 2026 году",
     description: "Как удобно пользоваться GPT-5 и другими нейросетями с оплатой в рублях. 3 рабочих способа в 2026 году.",
     date: "2026-03-18",
@@ -220,6 +226,7 @@ export const POSTS: BlogPost[] = [
   },
   {
     slug: "nejroset-dlya-generacii-kartinok",
+    author: "marketing-expert",
     title: "Нейросеть для генерации картинок бесплатно — топ-6 моделей 2026",
     description: "Обзор лучших нейросетей для генерации картинок: Flux, GPT-5 Image, SDXL, Nano Banana Pro. Примеры и цены.",
     date: "2026-03-17",
@@ -242,6 +249,7 @@ export const POSTS: BlogPost[] = [
   },
   {
     slug: "claude-opus-vs-gpt-5",
+    author: "ai-editor",
     title: "Claude Opus 4 vs GPT-5.1 — какая нейросеть лучше в 2026",
     description: "Детальное сравнение двух топовых нейросетей: Claude Opus 4 и GPT-5.1. Тесты, цены, для каких задач подходят.",
     date: "2026-03-16",
@@ -264,6 +272,7 @@ export const POSTS: BlogPost[] = [
   },
   {
     slug: "kak-napisat-prompt-dlya-nejroseti",
+    author: "marketing-expert",
     title: "Как написать промпт для нейросети — гайд с примерами",
     description: "Пошаговый гайд по написанию промптов для нейросетей. 20 примеров для текста, картинок, кода и анализа.",
     date: "2026-03-14",
@@ -288,6 +297,7 @@ export const POSTS: BlogPost[] = [
   },
   {
     slug: "deepseek-r1-obzor",
+    author: "ai-editor",
     title: "DeepSeek R1 — обзор reasoning-нейросети из Китая",
     description: "Обзор нейросети DeepSeek R1: как работает reasoning, для каких задач подходит, сравнение с o3 и Claude.",
     date: "2026-03-13",
@@ -306,6 +316,7 @@ export const POSTS: BlogPost[] = [
   },
   {
     slug: "ii-dlya-biznesa-v-rossii",
+    author: "dochstone",
     title: "ИИ для бизнеса в России — 7 способов применения нейросетей",
     description: "Как использовать нейросети для бизнеса: маркетинг, продажи, HR, юриспруденция, аналитика. Конкретные примеры и ROI.",
     date: "2026-03-11",
@@ -332,6 +343,7 @@ export const POSTS: BlogPost[] = [
   },
   {
     slug: "perplexity-poisk-nejrosetyu",
+    author: "ai-editor",
     title: "Perplexity — поиск нейросетью вместо Google",
     description: "Как Perplexity ищет в интернете с помощью ИИ. Deep Research, источники, сравнение с Google. Доступно всем.",
     date: "2026-03-09",
@@ -352,6 +364,7 @@ export const POSTS: BlogPost[] = [
 
   {
     slug: "kak-oplatit-chatgpt-iz-rossii-2026",
+    author: "dochstone",
     title: "Как оплатить ChatGPT из России в 2026 году — 5 способов",
     description: "Все способы оплатить ChatGPT Plus из России: через Stone AI от 590₽, криптовалюта, иностранные карты. Пошаговая инструкция.",
     date: "2026-03-24",
@@ -386,6 +399,7 @@ export const POSTS: BlogPost[] = [
 
   {
     slug: "chatgpt-plus-vs-analogi-rossiya",
+    author: "dochstone",
     title: "ChatGPT Plus vs аналоги в России — сравнение 7 сервисов",
     description: "Сравниваем ChatGPT Plus, Claude Pro, BotHub, MashaGPT, Stone AI и другие. Цены, модели, качество. Кто лучше для русскоязычного пользователя?",
     date: "2026-03-24",
@@ -420,6 +434,7 @@ export const POSTS: BlogPost[] = [
 
   {
     slug: "luchshie-nejroseti-2026-rejting",
+    author: "ai-editor",
     title: "Лучшие нейросети 2026 года — рейтинг 15 моделей",
     description: "Рейтинг 15 лучших нейросетей 2026: GPT-5.4, Claude Opus 4, Gemini 2.5 Pro, DeepSeek R1. Сравнение по задачам: тексты, код, картинки.",
     date: "2026-03-25",
@@ -451,6 +466,7 @@ export const POSTS: BlogPost[] = [
 
   {
     slug: "claude-opus-online-na-russkom",
+    author: "ai-editor",
     title: "Claude Opus 4 онлайн на русском — как пользоваться бесплатно",
     description: "Как использовать Claude Opus 4 на русском языке без VPN. Инструкция: Stone AI даёт доступ к Claude Opus с оплатой в рублях от 590₽/мес.",
     date: "2026-03-25",
@@ -479,6 +495,7 @@ export const POSTS: BlogPost[] = [
 
   {
     slug: "gpt-5-besplatno-kak-polzovatsya",
+    author: "ai-editor",
     title: "GPT-5 бесплатно — как пользоваться без оплаты и VPN",
     description: "Как использовать GPT-5 бесплатно в 2026 году. Stone AI даёт доступ к GPT-4o mini бесплатно (10 запросов/день) и GPT-5.4 по подписке от 590₽.",
     date: "2026-03-25",
@@ -503,6 +520,7 @@ export const POSTS: BlogPost[] = [
   },
   {
     slug: "nejroseti-dlya-generacii-video-2026",
+    author: "marketing-expert",
     title: "Нейросети для генерации видео в 2026: полный гайд",
     description:
       "Обзор лучших нейросетей для создания видео из текста: Kling 3.0, Sora 2, Veo 3, Pika 2.0. Как генерировать видео бесплатно в России.",
@@ -528,6 +546,7 @@ export const POSTS: BlogPost[] = [
   },
   {
     slug: "midjourney-analogi-besplatno-rossiya",
+    author: "marketing-expert",
     title: "Аналоги Midjourney бесплатно в России: 6 нейросетей для картинок",
     description:
       "Бесплатные аналоги Midjourney для генерации картинок в России без VPN. Flux, DALL-E, Stable Diffusion и другие нейросети.",
@@ -550,6 +569,7 @@ export const POSTS: BlogPost[] = [
   },
   {
     slug: "kak-ispolzovat-claude-v-rossii",
+    author: "ai-editor",
     title: "Как использовать Claude в России в 2026 году",
     description:
       "Полный гайд по доступу к Claude Opus, Sonnet и Haiku в России без VPN. Бесплатный доступ через Stone AI.",
@@ -705,6 +725,7 @@ export const POSTS: BlogPost[] = [
 
   {
     slug: "chatgpt-bez-vpn-russia",
+    author: "ai-editor",
     title: "Как пользоваться ChatGPT без VPN в России",
     description:
       "Как получить доступ к ChatGPT и GPT-5 в России без VPN. Альтернативы с оплатой в рублях, бесплатный доступ к нейросетям.",
@@ -737,6 +758,7 @@ export const POSTS: BlogPost[] = [
 
   {
     slug: "generate-images-ai-free",
+    author: "marketing-expert",
     title: "Генерация картинок нейросетью бесплатно — гайд 2026",
     description:
       "Как генерировать картинки нейросетью бесплатно в 2026 году. Лучшие модели: Flux, GPT-5 Image, Nano Banana. Примеры промптов и пошаговая инструкция.",
@@ -771,6 +793,7 @@ export const POSTS: BlogPost[] = [
 
   {
     slug: "best-ai-prompts",
+    author: "marketing-expert",
     title: "AI промпты — 50 лучших промптов для работы и учёбы",
     description:
       "50 готовых промптов для нейросетей: маркетинг, программирование, копирайтинг, учёба, анализ данных. Скопируйте и используйте в ChatGPT, Claude, Gemini.",
@@ -805,6 +828,7 @@ export const POSTS: BlogPost[] = [
 
   {
     slug: "ai-video-generation-2026",
+    author: "marketing-expert",
     title: "Генерация видео нейросетью — Sora, Veo 3, Luma в 2026",
     description:
       "Сравнение лучших нейросетей для генерации видео в 2026: Sora 2, Veo 3, Kling 3.0, Luma, Pika. Как создать видео из текста, цены и примеры.",
