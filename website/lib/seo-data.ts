@@ -155,9 +155,9 @@ export const ALTERNATIVES: Alternative[] = [
   {
     slug: "chatgpt",
     service: "ChatGPT",
-    title: "Альтернативы ChatGPT в России 2026 — ТОП-10 нейросетей",
-    description: "Лучшие альтернативы ChatGPT для России. Без VPN, на русском языке, дешевле. Stone AI, Claude, Gemini и другие.",
-    h1: "Альтернативы ChatGPT в России — 10 лучших в 2026",
+    title: "Аналог ChatGPT на русском без VPN 2026 — ТОП-10 нейросетей",
+    description: "Аналоги ChatGPT для России 2026: без VPN, на русском, оплата картой РФ. Stone AI, Claude Opus 4.5, Gemini 3 Pro, DeepSeek и 7 других — сравнение и цены.",
+    h1: "Аналоги ChatGPT на русском без VPN — 10 лучших в 2026",
     intro: "ChatGPT Plus стоит $20/мес (~1900₽) и периодически недоступен из России. Мы собрали лучшие альтернативы которые работают без VPN, поддерживают русский язык и стоят дешевле.",
     reasons: ["Блокировка в России — нужен VPN", "Цена $20/мес — дорого", "Только модели OpenAI — нет выбора", "Нет генерации видео и 3D"],
     models: ["gpt-4o-mini", "claude-sonnet-4", "gemini-2.5-flash", "deepseek-r1", "llama-4-maverick", "grok-3"],
@@ -165,9 +165,9 @@ export const ALTERNATIVES: Alternative[] = [
   {
     slug: "midjourney",
     service: "Midjourney",
-    title: "Альтернативы Midjourney 2026 — бесплатные нейросети для картинок",
-    description: "Лучшие альтернативы Midjourney для генерации изображений. Бесплатные варианты, без Discord, на русском языке.",
-    h1: "Альтернативы Midjourney — генерация картинок без Discord",
+    title: "Аналог Midjourney бесплатно без VPN 2026 — нейросети для картинок",
+    description: "Аналоги Midjourney 2026 бесплатно и без VPN: Nano Banana Pro, Flux, GPT-5 Image. Без Discord, с оплатой картой РФ, на русском. Сравнение и примеры.",
+    h1: "Аналоги Midjourney бесплатно без VPN — нейросети для картинок в 2026",
     intro: "Midjourney требует Discord и стоит от $10/мес. Мы нашли альтернативы которые работают в браузере, поддерживают русские промпты и доступны бесплатно.",
     reasons: ["Нужен Discord", "Платная ($10-60/мес)", "Нет русского интерфейса", "Медленная генерация"],
     models: ["nano-banana", "nano-banana-pro", "gpt-5-image", "gpt-5-image-mini"],
@@ -175,9 +175,9 @@ export const ALTERNATIVES: Alternative[] = [
   {
     slug: "sora",
     service: "Sora (OpenAI)",
-    title: "Альтернативы Sora 2026 — генерация видео нейросетью",
-    description: "Лучшие альтернативы OpenAI Sora для генерации видео. Veo 3, Luma Ray 2, Pika 2 и другие доступные модели.",
-    h1: "Альтернативы Sora — генерация видео AI в 2026",
+    title: "Аналог Sora 2 бесплатно без VPN 2026 — генерация видео нейросетью",
+    description: "Аналоги Sora 2 от OpenAI 2026: Veo 3, Luma Ray 2, Kling 2, Pika 2. Генерация видео нейросетью бесплатно и без VPN, оплата картой РФ.",
+    h1: "Аналоги Sora 2 бесплатно без VPN — генерация видео в 2026",
     intro: "Sora от OpenAI ограничена по доступу и дорогая. В Stone AI доступны 12+ видео-моделей включая Veo 3, Luma Ray 2, MiniMax — дешевле и без ограничений.",
     reasons: ["Ограниченный доступ", "Высокая цена", "Очереди на генерацию", "Нет в России"],
     models: ["gpt-4o-mini"],  // will show video models separately
