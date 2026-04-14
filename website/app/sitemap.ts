@@ -4,6 +4,7 @@ import { MODELS } from "@/lib/models";
 import { COMPARISONS, ALTERNATIVES, PROFESSIONS, TOOL_HUBS } from "@/lib/seo-data";
 import { USE_CASES } from "@/lib/use-cases";
 import { GLOSSARY } from "@/lib/glossary";
+import { AUTHORS } from "@/lib/authors";
 
 import { SITE_URL } from "@/lib/constants";
 
@@ -29,6 +30,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/blog`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
     { url: `${SITE_URL}/docs`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${SITE_URL}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${SITE_URL}/authors`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     { url: `${SITE_URL}/referral`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     { url: `${SITE_URL}/tools/utm-builder`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${SITE_URL}/chatbot`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
@@ -94,5 +96,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
 
-  return [...staticPages, ...blogPages, ...modelPages, ...comparePages, ...alternativePages, ...professionPages, ...toolHubPages, ...useCasePages, ...glossaryPages];
+  const authorPages: MetadataRoute.Sitemap = AUTHORS.map((a) => ({
+    url: `${SITE_URL}/authors/${a.slug}`,
+    lastModified: now,
+    changeFrequency: "monthly",
+    priority: 0.5,
+  }));
+
+  return [
+    ...staticPages,
+    ...blogPages,
+    ...modelPages,
+    ...comparePages,
+    ...alternativePages,
+    ...professionPages,
+    ...toolHubPages,
+    ...useCasePages,
+    ...glossaryPages,
+    ...authorPages,
+  ];
 }
