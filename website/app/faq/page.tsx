@@ -56,6 +56,17 @@ export default function FaqPage() {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <header className="text-center mb-8 md:mb-10">
+          <div className="relative w-36 h-36 sm:w-44 sm:h-44 mx-auto mb-5">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-accent/15 to-teal/10 blur-2xl" aria-hidden="true" />
+            <img
+              src="/mascots/stone-mascot-chat.webp"
+              alt="Маскот Stone AI отвечает на вопросы"
+              width={176}
+              height={176}
+              loading="eager"
+              className="relative w-full h-full object-contain drop-shadow-xl"
+            />
+          </div>
           <div className="inline-block bg-accent/10 text-accent px-4 py-1.5 rounded-full text-sm font-semibold mb-4">
             FAQ
           </div>
