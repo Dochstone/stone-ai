@@ -170,13 +170,36 @@ export default function AboutPage() {
         "@context": "https://schema.org",
         "@type": "AboutPage",
         name: "О Stone AI",
-        description: "Stone AI — российская платформа-агрегатор для работы с 65+ нейросетями.",
+        description: "Stone AI — российская платформа-агрегатор для работы с 65+ нейросетями. История, команда, миссия и принципы работы.",
         url: "https://stoneai.ru/about",
         inLanguage: "ru-RU",
+        primaryImageOfPage: {
+          "@type": "ImageObject",
+          url: "https://stoneai.ru/og-image.png",
+        },
+        breadcrumb: {
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Главная", item: "https://stoneai.ru/" },
+            { "@type": "ListItem", position: 2, name: "О нас", item: "https://stoneai.ru/about" },
+          ],
+        },
         mainEntity: {
           "@type": "Organization",
           "@id": "https://stoneai.ru/#organization",
         },
+        about: {
+          "@type": "Organization",
+          "@id": "https://stoneai.ru/#organization",
+        },
+        mentions: [
+          {
+            "@type": "Person",
+            "@id": "https://stoneai.ru/authors/dochstone#person",
+            name: "Артём Доченков",
+            jobTitle: "Основатель Stone AI",
+          },
+        ],
       }) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org",

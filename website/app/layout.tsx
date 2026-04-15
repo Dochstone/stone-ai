@@ -168,6 +168,44 @@ const jsonLdOrganization = {
   sameAs: [
     "https://t.me/stonetgbot",
     "https://t.me/StoneAIsupport",
+    "https://t.me/stonemvp",
+    "https://github.com/Dochstone/stone-ai",
+  ],
+  founder: {
+    "@type": "Person",
+    "@id": `${SITE_URL}/authors/dochstone#person`,
+    name: "Артём Доченков",
+    jobTitle: "Основатель Stone AI",
+    url: `${SITE_URL}/authors/dochstone`,
+    image: `${SITE_URL}/authors/dochstone.jpg`,
+    description:
+      "Основатель и идеолог Stone AI. Собрал платформу с 65+ нейросетями, чтобы россияне могли пользоваться AI без VPN и платить картой РФ.",
+    sameAs: ["https://t.me/stonemvp"],
+    knowsAbout: [
+      "Агрегаторы нейросетей",
+      "Оплата AI-сервисов из России",
+      "Сравнение AI-моделей",
+      "Практика использования LLM",
+      "Промпт-инжиниринг",
+    ],
+  },
+  foundingLocation: {
+    "@type": "Country",
+    name: "Russia",
+  },
+  numberOfEmployees: { "@type": "QuantitativeValue", value: 4 },
+  publishingPrinciples: `${SITE_URL}/about`,
+  actionableFeedbackPolicy: "https://t.me/StoneAIsupport",
+  brand: {
+    "@type": "Brand",
+    name: "Stone AI",
+    logo: `${SITE_URL}/og-image.png`,
+  },
+  makesOffer: [
+    { "@type": "Offer", name: "Free", priceCurrency: "RUB", price: "0" },
+    { "@type": "Offer", name: "Start", priceCurrency: "RUB", price: "990", url: `${SITE_URL}/pricing` },
+    { "@type": "Offer", name: "Pro", priceCurrency: "RUB", price: "1890", url: `${SITE_URL}/pricing` },
+    { "@type": "Offer", name: "Elite", priceCurrency: "RUB", price: "3990", url: `${SITE_URL}/pricing` },
   ],
   contactPoint: [
     {
