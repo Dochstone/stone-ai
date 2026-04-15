@@ -297,7 +297,7 @@ button[class*="rounded-xl"] {
   box-shadow: 0 10px 30px -8px rgba(196, 98, 61, 0.18);
 }
 .tile-hover .tile-icon {
-  @apply inline-block transition-transform duration-300 ease-out;
+  @apply transition-transform duration-300 ease-out;
 }
 .tile-hover:hover .tile-icon {
   transform: scale(1.18) rotate(-6deg);
