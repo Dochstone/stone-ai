@@ -14,6 +14,11 @@ import {
   planYearlyOldPrice,
   planYearlyMonthlyEquivalent,
 } from "@/lib/pricing";
+import { Wallet, Zap, Flame, Crown, type LucideIcon } from "lucide-react";
+
+const PLAN_ICON: Record<string, LucideIcon> = {
+  free: Wallet, mini: Zap, max: Flame, "max-pro": Crown,
+};
 import { USD_TO_RUB } from "@/lib/constants";
 
 const TonPayButton = dynamic(() => import("./TonPayButton"), { ssr: false });
@@ -367,12 +372,15 @@ export default function Pricing() {
               )}
 
               <div className="mb-4">
-                <div className="flex items-center gap-2.5 mb-1">
+                <div className="flex items-center gap-3 mb-1">
                   <span
-                    className="text-2xl"
-                    style={{ animation: "pricingFloat 3s ease-in-out infinite", display: "inline-block" }}
+                    className="glass-pad flex items-center justify-center w-11 h-11 rounded-xl shrink-0"
+                    style={{ ["--pad-c" as string]: plan.color }}
                   >
-                    {plan.icon}
+                    {(() => {
+                      const Icon = PLAN_ICON[plan.id];
+                      return Icon ? <Icon className="block" size={22} strokeWidth={2.4} /> : null;
+                    })()}
                   </span>
                   <h3 className={`text-lg font-extrabold ${plan.premium ? "text-white" : ""}`}>{plan.name}</h3>
                 </div>

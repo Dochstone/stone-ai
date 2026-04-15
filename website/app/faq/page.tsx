@@ -1,9 +1,19 @@
 import type { Metadata } from "next";
 import Breadcrumbs, { breadcrumbJsonLd } from "@/components/Breadcrumbs";
-import { homeFaqData, FAQ_CATEGORIES } from "@/lib/faq-data";
+import { homeFaqData, FAQ_CATEGORIES, type FaqCategory } from "@/lib/faq-data";
 import { tagToSlug } from "@/lib/blog";
 import { SITE_URL } from "@/lib/constants";
 import FaqSearch from "./FaqSearch";
+import { Rocket, Sparkles, Wrench, Gem, CreditCard, Wand2, type LucideIcon } from "lucide-react";
+
+const CAT_META: Record<FaqCategory, { Icon: LucideIcon; color: string }> = {
+  start:      { Icon: Rocket,     color: "#22D3EE" },
+  generation: { Icon: Sparkles,   color: "#A855F7" },
+  tools:      { Icon: Wrench,     color: "#F59E0B" },
+  pricing:    { Icon: Gem,        color: "#EC4899" },
+  payments:   { Icon: CreditCard, color: "#10B981" },
+  features:   { Icon: Wand2,      color: "#8B5CF6" },
+};
 
 export const metadata: Metadata = {
   title: "Частые вопросы (FAQ) — Stone AI",
@@ -85,16 +95,22 @@ export default function FaqPage() {
           aria-label="Категории FAQ"
           className="-mx-4 sm:mx-auto px-4 sm:px-0 mb-8 flex gap-2 overflow-x-auto no-scrollbar sm:flex-wrap sm:justify-center snap-x snap-proximity sm:snap-none"
         >
-          {grouped.map((c) => (
-            <a
-              key={c.id}
-              href={`#cat-${c.id}`}
-              className="shrink-0 snap-start whitespace-nowrap px-4 py-2 rounded-full bg-text/5 text-text/70 hover:bg-accent/10 hover:text-accent text-sm font-semibold transition-colors"
-            >
-              <span aria-hidden="true" className="mr-1">{c.icon}</span>
-              {c.name} ({c.items.length})
-            </a>
-          ))}
+          {grouped.map((c) => {
+            const Icon = CAT_META[c.id].Icon;
+            return (
+              <a
+                key={c.id}
+                href={`#cat-${c.id}`}
+                className="group shrink-0 snap-start whitespace-nowrap inline-flex items-center gap-2 pl-2 pr-4 py-1.5 rounded-full bg-text/5 text-text/70 hover:bg-accent/10 hover:text-accent text-sm font-semibold transition-colors"
+                style={{ ["--pad-c" as string]: CAT_META[c.id].color }}
+              >
+                <span className="glass-pad flex items-center justify-center w-7 h-7 rounded-full">
+                  <Icon className="block" size={14} strokeWidth={2.4} />
+                </span>
+                {c.name} ({c.items.length})
+              </a>
+            );
+          })}
         </nav>
 
         <FaqSearch
@@ -107,10 +123,19 @@ export default function FaqPage() {
         />
 
         <div className="space-y-10">
-          {grouped.map((cat) => (
-            <section key={cat.id} id={`cat-${cat.id}`} className="scroll-mt-28">
-              <h2 className="text-xl md:text-2xl font-extrabold mb-4 flex items-center gap-2">
-                <span aria-hidden="true">{cat.icon}</span>
+          {grouped.map((cat) => {
+            const Icon = CAT_META[cat.id].Icon;
+            return (
+            <section
+              key={cat.id}
+              id={`cat-${cat.id}`}
+              className="group scroll-mt-28"
+              style={{ ["--pad-c" as string]: CAT_META[cat.id].color }}
+            >
+              <h2 className="text-xl md:text-2xl font-extrabold mb-4 flex items-center gap-3">
+                <span className="glass-pad flex items-center justify-center w-9 h-9 rounded-xl">
+                  <Icon className="block" size={18} strokeWidth={2.4} />
+                </span>
                 {cat.name}
               </h2>
               <div className="space-y-3">
@@ -143,7 +168,8 @@ export default function FaqPage() {
                 ))}
               </div>
             </section>
-          ))}
+            );
+          })}
         </div>
 
         {/* No answer CTA */}
