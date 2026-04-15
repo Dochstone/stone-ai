@@ -225,18 +225,8 @@ export default function BlogPostPage({ params }: Props) {
 
         <div className="lg:grid lg:grid-cols-[1fr_16rem] lg:gap-10">
           <article className="min-w-0 max-w-3xl">
-            {/* Hero image */}
-            <img
-              src={`/blog/${post.slug}.jpg`}
-              alt={post.title}
-              className="w-full aspect-square sm:aspect-video object-cover rounded-2xl mb-6 border border-text/5"
-              loading="eager"
-              width={1024}
-              height={1024}
-            />
-
             {/* Header */}
-            <div className="mb-8">
+            <div className="mb-6">
               <h1 className="text-3xl md:text-4xl font-extrabold leading-tight mb-5">
                 {post.title}
               </h1>
@@ -266,6 +256,16 @@ export default function BlogPostPage({ params }: Props) {
                 <span>{post.readTime}</span>
               </div>
             </div>
+
+            {/* Hero image */}
+            <img
+              src={`/blog/${post.slug}.jpg`}
+              alt={post.title}
+              className="w-full aspect-square sm:aspect-video object-cover rounded-2xl mb-8 border border-text/5"
+              loading="eager"
+              width={1024}
+              height={1024}
+            />
 
             {/* Mobile TOC */}
             <div className="lg:hidden">
@@ -340,6 +340,23 @@ export default function BlogPostPage({ params }: Props) {
                       caption={block.comparison.caption}
                       footnote={block.comparison.footnote}
                     />
+                  );
+                }
+                if (typeof block === "object" && "img" in block) {
+                  return (
+                    <figure key={i} className="my-8">
+                      <img
+                        src={block.img.src}
+                        alt={block.img.alt}
+                        loading="lazy"
+                        className="w-full aspect-square sm:aspect-video object-cover rounded-2xl border border-text/5"
+                      />
+                      {block.img.caption && (
+                        <figcaption className="text-xs text-text/40 mt-2 text-center italic">
+                          {block.img.caption}
+                        </figcaption>
+                      )}
+                    </figure>
                   );
                 }
                 if (typeof block === "object" && "code" in block) {
