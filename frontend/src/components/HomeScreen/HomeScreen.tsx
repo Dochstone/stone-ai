@@ -182,7 +182,7 @@ export function HomeScreen() {
               {user.plan === 'max-pro' ? 'ELITE' : user.plan === 'max' ? 'PRO' : user.plan === 'mini' ? 'START' : 'FREE'}
             </span>
             <span style={{ fontSize: 10, color: '#5a8a70', cursor: 'pointer' }} onClick={() => window.open('https://stoneai.ru/pricing', '_blank')}>
-              {user.plan === 'free' || user.plan === 'per_token' ? 'Подписка от 590₽ →' : 'Управление →'}
+              {user.plan === 'free' || user.plan === 'per_token' ? 'Подписка от 990₽ →' : 'Управление →'}
             </span>
           </div>
         </div>

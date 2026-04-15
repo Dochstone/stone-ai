@@ -104,26 +104,26 @@ const KEYFRAMES = `
 const PLANS = [
   {
     id: 'free', name: 'Free', price: '0₽', priceSub: 'навсегда', stars: 0, tier: 'free',
-    features: ['7 моделей', '10 запросов/день', '2 картинки/день'],
+    features: ['6 быстрых моделей', '10 запросов/день + 2 премиум', '2 пробных картинки · 2 пробных видео'],
     color: '#5a8a70', gradient: 'linear-gradient(135deg, #5a8a70, #3d6b55)',
     icon: '🆓',
   },
   {
-    id: 'mini', name: 'Start', price: '590₽', priceSub: '/мес', stars: 300, tier: 'mini',
-    features: ['20+ моделей', '500 запросов/мес', '15 картинок, 3 видео', 'GPT-5.1, Claude Sonnet'],
+    id: 'mini', name: 'Start', price: '990₽', priceSub: '/мес', stars: 762, tier: 'mini',
+    features: ['20+ моделей', '600 быстрых · 90 премиум /мес', '60 картинок · 13 видео-поинтов', 'GPT-5.1, Claude Sonnet'],
     color: '#007aff', gradient: 'linear-gradient(135deg, #007aff, #5856d6)',
     icon: '⚡',
   },
   {
-    id: 'max', name: 'Pro', price: '890₽', priceSub: '/мес', stars: 685, tier: 'max',
-    features: ['65+ моделей', '2000 запросов/мес', '50 картинок, 10 видео', 'Claude Opus, 3D, аудио'],
+    id: 'max', name: 'Pro', price: '1 890₽', priceSub: '/мес', stars: 1454, tier: 'max',
+    features: ['65+ нейросетей + Opus', '1 500 быстрых · 112 премиум', '28 Opus · 140 картинок · 33 видео-поинта', 'Claude Opus, 3D, аудио'],
     color: '#ff9500', gradient: 'linear-gradient(135deg, #ff9500, #ff6b00)',
     recommended: true,
     icon: '🔥',
   },
   {
-    id: 'max-pro', name: 'Elite', price: '1 990₽', priceSub: '/мес', stars: 1531, tier: 'max-pro',
-    features: ['65+ моделей + API', '10 000 запросов/мес', '300 картинок, 50 видео', 'Приоритет, ранний доступ'],
+    id: 'max-pro', name: 'Elite', price: '3 990₽', priceSub: '/мес', stars: 3069, tier: 'max-pro',
+    features: ['65+ нейросетей + API', '4 500 быстрых · 336 премиум', '56 Opus · 280 картинок · 80 видео-поинтов', 'Приоритет, ранний доступ'],
     color: '#ff3b30', gradient: 'linear-gradient(135deg, #ff3b30, #ff2d55)',
     icon: '💎',
   },
@@ -290,7 +290,7 @@ export function PlansScreen() {
           Выберите тариф
         </div>
         <div style={{ fontSize: 13, color: '#5a8a70', fontWeight: 500 }}>
-          Подписка от 590₽/мес — все модели без ограничений
+          Подписка от 990₽/мес — все модели без ограничений
         </div>
       </div>
 

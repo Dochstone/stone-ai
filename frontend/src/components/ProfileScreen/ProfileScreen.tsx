@@ -115,7 +115,7 @@ export function ProfileScreen() {
               Управление подпиской
             </div>
             <div style={{ fontSize: 10, color: '#8aaa98' }}>
-              {user.plan === 'free' || user.plan === 'per_token' ? 'Подписка от 590₽/мес' : `Тариф: ${user.plan === 'max-pro' ? 'Elite' : user.plan === 'max' ? 'Pro' : user.plan === 'mini' ? 'Start' : 'Free'}`}
+              {user.plan === 'free' || user.plan === 'per_token' ? 'Подписка от 990₽/мес' : `Тариф: ${user.plan === 'max-pro' ? 'Elite' : user.plan === 'max' ? 'Pro' : user.plan === 'mini' ? 'Start' : 'Free'}`}
             </div>
           </div>
           <span style={{
