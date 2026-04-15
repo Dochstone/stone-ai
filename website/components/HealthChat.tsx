@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import AuthFormComponent, { type AuthState } from "@/components/AuthForm";
+import { Eye, Bandage, Smile, Hand, type LucideIcon } from "lucide-react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
@@ -43,11 +44,11 @@ interface Message {
   image?: string; // base64 data URL
 }
 
-const QUICK_PROMPTS = [
-  { icon: "👁", text: "Покраснение и раздражение глаза", description: "Анализ фото глаза" },
-  { icon: "🩹", text: "Высыпания или покраснения на коже", description: "Анализ кожных проявлений" },
-  { icon: "🦷", text: "Проблемы с полостью рта", description: "Осмотр ротовой полости" },
-  { icon: "💅", text: "Изменение цвета или формы ногтей", description: "Анализ состояния ногтей" },
+const QUICK_PROMPTS: { Icon: LucideIcon; color: string; text: string; description: string }[] = [
+  { Icon: Eye,     color: "#EF4444", text: "Покраснение и раздражение глаза",   description: "Анализ фото глаза" },
+  { Icon: Bandage, color: "#F97316", text: "Высыпания или покраснения на коже", description: "Анализ кожных проявлений" },
+  { Icon: Smile,   color: "#06B6D4", text: "Проблемы с полостью рта",           description: "Осмотр ротовой полости" },
+  { Icon: Hand,    color: "#EAB308", text: "Изменение цвета или формы ногтей",  description: "Анализ состояния ногтей" },
 ];
 
 export default function HealthChat() {
@@ -293,22 +294,28 @@ export default function HealthChat() {
 
             {/* Quick prompts */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {QUICK_PROMPTS.map((p, i) => (
-                <button
-                  key={i}
-                  onClick={() => {
-                    setInput(p.text);
-                    fileInputRef.current?.click();
-                  }}
-                  className="flex items-start gap-3 p-3 rounded-xl border border-text/[0.06] bg-bg hover:border-emerald-300 hover:shadow-sm transition-all text-left group"
-                >
-                  <span className="text-2xl shrink-0">{p.icon}</span>
-                  <div>
-                    <span className="text-[13px] font-semibold text-text/70 group-hover:text-emerald-600 transition-colors block">{p.text}</span>
-                    <span className="text-[11px] text-text/30">{p.description}</span>
-                  </div>
-                </button>
-              ))}
+              {QUICK_PROMPTS.map((p) => {
+                const { Icon } = p;
+                return (
+                  <button
+                    key={p.text}
+                    onClick={() => {
+                      setInput(p.text);
+                      fileInputRef.current?.click();
+                    }}
+                    style={{ ["--pad-c" as string]: p.color }}
+                    className="flex items-start gap-3 p-3 rounded-xl border border-text/[0.06] bg-bg hover:border-emerald-300 hover:shadow-sm transition-all text-left group"
+                  >
+                    <span className="glass-pad flex items-center justify-center w-10 h-10 rounded-xl shrink-0">
+                      <Icon className="block" size={20} strokeWidth={2.4} />
+                    </span>
+                    <div>
+                      <span className="text-[13px] font-semibold text-text/70 group-hover:text-emerald-600 transition-colors block">{p.text}</span>
+                      <span className="text-[11px] text-text/30">{p.description}</span>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
 
             {/* How it works */}

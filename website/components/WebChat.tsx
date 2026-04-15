@@ -158,14 +158,22 @@ function TemplatesPicker({ onSelect }: { onSelect: (text: string, modelId: strin
   return (
     <div>
       <div className="flex gap-1 overflow-x-auto pb-2 mb-2">
-        {PROMPT_CATEGORIES.map((c) => (
-          <button key={c.id} onClick={() => setCat(c.id)}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors ${
-              cat === c.id ? "bg-accent text-white" : "bg-bg text-text/40 hover:text-text/60"
-            }`}>
-            {c.icon} {c.label}
-          </button>
-        ))}
+        {PROMPT_CATEGORIES.map((c) => {
+          const active = cat === c.id;
+          const { Icon } = c;
+          return (
+            <button key={c.id} onClick={() => setCat(c.id)}
+              style={{ ["--pad-c" as string]: c.color }}
+              className={`inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors ${
+                active ? "bg-accent text-white" : "bg-bg text-text/40 hover:text-text/60"
+              }`}>
+              <span className={`flex items-center justify-center w-5 h-5 rounded-md shrink-0 ${active ? "bg-white/20" : "glass-pad"}`}>
+                <Icon className="block" size={11} strokeWidth={2.4} />
+              </span>
+              {c.label}
+            </button>
+          );
+        })}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
         {(PROMPT_TEMPLATES[cat] || []).map((tmpl, i) => (

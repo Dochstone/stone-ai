@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { getAuth } from "@/lib/auth";
 import { CHAT_MODELS } from "@/lib/models-config";
 import { USD_TO_RUB } from "@/lib/constants";
+import { ClipboardList, TrendingUp, FileText, PenLine, type LucideIcon } from "lucide-react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
@@ -11,11 +12,11 @@ const AGENT_MODELS = CHAT_MODELS.filter(m =>
   ["gpt-4o-mini", "deepseek-v3", "claude-haiku-4.5", "gpt-4.1-mini"].includes(m.id)
 );
 
-const TEMPLATES = [
-  { icon: "\ud83d\udcca", label: "\u041a\u043e\u043d\u0442\u0435\u043d\u0442-\u043f\u043b\u0430\u043d", text: "\u0421\u043e\u0441\u0442\u0430\u0432\u044c \u0434\u0435\u0442\u0430\u043b\u044c\u043d\u044b\u0439 \u043a\u043e\u043d\u0442\u0435\u043d\u0442-\u043f\u043b\u0430\u043d \u043d\u0430 \u043c\u0435\u0441\u044f\u0446 \u0434\u043b\u044f Telegram-\u043a\u0430\u043d\u0430\u043b\u0430 \u043e [\u0442\u0435\u043c\u0430]. \u0412\u043a\u043b\u044e\u0447\u0438 \u0440\u0443\u0431\u0440\u0438\u043a\u0438, \u0447\u0430\u0441\u0442\u043e\u0442\u0443 \u043f\u043e\u0441\u0442\u043e\u0432, \u043f\u0440\u0438\u043c\u0435\u0440\u044b \u0437\u0430\u0433\u043e\u043b\u043e\u0432\u043a\u043e\u0432." },
-  { icon: "\ud83d\udcc8", label: "\u0410\u043d\u0430\u043b\u0438\u0437 \u0440\u044b\u043d\u043a\u0430", text: "\u041f\u0440\u043e\u0430\u043d\u0430\u043b\u0438\u0437\u0438\u0440\u0443\u0439 \u0440\u044b\u043d\u043e\u043a [\u043d\u0438\u0448\u0430] \u0432 \u0420\u043e\u0441\u0441\u0438\u0438. \u041a\u043e\u043d\u043a\u0443\u0440\u0435\u043d\u0442\u044b, \u043e\u0431\u044a\u0451\u043c, \u0442\u0440\u0435\u043d\u0434\u044b, \u0432\u043e\u0437\u043c\u043e\u0436\u043d\u043e\u0441\u0442\u0438 \u0434\u043b\u044f \u0432\u0445\u043e\u0434\u0430." },
-  { icon: "\ud83d\udcdd", label: "\u0411\u0438\u0437\u043d\u0435\u0441-\u043f\u043b\u0430\u043d", text: "\u041d\u0430\u043f\u0438\u0448\u0438 \u0431\u0438\u0437\u043d\u0435\u0441-\u043f\u043b\u0430\u043d \u0434\u043b\u044f [\u0431\u0438\u0437\u043d\u0435\u0441]. \u0426\u0435\u043b\u0435\u0432\u0430\u044f \u0430\u0443\u0434\u0438\u0442\u043e\u0440\u0438\u044f, \u043c\u043e\u043d\u0435\u0442\u0438\u0437\u0430\u0446\u0438\u044f, \u043c\u0430\u0440\u043a\u0435\u0442\u0438\u043d\u0433, \u0444\u0438\u043d\u0430\u043d\u0441\u044b \u043d\u0430 12 \u043c\u0435\u0441\u044f\u0446\u0435\u0432." },
-  { icon: "\u270d\ufe0f", label: "SEO-\u0441\u0442\u0440\u0430\u0442\u0435\u0433\u0438\u044f", text: "\u0420\u0430\u0437\u0440\u0430\u0431\u043e\u0442\u0430\u0439 SEO-\u0441\u0442\u0440\u0430\u0442\u0435\u0433\u0438\u044e \u0434\u043b\u044f \u0441\u0430\u0439\u0442\u0430 [url]. \u041a\u043b\u044e\u0447\u0435\u0432\u044b\u0435 \u0441\u043b\u043e\u0432\u0430, \u043a\u043e\u043d\u0442\u0435\u043d\u0442-\u043f\u043b\u0430\u043d, \u0442\u0435\u0445\u043d\u0438\u0447\u0435\u0441\u043a\u043e\u0435 SEO, \u043b\u0438\u043d\u043a\u0431\u0438\u043b\u0434\u0438\u043d\u0433." },
+const TEMPLATES: { Icon: LucideIcon; color: string; label: string; text: string }[] = [
+  { Icon: ClipboardList, color: "#0EA5E9", label: "Контент-план",  text: "Составь детальный контент-план на месяц для Telegram-канала о [тема]. Включи рубрики, частоту постов, примеры заголовков." },
+  { Icon: TrendingUp,    color: "#10B981", label: "Анализ рынка",  text: "Проанализируй рынок [ниша] в России. Конкуренты, объём, тренды, возможности для входа." },
+  { Icon: FileText,      color: "#F59E0B", label: "Бизнес-план",   text: "Напиши бизнес-план для [бизнес]. Целевая аудитория, монетизация, маркетинг, финансы на 12 месяцев." },
+  { Icon: PenLine,       color: "#A855F7", label: "SEO-стратегия", text: "Разработай SEO-стратегию для сайта [url]. Ключевые слова, контент-план, техническое SEO, линкбилдинг." },
 ];
 
 interface Step { step: number; action: string; result: string; status: string }
@@ -148,12 +149,19 @@ export default function AgentPage() {
 
         {/* Templates */}
         <div className="flex flex-wrap gap-2 mb-3">
-          {TEMPLATES.map(t => (
-            <button key={t.label} onClick={() => setInstruction(t.text)}
-              className="text-xs px-3 py-1.5 rounded-lg bg-text/[0.04] hover:bg-accent/10 hover:text-accent transition-colors text-text/50">
-              {t.icon} {t.label}
-            </button>
-          ))}
+          {TEMPLATES.map(t => {
+            const { Icon } = t;
+            return (
+              <button key={t.label} onClick={() => setInstruction(t.text)}
+                style={{ ["--pad-c" as string]: t.color }}
+                className="group inline-flex items-center gap-1.5 text-xs pl-1 pr-3 py-1 rounded-lg bg-text/[0.04] hover:bg-accent/10 hover:text-accent transition-colors text-text/50">
+                <span className="glass-pad flex items-center justify-center w-6 h-6 rounded-md shrink-0">
+                  <Icon className="block" size={13} strokeWidth={2.4} />
+                </span>
+                {t.label}
+              </button>
+            );
+          })}
         </div>
 
         {/* Input */}

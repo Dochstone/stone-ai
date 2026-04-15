@@ -3,14 +3,15 @@
 import { useState } from "react";
 import { PROMPT_CATEGORIES, PROMPT_TEMPLATES } from "@/lib/prompt-templates";
 import { planPriceFull } from "@/lib/pricing";
+import { Gift, Lightbulb } from "lucide-react";
 
-const WELCOME_CONFIG: Record<string, { icon: string; bg: string; title: string; subtitle: string }> = {
-  all: { icon: "💬", bg: "bg-accent", title: "Чем могу помочь?", subtitle: "Выберите шаблон или напишите свой запрос" },
-  free: { icon: "✨", bg: "bg-teal", title: "Бесплатные модели", subtitle: "8 моделей без ограничений — 10 запросов в день" },
-  image: { icon: "🎨", bg: "bg-pink-500", title: "Генерация изображений", subtitle: "2 бесплатные картинки · Опишите — AI создаст за секунды" },
-  video: { icon: "🎬", bg: "bg-red-500", title: "Генерация видео", subtitle: "Опишите сцену — AI создаст видео. Качество и длительность настраиваются" },
-  "3d": { icon: "🧊", bg: "bg-cyan-500", title: "Генерация 3D", subtitle: "Скоро — подключаем нового провайдера" },
-  health: { icon: "🏥", bg: "bg-emerald-500", title: "AI Консультант", subtitle: "Загрузите фото или опишите симптомы" },
+const WELCOME_CONFIG: Record<string, { title: string; subtitle: string }> = {
+  all:    { title: "Чем могу помочь?",          subtitle: "Выберите шаблон или напишите свой запрос" },
+  free:   { title: "Бесплатные модели",         subtitle: "8 моделей без ограничений — 10 запросов в день" },
+  image:  { title: "Генерация изображений",     subtitle: "2 бесплатные картинки · Опишите — AI создаст за секунды" },
+  video:  { title: "Генерация видео",           subtitle: "Опишите сцену — AI создаст видео. Качество и длительность настраиваются" },
+  "3d":   { title: "Генерация 3D",              subtitle: "Скоро — подключаем нового провайдера" },
+  health: { title: "AI Консультант",            subtitle: "Загрузите фото или опишите симптомы" },
 };
 
 export default function WelcomeScreen({ onSuggestion, activeTab, plan }: { onSuggestion: (text: string, modelId: string) => void; activeTab: string; plan?: string }) {
@@ -33,18 +34,20 @@ export default function WelcomeScreen({ onSuggestion, activeTab, plan }: { onSug
             {/* Free models guide */}
             <div className="max-w-lg mx-auto text-left space-y-2">
               {[
-                { id: "gpt-4o-mini", name: "GPT-4o mini", icon: "🟢", desc: "Универсальная модель от OpenAI. Тексты, переводы, код, ответы на вопросы.", best: "Лучшая для большинства задач", prompt: "Привет! Расскажи что ты умеешь и чем можешь помочь" },
-                { id: "gemini-2.0-flash", name: "Gemini Flash", icon: "⚡", desc: "Самая быстрая модель от Google. Ответ за доли секунды.", best: "Когда важна скорость", prompt: "Быстро объясни что такое нейросети простыми словами" },
-                { id: "claude-haiku-4.5", name: "Claude Haiku", icon: "🟣", desc: "Аккуратная модель от Anthropic. Вежливые, структурированные ответы.", best: "Деловые письма, анализ", prompt: "Напиши деловое письмо клиенту с благодарностью за сотрудничество" },
-                { id: "deepseek-v3", name: "DeepSeek V3", icon: "🔵", desc: "Мощная open-source модель. Отлично пишет код и решает задачи.", best: "Код и математика", prompt: "Напиши функцию на Python для сортировки списка словарей по ключу" },
-                { id: "llama-4-maverick", name: "Llama 4", icon: "🦙", desc: "Креативная модель от Meta. Хороша для мозговых штурмов и идей.", best: "Креатив и брейншторм", prompt: "Придумай 5 креативных идей для Telegram-канала о путешествиях" },
-                { id: "mistral-large-25", name: "Mistral Large", icon: "🌊", desc: "Европейская модель. Хорошо работает с русским и другими языками.", best: "Мультиязычные задачи", prompt: "Переведи на английский сохранив стиль: Добро пожаловать в Stone AI — AI-студию нового поколения" },
-                { id: "nano-banana", name: "Nano Banana", icon: "🎨", desc: "Генерация картинок из текста. Бесплатная модель для изображений.", best: "2 бесплатно", prompt: "Нарисуй уютную кофейню в стиле Pixar с тёплым освещением" },
-                { id: "veo-3", name: "Veo 3", icon: "🎬", desc: "Генерация видео от Google. 4K, lip-sync, звуковой дизайн.", best: "2 пробных", prompt: "Создай 5-секундное видео: закат на океане, волны бьются о скалы" },
+                { id: "gpt-4o-mini",      name: "GPT-4o mini",    logo: "/logos/openai.svg",    desc: "Универсальная модель от OpenAI. Тексты, переводы, код, ответы на вопросы.", best: "Лучшая для большинства задач", prompt: "Привет! Расскажи что ты умеешь и чем можешь помочь" },
+                { id: "gemini-2.0-flash", name: "Gemini Flash",   logo: "/logos/google.svg",    desc: "Самая быстрая модель от Google. Ответ за доли секунды.",                    best: "Когда важна скорость",         prompt: "Быстро объясни что такое нейросети простыми словами" },
+                { id: "claude-haiku-4.5", name: "Claude Haiku",   logo: "/logos/anthropic.svg", desc: "Аккуратная модель от Anthropic. Вежливые, структурированные ответы.",       best: "Деловые письма, анализ",       prompt: "Напиши деловое письмо клиенту с благодарностью за сотрудничество" },
+                { id: "deepseek-v3",      name: "DeepSeek V3",    logo: "/logos/deepseek.svg",  desc: "Мощная open-source модель. Отлично пишет код и решает задачи.",             best: "Код и математика",             prompt: "Напиши функцию на Python для сортировки списка словарей по ключу" },
+                { id: "llama-4-maverick", name: "Llama 4",        logo: "/logos/meta.svg",      desc: "Креативная модель от Meta. Хороша для мозговых штурмов и идей.",            best: "Креатив и брейншторм",         prompt: "Придумай 5 креативных идей для Telegram-канала о путешествиях" },
+                { id: "mistral-large-25", name: "Mistral Large",  logo: "/logos/mistral.svg",   desc: "Европейская модель. Хорошо работает с русским и другими языками.",          best: "Мультиязычные задачи",         prompt: "Переведи на английский сохранив стиль: Добро пожаловать в Stone AI — AI-студию нового поколения" },
+                { id: "nano-banana",      name: "Nano Banana",    logo: "/logos/google.svg",    desc: "Генерация картинок из текста. Бесплатная модель для изображений.",          best: "2 бесплатно",                  prompt: "Нарисуй уютную кофейню в стиле Pixar с тёплым освещением" },
+                { id: "veo-3",            name: "Veo 3",          logo: "/logos/google.svg",    desc: "Генерация видео от Google. 4K, lip-sync, звуковой дизайн.",                 best: "2 пробных",                    prompt: "Создай 5-секундное видео: закат на океане, волны бьются о скалы" },
               ].map((m) => (
                 <button key={m.id} onClick={() => onSuggestion(m.prompt, m.id)}
                   className="w-full flex items-center gap-3 p-3 rounded-xl border border-text/[0.06] bg-bg hover:border-accent/30 hover:shadow-sm transition-all group">
-                  <span className="text-2xl shrink-0">{m.icon}</span>
+                  <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-text/[0.04] border border-text/[0.06] shrink-0">
+                    <img src={m.logo} alt={m.name} width={22} height={22} className="block" loading="lazy" />
+                  </span>
                   <div className="flex-1 min-w-0 text-left">
                     <div className="flex items-center gap-2">
                       <span className="text-[13px] font-bold text-text group-hover:text-accent transition-colors">{m.name}</span>
@@ -60,17 +63,25 @@ export default function WelcomeScreen({ onSuggestion, activeTab, plan }: { onSug
           <>
             {/* Category tabs */}
             <div className="flex gap-1 pb-2 mb-4 justify-center flex-wrap">
-              {PROMPT_CATEGORIES.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => setPromptCat(cat.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
-                    promptCat === cat.id ? "bg-accent text-white" : "bg-bg text-text/40 border border-text/[0.06] hover:text-text/60"
-                  }`}
-                >
-                  {cat.icon} {cat.label}
-                </button>
-              ))}
+              {PROMPT_CATEGORIES.map((cat) => {
+                const active = promptCat === cat.id;
+                const { Icon } = cat;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setPromptCat(cat.id)}
+                    style={{ ["--pad-c" as string]: cat.color }}
+                    className={`inline-flex items-center gap-1.5 pl-1.5 pr-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+                      active ? "bg-accent text-white" : "bg-bg text-text/40 border border-text/[0.06] hover:text-text/60"
+                    }`}
+                  >
+                    <span className={`flex items-center justify-center w-6 h-6 rounded-md shrink-0 ${active ? "bg-white/20" : "glass-pad"}`}>
+                      <Icon className="block" size={13} strokeWidth={2.4} />
+                    </span>
+                    {cat.label}
+                  </button>
+                );
+              })}
             </div>
             {/* Prompt cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-lg mx-auto text-left">
@@ -120,7 +131,7 @@ export default function WelcomeScreen({ onSuggestion, activeTab, plan }: { onSug
         {(activeTab === "all" || activeTab === "image" || activeTab === "video") && (
           <div className="mt-5 max-w-lg mx-auto bg-accent/[0.04] border border-accent/15 rounded-2xl p-3.5 text-left">
             <div className="flex items-start gap-2">
-              <span className="text-base shrink-0 mt-0.5">💡</span>
+              <span className="shrink-0 mt-0.5 text-accent"><Lightbulb size={16} strokeWidth={2.4} /></span>
               <div className="text-[11.5px] text-text/65 leading-relaxed">
                 <span className="font-bold text-accent">Как считается лимит:</span> один запрос = 1 единица.
                 Дорогие модели тратят больше:
@@ -148,7 +159,7 @@ export default function WelcomeScreen({ onSuggestion, activeTab, plan }: { onSug
             </a>
             <a href="/referral" className="flex items-center justify-between bg-teal/5 hover:bg-teal/10 border border-teal/10 rounded-xl px-4 py-2.5 mt-2 transition-colors">
               <div className="flex items-center gap-2">
-                <span>🎁</span>
+                <span className="text-teal"><Gift size={14} strokeWidth={2.4} /></span>
                 <span className="text-[11px] text-text/50">Пригласи друга — <span className="font-bold text-teal">+5 запросов обоим</span></span>
               </div>
               <span className="text-teal text-[10px] font-semibold shrink-0">Пригласить →</span>

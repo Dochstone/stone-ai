@@ -1,12 +1,23 @@
+import {
+  Star,
+  Megaphone,
+  Code,
+  PenLine,
+  Palette,
+  BarChart3,
+  Languages,
+  type LucideIcon,
+} from "lucide-react";
+
 export const PROMPT_CATEGORIES = [
-  { id: "popular", label: "Популярное", icon: "⭐" },
-  { id: "marketing", label: "Маркетинг", icon: "📢" },
-  { id: "code", label: "Код", icon: "💻" },
-  { id: "text", label: "Тексты", icon: "✍️" },
-  { id: "images", label: "Картинки", icon: "🎨" },
-  { id: "analysis", label: "Анализ", icon: "📊" },
-  { id: "translate", label: "Перевод", icon: "🌍" },
-] as const;
+  { id: "popular",   label: "Популярное", Icon: Star,      color: "#EAB308" },
+  { id: "marketing", label: "Маркетинг",  Icon: Megaphone, color: "#F59E0B" },
+  { id: "code",      label: "Код",        Icon: Code,      color: "#6366F1" },
+  { id: "text",      label: "Тексты",     Icon: PenLine,   color: "#14B8A6" },
+  { id: "images",    label: "Картинки",   Icon: Palette,   color: "#EC4899" },
+  { id: "analysis",  label: "Анализ",     Icon: BarChart3, color: "#0EA5E9" },
+  { id: "translate", label: "Перевод",    Icon: Languages, color: "#10B981" },
+] as const satisfies ReadonlyArray<{ id: string; label: string; Icon: LucideIcon; color: string }>;
 
 export const PROMPT_TEMPLATES: Record<string, { text: string; model: string }[]> = {
   popular: [
