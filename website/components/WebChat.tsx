@@ -132,6 +132,12 @@ const companyLogoFile: Record<string, string> = {
   Mistral: "/logos/mistral.svg", DeepSeek: "/logos/deepseek.svg",
   xAI: "/logos/xai.svg", Perplexity: "/logos/perplexity.svg",
   Alibaba: "/logos/alibaba.svg", Cohere: "/logos/cohere.svg",
+  NVIDIA: "/logos/nvidia.svg", Microsoft: "/logos/microsoft.svg",
+  Tencent: "/logos/tencent.svg", Stability: "/logos/stability.svg",
+  Moonshot: "/logos/moonshot.svg", Luma: "/logos/luma.svg",
+  Pika: "/logos/pika.svg", MiniMax: "/logos/minimax.svg",
+  Tripo3D: "/logos/tripo3d.svg", PixVerse: "/logos/pixverse.svg",
+  Kuaishou: "/logos/kuaishou.svg", Lightricks: "/logos/lightricks.svg",
 };
 
 const companyColors: Record<string, string> = {
@@ -140,6 +146,8 @@ const companyColors: Record<string, string> = {
   Alibaba: "#ff6a00", MiniMax: "#ec4899", Zhipu: "#0ea5e9", Cohere: "#39d353",
   Microsoft: "#00a4ef", NVIDIA: "#76b900", Gryphe: "#8b5cf6", BFL: "#f59e0b",
   Stability: "#a855f7", Moonshot: "#06b6d4",
+  Luma: "#9333EA", Tripo3D: "#14B8A6", Tencent: "#1E6FFF", PixVerse: "#A855F7",
+  Pika: "#F97316", Lightricks: "#3B82F6", Kuaishou: "#ff4f00",
 };
 
 // Fallback letter for companies without SVG logo
