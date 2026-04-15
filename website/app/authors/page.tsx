@@ -28,7 +28,7 @@ export default function AuthorsPage() {
   );
 
   return (
-    <div className="min-h-screen pb-20">
+    <div className="min-h-screen pt-28 pb-20">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList) }}
