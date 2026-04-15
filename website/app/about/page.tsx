@@ -263,20 +263,20 @@ export default function AboutPage() {
                   key={t.name}
                   href={t.href}
                   {...(t.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                  className="tile-hover group block bg-white rounded-xl border border-text/5 p-4 focus:outline-none focus:ring-2 focus:ring-accent/30"
+                  className="tile-hover group flex flex-col items-center text-center bg-white rounded-xl border border-text/5 p-4 focus:outline-none focus:ring-2 focus:ring-accent/30"
                 >
                   <span
-                    className="tile-icon relative z-10 inline-flex items-center justify-center w-11 h-11 rounded-xl backdrop-blur-sm mb-3"
+                    className="tile-icon inline-flex items-center justify-center w-12 h-12 rounded-xl mb-3 shrink-0"
                     style={{
                       background: t.bg,
-                      boxShadow: `inset 0 1px 0 rgba(255,255,255,0.15), 0 0 20px ${t.bg}`,
+                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.18)",
                       color: t.color,
                     }}
                   >
                     <Icon className="w-6 h-6" strokeWidth={2.4} />
                   </span>
-                  <div className="relative z-10 font-bold text-sm mb-0.5 transition-colors duration-200 group-hover:text-accent">{t.name}</div>
-                  <div className="relative z-10 text-text/40 text-[11px] transition-colors duration-200 group-hover:text-text/60">{t.desc}</div>
+                  <div className="font-bold text-sm mb-0.5 transition-colors duration-200 group-hover:text-accent">{t.name}</div>
+                  <div className="text-text/40 text-[11px] leading-snug transition-colors duration-200 group-hover:text-text/60">{t.desc}</div>
                 </a>
               );
             })}
