@@ -60,7 +60,7 @@ export default function HubPage({ params }: Props) {
   ];
 
   return (
-    <div className="min-h-screen pt-4 pb-20">
+    <div className="min-h-screen pt-28 pb-20">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(bcItems)) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(buildFAQPage(meta.faq)) }} />
 
