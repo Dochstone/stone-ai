@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import dynamic from "next/dynamic";
-import { POSTS, getFaq, getHowTo, getPost, getRelated, BLOG_CATEGORY_BY_SLUG } from "@/lib/blog";
+import { POSTS, getFaq, getHowTo, getPost, getRelated, BLOG_CATEGORY_BY_SLUG, tagToSlug } from "@/lib/blog";
 import { breadcrumbJsonLd } from "@/components/Breadcrumbs";
 import Callout from "@/components/content/Callout";
 import ComparisonTable from "@/components/content/ComparisonTable";
@@ -15,6 +15,8 @@ import { SITE_URL } from "@/lib/constants";
 
 const BlogCopyButtons = dynamic(() => import("@/components/BlogCopyButtons"), { ssr: false });
 const ChatWidget = dynamic(() => import("@/components/ChatWidget"), { ssr: false });
+const ReadingProgress = dynamic(() => import("@/components/ReadingProgress"), { ssr: false });
+const ShareButtons = dynamic(() => import("@/components/ShareButtons"), { ssr: false });
 
 export const revalidate = 3600;
 
@@ -208,6 +210,8 @@ export default function BlogPostPage({ params }: Props) {
 
   return (
     <div className="pt-28 pb-20 min-h-screen">
+      <ReadingProgress />
+      <ShareButtons title={post.title} slug={post.slug} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(bcItems)) }} />
       {faqJsonLd && (
@@ -446,12 +450,13 @@ export default function BlogPostPage({ params }: Props) {
             <p className="text-[11px] font-bold uppercase tracking-wider text-text/40 mb-3">Теги</p>
             <div className="flex flex-wrap gap-2">
               {post.tags.map((tag) => (
-                <span
+                <a
                   key={tag}
-                  className="text-xs font-semibold px-3 py-1.5 rounded-full bg-accent/8 text-accent/80 hover:bg-accent/15 transition-colors"
+                  href={`/blog/tag/${tagToSlug(tag)}`}
+                  className="text-xs font-semibold px-3 py-1.5 rounded-full bg-accent/8 text-accent/80 hover:bg-accent/15 hover:text-accent transition-colors"
                 >
                   #{tag}
-                </span>
+                </a>
               ))}
             </div>
           </div>

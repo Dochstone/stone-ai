@@ -2073,3 +2073,49 @@ export function getPostsByCategory(category: BlogCategorySlug): BlogPost[] {
 export function getCategory(slug: string): BlogCategory | undefined {
   return BLOG_CATEGORY_BY_SLUG[slug];
 }
+
+const CYR_TO_LAT: Record<string, string> = {
+  а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "e", ж: "zh", з: "z",
+  и: "i", й: "i", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r",
+  с: "s", т: "t", у: "u", ф: "f", х: "h", ц: "c", ч: "ch", ш: "sh", щ: "sch",
+  ъ: "", ы: "y", ь: "", э: "e", ю: "yu", я: "ya",
+};
+
+export function tagToSlug(tag: string): string {
+  return tag
+    .toLowerCase()
+    .split("")
+    .map((ch) => (CYR_TO_LAT[ch] !== undefined ? CYR_TO_LAT[ch] : ch))
+    .join("")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+export function getAllTagSlugs(): { slug: string; tag: string; count: number }[] {
+  const map = new Map<string, { tag: string; count: number }>();
+  for (const post of POSTS) {
+    if (!post.tags) continue;
+    for (const tag of post.tags) {
+      const s = tagToSlug(tag);
+      if (!s) continue;
+      const cur = map.get(s);
+      if (cur) cur.count += 1;
+      else map.set(s, { tag, count: 1 });
+    }
+  }
+  const out: { slug: string; tag: string; count: number }[] = [];
+  map.forEach((v, slug) => out.push({ slug, tag: v.tag, count: v.count }));
+  return out;
+}
+
+export function getPostsByTagSlug(tagSlug: string): BlogPost[] {
+  return SORTED_POSTS.filter((p) => p.tags?.some((t) => tagToSlug(t) === tagSlug));
+}
+
+export function getTagBySlug(tagSlug: string): string | undefined {
+  for (const p of POSTS) {
+    if (!p.tags) continue;
+    for (const t of p.tags) if (tagToSlug(t) === tagSlug) return t;
+  }
+  return undefined;
+}
