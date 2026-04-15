@@ -448,6 +448,11 @@ export default function BlogPostPage({ params }: Props) {
 
         <div className="max-w-3xl">
 
+        {/* Inline chat — попробовать AI прямо со страницы (высокий приоритет, сразу после контента) */}
+        <div className="mt-10">
+          <ChatWidget placeholder="Спросите по теме статьи или попробуйте AI на своей задаче" />
+        </div>
+
         {/* CTA */}
         <div className="mt-10 bg-accent/5 border border-accent/10 rounded-2xl p-6 sm:p-8 text-center">
           <h3 className="font-extrabold text-lg mb-2">Попробуйте Stone AI бесплатно</h3>
@@ -529,11 +534,6 @@ export default function BlogPostPage({ params }: Props) {
             </div>
           </div>
         )}
-        </div>
-
-        {/* Inline chat — попробовать AI прямо со страницы */}
-        <div className="max-w-3xl mt-14">
-          <ChatWidget placeholder="Спросите по теме статьи или попробуйте AI на своей задаче" />
         </div>
       </div>
     </div>
