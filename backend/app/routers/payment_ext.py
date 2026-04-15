@@ -685,6 +685,7 @@ async def get_ton_rate():
 class TonOrderRequest(BaseModel):
     tier: str
     amount_ton: float | None = None
+    period: str | None = None  # "month" (default) or "year"
 
 
 @router.post("/ton-order")
@@ -708,7 +709,8 @@ async def create_ton_order(
 
     order_id = _uuid.uuid4().hex[:12]
     comment = f"stone_{order_id}"
-    price_rub = PLAN_PRICES_RUB[req.tier]
+    is_yearly = (req.period or "month") == "year"
+    price_rub = PLAN_PRICES_YEARLY_RUB[req.tier] if is_yearly else PLAN_PRICES_RUB[req.tier]
     if user:
         price_rub, _ = apply_discount(price_rub, user)
         if _ is not None:
@@ -726,6 +728,7 @@ async def create_ton_order(
         "user_id": user_id, "user_tg_id": tg_user["id"],
         "tier": req.tier, "amount_ton": amount_ton,
         "amount_usd": price_usd, "comment": comment,
+        "period": "year" if is_yearly else "month",
         "status": "pending", "created_at": _time.time(),
         "confirmed_tx_hash": None,
     }
@@ -733,7 +736,7 @@ async def create_ton_order(
     tx = Transaction(
         user_tg_id=tg_user["id"], amount=price_rub, currency="TON",
         amount_usd=price_usd, product_type="subscription",
-        product_id=f"sub:{req.tier}", status="pending",
+        product_id=f"sub:{req.tier}:year" if is_yearly else f"sub:{req.tier}", status="pending",
         provider_id=f"ton:{order_id}",
     )
     db.add(tx)
@@ -811,7 +814,8 @@ async def check_ton_payment(
                         user = result2.scalar_one_or_none()
                     if user:
                         from app.services.subscription import activate_subscription
-                        activate_subscription(user, order["tier"])
+                        days = 365 if order.get("period") == "year" else 30
+                        activate_subscription(user, order["tier"], days=days)
 
                     tx.status = "completed"
                     from app.routers.referral import credit_referrer

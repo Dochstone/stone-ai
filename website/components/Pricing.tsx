@@ -836,6 +836,7 @@ export default function Pricing() {
                       <div className="rounded-xl border border-text/[0.06] overflow-hidden">
                         <TonPayButton
                           tier={modal.id}
+                          period={billing}
                           onSuccess={() => {
                             setSuccessAnim(true);
                             setTimeout(() => {

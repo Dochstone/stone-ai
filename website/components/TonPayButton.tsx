@@ -2,21 +2,19 @@
 
 import { TonConnectButton, useTonConnectUI, useTonWallet } from "@tonconnect/ui-react";
 import { useState, useEffect, useCallback } from "react";
+import { PLAN_PRICES_RUB, planYearlyPriceNum, type PaidPlanId } from "@/lib/pricing";
+import { USD_TO_RUB } from "@/lib/constants";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 const MERCHANT_WALLET = "UQBfxl37Bgf7FVaO4prAM5YA0d9pfJdRL7hymmYZX01Skjc7";
 
-const TIER_PRICES_USD: Record<string, number> = {
-  mini: 4.0,
-  max: 9.0,
-  "max-pro": 20.0,
-};
-
 export default function TonPayButton({
   tier,
+  period = "month",
   onSuccess,
 }: {
   tier: string;
+  period?: "month" | "year";
   onSuccess?: () => void;
 }) {
   const [tonConnectUI] = useTonConnectUI();
@@ -26,7 +24,11 @@ export default function TonPayButton({
   const [error, setError] = useState("");
   const [tonRate, setTonRate] = useState<number>(0);
 
-  const priceUsd = TIER_PRICES_USD[tier];
+  const tierPaid = (tier === "mini" || tier === "max" || tier === "max-pro") ? (tier as PaidPlanId) : null;
+  const rub = tierPaid
+    ? (period === "year" ? planYearlyPriceNum(tierPaid) : PLAN_PRICES_RUB[tierPaid])
+    : 0;
+  const priceUsd = rub > 0 ? rub / USD_TO_RUB : 0;
 
   useEffect(() => {
     fetch(`${API_URL}/api/payment/ton-rate`)
@@ -59,7 +61,7 @@ export default function TonPayButton({
       const orderRes = await fetch(`${API_URL}/api/payment/ton-order`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
-        body: JSON.stringify({ tier, amount_ton: payTon }),
+        body: JSON.stringify({ tier, amount_ton: payTon, period }),
       });
       const order = await orderRes.json();
       if (!orderRes.ok) { setError(order.detail || "Ошибка"); setLoading(false); setStatus(""); return; }
@@ -87,7 +89,7 @@ export default function TonPayButton({
     }
     setLoading(false);
     setStatus("");
-  }, [tier, priceUsd, tonConnectUI, onSuccess]);
+  }, [tier, period, priceUsd, tonConnectUI, onSuccess]);
 
   if (!priceUsd) return null;
 
