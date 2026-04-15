@@ -86,20 +86,20 @@ const techStack = [
   { name: "Tripo3D, Stability", models: "Tripo v2.5, TripoSR (3D)" },
 ];
 
-// Gradient-glass style: white icon on vibrant gradient tile with soft glow.
+// Glass style: 15% tint of the icon color + inner highlight + soft glow.
 const tools: Tool[] = [
-  { name: "AI Чат",             Icon: MessageSquare, color: "#22D3EE", bg: "linear-gradient(135deg,#06B6D4,#3B82F6)", href: "/dashboard/chat",          desc: "50+ моделей, стриминг, DualChat" },
-  { name: "Конструктор ботов",  Icon: Bot,           color: "#A855F7", bg: "linear-gradient(135deg,#A855F7,#6366F1)", href: "/dashboard/bots",          desc: "Бот с базой знаний (RAG)" },
-  { name: "AI-Агент",           Icon: Sparkles,      color: "#C4623D", bg: "linear-gradient(135deg,#C4623D,#F59E0B)", href: "/dashboard/agent",         desc: "Автономные multi-step задачи" },
-  { name: "Рекламные кампании", Icon: Megaphone,     color: "#F59E0B", bg: "linear-gradient(135deg,#F59E0B,#F43F5E)", href: "/dashboard/campaigns",     desc: "Яндекс Директ за 3 минуты" },
-  { name: "AI-шаблоны",         Icon: FileText,      color: "#14B8A6", bg: "linear-gradient(135deg,#14B8A6,#06B6D4)", href: "/dashboard/templates",     desc: "50+ готовых промптов" },
-  { name: "Фотосессия товаров", Icon: Camera,        color: "#F43F5E", bg: "linear-gradient(135deg,#F43F5E,#EC4899)", href: "/dashboard/photo-session", desc: "Смена фона, на модели, пакетная" },
-  { name: "Презентации",        Icon: Presentation,  color: "#3B82F6", bg: "linear-gradient(135deg,#3B82F6,#06B6D4)", href: "/dashboard/presentations", desc: "Слайды + PPTX экспорт" },
-  { name: "SEO-модуль",         Icon: Search,        color: "#10B981", bg: "linear-gradient(135deg,#10B981,#14B8A6)", href: "/dashboard/seo",           desc: "Статьи, мета-теги, A/B тесты" },
-  { name: "Виджет для сайта",   Icon: Code,          color: "#8B5CF6", bg: "linear-gradient(135deg,#8B5CF6,#6366F1)", href: "/widget",                  desc: "Встраиваемый чат-бот" },
-  { name: "Telegram-боты",      Icon: Send,          color: "#229ED9", bg: "linear-gradient(135deg,#229ED9,#0EA5E9)", external: true, href: "https://t.me/drifttt55bot", desc: "Подключение через BotFather" },
-  { name: "Аналитика",          Icon: LineChart,     color: "#06B6D4", bg: "linear-gradient(135deg,#06B6D4,#3B82F6)", href: "/admin",                   desc: "Отслеживание посещений" },
-  { name: "Геймификация",       Icon: Target,        color: "#EAB308", bg: "linear-gradient(135deg,#EAB308,#F59E0B)", href: "/dashboard/games",         desc: "Достижения, игры, лидерборд" },
+  { name: "AI Чат",             Icon: MessageSquare, color: "#22D3EE", bg: "rgba(34,211,238,0.15)",  href: "/dashboard/chat",          desc: "50+ моделей, стриминг, DualChat" },
+  { name: "Конструктор ботов",  Icon: Bot,           color: "#A855F7", bg: "rgba(168,85,247,0.15)",  href: "/dashboard/bots",          desc: "Бот с базой знаний (RAG)" },
+  { name: "AI-Агент",           Icon: Sparkles,      color: "#C4623D", bg: "rgba(196,98,61,0.15)",   href: "/dashboard/agent",         desc: "Автономные multi-step задачи" },
+  { name: "Рекламные кампании", Icon: Megaphone,     color: "#F59E0B", bg: "rgba(245,158,11,0.15)",  href: "/dashboard/campaigns",     desc: "Яндекс Директ за 3 минуты" },
+  { name: "AI-шаблоны",         Icon: FileText,      color: "#14B8A6", bg: "rgba(20,184,166,0.15)",  href: "/dashboard/templates",     desc: "50+ готовых промптов" },
+  { name: "Фотосессия товаров", Icon: Camera,        color: "#F43F5E", bg: "rgba(244,63,94,0.15)",   href: "/dashboard/photo-session", desc: "Смена фона, на модели, пакетная" },
+  { name: "Презентации",        Icon: Presentation,  color: "#3B82F6", bg: "rgba(59,130,246,0.15)",  href: "/dashboard/presentations", desc: "Слайды + PPTX экспорт" },
+  { name: "SEO-модуль",         Icon: Search,        color: "#10B981", bg: "rgba(16,185,129,0.15)",  href: "/dashboard/seo",           desc: "Статьи, мета-теги, A/B тесты" },
+  { name: "Виджет для сайта",   Icon: Code,          color: "#8B5CF6", bg: "rgba(139,92,246,0.15)",  href: "/widget",                  desc: "Встраиваемый чат-бот" },
+  { name: "Telegram-боты",      Icon: Send,          color: "#229ED9", bg: "rgba(34,158,217,0.15)",  external: true, href: "https://t.me/drifttt55bot", desc: "Подключение через BotFather" },
+  { name: "Аналитика",          Icon: LineChart,     color: "#06B6D4", bg: "rgba(6,182,212,0.15)",   href: "/admin",                   desc: "Отслеживание посещений" },
+  { name: "Геймификация",       Icon: Target,        color: "#EAB308", bg: "rgba(234,179,8,0.15)",   href: "/dashboard/games",         desc: "Достижения, игры, лидерборд" },
 ];
 
 const audiences = [
@@ -266,13 +266,14 @@ export default function AboutPage() {
                   className="tile-hover group block bg-white rounded-xl border border-text/5 p-4 focus:outline-none focus:ring-2 focus:ring-accent/30"
                 >
                   <span
-                    className="tile-icon relative z-10 inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3"
+                    className="tile-icon relative z-10 inline-flex items-center justify-center w-11 h-11 rounded-xl backdrop-blur-sm mb-3"
                     style={{
                       background: t.bg,
-                      boxShadow: `inset 0 1px 0 rgba(255,255,255,0.25), 0 6px 20px -6px ${t.color}80`,
+                      boxShadow: `inset 0 1px 0 rgba(255,255,255,0.15), 0 0 20px ${t.bg}`,
+                      color: t.color,
                     }}
                   >
-                    <Icon className="w-6 h-6 text-white drop-shadow" strokeWidth={2.4} />
+                    <Icon className="w-6 h-6" strokeWidth={2.4} />
                   </span>
                   <div className="relative z-10 font-bold text-sm mb-0.5 transition-colors duration-200 group-hover:text-accent">{t.name}</div>
                   <div className="relative z-10 text-text/40 text-[11px] transition-colors duration-200 group-hover:text-text/60">{t.desc}</div>
