@@ -2,6 +2,46 @@
 
 import { useState, useRef, useCallback } from "react";
 
+function CopyMessageButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      // ignore
+    }
+  };
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      aria-label={copied ? "Скопировано" : "Скопировать ответ"}
+      className={`opacity-0 group-hover:opacity-100 transition-all flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-md ${
+        copied ? "bg-teal/15 text-teal" : "bg-text/[0.06] text-text/50 hover:bg-accent/15 hover:text-accent"
+      }`}
+    >
+      {copied ? (
+        <>
+          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+          <span>Скопировано</span>
+        </>
+      ) : (
+        <>
+          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
+          <span>Копировать</span>
+        </>
+      )}
+    </button>
+  );
+}
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
 const STARTER_PROMPTS = [
@@ -158,31 +198,44 @@ export default function ChatWidget({ modelId, placeholder }: { modelId?: string;
               </div>
             </div>
           )}
-          {messages.map((m, i) => (
-            <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-              <div
-                className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-[13.5px] leading-relaxed ${
-                  m.role === "user"
-                    ? "bg-accent text-white rounded-br-sm"
-                    : "bg-text/[0.05] text-text/80 rounded-bl-sm"
-                }`}
-              >
-                {m.role === "assistant" && m.content === "REGISTER_CTA" ? (
-                  <span>
-                    Бесплатные запросы закончились.{" "}
-                    <a href="/profile" className="text-accent font-bold hover:underline">
-                      Зарегистрируйтесь
-                    </a>{" "}
-                    — 10 запросов/день бесплатно.
-                  </span>
-                ) : (
-                  <span className={streaming && i === messages.length - 1 && m.role === "assistant" ? "streaming-cursor" : ""}>
-                    {m.content}
-                  </span>
-                )}
+          {messages.map((m, i) => {
+            const isAssistant = m.role === "assistant";
+            const isCta = m.content === "REGISTER_CTA";
+            const isLastStreaming = streaming && i === messages.length - 1 && isAssistant;
+            const showCopy = isAssistant && !isCta && !isLastStreaming && m.content.length > 0;
+            return (
+              <div key={i} className={`flex group ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                <div className="max-w-[85%] flex flex-col gap-1.5">
+                  <div
+                    className={`rounded-2xl px-4 py-2.5 text-[13.5px] leading-relaxed ${
+                      m.role === "user"
+                        ? "bg-accent text-white rounded-br-sm"
+                        : "bg-text/[0.05] text-text/80 rounded-bl-sm"
+                    }`}
+                  >
+                    {isAssistant && isCta ? (
+                      <span>
+                        Бесплатные запросы закончились.{" "}
+                        <a href="/profile" className="text-accent font-bold hover:underline">
+                          Зарегистрируйтесь
+                        </a>{" "}
+                        — 10 запросов/день бесплатно.
+                      </span>
+                    ) : (
+                      <span className={isLastStreaming ? "streaming-cursor" : ""}>
+                        {m.content}
+                      </span>
+                    )}
+                  </div>
+                  {showCopy && (
+                    <div className="pl-1">
+                      <CopyMessageButton text={m.content} />
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Input */}
