@@ -55,20 +55,23 @@ export default function BlogPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogItemListJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogFaqJsonLd) }} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-14">
+        <div className="text-center mb-8 md:mb-14">
           <div className="inline-block bg-accent/10 text-accent px-4 py-1.5 rounded-full text-sm font-semibold mb-4">
             Блог
           </div>
-          <h1 className="text-3xl md:text-4xl font-extrabold mb-4">
+          <h1 className="text-4xl md:text-5xl font-extrabold mb-4">
             Статьи и гайды
           </h1>
-          <p className="text-text/60 max-w-lg mx-auto">
+          <p className="text-base text-text/70 max-w-lg mx-auto">
             Как выбрать AI-модель, сэкономить на токенах и оплатить в рублях.
           </p>
         </div>
 
-        <nav aria-label="Категории блога" className="flex flex-wrap justify-center gap-2 mb-10 max-w-4xl mx-auto">
-          <span className="px-4 py-2 rounded-full bg-accent text-white text-sm font-semibold">
+        <nav
+          aria-label="Категории блога"
+          className="-mx-4 sm:mx-auto px-4 sm:px-0 mb-8 md:mb-10 sm:max-w-4xl flex gap-2 overflow-x-auto sm:flex-wrap sm:justify-center snap-x snap-mandatory sm:snap-none"
+        >
+          <span className="shrink-0 snap-start whitespace-nowrap px-4 py-2 rounded-full bg-accent text-white text-sm font-semibold">
             Все ({POSTS.length})
           </span>
           {BLOG_CATEGORIES.map((c) => {
@@ -77,7 +80,7 @@ export default function BlogPage() {
               <Link
                 key={c.slug}
                 href={`/blog/category/${c.slug}`}
-                className="px-4 py-2 rounded-full bg-text/5 text-text/70 hover:bg-accent/10 hover:text-accent text-sm font-semibold transition-colors"
+                className="shrink-0 snap-start whitespace-nowrap px-4 py-2 rounded-full bg-text/5 text-text/70 hover:bg-accent/10 hover:text-accent text-sm font-semibold transition-colors"
               >
                 <span aria-hidden="true" className="mr-1">{c.icon}</span>
                 {c.name} ({count})

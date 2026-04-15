@@ -35,6 +35,14 @@ export default function Nav() {
   }, []);
 
   useEffect(() => {
+    if (menuOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => { document.body.style.overflow = prev; };
+    }
+  }, [menuOpen]);
+
+  useEffect(() => {
     try {
       const saved = localStorage.getItem("stone_auth");
       if (saved) {
@@ -187,8 +195,8 @@ export default function Nav() {
 
       {/* Mobile menu — below md (768px) */}
       {menuOpen && (
-        <div className="md:hidden bg-bg border-t border-text/5 px-4 pb-4 max-h-[80vh] overflow-y-auto">
-          <div className="flex flex-col gap-1 py-3">
+        <div className="md:hidden bg-bg border-t border-text/5 px-4 pb-[env(safe-area-inset-bottom)] h-[calc(100dvh-3.5rem)] overflow-y-auto">
+          <div className="flex flex-col gap-1 py-3 pb-6">
             {/* Основные инструменты */}
             <p className="text-xs text-text/30 font-semibold uppercase tracking-wider px-2 pt-1 pb-1">Инструменты</p>
             {tools.slice(0, 3).map((t) => (
@@ -236,8 +244,8 @@ export default function Nav() {
             {authEmail ? (
               <>
                 <a href="/dashboard" onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-3 py-2.5 px-2 min-h-[44px] text-accent hover:text-accent/80 font-semibold">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  className="flex items-center gap-3 py-2.5 px-2 min-h-[44px] text-text/70 hover:text-text font-medium">
+                  <svg className="w-5 h-5 text-accent/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                   </svg>
                   Панель управления
