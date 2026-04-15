@@ -1,10 +1,11 @@
 import Image from "next/image";
+import { planPrice } from "@/lib/pricing";
 
 const reviews = [
   {
     name: "Алексей М.",
     role: "Разработчик",
-    text: "Наконец-то все нейросети в одной студии. Пользуюсь каждый день для работы с кодом. Подписка за 890₽ — дешевле ChatGPT Plus в разы.",
+    text: `Наконец-то все нейросети в одной студии. Пользуюсь каждый день для работы с кодом. Подписка за ${planPrice("mini")} — дешевле ChatGPT Plus в разы.`,
     stars: 5,
     avatar: "/demo/avatar-alexey.webp",
   },
