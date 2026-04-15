@@ -43,9 +43,9 @@ export default function ProductScreenshot() {
                   <a
                     key={t.name}
                     href={t.href}
-                    className="group bg-text/[0.03] rounded-xl p-3 text-center transition-all duration-300 ease-out hover:bg-accent/8 hover:-translate-y-0.5 hover:scale-105 hover:shadow-md hover:shadow-accent/15 motion-reduce:transition-none motion-reduce:hover:transform-none block focus:outline-none focus:ring-2 focus:ring-accent/30"
+                    className="tile-hover group block bg-text/[0.03] rounded-xl p-3 text-center border border-transparent focus:outline-none focus:ring-2 focus:ring-accent/30"
                   >
-                    <span className="text-lg block mb-1 transition-transform duration-300 ease-out group-hover:scale-125 group-hover:-rotate-6 motion-reduce:transform-none">{t.icon}</span>
+                    <span className="tile-icon text-lg block mb-1">{t.icon}</span>
                     <span className="text-[10px] font-semibold text-text/60 block transition-colors group-hover:text-accent">{t.name}</span>
                     {t.badge && (
                       <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded mt-1 inline-block ${t.badge === "NEW" ? "bg-accent/10 text-accent" : "bg-text/[0.06] text-text/30"}`}>{t.badge}</span>

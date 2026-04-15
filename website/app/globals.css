@@ -274,12 +274,47 @@ button[class*="rounded-xl"] {
   min-height: 44px;
 }
 
-/* Card hover lift */
+/* Card hover lift — generic content cards (blog posts, models, reviews, ...) */
 .card-hover {
-  @apply transition-all duration-300;
+  @apply transition-all duration-300 ease-out;
 }
 .card-hover:hover {
-  @apply -translate-y-1 shadow-lg;
+  @apply -translate-y-1 scale-[1.02] shadow-xl;
+  border-color: rgba(196, 98, 61, 0.25); /* accent/25 */
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-hover, .card-hover:hover { transition: none; transform: none; }
+}
+
+/* Tile hover — small icon cards (tools, modules, dashboard tiles).
+ * Wrap an icon in <span class="tile-icon"> for the rotation/scale effect. */
+.tile-hover {
+  @apply relative overflow-hidden transition-all duration-300 ease-out;
+}
+.tile-hover:hover {
+  @apply -translate-y-1 scale-[1.04] shadow-xl;
+  border-color: rgba(196, 98, 61, 0.40);
+  box-shadow: 0 10px 30px -8px rgba(196, 98, 61, 0.18);
+}
+.tile-hover .tile-icon {
+  @apply inline-block transition-transform duration-300 ease-out;
+}
+.tile-hover:hover .tile-icon {
+  transform: scale(1.18) rotate(-6deg);
+}
+.tile-hover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(196,98,61,0.06), transparent 50%, rgba(20,184,166,0.06));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.tile-hover:hover::after { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .tile-hover, .tile-hover:hover, .tile-hover .tile-icon, .tile-hover:hover .tile-icon { transition: none; transform: none; }
+  .tile-hover::after, .tile-hover:hover::after { opacity: 0; }
 }
 
 /* ── WebChat markdown styles ── */
