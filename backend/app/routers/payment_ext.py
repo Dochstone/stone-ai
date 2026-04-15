@@ -190,7 +190,12 @@ async def create_platega_order(
         usd_amount = req.usd_amount
     order_id = platega_service.generate_order_id(tg_user["id"])
 
-    description = f"Stone AI · Подписка {req.tier}" if is_subscription else f"Stone AI · Пополнение баланса: ${req.usd_amount:.2f}"
+    if is_subscription:
+        from app.services.subscription import PLANS
+        tier_label = PLANS.get(req.tier, {}).get("name", req.tier)
+        description = f"Stone AI · Подписка {tier_label}"
+    else:
+        description = f"Stone AI · Пополнение баланса: ${req.usd_amount:.2f}"
 
     payment = await platega_service.create_payment(
         amount_rub=rub_amount,
