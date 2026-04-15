@@ -1,7 +1,7 @@
 """Telegram bot handlers — /start, /help, /plan commands."""
 
 from aiogram import Router, F
-from aiogram.types import Message, WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton, WebAppInfo as WAI
+from aiogram.types import Message, WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardRemove
 from aiogram.filters import Command
 
 from app.config import get_settings
@@ -140,8 +140,7 @@ async def cmd_start(message: Message):
         ],
     ])
 
-    # Remove old reply keyboard if exists
-    from aiogram.types import ReplyKeyboardRemove
+    # Remove old reply keyboard if it was ever set in prior sessions
     await message.answer(
         "<b>Stone AI — 65+ нейросетей в одном окне</b>\n\n"
         "GPT-5.4, Claude Opus, Gemini Pro, DeepSeek, Sora 2 — "
@@ -275,22 +274,3 @@ async def callback_plans(callback):
 async def callback_help(callback):
     await cmd_help(callback.message)
     await callback.answer()
-
-
-# Reply keyboard button handlers
-@router.message(F.text == "❓ Помощь")
-async def reply_help(message: Message):
-    await cmd_help(message)
-
-
-@router.message(F.text == "🌐 Сайт")
-async def reply_website(message: Message):
-    await message.answer(
-        "🌐 <b>Stone AI — Веб-версия</b>\n\n"
-        "Полный чат с историей, все модели:\n"
-        "👉 <a href='https://stoneai.ru/webchat'>stoneai.ru/webchat</a>\n\n"
-        "Тарифы и оплата:\n"
-        "👉 <a href='https://stoneai.ru/pricing'>stoneai.ru/pricing</a>",
-        parse_mode="HTML",
-        disable_web_page_preview=True,
-    )

@@ -90,17 +90,6 @@ PASS_LIMITS = {
     "single": {"premium": 1,  "duration_hours": None},
 }
 
-# Upgrade messages
-_UPGRADE_MESSAGES = {
-    "limit_hit": "Лимит на сегодня исчерпан. Обновление через {hours}ч. Перейдите на тариф Start за 990₽/мес",
-    "image_limit": "Лимит {limit} изображений на сегодня. Перейдите на тариф Start за 990₽/мес",
-    "model_locked": "{model_name} доступен на тарифе Start (990₽/мес)",
-    "video_locked": "Видео доступно на тарифе Опти (790₽/мес)",
-    "audio_locked": "Аудио доступно на тарифе Опти (790₽/мес)",
-    "3d_locked": "3D генерация доступна на тарифе Опти (790₽/мес)",
-}
-
-
 # ─── Helper functions ───
 
 async def get_or_create_user(db: AsyncSession, tg_user: dict, start_param: str | None = None) -> User:
