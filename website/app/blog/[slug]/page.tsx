@@ -126,17 +126,32 @@ export default function BlogPostPage({ params }: Props) {
 
   const ogUrl = `${SITE_URL}/blog/${post.slug}/opengraph-image`;
   const author = getAuthor(post.author ?? DEFAULT_AUTHOR_SLUG) ?? getAuthor(DEFAULT_AUTHOR_SLUG)!;
+  const category = post.category ? BLOG_CATEGORY_BY_SLUG[post.category] : null;
+
+  // Approximate word count for BlogPosting schema
+  const wordCount = post.content.reduce((acc, b) => {
+    const text = typeof b === "string" ? b : "";
+    return acc + text.replace(/<[^>]+>/g, " ").trim().split(/\s+/).filter(Boolean).length;
+  }, 0);
+
   const articleJsonLd = {
     "@context": "https://schema.org",
-    "@type": "Article",
+    "@type": "BlogPosting",
+    "@id": `${SITE_URL}/blog/${post.slug}#article`,
     headline: post.title,
     description: post.description,
     image: [ogUrl],
+    url: `${SITE_URL}/blog/${post.slug}`,
     datePublished: post.date,
     dateModified: post.dateModified,
     inLanguage: "ru-RU",
+    wordCount,
+    ...(category ? { articleSection: category.name } : {}),
+    ...(post.tags && post.tags.length ? { keywords: post.tags.join(", ") } : {}),
+    isPartOf: { "@type": "Blog", "@id": `${SITE_URL}/blog#blog`, name: "Блог Stone AI" },
     author: {
       "@type": "Person",
+      "@id": `${SITE_URL}/authors/${author.slug}#person`,
       name: author.name,
       url: `${SITE_URL}/authors/${author.slug}`,
       jobTitle: author.jobTitle,
@@ -203,7 +218,6 @@ export default function BlogPostPage({ params }: Props) {
 
   const related = getRelated(post.slug);
 
-  const category = post.category ? BLOG_CATEGORY_BY_SLUG[post.category] : null;
   const bcItems = [
     { label: "Блог", href: "/blog" },
     ...(category ? [{ label: category.name, href: `/blog/category/${category.slug}` }] : []),
@@ -281,18 +295,47 @@ export default function BlogPostPage({ params }: Props) {
 
             {/* Content */}
             <div className="space-y-6">
-              {post.content.map((block, i) => {
-                if (typeof block === "object" && "h2" in block) {
-                  return (
-                    <h2
-                      key={i}
-                      id={toAnchor(block.h2)}
-                      className="text-xl md:text-2xl font-extrabold mt-10 mb-2 scroll-mt-28"
-                    >
-                      {block.h2}
-                    </h2>
-                  );
-                }
+              {(() => {
+                const totalH2 = post.content.filter(
+                  (b): b is { h2: string } => typeof b === "object" && "h2" in b,
+                ).length;
+                // Insert mid-article CTA after the 3rd H2, but only on long reads
+                // (≥6 H2 sections — short posts already have the bottom CTA).
+                const ctaAfterH2Index = totalH2 >= 6 ? 3 : -1;
+                let h2Seen = 0;
+                return post.content.map((block, i) => {
+                  if (typeof block === "object" && "h2" in block) {
+                    h2Seen += 1;
+                    const showCtaAfter = h2Seen === ctaAfterH2Index;
+                    return (
+                      <span key={i}>
+                        <h2
+                          id={toAnchor(block.h2)}
+                          className="text-xl md:text-2xl font-extrabold mt-10 mb-2 scroll-mt-28"
+                        >
+                          {block.h2}
+                        </h2>
+                        {showCtaAfter && (
+                          <aside className="not-prose my-8 bg-gradient-to-br from-accent/10 to-teal/5 border border-accent/15 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                            <div className="flex-1 min-w-0">
+                              <p className="font-bold text-text text-[15px] mb-1">
+                                Попробуйте описанное прямо сейчас
+                              </p>
+                              <p className="text-text/55 text-sm">
+                                10 бесплатных запросов в день, 65+ моделей. Без VPN, оплата картой РФ.
+                              </p>
+                            </div>
+                            <a
+                              href="/dashboard/chat"
+                              className="shrink-0 bg-accent text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors whitespace-nowrap"
+                            >
+                              Открыть чат →
+                            </a>
+                          </aside>
+                        )}
+                      </span>
+                    );
+                  }
                 if (typeof block === "object" && "h3" in block) {
                   return (
                     <h3
@@ -386,12 +429,13 @@ export default function BlogPostPage({ params }: Props) {
                     />
                   );
                 }
-                return (
-                  <p key={i} className="text-text/70 text-[15px] leading-[1.8]">
-                    {autoLink(text)}
-                  </p>
-                );
-              })}
+                  return (
+                    <p key={i} className="text-text/70 text-[15px] leading-[1.8]">
+                      {autoLink(text)}
+                    </p>
+                  );
+                });
+              })()}
             </div>
             <BlogCopyButtons />
           </article>

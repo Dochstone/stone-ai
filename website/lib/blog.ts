@@ -2065,6 +2065,25 @@ export function getRelated(slug: string): BlogPost[] {
   if (slugs) {
     return slugs.map((s) => POSTS.find((p) => p.slug === s)).filter((p): p is BlogPost => !!p);
   }
+  const current = POSTS.find((p) => p.slug === slug);
+  if (current) {
+    const myTags = new Set((current.tags ?? []).map((t) => t.toLowerCase()));
+    const scored = POSTS.filter((p) => p.slug !== slug).map((p) => {
+      const theirTags = new Set((p.tags ?? []).map((t) => t.toLowerCase()));
+      let overlap = 0;
+      myTags.forEach((t) => { if (theirTags.has(t)) overlap += 1; });
+      const union = new Set<string>(Array.from(myTags).concat(Array.from(theirTags))).size || 1;
+      const sameCategory = p.category && p.category === current.category ? 0.15 : 0;
+      return { post: p, score: overlap / union + sameCategory };
+    });
+    const ranked = scored
+      .filter((x) => x.score > 0)
+      .sort((a, b) => b.score - a.score || b.post.date.localeCompare(a.post.date));
+    if (ranked.length >= 2) return ranked.slice(0, 4).map((x) => x.post);
+    const seen = new Set(ranked.map((x) => x.post.slug));
+    const fillers = SORTED_POSTS.filter((p) => p.slug !== slug && !seen.has(p.slug));
+    return [...ranked.map((x) => x.post), ...fillers].slice(0, 4);
+  }
   // Fallback: 4 most recent other posts
   return SORTED_POSTS.filter((p) => p.slug !== slug).slice(0, 4);
 }
