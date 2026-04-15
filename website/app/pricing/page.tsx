@@ -35,7 +35,7 @@ const pricingJsonLd = {
   "@context": "https://schema.org",
   "@type": "Product",
   name: "Stone AI",
-  description: `AI-студия нового поколения. 65+ нейросетей в одной подписке. Тарифы от 0 до 1 990₽ в месяц.`,
+  description: `AI-студия нового поколения. 65+ нейросетей в одной подписке. Тарифы от 0 до 2 990₽ в месяц.`,
   image: ["https://stoneai.ru/pricing/opengraph-image"],
   url: "https://stoneai.ru/pricing",
   brand: { "@type": "Brand", name: "Stone AI" },
