@@ -14,6 +14,7 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from app.models.user import User
 from app.models.daily_usage import DailyUsage
+from app.pricing import PLAN_PRICES_RUB
 
 logger = logging.getLogger(__name__)
 
@@ -475,7 +476,7 @@ async def check_daily_limit(
             return {
                 "allowed": False,
                 "error": "model_locked",
-                "reason": f"Эта модель доступна по подписке от 590₽/мес",
+                "reason": f"Эта модель доступна по подписке от {PLAN_PRICES_RUB['mini']}₽/мес",
                 "required_tier": "mini",
                 "plan": tier,
                 "tier": tier,
@@ -488,7 +489,7 @@ async def check_daily_limit(
         return {
             "allowed": False,
             "error": "model_locked",
-            "reason": f"Claude Opus доступен на тарифе Pro от 1290₽/мес",
+            "reason": f"Claude Opus доступен на тарифе Pro от {PLAN_PRICES_RUB['max']}₽/мес",
             "required_tier": "max",
             "plan": tier,
             "tier": tier,

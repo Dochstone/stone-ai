@@ -5,8 +5,25 @@ from aiogram.types import Message, WebAppInfo, InlineKeyboardMarkup, InlineKeybo
 from aiogram.filters import Command
 
 from app.config import get_settings
+from app.pricing import PLAN_PRICES_RUB
 
 router = Router()
+
+
+def _fmt_rub(n: int) -> str:
+    """Format 1890 → '1 890₽' (ru locale with NBSP-style space)."""
+    return f"{n:,}".replace(",", " ") + "₽"
+
+
+PRICE_MINI = _fmt_rub(PLAN_PRICES_RUB["mini"])       # 990₽
+PRICE_MAX = _fmt_rub(PLAN_PRICES_RUB["max"])         # 1 890₽
+PRICE_ELITE = _fmt_rub(PLAN_PRICES_RUB["max-pro"])   # 3 990₽
+PRICE_FROM_MIN = PRICE_MINI  # "от X₽" anchor
+
+
+PLAN_SUMMARY_MINI = "20+ моделей · 600 быстрых · 90 премиум · 60 картинок · 13 видео-поинтов"
+PLAN_SUMMARY_MAX = "65+ нейросетей · 1 500 быстрых · 112 премиум · 28 Opus · 140 картинок · 33 видео-поинта"
+PLAN_SUMMARY_ELITE = "65+ нейросетей · 4 500 быстрых · 336 премиум · 56 Opus · 280 картинок · 80 видео-поинтов · API"
 
 
 @router.message(Command("start"))
@@ -130,7 +147,7 @@ async def cmd_start(message: Message):
         "GPT-5.4, Claude Opus, Gemini Pro, DeepSeek, Sora 2 — "
         "текст, картинки, видео и аудио.\n\n"
         "✅ <b>Бесплатно</b> — 10 быстрых + 2 премиум запроса/день, 2 пробных видео\n"
-        "⭐ <b>Подписка от 590₽/мес</b> — все 65+ моделей\n\n"
+        f"⭐ <b>Подписка от {PRICE_FROM_MIN}/мес</b> — все 65+ моделей\n\n"
         "Нажми кнопку ниже, чтобы начать 👇",
         parse_mode="HTML",
         reply_markup=ReplyKeyboardRemove(),
@@ -150,15 +167,16 @@ async def cmd_help(message: Message):
         "/start — Главное меню\n"
         "/plan — Текущий тариф\n"
         "/help — Эта справка\n\n"
-        "<b>Бесплатные модели (10/день + 2 премиум):</b>\n"
+        "<b>Бесплатно (10 быстрых + 2 премиум/день):</b>\n"
         "GPT-4o mini, Claude Haiku, Gemini Flash, "
-        "Llama 4, Mistral Large, DeepSeek V3, Nano Banana, Veo 3\n\n"
-        "<b>Подписка от 590₽/мес:</b>\n"
-        "Start — 20+ моделей, 600 запросов, 13 видео-поинтов\n"
-        "Pro — 65+ моделей + Opus, 1 500 запросов, 33 видео-поинта\n"
-        "Elite — 4 500 запросов, 80 видео-поинтов, API\n\n"
+        "Llama 4, Mistral Large, DeepSeek V3\n\n"
+        "<b>+ пробные:</b> 2 картинки (Nano Banana) · 2 видео (Sora 2 / Veo 3 / Kling)\n\n"
+        f"<b>Подписка от {PRICE_FROM_MIN}/мес:</b>\n"
+        f"Start ({PRICE_MINI}) — {PLAN_SUMMARY_MINI}\n"
+        f"Pro ({PRICE_MAX}) — {PLAN_SUMMARY_MAX}\n"
+        f"Elite ({PRICE_ELITE}) — {PLAN_SUMMARY_ELITE}\n\n"
         "💡 Тяжёлые модели тратят больше единиц: Sonnet/GPT-5.1 = ×2, Opus = ×5\n\n"
-        "<b>Оплата:</b> Telegram Stars, крипто (USDT/BTC/ETH), TON\n\n"
+        "<b>Оплата:</b> Telegram Stars, карты/СБП, крипто (USDT/BTC/ETH), TON\n\n"
         "🌐 Сайт: stoneai.ru\n"
         "💬 Поддержка: @stoneaisupport",
         parse_mode="HTML",
@@ -181,9 +199,9 @@ async def cmd_plan(message: Message):
 
             if not user:
                 text = (
-                    "<b>Тариф: FREE</b>\n\n"
-                    "7 моделей, 10 запросов/день + 2 премиум\n\n"
-                    "Подписка от 590₽/мес открывает 65+ моделей."
+                    "<b>Тариф: 🆓 Free</b>\n\n"
+                    "6 быстрых моделей · 10 запросов/день + 2 премиум\n\n"
+                    f"Подписка от {PRICE_FROM_MIN}/мес открывает 65+ моделей."
                 )
             else:
                 tier = user.subscription_tier or "free"
@@ -193,8 +211,8 @@ async def cmd_plan(message: Message):
                 text = f"<b>Тариф: {tier_emoji} {tier_name}</b>\n\n"
 
                 if tier == "free":
-                    text += "7 моделей, 10 запросов/день\n\n"
-                    text += "Подписка от 590₽/мес открывает 65+ моделей."
+                    text += "6 быстрых моделей · 10 запросов/день + 2 премиум\n\n"
+                    text += f"Подписка от {PRICE_FROM_MIN}/мес открывает 65+ моделей."
                 else:
                     if user.credits_reset_date:
                         text += f"Действует до: {user.credits_reset_date.strftime('%d.%m.%Y')}\n"
@@ -206,8 +224,8 @@ async def cmd_plan(message: Message):
     except Exception:
         text = (
             "<b>Тариф: 🆓 Free</b>\n\n"
-            "7 моделей, 10 запросов/день\n\n"
-            "Подписка от 590₽/мес."
+            "6 быстрых моделей · 10 запросов/день\n\n"
+            f"Подписка от {PRICE_FROM_MIN}/мес."
         )
 
     settings = get_settings()
@@ -241,12 +259,12 @@ async def callback_plans(callback):
 
     await callback.message.answer(
         "<b>Тарифы Stone AI</b>\n\n"
-        "🆓 <b>Pay-per-Use</b> — от 3₽, 10/день + 2 премиум, инструменты с баланса\n"
-        "💙 <b>Start</b> — 590₽/мес, 20+ моделей, 600 запросов, 13 видео-поинтов\n"
-        "🧡 <b>Pro</b> — 1 290₽/мес, 65+ моделей + Opus, 33 видео-поинта\n"
-        "⭐ <b>Elite</b> — 2 990₽/мес, 4 500 запросов, 80 видео-поинтов, API\n\n"
+        "🆓 <b>Free</b> — 10 быстрых + 2 премиум/день, 2 картинки и 2 видео пробных\n"
+        f"💙 <b>Start</b> — {PRICE_MINI}/мес · {PLAN_SUMMARY_MINI}\n"
+        f"🧡 <b>Pro</b> — {PRICE_MAX}/мес · {PLAN_SUMMARY_MAX}\n"
+        f"⭐ <b>Elite</b> — {PRICE_ELITE}/мес · {PLAN_SUMMARY_ELITE}\n\n"
         "💡 Дорогие модели (Opus, Nano Banana Pro) тратят больше единиц.\n"
-        "Оплата: Stars, крипто, TON",
+        "Оплата: Stars, карты/СБП, крипто, TON",
         parse_mode="HTML",
         reply_markup=keyboard,
     )
