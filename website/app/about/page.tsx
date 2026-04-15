@@ -11,7 +11,17 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-type Tool = { name: string; Icon: LucideIcon; color: string; bg: string; href: string; desc: string; external?: boolean };
+type Tool = {
+  name: string;
+  Icon: LucideIcon;
+  color: string;
+  bg: string;
+  href: string;
+  desc: string;
+  external?: boolean;
+  emoji?: string;
+  style: "A" | "B" | "C" | "D" | "E" | "F";
+};
 
 export const metadata: Metadata = {
   title: "О Stone AI — команда, миссия, технологии",
@@ -79,19 +89,39 @@ const techStack = [
 ];
 
 const tools: Tool[] = [
-  { name: "AI Чат",             Icon: MessageSquare, color: "#22D3EE", bg: "rgba(34,211,238,0.15)",  href: "/dashboard/chat",          desc: "50+ моделей, стриминг, DualChat" },
-  { name: "Конструктор ботов",  Icon: Bot,           color: "#A855F7", bg: "rgba(168,85,247,0.15)",  href: "/dashboard/bots",          desc: "Бот с базой знаний (RAG)" },
-  { name: "AI-Агент",           Icon: Sparkles,      color: "#C4623D", bg: "rgba(196,98,61,0.15)",   href: "/dashboard/agent",         desc: "Автономные multi-step задачи" },
-  { name: "Рекламные кампании", Icon: Megaphone,     color: "#F59E0B", bg: "rgba(245,158,11,0.15)",  href: "/dashboard/campaigns",     desc: "Яндекс Директ за 3 минуты" },
-  { name: "AI-шаблоны",         Icon: FileText,      color: "#14B8A6", bg: "rgba(20,184,166,0.15)",  href: "/dashboard/templates",     desc: "50+ готовых промптов" },
-  { name: "Фотосессия товаров", Icon: Camera,        color: "#F43F5E", bg: "rgba(244,63,94,0.15)",   href: "/dashboard/photo-session", desc: "Смена фона, на модели, пакетная" },
-  { name: "Презентации",        Icon: Presentation,  color: "#3B82F6", bg: "rgba(59,130,246,0.15)",  href: "/dashboard/presentations", desc: "Слайды + PPTX экспорт" },
-  { name: "SEO-модуль",         Icon: Search,        color: "#10B981", bg: "rgba(16,185,129,0.15)",  href: "/dashboard/seo",           desc: "Статьи, мета-теги, A/B тесты" },
-  { name: "Виджет для сайта",   Icon: Code,          color: "#8B5CF6", bg: "rgba(139,92,246,0.15)",  href: "/widget",                  desc: "Встраиваемый чат-бот" },
-  { name: "Telegram-боты",      Icon: Send,          color: "#229ED9", bg: "rgba(34,158,217,0.15)",  href: "https://t.me/drifttt55bot", external: true, desc: "Подключение через BotFather" },
-  { name: "Аналитика",          Icon: LineChart,     color: "#06B6D4", bg: "rgba(6,182,212,0.15)",   href: "/admin",                   desc: "Отслеживание посещений" },
-  { name: "Геймификация",       Icon: Target,        color: "#EAB308", bg: "rgba(234,179,8,0.15)",   href: "/dashboard/games",         desc: "Достижения, игры, лидерборд" },
+  // A — Notion-style: tinted pad + mono SVG (current default)
+  { style: "A", name: "AI Чат",             Icon: MessageSquare, color: "#22D3EE", bg: "rgba(34,211,238,0.15)",  href: "/dashboard/chat",          desc: "50+ моделей, стриминг, DualChat" },
+  { style: "A", name: "Конструктор ботов",  Icon: Bot,           color: "#A855F7", bg: "rgba(168,85,247,0.15)",  href: "/dashboard/bots",          desc: "Бот с базой знаний (RAG)" },
+
+  // B — Solid filled icon, no padded tile
+  { style: "B", name: "AI-Агент",           Icon: Sparkles,      color: "#C4623D", bg: "",                       href: "/dashboard/agent",         desc: "Автономные multi-step задачи" },
+  { style: "B", name: "Рекламные кампании", Icon: Megaphone,     color: "#F59E0B", bg: "",                       href: "/dashboard/campaigns",     desc: "Яндекс Директ за 3 минуты" },
+
+  // C — Duotone (2-tone via opacity trick)
+  { style: "C", name: "AI-шаблоны",         Icon: FileText,      color: "#14B8A6", bg: "rgba(20,184,166,0.25)",  href: "/dashboard/templates",     desc: "50+ готовых промптов" },
+  { style: "C", name: "Фотосессия товаров", Icon: Camera,        color: "#F43F5E", bg: "rgba(244,63,94,0.25)",   href: "/dashboard/photo-session", desc: "Смена фона, на модели, пакетная" },
+
+  // D — Gradient fill tile with white icon
+  { style: "D", name: "Презентации",        Icon: Presentation,  color: "#FFFFFF", bg: "linear-gradient(135deg,#3B82F6,#06B6D4)", href: "/dashboard/presentations", desc: "Слайды + PPTX экспорт" },
+  { style: "D", name: "SEO-модуль",         Icon: Search,        color: "#FFFFFF", bg: "linear-gradient(135deg,#10B981,#14B8A6)", href: "/dashboard/seo",           desc: "Статьи, мета-теги, A/B тесты" },
+
+  // E — Emoji in pastel circle
+  { style: "E", name: "Виджет для сайта",   Icon: Code,          color: "#8B5CF6", bg: "rgba(139,92,246,0.15)",  emoji: "🪟", href: "/widget",        desc: "Встраиваемый чат-бот" },
+  { style: "E", name: "Telegram-боты",      Icon: Send,          color: "#229ED9", bg: "rgba(34,158,217,0.15)",  emoji: "✈️", external: true, href: "https://t.me/drifttt55bot", desc: "Подключение через BotFather" },
+
+  // F — Glass / glow style
+  { style: "F", name: "Аналитика",          Icon: LineChart,     color: "#06B6D4", bg: "rgba(6,182,212,0.15)",   href: "/admin",                   desc: "Отслеживание посещений" },
+  { style: "F", name: "Геймификация",       Icon: Target,        color: "#EAB308", bg: "rgba(234,179,8,0.15)",   href: "/dashboard/games",         desc: "Достижения, игры, лидерборд" },
 ];
+
+const STYLE_LABELS: Record<Tool["style"], string> = {
+  A: "A · Notion",
+  B: "B · Filled",
+  C: "C · Duotone",
+  D: "D · Gradient",
+  E: "E · Emoji",
+  F: "F · Glass",
+};
 
 const audiences = [
   { role: "Маркетологи и SMM", desc: "Контент-планы, сценарии для рилсов, тексты постов, визуалы для соцсетей, анализ конкурентов, генерация рекламных креативов. Экономят до 60% времени на рутинных задачах." },
@@ -246,22 +276,92 @@ export default function AboutPage() {
         <section className="mb-16">
           <h2 className="text-2xl md:text-3xl font-extrabold text-center mb-4">Что умеет Stone AI</h2>
           <p className="text-text/50 text-center mb-10 max-w-lg mx-auto">Не просто чат — полноценная AI-платформа для работы и бизнеса</p>
+          <p className="text-center text-xs text-text/40 mb-4">
+            ⓘ Демо-режим: каждая пара плиток — другой стиль иконки. Выбери любимый и напиши мне.
+          </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {tools.map((t) => {
               const Icon = t.Icon;
+
+              // ── Render icon box per style ──
+              let iconBox: React.ReactNode = null;
+              if (t.style === "A") {
+                // Notion-style: tinted rounded pad + mono SVG
+                iconBox = (
+                  <span
+                    className="inline-flex items-center justify-center w-11 h-11 rounded-xl"
+                    style={{ background: t.bg, color: t.color }}
+                  >
+                    <Icon className="w-6 h-6" strokeWidth={2.4} />
+                  </span>
+                );
+              } else if (t.style === "B") {
+                // Filled icon, no pad (icon becomes the focal point)
+                iconBox = (
+                  <Icon className="w-10 h-10" fill={t.color} stroke={t.color} strokeWidth={1.5} />
+                );
+              } else if (t.style === "C") {
+                // Duotone: stronger 25% tile + mixed fill/stroke
+                iconBox = (
+                  <span
+                    className="inline-flex items-center justify-center w-11 h-11 rounded-2xl"
+                    style={{ background: t.bg }}
+                  >
+                    <Icon
+                      className="w-6 h-6"
+                      fill={t.color}
+                      fillOpacity={0.25}
+                      stroke={t.color}
+                      strokeWidth={2}
+                    />
+                  </span>
+                );
+              } else if (t.style === "D") {
+                // Gradient-filled rounded tile with white icon
+                iconBox = (
+                  <span
+                    className="inline-flex items-center justify-center w-11 h-11 rounded-xl shadow-md"
+                    style={{ background: t.bg }}
+                  >
+                    <Icon className="w-6 h-6 text-white" strokeWidth={2.4} />
+                  </span>
+                );
+              } else if (t.style === "E") {
+                // Emoji inside pastel circle
+                iconBox = (
+                  <span
+                    className="inline-flex items-center justify-center w-11 h-11 rounded-full text-2xl"
+                    style={{ background: t.bg }}
+                  >
+                    {t.emoji}
+                  </span>
+                );
+              } else {
+                // F — Glass / glow: backdrop blur + inner glow ring
+                iconBox = (
+                  <span
+                    className="relative inline-flex items-center justify-center w-11 h-11 rounded-xl backdrop-blur-sm"
+                    style={{
+                      background: t.bg,
+                      boxShadow: `inset 0 1px 0 rgba(255,255,255,0.15), 0 0 20px ${t.bg}`,
+                    }}
+                  >
+                    <Icon className="w-6 h-6" strokeWidth={2.4} style={{ color: t.color }} />
+                  </span>
+                );
+              }
+
               return (
                 <a
                   key={t.name}
                   href={t.href}
                   {...(t.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                  className="tile-hover group block bg-white rounded-xl border border-text/5 p-4 focus:outline-none focus:ring-2 focus:ring-accent/30"
+                  className="tile-hover group relative block bg-white rounded-xl border border-text/5 p-4 focus:outline-none focus:ring-2 focus:ring-accent/30"
                 >
-                  <span
-                    className="tile-icon relative z-10 inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3"
-                    style={{ background: t.bg, color: t.color }}
-                  >
-                    <Icon className="w-6 h-6" strokeWidth={2.4} />
+                  <span className="absolute top-2 right-2 text-[9px] font-bold text-text/30 bg-text/5 px-1.5 py-0.5 rounded">
+                    {STYLE_LABELS[t.style]}
                   </span>
+                  <span className="tile-icon relative z-10 mb-3 block">{iconBox}</span>
                   <div className="relative z-10 font-bold text-sm mb-0.5 transition-colors duration-200 group-hover:text-accent">{t.name}</div>
                   <div className="relative z-10 text-text/40 text-[11px] transition-colors duration-200 group-hover:text-text/60">{t.desc}</div>
                 </a>
