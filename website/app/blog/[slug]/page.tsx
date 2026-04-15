@@ -337,9 +337,19 @@ export default function BlogPostPage({ params }: Props) {
                     </pre>
                   );
                 }
+                const text = String(block);
+                if (/<(br|b|i|u|strong|em|a|code)\b/i.test(text)) {
+                  return (
+                    <p
+                      key={i}
+                      className="text-text/70 text-[15px] leading-[1.8] [&_a]:text-accent [&_a]:hover:underline [&_b]:text-text [&_b]:font-semibold [&_strong]:text-text [&_strong]:font-semibold [&_code]:bg-text/5 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-[13px]"
+                      dangerouslySetInnerHTML={{ __html: text }}
+                    />
+                  );
+                }
                 return (
                   <p key={i} className="text-text/70 text-[15px] leading-[1.8]">
-                    {autoLink(String(block))}
+                    {autoLink(text)}
                   </p>
                 );
               })}
