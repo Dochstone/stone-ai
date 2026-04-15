@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import katex from "katex";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
@@ -166,6 +167,27 @@ function renderMarkdown(text: string): string {
     .replace(/```(\w*)\n([\s\S]*?)```/g, renderCodeBlock)
     .replace(/~~~(\w*)\n([\s\S]*?)~~~/g, renderCodeBlock);
 
+  // LaTeX math — render via KaTeX and tokenise so subsequent passes can't
+  // mangle the resulting HTML. Display mode ($$…$$) first, then inline ($…$).
+  // Also support \[ … \] and \( … \) since some models emit those forms.
+  const mathTokens: string[] = [];
+  const renderMath = (tex: string, displayMode: boolean) => {
+    try {
+      return katex.renderToString(tex, { displayMode, throwOnError: false, strict: "ignore" });
+    } catch {
+      return `<span class="math-raw">${displayMode ? `$$${tex}$$` : `$${tex}$`}</span>`;
+    }
+  };
+  const pushMath = (tex: string, displayMode: boolean) => {
+    const idx = mathTokens.push(renderMath(tex, displayMode)) - 1;
+    return `\x00M${idx}M\x00`;
+  };
+  html = html
+    .replace(/\$\$([\s\S]+?)\$\$/g, (_m, tex) => pushMath(tex.trim(), true))
+    .replace(/\\\[([\s\S]+?)\\\]/g, (_m, tex) => pushMath(tex.trim(), true))
+    .replace(/\\\(([\s\S]+?)\\\)/g, (_m, tex) => pushMath(tex.trim(), false))
+    .replace(/(?<![\w$])\$([^\s$][^$\n]*?[^\s$]|[^\s$])\$(?![\w$])/g, (_m, tex) => pushMath(tex, false));
+
   // Protect inline code from bold/italic/link mangling by tokenising now
   // and restoring after other inline passes.
   const inlineCodeTokens: string[] = [];
@@ -195,6 +217,9 @@ function renderMarkdown(text: string): string {
       .replace(/>/g, "&gt;");
     return `<code class="inline-code">${code}</code>`;
   });
+
+  // Restore KaTeX-rendered math
+  html = html.replace(/\x00M(\d+)M\x00/g, (_m, idx) => mathTokens[+idx] ?? "");
 
   html = html.replace(/(?:<li class="md-li md-oli">.*?<\/li>(?:<br\/?>)*)+/g, (match) => {
     const cleaned = match.replace(/<br\/?>/g, "");
