@@ -12,15 +12,15 @@ import {
 } from "lucide-react";
 
 const TOOLS: { name: string; Icon: LucideIcon; color: string; bg: string; href: string; badge: string | null }[] = [
-  { name: "AI Чат",       Icon: MessageSquare, color: "#22D3EE", bg: "rgba(34,211,238,0.15)",  href: "/dashboard/chat",          badge: null },
-  { name: "Шаблоны",      Icon: FileText,      color: "#F59E0B", bg: "rgba(245,158,11,0.15)",  href: "/dashboard/templates",     badge: "50+" },
-  { name: "Мои боты",     Icon: Bot,           color: "#A855F7", bg: "rgba(168,85,247,0.15)",  href: "/dashboard/bots",          badge: "NEW" },
-  { name: "Галерея",      Icon: ImageIcon,     color: "#EC4899", bg: "rgba(236,72,153,0.15)",  href: "/dashboard/gallery",       badge: null },
-  { name: "Презентации",  Icon: Presentation,  color: "#14B8A6", bg: "rgba(20,184,166,0.15)",  href: "/dashboard/presentations", badge: null },
-  { name: "Фотосессия",   Icon: Camera,        color: "#F43F5E", bg: "rgba(244,63,94,0.15)",   href: "/dashboard/photo-session", badge: null },
-  { name: "SEO",          Icon: Search,        color: "#10B981", bg: "rgba(16,185,129,0.15)",  href: "/dashboard/seo",           badge: null },
-  { name: "AI-Агент",     Icon: Sparkles,      color: "#C4623D", bg: "rgba(196,98,61,0.15)",   href: "/dashboard/agent",         badge: "NEW" },
-  { name: "Достижения",   Icon: Trophy,        color: "#EAB308", bg: "rgba(234,179,8,0.15)",   href: "/dashboard/achievements",  badge: null },
+  { name: "AI Чат",       Icon: MessageSquare, color: "#22D3EE", bg: "linear-gradient(135deg,#06B6D4,#3B82F6)",  href: "/dashboard/chat",          badge: null },
+  { name: "Шаблоны",      Icon: FileText,      color: "#F59E0B", bg: "linear-gradient(135deg,#F59E0B,#EAB308)",  href: "/dashboard/templates",     badge: "50+" },
+  { name: "Мои боты",     Icon: Bot,           color: "#A855F7", bg: "linear-gradient(135deg,#A855F7,#6366F1)",  href: "/dashboard/bots",          badge: "NEW" },
+  { name: "Галерея",      Icon: ImageIcon,     color: "#EC4899", bg: "linear-gradient(135deg,#EC4899,#F43F5E)",  href: "/dashboard/gallery",       badge: null },
+  { name: "Презентации",  Icon: Presentation,  color: "#14B8A6", bg: "linear-gradient(135deg,#3B82F6,#06B6D4)",  href: "/dashboard/presentations", badge: null },
+  { name: "Фотосессия",   Icon: Camera,        color: "#F43F5E", bg: "linear-gradient(135deg,#F43F5E,#EC4899)",  href: "/dashboard/photo-session", badge: null },
+  { name: "SEO",          Icon: Search,        color: "#10B981", bg: "linear-gradient(135deg,#10B981,#14B8A6)",  href: "/dashboard/seo",           badge: null },
+  { name: "AI-Агент",     Icon: Sparkles,      color: "#C4623D", bg: "linear-gradient(135deg,#C4623D,#F59E0B)",  href: "/dashboard/agent",         badge: "NEW" },
+  { name: "Достижения",   Icon: Trophy,        color: "#EAB308", bg: "linear-gradient(135deg,#EAB308,#F59E0B)",  href: "/dashboard/achievements",  badge: null },
 ];
 
 export default function ProductScreenshot() {
@@ -64,9 +64,12 @@ export default function ProductScreenshot() {
                     >
                       <span
                         className="tile-icon inline-flex items-center justify-center w-10 h-10 rounded-xl mb-1.5"
-                        style={{ background: t.bg, color: t.color }}
+                        style={{
+                          background: t.bg,
+                          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.25), 0 6px 16px -6px ${t.color}80`,
+                        }}
                       >
-                        <Icon className="w-5 h-5" strokeWidth={2.4} />
+                        <Icon className="w-5 h-5 text-white drop-shadow" strokeWidth={2.4} />
                       </span>
                       <span className="text-[10px] font-semibold text-text/60 block transition-colors group-hover:text-accent">{t.name}</span>
                       {t.badge && (
