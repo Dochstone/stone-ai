@@ -120,7 +120,7 @@ export default function Nav() {
           <a href="/blog" className="hidden lg:block text-text/70 hover:text-text font-medium text-sm transition-colors">
             Блог
           </a>
-          <a href="/#faq" className="hidden lg:block text-text/70 hover:text-text font-medium text-sm transition-colors">
+          <a href="/faq" className="hidden lg:block text-text/70 hover:text-text font-medium text-sm transition-colors">
             FAQ
           </a>
           <a href="/docs" className="hidden lg:block text-text/70 hover:text-text font-medium text-sm transition-colors">
@@ -234,7 +234,7 @@ export default function Nav() {
             <a href="/blog" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
               Блог
             </a>
-            <a href="/#faq" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
+            <a href="/faq" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
               FAQ
             </a>
             <a href="/docs" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
