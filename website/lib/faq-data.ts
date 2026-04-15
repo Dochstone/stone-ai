@@ -1,13 +1,14 @@
 import { renderPriceDeep } from "@/lib/pricing";
 
-export type FaqCategory = "start" | "tools" | "pricing" | "payments" | "features";
+export type FaqCategory = "start" | "generation" | "tools" | "pricing" | "payments" | "features";
 
 export const FAQ_CATEGORIES: { id: FaqCategory; name: string; icon: string }[] = [
-  { id: "start",    name: "Начало работы",    icon: "🚀" },
-  { id: "tools",    name: "Инструменты",      icon: "🛠" },
-  { id: "pricing",  name: "Тарифы",           icon: "💎" },
-  { id: "payments", name: "Оплата",           icon: "💳" },
-  { id: "features", name: "Возможности",      icon: "✨" },
+  { id: "start",      name: "Начало работы",          icon: "🚀" },
+  { id: "generation", name: "Чат, картинки, видео",  icon: "🤖" },
+  { id: "tools",      name: "Инструменты",            icon: "🛠" },
+  { id: "pricing",    name: "Тарифы",                 icon: "💎" },
+  { id: "payments",   name: "Оплата",                 icon: "💳" },
+  { id: "features",   name: "Возможности",            icon: "✨" },
 ];
 
 const _homeFaqData: { q: string; a: string; category: FaqCategory }[] = [
@@ -25,6 +26,11 @@ const _homeFaqData: { q: string; a: string; category: FaqCategory }[] = [
     category: "tools",
     q: "Что такое панель инструментов и какие инструменты доступны?",
     a: '<a href="/dashboard" class="text-accent hover:underline font-semibold">Панель инструментов</a> — ваш AI-кабинет с 15+ инструментами: <a href="/dashboard/templates" class="text-accent hover:underline">50+ AI-шаблонов</a> для маркетинга, SMM и SEO, <a href="/dashboard/presentations" class="text-accent hover:underline">генератор презентаций</a> с экспортом в PPTX, <a href="/dashboard/photo-session" class="text-accent hover:underline">AI-фотосессия</a> товаров (смена фона, фото на модели, пакетная обработка до 10 фото), <a href="/dashboard/seo" class="text-accent hover:underline">SEO-модуль</a> (статьи, мета-теги, <a href="/dashboard/seo/ab-test" class="text-accent hover:underline">A/B тестирование</a>), <a href="/dashboard/campaigns" class="text-accent hover:underline">генератор рекламных кампаний</a> для Яндекс Директ, <a href="/dashboard/bots" class="text-accent hover:underline">конструктор AI-ботов</a> с базой знаний, <a href="/dashboard/agent" class="text-accent hover:underline">AI-агент</a> для автономных задач, <a href="/dashboard/gallery" class="text-accent hover:underline">галерея генераций</a>, <a href="/dashboard/achievements" class="text-accent hover:underline">достижения</a> и <a href="/dashboard/games" class="text-accent hover:underline">игры</a>.',
+  },
+  {
+    category: "pricing",
+    q: "Что входит в подписку: как работают запросы, видео-поинты и лимиты?",
+    a: 'Каждый тариф — это месячный пул лимитов, которые тратятся как «валюта» за использование моделей.<br><br><strong>Быстрые запросы (fast)</strong> — лимит для простых моделей: GPT-4o mini, Claude Haiku, Gemini Flash, DeepSeek V3, Mistral Small. 1 сообщение = 1 быстрый запрос. На Start их 600/мес (~20/день), Pro — 1 500/мес (~50/день), Elite — 4 500/мес (~150/день).<br><br><strong>Премиум-запросы</strong> — лимит для флагманских моделей: GPT-5.1/5.4, Claude Sonnet 4.5, Gemini 3 Pro, Grok 3. Одно сообщение тратит 1 единицу. Start — 90/мес, Pro — 112/мес, Elite — 336/мес.<br><br><strong>Opus-запросы</strong> — отдельный счётчик для Claude Opus 4.5 (самая мощная модель). Один запрос к Opus тратит <strong>5 единиц</strong> из opus-счётчика (коэффициент веса ×5). Pro — 28 Opus-запросов в мес, Elite — 56. На Start Opus недоступен.<br><br><strong>Картинки</strong> — отдельный счётчик. 1 генерация (Flux, GPT-5 Image, Nano Banana Pro, Midjourney-аналог) = 1 картинка из лимита. Start — 60/мес, Pro — 140/мес, Elite — 280/мес.<br><br><strong>Видео-поинты</strong> — гибкая валюта для видео. Разные модели и форматы стоят разного: короткий клип Kling 720P/5сек ≈ 1 поинт; Veo 3.1 Standard/8сек ≈ 3 поинта; Sora 2 Premium 1080P/10сек с audio ≈ 8-10 поинтов. Start — 13 поинтов (≈6-10 видео), Pro — 33 (≈15-25 видео), Elite — 80 (≈40-60 видео). Точная стоимость показывается перед каждой генерацией.<br><br><strong>Озвучка (TTS/STT)</strong> — отдельный счётчик. 1 запрос = до 4096 символов текста (~2 минуты аудио). Start — 3/мес (STT отсутствует), Pro — 20/мес + голосовой ассистент, Elite — 100/мес.<br><br><strong>Что безлимитно на любом платном тарифе:</strong> история чатов, проекты, стрики, достижения, игры, переключение моделей, экспорт, собственные боты (до 20), AI-агент, A/B-тесты.<br><br>Неиспользованные лимиты частично переносятся на следующий месяц (rollover). Полная таблица — на <a href="/pricing" class="text-accent hover:underline font-semibold">странице тарифов</a>.',
   },
   {
     category: "pricing",
@@ -87,22 +93,22 @@ const _homeFaqData: { q: string; a: string; category: FaqCategory }[] = [
     a: 'Да! <a href="/dashboard/seo/ab-test" class="text-accent hover:underline font-semibold">A/B тестирование</a> генерирует 3 варианта текста по вашему запросу: эмоциональный, экспертный и прямолинейный. AI оценивает каждый от 1 до 10 с комментарием и автоматически выбирает лучший. Вы можете скопировать любой вариант или выбрать победителя вручную. Находится в разделе <a href="/dashboard/seo" class="text-accent hover:underline">SEO-инструменты</a>.',
   },
   {
-    category: "features",
+    category: "generation",
     q: "Как работает AI-чат и как выбрать модель?",
     a: 'В <a href="/dashboard/chat" class="text-accent hover:underline font-semibold">AI-чате</a> доступны все 45+ текстовых моделей: <strong>GPT-5.1, GPT-5.4</strong> (OpenAI), <strong>Claude Opus 4.5, Sonnet 4.5, Haiku 4.5</strong> (Anthropic), <strong>Gemini 3 Pro, 2.5 Pro</strong> (Google), <strong>DeepSeek R1, V3</strong>, <strong>Grok 3</strong>, <strong>Llama 4</strong>, <strong>Mistral Large</strong> и другие. Переключение моделей — один клик в выпадающем списке. Ответы идут <strong>стримингом</strong> (по словам), поддерживается <strong>DualChat</strong> — задаёте один вопрос и видите ответы 2 моделей параллельно для сравнения. История чатов сохраняется для каждой модели отдельно, можно закрепить чат, переименовать, удалить.',
   },
   {
-    category: "features",
+    category: "generation",
     q: "Как генерировать картинки и какие модели для этого есть?",
     a: 'Генерация картинок доступна прямо в <a href="/dashboard/chat" class="text-accent hover:underline font-semibold">AI-чате</a> — переключите модель на image и опишите картинку текстом. <strong>6 моделей:</strong> <strong>Nano Banana Pro</strong> (фотореализм и редактирование существующих фото), <strong>GPT-5 Image</strong> (отлично работает с текстом на картинке), <strong>Flux 1.1 Pro / Schnell</strong> (быстрая и художественная), <strong>Midjourney V7</strong> (арт-стиль), <strong>SDXL</strong> (разные стили от фотореализма до аниме). Бесплатно — 2 пробные картинки при регистрации. В подписке Start — 60/мес, Pro — 140/мес, Elite — 280/мес. <a href="/blog/generate-images-ai-free" class="text-accent hover:underline">Гайд по генерации картинок →</a>',
   },
   {
-    category: "features",
+    category: "generation",
     q: "Можно ли генерировать видео через нейросеть?",
     a: 'Да, доступны лучшие video-модели 2026. <strong>Sora 2</strong> (OpenAI) — до 10 секунд, фотореализм. <strong>Veo 3.1</strong> (Google) — быстрая генерация, стабильная физика. <strong>Kling v2</strong> — 5-10 сек, хорошая детализация. <strong>Luma Ray 2</strong>, <strong>Runway Gen-3</strong>, <strong>Pika 2</strong>, <strong>MiniMax</strong> — для разных стилей. Каждое видео тратит видео-поинты: короткие клипы 1-3 поинта, премиум 1080P/10 сек — 5-10 поинтов. Бесплатно — 2 пробных поинта навсегда. В Start — 13 поинтов + триалы, Pro — 33 поинта, Elite — 80 поинтов в месяц.',
   },
   {
-    category: "features",
+    category: "generation",
     q: "Есть ли озвучка текста (TTS) и распознавание речи (STT)?",
     a: 'Да, оба направления. <strong>TTS (озвучка текста):</strong> 9 голосов OpenAI — Alloy (нейтральный), Echo (глубокий), Nova (мягкий), Shimmer (тёплый), Onyx (низкий), Fable (выразительный) и другие. Работает на русском и 50+ языках, до 4096 символов (~2 минуты аудио) за запрос. <strong>STT (речь в текст):</strong> нажмите микрофон в чате — Whisper AI переведёт до 30 секунд речи в текст за секунду. Лимиты: Start — 3 озвучки/мес, Pro — 20/мес, Elite — 100/мес. Голосовой ассистент включён в Pro и Elite.',
   },
