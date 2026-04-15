@@ -13,7 +13,6 @@ import { getAuthor, DEFAULT_AUTHOR_SLUG } from "@/lib/authors";
 
 import { SITE_URL } from "@/lib/constants";
 
-const ChatWidget = dynamic(() => import("@/components/ChatWidget"), { ssr: false });
 const BlogCopyButtons = dynamic(() => import("@/components/BlogCopyButtons"), { ssr: false });
 
 export const revalidate = 3600;
@@ -463,7 +462,6 @@ export default function BlogPostPage({ params }: Props) {
         )}
         </div>
       </div>
-      <ChatWidget />
     </div>
   );
 }
