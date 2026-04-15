@@ -63,14 +63,14 @@ export default function ProductScreenshot() {
                       className="tile-hover group block bg-text/[0.03] rounded-xl p-3 text-center border border-transparent focus:outline-none focus:ring-2 focus:ring-accent/30"
                     >
                       <span
-                        className="tile-icon inline-flex items-center justify-center w-10 h-10 rounded-xl mb-1.5"
+                        className="tile-icon flex items-center justify-center w-10 h-10 rounded-xl mb-1.5 mx-auto"
                         style={{
                           background: t.bg,
                           boxShadow: "inset 0 1px 0 rgba(255,255,255,0.18)",
                           color: t.color,
                         }}
                       >
-                        <Icon className="w-5 h-5" strokeWidth={2.4} />
+                        <Icon className="block" size={20} strokeWidth={2.4} />
                       </span>
                       <span className="text-[10px] font-semibold text-text/60 block transition-colors group-hover:text-accent">{t.name}</span>
                       {t.badge && (
