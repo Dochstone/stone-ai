@@ -92,6 +92,14 @@ body.chat-active {
   background: rgba(255,255,255,0.2);
 }
 
+/* Utility: fully hide scrollbar for horizontal chip rows etc. */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* ── Dark mode overrides — WCAG AA compliant (4.5:1 min contrast) ── */
 
 /* Backgrounds */

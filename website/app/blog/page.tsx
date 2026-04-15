@@ -69,7 +69,7 @@ export default function BlogPage() {
 
         <nav
           aria-label="Категории блога"
-          className="-mx-4 sm:mx-auto px-4 sm:px-0 mb-8 md:mb-10 sm:max-w-4xl flex gap-2 overflow-x-auto sm:flex-wrap sm:justify-center snap-x snap-mandatory sm:snap-none"
+          className="-mx-4 sm:mx-auto px-4 sm:px-0 mb-8 md:mb-10 sm:max-w-4xl flex gap-2 overflow-x-auto no-scrollbar sm:flex-wrap sm:justify-center snap-x snap-proximity sm:snap-none"
         >
           <span className="shrink-0 snap-start whitespace-nowrap px-4 py-2 rounded-full bg-accent text-white text-sm font-semibold">
             Все ({POSTS.length})
