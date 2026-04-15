@@ -84,15 +84,23 @@ export default function AuthorPage({ params }: Props) {
         {/* Hero */}
         <header className="mb-10">
           <div className="flex items-start gap-6 mb-6">
-            <div className="shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-accent to-teal text-white font-bold flex items-center justify-center text-3xl">
-              {author.name
-                .split(" ")
-                .map((n) => n[0])
-                .filter(Boolean)
-                .slice(0, 2)
-                .join("")
-                .toUpperCase()}
-            </div>
+            {author.image ? (
+              <img
+                src={author.image}
+                alt={author.name}
+                className="shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover ring-2 ring-text/5"
+              />
+            ) : (
+              <div className="shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-accent to-teal text-white font-bold flex items-center justify-center text-3xl">
+                {author.name
+                  .split(" ")
+                  .map((n) => n[0])
+                  .filter(Boolean)
+                  .slice(0, 2)
+                  .join("")
+                  .toUpperCase()}
+              </div>
+            )}
             <div className="min-w-0">
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-1">{author.name}</h1>
               <p className="text-sm sm:text-base text-text/60">{author.jobTitle}</p>

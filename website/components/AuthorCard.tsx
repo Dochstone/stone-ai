@@ -26,9 +26,13 @@ export default function AuthorCard({ author, compact = false, showLink = true }:
         href={`/authors/${author.slug}`}
         className="inline-flex items-center gap-2 text-sm font-semibold text-text/70 hover:text-accent transition-colors"
       >
-        <span className="w-7 h-7 rounded-full bg-gradient-to-br from-accent to-teal text-white font-bold flex items-center justify-center text-[11px]">
-          {initials(author.name)}
-        </span>
+        {author.image ? (
+          <img src={author.image} alt={author.name} className="w-7 h-7 rounded-full object-cover" />
+        ) : (
+          <span className="w-7 h-7 rounded-full bg-gradient-to-br from-accent to-teal text-white font-bold flex items-center justify-center text-[11px]">
+            {initials(author.name)}
+          </span>
+        )}
         <span>{author.name}</span>
       </Link>
     );
@@ -37,9 +41,17 @@ export default function AuthorCard({ author, compact = false, showLink = true }:
   return (
     <article className="bg-bg border border-text/5 rounded-2xl p-6 hover:border-accent/30 hover:shadow-md transition-all">
       <div className="flex items-start gap-4 mb-4">
-        <div className="shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-accent to-teal text-white font-bold flex items-center justify-center text-lg">
-          {initials(author.name)}
-        </div>
+        {author.image ? (
+          <img
+            src={author.image}
+            alt={author.name}
+            className="shrink-0 w-14 h-14 rounded-full object-cover ring-2 ring-text/5"
+          />
+        ) : (
+          <div className="shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-accent to-teal text-white font-bold flex items-center justify-center text-lg">
+            {initials(author.name)}
+          </div>
+        )}
         <div className="min-w-0">
           <h3 className="font-extrabold text-base mb-0.5">
             {showLink ? (
