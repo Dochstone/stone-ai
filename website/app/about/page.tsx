@@ -263,20 +263,14 @@ export default function AboutPage() {
                   key={t.name}
                   href={t.href}
                   {...(t.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                  className="tile-hover group flex flex-col items-center text-center bg-white rounded-xl border border-text/5 p-4 focus:outline-none focus:ring-2 focus:ring-accent/30"
+                  className="tile-hover group flex flex-col items-center text-center bg-white rounded-xl border border-text/5 p-5 min-h-[170px] focus:outline-none focus:ring-2 focus:ring-accent/30"
+                  style={{ ["--pad-c" as string]: t.color }}
                 >
-                  <span
-                    className="tile-icon flex items-center justify-center w-12 h-12 rounded-xl mb-3 shrink-0"
-                    style={{
-                      background: t.bg,
-                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.18)",
-                      color: t.color,
-                    }}
-                  >
+                  <span className="glass-pad tile-icon flex items-center justify-center w-12 h-12 rounded-xl mb-3 shrink-0">
                     <Icon className="block" size={24} strokeWidth={2.4} />
                   </span>
                   <div className="font-bold text-sm mb-0.5 transition-colors duration-200 group-hover:text-accent">{t.name}</div>
-                  <div className="text-text/40 text-[11px] leading-snug transition-colors duration-200 group-hover:text-text/60">{t.desc}</div>
+                  <div className="text-text/40 text-[11px] leading-snug line-clamp-2 transition-colors duration-200 group-hover:text-text/60">{t.desc}</div>
                 </a>
               );
             })}
