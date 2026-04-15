@@ -256,6 +256,20 @@ export const PILLARS = {
     useCases: [],
     relatedBlogs: ["ii-dlya-biznesa-v-rossii", "guide-50-ai-models", "stone-ai-vs-chatgpt-plus"],
   },
+  "education-ai": {
+    title: "AI для образования — учителям, студентам, репетиторам",
+    modelCategories: ["chat", "reason"] as ModelCategory[],
+    alternatives: [],
+    useCases: ["napisat-statyu", "perevod-teksta"],
+    relatedBlogs: ["kak-napisat-prompt-dlya-nejroseti", "best-ai-prompts", "guide-50-ai-models"],
+  },
+  "reasoning-ai": {
+    title: "Reasoning-нейросети: DeepSeek R1, o3, Qwen QwQ, Claude Thinking",
+    modelCategories: ["reason"] as ModelCategory[],
+    alternatives: ["deepseek"],
+    useCases: [],
+    relatedBlogs: ["deepseek-r1-obzor", "claude-opus-vs-gpt-5", "guide-50-ai-models"],
+  },
 } as const;
 
 export type PillarTopic = keyof typeof PILLARS;

@@ -110,6 +110,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "video-ai",
     "coding-ai",
     "business-ai",
+    "education-ai",
+    "reasoning-ai",
   ].map((topic) => ({
     url: `${SITE_URL}/hub/${topic}`,
     lastModified: now,
