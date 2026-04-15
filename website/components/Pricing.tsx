@@ -297,11 +297,15 @@ export default function Pricing() {
         </p>
 
         <div className="flex justify-center mb-10">
-          <div className="inline-flex items-center bg-text/5 rounded-full p-1 text-sm font-semibold">
+          <div className="inline-flex items-center bg-text/[0.06] border border-text/10 rounded-full p-1 text-sm font-semibold">
             <button
               type="button"
               onClick={() => setBilling("month")}
-              className={`px-5 py-2 rounded-full transition-colors ${billing === "month" ? "bg-bg shadow-sm text-text" : "text-text/55 hover:text-text"}`}
+              className={`px-6 py-2 rounded-full transition-all duration-150 ${
+                billing === "month"
+                  ? "bg-accent text-white shadow-md shadow-accent/25"
+                  : "text-text/60 hover:text-text hover:bg-text/5"
+              }`}
               aria-pressed={billing === "month"}
             >
               Месяц
@@ -309,11 +313,17 @@ export default function Pricing() {
             <button
               type="button"
               onClick={() => setBilling("year")}
-              className={`px-5 py-2 rounded-full transition-colors flex items-center gap-2 ${billing === "year" ? "bg-bg shadow-sm text-text" : "text-text/55 hover:text-text"}`}
+              className={`px-6 py-2 rounded-full transition-all duration-150 flex items-center gap-2 ${
+                billing === "year"
+                  ? "bg-accent text-white shadow-md shadow-accent/25"
+                  : "text-text/60 hover:text-text hover:bg-text/5"
+              }`}
               aria-pressed={billing === "year"}
             >
               Год
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${billing === "year" ? "bg-accent/15 text-accent" : "bg-text/10 text-text/60"}`}>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition-colors ${
+                billing === "year" ? "bg-white/25 text-white" : "bg-accent/15 text-accent"
+              }`}>
                 −{Math.round(YEARLY_DISCOUNT * 100)}%
               </span>
             </button>
@@ -531,6 +541,20 @@ export default function Pricing() {
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
 
+            {(() => {
+              // Compute display values based on current billing toggle.
+              const isPaidTier = modal.id === "mini" || modal.id === "max" || modal.id === "max-pro";
+              const showYearly = isPaidTier && billing === "year";
+              const dPrice = showYearly ? planYearlyPrice(modal.id as PaidPlanId) : modal.price;
+              const dPeriod = showYearly ? "/год" : modal.period;
+              const dOldPrice = showYearly ? planYearlyOldPrice(modal.id as PaidPlanId) : modal.oldPrice;
+              const dDiscountPct = showYearly
+                ? Math.round((1 - planYearlyPriceNum(modal.id as PaidPlanId) / (PLAN_PRICES_RUB[modal.id as PaidPlanId] * 12)) * 100)
+                : modal.oldPrice
+                  ? Math.round((1 - modal.priceNum / parseInt(modal.oldPrice.replace(/\s/g, ""))) * 100)
+                  : 0;
+              const dPerMonthHint = showYearly ? planYearlyMonthlyEquivalent(modal.id as PaidPlanId) : null;
+              return (
             <div className="flex flex-col sm:flex-row">
 
               {/* ─── Left: Girl image ─── */}
@@ -565,11 +589,14 @@ export default function Pricing() {
                           </span>
                         )}
                         <h3 className="text-xl font-extrabold text-white drop-shadow-lg">{modal.name}</h3>
-                        <div className="flex items-baseline gap-1.5">
-                          {modal.oldPrice && <span className="text-sm line-through text-white/40">{modal.oldPrice}</span>}
-                          <span className="text-2xl font-extrabold drop-shadow-lg" style={{ color: modal.color }}>{modal.price}</span>
-                          <span className="text-xs text-white/60 font-semibold">{modal.period}</span>
+                        <div className="flex items-baseline gap-1.5 flex-wrap">
+                          {dOldPrice && <span className="text-sm line-through text-white/40">{dOldPrice}</span>}
+                          <span className="text-2xl font-extrabold drop-shadow-lg" style={{ color: modal.color }}>{dPrice}</span>
+                          <span className="text-xs text-white/60 font-semibold">{dPeriod}</span>
                         </div>
+                        {dPerMonthHint && (
+                          <div className="text-[10px] text-white/55 mt-0.5">≈ {dPerMonthHint}/мес</div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -595,12 +622,15 @@ export default function Pricing() {
                       <h3 className="text-xl font-extrabold text-text">Тариф {modal.name}</h3>
                     </div>
                   </div>
-                  <div className="flex items-baseline gap-2 mb-1" style={{ animation: "pricingStagger 0.4s ease both 0.15s" }}>
-                    {modal.oldPrice && <span className="text-lg line-through text-text/25">{modal.oldPrice}</span>}
-                    <span className="text-3xl font-extrabold" style={{ color: modal.color }}>{modal.price}</span>
-                    <span className="text-sm text-text/40 font-semibold">{modal.period}</span>
-                    {modal.oldPrice && <span className="text-[10px] font-bold bg-red-500/10 text-red-500 px-2 py-0.5 rounded-full">-{Math.round((1 - modal.priceNum / parseInt(modal.oldPrice.replace(/\s/g, ""))) * 100)}%</span>}
+                  <div className="flex items-baseline gap-2 mb-1 flex-wrap" style={{ animation: "pricingStagger 0.4s ease both 0.15s" }}>
+                    {dOldPrice && <span className="text-lg line-through text-text/25">{dOldPrice}</span>}
+                    <span className="text-3xl font-extrabold" style={{ color: modal.color }}>{dPrice}</span>
+                    <span className="text-sm text-text/40 font-semibold">{dPeriod}</span>
+                    {dDiscountPct > 0 && <span className="text-[10px] font-bold bg-accent/10 text-accent px-2 py-0.5 rounded-full">−{dDiscountPct}%</span>}
                   </div>
+                  {dPerMonthHint && (
+                    <p className="text-xs text-text/45 mb-2">≈ {dPerMonthHint}/мес при оплате за год</p>
+                  )}
                 </div>
 
                 {/* Features */}
@@ -772,7 +802,7 @@ export default function Pricing() {
                         </svg>
                         Создание счёта...
                       </span>
-                    ) : `Оплатить ${modal.price}${modal.period}`}
+                    ) : `Оплатить ${dPrice}${dPeriod}`}
                   </button>
                   <p className="text-[10px] text-text/25 text-center mt-1.5" style={{ animation: "pricingStagger 0.4s ease both 0.45s" }}>
                     Карта РФ · Мир · Visa · MC · СБП
@@ -831,6 +861,8 @@ export default function Pricing() {
                 </div>
               </div>
             </div>
+              );
+            })()}
           </div>{/* /inner content */}
           </div>{/* /outer border wrapper */}
         </div>
