@@ -1,5 +1,5 @@
 import {
-  MessageSquare,
+  BotMessageSquare,
   FileText,
   Bot,
   Image as ImageIcon,
@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 const TOOLS: { name: string; Icon: LucideIcon; color: string; bg: string; href: string; badge: string | null }[] = [
-  { name: "AI Чат",       Icon: MessageSquare, color: "#22D3EE", bg: "rgba(34,211,238,0.15)",  href: "/dashboard/chat",          badge: null },
+  { name: "AI Чат",       Icon: BotMessageSquare, color: "#22D3EE", bg: "rgba(34,211,238,0.15)",  href: "/dashboard/chat",          badge: null },
   { name: "Шаблоны",      Icon: FileText,      color: "#F59E0B", bg: "rgba(245,158,11,0.15)",  href: "/dashboard/templates",     badge: "50+" },
   { name: "Мои боты",     Icon: Bot,           color: "#A855F7", bg: "rgba(168,85,247,0.15)",  href: "/dashboard/bots",          badge: "NEW" },
   { name: "Галерея",      Icon: ImageIcon,     color: "#EC4899", bg: "rgba(236,72,153,0.15)",  href: "/dashboard/gallery",       badge: null },

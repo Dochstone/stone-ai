@@ -6,7 +6,7 @@ import StatBlock from "@/components/content/StatBlock";
 import FaqExtended from "@/components/content/FaqExtended";
 import { planPrice } from "@/lib/pricing";
 import {
-  MessageSquare, Bot, Sparkles, Megaphone, FileText, Camera,
+  BotMessageSquare, Bot, Sparkles, Megaphone, FileText, Camera,
   Presentation, Search, Code, Send, LineChart, Target,
   type LucideIcon,
 } from "lucide-react";
@@ -88,7 +88,7 @@ const techStack = [
 
 // Glass style: 15% tint of the icon color + inner highlight + soft glow.
 const tools: Tool[] = [
-  { name: "AI Чат",             Icon: MessageSquare, color: "#22D3EE", bg: "rgba(34,211,238,0.15)",  href: "/dashboard/chat",          desc: "50+ моделей, стриминг, DualChat" },
+  { name: "AI Чат",             Icon: BotMessageSquare, color: "#22D3EE", bg: "rgba(34,211,238,0.15)",  href: "/dashboard/chat",          desc: "50+ моделей, стриминг, DualChat" },
   { name: "Конструктор ботов",  Icon: Bot,           color: "#A855F7", bg: "rgba(168,85,247,0.15)",  href: "/dashboard/bots",          desc: "Бот с базой знаний (RAG)" },
   { name: "AI-Агент",           Icon: Sparkles,      color: "#C4623D", bg: "rgba(196,98,61,0.15)",   href: "/dashboard/agent",         desc: "Автономные multi-step задачи" },
   { name: "Рекламные кампании", Icon: Megaphone,     color: "#F59E0B", bg: "rgba(245,158,11,0.15)",  href: "/dashboard/campaigns",     desc: "Яндекс Директ за 3 минуты" },
