@@ -225,6 +225,16 @@ export default function BlogPostPage({ params }: Props) {
 
         <div className="lg:grid lg:grid-cols-[1fr_16rem] lg:gap-10">
           <article className="min-w-0 max-w-3xl">
+            {/* Hero image */}
+            <img
+              src={`/blog/${post.slug}.jpg`}
+              alt={post.title}
+              className="w-full aspect-square sm:aspect-video object-cover rounded-2xl mb-6 border border-text/5"
+              loading="eager"
+              width={1024}
+              height={1024}
+            />
+
             {/* Header */}
             <div className="mb-8">
               <h1 className="text-3xl md:text-4xl font-extrabold leading-tight mb-5">
