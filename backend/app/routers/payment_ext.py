@@ -60,6 +60,11 @@ MIN_TOP_UP_USD = 1.0
 class TopUpRequest(BaseModel):
     usd_amount: float
     tier: str | None = None  # If set, treat as subscription payment
+    period: str | None = None  # "month" (default) or "year" — yearly = 20% off, charges 12 mo upfront
+
+
+YEARLY_DISCOUNT = 0.2
+YEARLY_MULTIPLIER = round(12 * (1 - YEARLY_DISCOUNT), 4)  # 9.6 — pay for 12 months minus 20%
 
 
 async def _get_user_by_external_id(db: AsyncSession, external_id: int, *, lock: bool = False):
@@ -177,25 +182,26 @@ async def create_platega_order(
     if not is_subscription and req.usd_amount < MIN_TOP_UP_USD:
         raise HTTPException(status_code=400, detail=f"Минимальная сумма ${MIN_TOP_UP_USD:.0f}")
 
+    is_yearly = is_subscription and (req.period or "month") == "year"
+
     if is_subscription:
         from app.services.subscription import PLANS
 
         if req.tier not in PLANS:
             raise HTTPException(status_code=400, detail="Недопустимый тариф")
         plan = PLANS[req.tier]
-        rub_amount = round(float(plan["price_rub"]), 0)
-        usd_amount = round(float(plan["price_rub"]) / USD_TO_RUB, 2)
+        monthly_rub = float(plan["price_rub"])
+        rub_amount = round(monthly_rub * YEARLY_MULTIPLIER if is_yearly else monthly_rub, 0)
+        usd_amount = round(rub_amount / USD_TO_RUB, 2)
+        tier_label = plan.get("name", req.tier)
+        period_label = "Год" if is_yearly else "1 мес"
+        description = f"Stone AI · Подписка {tier_label} ({period_label})"
     else:
         rub_amount = round(req.usd_amount * USD_TO_RUB, 0)
         usd_amount = req.usd_amount
-    order_id = platega_service.generate_order_id(tg_user["id"])
-
-    if is_subscription:
-        from app.services.subscription import PLANS
-        tier_label = PLANS.get(req.tier, {}).get("name", req.tier)
-        description = f"Stone AI · Подписка {tier_label}"
-    else:
         description = f"Stone AI · Пополнение баланса: ${req.usd_amount:.2f}"
+
+    order_id = platega_service.generate_order_id(tg_user["id"])
 
     payment = await platega_service.create_payment(
         amount_rub=rub_amount,
@@ -214,7 +220,7 @@ async def create_platega_order(
         currency="RUB",
         amount_usd=usd_amount,
         product_type="subscription" if is_subscription else "topup",
-        product_id=f"sub:{req.tier}" if is_subscription else f"topup_usd:{usd_amount:.2f}",
+        product_id=(f"sub:{req.tier}:year" if is_yearly else f"sub:{req.tier}") if is_subscription else f"topup_usd:{usd_amount:.2f}",
         status="pending",
         tx_hash=order_id,
         provider_id=f"platega:{transaction_id}",
@@ -280,8 +286,10 @@ async def platega_webhook(request: Request, db: AsyncSession = Depends(get_db)):
 
     # Handle subscription or top-up
     if product_type == "subscription" and product_id and product_id.startswith("sub:"):
-        tier = product_id.split(":", 1)[1]
-        from datetime import datetime, timedelta
+        parts = product_id.split(":")
+        tier = parts[1] if len(parts) > 1 else ""
+        is_yearly_purchase = len(parts) > 2 and parts[2] == "year"
+        days = 365 if is_yearly_purchase else 30
         from sqlalchemy import select as sel
         from app.models.user import User
         from app.services.subscription import PLANS
@@ -289,8 +297,8 @@ async def platega_webhook(request: Request, db: AsyncSession = Depends(get_db)):
         user = user_result.scalar_one_or_none()
         if user and tier in PLANS:
             from app.services.subscription import activate_subscription
-            activate_subscription(user, tier)
-            logger.info(f"Platega subscription activated: user={user_tg_id}, tier={tier}")
+            activate_subscription(user, tier, days=days)
+            logger.info(f"Platega subscription activated: user={user_tg_id}, tier={tier}, days={days}")
     else:
         new_balance = await add_balance(db, user_tg_id, usd_amount)
         logger.info(f"Platega balance top-up: user={user_tg_id}, usd={usd_amount}, balance=${new_balance:.6f}")
@@ -475,8 +483,10 @@ async def heleket_webhook(request: Request, db: AsyncSession = Depends(get_db)):
 
     if product_type == "subscription" and product_id and product_id.startswith("sub:"):
         # Activate subscription
-        tier = product_id.split(":", 1)[1]
-        from datetime import datetime, timedelta
+        parts = product_id.split(":")
+        tier = parts[1] if len(parts) > 1 else ""
+        is_yearly_purchase = len(parts) > 2 and parts[2] == "year"
+        days = 365 if is_yearly_purchase else 30
         from sqlalchemy import select
         from app.models import User
         result = await db.execute(select(User).where(User.telegram_id == user_tg_id))
@@ -486,8 +496,8 @@ async def heleket_webhook(request: Request, db: AsyncSession = Depends(get_db)):
             user = result.scalar_one_or_none()
         if user:
             from app.services.subscription import activate_subscription
-            activate_subscription(user, tier)
-            logger.info(f"Subscription activated: user={user_tg_id}, tier={tier}")
+            activate_subscription(user, tier, days=days)
+            logger.info(f"Subscription activated: user={user_tg_id}, tier={tier}, days={days}")
             # Email: subscription activated
             try:
                 user_row2 = await db.execute(text("SELECT email FROM users WHERE telegram_id = :tid OR id = :tid LIMIT 1"), {"tid": user_tg_id})
@@ -537,6 +547,7 @@ from app.pricing import PLAN_PRICES_RUB  # single source of truth
 
 class SubscribePaymentRequest(BaseModel):
     tier: str  # mini, max, max-pro
+    period: str | None = None  # "month" (default) or "year"
 
 
 @router.post("/subscribe")
@@ -560,7 +571,9 @@ async def create_subscribe_payment(
     user = await db.execute(select(User).where(User.telegram_id == tg_user["id"]))
     user = user.scalar_one_or_none()
 
-    price_rub = PLAN_PRICES_RUB[req.tier]
+    is_yearly = (req.period or "month") == "year"
+    monthly_rub = PLAN_PRICES_RUB[req.tier]
+    price_rub = round(monthly_rub * YEARLY_MULTIPLIER) if is_yearly else monthly_rub
     discount_desc = None
     if user:
         price_rub, discount_desc = apply_discount(price_rub, user)
@@ -590,7 +603,7 @@ async def create_subscribe_payment(
         currency="RUB",
         amount_usd=price_usd,
         product_type="subscription",
-        product_id=f"sub:{req.tier}",
+        product_id=f"sub:{req.tier}:year" if is_yearly else f"sub:{req.tier}",
         status="pending",
         tx_hash=order_id,
         provider_id=f"heleket:{invoice.get('uuid', order_id)}",

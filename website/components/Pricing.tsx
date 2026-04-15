@@ -2,7 +2,18 @@
 
 import { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
-import { PLAN_PRICES_RUB, PRICING_PLANS, type PaidPlanId, type PricingPlan } from "@/lib/pricing";
+import {
+  PLAN_PRICES_RUB,
+  PRICING_PLANS,
+  type PaidPlanId,
+  type PricingPlan,
+  YEARLY_DISCOUNT,
+  planPrice,
+  planYearlyPriceNum,
+  planYearlyPrice,
+  planYearlyOldPrice,
+  planYearlyMonthlyEquivalent,
+} from "@/lib/pricing";
 import { USD_TO_RUB } from "@/lib/constants";
 
 const TonPayButton = dynamic(() => import("./TonPayButton"), { ssr: false });
@@ -125,6 +136,7 @@ const KEYFRAMES = `
 
 export default function Pricing() {
   const [loading, setLoading] = useState(false);
+  const [billing, setBilling] = useState<"month" | "year">("month");
   const [modal, setModal] = useState<PricingPlan | null>(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
@@ -240,13 +252,15 @@ export default function Pricing() {
     setLoading(true);
     setResult(null);
     try {
-      const usdAmount = PLAN_PRICES_RUB[tier] / USD_TO_RUB;
+      const period = billing;
+      const rub = period === "year" ? planYearlyPriceNum(tier) : PLAN_PRICES_RUB[tier];
+      const usdAmount = rub / USD_TO_RUB;
 
       if (method === "platega") {
         const res = await fetch(`${API_URL}/api/payment/platega/create-order`, {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
-          body: JSON.stringify({ usd_amount: usdAmount, tier }),
+          body: JSON.stringify({ usd_amount: usdAmount, tier, period }),
         });
         const data = await res.json();
         if (res.ok && data.payment_url) {
@@ -258,7 +272,7 @@ export default function Pricing() {
         const res = await fetch(`${API_URL}/api/payment/subscribe`, {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
-          body: JSON.stringify({ tier }),
+          body: JSON.stringify({ tier, period }),
         });
         const data = await res.json();
         if (res.ok && data.payment_url) {
@@ -278,9 +292,33 @@ export default function Pricing() {
         <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-4">
           Выберите тариф под свои задачи
         </h2>
-        <p className="text-text/60 text-center mb-12 max-w-xl mx-auto">
+        <p className="text-text/60 text-center mb-6 max-w-xl mx-auto">
           Бесплатный старт. Апгрейд когда нужно больше.
         </p>
+
+        <div className="flex justify-center mb-10">
+          <div className="inline-flex items-center bg-text/5 rounded-full p-1 text-sm font-semibold">
+            <button
+              type="button"
+              onClick={() => setBilling("month")}
+              className={`px-5 py-2 rounded-full transition-colors ${billing === "month" ? "bg-bg shadow-sm text-text" : "text-text/55 hover:text-text"}`}
+              aria-pressed={billing === "month"}
+            >
+              Месяц
+            </button>
+            <button
+              type="button"
+              onClick={() => setBilling("year")}
+              className={`px-5 py-2 rounded-full transition-colors flex items-center gap-2 ${billing === "year" ? "bg-bg shadow-sm text-text" : "text-text/55 hover:text-text"}`}
+              aria-pressed={billing === "year"}
+            >
+              Год
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${billing === "year" ? "bg-accent/15 text-accent" : "bg-text/10 text-text/60"}`}>
+                −{Math.round(YEARLY_DISCOUNT * 100)}%
+              </span>
+            </button>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto">
           {plans.map((plan) => (
@@ -328,16 +366,36 @@ export default function Pricing() {
                   </span>
                   <h3 className={`text-lg font-extrabold ${plan.premium ? "text-white" : ""}`}>{plan.name}</h3>
                 </div>
-                <div className="mt-1 flex items-baseline gap-2">
-                  {plan.oldPrice && (
-                    <span className={`text-sm line-through ${plan.premium ? "text-white/30" : "text-text/30"}`}>{plan.oldPrice}</span>
-                  )}
-                  <span className={`text-2xl font-extrabold ${plan.premium ? "text-amber-400" : ""}`}>{plan.price}</span>
-                  {plan.period && <span className={`text-sm ${plan.premium ? "text-white/40" : "text-text/40"}`}>{plan.period}</span>}
-                  {plan.oldPrice && (
-                    <span className="text-[10px] font-bold bg-red-500/10 text-red-500 px-1.5 py-0.5 rounded-full">-{Math.round((1 - plan.priceNum / parseInt(plan.oldPrice.replace(/\s/g, ""))) * 100)}%</span>
-                  )}
-                </div>
+                {(() => {
+                  const isPaid = plan.id === "mini" || plan.id === "max" || plan.id === "max-pro";
+                  const showYearly = isPaid && billing === "year";
+                  const displayPrice = showYearly
+                    ? planYearlyMonthlyEquivalent(plan.id as PaidPlanId)
+                    : plan.price;
+                  const displayPeriod = showYearly ? "/мес" : plan.period;
+                  const monthlyOld = isPaid && showYearly ? planPrice(plan.id as PaidPlanId) : plan.oldPrice;
+                  const showDiscount = showYearly && isPaid;
+                  return (
+                    <>
+                      <div className="mt-1 flex items-baseline gap-2 flex-wrap">
+                        {monthlyOld && (
+                          <span className={`text-sm line-through ${plan.premium ? "text-white/30" : "text-text/30"}`}>{monthlyOld}</span>
+                        )}
+                        <span className={`text-2xl font-extrabold ${plan.premium ? "text-amber-400" : ""}`}>{displayPrice}</span>
+                        {displayPeriod && <span className={`text-sm ${plan.premium ? "text-white/40" : "text-text/40"}`}>{displayPeriod}</span>}
+                        {showDiscount && (
+                          <span className="text-[10px] font-bold bg-accent/15 text-accent px-1.5 py-0.5 rounded-full">−{Math.round(YEARLY_DISCOUNT * 100)}%</span>
+                        )}
+                      </div>
+                      {showYearly && (
+                        <p className={`text-[11px] mt-0.5 ${plan.premium ? "text-white/40" : "text-text/40"}`}>
+                          оплата {planYearlyPrice(plan.id as PaidPlanId)} раз в год
+                          <span className="text-text/30"> · вместо {planYearlyOldPrice(plan.id as PaidPlanId)}</span>
+                        </p>
+                      )}
+                    </>
+                  );
+                })()}
                 <p className={`text-xs mt-1 ${plan.premium ? "text-white/50" : "text-text/50"}`}>{plan.desc}</p>
               </div>
 
