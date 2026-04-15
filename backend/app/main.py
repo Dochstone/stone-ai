@@ -220,6 +220,18 @@ async def lifespan(app: FastAPI):
                                 await db.commit()
                                 logger.info(f"Video worker: task {task.task_id} completed")
 
+                                # Log to `usage` so finance reports see real provider cost per tier
+                                try:
+                                    from app.services.limiter import record_usage
+                                    await record_usage(
+                                        db, task.user_tg_id, task.model_id,
+                                        cost_usd=float(task.cost_usd or 0),
+                                        provider_cost_usd=float(task.provider_cost_usd or 0),
+                                    )
+                                    await db.commit()
+                                except Exception as e:
+                                    logger.warning(f"Video worker: usage log failed for {task.task_id}: {e}")
+
                                 # Save to disk in background
                                 from app.routers.video import _save_video_to_disk
                                 from app.routers.achievements import check_and_update

@@ -322,6 +322,18 @@ async def video_status(
         task.completed_at = datetime.utcnow()
         await db.commit()
 
+        # Log to `usage` so finance reports see real provider cost per tier
+        try:
+            from app.services.limiter import record_usage
+            await record_usage(
+                db, tg_id, task.model_id,
+                cost_usd=float(task.cost_usd or 0),
+                provider_cost_usd=float(task.provider_cost_usd or 0),
+            )
+            await db.commit()
+        except Exception:
+            pass
+
         asyncio.create_task(
             _save_video_to_disk(
                 task.task_id,
