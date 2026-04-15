@@ -77,9 +77,9 @@ export function planOldPrice(id: PaidPlanId): string {
 export const YEARLY_DISCOUNT = 0.2; // marketing-rounded label only
 
 export const PRICES_YEARLY: Record<PaidPlanId, number> = {
-  mini: 9490,
-  max: 17990,
-  "max-pro": 37990,
+  mini: 9480,        // 790₽/мес × 12
+  max: 17988,        // 1 499₽/мес × 12
+  "max-pro": 38388,  // 3 199₽/мес × 12
 };
 
 export function planYearlyPriceNum(id: PaidPlanId): number {
