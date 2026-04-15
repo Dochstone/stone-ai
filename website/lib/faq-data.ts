@@ -87,6 +87,26 @@ const _homeFaqData: { q: string; a: string; category: FaqCategory }[] = [
     a: 'Да! <a href="/dashboard/seo/ab-test" class="text-accent hover:underline font-semibold">A/B тестирование</a> генерирует 3 варианта текста по вашему запросу: эмоциональный, экспертный и прямолинейный. AI оценивает каждый от 1 до 10 с комментарием и автоматически выбирает лучший. Вы можете скопировать любой вариант или выбрать победителя вручную. Находится в разделе <a href="/dashboard/seo" class="text-accent hover:underline">SEO-инструменты</a>.',
   },
   {
+    category: "features",
+    q: "Как работает AI-чат и как выбрать модель?",
+    a: 'В <a href="/dashboard/chat" class="text-accent hover:underline font-semibold">AI-чате</a> доступны все 45+ текстовых моделей: <strong>GPT-5.1, GPT-5.4</strong> (OpenAI), <strong>Claude Opus 4.5, Sonnet 4.5, Haiku 4.5</strong> (Anthropic), <strong>Gemini 3 Pro, 2.5 Pro</strong> (Google), <strong>DeepSeek R1, V3</strong>, <strong>Grok 3</strong>, <strong>Llama 4</strong>, <strong>Mistral Large</strong> и другие. Переключение моделей — один клик в выпадающем списке. Ответы идут <strong>стримингом</strong> (по словам), поддерживается <strong>DualChat</strong> — задаёте один вопрос и видите ответы 2 моделей параллельно для сравнения. История чатов сохраняется для каждой модели отдельно, можно закрепить чат, переименовать, удалить.',
+  },
+  {
+    category: "features",
+    q: "Как генерировать картинки и какие модели для этого есть?",
+    a: 'Генерация картинок доступна прямо в <a href="/dashboard/chat" class="text-accent hover:underline font-semibold">AI-чате</a> — переключите модель на image и опишите картинку текстом. <strong>6 моделей:</strong> <strong>Nano Banana Pro</strong> (фотореализм и редактирование существующих фото), <strong>GPT-5 Image</strong> (отлично работает с текстом на картинке), <strong>Flux 1.1 Pro / Schnell</strong> (быстрая и художественная), <strong>Midjourney V7</strong> (арт-стиль), <strong>SDXL</strong> (разные стили от фотореализма до аниме). Бесплатно — 2 пробные картинки при регистрации. В подписке Start — 60/мес, Pro — 140/мес, Elite — 280/мес. <a href="/blog/generate-images-ai-free" class="text-accent hover:underline">Гайд по генерации картинок →</a>',
+  },
+  {
+    category: "features",
+    q: "Можно ли генерировать видео через нейросеть?",
+    a: 'Да, доступны лучшие video-модели 2026. <strong>Sora 2</strong> (OpenAI) — до 10 секунд, фотореализм. <strong>Veo 3.1</strong> (Google) — быстрая генерация, стабильная физика. <strong>Kling v2</strong> — 5-10 сек, хорошая детализация. <strong>Luma Ray 2</strong>, <strong>Runway Gen-3</strong>, <strong>Pika 2</strong>, <strong>MiniMax</strong> — для разных стилей. Каждое видео тратит видео-поинты: короткие клипы 1-3 поинта, премиум 1080P/10 сек — 5-10 поинтов. Бесплатно — 2 пробных поинта навсегда. В Start — 13 поинтов + триалы, Pro — 33 поинта, Elite — 80 поинтов в месяц.',
+  },
+  {
+    category: "features",
+    q: "Есть ли озвучка текста (TTS) и распознавание речи (STT)?",
+    a: 'Да, оба направления. <strong>TTS (озвучка текста):</strong> 9 голосов OpenAI — Alloy (нейтральный), Echo (глубокий), Nova (мягкий), Shimmer (тёплый), Onyx (низкий), Fable (выразительный) и другие. Работает на русском и 50+ языках, до 4096 символов (~2 минуты аудио) за запрос. <strong>STT (речь в текст):</strong> нажмите микрофон в чате — Whisper AI переведёт до 30 секунд речи в текст за секунду. Лимиты: Start — 3 озвучки/мес, Pro — 20/мес, Elite — 100/мес. Голосовой ассистент включён в Pro и Elite.',
+  },
+  {
     category: "tools",
     q: "Можно ли встроить AI-бота на свой сайт?",
     a: 'Да! Создайте публичного бота в <a href="/dashboard/bots" class="text-accent hover:underline font-semibold">конструкторе ботов</a>, нажмите «Виджет» — код скопируется в буфер. Вставьте перед &lt;/body&gt; на вашем сайте: <code>&lt;script src="https://stoneai.ru/widget.js" data-bot-id="ID"&gt;&lt;/script&gt;</code>. Настройки через атрибуты: <code>data-color</code> (цвет кнопки), <code>data-position</code> (left/right), <code>data-text</code> (текст кнопки). Работает на WordPress, Tilda, Bitrix, любом HTML-сайте. Также можно подключить бота к Telegram через токен @BotFather.',
