@@ -125,21 +125,6 @@ interface ChatSessionItem {
 
 // ─── Company icon for AI avatar ───
 
-// Company logos — SVG files in /public/logos/
-const companyLogoFile: Record<string, string> = {
-  OpenAI: "/logos/openai.svg", Anthropic: "/logos/anthropic.svg",
-  Google: "/logos/google.svg", Meta: "/logos/meta.svg",
-  Mistral: "/logos/mistral.svg", DeepSeek: "/logos/deepseek.svg",
-  xAI: "/logos/xai.svg", Perplexity: "/logos/perplexity.svg",
-  Alibaba: "/logos/alibaba.svg", Cohere: "/logos/cohere.svg",
-  NVIDIA: "/logos/nvidia.svg", Microsoft: "/logos/microsoft.svg",
-  Tencent: "/logos/tencent.svg", Stability: "/logos/stability.svg",
-  Moonshot: "/logos/moonshot.svg", Luma: "/logos/luma.svg",
-  Pika: "/logos/pika.svg", MiniMax: "/logos/minimax.svg",
-  Tripo3D: "/logos/tripo3d.svg", PixVerse: "/logos/pixverse.svg",
-  Kuaishou: "/logos/kuaishou.svg", Lightricks: "/logos/lightricks.svg",
-};
-
 const companyColors: Record<string, string> = {
   OpenAI: "#10a37f", Anthropic: "#d97706", Google: "#4285f4", Meta: "#0668E1",
   Mistral: "#1a1a1a", DeepSeek: "#06b6d4", xAI: "#64748b", Perplexity: "#6366f1",
@@ -2114,27 +2099,11 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                           </span>
                         </div>
                       )
-                    ) : (() => {
-                      const msgModel = msg.modelId ? MODELS_MAP.get(msg.modelId) : null;
-                      const co = msgModel?.company || "";
-                      const color = companyColors[co] || "#C4623D";
-                      const logoFile = companyLogoFile[co];
-                      const letter = companyIcons[co];
-                      return (
-                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full ring-2 ring-text/[0.06] flex items-center justify-center overflow-hidden"
-                          style={{ backgroundColor: logoFile ? "#f5f5f5" : color }}>
-                          {logoFile ? (
-                            <img src={logoFile} alt={co} className="w-5 h-5 sm:w-5 sm:h-5 object-contain" />
-                          ) : letter ? (
-                            <span className="text-[11px] sm:text-[12px] font-bold text-white">{letter}</span>
-                          ) : (
-                            <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-                            </svg>
-                          )}
-                        </div>
-                      );
-                    })()}
+                    ) : (
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full ring-2 ring-text/[0.06] bg-bg overflow-hidden flex items-center justify-center">
+                        <img src="/mascots/stone-mascot-chat.webp" alt="Stone AI" className="w-6 h-6 sm:w-7 sm:h-7 object-contain" />
+                      </div>
+                    )}
                   </div>
 
                   {/* Message bubble */}
