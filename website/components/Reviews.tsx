@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { planPrice } from "@/lib/pricing";
 
 const reviews = [
@@ -58,7 +57,7 @@ export default function Reviews() {
                 &ldquo;{r.text}&rdquo;
               </p>
               <div className="flex items-center gap-3">
-                <Image
+                <img
                   src={r.avatar}
                   alt={r.name}
                   width={44}
