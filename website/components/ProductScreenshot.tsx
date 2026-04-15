@@ -1,3 +1,28 @@
+import {
+  MessageSquare,
+  FileText,
+  Bot,
+  Image as ImageIcon,
+  Presentation,
+  Camera,
+  Search,
+  Sparkles,
+  Trophy,
+  type LucideIcon,
+} from "lucide-react";
+
+const TOOLS: { name: string; Icon: LucideIcon; color: string; bg: string; href: string; badge: string | null }[] = [
+  { name: "AI Чат",       Icon: MessageSquare, color: "#22D3EE", bg: "rgba(34,211,238,0.15)",  href: "/dashboard/chat",          badge: null },
+  { name: "Шаблоны",      Icon: FileText,      color: "#F59E0B", bg: "rgba(245,158,11,0.15)",  href: "/dashboard/templates",     badge: "50+" },
+  { name: "Мои боты",     Icon: Bot,           color: "#A855F7", bg: "rgba(168,85,247,0.15)",  href: "/dashboard/bots",          badge: "NEW" },
+  { name: "Галерея",      Icon: ImageIcon,     color: "#EC4899", bg: "rgba(236,72,153,0.15)",  href: "/dashboard/gallery",       badge: null },
+  { name: "Презентации",  Icon: Presentation,  color: "#14B8A6", bg: "rgba(20,184,166,0.15)",  href: "/dashboard/presentations", badge: null },
+  { name: "Фотосессия",   Icon: Camera,        color: "#F43F5E", bg: "rgba(244,63,94,0.15)",   href: "/dashboard/photo-session", badge: null },
+  { name: "SEO",          Icon: Search,        color: "#10B981", bg: "rgba(16,185,129,0.15)",  href: "/dashboard/seo",           badge: null },
+  { name: "AI-Агент",     Icon: Sparkles,      color: "#C4623D", bg: "rgba(196,98,61,0.15)",   href: "/dashboard/agent",         badge: "NEW" },
+  { name: "Достижения",   Icon: Trophy,        color: "#EAB308", bg: "rgba(234,179,8,0.15)",   href: "/dashboard/achievements",  badge: null },
+];
+
 export default function ProductScreenshot() {
   return (
     <section className="py-16 md:py-24">
@@ -29,29 +54,27 @@ export default function ProductScreenshot() {
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-2">
-                {[
-                  { icon: "💬", name: "AI Чат",       href: "/dashboard/chat",          badge: null },
-                  { icon: "📝", name: "Шаблоны",      href: "/dashboard/templates",     badge: "50+" },
-                  { icon: "🤖", name: "Мои боты",     href: "/dashboard/bots",          badge: "NEW" },
-                  { icon: "🎨", name: "Галерея",      href: "/dashboard/gallery",       badge: null },
-                  { icon: "📊", name: "Презентации",  href: "/dashboard/presentations", badge: null },
-                  { icon: "📷", name: "Фотосессия",   href: "/dashboard/photo-session", badge: null },
-                  { icon: "🔍", name: "SEO",          href: "/dashboard/seo",           badge: null },
-                  { icon: "🧠", name: "AI-Агент",     href: "/dashboard/agent",         badge: "NEW" },
-                  { icon: "🏆", name: "Достижения",   href: "/dashboard/achievements",  badge: null },
-                ].map((t) => (
-                  <a
-                    key={t.name}
-                    href={t.href}
-                    className="tile-hover group block bg-text/[0.03] rounded-xl p-3 text-center border border-transparent focus:outline-none focus:ring-2 focus:ring-accent/30"
-                  >
-                    <span className="tile-icon text-lg block mb-1">{t.icon}</span>
-                    <span className="text-[10px] font-semibold text-text/60 block transition-colors group-hover:text-accent">{t.name}</span>
-                    {t.badge && (
-                      <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded mt-1 inline-block ${t.badge === "NEW" ? "bg-accent/10 text-accent" : "bg-text/[0.06] text-text/30"}`}>{t.badge}</span>
-                    )}
-                  </a>
-                ))}
+                {TOOLS.map((t) => {
+                  const Icon = t.Icon;
+                  return (
+                    <a
+                      key={t.name}
+                      href={t.href}
+                      className="tile-hover group block bg-text/[0.03] rounded-xl p-3 text-center border border-transparent focus:outline-none focus:ring-2 focus:ring-accent/30"
+                    >
+                      <span
+                        className="tile-icon inline-flex items-center justify-center w-10 h-10 rounded-xl mb-1.5"
+                        style={{ background: t.bg, color: t.color }}
+                      >
+                        <Icon className="w-5 h-5" strokeWidth={2.4} />
+                      </span>
+                      <span className="text-[10px] font-semibold text-text/60 block transition-colors group-hover:text-accent">{t.name}</span>
+                      {t.badge && (
+                        <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded mt-1 inline-block ${t.badge === "NEW" ? "bg-accent/10 text-accent" : "bg-text/[0.06] text-text/30"}`}>{t.badge}</span>
+                      )}
+                    </a>
+                  );
+                })}
               </div>
             </div>
           </div>
