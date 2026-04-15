@@ -1,5 +1,7 @@
 """Subscription plans — tier definitions, credit costs, model access."""
 
+from app.pricing import PLAN_PRICES_RUB  # single source of truth for tier prices
+
 # ─── Plan definitions (what user sees + hidden credits) ───
 
 PLANS = {
@@ -26,7 +28,7 @@ PLANS = {
     },
     "mini": {
         "name": "Start",
-        "price_rub": 590,
+        "price_rub": PLAN_PRICES_RUB["mini"],
         "credits": 1000,
         "limits": {
             "text_fast": 600,        # 20/day × 30
@@ -47,7 +49,7 @@ PLANS = {
     },
     "max": {
         "name": "Pro",
-        "price_rub": 1290,
+        "price_rub": PLAN_PRICES_RUB["max"],
         "credits": 3000,
         "limits": {
             "text_fast": 1500,       # 50/day × 30
@@ -68,7 +70,7 @@ PLANS = {
     },
     "max-pro": {
         "name": "Elite",
-        "price_rub": 2990,
+        "price_rub": PLAN_PRICES_RUB["max-pro"],
         "credits": 10000,
         "limits": {
             "text_fast": 4500,       # 150/day × 30
