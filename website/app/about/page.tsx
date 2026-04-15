@@ -245,11 +245,14 @@ export default function AboutPage() {
                 key={t.name}
                 href={t.href}
                 {...(t.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                className="block bg-white rounded-xl border border-text/5 p-4 hover:border-accent/30 hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-accent/30"
+                className="group relative block overflow-hidden bg-white rounded-xl border border-text/5 p-4 transition-all duration-300 ease-out hover:-translate-y-1 hover:scale-[1.03] hover:border-accent/40 hover:shadow-xl hover:shadow-accent/10 motion-reduce:transition-none motion-reduce:hover:transform-none focus:outline-none focus:ring-2 focus:ring-accent/30"
               >
-                <span className="text-2xl block mb-2">{t.icon}</span>
-                <div className="font-bold text-sm mb-0.5 group-hover:text-accent">{t.name}</div>
-                <div className="text-text/40 text-[11px]">{t.desc}</div>
+                <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-br from-accent/5 via-transparent to-teal/5 transition-opacity duration-300" />
+                <span className="relative z-10 inline-block text-2xl mb-2 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-rotate-3 motion-reduce:transform-none">
+                  {t.icon}
+                </span>
+                <div className="relative z-10 font-bold text-sm mb-0.5 transition-colors duration-200 group-hover:text-accent">{t.name}</div>
+                <div className="relative z-10 text-text/40 text-[11px] transition-colors duration-200 group-hover:text-text/60">{t.desc}</div>
               </a>
             ))}
           </div>
