@@ -111,14 +111,7 @@ export default function FaqPage() {
                   >
                     <summary className="p-5 cursor-pointer font-semibold text-sm text-text/85 list-none flex items-start justify-between gap-4 hover:bg-text/[0.02] transition-colors">
                       <span className="flex items-center gap-2">
-                        <a
-                          href={`#${item.slug}`}
-                          aria-label="Ссылка на вопрос"
-                          className="opacity-0 group-hover:opacity-100 text-text/30 hover:text-accent transition-opacity text-xs"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          #
-                        </a>
+                        <span aria-hidden="true" className="text-text/25 group-hover:text-accent transition-colors text-xs font-mono">#</span>
                         {item.q}
                       </span>
                       <svg
