@@ -174,11 +174,11 @@ function renderMarkdown(text: string): string {
     .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" class="md-link">$1</a>')
     .replace(/\n/g, "<br/>");
 
-  html = html.replace(/((?:<li class="md-li md-oli">.*?<\/li><br\/>?)+)/g, (match) => {
+  html = html.replace(/(?:<li class="md-li md-oli">.*?<\/li>(?:<br\/?>)*)+/g, (match) => {
     const cleaned = match.replace(/<br\/?>/g, "");
     return `<ol class="md-ol">${cleaned}</ol>`;
   });
-  html = html.replace(/((?:<li class="md-li">.*?<\/li><br\/>?)+)/g, (match) => {
+  html = html.replace(/(?:<li class="md-li">.*?<\/li>(?:<br\/?>)*)+/g, (match) => {
     const cleaned = match.replace(/<br\/?>/g, "");
     return `<ul class="md-ul">${cleaned}</ul>`;
   });
