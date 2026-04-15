@@ -589,7 +589,12 @@ export default function Pricing() {
                   {/* Mobile: overlay text on image */}
                   <div className="absolute bottom-4 left-4 right-4 sm:hidden">
                     <div className="flex items-center gap-3">
-                      <span className="text-3xl" style={{ animation: "pricingFloat 3s ease-in-out infinite" }}>{modal.icon}</span>
+                      <span
+                        className="glass-pad flex items-center justify-center w-12 h-12 rounded-xl shrink-0"
+                        style={{ ["--pad-c" as string]: modal.color }}
+                      >
+                        {(() => { const I = PLAN_ICON[modal.id]; return I ? <I className="block" size={26} strokeWidth={2.4} /> : null; })()}
+                      </span>
                       <div>
                         {modal.badge && (
                           <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold text-white mb-1" style={{ backgroundColor: modal.color }}>
@@ -617,7 +622,12 @@ export default function Pricing() {
                 {/* Desktop header (hidden on mobile since it's over image) */}
                 <div className="hidden sm:block px-6 pt-5 pb-2">
                   <div className="flex items-center gap-3 mb-2" style={{ animation: "pricingStagger 0.4s ease both 0.1s" }}>
-                    <span className="text-3xl" style={{ animation: "pricingFloat 3s ease-in-out infinite" }}>{modal.icon}</span>
+                    <span
+                      className="glass-pad flex items-center justify-center w-12 h-12 rounded-xl shrink-0"
+                      style={{ ["--pad-c" as string]: modal.color }}
+                    >
+                      {(() => { const I = PLAN_ICON[modal.id]; return I ? <I className="block" size={26} strokeWidth={2.4} /> : null; })()}
+                    </span>
                     <div>
                       {modal.badge && (
                         <span
