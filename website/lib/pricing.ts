@@ -70,30 +70,45 @@ export function planOldPrice(id: PaidPlanId): string {
   return `${formatRub(PRICES_OLD[id])}₽`;
 }
 
-/** Yearly billing — flat 20% off vs paying monthly for 12 months. */
-export const YEARLY_DISCOUNT = 0.2;
+/**
+ * Yearly billing — explicit "X 990" style prices that average ~20% off
+ * vs paying monthly for 12 months. Marketed as "−20%" on the toggle chip.
+ */
+export const YEARLY_DISCOUNT = 0.2; // marketing-rounded label only
+
+export const PRICES_YEARLY: Record<PaidPlanId, number> = {
+  mini: 9490,
+  max: 17990,
+  "max-pro": 37990,
+};
 
 export function planYearlyPriceNum(id: PaidPlanId): number {
-  return Math.round(PRICES_CURRENT[id] * 12 * (1 - YEARLY_DISCOUNT));
+  return PRICES_YEARLY[id];
 }
 
-/** "9 504₽" — total amount charged for a year. */
+/** "9 490₽" — total amount charged for a year. */
 export function planYearlyPrice(id: PaidPlanId): string {
-  return `${formatRub(planYearlyPriceNum(id))}₽`;
+  return `${formatRub(PRICES_YEARLY[id])}₽`;
 }
 
 export function planYearlyPriceFull(id: PaidPlanId): string {
   return `${planYearlyPrice(id)}/год`;
 }
 
-/** "792₽" — yearly cost amortised per month (for "от X₽/мес" style copy). */
+/** "791₽" — yearly cost amortised per month (for "от X₽/мес" style copy). */
 export function planYearlyMonthlyEquivalent(id: PaidPlanId): string {
-  return `${formatRub(Math.round(PRICES_CURRENT[id] * (1 - YEARLY_DISCOUNT)))}₽`;
+  return `${formatRub(Math.round(PRICES_YEARLY[id] / 12))}₽`;
 }
 
 /** "11 880₽" — what the user would pay if billing monthly for 12 months. */
 export function planYearlyOldPrice(id: PaidPlanId): string {
   return `${formatRub(PRICES_CURRENT[id] * 12)}₽`;
+}
+
+/** Real percent saved vs 12 monthly payments — for per-tier display if needed. */
+export function planYearlyDiscountPct(id: PaidPlanId): number {
+  const annual = PRICES_CURRENT[id] * 12;
+  return Math.round(((annual - PRICES_YEARLY[id]) / annual) * 100);
 }
 
 export const PLAN_DISPLAY = {

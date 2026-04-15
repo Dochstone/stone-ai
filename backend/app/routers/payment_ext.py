@@ -63,8 +63,7 @@ class TopUpRequest(BaseModel):
     period: str | None = None  # "month" (default) or "year" — yearly = 20% off, charges 12 mo upfront
 
 
-YEARLY_DISCOUNT = 0.2
-YEARLY_MULTIPLIER = round(12 * (1 - YEARLY_DISCOUNT), 4)  # 9.6 — pay for 12 months minus 20%
+from app.pricing import PLAN_PRICES_YEARLY_RUB
 
 
 async def _get_user_by_external_id(db: AsyncSession, external_id: int, *, lock: bool = False):
@@ -190,8 +189,7 @@ async def create_platega_order(
         if req.tier not in PLANS:
             raise HTTPException(status_code=400, detail="Недопустимый тариф")
         plan = PLANS[req.tier]
-        monthly_rub = float(plan["price_rub"])
-        rub_amount = round(monthly_rub * YEARLY_MULTIPLIER if is_yearly else monthly_rub, 0)
+        rub_amount = float(PLAN_PRICES_YEARLY_RUB[req.tier]) if is_yearly else float(plan["price_rub"])
         usd_amount = round(rub_amount / USD_TO_RUB, 2)
         tier_label = plan.get("name", req.tier)
         period_label = "Год" if is_yearly else "1 мес"
@@ -572,8 +570,7 @@ async def create_subscribe_payment(
     user = user.scalar_one_or_none()
 
     is_yearly = (req.period or "month") == "year"
-    monthly_rub = PLAN_PRICES_RUB[req.tier]
-    price_rub = round(monthly_rub * YEARLY_MULTIPLIER) if is_yearly else monthly_rub
+    price_rub = PLAN_PRICES_YEARLY_RUB[req.tier] if is_yearly else PLAN_PRICES_RUB[req.tier]
     discount_desc = None
     if user:
         price_rub, discount_desc = apply_discount(price_rub, user)
