@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
@@ -160,7 +160,7 @@ function renderMarkdown(text: string): string {
   html = html
     .replace(/```(\w*)\n([\s\S]*?)```/g, (_match, lang, code) => {
       const highlighted = highlightCode(code.trimEnd(), lang || "");
-      return `<div class="code-block-wrapper"><div class="code-block-header"><span class="code-lang">${lang || "code"}</span><button class="code-copy-btn" onclick="(function(btn){var code=btn.closest('.code-block-wrapper').querySelector('code').textContent;navigator.clipboard.writeText(code);btn.textContent='Скопировано!';setTimeout(function(){btn.textContent='Копировать'},2000)})(this)">Копировать</button></div><pre class="code-block"><code>${highlighted}</code></pre></div>`;
+      return `<div class="code-block-wrapper"><div class="code-block-header"><span class="code-lang">${lang || "code"}</span><button type="button" class="code-copy-btn">Копировать</button></div><pre class="code-block"><code>${highlighted}</code></pre></div>`;
     })
     .replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
@@ -172,6 +172,7 @@ function renderMarkdown(text: string): string {
     .replace(/^[*-] (.+)$/gm, '<li class="md-li">$1</li>')
     .replace(/^\d+\. (.+)$/gm, '<li class="md-li md-oli">$1</li>')
     .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" class="md-link">$1</a>')
+    .replace(/(?<!href=["'])https?:\/\/[^\s<>"'`]+[^\s<>"'`.,;:!?)\]]/g, (url) => `<a href="${url}" target="_blank" rel="noopener" class="md-link">${url}</a>`)
     .replace(/\n/g, "<br/>");
 
   html = html.replace(/(?:<li class="md-li md-oli">.*?<\/li>(?:<br\/?>)*)+/g, (match) => {
@@ -375,14 +376,37 @@ function ThinkingBlock({ content }: { content: string }) {
 // ─── Main Component ───
 
 export default function MessageContent({ content, role, selectedModel }: { content: string; role: string; selectedModel: string }) {
+  const mdRef = useRef<HTMLDivElement>(null);
+
+  // Extract <think>...</think> block (computed before hooks-after-early-return; safe when content is empty)
+  const thinkMatch = content ? content.match(/<think>([\s\S]*?)<\/think>/) : null;
+  const thinkContent = thinkMatch ? thinkMatch[1].trim() : null;
+  const displayContent = thinkMatch ? content.replace(/<think>[\s\S]*?<\/think>/, "").trim() : content;
+
+  useEffect(() => {
+    const el = mdRef.current;
+    if (!el) return;
+    const handler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const btn = target.closest<HTMLButtonElement>(".code-copy-btn");
+      if (!btn || !el.contains(btn)) return;
+      const code = btn.closest(".code-block-wrapper")?.querySelector("code")?.textContent ?? "";
+      navigator.clipboard.writeText(code).then(() => {
+        const prev = btn.textContent;
+        btn.textContent = "Скопировано!";
+        window.setTimeout(() => {
+          if (btn.textContent === "Скопировано!") btn.textContent = prev ?? "Копировать";
+        }, 2000);
+      });
+    };
+    el.addEventListener("click", handler);
+    return () => el.removeEventListener("click", handler);
+  }, [displayContent]);
+
   if (role !== "assistant" || !content) {
     return <div className="whitespace-pre-wrap break-words">{content}</div>;
   }
 
-  // Extract <think>...</think> block
-  const thinkMatch = content.match(/<think>([\s\S]*?)<\/think>/);
-  const thinkContent = thinkMatch ? thinkMatch[1].trim() : null;
-  const displayContent = thinkMatch ? content.replace(/<think>[\s\S]*?<\/think>/, "").trim() : content;
   // Detect still-thinking (open <think> without close)
   const isStillThinking = !thinkMatch && content.includes("<think>") && !content.includes("</think>");
   const partialThink = isStillThinking ? content.replace("<think>", "").trim() : null;
@@ -415,7 +439,7 @@ export default function MessageContent({ content, role, selectedModel }: { conte
       ) : displayContent.match(/^https?:\/\/\S+$/) ? (
         <ImageWithDownload url={displayContent.trim()} />
       ) : displayContent ? (
-        <div className="md-content break-words" dangerouslySetInnerHTML={{ __html: sanitizeHtml(renderMarkdown(displayContent)) }} />
+        <div ref={mdRef} className="md-content break-words" dangerouslySetInnerHTML={{ __html: sanitizeHtml(renderMarkdown(displayContent)) }} />
       ) : null}
     </div>
   );
