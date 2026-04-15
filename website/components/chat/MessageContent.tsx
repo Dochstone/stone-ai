@@ -157,12 +157,24 @@ function renderMarkdown(text: string): string {
     (match) => renderTable(match)
   );
 
+  // Fenced code blocks — support both ``` and ~~~ fences
+  const renderCodeBlock = (_m: string, lang: string, code: string) => {
+    const highlighted = highlightCode(code.trimEnd(), lang || "");
+    return `<div class="code-block-wrapper"><div class="code-block-header"><span class="code-lang">${lang || "code"}</span><button type="button" class="code-copy-btn">Копировать</button></div><pre class="code-block"><code>${highlighted}</code></pre></div>`;
+  };
   html = html
-    .replace(/```(\w*)\n([\s\S]*?)```/g, (_match, lang, code) => {
-      const highlighted = highlightCode(code.trimEnd(), lang || "");
-      return `<div class="code-block-wrapper"><div class="code-block-header"><span class="code-lang">${lang || "code"}</span><button type="button" class="code-copy-btn">Копировать</button></div><pre class="code-block"><code>${highlighted}</code></pre></div>`;
-    })
-    .replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
+    .replace(/```(\w*)\n([\s\S]*?)```/g, renderCodeBlock)
+    .replace(/~~~(\w*)\n([\s\S]*?)~~~/g, renderCodeBlock);
+
+  // Protect inline code from bold/italic/link mangling by tokenising now
+  // and restoring after other inline passes.
+  const inlineCodeTokens: string[] = [];
+  html = html.replace(/`([^`\n]+)`/g, (_m, code) => {
+    const idx = inlineCodeTokens.push(code) - 1;
+    return `\x00IC${idx}IC\x00`;
+  });
+
+  html = html
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.+?)\*/g, "<em>$1</em>")
     .replace(/~~(.+?)~~/g, "<del>$1</del>")
@@ -174,6 +186,15 @@ function renderMarkdown(text: string): string {
     .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" class="md-link">$1</a>')
     .replace(/(?<!href=["'])https?:\/\/[^\s<>"'`]+[^\s<>"'`.,;:!?)\]]/g, (url) => `<a href="${url}" target="_blank" rel="noopener" class="md-link">${url}</a>`)
     .replace(/\n/g, "<br/>");
+
+  // Restore inline code (escape HTML so content renders verbatim)
+  html = html.replace(/\x00IC(\d+)IC\x00/g, (_m, idx) => {
+    const code = inlineCodeTokens[+idx]
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+    return `<code class="inline-code">${code}</code>`;
+  });
 
   html = html.replace(/(?:<li class="md-li md-oli">.*?<\/li>(?:<br\/?>)*)+/g, (match) => {
     const cleaned = match.replace(/<br\/?>/g, "");
