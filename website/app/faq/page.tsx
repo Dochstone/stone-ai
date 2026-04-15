@@ -1,19 +1,9 @@
 import type { Metadata } from "next";
 import Breadcrumbs, { breadcrumbJsonLd } from "@/components/Breadcrumbs";
-import { homeFaqData, FAQ_CATEGORIES, type FaqCategory } from "@/lib/faq-data";
+import { homeFaqData, FAQ_CATEGORIES } from "@/lib/faq-data";
 import { tagToSlug } from "@/lib/blog";
 import { SITE_URL } from "@/lib/constants";
 import FaqSearch from "./FaqSearch";
-import { Rocket, Sparkles, Wrench, Gem, CreditCard, Wand2, type LucideIcon } from "lucide-react";
-
-const CAT_ICONS: Record<FaqCategory, LucideIcon> = {
-  start: Rocket,
-  generation: Sparkles,
-  tools: Wrench,
-  pricing: Gem,
-  payments: CreditCard,
-  features: Wand2,
-};
 
 export const metadata: Metadata = {
   title: "Частые вопросы (FAQ) — Stone AI",
@@ -95,19 +85,16 @@ export default function FaqPage() {
           aria-label="Категории FAQ"
           className="-mx-4 sm:mx-auto px-4 sm:px-0 mb-8 flex gap-2 overflow-x-auto no-scrollbar sm:flex-wrap sm:justify-center snap-x snap-proximity sm:snap-none"
         >
-          {grouped.map((c) => {
-            const Icon = CAT_ICONS[c.id];
-            return (
-              <a
-                key={c.id}
-                href={`#cat-${c.id}`}
-                className="shrink-0 snap-start whitespace-nowrap inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-text/5 text-text/70 hover:bg-accent/10 hover:text-accent text-sm font-semibold transition-colors"
-              >
-                <Icon className="w-4 h-4" strokeWidth={2} />
-                {c.name} ({c.items.length})
-              </a>
-            );
-          })}
+          {grouped.map((c) => (
+            <a
+              key={c.id}
+              href={`#cat-${c.id}`}
+              className="shrink-0 snap-start whitespace-nowrap px-4 py-2 rounded-full bg-text/5 text-text/70 hover:bg-accent/10 hover:text-accent text-sm font-semibold transition-colors"
+            >
+              <span aria-hidden="true" className="mr-1">{c.icon}</span>
+              {c.name} ({c.items.length})
+            </a>
+          ))}
         </nav>
 
         <FaqSearch
@@ -120,14 +107,10 @@ export default function FaqPage() {
         />
 
         <div className="space-y-10">
-          {grouped.map((cat) => {
-            const Icon = CAT_ICONS[cat.id];
-            return (
+          {grouped.map((cat) => (
             <section key={cat.id} id={`cat-${cat.id}`} className="scroll-mt-28">
-              <h2 className="text-xl md:text-2xl font-extrabold mb-4 flex items-center gap-2.5">
-                <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-accent/10 text-accent">
-                  <Icon className="w-4 h-4" strokeWidth={2.2} />
-                </span>
+              <h2 className="text-xl md:text-2xl font-extrabold mb-4 flex items-center gap-2">
+                <span aria-hidden="true">{cat.icon}</span>
                 {cat.name}
               </h2>
               <div className="space-y-3">
@@ -160,8 +143,7 @@ export default function FaqPage() {
                 ))}
               </div>
             </section>
-            );
-          })}
+          ))}
         </div>
 
         {/* No answer CTA */}

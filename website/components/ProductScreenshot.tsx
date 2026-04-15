@@ -1,28 +1,3 @@
-import {
-  MessageSquare,
-  FileText,
-  Bot,
-  Image as ImageIcon,
-  Presentation,
-  Camera,
-  Search,
-  Sparkles,
-  Trophy,
-  type LucideIcon,
-} from "lucide-react";
-
-const TOOL_ICONS: Record<string, LucideIcon> = {
-  "AI Чат": MessageSquare,
-  "Шаблоны": FileText,
-  "Мои боты": Bot,
-  "Галерея": ImageIcon,
-  "Презентации": Presentation,
-  "Фотосессия": Camera,
-  "SEO": Search,
-  "AI-Агент": Sparkles,
-  "Достижения": Trophy,
-};
-
 export default function ProductScreenshot() {
   return (
     <section className="py-16 md:py-24">
@@ -55,33 +30,28 @@ export default function ProductScreenshot() {
               </div>
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { name: "AI Чат",       href: "/dashboard/chat",          badge: null },
-                  { name: "Шаблоны",      href: "/dashboard/templates",     badge: "50+" },
-                  { name: "Мои боты",     href: "/dashboard/bots",          badge: "NEW" },
-                  { name: "Галерея",      href: "/dashboard/gallery",       badge: null },
-                  { name: "Презентации",  href: "/dashboard/presentations", badge: null },
-                  { name: "Фотосессия",   href: "/dashboard/photo-session", badge: null },
-                  { name: "SEO",          href: "/dashboard/seo",           badge: null },
-                  { name: "AI-Агент",     href: "/dashboard/agent",         badge: "NEW" },
-                  { name: "Достижения",   href: "/dashboard/achievements",  badge: null },
-                ].map((t) => {
-                  const Icon = TOOL_ICONS[t.name];
-                  return (
-                    <a
-                      key={t.name}
-                      href={t.href}
-                      className="tile-hover group block bg-text/[0.03] rounded-xl p-3 text-center border border-transparent focus:outline-none focus:ring-2 focus:ring-accent/30"
-                    >
-                      <span className="tile-icon inline-flex items-center justify-center w-8 h-8 rounded-lg bg-accent/10 text-accent mb-1.5">
-                        {Icon && <Icon className="w-4 h-4" strokeWidth={2} />}
-                      </span>
-                      <span className="text-[10px] font-semibold text-text/60 block transition-colors group-hover:text-accent">{t.name}</span>
-                      {t.badge && (
-                        <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded mt-1 inline-block ${t.badge === "NEW" ? "bg-accent/10 text-accent" : "bg-text/[0.06] text-text/30"}`}>{t.badge}</span>
-                      )}
-                    </a>
-                  );
-                })}
+                  { icon: "💬", name: "AI Чат",       href: "/dashboard/chat",          badge: null },
+                  { icon: "📝", name: "Шаблоны",      href: "/dashboard/templates",     badge: "50+" },
+                  { icon: "🤖", name: "Мои боты",     href: "/dashboard/bots",          badge: "NEW" },
+                  { icon: "🎨", name: "Галерея",      href: "/dashboard/gallery",       badge: null },
+                  { icon: "📊", name: "Презентации",  href: "/dashboard/presentations", badge: null },
+                  { icon: "📷", name: "Фотосессия",   href: "/dashboard/photo-session", badge: null },
+                  { icon: "🔍", name: "SEO",          href: "/dashboard/seo",           badge: null },
+                  { icon: "🧠", name: "AI-Агент",     href: "/dashboard/agent",         badge: "NEW" },
+                  { icon: "🏆", name: "Достижения",   href: "/dashboard/achievements",  badge: null },
+                ].map((t) => (
+                  <a
+                    key={t.name}
+                    href={t.href}
+                    className="tile-hover group block bg-text/[0.03] rounded-xl p-3 text-center border border-transparent focus:outline-none focus:ring-2 focus:ring-accent/30"
+                  >
+                    <span className="tile-icon text-lg block mb-1">{t.icon}</span>
+                    <span className="text-[10px] font-semibold text-text/60 block transition-colors group-hover:text-accent">{t.name}</span>
+                    {t.badge && (
+                      <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded mt-1 inline-block ${t.badge === "NEW" ? "bg-accent/10 text-accent" : "bg-text/[0.06] text-text/30"}`}>{t.badge}</span>
+                    )}
+                  </a>
+                ))}
               </div>
             </div>
           </div>

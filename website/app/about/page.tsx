@@ -5,36 +5,6 @@ import Quote from "@/components/content/Quote";
 import StatBlock from "@/components/content/StatBlock";
 import FaqExtended from "@/components/content/FaqExtended";
 import { planPrice } from "@/lib/pricing";
-import {
-  MessageSquare,
-  Bot,
-  Sparkles,
-  Megaphone,
-  FileText,
-  Camera,
-  Presentation,
-  Search,
-  Code,
-  Send,
-  LineChart,
-  Target,
-  type LucideIcon,
-} from "lucide-react";
-
-const TOOL_ICONS: Record<string, LucideIcon> = {
-  "AI Чат": MessageSquare,
-  "Конструктор ботов": Bot,
-  "AI-Агент": Sparkles,
-  "Рекламные кампании": Megaphone,
-  "AI-шаблоны": FileText,
-  "Фотосессия товаров": Camera,
-  "Презентации": Presentation,
-  "SEO-модуль": Search,
-  "Виджет для сайта": Code,
-  "Telegram-боты": Send,
-  "Аналитика": LineChart,
-  "Геймификация": Target,
-};
 
 export const metadata: Metadata = {
   title: "О Stone AI — команда, миссия, технологии",
@@ -102,18 +72,18 @@ const techStack = [
 ];
 
 const tools = [
-  { name: "AI Чат",            href: "/dashboard/chat",           desc: "50+ моделей, стриминг, DualChat" },
-  { name: "Конструктор ботов", href: "/dashboard/bots",           desc: "Бот с базой знаний (RAG)" },
-  { name: "AI-Агент",          href: "/dashboard/agent",          desc: "Автономные multi-step задачи" },
-  { name: "Рекламные кампании",href: "/dashboard/campaigns",      desc: "Яндекс Директ за 3 минуты" },
-  { name: "AI-шаблоны",        href: "/dashboard/templates",      desc: "50+ готовых промптов" },
-  { name: "Фотосессия товаров",href: "/dashboard/photo-session",  desc: "Смена фона, на модели, пакетная" },
-  { name: "Презентации",       href: "/dashboard/presentations",  desc: "Слайды + PPTX экспорт" },
-  { name: "SEO-модуль",        href: "/dashboard/seo",            desc: "Статьи, мета-теги, A/B тесты" },
-  { name: "Виджет для сайта",  href: "/widget",                   desc: "Встраиваемый чат-бот" },
-  { name: "Telegram-боты",     href: "https://t.me/drifttt55bot", external: true, desc: "Подключение через BotFather" },
-  { name: "Аналитика",         href: "/admin",                    desc: "Отслеживание посещений" },
-  { name: "Геймификация",      href: "/dashboard/games",          desc: "Достижения, игры, лидерборд" },
+  { icon: "💬", name: "AI Чат",            href: "/dashboard/chat",          desc: "50+ моделей, стриминг, DualChat" },
+  { icon: "🤖", name: "Конструктор ботов", href: "/dashboard/bots",          desc: "Бот с базой знаний (RAG)" },
+  { icon: "🧠", name: "AI-Агент",          href: "/dashboard/agent",         desc: "Автономные multi-step задачи" },
+  { icon: "📊", name: "Рекламные кампании",href: "/dashboard/campaigns",     desc: "Яндекс Директ за 3 минуты" },
+  { icon: "📝", name: "AI-шаблоны",        href: "/dashboard/templates",     desc: "50+ готовых промптов" },
+  { icon: "📷", name: "Фотосессия товаров",href: "/dashboard/photo-session", desc: "Смена фона, на модели, пакетная" },
+  { icon: "🎬", name: "Презентации",       href: "/dashboard/presentations", desc: "Слайды + PPTX экспорт" },
+  { icon: "🔍", name: "SEO-модуль",        href: "/dashboard/seo",           desc: "Статьи, мета-теги, A/B тесты" },
+  { icon: "🌐", name: "Виджет для сайта",  href: "/widget",                  desc: "Встраиваемый чат-бот" },
+  { icon: "📱", name: "Telegram-боты",     href: "https://t.me/drifttt55bot", external: true, desc: "Подключение через BotFather" },
+  { icon: "📈", name: "Аналитика",         href: "/admin",                   desc: "Отслеживание посещений" },
+  { icon: "🏆", name: "Геймификация",      href: "/dashboard/games",         desc: "Достижения, игры, лидерборд" },
 ];
 
 const audiences = [
@@ -270,23 +240,18 @@ export default function AboutPage() {
           <h2 className="text-2xl md:text-3xl font-extrabold text-center mb-4">Что умеет Stone AI</h2>
           <p className="text-text/50 text-center mb-10 max-w-lg mx-auto">Не просто чат — полноценная AI-платформа для работы и бизнеса</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-            {tools.map((t) => {
-              const Icon = TOOL_ICONS[t.name];
-              return (
-                <a
-                  key={t.name}
-                  href={t.href}
-                  {...(t.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                  className="tile-hover group block bg-white rounded-xl border border-text/5 p-4 focus:outline-none focus:ring-2 focus:ring-accent/30"
-                >
-                  <span className="tile-icon relative z-10 inline-flex items-center justify-center w-10 h-10 rounded-xl bg-accent/10 text-accent mb-3">
-                    {Icon && <Icon className="w-5 h-5" strokeWidth={2} />}
-                  </span>
-                  <div className="relative z-10 font-bold text-sm mb-0.5 transition-colors duration-200 group-hover:text-accent">{t.name}</div>
-                  <div className="relative z-10 text-text/40 text-[11px] transition-colors duration-200 group-hover:text-text/60">{t.desc}</div>
-                </a>
-              );
-            })}
+            {tools.map((t) => (
+              <a
+                key={t.name}
+                href={t.href}
+                {...(t.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                className="tile-hover group block bg-white rounded-xl border border-text/5 p-4 focus:outline-none focus:ring-2 focus:ring-accent/30"
+              >
+                <span className="tile-icon relative z-10 text-2xl mb-2 block">{t.icon}</span>
+                <div className="relative z-10 font-bold text-sm mb-0.5 transition-colors duration-200 group-hover:text-accent">{t.name}</div>
+                <div className="relative z-10 text-text/40 text-[11px] transition-colors duration-200 group-hover:text-text/60">{t.desc}</div>
+              </a>
+            ))}
           </div>
         </section>
 
