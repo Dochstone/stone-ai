@@ -139,7 +139,7 @@ export default function AlternativesPage({ params }: Props) {
             {faqItems.map((f) => (
               <details key={f.q} className="bg-bg rounded-xl border border-text/5 group">
                 <summary className="px-5 py-4 cursor-pointer text-sm font-semibold text-text/80 list-none flex items-center justify-between">{f.q}<svg className="w-4 h-4 text-text/20 group-open:rotate-180 transition-transform shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg></summary>
-                <p className="px-5 pb-4 text-sm text-text/50 leading-relaxed">{f.a}</p>
+                <p className="px-5 pb-4 text-sm text-text/50 leading-relaxed [&_a]:text-accent [&_a]:hover:underline [&_b]:text-text [&_b]:font-semibold [&_strong]:text-text [&_strong]:font-semibold [&_code]:bg-text/5 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded" dangerouslySetInnerHTML={{ __html: f.a }} />
               </details>
             ))}
           </div>
