@@ -81,19 +81,22 @@ export default function BlogCategoryPage({ params }: Props) {
       <Breadcrumbs items={bcItems} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <header className="text-center mb-14">
+        <header className="text-center mb-8 md:mb-14">
           <div className="inline-block bg-accent/10 text-accent px-4 py-1.5 rounded-full text-sm font-semibold mb-4">
             <span aria-hidden="true" className="mr-1">{category.icon}</span>
             Категория блога
           </div>
-          <h1 className="text-3xl md:text-4xl font-extrabold mb-4">{category.name}</h1>
-          <p className="text-text/60 max-w-2xl mx-auto">{category.description}</p>
+          <h1 className="text-4xl md:text-5xl font-extrabold mb-4">{category.name}</h1>
+          <p className="text-base text-text/70 max-w-2xl mx-auto">{category.description}</p>
         </header>
 
-        <nav aria-label="Категории блога" className="flex flex-wrap justify-center gap-2 mb-10 max-w-4xl mx-auto">
+        <nav
+          aria-label="Категории блога"
+          className="-mx-4 sm:mx-auto px-4 sm:px-0 mb-8 md:mb-10 sm:max-w-4xl flex gap-2 overflow-x-auto no-scrollbar sm:flex-wrap sm:justify-center snap-x snap-proximity sm:snap-none"
+        >
           <Link
             href="/blog"
-            className="px-4 py-2 rounded-full bg-text/5 text-text/70 hover:bg-accent/10 hover:text-accent text-sm font-semibold transition-colors"
+            className="shrink-0 snap-start whitespace-nowrap px-4 py-2 rounded-full bg-text/5 text-text/70 hover:bg-accent/10 hover:text-accent text-sm font-semibold transition-colors"
           >
             Все ({SORTED_POSTS.length})
           </Link>
@@ -106,8 +109,8 @@ export default function BlogCategoryPage({ params }: Props) {
                 href={`/blog/category/${c.slug}`}
                 className={
                   active
-                    ? "px-4 py-2 rounded-full bg-accent text-white text-sm font-semibold"
-                    : "px-4 py-2 rounded-full bg-text/5 text-text/70 hover:bg-accent/10 hover:text-accent text-sm font-semibold transition-colors"
+                    ? "shrink-0 snap-start whitespace-nowrap px-4 py-2 rounded-full bg-accent text-white text-sm font-semibold"
+                    : "shrink-0 snap-start whitespace-nowrap px-4 py-2 rounded-full bg-text/5 text-text/70 hover:bg-accent/10 hover:text-accent text-sm font-semibold transition-colors"
                 }
               >
                 <span aria-hidden="true" className="mr-1">{c.icon}</span>
