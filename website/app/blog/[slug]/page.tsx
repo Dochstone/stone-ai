@@ -440,6 +440,23 @@ export default function BlogPostPage({ params }: Props) {
         )}
 
         {/* Related articles — curated or fallback to recent */}
+        {/* Tags */}
+        {post.tags && post.tags.length > 0 && (
+          <div className="mt-12 pt-6 border-t border-text/5">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-text/40 mb-3">Теги</p>
+            <div className="flex flex-wrap gap-2">
+              {post.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="text-xs font-semibold px-3 py-1.5 rounded-full bg-accent/8 text-accent/80 hover:bg-accent/15 transition-colors"
+                >
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {related.length > 0 && (
           <div className="mt-14">
             <h3 className="font-bold text-lg mb-6">Похожие статьи</h3>
