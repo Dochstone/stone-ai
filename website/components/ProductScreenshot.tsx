@@ -10,12 +10,12 @@ export default function ProductScreenshot() {
         <div className="grid md:grid-cols-2 gap-6">
           {/* Mockup 1 — Dashboard Panel */}
           <div className="group rounded-2xl overflow-hidden border border-text/[0.08] bg-bg hover:border-accent/20 transition-all duration-300 hover:-translate-y-1" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.06)" }}>
-            <div className="h-8 bg-text/[0.03] border-b border-text/[0.06] flex items-center px-3 gap-1.5">
+            <a href="/dashboard" className="h-8 bg-text/[0.03] border-b border-text/[0.06] flex items-center px-3 gap-1.5 hover:bg-text/[0.05] transition-colors">
               <div className="w-2.5 h-2.5 rounded-full bg-red-400/60" />
               <div className="w-2.5 h-2.5 rounded-full bg-amber-400/60" />
               <div className="w-2.5 h-2.5 rounded-full bg-green-400/60" />
               <span className="text-[9px] text-text/25 ml-2">stoneai.ru/dashboard</span>
-            </div>
+            </a>
             <div className="p-5">
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-9 h-9 rounded-xl bg-accent/10 flex items-center justify-center">
@@ -30,30 +30,34 @@ export default function ProductScreenshot() {
               </div>
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { icon: "💬", name: "AI Чат", badge: null },
-                  { icon: "📝", name: "Шаблоны", badge: "50+" },
-                  { icon: "🤖", name: "Мои боты", badge: "NEW" },
-                  { icon: "🎨", name: "Галерея", badge: null },
-                  { icon: "📊", name: "Презентации", badge: null },
-                  { icon: "📷", name: "Фотосессия", badge: null },
-                  { icon: "🔍", name: "SEO", badge: null },
-                  { icon: "🧠", name: "AI-Агент", badge: "NEW" },
-                  { icon: "🏆", name: "Достижения", badge: null },
+                  { icon: "💬", name: "AI Чат",       href: "/dashboard/chat",          badge: null },
+                  { icon: "📝", name: "Шаблоны",      href: "/dashboard/templates",     badge: "50+" },
+                  { icon: "🤖", name: "Мои боты",     href: "/dashboard/bots",          badge: "NEW" },
+                  { icon: "🎨", name: "Галерея",      href: "/dashboard/gallery",       badge: null },
+                  { icon: "📊", name: "Презентации",  href: "/dashboard/presentations", badge: null },
+                  { icon: "📷", name: "Фотосессия",   href: "/dashboard/photo-session", badge: null },
+                  { icon: "🔍", name: "SEO",          href: "/dashboard/seo",           badge: null },
+                  { icon: "🧠", name: "AI-Агент",     href: "/dashboard/agent",         badge: "NEW" },
+                  { icon: "🏆", name: "Достижения",   href: "/dashboard/achievements",  badge: null },
                 ].map((t) => (
-                  <div key={t.name} className="bg-text/[0.03] rounded-xl p-3 text-center hover:bg-accent/5 transition-colors">
+                  <a
+                    key={t.name}
+                    href={t.href}
+                    className="bg-text/[0.03] rounded-xl p-3 text-center hover:bg-accent/5 hover:shadow-sm transition-all block focus:outline-none focus:ring-2 focus:ring-accent/30"
+                  >
                     <span className="text-lg block mb-1">{t.icon}</span>
                     <span className="text-[10px] font-semibold text-text/60 block">{t.name}</span>
                     {t.badge && (
                       <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded mt-1 inline-block ${t.badge === "NEW" ? "bg-accent/10 text-accent" : "bg-text/[0.06] text-text/30"}`}>{t.badge}</span>
                     )}
-                  </div>
+                  </a>
                 ))}
               </div>
             </div>
           </div>
 
           {/* Mockup 2 — AI Chat */}
-          <div className="group rounded-2xl overflow-hidden border border-text/[0.08] bg-bg hover:border-accent/20 transition-all duration-300 hover:-translate-y-1" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.06)" }}>
+          <a href="/dashboard/chat" className="group rounded-2xl overflow-hidden border border-text/[0.08] bg-bg hover:border-accent/20 transition-all duration-300 hover:-translate-y-1 block" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.06)" }}>
             <div className="h-8 bg-text/[0.03] border-b border-text/[0.06] flex items-center px-3 gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full bg-red-400/60" />
               <div className="w-2.5 h-2.5 rounded-full bg-amber-400/60" />
@@ -117,7 +121,7 @@ export default function ProductScreenshot() {
                 </svg>
               </div>
             </div>
-          </div>
+          </a>
         </div>
       </div>
     </section>
