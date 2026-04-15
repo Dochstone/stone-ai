@@ -26,6 +26,71 @@ export type BlogBlock =
     }
   | { code: { lang?: string; content: string } };
 
+export type BlogCategorySlug =
+  | "obzory"
+  | "sravneniya"
+  | "kartinki"
+  | "video"
+  | "dostup"
+  | "gaidy";
+
+export interface BlogCategory {
+  slug: BlogCategorySlug;
+  name: string;
+  description: string;
+  metaTitle: string;
+  icon: string;
+}
+
+export const BLOG_CATEGORIES: BlogCategory[] = [
+  {
+    slug: "obzory",
+    name: "Обзоры моделей",
+    description: "Детальные обзоры нейросетей 2026: что умеют, как пользоваться, для каких задач подходят.",
+    metaTitle: "Обзоры нейросетей 2026 — Sora 2, Nano Banana Pro, DeepSeek, Claude",
+    icon: "🔍",
+  },
+  {
+    slug: "sravneniya",
+    name: "Сравнения",
+    description: "Как выбрать нейросеть под задачу: GPT-5 vs Claude, Stone AI vs ChatGPT, лучшие модели 2026.",
+    metaTitle: "Сравнения нейросетей 2026 — GPT vs Claude vs Gemini, рейтинги",
+    icon: "⚖️",
+  },
+  {
+    slug: "kartinki",
+    name: "Генерация картинок",
+    description: "Как генерировать картинки нейросетью: Midjourney-аналоги, Nano Banana Pro, Flux, промпты и кейсы.",
+    metaTitle: "Генерация картинок нейросетью 2026 — промпты, модели, кейсы",
+    icon: "🎨",
+  },
+  {
+    slug: "video",
+    name: "Генерация видео",
+    description: "AI-видео в 2026: Sora 2, Kling v2, Veo 3. Как создать ролик нейросетью из текста или фото.",
+    metaTitle: "Генерация видео нейросетью 2026 — Sora 2, Kling, Veo 3",
+    icon: "🎬",
+  },
+  {
+    slug: "dostup",
+    name: "Доступ из России",
+    description: "Как пользоваться ChatGPT, Claude, Gemini из России без VPN. Оплата картой РФ, СБП, криптой.",
+    metaTitle: "AI без VPN в России 2026 — ChatGPT, Claude, оплата в рублях",
+    icon: "🇷🇺",
+  },
+  {
+    slug: "gaidy",
+    name: "Гайды и промпты",
+    description: "Практические гайды: как писать промпты, зарабатывать на AI, создавать ботов, применять AI в бизнесе.",
+    metaTitle: "AI-гайды и промпты 2026 — практика работы с нейросетями",
+    icon: "📚",
+  },
+];
+
+export const BLOG_CATEGORY_BY_SLUG: Record<string, BlogCategory> = Object.fromEntries(
+  BLOG_CATEGORIES.map((c) => [c.slug, c]),
+);
+
 export interface BlogPost {
   slug: string;
   title: string;
@@ -40,12 +105,15 @@ export interface BlogPost {
   related?: string[];
   /** Author slug from lib/authors.ts. Falls back to DEFAULT_AUTHOR_SLUG. */
   author?: string;
+  /** Category slug — determines category filter and category pages. */
+  category?: BlogCategorySlug;
 }
 
 export const POSTS: BlogPost[] = [
   {
     slug: "how-to-create-ai-bot",
     author: "tech-lead",
+    category: "gaidy",
     title: "Как создать AI-бота за 5 минут в Stone AI",
     description:
       "Пошаговый гайд: создайте персонального AI-бота с собственными инструкциями, выберите модель и поделитесь с другими.",
@@ -77,6 +145,7 @@ export const POSTS: BlogPost[] = [
   {
     slug: "gpt5-vs-claude-sonnet-vs-gemini",
     author: "tech-lead",
+    category: "sravneniya",
     title: "GPT-5 vs Claude Sonnet 4 vs Gemini 2.5: какую модель выбрать в 2026",
     description:
       "Детальное сравнение трёх флагманских моделей по качеству текста, кода, скорости и цене. Тесты на реальных задачах.",
@@ -111,6 +180,7 @@ export const POSTS: BlogPost[] = [
   {
     slug: "stone-ai-vs-chatgpt-plus",
     author: "dochstone",
+    category: "sravneniya",
     title: "Stone AI vs ChatGPT Plus 2026 — почему подписка от 590₽ выгоднее",
     description:
       "Детальное сравнение Stone AI и ChatGPT Plus в 2026: цена, модели, оплата, лимиты. Почему 65+ нейросетей за 590₽/мес выгоднее одной OpenAI за $20/мес. Без VPN, оплата картой РФ.",
@@ -159,6 +229,7 @@ export const POSTS: BlogPost[] = [
   {
     slug: "guide-50-ai-models",
     author: "ai-researcher",
+    category: "sravneniya",
     title: "Гайд по 65+ нейросетям: какую выбрать под вашу задачу",
     description:
       "Подробный разбор всех моделей Stone AI: от бесплатных до премиум. Какая модель лучше для текстов, кода, картинок и поиска.",
@@ -193,6 +264,7 @@ export const POSTS: BlogPost[] = [
   {
     slug: "4-ways-to-pay-ai-russia",
     author: "support-lead",
+    category: "dostup",
     title: "Как оплатить AI из России 2026 — 5 способов без иностранной карты",
     description: "Как оплатить ChatGPT, Claude и другие AI-сервисы из России в 2026: карта РФ, СБП, Telegram Stars, криптовалюта, TON. Пошаговые инструкции, сравнение комиссий и скорости, что делать если платёж не прошёл.",
     date: "2026-03-10",
@@ -238,6 +310,7 @@ export const POSTS: BlogPost[] = [
   {
     slug: "chatgpt-bez-vpn-rossiya",
     author: "support-lead",
+    category: "dostup",
     title: "ChatGPT без VPN в России 2026 — 5 рабочих способов на русском",
     description: "Как пользоваться ChatGPT и GPT-5 без VPN в России 2026: Stone AI, Telegram-боты, прокси-сервисы. Сравнение цен, скорости и безопасности всех способов. Оплата картой РФ.",
     date: "2026-03-18",
@@ -280,6 +353,7 @@ export const POSTS: BlogPost[] = [
   {
     slug: "nejroset-dlya-generacii-kartinok",
     author: "designer",
+    category: "kartinki",
     title: "Нейросеть для генерации картинок бесплатно 2026 — ТОП-8 моделей на русском",
     description: "Лучшие нейросети для генерации картинок в 2026: Nano Banana Pro (4K), GPT-5 Image, Midjourney-аналоги, Flux, SDXL. Бесплатно, на русском, без VPN, оплата картой РФ. Сравнение качества, цен, кейсы применения.",
     date: "2026-03-17",
@@ -331,6 +405,7 @@ export const POSTS: BlogPost[] = [
   {
     slug: "claude-opus-vs-gpt-5",
     author: "tech-lead",
+    category: "sravneniya",
     title: "Claude Opus 4.5 vs GPT-5 — какая нейросеть лучше в 2026",
     description: "Детальное сравнение Claude Opus 4.5 и GPT-5 в 2026: тесты на коде, текстах, анализе документов. Бенчмарки, цены, контекст, скорость. Какую модель выбрать под задачу. Доступны без VPN в Stone AI.",
     date: "2026-03-16",
@@ -374,6 +449,7 @@ export const POSTS: BlogPost[] = [
   {
     slug: "kak-napisat-prompt-dlya-nejroseti",
     author: "copywriter",
+    category: "gaidy",
     title: "Как написать промпт для нейросети — гайд с примерами",
     description: "Пошаговый гайд по написанию промптов для нейросетей. 20 примеров для текста, картинок, кода и анализа.",
     date: "2026-03-14",
@@ -399,6 +475,7 @@ export const POSTS: BlogPost[] = [
   {
     slug: "deepseek-r1-obzor",
     author: "ai-researcher",
+    category: "obzory",
     title: "DeepSeek R1 обзор 2026 — reasoning-нейросеть из Китая на русском",
     description: "Полный обзор DeepSeek R1 в 2026: как работает reasoning, бенчмарки vs OpenAI o3 и Claude, цена, примеры промптов, где применять. Доступна в России без VPN через Stone AI от 590₽/мес.",
     date: "2026-03-13",
@@ -434,6 +511,7 @@ export const POSTS: BlogPost[] = [
   {
     slug: "ii-dlya-biznesa-v-rossii",
     author: "dochstone",
+    category: "gaidy",
     title: "ИИ для бизнеса в России — 7 способов применения нейросетей",
     description: "Как использовать нейросети для бизнеса: маркетинг, продажи, HR, юриспруденция, аналитика. Конкретные примеры и ROI.",
     date: "2026-03-11",
@@ -461,6 +539,7 @@ export const POSTS: BlogPost[] = [
   {
     slug: "perplexity-poisk-nejrosetyu",
     author: "ai-researcher",
+    category: "obzory",
     title: "Perplexity 2026 — AI-поиск в России без VPN + Deep Research",
     description: "Полный обзор Perplexity в 2026: как AI-поиск заменяет Google, что такое Deep Research, 3 модели Perplexity, примеры запросов, сравнение с ChatGPT Search. Доступно без VPN через Stone AI.",
     date: "2026-03-09",
@@ -498,6 +577,7 @@ export const POSTS: BlogPost[] = [
   {
     slug: "kak-oplatit-chatgpt-iz-rossii-2026",
     author: "support-lead",
+    category: "dostup",
     title: "Как оплатить ChatGPT из России в 2026 году — 5 способов",
     description: "Все способы оплатить ChatGPT Plus из России: через Stone AI от 590₽, криптовалюта, иностранные карты. Пошаговая инструкция.",
     date: "2026-03-24",
@@ -533,6 +613,7 @@ export const POSTS: BlogPost[] = [
   {
     slug: "chatgpt-plus-vs-analogi-rossiya",
     author: "dochstone",
+    category: "sravneniya",
     title: "ChatGPT Plus vs аналоги в России — сравнение 7 сервисов",
     description: "Сравниваем ChatGPT Plus, Claude Pro, BotHub, MashaGPT, Stone AI и другие. Цены, модели, качество. Кто лучше для русскоязычного пользователя?",
     date: "2026-03-24",
@@ -568,6 +649,7 @@ export const POSTS: BlogPost[] = [
   {
     slug: "luchshie-nejroseti-2026-rejting",
     author: "ai-researcher",
+    category: "sravneniya",
     title: "Лучшие нейросети 2026 — рейтинг 15 моделей по задачам",
     description: "Рейтинг 15 лучших нейросетей 2026 с бенчмарками: GPT-5, Claude Opus 4.5, Gemini 3 Pro, DeepSeek R1, Nano Banana Pro, Sora 2. Какую выбрать под задачу: тексты, код, картинки, видео, музыка. Все без VPN в Stone AI.",
     date: "2026-03-25",
@@ -611,6 +693,7 @@ export const POSTS: BlogPost[] = [
   {
     slug: "claude-opus-online-na-russkom",
     author: "tech-lead",
+    category: "obzory",
     title: "Claude Opus 4 онлайн на русском — как пользоваться бесплатно",
     description: "Как использовать Claude Opus 4 на русском языке без VPN. Инструкция: Stone AI даёт доступ к Claude Opus с оплатой в рублях от 590₽/мес.",
     date: "2026-03-25",
@@ -640,6 +723,7 @@ export const POSTS: BlogPost[] = [
   {
     slug: "gpt-5-besplatno-kak-polzovatsya",
     author: "ai-editor",
+    category: "obzory",
     title: "GPT-5 бесплатно — как пользоваться без оплаты и VPN",
     description: "Как использовать GPT-5 бесплатно в 2026 году. Stone AI даёт доступ к GPT-4o mini бесплатно (10 запросов/день) и GPT-5.4 по подписке от 590₽.",
     date: "2026-03-25",
@@ -665,6 +749,7 @@ export const POSTS: BlogPost[] = [
   {
     slug: "nejroseti-dlya-generacii-video-2026",
     author: "marketing-expert",
+    category: "video",
     title: "Нейросети для генерации видео в 2026: полный гайд",
     description:
       "Обзор лучших нейросетей для создания видео из текста: Kling 3.0, Sora 2, Veo 3, Pika 2.0. Как генерировать видео бесплатно в России.",
@@ -691,6 +776,7 @@ export const POSTS: BlogPost[] = [
   {
     slug: "midjourney-analogi-besplatno-rossiya",
     author: "designer",
+    category: "kartinki",
     title: "Аналоги Midjourney бесплатно в России: 6 нейросетей для картинок",
     description:
       "Бесплатные аналоги Midjourney для генерации картинок в России без VPN. Flux, DALL-E, Stable Diffusion и другие нейросети.",
@@ -714,6 +800,7 @@ export const POSTS: BlogPost[] = [
   {
     slug: "kak-ispolzovat-claude-v-rossii",
     author: "ai-editor",
+    category: "dostup",
     title: "Как использовать Claude в России в 2026 году",
     description:
       "Полный гайд по доступу к Claude Opus, Sonnet и Haiku в России без VPN. Бесплатный доступ через Stone AI.",
@@ -740,6 +827,7 @@ export const POSTS: BlogPost[] = [
   {
     slug: "best-neural-networks-2026",
     author: "ai-researcher",
+    category: "sravneniya",
     title: "Лучшие нейросети 2026 — ТОП-15 для работы и учёбы",
     description:
       "Рейтинг 15 лучших нейросетей 2026 года: GPT-5.4, Claude Opus 4.5, Gemini 3 Pro, DeepSeek R1. Бесплатные и платные модели для текста, кода, картинок, видео и учёбы. С реальными тестами, сравнительной таблицей и FAQ.",
@@ -870,6 +958,7 @@ export const POSTS: BlogPost[] = [
   {
     slug: "chatgpt-bez-vpn-russia",
     author: "ai-editor",
+    category: "dostup",
     title: "Как пользоваться ChatGPT без VPN в России",
     description:
       "Как получить доступ к ChatGPT и GPT-5 в России без VPN. Альтернативы с оплатой в рублях, бесплатный доступ к нейросетям.",
@@ -903,6 +992,7 @@ export const POSTS: BlogPost[] = [
   {
     slug: "generate-images-ai-free",
     author: "designer",
+    category: "kartinki",
     title: "Генерация картинок нейросетью бесплатно — гайд 2026",
     description:
       "Как генерировать картинки нейросетью бесплатно в 2026 году. Лучшие модели: Flux, GPT-5 Image, Nano Banana. Примеры промптов и пошаговая инструкция.",
@@ -938,6 +1028,7 @@ export const POSTS: BlogPost[] = [
   {
     slug: "best-ai-prompts",
     author: "copywriter",
+    category: "gaidy",
     title: "AI промпты — 50 лучших промптов для работы и учёбы",
     description:
       "50 готовых промптов для нейросетей: маркетинг, программирование, копирайтинг, учёба, анализ данных. Скопируйте и используйте в ChatGPT, Claude, Gemini.",
@@ -973,6 +1064,7 @@ export const POSTS: BlogPost[] = [
   {
     slug: "ai-video-generation-2026",
     author: "marketing-expert",
+    category: "video",
     title: "Генерация видео нейросетью — Sora, Veo 3, Luma в 2026",
     description:
       "Сравнение лучших нейросетей для генерации видео в 2026: Sora 2, Veo 3, Kling 3.0, Luma, Pika. Как создать видео из текста, цены и примеры.",
@@ -1013,6 +1105,7 @@ export const POSTS: BlogPost[] = [
   {
     slug: "zarabotok-na-neyrosetyakh",
     author: "marketing-expert",
+    category: "gaidy",
     title: "Как заработать на нейросетях в 2026 — 10 способов с цифрами",
     description:
       "10 проверенных способов заработка на нейросетях в 2026: от TikTok-сеток и SMM до копирайтинга, стоков и AI-ботов. С реальными цифрами, моделями Stone AI и пошаговыми инструкциями без инфоцыганства.",
@@ -1068,6 +1161,7 @@ export const POSTS: BlogPost[] = [
   {
     slug: "sora-2-v-rossii-bez-vpn",
     author: "marketing-expert",
+    category: "obzory",
     title: "Sora 2 в России без VPN 2026 — как получить доступ + промпты",
     description:
       "Как получить доступ к Sora 2 от OpenAI в России 2026 без VPN и иностранной карты. Обзор модели, лучшие промпты для видео, сравнение с Veo 3 и Kling, цены и реальные кейсы.",
@@ -1108,6 +1202,7 @@ export const POSTS: BlogPost[] = [
   {
     slug: "nano-banana-pro-obzor",
     author: "designer",
+    category: "obzory",
     title: "Nano Banana Pro обзор 2026 — фотореализм 4K от Google",
     description:
       "Полный обзор Nano Banana Pro от Google 2026: фотореалистичная генерация картинок в 4K, рендер текста на изображениях, редактирование фото. Промпты, цены, сравнение с Midjourney и GPT-5 Image. Доступна в России без VPN.",
@@ -1596,4 +1691,12 @@ export function getRelated(slug: string): BlogPost[] {
 
 export function getPost(slug: string): BlogPost | undefined {
   return POSTS.find((p) => p.slug === slug);
+}
+
+export function getPostsByCategory(category: BlogCategorySlug): BlogPost[] {
+  return SORTED_POSTS.filter((p) => p.category === category);
+}
+
+export function getCategory(slug: string): BlogCategory | undefined {
+  return BLOG_CATEGORY_BY_SLUG[slug];
 }

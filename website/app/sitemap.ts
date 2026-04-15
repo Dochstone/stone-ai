@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { POSTS } from "@/lib/blog";
+import { POSTS, BLOG_CATEGORIES } from "@/lib/blog";
 import { MODELS } from "@/lib/models";
 import { COMPARISONS, ALTERNATIVES, PROFESSIONS, TOOL_HUBS } from "@/lib/seo-data";
 import { USE_CASES } from "@/lib/use-cases";
@@ -45,6 +45,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: new Date(post.date),
     changeFrequency: "monthly",
     priority: 0.7,
+  }));
+
+  const blogCategoryPages: MetadataRoute.Sitemap = BLOG_CATEGORIES.map((c) => ({
+    url: `${SITE_URL}/blog/category/${c.slug}`,
+    lastModified: now,
+    changeFrequency: "weekly",
+    priority: 0.75,
   }));
 
   const modelPages: MetadataRoute.Sitemap = MODELS.map((model) => ({
@@ -122,6 +129,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     ...staticPages,
     ...blogPages,
+    ...blogCategoryPages,
     ...modelPages,
     ...comparePages,
     ...alternativePages,

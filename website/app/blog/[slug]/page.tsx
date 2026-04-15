@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import dynamic from "next/dynamic";
-import { POSTS, getFaq, getHowTo, getPost, getRelated } from "@/lib/blog";
+import { POSTS, getFaq, getHowTo, getPost, getRelated, BLOG_CATEGORY_BY_SLUG } from "@/lib/blog";
 import { breadcrumbJsonLd } from "@/components/Breadcrumbs";
 import Callout from "@/components/content/Callout";
 import ComparisonTable from "@/components/content/ComparisonTable";
@@ -198,7 +198,12 @@ export default function BlogPostPage({ params }: Props) {
 
   const related = getRelated(post.slug);
 
-  const bcItems = [{ label: "Блог", href: "/blog" }, { label: post.title, href: `/blog/${post.slug}` }];
+  const category = post.category ? BLOG_CATEGORY_BY_SLUG[post.category] : null;
+  const bcItems = [
+    { label: "Блог", href: "/blog" },
+    ...(category ? [{ label: category.name, href: `/blog/category/${category.slug}` }] : []),
+    { label: post.title, href: `/blog/${post.slug}` },
+  ];
 
   return (
     <div className="pt-28 pb-20 min-h-screen">
