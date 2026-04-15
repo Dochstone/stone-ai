@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { planPrice, planPriceFull, planPriceNum } from "@/lib/pricing";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { MODELS } from "@/lib/models";
@@ -106,7 +107,7 @@ export function generateMetadata({ params }: Props): Metadata {
   const isFree = model.tier === "free";
   return {
     title: `${model.name} онлайн${isFree ? " бесплатно" : ""} без VPN — ${cat} нейросеть на русском`,
-    description: `${model.name} от ${model.company} — попробуйте ${isFree ? "бесплатно" : "по подписке от 590₽"} в Stone AI без VPN, с оплатой картой РФ. ${model.description || ""} Контекст ${model.context}. Русский интерфейс, русские промпты.`,
+    description: `${model.name} от ${model.company} — попробуйте ${isFree ? "бесплатно" : `по подписке от ${planPrice("mini")}`} в Stone AI без VPN, с оплатой картой РФ. ${model.description || ""} Контекст ${model.context}. Русский интерфейс, русские промпты.`,
     alternates: { canonical: `/models/${params.id}` },
     openGraph: {
       title: `${model.name} — попробовать ${isFree ? "бесплатно" : "онлайн"} | Stone AI`,
@@ -144,16 +145,16 @@ export default function ModelPage({ params }: Props) {
     ...(model.context ? { memoryRequirements: `Context window: ${model.context}` } : {}),
     offers: {
       "@type": "Offer",
-      price: isFree ? "0" : "590",
+      price: isFree ? "0" : String(planPriceNum("mini")),
       priceCurrency: "RUB",
       availability: "https://schema.org/InStock",
       url: `${SITE_URL}/pricing`,
-      description: isFree ? "10 бесплатных запросов в день" : "Подписка от 590₽/мес",
+      description: isFree ? "10 бесплатных запросов в день" : `Подписка от ${planPriceFull("mini")}`,
       priceSpecification: isFree
         ? undefined
         : {
             "@type": "UnitPriceSpecification",
-            price: 590,
+            price: planPriceNum("mini"),
             priceCurrency: "RUB",
             billingDuration: "P1M",
             billingIncrement: 1,
@@ -212,7 +213,7 @@ export default function ModelPage({ params }: Props) {
 
           <p className="text-text/60 text-lg leading-relaxed mb-8 max-w-2xl">
             {model.description || `${model.name} от ${model.company} — мощная нейросеть для ${cat.toLowerCase()}.`}
-            {" "}Доступна прямо в браузере. {isFree ? "Бесплатно, 10 запросов в день." : "Попробуйте бесплатно, подписка от 590₽/мес."}
+            {" "}Доступна прямо в браузере. {isFree ? "Бесплатно, 10 запросов в день." : `Попробуйте бесплатно, подписка от ${planPriceFull("mini")}.`}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3">
@@ -239,7 +240,7 @@ export default function ModelPage({ params }: Props) {
           </div>
           <div className="bg-bg rounded-2xl border border-text/5 p-4 text-center">
             <div className="text-text/40 text-[10px] font-semibold uppercase mb-1">Тариф</div>
-            <div className="text-xl font-extrabold">{isFree ? "Free" : "от 590₽"}</div>
+            <div className="text-xl font-extrabold">{isFree ? "Free" : `от ${planPrice("mini")}`}</div>
           </div>
           <div className="bg-bg rounded-2xl border border-text/5 p-4 text-center">
             <div className="text-text/40 text-[10px] font-semibold uppercase mb-1">Категория</div>
@@ -316,7 +317,7 @@ export default function ModelPage({ params }: Props) {
           <p className="text-text/50 text-sm mb-6 max-w-md mx-auto">
             {isFree
               ? `${model.name} доступна бесплатно — 10 запросов каждый день без регистрации карты.`
-              : `Начните с бесплатного плана, затем подключите подписку от 590₽/мес для полного доступа.`}
+              : `Начните с бесплатного плана, затем подключите подписку от ${planPriceFull("mini")} для полного доступа.`}
           </p>
           <a href={`/dashboard/chat?model=${model.id}`}
             className="inline-block bg-accent text-white px-10 py-4 rounded-xl font-bold text-lg hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25">

@@ -1,13 +1,15 @@
+import { planPriceFull } from "@/lib/pricing";
+
 const rows = [
   {
     feature: "Доступ к GPT-5",
-    stone: "От 590₽/мес (Start)",
+    stone: `От ${planPriceFull("mini")} (Start)`,
     chatgpt: "$20/мес (Plus)",
     competitors: "Подписка, ~на 30% дороже",
   },
   {
     feature: "Claude Opus 4",
-    stone: "От 890₽/мес (Pro)",
+    stone: `От ${planPriceFull("max")} (Pro)`,
     chatgpt: "---",
     competitors: "Подписка",
   },

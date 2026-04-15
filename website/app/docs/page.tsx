@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { planPrice, planPriceFull } from "@/lib/pricing";
 import CodeBlock from "@/components/CodeBlock";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
@@ -243,7 +244,7 @@ curl "${BASE_URL}/api/models?category=image"   # по категории`} />
 
             {/* Billing */}
             <Section id="billing" title="Биллинг">
-              <P>Stone AI: <strong>Pay-per-Use</strong> (баланс кабинета для инструментов, без подписки) или подписки <strong>Start</strong> (590₽/мес), <strong>Pro</strong> (1290₽/мес), <strong>Elite</strong> (2990₽/мес). Лимиты запросов зависят от тарифа. Баланс кабинета можно перенести в подписку.</P>
+              <P>Stone AI: <strong>Pay-per-Use</strong> (баланс кабинета для инструментов, без подписки) или подписки <strong>Start</strong> ({planPriceFull("mini")}), <strong>Pro</strong> ({planPriceFull("max")}), <strong>Elite</strong> ({planPriceFull("max-pro")}). Лимиты запросов зависят от тарифа. Баланс кабинета можно перенести в подписку.</P>
               <P>API доступен на тарифе Elite. Дорогие модели тратят больше единиц лимита (см. ниже).</P>
               <Table
                 headers={["Модель", "Категория", "Вес запроса"]}
@@ -266,9 +267,9 @@ curl "${BASE_URL}/api/models?category=image"   # по категории`} />
                 headers={["Тариф", "Fast/день", "Premium/нед", "Opus/нед", "Картинки", "Видео-поинты/мес"]}
                 rows={[
                   ["Pay-per-Use", "10", "2/день", "—", "2 пробных", "2 пробных (lifetime)"],
-                  ["Start (590₽)", "20", "3/день", "—", "60/мес", "13 + триалы"],
-                  ["Pro (1290₽)", "50", "28", "7", "35/нед", "33"],
-                  ["Elite (2990₽)", "150", "84", "14", "70/нед", "80"],
+                  [`Start (${planPrice("mini")})`, "20", "3/день", "—", "60/мес", "13 + триалы"],
+                  [`Pro (${planPrice("max")})`, "50", "28", "7", "35/нед", "33"],
+                  [`Elite (${planPrice("max-pro")})`, "150", "84", "14", "70/нед", "80"],
                 ]}
               />
               <P>Лимиты учитывают вес моделей. Один Claude Opus = 5 единиц premium. Один nano-banana-pro = 5 картинок.</P>

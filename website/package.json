@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/build-llms.mjs",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "build:llms": "node scripts/build-llms.mjs"
   },
   "dependencies": {
     "@tonconnect/ui-react": "^2.4.4",

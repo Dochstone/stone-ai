@@ -5,6 +5,7 @@ import ToolExamples from "@/components/ToolExamples";
 import ToolFaq from "@/components/ToolFaq";
 import ToolCta from "@/components/ToolCta";
 import { SITE_URL } from "@/lib/constants";
+import { planPriceFull } from "@/lib/pricing";
 
 export const metadata: Metadata = {
   title: "Озвучка текста нейросетью — ИИ голосовой бот",
@@ -21,7 +22,7 @@ const examples = [
 const faqItems = [
   { q: "Какие голоса доступны?", a: "9 голосов: Alloy (нейтральный), Echo (глубокий), Nova (мягкий), Shimmer (тёплый), Onyx (низкий), Fable (выразительный), Ash, Coral, Sage. Все на английском и русском." },
   { q: "Как работает голосовой ввод?", a: "Нажмите кнопку микрофона в чате, говорите до 30 секунд. Whisper AI мгновенно переведёт речь в текст. Поддерживает русский, английский и 50+ языков." },
-  { q: "Сколько стоит озвучка?", a: "TTS и STT включены в подписку Start (590₽/мес) и выше. Количество озвучек зависит от тарифа: Start — 3/мес, Pro — 20/мес, Elite — 100/мес." },
+  { q: "Сколько стоит озвучка?", a: `TTS и STT включены в подписку Start (${planPriceFull("mini")}) и выше. Количество озвучек зависит от тарифа: Start — 3/мес, Pro — 20/мес, Elite — 100/мес.` },
   { q: "Максимальная длина текста для озвучки?", a: "До 4096 символов за один запрос (~2 минуты аудио). Для длинных текстов разбивайте на части." },
 ];
 

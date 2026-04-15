@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import { planPrice, planPriceFull } from "@/lib/pricing";
 import ModelCatalog from "@/components/ModelCatalog";
 
 export const metadata: Metadata = {
   title: "Все 65+ нейросетей",
   description:
-    "Каталог из 65+ нейросетей: GPT-5, Claude Opus, Gemini Pro, DeepSeek, Flux и другие. Бесплатный старт. Подписка от 590₽/мес.",
+    `Каталог из 65+ нейросетей: GPT-5, Claude Opus, Gemini Pro, DeepSeek, Flux и другие. Бесплатный старт. Подписка от ${planPriceFull("mini")}.`,
   alternates: { canonical: "/models" },
   openGraph: {
     title: "65+ нейросетей в одном каталоге | Stone AI",
@@ -20,7 +21,7 @@ import { MODELS } from "@/lib/models";
 
 const faqItems = [
   { q: "Сколько моделей доступно бесплатно?", a: "8 моделей бесплатно: GPT-4o mini, Claude Haiku, Gemini Flash, DeepSeek V3, Llama 4, Mistral Large, Nano Banana и другие. 10 запросов в день." },
-  { q: "Чем отличаются тарифы по доступу к моделям?", a: "Free — 8 моделей. Start (590₽/мес) — 20+ моделей. Pro (1290₽/мес) и Elite (2990₽/мес) — все 65+ моделей включая Claude Opus и GPT-5." },
+  { q: "Чем отличаются тарифы по доступу к моделям?", a: `Free — 8 моделей. Start (${planPriceFull("mini")}) — 20+ моделей. Pro (${planPriceFull("max")}) и Elite (${planPriceFull("max-pro")}) — все 65+ моделей включая Claude Opus и GPT-5.` },
   { q: "Можно ли переключаться между моделями в чате?", a: "Да, переключение между моделями — один клик в нижней панели чата. История сохраняется." },
   { q: "Какие модели лучше для генерации картинок?", a: "Nano Banana Pro — лучшее качество. GPT-5 Image — фотореализм. Flux — скорость. Все доступны в Stone AI." },
 ];

@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
+import { planPrice, planPriceFull } from "@/lib/pricing";
 
 export const metadata: Metadata = {
   title: "Тарифы и цены",
   description:
-    "Тарифы Stone AI: Free (бесплатно), Start (590₽/мес), Pro (1 290₽/мес), Elite (2 990₽/мес). 65+ нейросетей, картинки, видео, 3D. Оплата криптой и Stars.",
+    `Тарифы Stone AI: Free (бесплатно), Start (${planPriceFull("mini")}), Pro (${planPriceFull("max")}), Elite (${planPriceFull("max-pro")}). 65+ нейросетей, картинки, видео, 3D. Оплата криптой и Stars.`,
   alternates: { canonical: "/pricing" },
   openGraph: {
-    title: "Тарифы Stone AI — от 590₽/мес",
+    title: `Тарифы Stone AI — от ${planPriceFull("mini")}`,
     description:
       "4 тарифа: Free, Start, Pro, Elite. До 65+ нейросетей, генерация картинок, видео и 3D. Бесплатный старт.",
   },

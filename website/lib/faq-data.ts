@@ -1,4 +1,5 @@
-export const homeFaqData = [
+import { renderPriceDeep } from "@/lib/pricing";
+const _homeFaqData = [
   {
     q: "Как начать пользоваться Stone AI?",
     a: 'Откройте <a href="/dashboard/chat" class="text-accent hover:underline font-semibold">AI-чат</a> или <a href="/dashboard" class="text-accent hover:underline font-semibold">панель инструментов</a>. 10 бесплатных запросов каждый день к 8 моделям — GPT-4o mini, Claude Haiku 4.5, Gemini 2.0 Flash, DeepSeek V3, Llama 4 Maverick, Mistral Large, Nano Banana и Veo 3 (2 пробных видео). Регистрация не обязательна для чата. Для полного доступа к инструментам создайте аккаунт за 30 секунд через Google, Яндекс или email.',
@@ -9,7 +10,7 @@ export const homeFaqData = [
   },
   {
     q: "Сколько стоят инструменты и подписка?",
-    a: '4 предложения на <a href="/pricing" class="text-accent hover:underline font-semibold">странице цен</a>: <strong>Pay-per-Use (без подписки)</strong> — 10 чат-запросов/день, 7 моделей, 2 пробных видео-поинта; инструменты оплачиваются с баланса (шаблоны от 3₽, презентации 40₽, SEO 15₽). Баланс можно перенести в подписку. <strong>Start (590₽/мес)</strong> — 20+ моделей, 600 быстрых + 90 премиум запросов/мес, 60 картинок, 13 видео-поинтов + триалы. <strong>Pro (1 290₽/мес)</strong> — все 65+ нейросетей вкл. Opus, 1 500 + 112 запросов, 140 картинок, 33 видео-поинта (Opus считается ×5). <strong>Elite (2 990₽/мес)</strong> — 4 500 запросов, 80 видео-поинтов, API, приоритет. Бонус 100₽ при регистрации.',
+    a: '4 предложения на <a href="/pricing" class="text-accent hover:underline font-semibold">странице цен</a>: <strong>Pay-per-Use (без подписки)</strong> — 10 чат-запросов/день, 7 моделей, 2 пробных видео-поинта; инструменты оплачиваются с баланса (шаблоны от 3₽, презентации 40₽, SEO 15₽). Баланс можно перенести в подписку. <strong>Start ({{price_mini_full}})</strong> — 20+ моделей, 600 быстрых + 90 премиум запросов/мес, 60 картинок, 13 видео-поинтов + триалы. <strong>Pro ({{price_max_full}})</strong> — все 65+ нейросетей вкл. Opus, 1 500 + 112 запросов, 140 картинок, 33 видео-поинта (Opus считается ×5). <strong>Elite ({{price_elite_full}})</strong> — 4 500 запросов, 80 видео-поинтов, API, приоритет. Бонус 100₽ при регистрации.',
   },
   {
     q: "Какие способы оплаты поддерживаются?",
@@ -21,7 +22,7 @@ export const homeFaqData = [
   },
   {
     q: "Чем Stone AI отличается от ChatGPT Plus?",
-    a: 'ChatGPT Plus стоит $20/мес (~1800₽) и даёт доступ только к моделям OpenAI. <a href="/pricing" class="text-accent hover:underline font-semibold">Stone AI Pro за 1 290₽/мес</a> — это 65+ нейросетей от 15 компаний: OpenAI, Anthropic, Google, Meta, xAI, DeepSeek, Mistral, Perplexity и других. Плюс инструменты которых нет в ChatGPT: <a href="/dashboard/campaigns" class="text-accent hover:underline">генератор рекламных кампаний</a>, <a href="/dashboard/photo-session" class="text-accent hover:underline">AI-фотосессия</a>, <a href="/dashboard/presentations" class="text-accent hover:underline">презентации с PPTX</a>, <a href="/dashboard/bots" class="text-accent hover:underline">конструктор ботов</a> с базой знаний. Подробное сравнение — в <a href="/blog/stone-ai-vs-chatgpt-plus" class="text-accent hover:underline">статье блога</a>.',
+    a: 'ChatGPT Plus стоит $20/мес (~1800₽) и даёт доступ только к моделям OpenAI. <a href="/pricing" class="text-accent hover:underline font-semibold">Stone AI Pro за {{price_max_full}}</a> — это 65+ нейросетей от 15 компаний: OpenAI, Anthropic, Google, Meta, xAI, DeepSeek, Mistral, Perplexity и других. Плюс инструменты которых нет в ChatGPT: <a href="/dashboard/campaigns" class="text-accent hover:underline">генератор рекламных кампаний</a>, <a href="/dashboard/photo-session" class="text-accent hover:underline">AI-фотосессия</a>, <a href="/dashboard/presentations" class="text-accent hover:underline">презентации с PPTX</a>, <a href="/dashboard/bots" class="text-accent hover:underline">конструктор ботов</a> с базой знаний. Подробное сравнение — в <a href="/blog/stone-ai-vs-chatgpt-plus" class="text-accent hover:underline">статье блога</a>.',
   },
   {
     q: "Как создать AI-бота с базой знаний?",
@@ -60,3 +61,6 @@ export const homeFaqData = [
     a: 'Да! Создайте публичного бота в <a href="/dashboard/bots" class="text-accent hover:underline font-semibold">конструкторе ботов</a>, нажмите «Виджет» — код скопируется в буфер. Вставьте перед &lt;/body&gt; на вашем сайте: <code>&lt;script src="https://stoneai.ru/widget.js" data-bot-id="ID"&gt;&lt;/script&gt;</code>. Настройки через атрибуты: <code>data-color</code> (цвет кнопки), <code>data-position</code> (left/right), <code>data-text</code> (текст кнопки). Работает на WordPress, Tilda, Bitrix, любом HTML-сайте. Также можно подключить бота к Telegram через токен @BotFather.',
   },
 ];
+
+/* renderPrice re-exports */
+export const homeFaqData: typeof _homeFaqData = renderPriceDeep(_homeFaqData);

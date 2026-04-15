@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { TELEGRAM_BOT_URL } from "@/lib/models";
+import { planPrice } from "@/lib/pricing";
 import ThemeToggle from "@/components/ThemeToggle";
 import WelcomeBonusBanner from "@/components/WelcomeBonusBanner";
 import dynamic from "next/dynamic";
@@ -244,7 +245,7 @@ export default function Nav() {
             {!authEmail && (
               <a href="/pricing" onClick={() => setMenuOpen(false)}
                 className="border-2 border-accent text-accent px-5 py-3 min-h-[44px] rounded-xl font-bold text-sm text-center hover:bg-accent hover:text-white transition-colors flex items-center justify-center">
-                Тарифы от 590₽
+                Тарифы от {planPrice("mini")}
               </a>
             )}
             {authEmail ? (

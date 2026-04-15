@@ -26,17 +26,89 @@ export interface PricingPlan {
   modalGuarantee?: string;    // money-back / refund / extras guarantee
 }
 
-export const PLAN_PRICES_RUB: Record<PaidPlanId, number> = {
+/**
+ * Price history — every tier has an `old` (pre-migration) and a `current` value.
+ * `PLAN_PRICES_RUB` and all helpers always read from `current`. If a tier price
+ * changes again, bump `current` here and add a new `old` entry.
+ */
+export const PRICES_OLD: Record<PaidPlanId, number> = {
   mini: 590,
   max: 1290,
   "max-pro": 2990,
 };
 
+export const PRICES_CURRENT: Record<PaidPlanId, number> = {
+  mini: 990,
+  max: 1890,
+  "max-pro": 3990,
+};
+
+/** Back-compat alias — everything numeric should import this. */
+export const PLAN_PRICES_RUB: Record<PaidPlanId, number> = PRICES_CURRENT;
+
+function formatRub(n: number): string {
+  return n.toLocaleString("ru-RU").replace(/,/g, " ");
+}
+
+/** "990₽" — just the price with ₽ sign. */
+export function planPrice(id: PaidPlanId): string {
+  return `${formatRub(PRICES_CURRENT[id])}₽`;
+}
+
+/** "990₽/мес" — price with ruble and period. */
+export function planPriceFull(id: PaidPlanId): string {
+  return `${planPrice(id)}/мес`;
+}
+
+/** Raw integer price. */
+export function planPriceNum(id: PaidPlanId): number {
+  return PRICES_CURRENT[id];
+}
+
+/** Previous (pre-migration) price for optional struck-through display. */
+export function planOldPrice(id: PaidPlanId): string {
+  return `${formatRub(PRICES_OLD[id])}₽`;
+}
+
 export const PLAN_DISPLAY = {
-  mini: { name: "Start", price: "590₽/мес" },
-  max: { name: "Pro", price: "1 290₽/мес" },
-  "max-pro": { name: "Elite", price: "2 990₽/мес" },
+  mini:      { name: "Start", price: planPriceFull("mini") },
+  max:       { name: "Pro",   price: planPriceFull("max") },
+  "max-pro": { name: "Elite", price: planPriceFull("max-pro") },
 } as const;
+
+/**
+ * Replace {{price_*}} placeholders in a string with current tier prices.
+ * Placeholders supported:
+ *   {{price_mini}}      → "990₽"
+ *   {{price_max}}       → "1 890₽"
+ *   {{price_elite}}     → "3 990₽"
+ *   {{price_mini_full}} → "990₽/мес"
+ *   {{price_max_full}}  → "1 890₽/мес"
+ *   {{price_elite_full}}→ "3 990₽/мес"
+ */
+export function renderPrice(text: string): string {
+  return text
+    .replace(/\{\{price_mini_full\}\}/g, planPriceFull("mini"))
+    .replace(/\{\{price_max_full\}\}/g, planPriceFull("max"))
+    .replace(/\{\{price_elite_full\}\}/g, planPriceFull("max-pro"))
+    .replace(/\{\{price_mini\}\}/g, planPrice("mini"))
+    .replace(/\{\{price_max\}\}/g, planPrice("max"))
+    .replace(/\{\{price_elite\}\}/g, planPrice("max-pro"));
+}
+
+/** Recursively apply renderPrice to every string inside an object/array. */
+export function renderPriceDeep<T>(value: T): T {
+  if (typeof value === "string") return renderPrice(value) as unknown as T;
+  if (Array.isArray(value)) return value.map((v) => renderPriceDeep(v)) as unknown as T;
+  if (value && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const k of Object.keys(value as object)) {
+      out[k] = renderPriceDeep((value as Record<string, unknown>)[k]);
+    }
+    return out as T;
+  }
+  return value;
+}
 
 export const UPGRADE_CTA_PRICE = PLAN_DISPLAY.mini.price;
 export const FREE_CHAT_MODEL_COUNT = 7;
@@ -70,8 +142,8 @@ export const PRICING_PLANS: PricingPlan[] = [
   {
     id: "mini",
     name: "Start",
-    price: "590₽",
-    priceNum: 590,
+    price: planPrice("mini"),
+    priceNum: planPriceNum("mini"),
     premium: false,
     period: "/мес",
     desc: "20+ моделей",
@@ -95,8 +167,8 @@ export const PRICING_PLANS: PricingPlan[] = [
   {
     id: "max",
     name: "Pro",
-    price: "1 290₽",
-    priceNum: 1290,
+    price: planPrice("max"),
+    priceNum: planPriceNum("max"),
     premium: false,
     period: "/мес",
     desc: "Все 65+ нейросети",
@@ -137,8 +209,8 @@ export const PRICING_PLANS: PricingPlan[] = [
   {
     id: "max-pro",
     name: "Elite",
-    price: "2 990₽",
-    priceNum: 2990,
+    price: planPrice("max-pro"),
+    priceNum: planPriceNum("max-pro"),
     premium: true,
     period: "/мес",
     desc: "Максимум возможностей",

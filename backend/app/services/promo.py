@@ -52,6 +52,15 @@ PROMO_CODES = {
         "one_per_user": True,
         "desc": "7 дней Start бесплатно (для читателей блога)",
     },
+    "LOYAL20": {
+        "type": "discount_percent",
+        "discount_value": 20,
+        "max_uses": 100000,
+        "max_uses_per_user": 2,
+        "one_per_user": False,
+        "valid_until": "2026-05-15T23:59:59+03:00",
+        "desc": "−20% на любой тариф (для активных подписчиков и одного друга)",
+    },
 }
 
 from sqlalchemy import func, select, text
@@ -102,13 +111,30 @@ async def apply_promo(db: AsyncSession, user: User, code: str) -> dict:
 
     promo = PROMO_CODES[code]
 
+    # Optional expiry — ISO 8601 string with timezone
+    valid_until = promo.get("valid_until")
+    if valid_until:
+        try:
+            deadline = datetime.fromisoformat(valid_until)
+            if datetime.now(timezone.utc) > deadline.astimezone(timezone.utc):
+                return {"ok": False, "error": "Срок действия промокода истёк"}
+        except ValueError:
+            logger.warning(f"Invalid valid_until on promo {code}: {valid_until}")
+
     total_uses = await _count_promo_uses(db, code)
     if total_uses >= promo["max_uses"]:
         return {"ok": False, "error": "Промокод больше не действует"}
 
     used_codes = (user.used_promo_codes or "").split(",")
-    if promo["one_per_user"] and code in used_codes:
+    if promo.get("one_per_user") and code in used_codes:
         return {"ok": False, "error": "Вы уже использовали этот промокод"}
+
+    # max_uses_per_user — allow N redemptions per single user (overrides one_per_user)
+    max_per_user = promo.get("max_uses_per_user")
+    if max_per_user:
+        used_count = sum(1 for c in used_codes if c == code)
+        if used_count >= max_per_user:
+            return {"ok": False, "error": f"Вы уже использовали этот промокод {max_per_user} раз(а)"}
 
     now = datetime.now(timezone.utc)
     message = ""

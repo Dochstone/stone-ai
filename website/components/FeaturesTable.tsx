@@ -1,3 +1,5 @@
+import { planPriceFull } from "@/lib/pricing";
+
 const features = [
   { name: "AI модели", free: "5 моделей", paid: "65+ нейросетей" },
   { name: "Запросы в день", free: "15", paid: "До 10 000/мес" },
@@ -5,7 +7,7 @@ const features = [
   { name: "Генерация картинок", free: "---", paid: "check" },
   { name: "AI Поиск (Perplexity)", free: "---", paid: "check" },
   { name: "Глубокий анализ (o3, R1)", free: "---", paid: "check" },
-  { name: "Стоимость", free: "Бесплатно", paid: "От 590₽/мес" },
+  { name: "Стоимость", free: "Бесплатно", paid: `От ${planPriceFull("mini")}` },
   { name: "Оплата", free: "—", paid: "Карта РФ, СБП, крипто" },
 ];
 

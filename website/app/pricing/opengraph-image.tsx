@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { OG_CONTENT_TYPE, OG_SIZE, OgTemplate } from "@/lib/og-template";
+import { planPrice } from "@/lib/pricing";
 
 export const runtime = "edge";
 export const alt = "Stone AI — Тарифы и цены";
@@ -10,7 +11,7 @@ export default async function Image() {
   return new ImageResponse(
     (
       <OgTemplate
-        title="Тарифы Stone AI от 590 ₽"
+        title={`Тарифы Stone AI от ${planPrice("mini")}`}
         subtitle="Free · Start · Pro · Elite. Все 65+ моделей в одной подписке. Оплата картами РФ, СБП, криптой, TON"
         category="Цены"
       />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { planPriceFull } from "@/lib/pricing";
 
 /* ── Video Cycler — smooth crossfade between multiple videos ── */
 function VideoCycler({ sources, poster }: { sources: string[]; poster?: string }) {
@@ -360,7 +361,7 @@ export default function Hero() {
             </a>
           </div>
           {!hasPaidPlan && (
-            <p className="mt-3 text-xs text-text/30">Бесплатно 10 запросов/день · Подписка от 590₽/мес</p>
+            <p className="mt-3 text-xs text-text/30">Бесплатно 10 запросов/день · Подписка от {planPriceFull("mini")}</p>
           )}
 
           <div className="mt-4 flex items-center justify-center">

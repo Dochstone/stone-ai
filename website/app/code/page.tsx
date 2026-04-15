@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { planPrice, planPriceFull } from "@/lib/pricing";
 import ToolPageHero from "@/components/ToolPageHero";
 import ToolModels from "@/components/ToolModels";
 import ToolExamples from "@/components/ToolExamples";
@@ -62,7 +63,7 @@ const faqItems = [
   },
   {
     q: "Какая модель лучше для кода?",
-    a: "Claude Opus 4 и Claude Sonnet 4 считаются лучшими для программирования. Devstral — бюджетная альтернатива. Для алгоритмических задач — DeepSeek R1 или o3 (reasoning-модели). Все доступны по подписке от 590₽/мес.",
+    a: `Claude Opus 4 и Claude Sonnet 4 считаются лучшими для программирования. Devstral — бюджетная альтернатива. Для алгоритмических задач — DeepSeek R1 или o3 (reasoning-модели). Все доступны по подписке от ${planPriceFull("mini")}.`,
   },
   {
     q: "Безопасно ли отправлять проприетарный код?",
@@ -95,7 +96,7 @@ export default function CodePage() {
         examples={examples}
       />
       <ToolFaq items={faqItems} />
-      <ToolCta title="Ускорьте свою разработку" subtitle="Claude Opus для сложных задач, Devstral для ежедневного кодинга. Подписка от 590₽/мес." />
+      <ToolCta title="Ускорьте свою разработку" subtitle={`Claude Opus для сложных задач, Devstral для ежедневного кодинга. Подписка от ${planPriceFull("mini")}.`} />
     </>
   );
 }

@@ -1,3 +1,4 @@
+import { renderPriceDeep } from "@/lib/pricing";
 /**
  * SEO programmatic data — comparisons, alternatives, professions.
  * Used to generate static pages for search engine traffic.
@@ -19,7 +20,7 @@ export interface Comparison {
   platform2?: { name: string; desc: string; logo: string; stats: { label: string; value: string }[] };
 }
 
-export const COMPARISONS: Comparison[] = [
+const _COMPARISONS: Comparison[] = [
   // ─── Flagship vs Flagship ───
   {
     slug: "gpt-5-vs-claude-opus-4",
@@ -91,11 +92,11 @@ export const COMPARISONS: Comparison[] = [
     slug: "stone-ai-vs-chatgpt-plus",
     model1: "gpt-5.1", model2: "gpt-4o-mini",
     title: "Stone AI vs ChatGPT Plus: сравнение подписок 2026",
-    description: "Stone AI от 590₽/мес с 65+ моделями vs ChatGPT Plus за $20/мес с одним GPT. Полное сравнение цен, моделей, функций.",
+    description: "Stone AI от {{price_mini_full}} с 65+ моделями vs ChatGPT Plus за $20/мес с одним GPT. Полное сравнение цен, моделей, функций.",
     h1: "Stone AI vs ChatGPT Plus — почему платить меньше за большее?",
-    verdict: "Stone AI: 65+ нейросетей (GPT, Claude, Gemini, Llama и др.) от 590₽/мес. ChatGPT Plus: только модели OpenAI за $20/мес (~1900₽). Stone AI выгоднее в 5 раз, даёт доступ ко всем провайдерам, генерацию картинок, видео, SEO-инструменты — всё в одном.",
-    useCases: { model1: ["65+ нейросетей от всех провайдеров", "От 590₽/мес (в 5 раз дешевле)", "Картинки, видео, 3D, SEO", "Работает без VPN из России", "Telegram-бот + веб-чат"], model2: ["Только модели OpenAI", "$20/мес (~1900₽)", "Нет генерации видео", "Нужен VPN из России", "Только веб-интерфейс"] },
-    platform1: { name: "Stone AI", desc: "AI-студия нового поколения. 65+ нейросетей от всех провайдеров в одном интерфейсе.", logo: "/mascots/stone-mascot-idle.webp", stats: [{ label: "Моделей", value: "65+" }, { label: "Цена", value: "от 590₽" }, { label: "Инструменты", value: "15+" }] },
+    verdict: "Stone AI: 65+ нейросетей (GPT, Claude, Gemini, Llama и др.) от {{price_mini_full}}. ChatGPT Plus: только модели OpenAI за $20/мес (~1900₽). Stone AI выгоднее в 5 раз, даёт доступ ко всем провайдерам, генерацию картинок, видео, SEO-инструменты — всё в одном.",
+    useCases: { model1: ["65+ нейросетей от всех провайдеров", "От {{price_mini_full}} (в 5 раз дешевле)", "Картинки, видео, 3D, SEO", "Работает без VPN из России", "Telegram-бот + веб-чат"], model2: ["Только модели OpenAI", "$20/мес (~1900₽)", "Нет генерации видео", "Нужен VPN из России", "Только веб-интерфейс"] },
+    platform1: { name: "Stone AI", desc: "AI-студия нового поколения. 65+ нейросетей от всех провайдеров в одном интерфейсе.", logo: "/mascots/stone-mascot-idle.webp", stats: [{ label: "Моделей", value: "65+" }, { label: "Цена", value: "от {{price_mini}}" }, { label: "Инструменты", value: "15+" }] },
     platform2: { name: "ChatGPT Plus", desc: "Подписка на модели OpenAI. Доступ к GPT-4o и DALL-E через веб-интерфейс.", logo: "/logos/openai.svg", stats: [{ label: "Моделей", value: "~5" }, { label: "Цена", value: "$20/мес" }, { label: "Инструменты", value: "3" }] },
   },
   {
@@ -105,8 +106,8 @@ export const COMPARISONS: Comparison[] = [
     description: "Stone AI с 65+ моделями и AI-поиском vs Perplexity. Сравнение функций, цен, и возможностей для продуктивности.",
     h1: "Stone AI vs Perplexity — что лучше для работы?",
     verdict: "Perplexity — специализированный AI-поиск с цитированием. Stone AI — полная AI-студия: 65+ нейросетей для чата, картинки, видео, SEO-инструменты, агент. Perplexity Sonar доступен внутри Stone AI как одна из 65+ нейросетей. Stone AI универсальнее и дешевле.",
-    useCases: { model1: ["65+ нейросетей + Perplexity Sonar", "Чат + картинки + видео + SEO", "От 590₽/мес за всё", "Без VPN из России"], model2: ["Только поиск в интернете", "Цитирование источников", "$20/мес за Pro", "Нет генерации контента"] },
-    platform1: { name: "Stone AI", desc: "AI-студия: чат, картинки, видео, SEO. 65+ нейросетей включая Perplexity Sonar.", logo: "/mascots/stone-mascot-idle.webp", stats: [{ label: "Моделей", value: "65+" }, { label: "Цена", value: "от 590₽" }, { label: "Возможности", value: "Всё" }] },
+    useCases: { model1: ["65+ нейросетей + Perplexity Sonar", "Чат + картинки + видео + SEO", "От {{price_mini_full}} за всё", "Без VPN из России"], model2: ["Только поиск в интернете", "Цитирование источников", "$20/мес за Pro", "Нет генерации контента"] },
+    platform1: { name: "Stone AI", desc: "AI-студия: чат, картинки, видео, SEO. 65+ нейросетей включая Perplexity Sonar.", logo: "/mascots/stone-mascot-idle.webp", stats: [{ label: "Моделей", value: "65+" }, { label: "Цена", value: "от {{price_mini}}" }, { label: "Возможности", value: "Всё" }] },
     platform2: { name: "Perplexity AI", desc: "AI-поиск с цитированием источников. Специализация на поиске в интернете.", logo: "/logos/perplexity.svg", stats: [{ label: "Фокус", value: "Поиск" }, { label: "Цена", value: "$20/мес" }, { label: "Генерация", value: "Нет" }] },
   },
   {
@@ -160,7 +161,7 @@ export interface Alternative {
   models: string[];    // model ids from MODELS to recommend
 }
 
-export const ALTERNATIVES: Alternative[] = [
+const _ALTERNATIVES: Alternative[] = [
   {
     slug: "chatgpt",
     service: "ChatGPT",
@@ -197,7 +198,7 @@ export const ALTERNATIVES: Alternative[] = [
     title: "Альтернативы Claude 2026 — аналоги Anthropic AI",
     description: "Лучшие альтернативы Claude от Anthropic. GPT-5, Gemini 3, DeepSeek R1 и другие модели для кода и анализа.",
     h1: "Альтернативы Claude — что выбрать вместо Anthropic?",
-    intro: "Claude Pro стоит $20/мес и ограничен в количестве запросов. В Stone AI Claude доступен наряду с 64 другими моделями от 590₽/мес.",
+    intro: "Claude Pro стоит $20/мес и ограничен в количестве запросов. В Stone AI Claude доступен наряду с 64 другими моделями от {{price_mini_full}}.",
     reasons: ["Дорогая подписка $20/мес", "Лимиты на Opus", "Нет генерации картинок", "Только текст и код"],
     models: ["gpt-5.1", "gemini-3-pro", "deepseek-r1", "grok-3", "llama-4-maverick"],
   },
@@ -207,7 +208,7 @@ export const ALTERNATIVES: Alternative[] = [
     title: "Альтернативы Google Gemini 2026 — лучшие AI модели",
     description: "Лучшие альтернативы Google Gemini. Claude, GPT-5, DeepSeek и другие модели для работы и учёбы.",
     h1: "Альтернативы Google Gemini — ТОП моделей 2026",
-    intro: "Gemini Advanced стоит $20/мес и привязан к экосистеме Google. В Stone AI вы получаете доступ к Gemini + 64 другим моделям от 590₽/мес.",
+    intro: "Gemini Advanced стоит $20/мес и привязан к экосистеме Google. В Stone AI вы получаете доступ к Gemini + 64 другим моделям от {{price_mini_full}}.",
     reasons: ["Привязка к Google", "Дорогая ($20/мес)", "Ограниченные инструменты", "Нет видео-генерации"],
     models: ["claude-opus-4", "gpt-5.1", "deepseek-r1", "grok-3", "llama-4-maverick"],
   },
@@ -237,7 +238,7 @@ export const ALTERNATIVES: Alternative[] = [
     title: "Альтернативы Grok 2026 — аналоги xAI бесплатно",
     description: "Лучшие альтернативы Grok от xAI. GPT-5, Claude, Gemini и другие модели без привязки к X/Twitter.",
     h1: "Альтернативы Grok — AI без привязки к Twitter",
-    intro: "Grok от xAI доступен только через подписку X Premium ($16/мес) или SuperGrok ($30/мес). В Stone AI Grok 3 доступен наряду с 64 другими моделями от 590₽/мес — дешевле и функциональнее.",
+    intro: "Grok от xAI доступен только через подписку X Premium ($16/мес) или SuperGrok ($30/мес). В Stone AI Grok 3 доступен наряду с 64 другими моделями от {{price_mini_full}} — дешевле и функциональнее.",
     reasons: ["Нужна подписка X Premium ($16/мес)", "Привязан к Twitter/X", "Нет генерации видео и 3D", "Ограниченный API", "Недоступен в России без VPN"],
     models: ["gpt-5.1", "claude-opus-4", "gemini-3-pro", "deepseek-r1", "llama-4-maverick", "grok-3"],
   },
@@ -286,7 +287,7 @@ export interface Profession {
   prompts: { title: string; prompt: string }[];
 }
 
-export const PROFESSIONS: Profession[] = [
+const _PROFESSIONS: Profession[] = [
   {
     slug: "marketer",
     role: "Маркетолог",
@@ -418,7 +419,7 @@ export const PROFESSIONS: Profession[] = [
     slug: "business",
     role: "Предприниматель",
     title: "AI для бизнеса 2026 — нейросети для предпринимателей",
-    description: "Нейросети для бизнеса: автоматизация рутины, аналитика, контент, поддержка клиентов. 65+ моделей от 590₽/мес.",
+    description: "Нейросети для бизнеса: автоматизация рутины, аналитика, контент, поддержка клиентов. 65+ моделей от {{price_mini_full}}.",
     h1: "AI для бизнеса — нейросети для предпринимателей",
     intro: "AI экономит предпринимателю 15-20 часов в неделю. Автоматизация переписки, анализ конкурентов, создание контента, подготовка презентаций и коммерческих предложений — всё через один интерфейс. Stone AI даёт доступ к 65+ нейросетям без VPN, в рублях.",
     tasks: [
@@ -503,7 +504,7 @@ export interface ToolHub {
   modelIds: string[];  // model ids to show
 }
 
-export const TOOL_HUBS: ToolHub[] = [
+const _TOOL_HUBS: ToolHub[] = [
   {
     slug: "image-generation",
     category: "Генерация изображений",
@@ -517,7 +518,7 @@ export const TOOL_HUBS: ToolHub[] = [
     slug: "video-generation",
     category: "Генерация видео",
     title: "Генерация видео нейросетью онлайн 2026 — Sora, Veo, Luma",
-    description: "Генерация видео по тексту. 12 моделей: Sora 2, Veo 3, Luma Ray 2, MiniMax, Pika 2 и другие. От 590₽/мес.",
+    description: "Генерация видео по тексту. 12 моделей: Sora 2, Veo 3, Luma Ray 2, MiniMax, Pika 2 и другие. От {{price_mini_full}}.",
     h1: "Генерация видео нейросетью — 12 моделей в одном месте",
     intro: "Создавайте видео из текстового описания. Sora 2 Pro, Veo 3, Luma Ray 2, MiniMax Hailuo и 8 других моделей. 1 бесплатное видео для новых пользователей.",
     modelIds: ["gpt-4o-mini"],  // video models shown separately
@@ -541,3 +542,9 @@ export const TOOL_HUBS: ToolHub[] = [
     modelIds: ["claude-opus-4", "devstral", "gpt-5.1", "deepseek-r1", "gpt-4.1"],
   },
 ];
+
+/* renderPrice re-exports */
+export const COMPARISONS: typeof _COMPARISONS = renderPriceDeep(_COMPARISONS);
+export const ALTERNATIVES: typeof _ALTERNATIVES = renderPriceDeep(_ALTERNATIVES);
+export const PROFESSIONS: typeof _PROFESSIONS = renderPriceDeep(_PROFESSIONS);
+export const TOOL_HUBS: typeof _TOOL_HUBS = renderPriceDeep(_TOOL_HUBS);

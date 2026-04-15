@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { planPrice, planPriceFull } from "@/lib/pricing";
 import Link from "next/link";
 import { ALTERNATIVES } from "@/lib/seo-data";
 import { CrossLinks } from "@/components/CrossLinks";
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
   alternates: { canonical: `${SITE_URL}/alternatives` },
   openGraph: {
     title: "Альтернативы нейросетям 2026 | Stone AI",
-    description: "Лучшие аналоги ChatGPT, Midjourney, Sora и других AI-сервисов. 65+ моделей от 590₽/мес.",
+    description: `Лучшие аналоги ChatGPT, Midjourney, Sora и других AI-сервисов. 65+ моделей от ${planPriceFull("mini")}.`,
     url: `${SITE_URL}/alternatives`,
     type: "website",
     siteName: "Stone AI",
@@ -43,7 +44,7 @@ export default function AlternativesHubPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         <Breadcrumbs items={[{ label: "Альтернативы", href: "/alternatives" }]} />
         <h1 className="text-3xl md:text-5xl font-extrabold text-text mt-6 mb-2">Альтернативы популярным AI-сервисам</h1>
-        <p className="text-text/50 mb-8 max-w-2xl">ChatGPT, Midjourney, Sora — все они дорогие или недоступны в России. Stone AI объединяет 65+ нейросетей в одном интерфейсе от 590₽/мес без VPN.</p>
+        <p className="text-text/50 mb-8 max-w-2xl">ChatGPT, Midjourney, Sora — все они дорогие или недоступны в России. Stone AI объединяет 65+ нейросетей в одном интерфейсе от {planPriceFull("mini")} без VPN.</p>
 
         <div className="grid gap-4">
           {ALTERNATIVES.map((a) => (
@@ -64,7 +65,7 @@ export default function AlternativesHubPage() {
 
         <section className="mt-12 bg-dark text-white rounded-2xl p-8 sm:p-10 text-center">
           <h2 className="text-xl font-extrabold mb-3">65+ нейросетей в одном месте</h2>
-          <p className="text-white/40 text-sm mb-6">GPT-5, Claude Opus, Gemini, DeepSeek, Grok и другие. Без VPN, на русском, от 590₽/мес.</p>
+          <p className="text-white/40 text-sm mb-6">GPT-5, Claude Opus, Gemini, DeepSeek, Grok и другие. Без VPN, на русском, от {planPriceFull("mini")}.</p>
           <Link href="/dashboard/chat" className="inline-flex items-center gap-2 bg-accent text-white font-bold px-8 py-4 rounded-xl hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25">
             Попробовать бесплатно
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>

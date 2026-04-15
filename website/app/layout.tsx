@@ -18,6 +18,7 @@ const manrope = Manrope({
 });
 
 import { SITE_URL } from "@/lib/constants";
+import { planPrice, planPriceFull, planPriceNum } from "@/lib/pricing";
 const OG_IMAGE = `${SITE_URL}/og-image.png`;
 
 export const viewport: Viewport = {
@@ -194,7 +195,7 @@ const jsonLdWebSite = {
   inLanguage: "ru",
   publisher: { "@id": `${SITE_URL}/#organization` },
   description:
-    "AI-студия нового поколения. Текст, картинки, видео и код. Бесплатный старт. Подписка от 590₽/мес.",
+    `AI-студия нового поколения. Текст, картинки, видео и код. Бесплатный старт. Подписка от ${planPriceFull("mini")}.`,
   potentialAction: {
     "@type": "SearchAction",
     target: { "@type": "EntryPoint", urlTemplate: `${SITE_URL}/models?q={search_term_string}` },
@@ -230,11 +231,11 @@ const jsonLdSoftware = {
   offers: {
     "@type": "AggregateOffer",
     lowPrice: "0",
-    highPrice: "2990",
+    highPrice: String(planPriceNum("max-pro")),
     priceCurrency: "RUB",
     offerCount: "4",
     description:
-      "Бесплатный старт — 10 запросов/день. Подписки: Start 590₽, Pro 1290₽, Elite 2990₽ в месяц.",
+      `Бесплатный старт — 10 запросов/день. Подписки: Start ${planPrice("mini")}, Pro ${planPrice("max")}, Elite ${planPrice("max-pro")} в месяц.`,
   },
   aggregateRating: {
     "@type": "AggregateRating",

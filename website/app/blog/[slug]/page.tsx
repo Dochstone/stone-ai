@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { planPrice, planPriceFull, renderPriceDeep } from "@/lib/pricing";
 import { notFound } from "next/navigation";
 import dynamic from "next/dynamic";
 import { POSTS, getFaq, getHowTo, getPost, getRelated, BLOG_CATEGORY_BY_SLUG, tagToSlug } from "@/lib/blog";
@@ -29,7 +30,7 @@ export function generateStaticParams() {
 }
 
 export function generateMetadata({ params }: Props): Metadata {
-  const post = getPost(params.slug);
+  const post = renderPriceDeep(getPost(params.slug));
   if (!post) return {};
 
   return {
@@ -119,8 +120,9 @@ function autoLink(text: string): (string | JSX.Element)[] {
 }
 
 export default function BlogPostPage({ params }: Props) {
-  const post = getPost(params.slug);
-  if (!post) return notFound();
+  const rawPost = getPost(params.slug);
+  if (!rawPost) return notFound();
+  const post = renderPriceDeep(rawPost);
 
   const ogUrl = `${SITE_URL}/blog/${post.slug}/opengraph-image`;
   const author = getAuthor(post.author ?? DEFAULT_AUTHOR_SLUG) ?? getAuthor(DEFAULT_AUTHOR_SLUG)!;
@@ -168,7 +170,7 @@ export default function BlogPostPage({ params }: Props) {
     }
   }
 
-  const faq = getFaq(post.slug);
+  const faq = renderPriceDeep(getFaq(post.slug));
   const faqJsonLd = faq
     ? {
         "@context": "https://schema.org",
@@ -405,7 +407,7 @@ export default function BlogPostPage({ params }: Props) {
         {/* CTA */}
         <div className="mt-10 bg-accent/5 border border-accent/10 rounded-2xl p-6 sm:p-8 text-center">
           <h3 className="font-extrabold text-lg mb-2">Попробуйте Stone AI бесплатно</h3>
-          <p className="text-text/50 text-sm mb-4">10 запросов каждый день, 7 моделей. Подписка от 590₽/мес открывает 65+ нейросетей.</p>
+          <p className="text-text/50 text-sm mb-4">10 запросов каждый день, 7 моделей. Подписка от {planPriceFull("mini")} открывает 65+ нейросетей.</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <a href="/dashboard/chat" className="bg-accent text-white px-8 py-3 rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors">Начать бесплатно</a>
             <a href="/pricing" className="border-2 border-text/15 text-text px-8 py-3 rounded-xl font-bold text-sm hover:border-accent hover:text-accent transition-colors">Смотреть тарифы</a>

@@ -12,11 +12,20 @@ from app.config import get_settings
 router = Router()
 
 # Stars products — subscription plans
-# Price in Stars: RUB price / ~1.3 RUB per Star
+# Price in Stars: RUB price / ~1.3 RUB per Star (derived from PLAN_PRICES_RUB)
+from app.pricing import PLAN_PRICES_RUB
+
+_STARS_PER_RUB = 1 / 1.3  # 1.3 RUB per Star
+
+
+def _to_stars(rub: int) -> int:
+    return int(round(rub * _STARS_PER_RUB))
+
+
 STARS_PRODUCTS = {
-    "sub_mini": {"tier": "mini", "price": 454, "name": "Start подписка (1 мес)"},
-    "sub_max": {"tier": "max", "price": 992, "name": "Pro подписка (1 мес)"},
-    "sub_max_pro": {"tier": "max-pro", "price": 2300, "name": "Elite подписка (1 мес)"},
+    "sub_mini":    {"tier": "mini",    "price": _to_stars(PLAN_PRICES_RUB["mini"]),    "name": "Start подписка (1 мес)"},
+    "sub_max":     {"tier": "max",     "price": _to_stars(PLAN_PRICES_RUB["max"]),     "name": "Pro подписка (1 мес)"},
+    "sub_max_pro": {"tier": "max-pro", "price": _to_stars(PLAN_PRICES_RUB["max-pro"]), "name": "Elite подписка (1 мес)"},
 }
 
 

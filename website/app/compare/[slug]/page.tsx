@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { MODELS } from "@/lib/models";
 import { COMPARISONS } from "@/lib/seo-data";
 import { SITE_URL } from "@/lib/constants";
+import { planPriceFull } from "@/lib/pricing";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { buildItemList } from "@/lib/schema";
 import { getAuthor, DEFAULT_AUTHOR_SLUG } from "@/lib/authors";
@@ -147,7 +148,7 @@ export default function ComparePage({ params }: Props) {
     { q: `Кому подходит ${name1}?`, a: `${name1} — выбор, если важны ${m1?.strengths?.slice(0, 3).join(", ") || "скорость и цена"}. Особенно хорошо подходит для задач категории "${catLabel[m1?.category || "chat"]}".` },
     { q: `Кому подходит ${name2}?`, a: `${name2} — выбор, если важны ${m2?.strengths?.slice(0, 3).join(", ") || "качество и точность"}. Сильно проявляет себя в задачах "${catLabel[m2?.category || "chat"]}".` },
     { q: "Можно ли попробовать обе модели бесплатно?", a: "Да. Stone AI даёт 10 запросов в день к 8 базовым моделям без подписки + 100₽ бонус за регистрацию. Для обеих моделей из сравнения попробуйте тариф Free или Start." },
-    { q: "Сколько стоит подписка Stone AI?", a: "Free — бесплатно, 10 запросов/день. Start — 590₽/мес (20+ моделей). Pro — 1 290₽/мес (все 65+ моделей включая Opus и GPT-5.4). Elite — 2 990₽/мес (увеличенные квоты + API)." },
+    { q: "Сколько стоит подписка Stone AI?", a: `Free — бесплатно, 10 запросов/день. Start — ${planPriceFull("mini")} (20+ моделей). Pro — ${planPriceFull("max")} (все 65+ моделей включая Opus и GPT-5.4). Elite — ${planPriceFull("max-pro")} (увеличенные квоты + API).` },
     { q: "Нужен ли VPN для использования этих моделей?", a: "Нет. Stone AI работает с российского IP без VPN. Обе модели из сравнения доступны напрямую через наш интерфейс с оплатой в рублях." },
     { q: "Можно ли переключаться между моделями в одном диалоге?", a: "Да. В чате Stone AI есть переключатель моделей — можете задать одну и ту же задачу обеим моделям и сравнить ответы в реальном времени (DualChat)." },
     { q: "Какая модель лучше для русского языка?", a: `Обе модели хорошо работают с русским языком. Однако ${comp.verdict.split(".")[0]}.` },

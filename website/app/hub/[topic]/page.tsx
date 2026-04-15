@@ -14,6 +14,7 @@ import { PILLARS, type PillarTopic, getPillarModels } from "@/lib/content-graph"
 import { ALTERNATIVES } from "@/lib/seo-data";
 import { POSTS } from "@/lib/blog";
 import { buildFAQPage } from "@/lib/schema";
+import { renderPriceDeep } from "@/lib/pricing";
 import { PILLAR_CONTENT } from "./content";
 
 interface Props {
@@ -26,8 +27,9 @@ export function generateStaticParams() {
 }
 
 export function generateMetadata({ params }: Props): Metadata {
-  const meta = PILLAR_CONTENT[params.topic];
-  if (!meta) return {};
+  const raw = PILLAR_CONTENT[params.topic];
+  if (!raw) return {};
+  const meta = renderPriceDeep(raw);
   return {
     title: meta.metaTitle,
     description: meta.description,
@@ -43,8 +45,9 @@ export function generateMetadata({ params }: Props): Metadata {
 export default function HubPage({ params }: Props) {
   const topic = params.topic as PillarTopic;
   const pillar = PILLARS[topic];
-  const meta = PILLAR_CONTENT[params.topic];
-  if (!pillar || !meta) return notFound();
+  const raw = PILLAR_CONTENT[params.topic];
+  if (!pillar || !raw) return notFound();
+  const meta = renderPriceDeep(raw);
 
   const models = getPillarModels(topic);
   const alternatives = pillar.alternatives

@@ -11,6 +11,8 @@ import {
   PLAN_LIMIT_LABELS,
   PLAN_SUMMARY,
   PRICING_PLANS,
+  planPrice,
+  planPriceFull,
 } from "@/lib/pricing";
 
 const startPlan = PRICING_PLANS.find((plan) => plan.id === "mini")!;
@@ -35,7 +37,7 @@ const pricingJsonLd = {
   "@context": "https://schema.org",
   "@type": "Product",
   name: "Stone AI",
-  description: `AI-студия нового поколения. 65+ нейросетей в одной подписке. Тарифы от 0 до 2 990₽ в месяц.`,
+  description: `AI-студия нового поколения. 65+ нейросетей в одной подписке. Тарифы от 0 до ${planPrice("max-pro")} в месяц.`,
   image: ["https://stoneai.ru/pricing/opengraph-image"],
   url: "https://stoneai.ru/pricing",
   brand: { "@type": "Brand", name: "Stone AI" },
@@ -164,7 +166,7 @@ export default function PricingPage() {
           <p className="text-text/50 max-w-2xl mx-auto text-lg">
             {hasPaidPlan
               ? "Управляйте подпиской и сравнивайте тарифы."
-              : "Бесплатный старт — 10 запросов в день. Подписка от 590₽/мес открывает GPT-5, Claude Opus, генерацию картинок и видео."}
+              : `Бесплатный старт — 10 запросов в день. Подписка от ${planPriceFull("mini")} открывает GPT-5, Claude Opus, генерацию картинок и видео.`}
           </p>
         </div>
       </div>

@@ -7,6 +7,8 @@
  * stylesheets.
  */
 
+import { planPriceFull } from "@/lib/pricing";
+
 export interface OgTemplateProps {
   title: string;
   subtitle?: string;
@@ -120,7 +122,7 @@ export function OgTemplate({ title, subtitle, category, accent = ACCENT }: OgTem
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <span style={{ fontSize: 22, color: TEXT_DIM }}>65+ нейросетей · без VPN · от 590 ₽/мес</span>
+          <span style={{ fontSize: 22, color: TEXT_DIM }}>{`65+ нейросетей · без VPN · от ${planPriceFull("mini")}`}</span>
         </div>
         <span style={{ fontSize: 22, color: accent, fontWeight: 700 }}>stoneai.ru</span>
       </div>
