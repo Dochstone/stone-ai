@@ -6,9 +6,8 @@ Uses source-level verification and formula checks.
 Scenarios:
 1. Stars invoice $5 → confirm → balance +$5
 2. Heleket webhook $10 → balance +$10
-3. Lava webhook $3 → balance +$3
-4. Duplicate webhook → balance NOT increased twice
-5. Invalid webhook signature → rejected
+3. Duplicate webhook → balance NOT increased twice
+4. Invalid webhook signature → rejected
 """
 
 import ast
@@ -21,12 +20,10 @@ from pathlib import Path
 BACKEND = Path(__file__).parent.parent
 PAYMENT_SRC = BACKEND / "app" / "routers" / "payment.py"
 PAYMENT_EXT_SRC = BACKEND / "app" / "routers" / "payment_ext.py"
-LAVA_SRC = BACKEND / "app" / "services" / "lava.py"
 HELEKET_SRC = BACKEND / "app" / "services" / "heleket.py"
 
 _payment_src = PAYMENT_SRC.read_text(encoding="utf-8")
 _payment_ext_src = PAYMENT_EXT_SRC.read_text(encoding="utf-8")
-_lava_src = LAVA_SRC.read_text(encoding="utf-8")
 _heleket_src = HELEKET_SRC.read_text(encoding="utf-8")
 
 # Extract constants
@@ -35,17 +32,6 @@ MIN_TOP_UP_USD = 1.0
 
 
 # ─── Helpers: replicate signature functions ───
-
-def _lava_make_signature(data: dict, key: str) -> str:
-    """Replicate Lava's _make_signature."""
-    sorted_values = "|".join(str(v) for k, v in sorted(data.items()))
-    return hashlib.sha256(f"{sorted_values}|{key}".encode()).hexdigest()
-
-
-def _lava_verify(data: dict, signature: str, key: str) -> bool:
-    expected = _lava_make_signature(data, key)
-    return hmac.compare_digest(expected, signature)
-
 
 def _heleket_make_signature(body_bytes: bytes, api_key: str) -> str:
     """Replicate Heleket's webhook signature."""
@@ -149,42 +135,8 @@ class TestHeleket:
 
 
 # ═══════════════════════════════════════════════════════════
-# SCENARIO 3: Lava webhook $3 → balance +$3
+# (former SCENARIO 3 — Lava webhook — removed; provider deprecated)
 # ═══════════════════════════════════════════════════════════
-
-class TestLavaWebhook:
-    def test_webhook_endpoint_exists(self):
-        assert "lava/webhook" in _payment_ext_src
-
-    def test_webhook_checks_success_status(self):
-        assert '"success"' in _payment_ext_src
-
-    def test_webhook_finds_transaction(self):
-        assert 'lava:' in _payment_ext_src
-
-    def test_webhook_calls_add_balance(self):
-        assert "add_balance" in _payment_ext_src
-
-    def test_balance_increase(self):
-        balance = 2.0
-        topup = 3.0
-        assert round(balance + topup, 6) == 5.0
-
-    def test_valid_lava_signature(self):
-        """Valid Lava signature should pass verification."""
-        key = "test_webhook_key"
-        data = {"status": "success", "order_id": "ORD-123", "amount": "300.00"}
-        signature = _lava_make_signature(data, key)
-        assert _lava_verify(data, signature, key)
-
-    def test_usd_to_rub_conversion(self):
-        """payment_ext.py converts USD to RUB for Lava."""
-        assert "USD_TO_RUB" in _payment_ext_src
-
-    def test_signature_check_in_webhook(self):
-        assert "verify_webhook_signature" in _payment_ext_src
-        assert "Signature" in _payment_ext_src  # header name
-
 
 # ═══════════════════════════════════════════════════════════
 # SCENARIO 4: Duplicate webhook → balance NOT increased twice
@@ -195,16 +147,8 @@ class TestDuplicateWebhook:
         """Heleket webhook returns early if status=completed."""
         assert '"Already processed"' in _payment_ext_src
 
-    def test_lava_checks_already_completed(self):
-        """Lava webhook returns early if status=completed."""
-        assert '"Already processed"' in _payment_ext_src
-
     def test_heleket_only_pending_matched(self):
         """Heleket webhook only matches status='pending' transactions."""
-        assert "status = 'pending'" in _payment_ext_src
-
-    def test_lava_only_pending_matched(self):
-        """Lava webhook queries for pending transactions only."""
         assert "status = 'pending'" in _payment_ext_src
 
     def test_duplicate_logic_flow(self):
@@ -255,22 +199,6 @@ class TestInvalidSignature:
         sign_with_real = _heleket_make_signature(body, "real_key")
         assert not _heleket_verify(body, sign_with_real, "wrong_key")
 
-    def test_lava_invalid_signature_rejected(self):
-        """Wrong signature should fail Lava verification."""
-        key = "real_key"
-        data = {"status": "success", "order_id": "ORD-1"}
-        wrong_sign = "aaabbbccc"
-        assert not _lava_verify(data, wrong_sign, key)
-
-    def test_lava_tampered_data_rejected(self):
-        """Tampered data with original signature should fail."""
-        key = "real_key"
-        original_data = {"status": "success", "amount": "300"}
-        signature = _lava_make_signature(original_data, key)
-
-        tampered_data = {"status": "success", "amount": "30000"}
-        assert not _lava_verify(tampered_data, signature, key)
-
     def test_webhook_returns_403(self):
         """Both webhooks raise 403 on invalid signature."""
         assert "403" in _payment_ext_src
@@ -280,4 +208,3 @@ class TestInvalidSignature:
         """Empty signature should not match."""
         body = b'{"test": true}'
         assert not _heleket_verify(body, "", "key")
-        assert not _lava_verify({"test": True}, "", "key")

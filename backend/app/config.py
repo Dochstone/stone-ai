@@ -90,11 +90,6 @@ class Settings:
         self.kling_access_key = os.getenv("KLING_ACCESS_KEY", "")
         self.kling_secret_key = os.getenv("KLING_SECRET_KEY", "")
 
-        # Lava.ru (Cards RU + SBP)
-        self.lava_secret_key = os.getenv("LAVA_SECRET_KEY", "")
-        self.lava_shop_id = os.getenv("LAVA_SHOP_ID", "")
-        self.lava_webhook_key = os.getenv("LAVA_WEBHOOK_KEY", "")
-
         # Heleket (Crypto: USDT, BTC, ETH, TON, SOL, etc.)
         self.heleket_api_key = os.getenv("HELEKET_API_KEY", "")
         self.heleket_merchant = os.getenv("HELEKET_MERCHANT", "")

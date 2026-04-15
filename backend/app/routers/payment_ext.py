@@ -1,4 +1,4 @@
-"""Payment endpoints — Lava.ru (cards/SBP) + Heleket (crypto).
+"""Payment endpoints — Platega (cards/SBP) + Heleket (crypto).
 
 Both methods top up user's USD balance directly (per-token billing).
 """
@@ -14,7 +14,6 @@ from app.middleware.auth import get_current_user
 from app.models import Transaction
 from app.models.user import User
 from app.services.token_billing import add_balance
-from app.services import lava as lava_service
 from app.services import heleket as heleket_service
 from app.services import platega as platega_service
 import httpx
@@ -157,145 +156,9 @@ async def _verify_platega_webhook_payload(transaction_id: str, amount: float | i
         return False
 
 
-# ═══════════════════════════════════════════════════════════
-# LAVA.RU — Russian Cards + SBP
-# ═══════════════════════════════════════════════════════════
-
-@router.post("/lava/create-order")
-async def create_lava_order(
-    req: TopUpRequest,
-    tg_user: dict = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-):
-    """Create a Lava.ru payment invoice for card/SBP balance top-up."""
-    settings = get_settings()
-
-    if not settings.lava_secret_key or not settings.lava_shop_id:
-        raise HTTPException(status_code=503, detail="Оплата картой временно недоступна")
-
-    if req.usd_amount < MIN_TOP_UP_USD:
-        raise HTTPException(status_code=400, detail=f"Минимальная сумма ${MIN_TOP_UP_USD:.0f}")
-
-    rub_amount = round(req.usd_amount * USD_TO_RUB, 2)
-    order_id = lava_service.generate_order_id(tg_user["id"])
-
-    invoice = await lava_service.create_invoice(
-        amount_rub=rub_amount,
-        order_id=order_id,
-        description=f"Stone AI · Пополнение баланса: ${req.usd_amount:.2f}",
-        success_url=settings.webapp_url,
-    )
-
-    if not invoice:
-        raise HTTPException(status_code=500, detail="Не удалось создать счёт. Попробуйте позже.")
-
-    tx = Transaction(
-        user_tg_id=tg_user["id"],
-        amount=rub_amount,
-        currency="RUB",
-        amount_usd=req.usd_amount,
-        product_type="topup",
-        product_id=f"topup_usd:{req.usd_amount:.2f}",
-        status="pending",
-        tx_hash=order_id,
-        provider_id=f"lava:{invoice.get('id', order_id)}",
-    )
-    db.add(tx)
-    await db.commit()
-
-    logger.info(f"Lava order: user={tg_user['id']}, rub={rub_amount}, usd={req.usd_amount}")
-
-    return {
-        "order_id": order_id,
-        "invoice_id": invoice.get("id"),
-        "payment_url": invoice.get("url"),
-        "amount_rub": rub_amount,
-        "usd_amount": req.usd_amount,
-        "expires_in": 900,
-    }
-
-
-@router.post("/lava/webhook")
-async def lava_webhook(request: Request, db: AsyncSession = Depends(get_db)):
-    """Handle Lava.ru webhook callback after payment."""
-    settings = get_settings()
-    if not settings.lava_webhook_key:
-        raise HTTPException(status_code=503, detail="Lava webhook verification is not configured")
-
-    body = await request.json()
-    signature = request.headers.get("Signature", "")
-    if not signature or not lava_service.verify_webhook_signature(body, signature, settings.lava_webhook_key):
-        logger.warning("Lava webhook: invalid signature")
-        raise HTTPException(status_code=403, detail="Invalid signature")
-
-    status = body.get("status")
-    order_id = body.get("order_id", "")
-    invoice_id = body.get("invoice_id", "")
-
-    logger.info(f"Lava webhook: status={status}, order={order_id}")
-
-    if status != "success":
-        return {"ok": True, "message": "Ignored non-success status"}
-
-    tx, already_processed = await _claim_pending_transaction(
-        db,
-        provider_id=f"lava:{invoice_id}",
-        fallback_tx_hash=order_id,
-    )
-    if already_processed:
-        return {"ok": True, "message": "Already processed"}
-    if not tx:
-        logger.warning(f"Lava webhook: transaction not found for order={order_id}")
-        return {"ok": True, "message": "Transaction not found"}
-
-    user_tg_id = tx.user_tg_id
-    usd_amount = float(tx.amount_usd or 0)
-
-    new_balance = await add_balance(db, user_tg_id, usd_amount)
-    await _increment_total_deposited(db, user_tg_id, usd_amount)
-
-    from app.routers.referral import credit_referrer
-    await credit_referrer(db, user_tg_id, usd_amount)
-
-    await db.commit()
-
-    logger.info(f"Lava payment completed: user={user_tg_id}, usd={usd_amount}, balance=${new_balance:.6f}")
-
-    try:
-        user_row = await db.execute(text("SELECT email FROM users WHERE telegram_id = :tid OR id = :tid LIMIT 1"), {"tid": user_tg_id})
-        user_email = user_row.scalar()
-        if user_email and new_balance is not None:
-            from app.services.email_service import send_payment_confirmation
-            send_payment_confirmation(user_email, round(usd_amount * USD_TO_RUB), round(new_balance * USD_TO_RUB), "Карта РФ / СБП")
-    except Exception as e:
-        logger.warning(f"Failed to send payment email: {e}")
-
-    return {"ok": True}
-
-
-@router.get("/lava/check/{order_id}")
-async def check_lava_payment(
-    order_id: str,
-    tg_user: dict = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-):
-    """Check Lava payment status (polled by frontend)."""
-    result = await db.execute(
-        text("SELECT status, amount_usd FROM transactions "
-             "WHERE tx_hash = :order_id AND user_tg_id = :tid ORDER BY id DESC LIMIT 1"),
-        {"order_id": order_id, "tid": tg_user["id"]}
-    )
-    row = result.fetchone()
-
-    if not row:
-        raise HTTPException(status_code=404, detail="Заказ не найден")
-
-    status, usd_amount = row
-    return {"status": status, "usd_amount": usd_amount}
-
 
 # ═══════════════════════════════════════════════════════════
-# PLATEGA.IO — Russian Cards + SBP (alternative to Lava)
+# PLATEGA.IO — Russian Cards + SBP
 # ═══════════════════════════════════════════════════════════
 
 @router.post("/platega/create-order")

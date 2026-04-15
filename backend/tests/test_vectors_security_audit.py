@@ -28,7 +28,6 @@ class TestMoneyHardening:
         assert '"status": "already_processed"' in PAYMENT_SRC
 
     def test_webhooks_fail_closed_when_verification_missing(self):
-        assert 'if not settings.lava_webhook_key' in PAYMENT_EXT_SRC
         assert 'if not settings.heleket_api_key' in PAYMENT_EXT_SRC
         assert 'raise HTTPException(status_code=403, detail="Invalid signature")' in PAYMENT_EXT_SRC
 
