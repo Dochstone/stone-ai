@@ -72,18 +72,18 @@ const techStack = [
 ];
 
 const tools = [
-  { icon: "💬", name: "AI Чат", desc: "50+ моделей, стриминг, DualChat" },
-  { icon: "🤖", name: "Конструктор ботов", desc: "Бот с базой знаний (RAG)" },
-  { icon: "🧠", name: "AI-Агент", desc: "Автономные multi-step задачи" },
-  { icon: "📊", name: "Рекламные кампании", desc: "Яндекс Директ за 3 минуты" },
-  { icon: "📝", name: "AI-шаблоны", desc: "50+ готовых промптов" },
-  { icon: "📷", name: "Фотосессия товаров", desc: "Смена фона, на модели, пакетная" },
-  { icon: "🎬", name: "Презентации", desc: "Слайды + PPTX экспорт" },
-  { icon: "🔍", name: "SEO-модуль", desc: "Статьи, мета-теги, A/B тесты" },
-  { icon: "🌐", name: "Виджет для сайта", desc: "Встраиваемый чат-бот" },
-  { icon: "📱", name: "Telegram-боты", desc: "Подключение через BotFather" },
-  { icon: "📈", name: "Аналитика", desc: "Отслеживание посещений" },
-  { icon: "🏆", name: "Геймификация", desc: "Достижения, игры, лидерборд" },
+  { icon: "💬", name: "AI Чат",            href: "/dashboard/chat",          desc: "50+ моделей, стриминг, DualChat" },
+  { icon: "🤖", name: "Конструктор ботов", href: "/dashboard/bots",          desc: "Бот с базой знаний (RAG)" },
+  { icon: "🧠", name: "AI-Агент",          href: "/dashboard/agent",         desc: "Автономные multi-step задачи" },
+  { icon: "📊", name: "Рекламные кампании",href: "/dashboard/campaigns",     desc: "Яндекс Директ за 3 минуты" },
+  { icon: "📝", name: "AI-шаблоны",        href: "/dashboard/templates",     desc: "50+ готовых промптов" },
+  { icon: "📷", name: "Фотосессия товаров",href: "/dashboard/photo-session", desc: "Смена фона, на модели, пакетная" },
+  { icon: "🎬", name: "Презентации",       href: "/dashboard/presentations", desc: "Слайды + PPTX экспорт" },
+  { icon: "🔍", name: "SEO-модуль",        href: "/dashboard/seo",           desc: "Статьи, мета-теги, A/B тесты" },
+  { icon: "🌐", name: "Виджет для сайта",  href: "/widget",                  desc: "Встраиваемый чат-бот" },
+  { icon: "📱", name: "Telegram-боты",     href: "https://t.me/drifttt55bot", external: true, desc: "Подключение через BotFather" },
+  { icon: "📈", name: "Аналитика",         href: "/admin",                   desc: "Отслеживание посещений" },
+  { icon: "🏆", name: "Геймификация",      href: "/dashboard/games",         desc: "Достижения, игры, лидерборд" },
 ];
 
 const audiences = [
@@ -241,11 +241,16 @@ export default function AboutPage() {
           <p className="text-text/50 text-center mb-10 max-w-lg mx-auto">Не просто чат — полноценная AI-платформа для работы и бизнеса</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {tools.map((t) => (
-              <div key={t.name} className="bg-white rounded-xl border border-text/5 p-4 hover:border-accent/20 transition-colors">
+              <a
+                key={t.name}
+                href={t.href}
+                {...(t.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                className="block bg-white rounded-xl border border-text/5 p-4 hover:border-accent/30 hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-accent/30"
+              >
                 <span className="text-2xl block mb-2">{t.icon}</span>
-                <div className="font-bold text-sm mb-0.5">{t.name}</div>
+                <div className="font-bold text-sm mb-0.5 group-hover:text-accent">{t.name}</div>
                 <div className="text-text/40 text-[11px]">{t.desc}</div>
-              </div>
+              </a>
             ))}
           </div>
         </section>
