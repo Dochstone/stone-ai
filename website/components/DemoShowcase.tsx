@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
+import { Palette, Film, Box, Volume2 } from "lucide-react";
 
 
 function LazyLoad({ children, className = "" }: { children: React.ReactNode; className?: string }) {
@@ -29,10 +30,10 @@ export default function DemoShowcase() {
 
         {/* Image gallery */}
         <div className="mb-16">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 rounded-lg bg-pink-500/10 flex items-center justify-center">
-              <span className="text-sm">🎨</span>
-            </div>
+          <div className="flex items-center gap-3 mb-6" style={{ ["--pad-c" as string]: "#EC4899" }}>
+            <span className="glass-pad flex items-center justify-center w-9 h-9 rounded-xl shrink-0">
+              <Palette className="block" size={18} strokeWidth={2.4} />
+            </span>
             <div>
               <h3 className="font-bold text-text">AI Картинки</h3>
               <p className="text-xs text-text/40">Nano Banana Pro · GPT-5 Image · Flux</p>
@@ -77,8 +78,10 @@ export default function DemoShowcase() {
               <video src="/demo/video-1.mp4" muted loop playsInline autoPlay preload="none" className="w-full h-full object-cover" />
             </LazyLoad>
             <div className="p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-sm">🎬</span>
+              <div className="flex items-center gap-2 mb-1" style={{ ["--pad-c" as string]: "#3B82F6" }}>
+                <span className="glass-pad flex items-center justify-center w-6 h-6 rounded-lg shrink-0">
+                  <Film className="block" size={13} strokeWidth={2.4} />
+                </span>
                 <span className="text-sm font-bold text-text">AI Видео</span>
               </div>
               <p className="text-xs text-text/40 mb-2">5-10 секунд видео из текста. Sora, Veo 3, Kling, Pika.</p>
@@ -92,8 +95,10 @@ export default function DemoShowcase() {
               <div className="w-full h-full" dangerouslySetInnerHTML={{ __html: `<model-viewer src="/demo/model-demo.glb" auto-rotate camera-controls touch-action="pan-y" style="width:100%;height:100%;background:inherit" shadow-intensity="1" exposure="1.2"></model-viewer>` }} />
             </LazyLoad>
             <div className="p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-sm">🧊</span>
+              <div className="flex items-center gap-2 mb-1" style={{ ["--pad-c" as string]: "#06B6D4" }}>
+                <span className="glass-pad flex items-center justify-center w-6 h-6 rounded-lg shrink-0">
+                  <Box className="block" size={13} strokeWidth={2.4} />
+                </span>
                 <span className="text-sm font-bold text-text">3D Модели</span>
               </div>
               <p className="text-xs text-text/40 mb-2">GLB из текста или фото. Tripo v2.5, TripoSR.</p>
@@ -114,8 +119,10 @@ export default function DemoShowcase() {
               <span className="text-[11px] text-white/80 mt-2 drop-shadow">Нажмите, чтобы прослушать</span>
             </div>
             <div className="p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-sm">🔊</span>
+              <div className="flex items-center gap-2 mb-1" style={{ ["--pad-c" as string]: "#6366F1" }}>
+                <span className="glass-pad flex items-center justify-center w-6 h-6 rounded-lg shrink-0">
+                  <Volume2 className="block" size={13} strokeWidth={2.4} />
+                </span>
                 <span className="text-sm font-bold text-text">AI Аудио</span>
               </div>
               <p className="text-xs text-text/40 mb-2">Озвучка 10+ голосами. Голосовой ввод Whisper.</p>

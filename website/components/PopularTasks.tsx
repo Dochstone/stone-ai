@@ -1,18 +1,36 @@
 "use client";
 
-const POPULAR_TASKS = [
-  { label: "Рекламные кампании", href: "/dashboard/campaigns", emoji: "🎯" },
-  { label: "SEO-статьи", href: "/dashboard/seo/article", emoji: "📝" },
-  { label: "AI-шаблоны", href: "/dashboard/templates", emoji: "📅" },
-  { label: "Генерация картинок", href: "/dashboard/chat?tab=image", emoji: "🎨" },
-  { label: "AI Видео", href: "/dashboard/chat?tab=video", emoji: "🎬" },
-  { label: "Презентации", href: "/dashboard/presentations", emoji: "📊" },
-  { label: "Фотосессия товаров", href: "/dashboard/photo-session", emoji: "📸" },
-  { label: "AI Чат-бот", href: "/dashboard/bots", emoji: "🤖" },
-  { label: "AI-Агент", href: "/dashboard/agent", emoji: "🧠" },
-  { label: "Маркетплейс шаблонов", href: "/dashboard/marketplace", emoji: "🏪" },
-  { label: "Анализ текста", href: "/dashboard/seo/analyze", emoji: "🔍" },
-  { label: "A/B тест", href: "/dashboard/seo/ab-test", emoji: "⚡" },
+import {
+  Megaphone,
+  FileText,
+  LayoutTemplate,
+  Palette,
+  Film,
+  Presentation,
+  Camera,
+  Bot,
+  Sparkles,
+  Store,
+  Search,
+  Zap,
+  type LucideIcon,
+} from "lucide-react";
+
+type Task = { label: string; href: string; Icon: LucideIcon; color: string };
+
+const POPULAR_TASKS: Task[] = [
+  { label: "Рекламные кампании",     href: "/dashboard/campaigns",          Icon: Megaphone,      color: "#F59E0B" },
+  { label: "SEO-статьи",             href: "/dashboard/seo/article",        Icon: FileText,       color: "#14B8A6" },
+  { label: "AI-шаблоны",             href: "/dashboard/templates",          Icon: LayoutTemplate, color: "#A855F7" },
+  { label: "Генерация картинок",     href: "/dashboard/chat?tab=image",     Icon: Palette,        color: "#EC4899" },
+  { label: "AI Видео",               href: "/dashboard/chat?tab=video",     Icon: Film,           color: "#3B82F6" },
+  { label: "Презентации",            href: "/dashboard/presentations",      Icon: Presentation,   color: "#0EA5E9" },
+  { label: "Фотосессия товаров",     href: "/dashboard/photo-session",      Icon: Camera,         color: "#F43F5E" },
+  { label: "AI Чат-бот",             href: "/dashboard/bots",               Icon: Bot,            color: "#6366F1" },
+  { label: "AI-Агент",               href: "/dashboard/agent",              Icon: Sparkles,       color: "#C4623D" },
+  { label: "Маркетплейс шаблонов",   href: "/dashboard/marketplace",        Icon: Store,          color: "#10B981" },
+  { label: "Анализ текста",          href: "/dashboard/seo/analyze",        Icon: Search,         color: "#22D3EE" },
+  { label: "A/B тест",               href: "/dashboard/seo/ab-test",        Icon: Zap,            color: "#EAB308" },
 ];
 
 export default function PopularTasks() {
@@ -23,16 +41,19 @@ export default function PopularTasks() {
           Популярные задачи
         </h2>
         <div className="flex flex-wrap justify-center gap-2">
-          {POPULAR_TASKS.map(task => (
+          {POPULAR_TASKS.map(({ label, href, Icon, color }) => (
             <a
-              key={task.label}
-              href={task.href}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full
+              key={label}
+              href={href}
+              className="group inline-flex items-center gap-2 pl-1.5 pr-4 py-1.5 rounded-full
                          bg-text/[0.03] hover:bg-accent/10 border border-text/5 hover:border-accent/20
                          text-sm text-text/60 hover:text-accent transition-all"
+              style={{ ["--pad-c" as string]: color }}
             >
-              <span className="text-base">{task.emoji}</span>
-              {task.label}
+              <span className="glass-pad flex items-center justify-center w-7 h-7 rounded-full shrink-0">
+                <Icon className="block" size={14} strokeWidth={2.4} />
+              </span>
+              {label}
             </a>
           ))}
         </div>

@@ -14,23 +14,47 @@ import {
   planPrice,
   planPriceFull,
 } from "@/lib/pricing";
+import {
+  Sparkles,
+  BotMessageSquare,
+  Star,
+  FileText,
+  Palette,
+  Film,
+  Box,
+  Mic,
+  Plug,
+  Zap,
+  Rocket,
+  type LucideIcon,
+} from "lucide-react";
 
 const startPlan = PRICING_PLANS.find((plan) => plan.id === "mini")!;
 const proPlan = PRICING_PLANS.find((plan) => plan.id === "max")!;
 const elitePlan = PRICING_PLANS.find((plan) => plan.id === "max-pro")!;
 
-const comparisonRows = [
-  { icon: "🧠", feature: "AI модели", free: PLAN_LIMIT_LABELS.free.models, mini: PLAN_LIMIT_LABELS.mini.models, max: PLAN_LIMIT_LABELS.max.models, maxpro: PLAN_LIMIT_LABELS["max-pro"].models },
-  { icon: "💬", feature: "Чат", free: PLAN_LIMIT_LABELS.free.chat, mini: PLAN_LIMIT_LABELS.mini.chat, max: PLAN_LIMIT_LABELS.max.chat, maxpro: PLAN_LIMIT_LABELS["max-pro"].chat },
-  { icon: "⭐", feature: "Премиум модели", free: PLAN_LIMIT_LABELS.free.premium, mini: PLAN_LIMIT_LABELS.mini.premium, max: PLAN_LIMIT_LABELS.max.premium, maxpro: PLAN_LIMIT_LABELS["max-pro"].premium },
-  { icon: "🧾", feature: "Claude Opus", free: PLAN_LIMIT_LABELS.free.opus, mini: PLAN_LIMIT_LABELS.mini.opus, max: PLAN_LIMIT_LABELS.max.opus, maxpro: PLAN_LIMIT_LABELS["max-pro"].opus },
-  { icon: "🎨", feature: "Картинки", free: PLAN_LIMIT_LABELS.free.images, mini: PLAN_LIMIT_LABELS.mini.images, max: PLAN_LIMIT_LABELS.max.images, maxpro: PLAN_LIMIT_LABELS["max-pro"].images },
-  { icon: "🎬", feature: "Видео", free: PLAN_LIMIT_LABELS.free.video, mini: PLAN_LIMIT_LABELS.mini.video, max: PLAN_LIMIT_LABELS.max.video, maxpro: PLAN_LIMIT_LABELS["max-pro"].video },
-  { icon: "🧊", feature: "3D модели", free: PLAN_LIMIT_LABELS.free.threed, mini: PLAN_LIMIT_LABELS.mini.threed, max: PLAN_LIMIT_LABELS.max.threed, maxpro: PLAN_LIMIT_LABELS["max-pro"].threed },
-  { icon: "🎤", feature: "Озвучка (TTS)", free: PLAN_LIMIT_LABELS.free.audio, mini: PLAN_LIMIT_LABELS.mini.audio, max: PLAN_LIMIT_LABELS.max.audio, maxpro: PLAN_LIMIT_LABELS["max-pro"].audio },
-  { icon: "🔌", feature: "API доступ", free: PLAN_LIMIT_LABELS.free.api, mini: PLAN_LIMIT_LABELS.mini.api, max: PLAN_LIMIT_LABELS.max.api, maxpro: PLAN_LIMIT_LABELS["max-pro"].api },
-  { icon: "⚡", feature: "Приоритетная скорость", free: PLAN_LIMIT_LABELS.free.priority, mini: PLAN_LIMIT_LABELS.mini.priority, max: PLAN_LIMIT_LABELS.max.priority, maxpro: PLAN_LIMIT_LABELS["max-pro"].priority },
-  { icon: "🚀", feature: "Ранний доступ", free: PLAN_LIMIT_LABELS.free.early, mini: PLAN_LIMIT_LABELS.mini.early, max: PLAN_LIMIT_LABELS.max.early, maxpro: PLAN_LIMIT_LABELS["max-pro"].early },
+type ComparisonRow = {
+  Icon: LucideIcon;
+  color: string;
+  feature: string;
+  free: string;
+  mini: string;
+  max: string;
+  maxpro: string;
+};
+
+const comparisonRows: ComparisonRow[] = [
+  { Icon: Sparkles,         color: "#C4623D", feature: "AI модели",             free: PLAN_LIMIT_LABELS.free.models,   mini: PLAN_LIMIT_LABELS.mini.models,   max: PLAN_LIMIT_LABELS.max.models,   maxpro: PLAN_LIMIT_LABELS["max-pro"].models },
+  { Icon: BotMessageSquare, color: "#22D3EE", feature: "Чат",                   free: PLAN_LIMIT_LABELS.free.chat,     mini: PLAN_LIMIT_LABELS.mini.chat,     max: PLAN_LIMIT_LABELS.max.chat,     maxpro: PLAN_LIMIT_LABELS["max-pro"].chat },
+  { Icon: Star,             color: "#EAB308", feature: "Премиум модели",        free: PLAN_LIMIT_LABELS.free.premium,  mini: PLAN_LIMIT_LABELS.mini.premium,  max: PLAN_LIMIT_LABELS.max.premium,  maxpro: PLAN_LIMIT_LABELS["max-pro"].premium },
+  { Icon: FileText,         color: "#14B8A6", feature: "Claude Opus",           free: PLAN_LIMIT_LABELS.free.opus,     mini: PLAN_LIMIT_LABELS.mini.opus,     max: PLAN_LIMIT_LABELS.max.opus,     maxpro: PLAN_LIMIT_LABELS["max-pro"].opus },
+  { Icon: Palette,          color: "#EC4899", feature: "Картинки",              free: PLAN_LIMIT_LABELS.free.images,   mini: PLAN_LIMIT_LABELS.mini.images,   max: PLAN_LIMIT_LABELS.max.images,   maxpro: PLAN_LIMIT_LABELS["max-pro"].images },
+  { Icon: Film,             color: "#3B82F6", feature: "Видео",                 free: PLAN_LIMIT_LABELS.free.video,    mini: PLAN_LIMIT_LABELS.mini.video,    max: PLAN_LIMIT_LABELS.max.video,    maxpro: PLAN_LIMIT_LABELS["max-pro"].video },
+  { Icon: Box,              color: "#06B6D4", feature: "3D модели",             free: PLAN_LIMIT_LABELS.free.threed,   mini: PLAN_LIMIT_LABELS.mini.threed,   max: PLAN_LIMIT_LABELS.max.threed,   maxpro: PLAN_LIMIT_LABELS["max-pro"].threed },
+  { Icon: Mic,              color: "#8B5CF6", feature: "Озвучка (TTS)",         free: PLAN_LIMIT_LABELS.free.audio,    mini: PLAN_LIMIT_LABELS.mini.audio,    max: PLAN_LIMIT_LABELS.max.audio,    maxpro: PLAN_LIMIT_LABELS["max-pro"].audio },
+  { Icon: Plug,             color: "#10B981", feature: "API доступ",            free: PLAN_LIMIT_LABELS.free.api,      mini: PLAN_LIMIT_LABELS.mini.api,      max: PLAN_LIMIT_LABELS.max.api,      maxpro: PLAN_LIMIT_LABELS["max-pro"].api },
+  { Icon: Zap,              color: "#F59E0B", feature: "Приоритетная скорость", free: PLAN_LIMIT_LABELS.free.priority, mini: PLAN_LIMIT_LABELS.mini.priority, max: PLAN_LIMIT_LABELS.max.priority, maxpro: PLAN_LIMIT_LABELS["max-pro"].priority },
+  { Icon: Rocket,           color: "#F43F5E", feature: "Ранний доступ",         free: PLAN_LIMIT_LABELS.free.early,    mini: PLAN_LIMIT_LABELS.mini.early,    max: PLAN_LIMIT_LABELS.max.early,    maxpro: PLAN_LIMIT_LABELS["max-pro"].early },
 ];
 
 const pricingJsonLd = {
@@ -262,11 +286,15 @@ export default function PricingPage() {
               </tr>
             </thead>
             <tbody>
-              {comparisonRows.map((row, i) => (
-                <tr key={i} className={`border-t border-text/[0.04] ${i % 2 === 0 ? "" : "bg-text/[0.01]"} hover:bg-accent/[0.02] transition-colors`}>
+              {comparisonRows.map((row, i) => {
+                const { Icon } = row;
+                return (
+                <tr key={row.feature} className={`border-t border-text/[0.04] ${i % 2 === 0 ? "" : "bg-text/[0.01]"} hover:bg-accent/[0.02] transition-colors`}>
                   <td className="py-3.5 px-5">
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-base">{row.icon}</span>
+                    <div className="flex items-center gap-2.5" style={{ ["--pad-c" as string]: row.color }}>
+                      <span className="glass-pad flex items-center justify-center w-6 h-6 rounded-lg shrink-0">
+                        <Icon className="block" size={13} strokeWidth={2.4} />
+                      </span>
                       <span className="text-[13px] font-medium text-text/70">{row.feature}</span>
                     </div>
                   </td>
@@ -275,7 +303,8 @@ export default function PricingPage() {
                   <td className="py-3.5 px-4 text-center text-[13px] font-semibold text-text/80 bg-[#A855F7]/[0.03]">{row.max === "—" ? <span className="text-text/15">—</span> : row.max}</td>
                   <td className="py-3.5 px-4 text-center text-[13px] font-semibold text-text/80">{row.maxpro === "✓" ? <span className="text-accent text-base">✓</span> : row.maxpro}</td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
