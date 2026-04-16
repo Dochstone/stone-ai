@@ -17,7 +17,7 @@ const manrope = Manrope({
   variable: "--font-manrope",
 });
 
-import { SITE_URL } from "@/lib/constants";
+import { SITE_URL, SITE_RATING } from "@/lib/constants";
 import { planPrice, planPriceFull, planPriceNum } from "@/lib/pricing";
 const OG_IMAGE = `${SITE_URL}/og-image.png`;
 
@@ -277,10 +277,10 @@ const jsonLdSoftware = {
   },
   aggregateRating: {
     "@type": "AggregateRating",
-    ratingValue: "4.8",
-    reviewCount: "1247",
-    bestRating: "5",
-    worstRating: "1",
+    ratingValue: SITE_RATING.value,
+    reviewCount: SITE_RATING.count,
+    bestRating: SITE_RATING.best,
+    worstRating: SITE_RATING.worst,
   },
 };
 

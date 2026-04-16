@@ -2,6 +2,13 @@ export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://stoneai.ru"
 
 export const DEFAULT_MODEL = "gpt-4o-mini";
 
+export const SITE_RATING = {
+  value: "4.8",
+  count: "1247",
+  best: "5",
+  worst: "1",
+} as const;
+
 // Single source of truth for USD→RUB conversion across the website.
 // Keep in sync with backend `USD_TO_RUB` in app/config.py.
 export const USD_TO_RUB = 84;
