@@ -124,29 +124,43 @@ async def cmd_start(message: Message):
 
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
-            text="🚀 Открыть Stone AI",
-            web_app=WebAppInfo(url=webapp_url),
+            text="💬 Чат с AI",
+            url="https://stoneai.ru/webchat",
         )],
         [
             InlineKeyboardButton(
-                text="💎 Тарифы",
-                web_app=WebAppInfo(url=f"{webapp_url}?tab=plans"),
+                text="🎨 Картинки",
+                url="https://stoneai.ru/images",
             ),
             InlineKeyboardButton(
-                text="🌐 Сайт",
-                url="https://stoneai.ru",
+                text="🎬 Видео",
+                url="https://stoneai.ru/video",
             ),
         ],
         [
             InlineKeyboardButton(
-                text="🎁 Пригласи друга — 10%",
-                callback_data="referral",
+                text="🔍 Поиск AI",
+                url="https://stoneai.ru/search",
             ),
             InlineKeyboardButton(
-                text="❓ Помощь",
-                url="https://t.me/stoneaisupport",
+                text="🤖 Модели",
+                url="https://stoneai.ru/models",
             ),
         ],
+        [
+            InlineKeyboardButton(
+                text="💎 Тарифы",
+                url="https://stoneai.ru/pricing",
+            ),
+            InlineKeyboardButton(
+                text="🎁 Пригласи друга",
+                callback_data="referral",
+            ),
+        ],
+        [InlineKeyboardButton(
+            text="❓ Помощь",
+            url="https://t.me/stoneaisupport",
+        )],
     ])
 
     welcome_text = (
