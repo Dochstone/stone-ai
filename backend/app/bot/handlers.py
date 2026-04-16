@@ -1,7 +1,10 @@
-"""Telegram bot handlers — /start, /help, /plan commands."""
+"""Telegram bot handlers — /start, /help, /plan, /ref commands."""
 
 from aiogram import Router, F
-from aiogram.types import Message, WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardRemove
+from aiogram.types import (
+    Message, WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton,
+    ReplyKeyboardRemove, FSInputFile, CallbackQuery,
+)
 from aiogram.filters import Command
 
 from app.config import get_settings
@@ -124,14 +127,20 @@ async def cmd_start(message: Message):
             text="🚀 Открыть Stone AI",
             web_app=WebAppInfo(url=webapp_url),
         )],
-        [InlineKeyboardButton(
-            text="🌐 Открыть на сайте",
-            url="https://stoneai.ru/webchat",
-        )],
         [
             InlineKeyboardButton(
                 text="💎 Тарифы",
                 web_app=WebAppInfo(url=f"{webapp_url}?tab=plans"),
+            ),
+            InlineKeyboardButton(
+                text="🌐 Сайт",
+                url="https://stoneai.ru",
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text="🎁 Пригласи друга — 10%",
+                callback_data="referral",
             ),
             InlineKeyboardButton(
                 text="❓ Помощь",
@@ -140,22 +149,51 @@ async def cmd_start(message: Message):
         ],
     ])
 
-    # Remove old reply keyboard if it was ever set in prior sessions
-    await message.answer(
+    welcome_text = (
         "<b>Stone AI — 65+ нейросетей в одном окне</b>\n\n"
-        "GPT-5.4, Claude Opus, Gemini Pro, DeepSeek, Sora 2 — "
-        "текст, картинки, видео и аудио.\n\n"
-        "✅ <b>Бесплатно</b> — 10 быстрых + 2 премиум запроса/день, 2 пробных видео\n"
-        f"⭐ <b>Подписка от {PRICE_FROM_MIN}/мес</b> — все 65+ моделей\n\n"
-        "Нажми кнопку ниже, чтобы начать 👇",
-        parse_mode="HTML",
-        reply_markup=ReplyKeyboardRemove(),
+
+        "💬 <b>Текст и чат</b>\n"
+        "GPT-5.4 · Claude Opus · Gemini 3 · DeepSeek R1\n\n"
+
+        "🎨 <b>Генерация картинок</b>\n"
+        "Nano Banana Pro · Flux · GPT-5 Image · Midjourney\n\n"
+
+        "🎬 <b>Генерация видео</b>\n"
+        "Sora 2 · Veo 3 · Kling v2 · Luma Ray 2\n\n"
+
+        "🔍 <b>Умный поиск</b>\n"
+        "Perplexity Sonar · Deep Research\n\n"
+
+        "🎤 <b>Озвучка и аудио</b>\n"
+        "Whisper STT · TTS\n\n"
+
+        "━━━━━━━━━━━━━━━━━━━━\n"
+        "✅ <b>Бесплатно:</b> 10 быстрых + 2 премиум/день + 2 картинки + 2 видео\n"
+        f"⭐ <b>Подписка:</b> от {PRICE_FROM_MIN}/мес — все модели безлимитно\n"
+        "💳 <b>Оплата:</b> карта РФ · СБП · Stars · крипто\n"
+        "━━━━━━━━━━━━━━━━━━━━\n\n"
+        "👇 Нажми кнопку — начни бесплатно:"
     )
 
-    await message.answer(
-        "👇 Выберите действие:",
-        reply_markup=keyboard,
-    )
+    # Remove old reply keyboard
+    await message.answer("⏳", reply_markup=ReplyKeyboardRemove())
+
+    # Send welcome banner + text
+    try:
+        banner = FSInputFile("/var/www/stone-ai/media/images/bot-welcome.png")
+        await message.answer_photo(
+            photo=banner,
+            caption=welcome_text,
+            parse_mode="HTML",
+            reply_markup=keyboard,
+        )
+    except Exception:
+        # Fallback: text only if banner fails
+        await message.answer(
+            welcome_text,
+            parse_mode="HTML",
+            reply_markup=keyboard,
+        )
 
 
 @router.message(Command("help"))
@@ -273,4 +311,73 @@ async def callback_plans(callback):
 @router.callback_query(F.data == "help")
 async def callback_help(callback):
     await cmd_help(callback.message)
+    await callback.answer()
+
+
+async def _get_referral_text(tg_id: int) -> str:
+    """Build referral info message for a user."""
+    from app.database import async_session
+    from sqlalchemy import select, func
+    from app.models import User
+
+    try:
+        async with async_session() as db:
+            result = await db.execute(select(User).where(User.telegram_id == tg_id))
+            user = result.scalar_one_or_none()
+
+            if not user:
+                return (
+                    "<b>🎁 Реферальная программа Stone AI</b>\n\n"
+                    "Чтобы получить реферальный код, сначала откройте бота "
+                    "и сделайте хотя бы 1 запрос."
+                )
+
+            # Generate code if not exists
+            if not user.referral_code:
+                import secrets
+                user.referral_code = secrets.token_hex(4).upper()[:8]
+                await db.commit()
+
+            code = user.referral_code
+            ref_link = f"https://t.me/stonetgbot?start=ref_{code}"
+
+            # Count referrals
+            count_result = await db.execute(
+                select(func.count()).where(User.referrer_id == tg_id)
+            )
+            ref_count = count_result.scalar() or 0
+            ref_balance = float(user.referral_balance or 0)
+
+            return (
+                "<b>🎁 Реферальная программа Stone AI</b>\n\n"
+                "<b>Как это работает:</b>\n"
+                "1. Поделись ссылкой с другом\n"
+                "2. Друг получает <b>+5 бесплатных запросов</b>\n"
+                "3. Ты получаешь <b>+5 запросов</b> + <b>10% с каждого пополнения</b> друга\n\n"
+                "━━━━━━━━━━━━━━━━━━━━\n"
+                f"🔗 <b>Твоя ссылка:</b>\n<code>{ref_link}</code>\n\n"
+                f"👥 Приглашено друзей: <b>{ref_count}</b>\n"
+                f"💰 Заработано: <b>${ref_balance:.2f}</b>\n"
+                "━━━━━━━━━━━━━━━━━━━━\n\n"
+                "👆 Нажми на ссылку чтобы скопировать"
+            )
+    except Exception:
+        return (
+            "<b>🎁 Реферальная программа Stone AI</b>\n\n"
+            "Пригласи друга — получи <b>10% с его пополнений</b> "
+            "и <b>+5 бесплатных запросов</b>.\n\n"
+            "Откройте Stone AI чтобы получить реферальную ссылку."
+        )
+
+
+@router.message(Command("ref"))
+async def cmd_ref(message: Message):
+    text = await _get_referral_text(message.from_user.id)
+    await message.answer(text, parse_mode="HTML")
+
+
+@router.callback_query(F.data == "referral")
+async def callback_referral(callback: CallbackQuery):
+    text = await _get_referral_text(callback.from_user.id)
+    await callback.message.answer(text, parse_mode="HTML")
     await callback.answer()

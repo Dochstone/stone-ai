@@ -70,6 +70,7 @@ async def lifespan(app: FastAPI):
             await bot.set_my_commands([
                 BotCommand(command="start", description="🚀 Открыть Stone AI"),
                 BotCommand(command="plan", description="💎 Мой тариф"),
+                BotCommand(command="ref", description="🎁 Пригласи друга — 10%"),
                 BotCommand(command="help", description="❓ Помощь"),
             ])
         except Exception as e:
