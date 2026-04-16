@@ -10,6 +10,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { CrossLinks } from "@/components/CrossLinks";
 
 const ChatWidget = dynamic(() => import("@/components/ChatWidget"), { ssr: false });
+const CopyButton = dynamic(() => import("@/components/CopyButton"), { ssr: false });
 
 interface Props { params: { role: string } }
 
@@ -292,11 +293,14 @@ export default function ProfessionPage({ params }: Props) {
           <div className="space-y-3">
             {prof.prompts.map((p) => (
               <div key={p.title} className="bg-bg rounded-2xl border border-text/5 p-6">
-                <h3 className="font-bold text-text mb-2">{p.title}</h3>
-                <pre className="text-sm text-text/50 bg-text/[0.03] rounded-xl p-4 whitespace-pre-wrap font-sans leading-relaxed">{p.prompt}</pre>
-                <Link href="/dashboard/chat" className="inline-flex items-center gap-1.5 mt-3 text-xs font-bold text-accent hover:underline">
-                  Попробовать в чате <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                </Link>
+                <h3 className="font-bold text-text mb-3">{p.title}</h3>
+                <pre className="text-sm text-text/60 bg-gradient-to-br from-text/[0.05] to-text/[0.02] border border-text/8 rounded-xl p-4 whitespace-pre-wrap font-sans leading-relaxed">{p.prompt}</pre>
+                <div className="flex items-center gap-3 mt-3">
+                  <CopyButton text={p.prompt} />
+                  <Link href="/dashboard/chat" className="inline-flex items-center gap-1.5 text-xs font-bold text-accent hover:underline">
+                    Попробовать в чате <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                  </Link>
+                </div>
               </div>
             ))}
           </div>
