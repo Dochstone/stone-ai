@@ -93,7 +93,7 @@ export default function App() {
     <TonConnectUIProvider
       manifestUrl="https://stoneai.ru/tonconnect-manifest.json"
       actionsConfiguration={{
-        twaReturnUrl: 'https://t.me/StoneAI_bot'
+        twaReturnUrl: 'https://t.me/stonetgbot'
       }}
     >
     <div style={{

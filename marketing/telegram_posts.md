@@ -16,7 +16,7 @@ ChatGPT, Claude, Gemini, Sora, Midjourney — всё в одном месте.
 15 запросов в день — бесплатно.
 
 Попробовать: stoneai.ru
-Бот: @drifttt55bot
+Бот: @stonetgbot
 
 ---
 

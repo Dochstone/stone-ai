@@ -2760,7 +2760,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                         try {
                           const res = await fetch(`${API_URL}/api/auth/telegram-web-start`, { method: "POST" });
                           const data = await res.json();
-                          const tgUrl = `https://t.me/drifttt55bot?start=web_${data.session_id}`;
+                          const tgUrl = `https://t.me/stonetgbot?start=web_${data.session_id}`;
                           window.location.href = tgUrl;
                         } catch { window.location.href = "/profile"; }
                       }}

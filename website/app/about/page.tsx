@@ -97,7 +97,7 @@ const tools: Tool[] = [
   { name: "Презентации",        Icon: Presentation,  color: "#3B82F6", bg: "rgba(59,130,246,0.15)",  href: "/dashboard/presentations", desc: "Слайды + PPTX экспорт" },
   { name: "SEO-модуль",         Icon: Search,        color: "#10B981", bg: "rgba(16,185,129,0.15)",  href: "/dashboard/seo",           desc: "Статьи, мета-теги, A/B тесты" },
   { name: "Виджет для сайта",   Icon: Code,          color: "#8B5CF6", bg: "rgba(139,92,246,0.15)",  href: "/widget",                  desc: "Встраиваемый чат-бот" },
-  { name: "Telegram-боты",      Icon: Send,          color: "#229ED9", bg: "rgba(34,158,217,0.15)",  external: true, href: "https://t.me/drifttt55bot", desc: "Подключение через BotFather" },
+  { name: "Telegram-боты",      Icon: Send,          color: "#229ED9", bg: "rgba(34,158,217,0.15)",  external: true, href: "https://t.me/stonetgbot", desc: "Подключение через BotFather" },
   { name: "Аналитика",          Icon: LineChart,     color: "#06B6D4", bg: "rgba(6,182,212,0.15)",   href: "/admin",                   desc: "Отслеживание посещений" },
   { name: "Геймификация",       Icon: Target,        color: "#EAB308", bg: "rgba(234,179,8,0.15)",   href: "/dashboard/games",         desc: "Достижения, игры, лидерборд" },
 ];

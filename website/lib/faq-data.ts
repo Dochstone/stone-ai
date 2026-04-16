@@ -20,7 +20,7 @@ const _homeFaqData: { q: string; a: string; category: FaqCategory }[] = [
   {
     category: "start",
     q: "Как зарегистрироваться в Stone AI?",
-    a: 'Откройте <a href="/profile" class="text-accent hover:underline font-semibold">страницу входа</a> и выберите один из 4 способов регистрации: <strong>Google</strong> (1 клик), <strong>Яндекс ID</strong> (1 клик), <strong>Email + пароль</strong> (30 секунд — придёт код на почту), <strong>Telegram</strong> (через бота @drifttt55bot). После регистрации вы автоматически получаете <strong>100₽ бонуса</strong> на баланс и сразу доступ ко всем бесплатным моделям. Номер телефона и банковская карта при регистрации не требуются. Подписка и пополнение баланса — опционально, уже после того как вы попробуете.',
+    a: 'Откройте <a href="/profile" class="text-accent hover:underline font-semibold">страницу входа</a> и выберите один из 4 способов регистрации: <strong>Google</strong> (1 клик), <strong>Яндекс ID</strong> (1 клик), <strong>Email + пароль</strong> (30 секунд — придёт код на почту), <strong>Telegram</strong> (через бота @stonetgbot). После регистрации вы автоматически получаете <strong>100₽ бонуса</strong> на баланс и сразу доступ ко всем бесплатным моделям. Номер телефона и банковская карта при регистрации не требуются. Подписка и пополнение баланса — опционально, уже после того как вы попробуете.',
   },
   {
     category: "tools",
@@ -40,7 +40,7 @@ const _homeFaqData: { q: string; a: string; category: FaqCategory }[] = [
   {
     category: "payments",
     q: "Какие способы оплаты поддерживаются?",
-    a: '4 способа оплаты: <strong>Карты РФ и СБП</strong> (Мир, Visa, Mastercard) через Platega — самый популярный способ. <strong>Криптовалюта</strong> (USDT, BTC, ETH, SOL) через Heleket — без KYC. <strong>TON Connect</strong> через Tonkeeper — нативно в Telegram. <strong>Telegram Stars</strong> — в боте @drifttt55bot. Все цены в рублях, без VPN, без иностранных карт. Пополнение баланса от 100₽ на <a href="/topup" class="text-accent hover:underline font-semibold">странице пополнения</a>.',
+    a: '4 способа оплаты: <strong>Карты РФ и СБП</strong> (Мир, Visa, Mastercard) через Platega — самый популярный способ. <strong>Криптовалюта</strong> (USDT, BTC, ETH, SOL) через Heleket — без KYC. <strong>TON Connect</strong> через Tonkeeper — нативно в Telegram. <strong>Telegram Stars</strong> — в боте @stonetgbot. Все цены в рублях, без VPN, без иностранных карт. Пополнение баланса от 100₽ на <a href="/topup" class="text-accent hover:underline font-semibold">странице пополнения</a>.',
   },
   {
     category: "pricing",

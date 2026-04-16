@@ -15,7 +15,7 @@
 Платежи: Platega.io (карты РФ, СБП, крипто) — интеграция в процессе. Также: Telegram Stars, TON, крипто.
 Хостинг: [указать свой — Vercel / VPS / etc.]
 Аналитика: Яндекс.Метрика.
-Telegram-бот: @drifttt55bot.
+Telegram-бот: @stonetgbot.
 Текущий функционал: AI чат (65+ моделей), генерация картинок, видео, 3D, аудио, AI поиск (Perplexity), анализ документов, код-ассистент, переводчик, публичный API.
 Чат без регистрации: уже работает на /webchat.
 ```
@@ -605,7 +605,7 @@ Telegram-бот: @drifttt55bot.
    - Авторизация через Telegram initData (валидация на сервере).
    - 2 бесплатных генерации в день, затем оплата через Stars или Platega.
 
-2. Зарегистрируй Mini App в BotFather для @drifttt55bot:
+2. Зарегистрируй Mini App в BotFather для @stonetgbot:
    - URL: https://stoneai.ru/tg-app/images
    - Добавь кнопку в меню бота.
 

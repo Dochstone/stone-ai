@@ -40,7 +40,7 @@ export default function Reviews() {
         </h2>
         <p className="text-center text-text/40 text-sm mb-12">
           Отзывы от пользователей{" "}
-          <a href="https://t.me/drifttt55bot" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">@drifttt55bot</a>
+          <a href="https://t.me/stonetgbot" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">@stonetgbot</a>
           {" "}в Telegram
         </p>
 

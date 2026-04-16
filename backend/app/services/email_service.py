@@ -46,7 +46,7 @@ FOOTER = """
     <p style="color:#bbb;font-size:11px;margin-top:8px">
         AI-студия нового поколения · 65+ нейросетей<br>
         <a href="https://stoneai.ru" style="color:#C4623D">stoneai.ru</a> ·
-        <a href="https://t.me/drifttt55bot" style="color:#999">Telegram</a> ·
+        <a href="https://t.me/stonetgbot" style="color:#999">Telegram</a> ·
         <a href="https://t.me/StoneAIsupport" style="color:#999">Поддержка</a>
     </p>
 </div>
@@ -162,7 +162,7 @@ def send_welcome(to_email: str, name: str = "", tg_id: int | None = None):
             Открыть Stone AI →
         </a>
         <p style="text-align:center;font-size:12px;color:#888;margin:0 0 20px 0">
-            Или зайдите через <a href="https://t.me/drifttt55bot" style="color:#C4623D;text-decoration:none">Telegram-бот</a> — работает даже в мобильном
+            Или зайдите через <a href="https://t.me/stonetgbot" style="color:#C4623D;text-decoration:none">Telegram-бот</a> — работает даже в мобильном
         </p>
 
         <div style="background:#f0f7f5;border-radius:12px;padding:14px 16px;margin:16px 0;font-size:12px;color:#555;line-height:1.6">

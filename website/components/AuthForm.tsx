@@ -100,7 +100,7 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
       setTgPolling(true);
       // Save session to survive page navigation on mobile
       try { sessionStorage.setItem("stone_tg_session", sid); } catch {}
-      const tgUrl = `https://t.me/drifttt55bot?start=web_${sid}`;
+      const tgUrl = `https://t.me/stonetgbot?start=web_${sid}`;
       const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
       const isAndroid = /Android/i.test(navigator.userAgent);
       if (isIOS) {
@@ -439,7 +439,7 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
                 3. Страница обновится автоматически
               </p>
               <a
-                href={`https://t.me/drifttt55bot?start=web_${tgSessionId}`}
+                href={`https://t.me/stonetgbot?start=web_${tgSessionId}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-2 inline-block text-xs text-[#2AABEE] hover:underline"

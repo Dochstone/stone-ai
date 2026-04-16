@@ -7,7 +7,7 @@ Stone AI — multi-platform AI SaaS platform. Unified interface to 65+ AI models
 **Repo:** github.com/Dochstone/stone-ai
 **Domain:** stoneai.ru
 **Server:** 45.11.93.113 (root SSH)
-**Telegram Bot:** @drifttt55bot
+**Telegram Bot:** @stonetgbot
 **Telegram Channel:** @stoneAIC
 
 ## Tech Stack

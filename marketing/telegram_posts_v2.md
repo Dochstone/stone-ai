@@ -12,7 +12,7 @@ GPT-5. Claude Opus. Gemini. Sora. Midjourney.
 А 15 запросов в день — вообще бесплатно. Каждый день. Навсегда.
 
 Сайт: stoneai.ru
-Бот: @drifttt55bot
+Бот: @stonetgbot
 
 Пригласи друга — оба получите +5 запросов.
 

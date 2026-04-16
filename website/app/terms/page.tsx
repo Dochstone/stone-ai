@@ -18,7 +18,7 @@ export default function TermsPage() {
             <p className="mb-2">
               1.1. Настоящая публичная оферта (далее — «Оферта») определяет условия использования
               сервиса Stone AI (далее — «Сервис»), доступного через Telegram-бота{" "}
-              <a href="https://t.me/drifttt55bot" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">@drifttt55bot</a>{" "}
+              <a href="https://t.me/stonetgbot" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">@stonetgbot</a>{" "}
               и связанное с ним веб-приложение (Telegram Mini App).
             </p>
             <p className="mb-2">
@@ -210,7 +210,7 @@ export default function TermsPage() {
             <p className="mb-2">
               10.1. Администрация оставляет за собой право в одностороннем порядке изменять условия
               настоящей Оферты. Уведомление об изменениях направляется Пользователям через
-              Telegram-бота @drifttt55bot и/или публикуется на сайте Сервиса.
+              Telegram-бота @stonetgbot и/или публикуется на сайте Сервиса.
             </p>
             <p className="mb-2">
               10.2. Изменения вступают в силу с момента публикации обновлённой версии Оферты,

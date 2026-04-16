@@ -90,7 +90,7 @@ export function getModelWeight(modelId: string): number {
   return MODEL_WEIGHTS[modelId] || 1;
 }
 
-export const TELEGRAM_BOT_URL = "https://t.me/drifttt55bot";
+export const TELEGRAM_BOT_URL = "https://t.me/stonetgbot";
 
 export const MODELS: AIModel[] = [
   // TIER 1: FREE (8 models)
