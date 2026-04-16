@@ -1799,6 +1799,10 @@ const _POSTS_RAW: BlogPost[] = [
       `<b>Шаг 1. Напишите сценарий.</b> Зарегистрируйтесь на <a href="https://stoneai.ru">stoneai.ru</a> и попросите Claude Opus или GPT-5: «Напиши сценарий для YouTube-ролика на 5 минут на тему [ваша тема]. Стиль — разговорный, для аудитории 25–35 лет». Получите готовый текст за 30 секунд.<br><br><b>Шаг 2. Выберите TTS-сервис.</b><br>— Бесплатно и просто: <b>Edge TTS</b> (установите <code>pip install edge-tts</code> и запустите).<br>— Лучшее качество: <b>ElevenLabs</b> (бесплатный тир — 10 000 символов, ~3 минуты аудио).<br>— Лучший русский: <b>Yandex SpeechKit</b> (от 1.6₽/1000 символов).<br><br><b>Шаг 3. Сгенерируйте аудио.</b> Вставьте текст сценария → выберите голос → скачайте MP3.<br><br><b>Шаг 4. Пост-обработка.</b> Откройте в Audacity (бесплатно): нормализуйте громкость, уберите длинные паузы, добавьте фоновую музыку если нужно.<br><br><b>Шаг 5. Масштабируйте.</b> Когда workflow отлажен — один ролик в день становится реальностью. Сценарий (Stone AI) → озвучка (TTS) → видеоряд (Sora 2 / Kling) → монтаж (CapCut) → публикация.<br><br>Написать сценарий для озвучки — <a href="https://stoneai.ru">stoneai.ru</a>. Все 65+ AI-моделей для текста, изображений и видео — в одном интерфейсе.`,
     ],
   },
+];
+
+// ── DRAFT: публикация 2026-04-17 ── раскомментировать и вернуть в _POSTS_RAW ──
+const _DRAFTS: BlogPost[] = [
   {
     slug: "besplatnye-nejroseti-2026",
     author: "ai-editor",
@@ -2041,6 +2045,7 @@ const _POSTS_RAW: BlogPost[] = [
     ],
   },
 ];
+// ── END DRAFTS ──
 
 /** Posts with price placeholders resolved at runtime. */
 export const POSTS: BlogPost[] = renderPriceDeep(_POSTS_RAW);
