@@ -413,7 +413,7 @@ export default function BlogPostPage({ params }: Props) {
                   return (
                     <pre
                       key={i}
-                      className="my-4 bg-text/[0.05] border border-text/10 rounded-xl p-4 overflow-x-auto text-sm"
+                      className="my-4 bg-gradient-to-br from-text/[0.06] to-text/[0.03] border border-text/10 rounded-xl p-4 overflow-x-auto text-sm shadow-inner"
                     >
                       <code>{block.code.content}</code>
                     </pre>
@@ -424,7 +424,7 @@ export default function BlogPostPage({ params }: Props) {
                   return (
                     <p
                       key={i}
-                      className="text-text/70 text-[15px] leading-[1.8] [&_a]:text-accent [&_a]:hover:underline [&_b]:text-text [&_b]:font-semibold [&_strong]:text-text [&_strong]:font-semibold [&_code]:bg-text/5 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-[13px]"
+                      className="text-text/70 text-[15px] leading-[1.8] break-words overflow-hidden [&_a]:text-accent [&_a]:hover:underline [&_a]:break-all [&_b]:text-text [&_b]:font-semibold [&_strong]:text-text [&_strong]:font-semibold [&_code]:bg-text/5 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-[13px] [&_code]:break-all"
                       dangerouslySetInnerHTML={{ __html: text }}
                     />
                   );

@@ -22,10 +22,10 @@ export default function Quote({ text, author, role, url, accent = false }: Props
 
   return (
     <figure
-      className={`my-8 rounded-2xl p-6 sm:p-8 relative overflow-hidden ${
+      className={`my-8 rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-sm ${
         accent
-          ? "bg-gradient-to-br from-accent/5 via-teal/5 to-transparent border border-accent/20"
-          : "bg-text/[0.03] border border-text/5"
+          ? "bg-gradient-to-br from-accent/10 via-teal/5 to-transparent border-l-4 border-l-accent border border-accent/20"
+          : "bg-text/[0.03] border-l-4 border-l-text/20 border border-text/5"
       }`}
     >
       {/* Decorative quote mark */}

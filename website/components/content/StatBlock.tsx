@@ -19,10 +19,10 @@ export default function StatBlock({ stats, source, sourceUrl }: Props) {
         {stats.map((s, i) => (
           <div
             key={i}
-            className={`rounded-2xl p-5 sm:p-6 border ${
+            className={`rounded-2xl p-5 sm:p-6 border transition-shadow hover:shadow-md ${
               s.accent
-                ? "bg-gradient-to-br from-accent/10 to-teal/5 border-accent/25"
-                : "bg-text/[0.03] border-text/5"
+                ? "bg-gradient-to-br from-accent/15 to-teal/8 border-accent/30 shadow-sm shadow-accent/10"
+                : "bg-text/[0.03] border-text/8 shadow-sm"
             }`}
           >
             <div

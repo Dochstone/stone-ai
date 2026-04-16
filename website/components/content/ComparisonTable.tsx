@@ -35,13 +35,13 @@ function renderCell(v: Cell) {
 
 export default function ComparisonTable({ columns, rows, caption, footnote }: Props) {
   return (
-    <figure className="my-8 -mx-4 sm:mx-0 overflow-x-auto">
-      <table className="w-full border-collapse text-left">
+    <figure className="my-8 -mx-4 sm:mx-0 overflow-x-auto rounded-xl sm:border sm:border-text/10 sm:shadow-sm">
+      <table className="w-full border-collapse text-left min-w-[480px]">
         {caption && (
           <caption className="text-xs text-text/40 mb-3 text-left px-4 sm:px-0">{caption}</caption>
         )}
         <thead>
-          <tr className="border-b-2 border-text/10">
+          <tr className="border-b-2 border-text/10 bg-text/[0.02]">
             <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-text/40 w-[32%]">
               Критерий
             </th>
@@ -69,7 +69,7 @@ export default function ComparisonTable({ columns, rows, caption, footnote }: Pr
           {rows.map((r, ri) => (
             <tr
               key={ri}
-              className={`border-b border-text/[0.05] ${r.highlight ? "bg-accent/[0.03]" : ""}`}
+              className={`border-b border-text/[0.05] transition-colors hover:bg-text/[0.02] ${r.highlight ? "bg-accent/[0.06]" : ""}`}
             >
               <td className="px-4 py-3 text-sm font-semibold text-text/70">{r.criterion}</td>
               {r.values.map((v, ci) => (
