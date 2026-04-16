@@ -233,7 +233,7 @@ export default function ProfessionPage({ params }: Props) {
 
         {/* Benefits */}
         <section className="mb-14">
-          <h2 className="text-2xl font-extrabold text-text mb-6">Преимущества AI для {prof.role.toLowerCase()}а</h2>
+          <h2 className="text-2xl font-extrabold text-text mb-6">Что вы получаете</h2>
           <div className="grid sm:grid-cols-2 gap-3">
             {benefits.map((b) => (
               <div key={b} className="flex items-start gap-3 bg-bg rounded-xl border border-text/5 p-4">
@@ -247,8 +247,8 @@ export default function ProfessionPage({ params }: Props) {
         {/* Early CTA */}
         <div className="mb-14 flex flex-col sm:flex-row items-center gap-4 bg-accent/5 border border-accent/15 rounded-2xl p-6">
           <div className="flex-1">
-            <p className="font-bold text-text text-sm">Попробуйте бесплатно — 10 запросов/день</p>
-            <p className="text-text/40 text-xs mt-1">65+ моделей. Без VPN. <Link href="/pricing" className="text-accent hover:underline">Подписка от {planPriceFull("mini")}</Link></p>
+            <p className="font-bold text-text text-sm">10 бесплатных запросов каждый день. Карта не нужна.</p>
+            <p className="text-text/40 text-xs mt-1">65+ нейросетей. Без VPN из России. <Link href="/pricing" className="text-accent hover:underline">Подписка от {planPriceFull("mini")}</Link></p>
           </div>
           <Link href="/dashboard/chat" className="shrink-0 bg-accent text-white font-bold px-6 py-3 rounded-xl text-sm hover:bg-accent/90 transition-all">
             Открыть чат
@@ -257,7 +257,7 @@ export default function ProfessionPage({ params }: Props) {
 
         {/* Tasks */}
         <section className="mb-14">
-          <h2 className="text-2xl font-extrabold text-text mb-6">Задачи которые решает AI</h2>
+          <h2 className="text-2xl font-extrabold text-text mb-6">Что умеет AI в вашей работе</h2>
           <div className="space-y-3">
             {prof.tasks.map((t) => (
               <div key={t.name} className="bg-bg rounded-2xl border border-text/5 p-6">
