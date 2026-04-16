@@ -53,6 +53,7 @@ const companyLogo: Record<string, string> = {
 
 const catEmoji: Record<string, string> = { chat: "💬", image: "🎨", video: "📹", reason: "🧠", code: "💻", search: "🔍", "3d": "🧊" };
 const catLabel: Record<string, string> = { chat: "Чат", image: "Картинки", video: "Видео", reason: "Reasoning", code: "Код", search: "Поиск", "3d": "3D" };
+const speedLabel: Record<string, string> = { instant: "Мгновенная", fast: "Быстрая", medium: "Средняя", slow: "Медленная" };
 
 function ModelCard({ id, side }: { id: string; side: "left" | "right" }) {
   const m = MODELS.find((x) => x.id === id);
@@ -86,8 +87,8 @@ function ModelCard({ id, side }: { id: string; side: "left" | "right" }) {
             <div className="text-sm font-extrabold text-text/80 mt-0.5">{catEmoji[m.category]} {catLabel[m.category]}</div>
           </div>
           <div className="bg-text/[0.03] rounded-xl p-2.5 text-center">
-            <div className="text-[9px] text-text/30 font-semibold uppercase">Цена</div>
-            <div className="text-sm font-extrabold text-text/80 mt-0.5">{m.tier === "free" ? "FREE" : `$${m.pricePerMillion}`}</div>
+            <div className="text-[9px] text-text/30 font-semibold uppercase">Тариф</div>
+            <div className="text-sm font-extrabold text-text/80 mt-0.5">{m.tier === "free" ? "Free" : "Pro"}</div>
           </div>
         </div>
         {/* Strengths */}
@@ -262,8 +263,8 @@ export default function ComparePage({ params }: Props) {
                   <>
                     <tr><td className="px-5 py-3 text-text/40">Компания</td><td className="px-5 py-3 text-center font-medium text-text/70">{m1?.company}</td><td className="px-5 py-3 text-center font-medium text-text/70">{m2?.company}</td></tr>
                     <tr><td className="px-5 py-3 text-text/40">Контекст</td><td className="px-5 py-3 text-center font-medium text-text/70">{m1?.context || "—"}</td><td className="px-5 py-3 text-center font-medium text-text/70">{m2?.context || "—"}</td></tr>
-                    <tr><td className="px-5 py-3 text-text/40">Цена / 1M</td><td className="px-5 py-3 text-center font-medium text-text/70">${m1?.pricePerMillion}</td><td className="px-5 py-3 text-center font-medium text-text/70">${m2?.pricePerMillion}</td></tr>
-                    <tr><td className="px-5 py-3 text-text/40">Доступ</td><td className="px-5 py-3 text-center font-medium text-text/70">{m1?.tier === "free" ? "Бесплатно" : "Подписка"}</td><td className="px-5 py-3 text-center font-medium text-text/70">{m2?.tier === "free" ? "Бесплатно" : "Подписка"}</td></tr>
+                    <tr><td className="px-5 py-3 text-text/40">Скорость</td><td className="px-5 py-3 text-center font-medium text-text/70">{(m1?.speed && speedLabel[m1.speed]) || "—"}</td><td className="px-5 py-3 text-center font-medium text-text/70">{(m2?.speed && speedLabel[m2.speed]) || "—"}</td></tr>
+                    <tr><td className="px-5 py-3 text-text/40">Доступ</td><td className="px-5 py-3 text-center font-medium text-text/70">{m1?.tier === "free" ? "Бесплатно" : "По подписке"}</td><td className="px-5 py-3 text-center font-medium text-text/70">{m2?.tier === "free" ? "Бесплатно" : "По подписке"}</td></tr>
                   </>
                 )}
               </tbody>

@@ -96,7 +96,7 @@ export default function ToolHubPage({ params }: Props) {
                   <div className="flex flex-wrap gap-1">
                     {m.strengths?.slice(0, 3).map((s) => <span key={s} className="text-[10px] bg-text/[0.04] text-text/40 px-2 py-0.5 rounded-full font-medium">{s}</span>)}
                   </div>
-                  <span className="text-xs font-bold text-accent">{m.tier === "free" ? "Бесплатно" : `$${m.pricePerMillion}${m.priceUnit || "/1M"}`}</span>
+                  <span className="text-xs font-bold text-accent">{m.tier === "free" ? "Бесплатно" : "По подписке"}</span>
                 </div>
               </Link>
             ))}
