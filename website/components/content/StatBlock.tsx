@@ -26,9 +26,10 @@ export default function StatBlock({ stats, source, sourceUrl }: Props) {
             }`}
           >
             <div
-              className={`text-3xl sm:text-4xl font-extrabold mb-1 leading-none tabular-nums ${
+              className={`text-2xl sm:text-3xl lg:text-4xl font-extrabold mb-1 leading-none tabular-nums truncate ${
                 s.accent ? "text-accent" : "text-text"
               }`}
+              title={s.value}
             >
               {s.value}
             </div>

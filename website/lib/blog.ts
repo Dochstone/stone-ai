@@ -1883,7 +1883,7 @@ const _DRAFTS: BlogPost[] = [
       { stats: {
         items: [
           { value: "5 сек", label: "генерация Flux Schnell", sub: "самая быстрая бесплатная модель" },
-          { value: "1024×1024", label: "разрешение бесплатно", sub: "Flux и Nano Banana" },
+          { value: "1024px", label: "разрешение бесплатно", sub: "Flux и Nano Banana" },
           { value: "0₽", label: "стоимость на Free", sub: "2 генерации/день в Stone AI", accent: true },
           { value: "15", label: "бустов в DALL-E 3", sub: "через Bing Image Creator, нужен VPN" },
         ],
