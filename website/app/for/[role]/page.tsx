@@ -233,7 +233,7 @@ export default function ProfessionPage({ params }: Props) {
 
         {/* Benefits */}
         <section className="mb-14">
-          <h2 className="text-2xl font-extrabold text-text mb-6">Что вы получаете</h2>
+          <h2 className="text-2xl font-extrabold text-text mb-6">Что даёт AI {prof.role.toLowerCase()}у</h2>
           <div className="grid sm:grid-cols-2 gap-3">
             {benefits.map((b) => (
               <div key={b} className="flex items-start gap-3 bg-bg rounded-xl border border-text/5 p-4">
@@ -257,7 +257,7 @@ export default function ProfessionPage({ params }: Props) {
 
         {/* Tasks */}
         <section className="mb-14">
-          <h2 className="text-2xl font-extrabold text-text mb-6">Что умеет AI в вашей работе</h2>
+          <h2 className="text-2xl font-extrabold text-text mb-6">Задачи, которые решает AI</h2>
           <div className="space-y-3">
             {prof.tasks.map((t) => (
               <div key={t.name} className="bg-bg rounded-2xl border border-text/5 p-6">
