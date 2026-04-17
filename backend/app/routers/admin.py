@@ -1166,6 +1166,95 @@ async def web_admin_user_detail(
 
 
 # ═══════════════════════════════════════════
+# UTM / Acquisition Analytics
+# ═══════════════════════════════════════════
+
+@router.get("/web/utm-stats")
+async def web_admin_utm_stats(
+    _admin: dict = Depends(require_web_admin),
+    db: AsyncSession = Depends(get_db),
+    days: int = Query(default=30, ge=1, le=365),
+):
+    """Агрегированный отчёт по UTM-меткам: сколько юзеров пришло с кампании и сколько оплатили."""
+    start_date = datetime.now() - timedelta(days=days)
+
+    user_q = await db.execute(
+        select(
+            User.utm_source,
+            User.utm_medium,
+            User.utm_campaign,
+            func.count(User.id).label("users"),
+            func.count(User.telegram_id).label("tg_users"),
+        )
+        .where(User.joined_at >= start_date)
+        .group_by(User.utm_source, User.utm_medium, User.utm_campaign)
+    )
+    user_rows = user_q.all()
+
+    # Map (source, medium, campaign) -> list of user_tg_ids for revenue join
+    campaign_keys = [
+        (r.utm_source, r.utm_medium, r.utm_campaign) for r in user_rows
+    ]
+
+    tg_ids_q = await db.execute(
+        select(User.telegram_id, User.utm_source, User.utm_medium, User.utm_campaign)
+        .where(User.joined_at >= start_date)
+    )
+    tg_to_key: dict[int, tuple] = {
+        row.telegram_id: (row.utm_source, row.utm_medium, row.utm_campaign)
+        for row in tg_ids_q.all()
+    }
+
+    # Revenue per campaign from completed transactions
+    rev_q = await db.execute(
+        select(
+            Transaction.user_tg_id,
+            func.sum(Transaction.amount_usd).label("revenue_usd"),
+            func.count().label("paid_count"),
+        )
+        .where(
+            Transaction.status == "completed",
+            Transaction.created_at >= start_date,
+        )
+        .group_by(Transaction.user_tg_id)
+    )
+    rev_by_user: dict[int, dict] = {
+        row.user_tg_id: {"revenue_usd": float(row.revenue_usd or 0), "paid_count": row.paid_count}
+        for row in rev_q.all()
+    }
+
+    # Aggregate revenue per (source, medium, campaign) key
+    key_rev: dict[tuple, dict] = {}
+    for tg_id, stats in rev_by_user.items():
+        key = tg_to_key.get(tg_id)
+        if not key:
+            continue
+        bucket = key_rev.setdefault(key, {"revenue_usd": 0.0, "paid_users": set()})
+        bucket["revenue_usd"] += stats["revenue_usd"]
+        bucket["paid_users"].add(tg_id)
+
+    result = []
+    for r in user_rows:
+        key = (r.utm_source, r.utm_medium, r.utm_campaign)
+        rev = key_rev.get(key, {"revenue_usd": 0.0, "paid_users": set()})
+        paid_users = len(rev["paid_users"])
+        users_count = r.users
+        result.append({
+            "utm_source": r.utm_source or "(direct)",
+            "utm_medium": r.utm_medium,
+            "utm_campaign": r.utm_campaign,
+            "users": users_count,
+            "paid_users": paid_users,
+            "conversion_pct": round(paid_users / users_count * 100, 1) if users_count else 0,
+            "revenue_usd": round(rev["revenue_usd"], 2),
+        })
+
+    result.sort(key=lambda x: x["users"], reverse=True)
+    return {"days": days, "since": start_date.isoformat(), "campaigns": result}
+
+
+
+# ═══════════════════════════════════════════
 # Cost Analytics — P&L, per-user, per-model
 # ════════════════════════════════���══════════
 
