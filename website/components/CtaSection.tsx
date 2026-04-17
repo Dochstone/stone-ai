@@ -35,7 +35,7 @@ export default function CtaSection() {
   return (
     <section className="bg-dark text-white py-20 md:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <img src="/mascots/stone-mascot-chat.webp" alt="" width="72" height="72" className="mx-auto mb-5" />
+        <img src="/mascots/stone-mascot-chat.webp" alt="" width="72" height="72" loading="lazy" className="mx-auto mb-5" />
         <h2 className="text-3xl md:text-4xl font-extrabold mb-4">
           Будущее AI — уже доступно. Начните сейчас
         </h2>

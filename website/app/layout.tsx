@@ -6,7 +6,7 @@ import ScrollToTop from "@/components/ScrollToTop";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 // WelcomeBonusBanner moved inside Nav to fix z-index overlap
 import WebVitals from "@/components/WebVitals";
-import TonProvider from "@/components/TonProvider";
+import TonProvider from "@/components/TonProviderLazy";
 import PageTracker from "@/components/PageTracker";
 import CookieBanner from "@/components/CookieBanner";
 import TelegramWebApp from "@/components/TelegramWebApp";

@@ -22,7 +22,7 @@ export default function HowItWorks() {
   return (
     <section className="py-20 md:py-28 bg-bg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <img src="/mascots/stone-mascot-success.webp" alt="" width="64" height="64" className="mx-auto mb-4" />
+        <img src="/mascots/stone-mascot-success.webp" alt="" width="64" height="64" loading="lazy" className="mx-auto mb-4" />
         <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-4">
           Как начать
         </h2>

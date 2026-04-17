@@ -42,10 +42,10 @@ function ImageCarousel({ images, interval = 3000 }: { images: string[]; interval
 
   return (
     <div className="relative w-full h-full overflow-hidden">
-      <img src={images[idx]} alt="AI-сгенерированное изображение"
+      <img src={images[idx]} alt="AI-сгенерированное изображение" loading="lazy"
         className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
         style={{ opacity: fading ? 0 : 1 }} />
-      <img src={images[nextIdx]} alt=""
+      <img src={images[nextIdx]} alt="" loading="lazy"
         className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
         style={{ opacity: fading ? 1 : 0 }} />
     </div>
