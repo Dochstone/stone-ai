@@ -53,3 +53,9 @@ CLAUDE_CODE_*.md
 CODEX_TASK_*.md
 TZ_*.md
 PLAN_INFO_UPDATE.md
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
