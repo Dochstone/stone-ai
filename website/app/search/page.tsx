@@ -7,13 +7,13 @@ import ToolCta from "@/components/ToolCta";
 import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "ИИ поиск нейросетью — Perplexity в Telegram",
+  title: "AI поиск онлайн — Perplexity на русском без VPN 2026",
   description:
-    "Поиск в интернете нейросетью: актуальные данные, источники. ИИ чат-бот Perplexity Sonar и Deep Research. В Telegram.",
+    "Поиск в интернете нейросетью Perplexity Sonar и Deep Research: свежие данные, ссылки на источники, глубокий анализ. На русском, без VPN, в Telegram и на сайте.",
   alternates: { canonical: "/search" },
   openGraph: {
-    title: "AI Поиск — Perplexity в Telegram",
-    description: "Perplexity в Telegram. Real-time данные, ссылки на источники, глубокие исследования.",
+    title: "AI Поиск — Perplexity на русском без VPN",
+    description: "Perplexity Sonar на русском. Real-time данные, ссылки на источники, глубокие исследования. Без VPN.",
   },
 };
 

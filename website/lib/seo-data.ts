@@ -235,8 +235,8 @@ const _ALTERNATIVES: Alternative[] = [
   {
     slug: "grok",
     service: "Grok (xAI)",
-    title: "Альтернативы Grok 2026 — аналоги xAI бесплатно",
-    description: "Лучшие альтернативы Grok от xAI. GPT-5, Claude, Gemini и другие модели без привязки к X/Twitter.",
+    title: "Аналоги Grok без цензуры 2026 — 6 альтернатив без подписки X",
+    description: "Лучшие аналоги Grok от xAI в России без подписки X Premium. GPT-5, Claude, DeepSeek R1 — мощнее, дешевле, без привязки к Twitter. Сравнение + доступ без VPN.",
     h1: "Альтернативы Grok — AI без привязки к Twitter",
     intro: "Grok от xAI доступен только через подписку X Premium ($16/мес) или SuperGrok ($30/мес). В Stone AI Grok 3 доступен наряду с 64 другими моделями от {{price_mini_full}} — дешевле и функциональнее.",
     reasons: ["Нужна подписка X Premium ($16/мес)", "Привязан к Twitter/X", "Нет генерации видео и 3D", "Ограниченный API", "Недоступен в России без VPN"],

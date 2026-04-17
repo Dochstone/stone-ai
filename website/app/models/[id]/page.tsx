@@ -106,8 +106,8 @@ export function generateMetadata({ params }: Props): Metadata {
   const cat = categoryLabels[model.category] || model.category;
   const isFree = model.tier === "free";
   return {
-    title: `${model.name} онлайн${isFree ? " бесплатно" : ""} без VPN — ${cat} нейросеть на русском`,
-    description: `${model.name} от ${model.company} — попробуйте ${isFree ? "бесплатно" : `по подписке от ${planPrice("mini")}`} в Stone AI без VPN, с оплатой картой РФ. ${model.description || ""} Контекст ${model.context}. Русский интерфейс, русские промпты.`,
+    title: `${model.name} на русском${isFree ? " бесплатно" : ""} — ${cat} онлайн без VPN 2026`,
+    description: `Попробуйте ${model.name} от ${model.company} ${isFree ? "бесплатно" : `от ${planPrice("mini")}`} в России без VPN. ${model.description || ""} Контекст ${model.context}. Оплата картой РФ, СБП. Работает в браузере и Telegram.`,
     alternates: { canonical: `/models/${params.id}` },
     openGraph: {
       title: `${model.name} — попробовать ${isFree ? "бесплатно" : "онлайн"} | Stone AI`,

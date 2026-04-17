@@ -8,13 +8,13 @@ import ToolCta from "@/components/ToolCta";
 import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Нейросеть для кода — ИИ-ассистент для программистов",
+  title: "Нейросеть для кода онлайн — Claude, GPT, DeepSeek без VPN",
   description:
-    "ИИ чат-бот для программистов: отладка, рефакторинг, генерация кода. Нейросети Claude Opus, GPT-4.1, Devstral. В Telegram.",
+    "ИИ-ассистент для программистов: отладка, рефакторинг, генерация кода на Claude Opus, GPT-4.1, Devstral, o3. На русском, без VPN, оплата картой РФ.",
   alternates: { canonical: "/code" },
   openGraph: {
-    title: "AI Код-ассистент — Claude, GPT, DeepSeek",
-    description: "AI-помощник для разработчиков: Claude Opus, GPT-4.1, Devstral, o3. В Telegram.",
+    title: "AI Код-ассистент — Claude, GPT, DeepSeek без VPN",
+    description: "AI-помощник для разработчиков: Claude Opus, GPT-4.1, Devstral, o3. На русском, без VPN.",
   },
 };
 
