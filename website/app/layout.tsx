@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     template: "%s | Stone AI",
   },
   description:
-    "Stone AI — агрегатор 65+ нейросетей в одном окне: GPT-5, Claude Opus 4.5, Midjourney, Sora, DeepSeek. Без VPN, оплата картой РФ, на русском. 15 инструментов: чат, картинки, видео, SEO, презентации. Бесплатный старт 10 запросов/день.",
+    "65+ нейросетей в одном окне: GPT-5, Claude Opus, Midjourney, Sora. Без VPN, оплата рублями. Бесплатный старт — 10 запросов/день + 100₽ бонус.",
   keywords: [
     "агрегатор нейросетей",
     "все нейросети в одном месте",
