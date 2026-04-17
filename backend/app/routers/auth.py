@@ -24,7 +24,7 @@ from app.middleware.web_auth import (
     JWT_EXPIRE_DAYS,
 )
 from app.middleware.rate_limit import RateLimiter
-from app.config import get_settings
+from app.config import get_settings, WELCOME_BONUS_USD, WELCOME_BONUS_RUB
 from app.services.email_service import generate_code, send_verification_code, send_reset_code
 from app.services.linked_providers import add_linked_providers, get_linked_providers
 from app.services.streak import update_login_streak
@@ -235,7 +235,7 @@ async def verify_email(body: VerifyEmailRequest, request: Request, db: AsyncSess
         first_name=email.split("@")[0],
         username=None,
         joined_at=datetime.utcnow(),
-        balance_usd=1.0,  # Welcome bonus ~95₽
+        balance_usd=WELCOME_BONUS_USD,
         utm_source=body.utm_source,
         utm_medium=body.utm_medium,
         utm_campaign=body.utm_campaign,
@@ -243,7 +243,7 @@ async def verify_email(body: VerifyEmailRequest, request: Request, db: AsyncSess
     )
     db.add(user)
     await db.flush()
-    logger.info(f"Welcome bonus $1 credited to new email user {email}")
+    logger.info(f"Welcome bonus {WELCOME_BONUS_RUB}₽ credited to new email user {email}")
 
     user.last_ip = request.client.host if request.client else None
     await update_login_streak(db, user)
@@ -398,7 +398,7 @@ async def _get_or_create_oauth_user(
         first_name=first_name,
         username=None,
         joined_at=datetime.utcnow(),
-        balance_usd=1.0,  # Welcome bonus ~95₽
+        balance_usd=WELCOME_BONUS_USD,
         utm_source=utm_source,
         utm_medium=utm_medium,
         utm_campaign=utm_campaign,
@@ -406,7 +406,7 @@ async def _get_or_create_oauth_user(
     )
     db.add(user)
     await db.flush()
-    logger.info(f"Welcome bonus $1 credited to new OAuth user {email} ({provider})")
+    logger.info(f"Welcome bonus {WELCOME_BONUS_RUB}₽ credited to new OAuth user {email} ({provider})")
 
     # Achievement: registered
     asyncio.create_task(check_and_update(user.telegram_id or user.id, "registered", 1))
@@ -772,11 +772,11 @@ async def confirm_tg_web_session(session_id: str, tg_id: int, tg_user_data: dict
                 language=tg_user_data.get("language_code", "ru"),
                 auth_provider="telegram",
                 linked_providers="telegram",
-                balance_usd=1.0,  # Welcome bonus ~95₽
+                balance_usd=WELCOME_BONUS_USD,
             )
             db.add(user)
             await db.flush()
-            logger.info(f"Welcome bonus $1 credited to new TG web user {tg_id}")
+            logger.info(f"Welcome bonus {WELCOME_BONUS_RUB}₽ credited to new TG web user {tg_id}")
 
             # Achievement: registered
             asyncio.create_task(check_and_update(tg_id, "registered", 1))
@@ -847,11 +847,11 @@ async def telegram_webapp_login(
             language=tg_user.get("language_code", "ru"),
             auth_provider="telegram",
             linked_providers="telegram",
-            balance_usd=1.0,
+            balance_usd=WELCOME_BONUS_USD,
         )
         db.add(user)
         await db.flush()
-        logger.info(f"New TG WebApp user: {tg_id}")
+        logger.info(f"Welcome bonus {WELCOME_BONUS_RUB}₽ credited to new TG WebApp user {tg_id}")
 
     await update_login_streak(db, user)
     token = create_jwt(user.id, user.email or "")

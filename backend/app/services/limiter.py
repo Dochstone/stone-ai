@@ -11,6 +11,7 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import User, Subscription, Pass, Usage
+from app.config import WELCOME_BONUS_USD
 from app.services.ai_router import get_model_tier, get_model_category, MODELS_REGISTRY
 from app.services.subscription import FREE_MODELS, get_accessible_models, get_required_tier, get_plan, PLANS
 
@@ -114,7 +115,7 @@ async def get_or_create_user(db: AsyncSession, tg_user: dict, start_param: str |
             username=tg_user.get("username"),
             first_name=tg_user.get("first_name"),
             language=tg_user.get("language_code", "ru"),
-            balance_usd=1.05,  # Welcome bonus ≈100₽ ($1.05 × 95₽)
+            balance_usd=WELCOME_BONUS_USD,
             utm_source=utm_source,
             utm_medium=utm_medium,
             utm_campaign=utm_campaign,

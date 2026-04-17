@@ -7,6 +7,8 @@ load_dotenv()
 
 # ─── Global constants ───
 USD_TO_RUB = 84.0  # Exchange rate for all price conversions
+WELCOME_BONUS_RUB = 100  # Welcome bonus in rubles (fixed, not tied to USD)
+WELCOME_BONUS_USD = round(WELCOME_BONUS_RUB / USD_TO_RUB, 6)
 SUBSCRIBER_DISCOUNT = 0.0  # No discount for now
 
 # Free tier lifetime trial limits (total, not per day)
