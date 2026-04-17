@@ -261,8 +261,8 @@ function OverviewTab({ profile, usage, limits }: { profile: UserProfile; usage: 
             {limits.fast && <LimitBar label="Быстрые модели" used={limits.fast.used} limit={limits.fast.limit} emoji="⚡" />}
             {limits.premium && limits.premium.limit > 0 && <LimitBar label="Премиум модели" used={limits.premium.used} limit={limits.premium.limit} emoji="🧠" />}
             {limits.opus && limits.opus.limit > 0 && <LimitBar label="Opus модели" used={limits.opus.used} limit={limits.opus.limit} emoji="💎" />}
-            {limits.image && limits.image.limit > 0 && <LimitBar label="Картинки" used={limits.image.used} limit={limits.image.limit} emoji="🎨" />}
-            {limits.video && limits.video.limit > 0 && <LimitBar label="Видео" used={limits.video.used} limit={limits.video.limit} emoji="🎬" />}
+            {limits.image && limits.image.limit > 0 && <LimitBar label="Картинки" used={limits.image.used} limit={limits.image.limit} emoji="🖼️" />}
+            {limits.video && limits.video.limit > 0 && <LimitBar label="Видео" used={limits.video.used} limit={limits.video.limit} emoji="🎥" />}
           </div>
           {limits.streak && limits.streak.days > 0 && (
             <div className="mt-3 pt-3 border-t border-text/[0.04] flex items-center gap-2">
@@ -315,17 +315,17 @@ function OverviewTab({ profile, usage, limits }: { profile: UserProfile; usage: 
       {/* Quick links */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         <a href="/dashboard/chat" className="bg-bg rounded-2xl border border-text/[0.06] p-4 hover:shadow-md hover:border-accent/20 transition-all group">
-          <div className="text-lg mb-1">💬</div>
+          <div className="text-lg mb-1">🤖</div>
           <div className="text-xs font-bold text-text group-hover:text-accent transition-colors">AI Чат</div>
           <div className="text-[10px] text-text/30 mt-0.5">65+ нейросетей</div>
         </a>
         <a href="/dashboard/templates" className="bg-bg rounded-2xl border border-text/[0.06] p-4 hover:shadow-md hover:border-accent/20 transition-all group">
-          <div className="text-lg mb-1">📝</div>
+          <div className="text-lg mb-1">✨</div>
           <div className="text-xs font-bold text-text group-hover:text-accent transition-colors">AI-шаблоны</div>
           <div className="text-[10px] text-text/30 mt-0.5">50+ промптов</div>
         </a>
         <a href="/dashboard/gallery" className="bg-bg rounded-2xl border border-text/[0.06] p-4 hover:shadow-md hover:border-accent/20 transition-all group">
-          <div className="text-lg mb-1">🎨</div>
+          <div className="text-lg mb-1">🖼️</div>
           <div className="text-xs font-bold text-text group-hover:text-accent transition-colors">Галерея</div>
           <div className="text-[10px] text-text/30 mt-0.5">Все генерации</div>
         </a>
@@ -335,12 +335,12 @@ function OverviewTab({ profile, usage, limits }: { profile: UserProfile; usage: 
           <div className="text-[10px] text-text/30 mt-0.5">Смена фона, карточки</div>
         </a>
         <a href="/dashboard/achievements" className="bg-bg rounded-2xl border border-text/[0.06] p-4 hover:shadow-md hover:border-accent/20 transition-all group">
-          <div className="text-lg mb-1">🏆</div>
+          <div className="text-lg mb-1">🎯</div>
           <div className="text-xs font-bold text-text group-hover:text-accent transition-colors">Достижения</div>
           <div className="text-[10px] text-text/30 mt-0.5">Награды до 360₽</div>
         </a>
         <a href="/dashboard/seo" className="bg-bg rounded-2xl border border-text/[0.06] p-4 hover:shadow-md hover:border-accent/20 transition-all group">
-          <div className="text-lg mb-1">🔍</div>
+          <div className="text-lg mb-1">📊</div>
           <div className="text-xs font-bold text-text group-hover:text-accent transition-colors">SEO-модуль</div>
           <div className="text-[10px] text-text/30 mt-0.5">Статьи, анализ, мета</div>
         </a>
