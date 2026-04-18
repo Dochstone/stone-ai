@@ -1,10 +1,9 @@
 /**
  * Shared OG image template. Rendered server-side by Next.js ImageResponse
- * into a 1200×630 PNG. Used by every route's opengraph-image.tsx.
+ * into a 1200×630 PNG.
  *
- * Note: ImageResponse uses Satori which supports a subset of CSS (flex,
- * colors, transforms). Avoid grid, filters, pseudo-elements, external
- * stylesheets. Avoid webp in <img> — use PNG/JPG or inline base64 SVG.
+ * Note: Satori does not render webp reliably. Use PNG. SVG support is partial —
+ * prefer PNG icons for logos.
  */
 
 export interface OgTemplateProps {
@@ -17,9 +16,12 @@ export interface OgTemplateProps {
 const BG = "#0a0a0a";
 const ACCENT = "#D97757";
 const PURPLE = "#7C3AED";
-const TEAL = "#2DD4BF";
 const TEXT = "#f5f5f5";
 const TEXT_DIM = "rgba(245,245,245,0.55)";
+
+const PROVIDER_LOGOS = [
+  "openai", "anthropic", "google", "meta", "xai", "mistral", "perplexity",
+];
 
 export function OgTemplate({ title, subtitle, category, accent = ACCENT }: OgTemplateProps) {
   return (
@@ -30,7 +32,7 @@ export function OgTemplate({ title, subtitle, category, accent = ACCENT }: OgTem
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
-        padding: "72px 80px",
+        padding: "60px 72px",
         background: `linear-gradient(135deg, ${BG} 0%, #1a1210 100%)`,
         color: TEXT,
         fontFamily: "sans-serif",
@@ -47,7 +49,7 @@ export function OgTemplate({ title, subtitle, category, accent = ACCENT }: OgTem
           height: 560,
           borderRadius: "50%",
           background: `radial-gradient(circle, ${accent} 0%, rgba(217,119,87,0) 70%)`,
-          opacity: 0.5,
+          opacity: 0.45,
           display: "flex",
         }}
       />
@@ -55,36 +57,44 @@ export function OgTemplate({ title, subtitle, category, accent = ACCENT }: OgTem
       <div
         style={{
           position: "absolute",
-          bottom: -160,
-          left: -160,
+          bottom: -180,
+          left: -180,
           width: 460,
           height: 460,
           borderRadius: "50%",
           background: `radial-gradient(circle, ${PURPLE} 0%, rgba(124,58,237,0) 70%)`,
-          opacity: 0.32,
+          opacity: 0.3,
           display: "flex",
         }}
       />
 
-      {/* Header: Logo + brand */}
+      {/* Header: Mascot + brand */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 26 }}>
           <img
             src="https://stoneai.ru/stone-mascot-idle.png"
-            width="96"
-            height="96"
+            width="140"
+            height="140"
             style={{
-              borderRadius: 22,
-              border: `2px solid ${accent}`,
+              borderRadius: 28,
+              border: `3px solid ${accent}`,
+              background: "#2a1f1c",
             }}
           />
-          <span style={{ fontSize: 44, fontWeight: 900, letterSpacing: "-0.03em" }}>Stone AI</span>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <span style={{ fontSize: 52, fontWeight: 900, letterSpacing: "-0.03em", lineHeight: 1 }}>
+              Stone AI
+            </span>
+            <span style={{ fontSize: 22, color: TEXT_DIM, fontWeight: 600 }}>
+              stoneai.ru
+            </span>
+          </div>
         </div>
         {category ? (
           <div
             style={{
               display: "flex",
-              padding: "14px 28px",
+              padding: "12px 24px",
               borderRadius: 999,
               border: `2px solid ${accent}`,
               color: accent,
@@ -100,10 +110,10 @@ export function OgTemplate({ title, subtitle, category, accent = ACCENT }: OgTem
       </div>
 
       {/* Main title block */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 28, maxWidth: 940 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 20, maxWidth: 960 }}>
         <div
           style={{
-            fontSize: title.length > 50 ? 64 : 96,
+            fontSize: title.length > 50 ? 64 : 88,
             fontWeight: 900,
             lineHeight: 1,
             letterSpacing: "-0.04em",
@@ -112,45 +122,37 @@ export function OgTemplate({ title, subtitle, category, accent = ACCENT }: OgTem
           {title}
         </div>
         {subtitle ? (
-          <div style={{ fontSize: 30, color: TEXT_DIM, lineHeight: 1.35, maxWidth: 880 }}>
+          <div style={{ fontSize: 28, color: TEXT_DIM, lineHeight: 1.3, maxWidth: 900 }}>
             {subtitle}
           </div>
         ) : null}
       </div>
 
-      {/* Models badges + URL */}
+      {/* Footer: real provider logos */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          paddingTop: 32,
+          paddingTop: 24,
           borderTop: "2px solid rgba(255,255,255,0.1)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          {["GPT-5", "Claude", "Midjourney", "Sora", "Gemini"].map((name, i) => (
-            <div
-              key={i}
-              style={{
-                display: "flex",
-                padding: "8px 16px",
-                borderRadius: 10,
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.12)",
-                fontSize: 18,
-                color: TEXT,
-                fontWeight: 700,
-              }}
-            >
-              {name}
-            </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+          {PROVIDER_LOGOS.map((name) => (
+            <img
+              key={name}
+              src={`https://stoneai.ru/logos-png/${name}.png`}
+              width="44"
+              height="44"
+              style={{ borderRadius: 8, background: "#fff", padding: 6 }}
+            />
           ))}
-          <span style={{ fontSize: 18, color: TEXT_DIM, fontWeight: 600, marginLeft: 8 }}>
+          <span style={{ fontSize: 20, color: TEXT_DIM, fontWeight: 700, marginLeft: 10 }}>
             и ещё 60+
           </span>
         </div>
-        <span style={{ fontSize: 28, color: accent, fontWeight: 800 }}>stoneai.ru</span>
+        <span style={{ fontSize: 24, color: accent, fontWeight: 800 }}>65+ моделей</span>
       </div>
     </div>
   );
