@@ -232,7 +232,7 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
                 {[
                   { icon: "⚡", text: "10 запросов/день" },
                   { icon: "🖼️", text: "Картинки" },
-                  { icon: "📂", text: "История" },
+                  { icon: "🎥", text: "Видео" },
                 ].map((b, i) => (
                   <div key={i} className="flex items-center gap-1.5 text-white/60 text-[10px]">
                     <span>{b.icon}</span><span>{b.text}</span>
