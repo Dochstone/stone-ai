@@ -19,7 +19,7 @@ const manrope = Manrope({
 
 import { SITE_URL, SITE_RATING } from "@/lib/constants";
 import { planPrice, planPriceFull, planPriceNum } from "@/lib/pricing";
-const OG_IMAGE = `${SITE_URL}/og-image.png`;
+const OG_IMAGE = `${SITE_URL}/opengraph-image?v=2`;
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -123,7 +123,7 @@ const jsonLdOrganization = {
   url: SITE_URL,
   logo: {
     "@type": "ImageObject",
-    url: `${SITE_URL}/og-image.png`,
+    url: `${SITE_URL}/opengraph-image?v=2`,
     width: 1200,
     height: 630,
   },
@@ -199,7 +199,7 @@ const jsonLdOrganization = {
   brand: {
     "@type": "Brand",
     name: "Stone AI",
-    logo: `${SITE_URL}/og-image.png`,
+    logo: `${SITE_URL}/opengraph-image?v=2`,
   },
   makesOffer: [
     { "@type": "Offer", name: "Free", priceCurrency: "RUB", price: "0" },
