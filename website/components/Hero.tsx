@@ -318,7 +318,7 @@ export default function Hero() {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <a
-            href="/dashboard/chat?model=claude-opus-4.6"
+            href="/dashboard/chat?model=claude-opus-4.7"
             className="group inline-flex items-center gap-3 bg-gradient-to-r from-accent/15 to-teal/15 border border-accent/20 text-text px-4 py-2 rounded-full text-sm font-semibold mb-6 hover:border-accent/50 transition-all"
           >
             <span className="flex items-center gap-1.5">
@@ -329,7 +329,7 @@ export default function Hero() {
               <span className="text-accent uppercase tracking-wider text-[10px] font-bold">Новое</span>
             </span>
             <span className="text-text/90">
-              <b>Claude Opus 4.6</b> уже в Stone AI — новая флагманская модель Anthropic
+              <b>Claude Opus 4.7</b> — флагман Anthropic только что вышел, скоро в Stone AI
             </span>
             <svg className="w-4 h-4 text-accent group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
