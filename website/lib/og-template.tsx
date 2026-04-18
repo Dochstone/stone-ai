@@ -74,24 +74,12 @@ export function OgTemplate({ title, subtitle, category, accent = ACCENT }: OgTem
       {/* Header: Stylized logo + brand */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 112,
-              height: 112,
-              borderRadius: 28,
-              background: `linear-gradient(135deg, ${accent} 0%, #B45309 60%, ${PURPLE} 140%)`,
-              color: "#fff",
-              fontSize: 72,
-              fontWeight: 900,
-              letterSpacing: "-0.06em",
-              boxShadow: `0 24px 80px rgba(217,119,87,0.6)`,
-            }}
-          >
-            S
-          </div>
+          <img
+            src="https://stoneai.ru/stone-logo.png"
+            width="128"
+            height="128"
+            style={{ borderRadius: 28 }}
+          />
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
             <span style={{ fontSize: 56, fontWeight: 900, letterSpacing: "-0.04em", lineHeight: 1 }}>
               Stone AI
