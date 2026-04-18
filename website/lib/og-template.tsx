@@ -17,13 +17,12 @@ const TEXT = "#f5f5f5";
 const TEXT_DIM = "rgba(245,245,245,0.55)";
 
 const PROVIDER_LOGOS = [
-  { name: "openai", bg: "#fff" },
-  { name: "anthropic", bg: "#fff" },
-  { name: "google", bg: "transparent" },
-  { name: "sora2", bg: "transparent" },
-  { name: "kling", bg: "transparent" },
-  { name: "qwen", bg: "transparent" },
-  { name: "suno", bg: "transparent" },
+  "google",
+  "mistral",
+  "sora2",
+  "kling",
+  "qwen",
+  "suno",
 ];
 
 export function OgTemplate({ title, subtitle, category, accent = ACCENT }: OgTemplateProps) {
@@ -150,27 +149,14 @@ export function OgTemplate({ title, subtitle, category, accent = ACCENT }: OgTem
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          {PROVIDER_LOGOS.map((logo) => (
-            <div
-              key={logo.name}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: 52,
-                height: 52,
-                borderRadius: 12,
-                background: logo.bg === "transparent" ? "transparent" : logo.bg,
-                padding: logo.bg === "#fff" ? 6 : 0,
-              }}
-            >
-              <img
-                src={`https://stoneai.ru/logos-png/${logo.name}.png`}
-                width={logo.bg === "#fff" ? 40 : 52}
-                height={logo.bg === "#fff" ? 40 : 52}
-                style={{ borderRadius: logo.bg === "transparent" ? 12 : 0 }}
-              />
-            </div>
+          {PROVIDER_LOGOS.map((name) => (
+            <img
+              key={name}
+              src={`https://stoneai.ru/logos-png/${name}.png`}
+              width="56"
+              height="56"
+              style={{ borderRadius: 12 }}
+            />
           ))}
           <span style={{ fontSize: 22, color: TEXT_DIM, fontWeight: 700, marginLeft: 6 }}>
             и ещё 60+
