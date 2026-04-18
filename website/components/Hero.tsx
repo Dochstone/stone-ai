@@ -317,9 +317,24 @@ export default function Hero() {
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
-          <div className="inline-block bg-accent/10 text-accent px-4 py-1.5 rounded-full text-sm font-semibold mb-6">
-            Попробуйте бесплатно
-          </div>
+          <a
+            href="/dashboard/chat?model=claude-opus-4.6"
+            className="group inline-flex items-center gap-3 bg-gradient-to-r from-accent/15 to-teal/15 border border-accent/20 text-text px-4 py-2 rounded-full text-sm font-semibold mb-6 hover:border-accent/50 transition-all"
+          >
+            <span className="flex items-center gap-1.5">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
+              </span>
+              <span className="text-accent uppercase tracking-wider text-[10px] font-bold">Новое</span>
+            </span>
+            <span className="text-text/90">
+              <b>Claude Opus 4.6</b> уже в Stone AI — новая флагманская модель Anthropic
+            </span>
+            <svg className="w-4 h-4 text-accent group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tight">
             Агрегатор{" "}

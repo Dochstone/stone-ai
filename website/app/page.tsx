@@ -2,6 +2,7 @@ import Hero from "@/components/Hero";
 import PopularTasks from "@/components/PopularTasks";
 import PromoBanner from "@/components/PromoBanner";
 import ToolCards from "@/components/ToolCards";
+import ToolsGallery from "@/components/ToolsGallery";
 import ProductScreenshot from "@/components/ProductScreenshot";
 import DemoShowcase from "@/components/DemoShowcase";
 import HowItWorks from "@/components/HowItWorks";
@@ -34,6 +35,7 @@ export default function Home() {
       <PopularTasks />
       <PromoBanner />
       <ToolCards />
+      <ToolsGallery />
       <ProductScreenshot />
       <DemoShowcase />
       <HowItWorks />
