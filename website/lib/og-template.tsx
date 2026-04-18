@@ -17,12 +17,13 @@ const TEXT = "#f5f5f5";
 const TEXT_DIM = "rgba(245,245,245,0.55)";
 
 const PROVIDER_LOGOS = [
-  "google",
-  "mistral",
+  "gpt",
+  "claude",
+  "midjourney",
   "sora2",
   "kling",
   "qwen",
-  "suno",
+  "grok",
 ];
 
 export function OgTemplate({ title, subtitle, category, accent = ACCENT }: OgTemplateProps) {
