@@ -96,7 +96,7 @@ export default function ToolsPage() {
                       alt={tool.title}
                       width={72}
                       height={72}
-                      className="shrink-0 rounded-2xl shadow-sm group-hover:scale-105 transition-transform"
+                      className="shrink-0 group-hover:scale-105 transition-transform"
                       loading="lazy"
                     />
                     <div className="flex-1 min-w-0 pr-8">
