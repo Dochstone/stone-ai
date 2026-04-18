@@ -69,24 +69,15 @@ export function OgTemplate({ title, subtitle, category, accent = ACCENT }: OgTem
       {/* Header: Logo + brand */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
-          <div
+          <img
+            src="https://stoneai.ru/stone-mascot-idle.png"
+            width="96"
+            height="96"
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 88,
-              height: 88,
               borderRadius: 22,
-              background: `linear-gradient(135deg, ${accent} 0%, #B45309 100%)`,
-              color: "#fff",
-              fontSize: 56,
-              fontWeight: 900,
-              letterSpacing: "-0.04em",
-              boxShadow: `0 20px 60px rgba(217,119,87,0.5)`,
+              border: `2px solid ${accent}`,
             }}
-          >
-            S
-          </div>
+          />
           <span style={{ fontSize: 44, fontWeight: 900, letterSpacing: "-0.03em" }}>Stone AI</span>
         </div>
         {category ? (
