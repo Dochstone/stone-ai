@@ -20,7 +20,7 @@ const TEXT = "#f5f5f5";
 const TEXT_DIM = "rgba(245,245,245,0.55)";
 
 const PROVIDER_LOGOS = [
-  "openai", "anthropic", "google", "meta", "xai", "mistral", "perplexity",
+  "openai", "anthropic", "google", "sora2", "kling", "qwen", "suno",
 ];
 
 export function OgTemplate({ title, subtitle, category, accent = ACCENT }: OgTemplateProps) {
@@ -145,7 +145,7 @@ export function OgTemplate({ title, subtitle, category, accent = ACCENT }: OgTem
               src={`https://stoneai.ru/logos-png/${name}.png`}
               width="44"
               height="44"
-              style={{ borderRadius: 8, background: "#fff", padding: 6 }}
+              style={{ borderRadius: 10 }}
             />
           ))}
           <span style={{ fontSize: 20, color: TEXT_DIM, fontWeight: 700, marginLeft: 10 }}>
