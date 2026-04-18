@@ -229,7 +229,7 @@ export default function AboutPage() {
             65+ нейросетей и 15+ инструментов для бизнеса в одном интерфейсе. Без VPN, с оплатой в рублях, с историей чатов на русском.
           </p>
           <div className="mt-6">
-            <img src="/stone-logo.png" alt="Stone AI маскот" width="120" height="120" className="mx-auto" />
+            <img src="/mascots/stone-mascot-idle.webp" alt="Stone AI маскот" width="120" height="120" className="mx-auto" />
           </div>
         </div>
 
