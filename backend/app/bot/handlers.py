@@ -124,16 +124,16 @@ async def cmd_start(message: Message):
 
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
-            text="💬 Чат с AI",
+            text="🤖 Чат с AI",
             url="https://stoneai.ru/webchat",
         )],
         [
             InlineKeyboardButton(
-                text="🎨 Картинки",
+                text="🖼️ Картинки",
                 url="https://stoneai.ru/images",
             ),
             InlineKeyboardButton(
-                text="🎬 Видео",
+                text="🎥 Видео",
                 url="https://stoneai.ru/video",
             ),
         ],
@@ -143,7 +143,7 @@ async def cmd_start(message: Message):
                 url="https://stoneai.ru/search",
             ),
             InlineKeyboardButton(
-                text="🤖 Модели",
+                text="🧠 Модели",
                 url="https://stoneai.ru/models",
             ),
         ],
@@ -166,19 +166,19 @@ async def cmd_start(message: Message):
     welcome_text = (
         "<b>Stone AI — 65+ нейросетей в одном окне</b>\n\n"
 
-        "💬 <b>Текст и чат</b>\n"
+        "🤖 <b>Текст и чат</b>\n"
         "GPT-5.4 · Claude Opus · Gemini 3 · DeepSeek R1\n\n"
 
-        "🎨 <b>Генерация картинок</b>\n"
+        "🖼️ <b>Генерация картинок</b>\n"
         "Nano Banana Pro · Flux · GPT-5 Image · Midjourney\n\n"
 
-        "🎬 <b>Генерация видео</b>\n"
+        "🎥 <b>Генерация видео</b>\n"
         "Sora 2 · Veo 3 · Kling v2 · Luma Ray 2\n\n"
 
         "🔍 <b>Умный поиск</b>\n"
         "Perplexity Sonar · Deep Research\n\n"
 
-        "🎤 <b>Озвучка и аудио</b>\n"
+        "🎙️ <b>Озвучка и аудио</b>\n"
         "Whisper STT · TTS\n\n"
 
         "━━━━━━━━━━━━━━━━━━━━\n"
