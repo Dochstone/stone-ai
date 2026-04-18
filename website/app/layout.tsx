@@ -29,11 +29,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Stone AI — агрегатор 65+ нейросетей без VPN, оплата рублями",
+    default: "Stone AI — агрегатор 65+ нейросетей в одном чате без VPN",
     template: "%s | Stone AI",
   },
   description:
-    "65+ нейросетей в одном окне: GPT-5, Claude Opus, Midjourney, Sora. Без VPN, оплата рублями. Бесплатный старт — 10 запросов/день + 100₽ бонус.",
+    "Агрегатор 65+ нейросетей в одном чате: GPT-5, Claude Opus, Midjourney, Sora. Плюс панель инструментов — SEO, презентации, фотосессии. Без VPN, оплата рублями. Бесплатный старт — 10 запросов/день + 100₽ бонус.",
   keywords: [
     "агрегатор нейросетей",
     "все нейросети в одном месте",
@@ -61,9 +61,9 @@ export const metadata: Metadata = {
     locale: "ru_RU",
     url: SITE_URL,
     siteName: "Stone AI",
-    title: "Stone AI — агрегатор 65+ нейросетей без VPN",
+    title: "Stone AI — агрегатор 65+ нейросетей в одном чате без VPN",
     description:
-      "65+ нейросетей в одном окне: GPT-5, Claude Opus, Midjourney, Sora. Без VPN, оплата картой РФ. Бесплатный старт + 100₽ на баланс.",
+      "Агрегатор 65+ нейросетей в одном чате: GPT-5, Claude Opus, Midjourney, Sora. Без VPN, оплата картой РФ. Бесплатный старт + 100₽ на баланс.",
     images: [
       {
         url: OG_IMAGE,

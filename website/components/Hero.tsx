@@ -322,9 +322,9 @@ export default function Hero() {
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tight">
-            AI-студия{" "}
+            Агрегатор{" "}
             <span className="bg-gradient-to-r from-accent to-teal bg-clip-text text-transparent">
-              нового поколения
+              нейросетей
             </span>
           </h1>
 
