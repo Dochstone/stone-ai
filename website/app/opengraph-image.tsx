@@ -12,7 +12,6 @@ export default async function Image() {
       <OgTemplate
         title="Агрегатор нейросетей"
         subtitle="65+ моделей в одном чате: GPT-5, Claude Opus, Midjourney, Sora. Без VPN, оплата в рублях"
-        category="Stone AI"
       />
     ),
     { ...size }
