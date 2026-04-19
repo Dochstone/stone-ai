@@ -21,6 +21,7 @@ interface Props {
   rows: ComparisonRow[];
   caption?: string;
   footnote?: string;
+  showIcons?: boolean; // default true
 }
 
 /** Map model/provider keywords to icon paths. */
@@ -77,7 +78,7 @@ function renderCell(v: Cell) {
   return <span className="text-[14px] text-text/85">{str}</span>;
 }
 
-export default function ComparisonTable({ columns, rows, caption, footnote }: Props) {
+export default function ComparisonTable({ columns, rows, caption, footnote, showIcons = true }: Props) {
   return (
     <figure className="my-8">
       {caption && (
@@ -91,7 +92,7 @@ export default function ComparisonTable({ columns, rows, caption, footnote }: Pr
                 Критерий
               </th>
               {columns.map((c, i) => {
-                const iconSrc = c.icon || autoIcon(c.title);
+                const iconSrc = showIcons ? (c.icon || autoIcon(c.title)) : undefined;
                 return (
                   <th
                     key={i}
