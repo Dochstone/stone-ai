@@ -19,7 +19,7 @@ const WebChat = dynamic(() => import("@/components/WebChat"), {
 });
 
 const NAV_PRIMARY = [
-  { href: "/dashboard/tools", label: "Все инструменты", icon: "M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5", badge: "NEW" },
+  { href: "/dashboard", label: "Все инструменты", icon: "M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5", badge: "NEW" },
   { href: "/dashboard/chat", label: "AI Чат", icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" },
   { href: "/dashboard/gallery", label: "Галерея", icon: "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" },
   { href: "/dashboard/projects", label: "Проекты", icon: "M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" },
@@ -166,6 +166,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [isChat]);
 
   const isActive = (href: string) => {
+    if (href === "/dashboard") return pathname === "/dashboard";
     if (href === "/dashboard/seo") return pathname === "/dashboard/seo";
     return pathname === href || pathname.startsWith(href + "/");
   };
@@ -292,7 +293,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
                 {/* 1. Все инструменты — solo at top */}
                 <div className="space-y-0.5">
-                  {NAV_PRIMARY.filter(item => item.href === "/dashboard/tools").map((item) => {
+                  {NAV_PRIMARY.filter(item => item.href === "/dashboard").map((item) => {
                     const active = isActive(item.href);
                     return (
                       <Link key={item.href} href={item.href}
@@ -339,7 +340,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
                 {/* 3. Rest of primary — Галерея, Проекты */}
                 <div className="space-y-0.5 mt-1">
-                  {NAV_PRIMARY.filter(item => item.href !== "/dashboard/tools" && item.href !== "/dashboard/chat").map((item) => {
+                  {NAV_PRIMARY.filter(item => item.href !== "/dashboard" && item.href !== "/dashboard/chat").map((item) => {
                     const active = isActive(item.href);
                     return (
                       <Link key={item.href} href={item.href}
