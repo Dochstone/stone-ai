@@ -413,9 +413,11 @@ export default function BlogPostPage({ params }: Props) {
                   );
                 }
                 const text = String(block);
-                if (/<(br|b|i|u|strong|em|a|code)\b/i.test(text)) {
+                if (/<(br|b|i|u|strong|em|a|code|img|div|span|p)\b/i.test(text)) {
+                  const isBlock = /<(img|div)\b/i.test(text);
+                  const Tag = isBlock ? "div" : "p";
                   return (
-                    <p
+                    <Tag
                       key={i}
                       className="text-text/70 text-[15px] leading-[1.8] break-words overflow-hidden [&_a]:text-accent [&_a]:hover:underline [&_a]:break-all [&_b]:text-text [&_b]:font-semibold [&_strong]:text-text [&_strong]:font-semibold [&_code]:bg-text/5 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-[13px] [&_code]:break-all"
                       dangerouslySetInnerHTML={{ __html: text }}
