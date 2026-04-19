@@ -18,14 +18,14 @@ const TOOLS: { group: string; items: Tool[] }[] = [
   {
     group: "Рабочее пространство",
     items: [
-      { href: "/dashboard/chat", emoji: "💬", bgColor: "#6B46C1", title: "AI Чат", description: "Общение с 65+ нейросетями в одном окне", popular: true },
-      { href: "/dashboard/templates", emoji: "📋", bgColor: "#14B8A6", title: "AI-шаблоны", description: "50+ готовых шаблонов для промптов", badge: "50+" },
-      { href: "/dashboard/marketplace", emoji: "🛍️", bgColor: "#F97316", title: "Маркетплейс", description: "Боты и ассистенты от сообщества", badge: "NEW" },
+      { href: "/dashboard/chat", icon: "/tool-icons/tool-chat.png", title: "AI Чат", description: "Общение с 65+ нейросетями в одном окне", popular: true },
+      { href: "/dashboard/templates", icon: "/tool-icons/tool-templates.png", title: "AI-шаблоны", description: "50+ готовых шаблонов для промптов", badge: "50+" },
+      { href: "/dashboard/marketplace", icon: "/tool-icons/tool-marketplace.png", title: "Маркетплейс", description: "Боты и ассистенты от сообщества", badge: "NEW" },
       { href: "/dashboard/agent", icon: "/tool-icons/tool-agent.png", title: "AI-Агент", description: "Автономный агент для сложных задач", badge: "NEW", popular: true },
-      { href: "/dashboard/bots", emoji: "🤖", bgColor: "#4F46E5", title: "Мои боты", description: "Создавайте своих ботов с system prompt", badge: "NEW" },
+      { href: "/dashboard/bots", icon: "/tool-icons/tool-bots.png", title: "Мои боты", description: "Создавайте своих ботов с system prompt", badge: "NEW" },
       { href: "/dashboard/projects", icon: "/tool-icons/tool-projects.png", title: "Мои проекты", description: "Организуйте чаты и файлы по проектам" },
       {
-        href: "/dashboard/gallery", emoji: "🖼️", bgColor: "#EC4899", title: "Галерея",
+        href: "/dashboard/gallery", icon: "/tool-icons/tool-gallery.png", title: "Галерея",
         description: "История сгенерированных изображений и видео",
         preview: ["/demo/img-cosmos.webp", "/demo/img-portrait.webp", "/demo/img-cyberpunk.webp"],
       },
