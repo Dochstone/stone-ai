@@ -1552,10 +1552,9 @@ async def admin_costs_models(
 
 
 class CreatePartnerRequest(BaseModel):
+    email: str  # existing user email — must already be registered
     code: str  # custom referral code, e.g. "VKPARTNER"
     referral_percent: int = 20  # partner commission %
-    email: str | None = None  # optional: create account with email
-    name: str | None = None  # display name
 
 
 @router.post("/partners/create")
@@ -1565,41 +1564,28 @@ async def create_partner(
     admin: dict = Depends(require_web_admin),
     db: AsyncSession = Depends(get_db),
 ):
-    """Create a partner referral code with custom commission rate."""
-    import uuid
-
+    """Assign partner status to an existing user by email."""
+    email = body.email.strip().lower()
     code = body.code.strip().upper()
+
     if len(code) < 3 or len(code) > 16:
         raise HTTPException(400, "Code must be 3-16 characters")
 
-    # Check code not already taken
+    # Find user by email
+    result = await db.execute(select(User).where(User.email == email))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(404, f"User with email '{email}' not found. They must register first.")
+
+    # Check code not already taken by someone else
     existing = await db.execute(select(User).where(User.referral_code == code))
-    if existing.scalar_one_or_none():
-        raise HTTPException(409, f"Referral code '{code}' already exists")
+    holder = existing.scalar_one_or_none()
+    if holder and holder.id != user.id:
+        raise HTTPException(409, f"Referral code '{code}' already taken by another user")
 
-    # Check email not taken (if provided)
-    if body.email:
-        email = body.email.strip().lower()
-        existing_email = await db.execute(select(User).where(User.email == email))
-        if existing_email.scalar_one_or_none():
-            raise HTTPException(409, f"Email '{email}' already registered")
-    else:
-        email = None
-
-    placeholder_tg_id = -int(uuid.uuid4().int % (2**53))
-    user = User(
-        telegram_id=placeholder_tg_id,
-        email=email,
-        first_name=body.name or f"Partner {code}",
-        auth_provider="partner",
-        linked_providers="partner",
-        referral_code=code,
-        referral_percent=body.referral_percent,
-        joined_at=datetime.utcnow(),
-        balance_usd=0,
-    )
-    db.add(user)
-    await db.flush()
+    # Assign partner
+    user.referral_code = code
+    user.referral_percent = body.referral_percent
 
     admin_user_id, admin_email = _audit_actor(admin)
     await log_admin_action(
@@ -1609,13 +1595,13 @@ async def create_partner(
         action="create_partner",
         target_type="user",
         target_id=str(user.id),
-        payload={"code": code, "percent": body.referral_percent},
+        payload={"code": code, "percent": body.referral_percent, "email": email},
         ip_address=_client_ip(request),
         user_agent=_user_agent(request),
     )
     await db.commit()
 
-    logger.info(f"Partner created: code={code}, percent={body.referral_percent}%, user_id={user.id}")
+    logger.info(f"Partner assigned: email={email}, code={code}, percent={body.referral_percent}%, user_id={user.id}")
 
     return {
         "status": "ok",
@@ -1625,7 +1611,6 @@ async def create_partner(
             "referral_percent": body.referral_percent,
             "email": email,
             "name": user.first_name,
-            "link": f"https://stoneai.ru/?ref={code}&utm_source=vk&utm_medium=cpc&utm_campaign=partner_{code.lower()}",
         },
     }
 

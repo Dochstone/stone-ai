@@ -30,7 +30,6 @@ export default function PartnersTab({ token }: Props) {
   const [showCreate, setShowCreate] = useState(false);
   const [newCode, setNewCode] = useState("");
   const [newPercent, setNewPercent] = useState(20);
-  const [newName, setNewName] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [creating, setCreating] = useState(false);
 
@@ -69,7 +68,7 @@ export default function PartnersTab({ token }: Props) {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newCode.trim()) return;
+    if (!newCode.trim() || !newEmail.trim()) return;
     setCreating(true);
     setError("");
     setSuccess("");
@@ -81,19 +80,17 @@ export default function PartnersTab({ token }: Props) {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
+          email: newEmail.trim(),
           code: newCode.trim().toUpperCase(),
           referral_percent: newPercent,
-          name: newName.trim() || undefined,
-          email: newEmail.trim() || undefined,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "Error");
-      setSuccess(`Partner ${data.partner.code} created`);
+      setSuccess(`Partner ${data.partner.code} assigned to ${data.partner.email}`);
       setShowCreate(false);
       setNewCode("");
       setNewPercent(20);
-      setNewName("");
       setNewEmail("");
       fetchPartners();
     } catch (err: any) {
@@ -206,8 +203,20 @@ export default function PartnersTab({ token }: Props) {
       {/* Create Form */}
       {showCreate && (
         <form onSubmit={handleCreate} className="bg-surface rounded-2xl border border-text/5 p-6 space-y-4">
-          <h3 className="font-bold text-sm text-text/60 uppercase tracking-wider">New Partner</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <h3 className="font-bold text-sm text-text/60 uppercase tracking-wider">Assign Partner</h3>
+          <p className="text-xs text-text/30 mb-3">User must be registered on stoneai.ru first</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="text-xs font-semibold text-text/40 mb-1 block">Email *</label>
+              <input
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                placeholder="partner@mail.ru"
+                required
+                className={inputClass}
+              />
+            </div>
             <div>
               <label className="text-xs font-semibold text-text/40 mb-1 block">Code *</label>
               <input
@@ -228,25 +237,6 @@ export default function PartnersTab({ token }: Props) {
                 onChange={(e) => setNewPercent(Number(e.target.value))}
                 min={1}
                 max={50}
-                className={inputClass}
-              />
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-text/40 mb-1 block">Name</label>
-              <input
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                placeholder="Ivan VK Ads"
-                className={inputClass}
-              />
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-text/40 mb-1 block">Email</label>
-              <input
-                type="email"
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
-                placeholder="partner@mail.ru"
                 className={inputClass}
               />
             </div>
