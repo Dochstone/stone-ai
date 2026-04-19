@@ -1601,11 +1601,17 @@ async def create_partner(
     db.add(user)
     await db.flush()
 
+    admin_user_id, admin_email = _audit_actor(admin)
     await log_admin_action(
-        db, *_audit_actor(admin), "create_partner",
-        target_user_id=user.telegram_id,
-        details=f"code={code}, percent={body.referral_percent}%",
-        ip=_client_ip(request), user_agent=_user_agent(request),
+        db,
+        admin_user_id=admin_user_id,
+        admin_email=admin_email,
+        action="create_partner",
+        target_type="user",
+        target_id=str(user.id),
+        payload={"code": code, "percent": body.referral_percent},
+        ip_address=_client_ip(request),
+        user_agent=_user_agent(request),
     )
     await db.commit()
 
@@ -1683,11 +1689,17 @@ async def update_partner(
         changes.append(f"name={user.first_name}")
 
     if changes:
+        admin_user_id, admin_email = _audit_actor(admin)
         await log_admin_action(
-            db, *_audit_actor(admin), "update_partner",
-            target_user_id=user.telegram_id,
-            details=f"partner={user.referral_code}, {', '.join(changes)}",
-            ip=_client_ip(request), user_agent=_user_agent(request),
+            db,
+            admin_user_id=admin_user_id,
+            admin_email=admin_email,
+            action="update_partner",
+            target_type="user",
+            target_id=str(user.id),
+            payload={"code": user.referral_code, "changes": changes},
+            ip_address=_client_ip(request),
+            user_agent=_user_agent(request),
         )
         await db.commit()
 
@@ -1710,11 +1722,17 @@ async def delete_partner(
     code = user.referral_code
     user.referral_percent = None
 
+    admin_user_id, admin_email = _audit_actor(admin)
     await log_admin_action(
-        db, *_audit_actor(admin), "delete_partner",
-        target_user_id=user.telegram_id,
-        details=f"code={code}",
-        ip=_client_ip(request), user_agent=_user_agent(request),
+        db,
+        admin_user_id=admin_user_id,
+        admin_email=admin_email,
+        action="delete_partner",
+        target_type="user",
+        target_id=str(user.id),
+        payload={"code": code},
+        ip_address=_client_ip(request),
+        user_agent=_user_agent(request),
     )
     await db.commit()
     return {"status": "ok"}
