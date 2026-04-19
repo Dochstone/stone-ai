@@ -8,6 +8,7 @@ import { SITE_URL } from "@/lib/constants";
 import { planPriceFull } from "@/lib/pricing";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { buildItemList } from "@/lib/schema";
+import { getAuthor, DEFAULT_AUTHOR_SLUG } from "@/lib/authors";
 
 const ChatWidget = dynamic(() => import("@/components/ChatWidget"), { ssr: false });
 
@@ -40,14 +41,18 @@ const companyColor: Record<string, string> = {
 };
 
 const companyLogo: Record<string, string> = {
-  OpenAI: "/logos/openai.svg",
-  Anthropic: "/logos/anthropic.svg",
-  Google: "/logos/google.svg",
+  OpenAI: "/logos/openai-icon.png",
+  Anthropic: "/logos/claude-icon.png",
+  Google: "/logos/gemini-pro-icon.png",
   Meta: "/logos/meta.svg",
   Mistral: "/logos/mistral.svg",
-  DeepSeek: "/logos/deepseek.svg",
-  xAI: "/logos/xai.svg",
-  Perplexity: "/logos/perplexity.svg",
+  DeepSeek: "/logos/deepseek-icon.png",
+  xAI: "/logos/grok-icon.png",
+  Perplexity: "/logos/perplexity-icon.png",
+  Alibaba: "/logos/qwen-icon.png",
+  Cohere: "/logos/cohere-icon.png",
+  Kuaishou: "/logos/kling-icon.png",
+  Midjourney: "/logos/mj-icon.png",
 };
 
 const catEmoji: Record<string, string> = { chat: "💬", image: "🎨", video: "📹", reason: "🧠", code: "💻", search: "🔍", "3d": "🧊" };
@@ -155,6 +160,7 @@ export default function ComparePage({ params }: Props) {
     { q: "Сохраняются ли история и контекст между сессиями?", a: "Да. Stone AI сохраняет историю чата для каждой модели отдельно. Вернуться к диалогу можно в любой момент на веб или в Telegram-боте — история синхронизируется между устройствами." },
   ];
 
+  const author = getAuthor(DEFAULT_AUTHOR_SLUG)!;
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -163,10 +169,9 @@ export default function ComparePage({ params }: Props) {
     datePublished: "2026-04-07",
     dateModified: new Date().toISOString().split("T")[0],
     author: {
-      "@type": "Organization",
-      "@id": `${SITE_URL}/#organization`,
-      name: "Stone AI",
-      url: SITE_URL,
+      "@type": "Person",
+      name: author.name,
+      url: `${SITE_URL}/authors/${author.slug}`,
     },
     publisher: {
       "@type": "Organization",
@@ -280,7 +285,7 @@ export default function ComparePage({ params }: Props) {
               <h3 className="font-extrabold text-text mb-4 flex items-center gap-2">
                 {isPlatformCompare
                   ? <img src={comp.platform1!.logo} alt="" className={`w-5 h-5 rounded ${comp.platform1!.logo.endsWith(".svg") ? "opacity-70 dark:invert" : ""}`} />
-                  : companyLogo[m1?.company || ""] && <img src={companyLogo[m1?.company || ""]} alt="" className="w-5 h-5 rounded opacity-70 dark:invert" />}
+                  : companyLogo[m1?.company || ""] && <img src={companyLogo[m1?.company || ""]} alt="" className="w-10 h-10 rounded-lg" />}
                 {name1}
               </h3>
               <ul className="space-y-3">
@@ -299,7 +304,7 @@ export default function ComparePage({ params }: Props) {
               <h3 className="font-extrabold text-text mb-4 flex items-center gap-2">
                 {isPlatformCompare
                   ? <img src={comp.platform2!.logo} alt="" className={`w-5 h-5 rounded ${comp.platform2!.logo.endsWith(".svg") ? "opacity-70 dark:invert" : ""}`} />
-                  : companyLogo[m2?.company || ""] && <img src={companyLogo[m2?.company || ""]} alt="" className="w-5 h-5 rounded opacity-70 dark:invert" />}
+                  : companyLogo[m2?.company || ""] && <img src={companyLogo[m2?.company || ""]} alt="" className="w-10 h-10 rounded-lg" />}
                 {name2}
               </h3>
               <ul className="space-y-3">

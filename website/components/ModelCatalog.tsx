@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getModelIconSrc } from "@/lib/company-icon";
 import Link from "next/link";
 import {
   MODELS,
@@ -10,7 +11,6 @@ import {
   type ModelCategory,
 } from "@/lib/models";
 import { planPrice } from "@/lib/pricing";
-import ProviderIcon from "@/components/ProviderIcon";
 
 const categoryLabels: Record<ModelCategory, string> = {
   chat: "Чат",
@@ -20,6 +20,31 @@ const categoryLabels: Record<ModelCategory, string> = {
   code: "Код",
   video: "Видео",
   "3d": "3D",
+};
+
+const companyColors: Record<string, string> = {
+  OpenAI: "bg-green-500/10 text-green-600",
+  Anthropic: "bg-orange-500/10 text-orange-600",
+  Google: "bg-blue-500/10 text-blue-600",
+  Meta: "bg-sky-500/10 text-sky-600",
+  Mistral: "bg-purple-500/10 text-purple-600",
+  DeepSeek: "bg-cyan-500/10 text-cyan-600",
+  xAI: "bg-slate-500/10 text-slate-600",
+  Perplexity: "bg-indigo-500/10 text-indigo-600",
+  BFL: "bg-amber-500/10 text-amber-600",
+  Stability: "bg-pink-500/10 text-pink-600",
+  Alibaba: "bg-orange-500/10 text-orange-600",
+  MiniMax: "bg-rose-500/10 text-rose-600",
+  Zhipu: "bg-violet-500/10 text-violet-600",
+  Moonshot: "bg-blue-500/10 text-blue-600",
+  Cohere: "bg-yellow-500/10 text-yellow-600",
+  Microsoft: "bg-blue-500/10 text-blue-600",
+  NVIDIA: "bg-lime-500/10 text-lime-600",
+  Gryphe: "bg-red-500/10 text-red-600",
+  Kuaishou: "bg-red-500/10 text-red-600",
+  Pika: "bg-pink-500/10 text-pink-600",
+  Luma: "bg-indigo-500/10 text-indigo-600",
+  Tripo3D: "bg-cyan-500/10 text-cyan-600",
 };
 
 // Model tier based on pricing (same as WebChat)
@@ -167,9 +192,9 @@ export default function ModelCatalog() {
                       >
                         <div className="p-5">
                           <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-1.5">
-                              <ProviderIcon company={model.company} size={22} />
-                              <span className="text-[10px] font-semibold text-text/50">{model.company}</span>
+                            <div className="flex items-center gap-2">
+                              {(() => { const src = getModelIconSrc(model.id, model.company); return src ? <img src={src} alt="" width={32} height={32} className="rounded-lg shrink-0 shadow-sm" /> : null; })()}
+                              <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold ${companyColors[model.company] ?? "bg-gray-500/10 text-gray-600"}`}>{model.company}</span>
                             </div>
                             <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${tierInfo.style}`}>{tierInfo.label}</span>
                           </div>
@@ -235,7 +260,7 @@ export default function ModelCatalog() {
                     <div className="flex flex-col md:flex-row gap-6">
                       <div className="flex-1 space-y-4">
                         <div className="flex items-center gap-3 flex-wrap">
-                          <ProviderIcon company={exp.company} size={28} />
+                          <>{(() => { const src = getModelIconSrc(exp.id, exp.company); return src ? <img src={src} alt="" width={40} height={40} className="rounded-lg shrink-0 shadow-sm" /> : null; })()}<span className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${companyColors[exp.company] ?? "bg-gray-500/10 text-gray-600"}`}>{exp.company}</span></>
                           <h3 className="font-extrabold text-lg">{exp.name}</h3>
                           <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${getTierLabel(exp.id).style}`}>{getTierLabel(exp.id).label}</span>
                         </div>

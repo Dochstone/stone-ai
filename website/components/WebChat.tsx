@@ -1,5 +1,6 @@
 "use client";
 
+import { getModelIconSrc } from "@/lib/company-icon";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { MODELS, getModelWeight, type AIModel, type UserLimits, type VideoGenerationOptions, type VideoModelMeta } from "@/lib/models";
 import AuthFormComponent, { type AuthState } from "@/components/AuthForm";
@@ -124,7 +125,23 @@ interface ChatSessionItem {
 }
 
 // ─── Company icon for AI avatar ───
-import ProviderIcon, { getProviderColor } from "@/components/ProviderIcon";
+
+const companyColors: Record<string, string> = {
+  OpenAI: "#10a37f", Anthropic: "#d97706", Google: "#4285f4", Meta: "#0668E1",
+  Mistral: "#1a1a1a", DeepSeek: "#06b6d4", xAI: "#64748b", Perplexity: "#6366f1",
+  Alibaba: "#ff6a00", MiniMax: "#ec4899", Zhipu: "#0ea5e9", Cohere: "#39d353",
+  Microsoft: "#00a4ef", NVIDIA: "#76b900", Gryphe: "#8b5cf6", BFL: "#f59e0b",
+  Stability: "#a855f7", Moonshot: "#06b6d4",
+  Luma: "#9333EA", Tripo3D: "#14B8A6", Tencent: "#1E6FFF", PixVerse: "#A855F7",
+  Pika: "#F97316", Lightricks: "#3B82F6", Kuaishou: "#ff4f00",
+};
+
+// Fallback letter for companies without SVG logo
+const companyIcons: Record<string, string> = {
+  Alibaba: "Q", MiniMax: "M", Zhipu: "Z", Cohere: "C",
+  Microsoft: "M", NVIDIA: "N", Gryphe: "G", BFL: "F",
+  Stability: "S", Moonshot: "K",
+};
 
 // PROMPT_CATEGORIES and PROMPT_TEMPLATES imported from @/lib/prompt-templates
 
@@ -402,7 +419,7 @@ function Sidebar({
         {selectedModel && (() => {
           const m = MODELS_MAP.get(selectedModel);
           if (!m) return null;
-          const color = getProviderColor(m.company);
+          const color = companyColors[m.company] || "#C4623D";
           return (
             <div className="px-3 pt-3 pb-2">
               <div
@@ -412,7 +429,15 @@ function Sidebar({
                   borderColor: `${color}25`,
                 }}
               >
-                <ProviderIcon company={m.company} size={28} />
+                {(() => {
+                  const src = getModelIconSrc(m.id, m.company);
+                  if (src) return <img src={src} alt={m.company} className="w-9 h-9 rounded-lg shrink-0 object-cover shadow-sm" />;
+                  return (
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-white text-[11px] font-extrabold shadow-sm" style={{ background: color }}>
+                      {(companyIcons[m.company] || m.company[0] || "A").toUpperCase()}
+                    </div>
+                  );
+                })()}
                 <div className="flex-1 min-w-0">
                   <div className="text-[9px] font-bold uppercase tracking-[1.5px]" style={{ color }}>История</div>
                   <div className="text-[12px] font-bold text-text truncate leading-tight">{m.name}</div>
@@ -508,6 +533,16 @@ function Sidebar({
                           onClick={() => { if (editingId !== s.id) { onLoadSession(s.id); if (window.innerWidth < 1024) onToggle(); } }}
                           onDoubleClick={(e) => { e.stopPropagation(); setEditingId(s.id); setEditTitle(s.title || ""); }}
                         >
+                          {(() => {
+                            const mm = MODELS_MAP.get(s.model_id);
+                            const src = getModelIconSrc(mm?.id, mm?.company);
+                            if (src) return <img src={src} alt={mm?.company || ""} className="w-7 h-7 rounded-lg shrink-0 object-cover shadow-sm" />;
+                            return (
+                              <div className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shrink-0" style={{ backgroundColor: companyColors[mm?.company ?? ""] || "#C4623D" }}>
+                                {(companyIcons[mm?.company ?? ""] || mm?.company?.[0] || "A").toUpperCase()}
+                              </div>
+                            );
+                          })()}
                           <div className="flex-1 min-w-0">
                             {editingId === s.id ? (
                               <input
@@ -1802,7 +1837,8 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
   if (!loaded) return null;
 
-  const aiCompany = model?.company ?? "";
+  const aiColor = companyColors[model?.company ?? ""] || "#C4623D";
+  const aiLetter = companyIcons[model?.company ?? ""] || "AI";
   const lastMsg = messages[messages.length - 1];
   const showStreamingDots = streaming && (!lastMsg || lastMsg.role !== "assistant" || !lastMsg.content);
 
@@ -1895,7 +1931,15 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
             {/* Model info */}
             <div className="flex items-center gap-1.5 min-w-0">
-              <ProviderIcon company={aiCompany} size={24} />
+              {(() => {
+                const src = getModelIconSrc(model?.id, model?.company);
+                if (src) return <img src={src} alt={model?.company || "AI"} className="w-9 h-9 rounded-lg shrink-0 object-cover" />;
+                return (
+                  <div className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shrink-0" style={{ backgroundColor: aiColor }}>
+                    {aiLetter}
+                  </div>
+                );
+              })()}
               <span className="text-xs text-text/40 font-medium truncate">{model?.name || "AI Чат"}</span>
             </div>
           </div>
@@ -1985,7 +2029,15 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                       }} className={`w-full flex items-start gap-3 px-3 py-3 sm:py-2.5 rounded-xl text-left transition-colors ${
                         selectedModel === m.id ? "bg-accent/5 border border-accent/20" : "hover:bg-text/[0.03] active:bg-text/[0.06]"
                       } ${lock ? "opacity-50" : ""}`}>
-                        <ProviderIcon company={m.company} size={32} className="mt-0.5" />
+                        {(() => {
+                          const src = getModelIconSrc(m.id, m.company);
+                          if (src) return <img src={src} alt={m.company} className="w-9 h-9 rounded-lg shrink-0 object-cover shadow-sm mt-0.5" />;
+                          return (
+                            <div className="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold text-white shrink-0 mt-0.5" style={{ backgroundColor: companyColors[m.company] || "#C4623D" }}>
+                              {(companyIcons[m.company] || m.company[0] || "A").toUpperCase()}
+                            </div>
+                          );
+                        })()}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5">
                             <span className="text-[14px] sm:text-sm font-semibold truncate">{lock ? "🔒 " : ""}{m.name}</span>
@@ -2241,7 +2293,15 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
               {showStreamingDots && (
                 <div className="flex gap-2.5 sm:gap-3">
                   <div className="shrink-0 mt-0.5">
-                    <ProviderIcon company={aiCompany} size={28} />
+                    {(() => {
+                      const src = getModelIconSrc(model?.id, model?.company);
+                      if (src) return <img src={src} alt={model?.company || "AI"} className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover" />;
+                      return (
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: aiColor }}>
+                          <span className="text-[10px] sm:text-[11px] font-bold text-white">{aiLetter}</span>
+                        </div>
+                      );
+                    })()}
                   </div>
                   <div className="bg-text/[0.06] rounded-2xl rounded-tl-md px-4 py-3">
                     <div className="flex items-center gap-2">
@@ -2383,9 +2443,14 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
               <button
                 onClick={() => setModelPickerOpen(!modelPickerOpen)}
                 data-onboard="model-picker"
-                className="shrink-0 flex items-center gap-1 px-2 py-1.5 rounded-lg bg-text/[0.04] hover:bg-text/[0.08] text-[11px] font-semibold text-text/60 transition-colors max-w-[120px] sm:max-w-[160px]"
+                className="shrink-0 flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-text/[0.04] hover:bg-text/[0.08] text-[11px] font-semibold text-text/60 transition-colors max-w-[140px] sm:max-w-[180px]"
                 title={model ? `${model.name}${getModelWeight(model.id) > 1 ? ` · 1 запрос = ${getModelWeight(model.id)} единиц лимита` : ""}` : undefined}
               >
+                {(() => {
+                  const src = getModelIconSrc(model?.id, model?.company);
+                  if (src) return <img src={src} alt={model?.company || "AI"} className="w-5 h-5 rounded shrink-0 object-cover" />;
+                  return null;
+                })()}
                 <span className="truncate">{model?.name?.split(" ").slice(0, 2).join(" ") || "Модель"}</span>
                 {model && getModelWeight(model.id) > 1 && (
                   <span className={`text-[9px] font-bold px-1 py-0 rounded shrink-0 ${

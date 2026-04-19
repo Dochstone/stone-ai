@@ -2,7 +2,28 @@
 
 import { useState } from "react";
 import { MODELS, type ModelCategory } from "@/lib/models";
-import ProviderIcon from "@/components/ProviderIcon";
+import { getModelIconSrc } from "@/lib/company-icon";
+
+const companyColors: Record<string, string> = {
+  OpenAI: "bg-green-100 text-green-700",
+  Anthropic: "bg-orange-100 text-orange-700",
+  Google: "bg-blue-100 text-blue-700",
+  Meta: "bg-sky-100 text-sky-700",
+  Mistral: "bg-purple-100 text-purple-700",
+  DeepSeek: "bg-cyan-100 text-cyan-700",
+  xAI: "bg-slate-100 text-slate-700",
+  Perplexity: "bg-indigo-100 text-indigo-700",
+  BFL: "bg-amber-100 text-amber-700",
+  Stability: "bg-purple-100 text-purple-700",
+  Alibaba: "bg-orange-100 text-orange-700",
+  Moonshot: "bg-cyan-100 text-cyan-700",
+  MiniMax: "bg-pink-100 text-pink-700",
+  Microsoft: "bg-blue-100 text-blue-700",
+  NVIDIA: "bg-green-100 text-green-700",
+  Cohere: "bg-emerald-100 text-emerald-700",
+  Zhipu: "bg-sky-100 text-sky-700",
+  Gryphe: "bg-violet-100 text-violet-700",
+};
 
 // Badges for popular/new/fast models
 const modelBadges: Record<string, { label: string; color: string }[]> = {
@@ -109,8 +130,8 @@ export default function ModelGrid() {
                           <div className="p-5">
                             <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center gap-1.5">
-                                <ProviderIcon company={model.company} size={22} />
-                                <span className="text-[10px] font-semibold text-text/50">{model.company}</span>
+                                {(() => { const s = getModelIconSrc(model.id, model.company); return s ? <img src={s} alt="" width={36} height={36} className="rounded-lg shrink-0 shadow-sm" /> : null; })()}
+                                <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold ${companyColors[model.company] ?? "bg-gray-100 text-gray-700"}`}>{model.company}</span>
                               </div>
                               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${model.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"}`}>{formatPrice(model)}</span>
                             </div>
@@ -170,7 +191,10 @@ export default function ModelGrid() {
                         {/* Left: info */}
                         <div className="flex-1 space-y-4">
                           <div className="flex items-center gap-3">
-                            <ProviderIcon company={expandedInRow.company} size={28} />
+                            <div className="flex items-center gap-2">
+                          {(() => { const s = getModelIconSrc(expandedInRow.id, expandedInRow.company); return s ? <img src={s} alt="" width={44} height={44} className="rounded-lg shrink-0 shadow-sm" /> : null; })()}
+                          <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${companyColors[expandedInRow.company] ?? "bg-gray-100 text-gray-700"}`}>{expandedInRow.company}</span>
+                        </div>
                             <h3 className="font-extrabold text-lg">{expandedInRow.name}</h3>
                             <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${expandedInRow.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"}`}>{formatPrice(expandedInRow)}</span>
                           </div>

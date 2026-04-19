@@ -18,41 +18,29 @@ const WebChat = dynamic(() => import("@/components/WebChat"), {
   ),
 });
 
+const NAV_PRIMARY = [
+  { href: "/dashboard/tools", label: "Все инструменты", icon: "M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5", badge: "NEW" },
+  { href: "/dashboard/chat", label: "AI Чат", icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" },
+  { href: "/dashboard/gallery", label: "Галерея", icon: "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" },
+  { href: "/dashboard/projects", label: "Проекты", icon: "M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" },
+];
+
+const NAV_SECONDARY = [
+  { href: "/dashboard/templates", label: "AI-шаблоны", icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" },
+  { href: "/dashboard/marketplace", label: "Маркетплейс", icon: "M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64M13.5 21H10.5m0 0V13.5m0 7.5H5.625c-.621 0-1.125-.504-1.125-1.125V9.349m0 0a3.001 3.001 0 003.75-.615M4.5 9.349V5.25c0-.621.504-1.125 1.125-1.125h12.75c.621 0 1.125.504 1.125 1.125v4.099m-16.5 0a3.004 3.004 0 003-3h13.5a3 3 0 003 3" },
+  { href: "/dashboard/agent", label: "AI-Агент", icon: "M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" },
+  { href: "/dashboard/bots", label: "Мои боты", icon: "M7.5 7.5h.008v.008H7.5V7.5zm0 4.5h.008v.008H7.5V12zm0 4.5h.008v.008H7.5v-.008zM12 7.5h4.5v.008H12V7.5zm0 4.5h4.5v.008H12V12zm0 4.5h4.5v.008H12v-.008zM4.5 3.75h15a1.5 1.5 0 011.5 1.5v13.5a1.5 1.5 0 01-1.5 1.5h-15a1.5 1.5 0 01-1.5-1.5V5.25a1.5 1.5 0 011.5-1.5z" },
+  { href: "/dashboard/photo-session", label: "Фотосессия", icon: "M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316zM16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" },
+  { href: "/dashboard/presentations", label: "Презентации", icon: "M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5" },
+  { href: "/dashboard/campaigns", label: "Кампании", icon: "M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73" },
+  { href: "/dashboard/achievements", label: "Достижения", icon: "M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35" },
+  { href: "/dashboard/faq", label: "FAQ", icon: "M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" },
+  { href: "/dashboard/games", label: "Игры", icon: "M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z" },
+];
+
+// Backwards-compat: flat union for code that still iterates NAV_ITEMS
 const NAV_ITEMS = [
-  {
-    group: "Рабочее пространство",
-    items: [
-      { href: "/dashboard/tools", label: "Все инструменты", icon: "M4 6h16M4 12h16M4 18h7", badge: "NEW" },
-      { href: "/dashboard/chat", label: "AI Чат", icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" },
-      { href: "/dashboard/templates", label: "AI-шаблоны", icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z", badge: "50+" },
-      { href: "/dashboard/marketplace", label: "Маркетплейс", icon: "M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .415.336.75.75.75z", badge: "NEW" },
-      { href: "/dashboard/agent", label: "AI-Агент", icon: "M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 00.659 1.591L19 14.5M14.25 3.104c.251.023.501.05.75.082M5 14.5l2.47 2.47a3.18 3.18 0 004.56 0L14.5 14.5m4.5 0l-2.47 2.47a3.18 3.18 0 01-4.56 0", badge: "NEW" },
-      { href: "/dashboard/bots", label: "Мои боты", icon: "M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 00.659 1.591L19 14.5M14.25 3.104c.251.023.501.05.75.082M19 14.5l-1.756-1.089a1.477 1.477 0 00-.82-.243H7.576a1.477 1.477 0 00-.82.243L5 14.5m14 0v4.25A2.25 2.25 0 0116.75 21h-9.5A2.25 2.25 0 015 18.75V14.5", badge: "NEW" },
-      { href: "/dashboard/projects", label: "Мои проекты", icon: "M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" },
-      { href: "/dashboard/gallery", label: "Галерея", icon: "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" },
-      { href: "/dashboard/photo-session", label: "Фотосессия", icon: "M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" },
-      { href: "/dashboard/presentations", label: "Презентации", icon: "M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5" },
-    ],
-  },
-  {
-    group: "SEO-инструменты",
-    items: [
-      { href: "/dashboard/campaigns", label: "Рекламные кампании", icon: "M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6", badge: "NEW" },
-      { href: "/dashboard/seo", label: "SEO-модуль", icon: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" },
-      { href: "/dashboard/seo/article", label: "SEO-статьи", icon: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" },
-      { href: "/dashboard/seo/analyze", label: "Анализ текста", icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" },
-      { href: "/dashboard/seo/ab-test", label: "A/B тест", icon: "M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" },
-      { href: "/dashboard/seo/meta", label: "Мета-теги", icon: "M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" },
-    ],
-  },
-  {
-    group: "Прогресс",
-    items: [
-      { href: "/dashboard/achievements", label: "Достижения", icon: "M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" },
-      { href: "/dashboard/faq", label: "FAQ", icon: "M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" },
-      { href: "/dashboard/games", label: "Игры", icon: "M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z", badge: "NEW" },
-    ],
-  },
+  { group: "", items: [...NAV_PRIMARY, ...NAV_SECONDARY] },
 ];
 
 function NavIcon({ d, size }: { d: string; size?: number }) {
@@ -82,6 +70,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [showTour, setShowTour] = useState(false);
   const [chatLoaded, setChatLoaded] = useState(false);
   const [chatCategory, setChatCategory] = useState("all");
+  const [moreOpen, setMoreOpen] = useState(false);
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const isChat = pathname === "/dashboard/chat";
 
@@ -271,7 +260,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   </button>
                 ))}
                 <div className="w-6 h-px bg-text/[0.08] my-1" />
-                {NAV_ITEMS.flatMap(g => g.items).filter(i => i.href !== "/dashboard/chat").map((item) => (
+                {NAV_PRIMARY.filter(i => i.href !== "/dashboard/chat").map((item) => (
                   <Link key={item.href} href={item.href} aria-label={item.label} onClick={() => setSidebarOpen(false)}
                     className={`group relative w-9 h-9 flex items-center justify-center rounded-lg transition-all ${isActive(item.href) ? "text-accent bg-accent/5" : "text-text/30 hover:text-text/50 hover:bg-text/[0.05]"}`}>
                     <NavIcon d={item.icon} size={20} />
@@ -285,28 +274,42 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {expanded && (
               <>
                 {/* Header */}
-                {isChat && (
-                  <div className="px-3 pb-2 mb-1 border-b border-text/[0.06] flex items-center" style={{ paddingTop: "max(8px, env(safe-area-inset-top))" }}>
-                    <a href="/" className="flex items-center gap-1.5">
-                      <img src="/mascots/stone-mascot-idle.webp" alt="" width="24" height="24" />
-                      <span className="text-sm font-extrabold text-text">Stone AI</span>
-                    </a>
-                    <span className="text-[9px] text-accent font-bold ml-1.5">65+</span>
-                    {isChat && (
-                      <button onClick={() => setSidebarPinned(p => !p)} title={sidebarPinned ? "Открепить" : "Закрепить"}
-                        className={`ml-auto hidden lg:flex w-6 h-6 items-center justify-center rounded-md transition-colors ${sidebarPinned ? "text-accent bg-accent/10" : "text-text/20 hover:text-text/40"}`}>
-                        <svg className="w-3.5 h-3.5" fill={sidebarPinned ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 4.5l-4 4L7 7 4 10l5.5 5.5L7 18h3l2.5-2.5L18 21l3-3-1.5-4 4-4-6.5-5.5z" />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
-                )}
+                <div className="px-3 pb-2 mb-1 border-b border-text/[0.06] flex items-center" style={{ paddingTop: "max(8px, env(safe-area-inset-top))" }}>
+                  <a href="/" className="flex items-center gap-1.5">
+                    <img src="/mascots/stone-mascot-idle.webp" alt="" width="24" height="24" />
+                    <span className="text-sm font-extrabold text-text">Stone AI</span>
+                  </a>
+                  <span className="text-[9px] text-accent font-bold ml-1.5">65+</span>
+                  {isChat && (
+                    <button onClick={() => setSidebarPinned(p => !p)} title={sidebarPinned ? "Открепить" : "Закрепить"}
+                      className={`ml-auto hidden lg:flex w-6 h-6 items-center justify-center rounded-md transition-colors ${sidebarPinned ? "text-accent bg-accent/10" : "text-text/20 hover:text-text/40"}`}>
+                      <svg className="w-3.5 h-3.5" fill={sidebarPinned ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 4.5l-4 4L7 7 4 10l5.5 5.5L7 18h3l2.5-2.5L18 21l3-3-1.5-4 4-4-6.5-5.5z" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
 
-                {/* Chat categories */}
-                {isChat && (
+                {/* 1. Все инструменты — solo at top */}
+                <div className="space-y-0.5">
+                  {NAV_PRIMARY.filter(item => item.href === "/dashboard/tools").map((item) => {
+                    const active = isActive(item.href);
+                    return (
+                      <Link key={item.href} href={item.href}
+                        onClick={() => { setSidebarOpen(false); setSidebarHover(false); }}
+                        className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-medium transition-all ${active ? "bg-accent/10 text-accent font-semibold" : "text-text/50 hover:text-text/80 hover:bg-text/[0.04]"}`}>
+                        <NavIcon d={item.icon} />
+                        <span className="truncate">{item.label}</span>
+                        {item.badge && <span className={`ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-md ${active ? "bg-accent/20 text-accent" : "bg-text/[0.06] text-text/30"}`}>{item.badge}</span>}
+                      </Link>
+                    );
+                  })}
+                </div>
+
+                {/* 2. Chat block — modes on chat page, or AI Чат link elsewhere */}
+                {isChat ? (
                   <>
-                    <div className="text-[9px] font-bold text-accent/50 uppercase tracking-[2px] px-3 pt-1 mb-1">Режим AI</div>
+                    <div className="text-[9px] font-bold text-accent/50 uppercase tracking-[2px] px-3 pt-2 mb-1">Режим AI</div>
                     <div className="space-y-px mb-1">
                       {CHAT_CATEGORIES.map((c) => (
                         <button key={c.id} onClick={() => { setChatCategory(c.id); setSidebarOpen(false); }}
@@ -317,34 +320,64 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         </button>
                       ))}
                     </div>
-                    <div className="flex items-center gap-2 my-1 px-3">
-                      <div className="flex-1 h-px bg-text/[0.06]" />
-                      <span className="text-[8px] text-text/15 font-bold uppercase tracking-widest">Инструменты</span>
-                      <div className="flex-1 h-px bg-text/[0.06]" />
-                    </div>
                   </>
+                ) : (
+                  <div className="space-y-0.5">
+                    {NAV_PRIMARY.filter(item => item.href === "/dashboard/chat").map((item) => {
+                      const active = isActive(item.href);
+                      return (
+                        <Link key={item.href} href={item.href}
+                          onClick={() => { setSidebarOpen(false); setSidebarHover(false); }}
+                          className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-medium transition-all ${active ? "bg-accent/10 text-accent font-semibold" : "text-text/50 hover:text-text/80 hover:bg-text/[0.04]"}`}>
+                          <NavIcon d={item.icon} />
+                          <span className="truncate">{item.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
                 )}
 
-                {/* Nav groups — ONE render path for all states */}
-                {NAV_ITEMS.map((group) => (
-                  <div key={group.group}>
-                    <div className="text-[9px] font-bold text-text/20 uppercase tracking-[1.5px] px-3 pt-2 mb-0.5">{group.group}</div>
-                    <div className="space-y-0.5">
-                      {group.items.filter(item => !(isChat && item.href === "/dashboard/chat")).map((item) => {
-                        const active = isActive(item.href);
-                        return (
-                          <Link key={item.href} href={item.href}
-                            onClick={() => { setSidebarOpen(false); setSidebarHover(false); }}
-                            className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-medium transition-all ${active ? "bg-accent/10 text-accent font-semibold" : "text-text/50 hover:text-text/80 hover:bg-text/[0.04]"}`}>
-                            <NavIcon d={item.icon} />
-                            <span className="truncate">{item.label}</span>
-                            {item.badge && <span className={`ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-md ${active ? "bg-accent/20 text-accent" : "bg-text/[0.06] text-text/30"}`}>{item.badge}</span>}
-                          </Link>
-                        );
-                      })}
-                    </div>
+                {/* 3. Rest of primary — Галерея, Проекты */}
+                <div className="space-y-0.5 mt-1">
+                  {NAV_PRIMARY.filter(item => item.href !== "/dashboard/tools" && item.href !== "/dashboard/chat").map((item) => {
+                    const active = isActive(item.href);
+                    return (
+                      <Link key={item.href} href={item.href}
+                        onClick={() => { setSidebarOpen(false); setSidebarHover(false); }}
+                        className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-medium transition-all ${active ? "bg-accent/10 text-accent font-semibold" : "text-text/50 hover:text-text/80 hover:bg-text/[0.04]"}`}>
+                        <NavIcon d={item.icon} />
+                        <span className="truncate">{item.label}</span>
+                        {item.badge && <span className={`ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-md ${active ? "bg-accent/20 text-accent" : "bg-text/[0.06] text-text/30"}`}>{item.badge}</span>}
+                      </Link>
+                    );
+                  })}
+                </div>
+
+                {/* Secondary nav — collapsible */}
+                <button
+                  onClick={() => setMoreOpen(p => !p)}
+                  className="mt-2 w-full flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold text-text/30 uppercase tracking-[1.5px] hover:text-text/50 transition-colors"
+                >
+                  <span>Ещё</span>
+                  <svg className={`w-3 h-3 transition-transform ${moreOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {moreOpen && (
+                  <div className="space-y-0.5">
+                    {NAV_SECONDARY.map((item) => {
+                      const active = isActive(item.href);
+                      return (
+                        <Link key={item.href} href={item.href}
+                          onClick={() => { setSidebarOpen(false); setSidebarHover(false); }}
+                          className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-medium transition-all ${active ? "bg-accent/10 text-accent font-semibold" : "text-text/50 hover:text-text/80 hover:bg-text/[0.04]"}`}>
+                          <NavIcon d={item.icon} />
+                          <span className="truncate">{item.label}</span>
+                        </Link>
+                      );
+                    })}
                   </div>
-                ))}
+                )}
               </>
             )}
 
