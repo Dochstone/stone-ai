@@ -114,7 +114,7 @@ const audiences = [
 const faqItems = [
   {
     q: "Кто стоит за Stone AI? Это частная компания или корпорация?",
-    a: "Stone AI — независимый частный проект, основан в 2024 году российским фаундером. Команда — несколько человек: разработчики, продакт-менеджер, контент-редактор. Юридически оформлены в странах с прямым доступом к западным AI-API, чтобы легально перепродавать доступ россиянам в рублях.",
+    a: "Stone AI — независимый частный проект, основан в 2024 году. Команда — несколько человек: разработчики, продакт-менеджер, контент-редактор. Юридически оформлены в странах с прямым доступом к западным AI-API, чтобы легально перепродавать доступ россиянам в рублях.",
   },
   {
     q: "Сколько пользователей у платформы сейчас?",
@@ -192,14 +192,7 @@ export default function AboutPage() {
           "@type": "Organization",
           "@id": "https://stoneai.ru/#organization",
         },
-        mentions: [
-          {
-            "@type": "Person",
-            "@id": "https://stoneai.ru/authors/dochstone#person",
-            name: "Артём Доченков",
-            jobTitle: "Основатель Stone AI",
-          },
-        ],
+        mentions: [],
       }) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org",
@@ -251,7 +244,7 @@ export default function AboutPage() {
               В 2024 году российский пользователь AI оказался в парадоксальной ситуации. С одной стороны — рекордный выбор нейросетей: GPT-5 от OpenAI, Claude Opus от Anthropic, Gemini от Google, Midjourney для картинок, Sora для видео, Suno для музыки. С другой стороны — всё это заблокировано на уровне IP, стоит долларов, требует иностранных карт и работает только через VPN, который РКН блокирует всё чаще и чаще.
             </p>
             <p>
-              Фаундер Stone AI, Артём Доченков, сам был этим пользователем. Подписка на ChatGPT Plus через перекупа, Claude через знакомого в Сербии, Midjourney через третий обменник, Perplexity через четвёртый, ещё VPN за 400₽/мес, три иностранные карты «на всякий случай». Полная сумма — почти 9 000₽ в месяц. И каждую пятницу — борьба с упавшим VPN перед сдачей клиентского отчёта.
+              Основатели Stone AI сами были такими пользователями. Подписка на ChatGPT Plus через перекупа, Claude через знакомого в Сербии, Midjourney через третий обменник, Perplexity через четвёртый, ещё VPN за 400₽/мес, три иностранные карты «на всякий случай». Полная сумма — почти 9 000₽ в месяц. И каждую пятницу — борьба с упавшим VPN перед сдачей клиентского отчёта.
             </p>
             <p>
               Изначально проект задумывался как личный инструмент для решения этой боли — один бот с одной подпиской, который обслуживает все нейросети сразу. Но после трёх месяцев в закрытой бете стало понятно: в этом нуждаются не единицы, а десятки тысяч русскоязычных юзеров, которые ежедневно воюют с западной AI-инфраструктурой.
@@ -263,14 +256,13 @@ export default function AboutPage() {
           </Callout>
         </section>
 
-        {/* Founder quote */}
+        {/* Mission quote */}
         <section className="max-w-3xl mx-auto mb-16">
           <Quote
             accent
             text="Мы не «русский ChatGPT». Мы — мост между русскоязычными пользователями и мировым AI-рынком. Наша задача — не конкурировать с OpenAI или Anthropic, а убрать барьеры: VPN, иностранные карты, комиссии посредников, переключение между пятью сервисами. Один логин, 65+ моделей, оплата Сбером."
-            author="Артём Доченков"
-            role="Основатель Stone AI"
-            url="/authors/dochstone"
+            author="Команда Stone AI"
+            role=""
           />
         </section>
 
@@ -386,7 +378,7 @@ export default function AboutPage() {
               className="bg-accent text-white px-8 py-3.5 rounded-xl font-bold hover:bg-accent/90 transition-colors">
               Написать в поддержку
             </a>
-            <a href="mailto:dochstone@gmail.com"
+            <a href="mailto:support@stoneai.ru"
               className="border-2 border-text/15 text-text px-8 py-3.5 rounded-xl font-bold hover:border-accent hover:text-accent transition-colors">
               Email
             </a>

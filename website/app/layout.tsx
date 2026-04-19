@@ -171,24 +171,6 @@ const jsonLdOrganization = {
     "https://t.me/stonemvp",
     "https://github.com/Dochstone/stone-ai",
   ],
-  founder: {
-    "@type": "Person",
-    "@id": `${SITE_URL}/authors/dochstone#person`,
-    name: "Артём Доченков",
-    jobTitle: "Основатель Stone AI",
-    url: `${SITE_URL}/authors/dochstone`,
-    image: `${SITE_URL}/authors/dochstone.jpg`,
-    description:
-      "Основатель и идеолог Stone AI. Собрал платформу с 65+ нейросетями, чтобы россияне могли пользоваться AI без VPN и платить картой РФ.",
-    sameAs: ["https://t.me/stonemvp"],
-    knowsAbout: [
-      "Агрегаторы нейросетей",
-      "Оплата AI-сервисов из России",
-      "Сравнение AI-моделей",
-      "Практика использования LLM",
-      "Промпт-инжиниринг",
-    ],
-  },
   foundingLocation: {
     "@type": "Country",
     name: "Russia",

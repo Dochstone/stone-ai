@@ -19,12 +19,17 @@ export default function GoogleCallback() {
       return;
     }
 
+    const utm = (() => { try { return JSON.parse(localStorage.getItem("stone_utm") || "{}"); } catch { return {}; } })();
+    const ref_code = (() => { try { return localStorage.getItem("stone_ref") || undefined; } catch { return undefined; } })();
+
     fetch(`${API_URL}/api/auth/google`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         code,
         redirect_uri: window.location.origin + "/auth/google/callback",
+        ref_code,
+        ...utm,
       }),
     })
       .then((res) => res.json())

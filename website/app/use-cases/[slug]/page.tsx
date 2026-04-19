@@ -5,7 +5,6 @@ import { SITE_URL } from "@/lib/constants";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import dynamic from "next/dynamic";
 import { buildHowTo } from "@/lib/schema";
-import { getAuthor, DEFAULT_AUTHOR_SLUG } from "@/lib/authors";
 import RelatedModels from "@/components/RelatedModels";
 import { CrossLinks } from "@/components/CrossLinks";
 import { relatedUseCases, modelsForUseCase } from "@/lib/content-graph";
@@ -47,16 +46,16 @@ export default function UseCasePage({ params }: { params: { slug: string } }) {
     })),
   };
 
-  const author = getAuthor(DEFAULT_AUTHOR_SLUG)!;
   const articleJsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: uc.h1,
     description: uc.description,
     author: {
-      "@type": "Person",
-      name: author.name,
-      url: `${SITE_URL}/authors/${author.slug}`,
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: "Stone AI",
+      url: SITE_URL,
     },
     publisher: {
       "@type": "Organization",

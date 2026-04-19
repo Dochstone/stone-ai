@@ -171,20 +171,16 @@ async def get_referral_stats(
         "referral_code": user.referral_code,
         "referral_count": referral_count,
         "referral_balance": round(float(user.referral_balance or 0), 2),
-        "referral_percent": REFERRAL_PERCENT,
+        "referral_percent": user.referral_percent if user.referral_percent is not None else REFERRAL_PERCENT,
         "referrals": referrals,
     }
 
 
 async def credit_referrer(db: AsyncSession, user_tg_id: int, deposit_usd: float):
-    """Credit referrer with REFERRAL_PERCENT of deposit. Call after successful payment."""
+    """Credit referrer with their referral_percent (or global default) of deposit."""
     result = await db.execute(select(User).where(User.telegram_id == user_tg_id))
     user = result.scalar_one_or_none()
     if not user or not user.referrer_id:
-        return
-
-    bonus = round(deposit_usd * REFERRAL_PERCENT / 100, 6)
-    if bonus <= 0:
         return
 
     referrer_result = await db.execute(
@@ -194,10 +190,15 @@ async def credit_referrer(db: AsyncSession, user_tg_id: int, deposit_usd: float)
     if not referrer:
         return
 
+    percent = referrer.referral_percent if referrer.referral_percent is not None else REFERRAL_PERCENT
+    bonus = round(deposit_usd * percent / 100, 6)
+    if bonus <= 0:
+        return
+
     referrer.referral_balance = round(float(referrer.referral_balance or 0) + bonus, 6)
     referrer.balance_usd = round(float(referrer.balance_usd or 0) + bonus, 6)
 
     logger.info(
         f"Referral bonus: referrer={referrer.telegram_id}, "
-        f"from_user={user_tg_id}, deposit=${deposit_usd}, bonus=${bonus}"
+        f"from_user={user_tg_id}, deposit=${deposit_usd}, percent={percent}%, bonus=${bonus}"
     )

@@ -8,7 +8,6 @@ import { SITE_URL } from "@/lib/constants";
 import { planPriceFull } from "@/lib/pricing";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { buildItemList } from "@/lib/schema";
-import { getAuthor, DEFAULT_AUTHOR_SLUG } from "@/lib/authors";
 
 const ChatWidget = dynamic(() => import("@/components/ChatWidget"), { ssr: false });
 
@@ -156,7 +155,6 @@ export default function ComparePage({ params }: Props) {
     { q: "Сохраняются ли история и контекст между сессиями?", a: "Да. Stone AI сохраняет историю чата для каждой модели отдельно. Вернуться к диалогу можно в любой момент на веб или в Telegram-боте — история синхронизируется между устройствами." },
   ];
 
-  const author = getAuthor(DEFAULT_AUTHOR_SLUG)!;
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -165,9 +163,10 @@ export default function ComparePage({ params }: Props) {
     datePublished: "2026-04-07",
     dateModified: new Date().toISOString().split("T")[0],
     author: {
-      "@type": "Person",
-      name: author.name,
-      url: `${SITE_URL}/authors/${author.slug}`,
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: "Stone AI",
+      url: SITE_URL,
     },
     publisher: {
       "@type": "Organization",

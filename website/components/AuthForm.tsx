@@ -174,7 +174,8 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
     setError(""); setLoading(true);
     try {
       const utm = (() => { try { return JSON.parse(localStorage.getItem("stone_utm") || "{}"); } catch { return {}; } })();
-      const data = await api("/api/auth/verify-email", { email, code, ...utm });
+      const ref_code = (() => { try { return localStorage.getItem("stone_ref") || undefined; } catch { return undefined; } })();
+      const data = await api("/api/auth/verify-email", { email, code, ...utm, ref_code });
       handleAuthResponse(data, onAuth);
     } catch (err: any) { setError(err.message); } finally { setLoading(false); }
   };
@@ -211,46 +212,105 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
     window.location.href = url;
   };
 
-  const inputClass = "w-full bg-bg border border-text/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent";
-  const btnClass = "w-full bg-accent text-white py-3 min-h-[44px] rounded-xl font-bold text-sm hover:bg-accent/90 transition-colors disabled:opacity-50";
+  const inputClass = "w-full bg-bg border border-text/10 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent/60 transition-all duration-200 placeholder:text-text/30";
+  const btnClass = "w-full bg-accent text-white py-3.5 min-h-[48px] rounded-xl font-bold text-sm hover:bg-accent/90 hover:shadow-lg hover:shadow-accent/20 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:hover:shadow-none";
 
   return (
     <div className="min-h-screen bg-bg flex items-center justify-center px-4 pt-24 pb-12">
-      <div className="w-full max-w-[860px] bg-surface rounded-2xl border border-text/5 shadow-xl overflow-hidden">
-        <div className="flex flex-col md:flex-row">
-          {/* Left — hero image */}
-          <div className="hidden md:block md:w-[340px] shrink-0 relative">
-            <img src="/onboard-hero.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-            <div className="absolute bottom-6 left-6 right-6">
-              <div className="inline-flex items-center gap-1.5 bg-accent/90 text-white text-[11px] font-bold px-3 py-1.5 rounded-full mb-3">
-                🎁 +100₽ на баланс
+      <style>{`
+        @keyframes auth-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        @keyframes auth-pulse-ring { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.5); opacity: 0; } }
+        @keyframes auth-gradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes auth-shine { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+        .auth-float { animation: auth-float 4s ease-in-out infinite; }
+        .auth-float-delay { animation: auth-float 4s ease-in-out 1s infinite; }
+        .auth-float-delay2 { animation: auth-float 4s ease-in-out 2s infinite; }
+        .auth-gradient-bg { background: linear-gradient(-45deg, #1a1a2e, #16213e, #0f3460, #1a1a2e); background-size: 400% 400%; animation: auth-gradient 8s ease infinite; }
+        .auth-shine-btn { position: relative; overflow: hidden; }
+        .auth-shine-btn::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); animation: auth-shine 3s ease-in-out infinite; }
+      `}</style>
+      <div className="w-full max-w-[920px] bg-surface rounded-3xl border border-text/5 shadow-2xl overflow-hidden">
+        <div className="flex flex-col md:flex-row min-h-[580px]">
+          {/* Left — hero panel */}
+          <div className="hidden md:flex md:w-[380px] shrink-0 relative auth-gradient-bg flex-col justify-between p-8 overflow-hidden">
+            {/* Decorative circles */}
+            <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-accent/10 blur-3xl" />
+            <div className="absolute -bottom-32 -left-20 w-80 h-80 rounded-full bg-blue-500/10 blur-3xl" />
+            <div className="absolute top-1/2 right-0 w-40 h-40 rounded-full bg-purple-500/8 blur-2xl" />
+
+            {/* Top — branding */}
+            <div className="relative z-10">
+              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white text-xs font-bold px-4 py-2 rounded-full mb-6 border border-white/10">
+                🎁 +100₽ на баланс при регистрации
               </div>
-              <h2 className="text-white text-xl font-extrabold leading-tight mb-1">65+ нейросетей</h2>
-              <p className="text-white/50 text-xs leading-relaxed">GPT-5 · Claude · Gemini · DeepSeek · Llama · Mistral</p>
-              <div className="flex gap-3 mt-3">
-                {[
-                  { icon: "🤖", text: "Чат" },
-                  { icon: "🖼️", text: "Картинки" },
-                  { icon: "🎥", text: "Видео" },
-                ].map((b, i) => (
-                  <div key={i} className="flex items-center gap-1.5 text-white/60 text-[10px]">
-                    <span>{b.icon}</span><span>{b.text}</span>
+              <h2 className="text-white text-2xl font-extrabold leading-tight mb-2">
+                Все нейросети<br/>в одном месте
+              </h2>
+              <p className="text-white/40 text-sm leading-relaxed">
+                GPT-5 · Claude · Gemini · DeepSeek · Llama · Mistral
+              </p>
+            </div>
+
+            {/* Middle — feature cards */}
+            <div className="relative z-10 space-y-3 my-6">
+              {[
+                { icon: "💬", title: "AI-чат", desc: "10 бесплатных запросов/день", delay: "" },
+                { icon: "🎨", title: "Генерация картинок", desc: "DALL-E, Midjourney, Flux", delay: "auth-float-delay" },
+                { icon: "🎬", title: "Создание видео", desc: "Kling, Runway, Wan", delay: "auth-float-delay2" },
+              ].map((f, i) => (
+                <div key={i} className={`flex items-center gap-3 bg-white/[0.07] backdrop-blur-sm rounded-xl px-4 py-3 border border-white/[0.06] hover:bg-white/[0.12] transition-colors duration-300 ${f.delay}`}>
+                  <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center text-lg shrink-0">
+                    {f.icon}
                   </div>
+                  <div>
+                    <div className="text-white text-sm font-semibold">{f.title}</div>
+                    <div className="text-white/40 text-[11px]">{f.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Bottom — social proof */}
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex -space-x-2">
+                  {["🧑‍💻","👩‍🎨","👨‍💼","👩‍🔬"].map((e, i) => (
+                    <div key={i} className="w-7 h-7 rounded-full bg-white/10 border-2 border-[#1a1a2e] flex items-center justify-center text-xs">
+                      {e}
+                    </div>
+                  ))}
+                </div>
+                <div className="text-white/60 text-xs">
+                  <span className="text-white font-bold">1 000+</span> пользователей
+                </div>
+              </div>
+              <div className="flex gap-1">
+                {[1,2,3,4,5].map(i => (
+                  <svg key={i} className="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
                 ))}
+                <span className="text-white/40 text-[11px] ml-1">4.8 / 5</span>
               </div>
             </div>
           </div>
 
           {/* Right — auth form */}
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 flex flex-col">
             {/* Mobile header */}
-            <div className="md:hidden bg-gradient-to-r from-accent to-accent/80 px-6 py-5 text-center">
-              <h2 className="text-lg font-extrabold text-white">{subtitle || "AI-студия нового поколения"}</h2>
-              <p className="text-white/70 text-xs mt-1">Регистрация за 10 секунд — <b className="text-white">100₽ бонус</b></p>
+            <div className="md:hidden bg-gradient-to-br from-accent via-accent/90 to-orange-400 px-6 py-6 text-center relative overflow-hidden">
+              <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-10 -left-10 w-24 h-24 rounded-full bg-white/10 blur-2xl" />
+              <h2 className="text-lg font-extrabold text-white relative z-10">{subtitle || "Все нейросети в одном месте"}</h2>
+              <p className="text-white/80 text-xs mt-1.5 relative z-10">Регистрация за 10 секунд — <b className="text-white">100₽ бонус</b></p>
+              <div className="flex justify-center gap-4 mt-3 relative z-10">
+                {["💬 Чат","🎨 Картинки","🎬 Видео"].map((t, i) => (
+                  <span key={i} className="text-white/70 text-[11px] font-medium">{t}</span>
+                ))}
+              </div>
             </div>
 
-            <div className="p-6 md:p-8">
+            <div className="p-6 md:p-8 flex-1 flex flex-col justify-center">
 
           {/* Verify Email Screen */}
           {screen === "verify" && (
@@ -341,8 +401,8 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
               {/* OAuth buttons */}
               <div className="space-y-2.5 mb-6">
                 <button onClick={googleLogin}
-                  className="w-full flex items-center justify-center gap-3 bg-surface border-2 border-text/10 py-3 rounded-xl font-semibold text-sm hover:border-text/20 hover:bg-text/5 transition-colors">
-                  <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  className="w-full flex items-center justify-center gap-3 bg-surface border border-text/10 py-3.5 rounded-xl font-semibold text-sm hover:border-text/20 hover:bg-text/[0.03] hover:shadow-md transition-all duration-200 group">
+                  <svg className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
                     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
@@ -350,36 +410,38 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
                   </svg>
                   Войти через Google
                 </button>
-                <button onClick={yandexLogin}
-                  className="w-full flex items-center justify-center gap-3 bg-[#FC3F1D] text-white py-3 rounded-xl font-semibold text-sm hover:bg-[#e53517] transition-colors">
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M13.63 21.67h2.45V2.33h-3.46c-4.07 0-6.2 2.14-6.2 5.27 0 2.63 1.07 4.14 3.33 5.67l-3.65 8.4h2.6l3.94-9.14-.94-.63c-1.81-1.2-2.63-2.28-2.63-4.2 0-2.07 1.35-3.47 3.63-3.47h.93v17.37z" />
-                  </svg>
-                  Войти через Яндекс
-                </button>
-                <button onClick={telegramLogin} disabled={tgPolling}
-                  className="w-full flex items-center justify-center gap-3 bg-[#2AABEE] text-white py-3 rounded-xl font-semibold text-sm hover:bg-[#229ED9] transition-colors disabled:opacity-70">
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
-                  </svg>
-                  {tgPolling ? "Ожидание подтверждения..." : "Войти через Telegram"}
-                </button>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <button onClick={yandexLogin}
+                    className="w-full flex items-center justify-center gap-2.5 bg-[#FC3F1D] text-white py-3.5 rounded-xl font-semibold text-sm hover:bg-[#e53517] hover:shadow-lg hover:shadow-red-500/20 active:scale-[0.98] transition-all duration-200 group">
+                    <svg className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M13.63 21.67h2.45V2.33h-3.46c-4.07 0-6.2 2.14-6.2 5.27 0 2.63 1.07 4.14 3.33 5.67l-3.65 8.4h2.6l3.94-9.14-.94-.63c-1.81-1.2-2.63-2.28-2.63-4.2 0-2.07 1.35-3.47 3.63-3.47h.93v17.37z" />
+                    </svg>
+                    Яндекс
+                  </button>
+                  <button onClick={telegramLogin} disabled={tgPolling}
+                    className="w-full flex items-center justify-center gap-2.5 bg-[#2AABEE] text-white py-3.5 rounded-xl font-semibold text-sm hover:bg-[#229ED9] hover:shadow-lg hover:shadow-blue-500/20 active:scale-[0.98] transition-all duration-200 disabled:opacity-70 group">
+                    <svg className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
+                    </svg>
+                    {tgPolling ? "Ожидание..." : "Telegram"}
+                  </button>
+                </div>
               </div>
 
-              <div className="flex items-center gap-3 mb-6">
-                <div className="flex-1 h-px bg-text/10" />
-                <span className="text-xs text-text/30 font-medium">или</span>
-                <div className="flex-1 h-px bg-text/10" />
+              <div className="flex items-center gap-4 mb-6">
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-text/10 to-transparent" />
+                <span className="text-xs text-text/25 font-medium uppercase tracking-wider">или</span>
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-text/10 to-transparent" />
               </div>
 
               {/* Tabs */}
               <div className="flex gap-1 bg-bg rounded-xl p-1 mb-5">
                 <button onClick={() => { setScreen("login"); setError(""); }}
-                  className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${screen === "login" ? "bg-surface text-text shadow-sm" : "text-text/40"}`}>
+                  className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${screen === "login" ? "bg-surface text-text shadow-sm" : "text-text/35 hover:text-text/60"}`}>
                   Вход
                 </button>
                 <button onClick={() => { setScreen("register"); setError(""); }}
-                  className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${screen === "register" ? "bg-surface text-text shadow-sm" : "text-text/40"}`}>
+                  className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${screen === "register" ? "bg-surface text-text shadow-sm" : "text-text/35 hover:text-text/60"}`}>
                   Регистрация
                 </button>
               </div>
@@ -416,7 +478,7 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
                   </div>
                 )}
 
-                <button type="submit" disabled={loading} className={btnClass}>
+                <button type="submit" disabled={loading} className={`${btnClass} auth-shine-btn`}>
                   {loading ? "Загрузка..." : screen === "login" ? "Войти" : "Получить код на почту"}
                 </button>
 
@@ -449,8 +511,8 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
             </div>
           )}
             </div>{/* /p-6 */}
-          </div>{/* /flex-1 */}
-        </div>{/* /flex-row */}
+          </div>{/* /flex-1 flex-col */}
+        </div>{/* /flex-row min-h */}
       </div>{/* /max-w card */}
     </div>
   );

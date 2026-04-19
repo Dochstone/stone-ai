@@ -77,6 +77,7 @@ class User(Base):
     first_referrer: Mapped[str | None] = mapped_column(String(512), nullable=True)
     used_promo_codes: Mapped[str | None] = mapped_column(String(512), nullable=True)
     pending_discount: Mapped[str | None] = mapped_column(String(256), nullable=True)  # JSON: {"type":"percent","value":20} or {"type":"rub","value":200}
+    referral_percent: Mapped[int | None] = mapped_column(Integer, nullable=True)  # custom partner %, NULL = global default
 
     # ─── Avatar ───
     avatar_url: Mapped[str | None] = mapped_column(String(512), nullable=True)

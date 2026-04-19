@@ -57,10 +57,20 @@ class TelegramLinkRequest(BaseModel):
 class GoogleAuthRequest(BaseModel):
     code: str
     redirect_uri: str | None = None
+    ref_code: str | None = None
+    utm_source: str | None = None
+    utm_medium: str | None = None
+    utm_campaign: str | None = None
+    first_referrer: str | None = None
 
 
 class YandexAuthRequest(BaseModel):
     code: str
+    ref_code: str | None = None
+    utm_source: str | None = None
+    utm_medium: str | None = None
+    utm_campaign: str | None = None
+    first_referrer: str | None = None
 
 
 class VerifyEmailRequest(BaseModel):
@@ -70,6 +80,7 @@ class VerifyEmailRequest(BaseModel):
     utm_medium: str | None = None
     utm_campaign: str | None = None
     first_referrer: str | None = None
+    ref_code: str | None = None
 
 
 class ForgotPasswordRequest(BaseModel):
@@ -91,6 +102,41 @@ BLOCKED_EMAIL_DOMAINS = {
     "mohmal.com", "dispostable.com", "mailnesia.com", "maildrop.cc",
     "temp-mail.io", "emailondeck.com", "getnada.com", "burnermail.io",
 }
+
+
+async def _auto_apply_referral(db: AsyncSession, user: User, ref_code: str | None):
+    """Auto-apply referral code during registration. Silent on failure."""
+    if not ref_code:
+        return
+    code = ref_code.strip().upper()
+    if len(code) < 4:
+        return
+    try:
+        result = await db.execute(select(User).where(User.referral_code == code))
+        referrer = result.scalar_one_or_none()
+        if not referrer:
+            return
+        if referrer.telegram_id == user.telegram_id:
+            return
+        user.referrer_id = referrer.telegram_id
+
+        from app.services.daily_limits import get_or_create_today
+        from app.routers.referral import REFERRAL_BONUS_REQUESTS
+
+        user_tier = user.subscription_tier or "free"
+        user_row = await get_or_create_today(db, user.telegram_id, user_tier)
+        if user_row:
+            user_row.rollover_fast = (user_row.rollover_fast or 0) + REFERRAL_BONUS_REQUESTS
+
+        referrer_tg = referrer.telegram_id or referrer.id
+        referrer_tier = referrer.subscription_tier or "free"
+        referrer_row = await get_or_create_today(db, referrer_tg, referrer_tier)
+        if referrer_row:
+            referrer_row.rollover_fast = (referrer_row.rollover_fast or 0) + REFERRAL_BONUS_REQUESTS
+
+        logger.info(f"Auto-applied referral: user={user.telegram_id}, referrer={referrer.telegram_id}, code={code}")
+    except Exception as e:
+        logger.warning(f"Failed to auto-apply referral code {code}: {e}")
 
 
 def _validate_email(email: str) -> str:
@@ -245,6 +291,9 @@ async def verify_email(body: VerifyEmailRequest, request: Request, db: AsyncSess
     await db.flush()
     logger.info(f"Welcome bonus {WELCOME_BONUS_RUB}₽ credited to new email user {email}")
 
+    # Auto-apply referral code from partner link
+    await _auto_apply_referral(db, user, body.ref_code)
+
     user.last_ip = request.client.host if request.client else None
     await update_login_streak(db, user)
 
@@ -375,6 +424,7 @@ async def _get_or_create_oauth_user(
     db: AsyncSession, email: str, first_name: str, provider: str,
     utm_source: str | None = None, utm_medium: str | None = None,
     utm_campaign: str | None = None, first_referrer: str | None = None,
+    ref_code: str | None = None,
 ) -> tuple:
     """Find existing user by email or create new one. Returns (user, token)."""
     result = await db.execute(select(User).where(User.email == email))
@@ -407,6 +457,9 @@ async def _get_or_create_oauth_user(
     db.add(user)
     await db.flush()
     logger.info(f"Welcome bonus {WELCOME_BONUS_RUB}₽ credited to new OAuth user {email} ({provider})")
+
+    # Auto-apply referral code from partner link
+    await _auto_apply_referral(db, user, ref_code)
 
     # Achievement: registered
     asyncio.create_task(check_and_update(user.telegram_id or user.id, "registered", 1))
@@ -477,7 +530,12 @@ async def google_auth(body: GoogleAuthRequest, request: Request, db: AsyncSessio
         logger.error(f"Google user info error: {e}")
         raise HTTPException(502, "Google auth unavailable")
 
-    user, token = await _get_or_create_oauth_user(db, email.lower(), first_name, "google")
+    user, token = await _get_or_create_oauth_user(
+        db, email.lower(), first_name, "google",
+        utm_source=body.utm_source, utm_medium=body.utm_medium,
+        utm_campaign=body.utm_campaign, first_referrer=body.first_referrer,
+        ref_code=body.ref_code,
+    )
     user.last_ip = request.client.host if request.client else None
     await update_login_streak(db, user)
     logger.info(f"Google auth: user={user.id}, email={email}")
@@ -538,7 +596,12 @@ async def yandex_auth(body: YandexAuthRequest, request: Request, db: AsyncSessio
         logger.error(f"Yandex user info error: {e}")
         raise HTTPException(502, "Yandex auth unavailable")
 
-    user, token = await _get_or_create_oauth_user(db, email.lower(), first_name, "yandex")
+    user, token = await _get_or_create_oauth_user(
+        db, email.lower(), first_name, "yandex",
+        utm_source=body.utm_source, utm_medium=body.utm_medium,
+        utm_campaign=body.utm_campaign, first_referrer=body.first_referrer,
+        ref_code=body.ref_code,
+    )
     user.last_ip = request.client.host if request.client else None
     await update_login_streak(db, user)
     logger.info(f"Yandex auth: user={user.id}, email={email}")

@@ -10,11 +10,18 @@ export default function PageTracker() {
   const startRef = useRef(Date.now());
   const lastPathRef = useRef("");
 
-  // Capture UTM params on first visit
+  // Capture UTM params + ref code on first visit
   useEffect(() => {
     try {
-      if (localStorage.getItem("stone_utm")) return;
       const params = new URLSearchParams(window.location.search);
+
+      // Always capture ref if present (overwrite previous — latest link wins)
+      const ref = params.get("ref");
+      if (ref) {
+        localStorage.setItem("stone_ref", ref.trim().toUpperCase());
+      }
+
+      if (localStorage.getItem("stone_utm")) return;
       const utm: Record<string, string> = {};
       for (const key of ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"]) {
         const v = params.get(key);

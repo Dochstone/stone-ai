@@ -94,7 +94,6 @@ export default function Footer() {
               <li><a href="/about" className="hover:text-text transition-colors">О Stone AI</a></li>
               <li><a href="/pricing" className="hover:text-text transition-colors">Тарифы</a></li>
               <li><a href="/blog" className="hover:text-text transition-colors">Блог</a></li>
-              <li><a href="/authors" className="hover:text-text transition-colors">Авторы блога</a></li>
               <li><a href="/referral" className="hover:text-text transition-colors">Рефералы</a></li>
               <li><a href="/docs" className="hover:text-text transition-colors">API Docs</a></li>
               <li><a href="https://t.me/StoneAIsupport" target="_blank" rel="noopener noreferrer" className="hover:text-text transition-colors">Поддержка</a></li>

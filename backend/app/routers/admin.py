@@ -1546,3 +1546,110 @@ async def admin_costs_models(
             for model_id, data in rows
         ],
     }
+
+
+# ── Partner management ──────────────────────────────────────────────
+
+
+class CreatePartnerRequest(BaseModel):
+    code: str  # custom referral code, e.g. "VKPARTNER"
+    referral_percent: int = 20  # partner commission %
+    email: str | None = None  # optional: create account with email
+    name: str | None = None  # display name
+
+
+@router.post("/partners/create")
+async def create_partner(
+    body: CreatePartnerRequest,
+    request: Request,
+    admin: dict = Depends(require_web_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create a partner referral code with custom commission rate."""
+    import uuid
+
+    code = body.code.strip().upper()
+    if len(code) < 3 or len(code) > 16:
+        raise HTTPException(400, "Code must be 3-16 characters")
+
+    # Check code not already taken
+    existing = await db.execute(select(User).where(User.referral_code == code))
+    if existing.scalar_one_or_none():
+        raise HTTPException(409, f"Referral code '{code}' already exists")
+
+    # Check email not taken (if provided)
+    if body.email:
+        email = body.email.strip().lower()
+        existing_email = await db.execute(select(User).where(User.email == email))
+        if existing_email.scalar_one_or_none():
+            raise HTTPException(409, f"Email '{email}' already registered")
+    else:
+        email = None
+
+    placeholder_tg_id = -int(uuid.uuid4().int % (2**53))
+    user = User(
+        telegram_id=placeholder_tg_id,
+        email=email,
+        first_name=body.name or f"Partner {code}",
+        auth_provider="partner",
+        linked_providers="partner",
+        referral_code=code,
+        referral_percent=body.referral_percent,
+        joined_at=datetime.utcnow(),
+        balance_usd=0,
+    )
+    db.add(user)
+    await db.flush()
+
+    await log_admin_action(
+        db, *_audit_actor(admin), "create_partner",
+        target_user_id=user.telegram_id,
+        details=f"code={code}, percent={body.referral_percent}%",
+        ip=_client_ip(request), user_agent=_user_agent(request),
+    )
+    await db.commit()
+
+    logger.info(f"Partner created: code={code}, percent={body.referral_percent}%, user_id={user.id}")
+
+    return {
+        "status": "ok",
+        "partner": {
+            "id": user.id,
+            "code": code,
+            "referral_percent": body.referral_percent,
+            "email": email,
+            "name": user.first_name,
+            "link": f"https://stoneai.ru/?ref={code}&utm_source=vk&utm_medium=cpc&utm_campaign=partner_{code.lower()}",
+        },
+    }
+
+
+@router.get("/partners")
+async def list_partners(
+    admin: dict = Depends(require_web_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """List all partners with custom referral rates."""
+    result = await db.execute(
+        select(User).where(User.referral_percent.isnot(None)).order_by(User.id.desc())
+    )
+    partners = result.scalars().all()
+
+    items = []
+    for p in partners:
+        count_result = await db.execute(
+            select(func.count(User.id)).where(User.referrer_id == p.telegram_id)
+        )
+        referral_count = count_result.scalar() or 0
+        items.append({
+            "id": p.id,
+            "code": p.referral_code,
+            "name": p.first_name,
+            "email": p.email,
+            "referral_percent": p.referral_percent,
+            "referral_balance": round(float(p.referral_balance or 0), 2),
+            "referral_count": referral_count,
+            "joined_at": p.joined_at.isoformat() if p.joined_at else None,
+        })
+
+    return {"partners": items}

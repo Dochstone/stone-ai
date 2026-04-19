@@ -10,7 +10,6 @@ import Quote from "@/components/content/Quote";
 import StatBlock from "@/components/content/StatBlock";
 import TableOfContents from "@/components/content/TableOfContents";
 import { toAnchor, type TocItem } from "@/lib/toc";
-import { getAuthor, DEFAULT_AUTHOR_SLUG } from "@/lib/authors";
 
 import { SITE_URL } from "@/lib/constants";
 
@@ -125,7 +124,6 @@ export default function BlogPostPage({ params }: Props) {
   const post = renderPriceDeep(rawPost);
 
   const ogUrl = `${SITE_URL}/blog/${post.slug}/opengraph-image`;
-  const author = getAuthor(post.author ?? DEFAULT_AUTHOR_SLUG) ?? getAuthor(DEFAULT_AUTHOR_SLUG)!;
   const category = post.category ? BLOG_CATEGORY_BY_SLUG[post.category] : null;
 
   // Approximate word count for BlogPosting schema
@@ -150,12 +148,10 @@ export default function BlogPostPage({ params }: Props) {
     ...(post.tags && post.tags.length ? { keywords: post.tags.join(", ") } : {}),
     isPartOf: { "@type": "Blog", "@id": `${SITE_URL}/blog#blog`, name: "Блог Stone AI" },
     author: {
-      "@type": "Person",
-      "@id": `${SITE_URL}/authors/${author.slug}#person`,
-      name: author.name,
-      url: `${SITE_URL}/authors/${author.slug}`,
-      jobTitle: author.jobTitle,
-      ...(author.sameAs && author.sameAs.length ? { sameAs: author.sameAs } : {}),
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: "Stone AI",
+      url: SITE_URL,
     },
     publisher: {
       "@type": "Organization",
@@ -254,15 +250,12 @@ export default function BlogPostPage({ params }: Props) {
 
               {/* Author + meta */}
               <div className="flex flex-wrap items-center gap-3 text-sm text-text/50 mb-2">
-                <a
-                  href={`/authors/${author.slug}`}
-                  className="flex items-center gap-2 font-semibold text-text/70 hover:text-accent transition-colors"
-                >
+                <span className="flex items-center gap-2 font-semibold text-text/70">
                   <span className="w-7 h-7 rounded-full bg-gradient-to-br from-accent to-teal text-white font-bold flex items-center justify-center text-[11px]">
-                    {author.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
+                    SA
                   </span>
-                  <span>{author.name}</span>
-                </a>
+                  <span>Stone AI</span>
+                </span>
                 <span className="w-1 h-1 bg-text/15 rounded-full" aria-hidden="true" />
                 <time dateTime={post.date}>Опубликовано {formatDate(post.date)}</time>
                 {post.dateModified && post.dateModified !== post.date && (

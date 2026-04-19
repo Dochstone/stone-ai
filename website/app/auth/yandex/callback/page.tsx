@@ -19,10 +19,13 @@ export default function YandexCallback() {
       return;
     }
 
+    const utm = (() => { try { return JSON.parse(localStorage.getItem("stone_utm") || "{}"); } catch { return {}; } })();
+    const ref_code = (() => { try { return localStorage.getItem("stone_ref") || undefined; } catch { return undefined; } })();
+
     fetch(`${API_URL}/api/auth/yandex`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code }),
+      body: JSON.stringify({ code, ref_code, ...utm }),
     })
       .then((res) => res.json())
       .then((data) => {
