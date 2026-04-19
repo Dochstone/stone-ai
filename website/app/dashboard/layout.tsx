@@ -433,7 +433,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Main content */}
         <main className="flex-1 min-w-0">
-          {chatLoaded && (
+          {isChat && (
             <div className={`${isChat ? "fixed inset-x-0 top-12 bottom-0 lg:relative lg:inset-auto lg:top-auto lg:bottom-auto lg:h-dvh" : "hidden"}`}>
               <WebChat embedded initialCategory={chatCategory} />
             </div>
