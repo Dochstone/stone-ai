@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PROMPT_CATEGORIES, PROMPT_TEMPLATES } from "@/lib/prompt-templates";
 import { planPriceFull } from "@/lib/pricing";
 import { Gift, Lightbulb } from "lucide-react";
+import ProviderIcon from "@/components/ProviderIcon";
 
 const WELCOME_CONFIG: Record<string, { title: string; subtitle: string }> = {
   all:    { title: "Чем могу помочь?",          subtitle: "Выберите шаблон или напишите свой запрос" },
@@ -34,20 +35,18 @@ export default function WelcomeScreen({ onSuggestion, activeTab, plan }: { onSug
             {/* Free models guide */}
             <div className="max-w-lg mx-auto text-left space-y-2">
               {[
-                { id: "gpt-4o-mini",      name: "GPT-4o mini",    logo: "/logos/openai.svg",    desc: "Универсальная модель от OpenAI. Тексты, переводы, код, ответы на вопросы.", best: "Лучшая для большинства задач", prompt: "Привет! Расскажи что ты умеешь и чем можешь помочь" },
-                { id: "gemini-2.0-flash", name: "Gemini Flash",   logo: "/logos/google.svg",    desc: "Самая быстрая модель от Google. Ответ за доли секунды.",                    best: "Когда важна скорость",         prompt: "Быстро объясни что такое нейросети простыми словами" },
-                { id: "claude-haiku-4.5", name: "Claude Haiku",   logo: "/logos/anthropic.svg", desc: "Аккуратная модель от Anthropic. Вежливые, структурированные ответы.",       best: "Деловые письма, анализ",       prompt: "Напиши деловое письмо клиенту с благодарностью за сотрудничество" },
-                { id: "deepseek-v3",      name: "DeepSeek V3",    logo: "/logos/deepseek.svg",  desc: "Мощная open-source модель. Отлично пишет код и решает задачи.",             best: "Код и математика",             prompt: "Напиши функцию на Python для сортировки списка словарей по ключу" },
-                { id: "llama-4-maverick", name: "Llama 4",        logo: "/logos/meta.svg",      desc: "Креативная модель от Meta. Хороша для мозговых штурмов и идей.",            best: "Креатив и брейншторм",         prompt: "Придумай 5 креативных идей для Telegram-канала о путешествиях" },
-                { id: "mistral-large-25", name: "Mistral Large",  logo: "/logos/mistral.svg",   desc: "Европейская модель. Хорошо работает с русским и другими языками.",          best: "Мультиязычные задачи",         prompt: "Переведи на английский сохранив стиль: Добро пожаловать в Stone AI — AI-студию нового поколения" },
-                { id: "nano-banana",      name: "Nano Banana",    logo: "/logos/google.svg",    desc: "Генерация картинок из текста. Бесплатная модель для изображений.",          best: "2 бесплатно",                  prompt: "Нарисуй уютную кофейню в стиле Pixar с тёплым освещением" },
-                { id: "veo-3",            name: "Veo 3",          logo: "/logos/google.svg",    desc: "Генерация видео от Google. 4K, lip-sync, звуковой дизайн.",                 best: "2 пробных",                    prompt: "Создай 5-секундное видео: закат на океане, волны бьются о скалы" },
+                { id: "gpt-4o-mini",      name: "GPT-4o mini",    company: "OpenAI",    desc: "Универсальная модель от OpenAI. Тексты, переводы, код, ответы на вопросы.", best: "Лучшая для большинства задач", prompt: "Привет! Расскажи что ты умеешь и чем можешь помочь" },
+                { id: "gemini-2.0-flash", name: "Gemini Flash",   company: "Google",    desc: "Самая быстрая модель от Google. Ответ за доли секунды.",                    best: "Когда важна скорость",         prompt: "Быстро объясни что такое нейросети простыми словами" },
+                { id: "claude-haiku-4.5", name: "Claude Haiku",   company: "Anthropic", desc: "Аккуратная модель от Anthropic. Вежливые, структурированные ответы.",       best: "Деловые письма, анализ",       prompt: "Напиши деловое письмо клиенту с благодарностью за сотрудничество" },
+                { id: "deepseek-v3",      name: "DeepSeek V3",    company: "DeepSeek",  desc: "Мощная open-source модель. Отлично пишет код и решает задачи.",             best: "Код и математика",             prompt: "Напиши функцию на Python для сортировки списка словарей по ключу" },
+                { id: "llama-4-maverick", name: "Llama 4",        company: "Meta",      desc: "Креативная модель от Meta. Хороша для мозговых штурмов и идей.",            best: "Креатив и брейншторм",         prompt: "Придумай 5 креативных идей для Telegram-канала о путешествиях" },
+                { id: "mistral-large-25", name: "Mistral Large",  company: "Mistral",   desc: "Европейская модель. Хорошо работает с русским и другими языками.",          best: "Мультиязычные задачи",         prompt: "Переведи на английский сохранив стиль: Добро пожаловать в Stone AI — AI-студию нового поколения" },
+                { id: "nano-banana",      name: "Nano Banana",    company: "Google",    desc: "Генерация картинок из текста. Бесплатная модель для изображений.",          best: "2 бесплатно",                  prompt: "Нарисуй уютную кофейню в стиле Pixar с тёплым освещением" },
+                { id: "veo-3",            name: "Veo 3",          company: "Google",    desc: "Генерация видео от Google. 4K, lip-sync, звуковой дизайн.",                 best: "2 пробных",                    prompt: "Создай 5-секундное видео: закат на океане, волны бьются о скалы" },
               ].map((m) => (
                 <button key={m.id} onClick={() => onSuggestion(m.prompt, m.id)}
                   className="w-full flex items-center gap-3 p-3 rounded-xl border border-text/[0.06] bg-bg hover:border-accent/30 hover:shadow-sm transition-all group">
-                  <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-text/[0.04] border border-text/[0.06] shrink-0">
-                    <img src={m.logo} alt={m.name} width={22} height={22} className="block" loading="lazy" />
-                  </span>
+                  <ProviderIcon company={m.company} size={40} />
                   <div className="flex-1 min-w-0 text-left">
                     <div className="flex items-center gap-2">
                       <span className="text-[13px] font-bold text-text group-hover:text-accent transition-colors">{m.name}</span>

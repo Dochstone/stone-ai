@@ -7,6 +7,7 @@ import { COMPARISONS } from "@/lib/seo-data";
 import { SITE_URL } from "@/lib/constants";
 import { breadcrumbJsonLd } from "@/components/Breadcrumbs";
 import RelatedModels from "@/components/RelatedModels";
+import ProviderIcon from "@/components/ProviderIcon";
 import { CrossLinks } from "@/components/CrossLinks";
 import { relatedModels } from "@/lib/content-graph";
 
@@ -202,7 +203,10 @@ export default function ModelPage({ params }: Props) {
               {isFree ? "Бесплатная" : "Подписка"}
             </span>
             <span className="text-xs text-text/40 bg-text/[0.04] px-3 py-1 rounded-full">{cat}</span>
-            <span className="text-xs text-text/40 bg-text/[0.04] px-3 py-1 rounded-full">{model.company}</span>
+            <span className="inline-flex items-center gap-1.5 text-xs text-text/40 bg-text/[0.04] px-3 py-1 rounded-full">
+              <ProviderIcon company={model.company} size={16} />
+              {model.company}
+            </span>
             <span className="text-xs text-text/40 bg-text/[0.04] px-3 py-1 rounded-full">{model.context}</span>
           </div>
 
@@ -236,7 +240,10 @@ export default function ModelPage({ params }: Props) {
           </div>
           <div className="bg-bg rounded-2xl border border-text/5 p-4 text-center">
             <div className="text-text/40 text-[10px] font-semibold uppercase mb-1">Компания</div>
-            <div className="text-xl font-extrabold">{model.company}</div>
+            <div className="flex items-center justify-center gap-2">
+              <ProviderIcon company={model.company} size={24} />
+              <span className="text-xl font-extrabold">{model.company}</span>
+            </div>
           </div>
           <div className="bg-bg rounded-2xl border border-text/5 p-4 text-center">
             <div className="text-text/40 text-[10px] font-semibold uppercase mb-1">Тариф</div>
@@ -361,6 +368,7 @@ export default function ModelPage({ params }: Props) {
                   </div>
                   <p className="text-text/40 text-xs line-clamp-1">{m.description}</p>
                   <div className="flex items-center gap-2 mt-2 text-[10px] text-text/30">
+                    <ProviderIcon company={m.company} size={14} />
                     <span>{m.company}</span>
                     <span>{m.context}</span>
                   </div>

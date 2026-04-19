@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { AIModel } from "@/lib/models";
+import ProviderIcon from "@/components/ProviderIcon";
 
 interface Props {
   models: AIModel[];
@@ -38,9 +39,10 @@ export default function RelatedModels({
             className="group block bg-bg border border-text/5 rounded-2xl p-5 hover:border-accent/30 hover:shadow-md transition-all"
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-text/[0.04] text-text/50">
-                {m.company}
-              </span>
+              <div className="flex items-center gap-1.5">
+                <ProviderIcon company={m.company} size={20} />
+                <span className="text-[10px] font-bold text-text/50">{m.company}</span>
+              </div>
               <span
                 className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                   m.tier === "free"

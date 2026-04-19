@@ -1653,3 +1653,68 @@ async def list_partners(
         })
 
     return {"partners": items}
+
+
+class UpdatePartnerRequest(BaseModel):
+    referral_percent: int | None = None
+    name: str | None = None
+
+
+@router.patch("/partners/{partner_id}")
+async def update_partner(
+    partner_id: int,
+    body: UpdatePartnerRequest,
+    request: Request,
+    admin: dict = Depends(require_web_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update partner settings (percent, name)."""
+    result = await db.execute(select(User).where(User.id == partner_id))
+    user = result.scalar_one_or_none()
+    if not user or user.referral_percent is None:
+        raise HTTPException(404, "Partner not found")
+
+    changes = []
+    if body.referral_percent is not None and 1 <= body.referral_percent <= 50:
+        user.referral_percent = body.referral_percent
+        changes.append(f"percent={body.referral_percent}%")
+    if body.name is not None:
+        user.first_name = body.name.strip() or user.first_name
+        changes.append(f"name={user.first_name}")
+
+    if changes:
+        await log_admin_action(
+            db, *_audit_actor(admin), "update_partner",
+            target_user_id=user.telegram_id,
+            details=f"partner={user.referral_code}, {', '.join(changes)}",
+            ip=_client_ip(request), user_agent=_user_agent(request),
+        )
+        await db.commit()
+
+    return {"status": "ok", "id": user.id, "referral_percent": user.referral_percent, "name": user.first_name}
+
+
+@router.delete("/partners/{partner_id}")
+async def delete_partner(
+    partner_id: int,
+    request: Request,
+    admin: dict = Depends(require_web_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete a partner (remove referral_percent, keep user record)."""
+    result = await db.execute(select(User).where(User.id == partner_id))
+    user = result.scalar_one_or_none()
+    if not user or user.referral_percent is None:
+        raise HTTPException(404, "Partner not found")
+
+    code = user.referral_code
+    user.referral_percent = None
+
+    await log_admin_action(
+        db, *_audit_actor(admin), "delete_partner",
+        target_user_id=user.telegram_id,
+        details=f"code={code}",
+        ip=_client_ip(request), user_agent=_user_agent(request),
+    )
+    await db.commit()
+    return {"status": "ok"}

@@ -1,5 +1,99 @@
 # AGENTS.md — Stone AI Project Context
 
+> **Этот файл читается Codex CLI автоматически при старте.**
+> Сначала — роль и правила, затем техническая документация проекта.
+
+---
+
+## Твоя роль
+
+Ты — **senior full-stack implementer**. Работаешь в паре с Claude Code (Opus 4.6).
+
+- **Claude** — архитектор, ревью, деплой через SSH на Beget VPS
+- **Ты (Codex / GPT-5.4)** — реализация кода по ТЗ, аудит, рефакторинг
+
+Пиши чистый, типизированный, читаемый код. Архитектурных решений без запроса не принимаешь — если ТЗ неоднозначно, задавай уточняющие вопросы, а не додумывай.
+
+## Правила работы
+
+1. **Перед изменением** — читай существующий код в области задачи (минимум 2-3 связанных файла).
+2. **Следуй паттернам проекта** — не переписывай стиль, даже если считаешь что лучше. Если есть сомнения — спрашивай.
+3. **Один коммит = одна логическая единица.** Не смешивай фикс и рефакторинг.
+4. **Diff перед финализацией** — всегда проверяй `git diff` на свои же изменения.
+5. **Не пушишь в git** — только локальные изменения. Пуш и деплой делает пользователь вместе с Claude.
+6. **Не деплоишь** — SSH-доступа у тебя нет и быть не должно.
+
+## Что МОЖНО править свободно
+
+- `backend/app/routers/*` (кроме `auth.py` — согласовать)
+- `backend/app/services/*` (кроме `ai_router.py` — согласовать при изменении model mapping)
+- `backend/app/models/*` — можно, но миграция БД отдельным шагом
+- `website/components/*`
+- `website/app/*` (страницы)
+- `frontend/src/*` (TG Mini App)
+- Тесты в `backend/tests/*`
+
+## Что согласовывать перед правкой
+
+- `backend/app/middleware/*` — ломкая зона (auth, rate limit)
+- `backend/app/main.py` — lifespan, background workers
+- `backend/app/config.py` — константы, env-переменные
+- `backend/migrations/*` — SQL миграции (риск потери данных)
+- `website/lib/pricing.ts` — единый источник цен
+- `website/lib/models.ts` — каталог моделей
+- `AGENTS.md`, `CLAUDE.md`, `GPT_CONTEXT.md`
+
+## Что НЕ трогать никогда
+
+- `.env`, `.env.local`, `.env.production` — секреты
+- `deploy.sh` — деплой-скрипт
+- `.github/workflows/*` — CI/CD
+- `ecosystem.config.js` / PM2 конфиги
+- `package-lock.json`, `yarn.lock`, `poetry.lock` — только через менеджер пакетов по явной команде
+- Ничего в `/var/www/` — это на сервере, не в репо
+
+## Частые ошибки, которых надо избегать
+
+1. **Путаница `routers/auth.py` и `middleware/auth.py`** — это разные файлы с разной логикой. `routers/auth.py` — эндпоинты логина/регистрации. `middleware/auth.py` — валидация JWT/TG initData на входящих запросах. **Читай оба, прежде чем трогать хотя бы один.**
+2. **Дублирование цен** — цены живут ТОЛЬКО в `website/lib/pricing.ts` и `backend/app/services/subscription.py`. Не хардкодь в компонентах.
+3. **Mock в тестах** — не мокай БД в integration-тестах биллинга. Причина: прошлый инцидент, когда мок скрыл баг миграции.
+4. **TODO/FIXME без контекста** — запрещено. Если ставишь — указывай причину и план.
+
+## Workflow (пара AI)
+
+```
+Пользователь ставит задачу
+         ↓
+Claude пишет ТЗ (или ТЗ уже есть в TZ_FOR_CODEX.md)
+         ↓
+Ты реализуешь локально в C:\Users\Administrator\stone-ai\
+         ↓
+Пользователь делает `git diff` → шлёт Claude
+         ↓
+Claude ревьюит → одобряет или просит правки
+         ↓
+Claude деплоит через SSH (ты не участвуешь)
+```
+
+## Язык
+
+- **Общение:** русский
+- **Код, коммиты, комментарии:** английский
+- **Технические термины** не переводи: hook, state, session, middleware и т.п.
+
+## Формат коммитов
+
+`<type>(<area>): <description>`
+
+Типы: `feat`, `fix`, `refactor`, `perf`, `style`, `docs`, `test`, `chore`
+
+Примеры:
+- `feat(rag): add pgvector semantic search endpoint`
+- `fix(photo-session): use discounted per-image cost in batch accounting`
+- `refactor(email): move sending to background queue with retry`
+
+---
+
 ## Overview
 
 Stone AI — multi-platform AI SaaS platform. Unified interface to 65+ AI models (text, image, video, 3D, audio) with complex monetization and multi-auth.

@@ -1,3 +1,5 @@
+import ProviderIcon from "@/components/ProviderIcon";
+
 const providers = [
   {
     name: "OpenAI",
@@ -74,7 +76,10 @@ export default function Providers() {
               <div className={`absolute inset-0 rounded-2xl ${p.glow} transition-colors duration-300`} />
               <div className="relative">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className={`text-xl font-extrabold ${p.color}`}>{p.name}</h3>
+                  <div className="flex items-center gap-3">
+                    <ProviderIcon company={p.name} size={36} />
+                    <h3 className={`text-xl font-extrabold ${p.color}`}>{p.name}</h3>
+                  </div>
                   <span className="text-[11px] text-white/20 font-medium">
                     {p.models} {p.models < 5 ? "модели" : "моделей"}
                   </span>

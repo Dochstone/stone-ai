@@ -124,23 +124,7 @@ interface ChatSessionItem {
 }
 
 // ─── Company icon for AI avatar ───
-
-const companyColors: Record<string, string> = {
-  OpenAI: "#10a37f", Anthropic: "#d97706", Google: "#4285f4", Meta: "#0668E1",
-  Mistral: "#1a1a1a", DeepSeek: "#06b6d4", xAI: "#64748b", Perplexity: "#6366f1",
-  Alibaba: "#ff6a00", MiniMax: "#ec4899", Zhipu: "#0ea5e9", Cohere: "#39d353",
-  Microsoft: "#00a4ef", NVIDIA: "#76b900", Gryphe: "#8b5cf6", BFL: "#f59e0b",
-  Stability: "#a855f7", Moonshot: "#06b6d4",
-  Luma: "#9333EA", Tripo3D: "#14B8A6", Tencent: "#1E6FFF", PixVerse: "#A855F7",
-  Pika: "#F97316", Lightricks: "#3B82F6", Kuaishou: "#ff4f00",
-};
-
-// Fallback letter for companies without SVG logo
-const companyIcons: Record<string, string> = {
-  Alibaba: "Q", MiniMax: "M", Zhipu: "Z", Cohere: "C",
-  Microsoft: "M", NVIDIA: "N", Gryphe: "G", BFL: "F",
-  Stability: "S", Moonshot: "K",
-};
+import ProviderIcon, { getProviderColor } from "@/components/ProviderIcon";
 
 // PROMPT_CATEGORIES and PROMPT_TEMPLATES imported from @/lib/prompt-templates
 
@@ -418,7 +402,7 @@ function Sidebar({
         {selectedModel && (() => {
           const m = MODELS_MAP.get(selectedModel);
           if (!m) return null;
-          const color = companyColors[m.company] || "#C4623D";
+          const color = getProviderColor(m.company);
           return (
             <div className="px-3 pt-3 pb-2">
               <div
@@ -428,12 +412,7 @@ function Sidebar({
                   borderColor: `${color}25`,
                 }}
               >
-                <div
-                  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-white text-[11px] font-extrabold shadow-sm"
-                  style={{ background: color }}
-                >
-                  {(companyIcons[m.company] || m.company[0] || "A").toUpperCase()}
-                </div>
+                <ProviderIcon company={m.company} size={28} />
                 <div className="flex-1 min-w-0">
                   <div className="text-[9px] font-bold uppercase tracking-[1.5px]" style={{ color }}>История</div>
                   <div className="text-[12px] font-bold text-text truncate leading-tight">{m.name}</div>
@@ -1823,8 +1802,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
   if (!loaded) return null;
 
-  const aiColor = companyColors[model?.company ?? ""] || "#C4623D";
-  const aiLetter = companyIcons[model?.company ?? ""] || "AI";
+  const aiCompany = model?.company ?? "";
   const lastMsg = messages[messages.length - 1];
   const showStreamingDots = streaming && (!lastMsg || lastMsg.role !== "assistant" || !lastMsg.content);
 
@@ -1917,12 +1895,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
 
             {/* Model info */}
             <div className="flex items-center gap-1.5 min-w-0">
-              <div
-                className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shrink-0"
-                style={{ backgroundColor: aiColor }}
-              >
-                {aiLetter}
-              </div>
+              <ProviderIcon company={aiCompany} size={24} />
               <span className="text-xs text-text/40 font-medium truncate">{model?.name || "AI Чат"}</span>
             </div>
           </div>
@@ -2012,6 +1985,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                       }} className={`w-full flex items-start gap-3 px-3 py-3 sm:py-2.5 rounded-xl text-left transition-colors ${
                         selectedModel === m.id ? "bg-accent/5 border border-accent/20" : "hover:bg-text/[0.03] active:bg-text/[0.06]"
                       } ${lock ? "opacity-50" : ""}`}>
+                        <ProviderIcon company={m.company} size={32} className="mt-0.5" />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5">
                             <span className="text-[14px] sm:text-sm font-semibold truncate">{lock ? "🔒 " : ""}{m.name}</span>
@@ -2267,9 +2241,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
               {showStreamingDots && (
                 <div className="flex gap-2.5 sm:gap-3">
                   <div className="shrink-0 mt-0.5">
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: aiColor }}>
-                      <span className="text-[10px] sm:text-[11px] font-bold text-white">{aiLetter}</span>
-                    </div>
+                    <ProviderIcon company={aiCompany} size={28} />
                   </div>
                   <div className="bg-text/[0.06] rounded-2xl rounded-tl-md px-4 py-3">
                     <div className="flex items-center gap-2">

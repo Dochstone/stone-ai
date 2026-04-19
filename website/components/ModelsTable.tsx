@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import ProviderIcon from "@/components/ProviderIcon";
 
 const MODELS_DATA = [
   // Free (Tier 1)
@@ -178,7 +179,10 @@ export default function ModelsTable() {
                   {m.name}
                 </td>
                 <td className="py-3 px-4 text-text/50 text-[13px]">
-                  {m.company}
+                  <div className="flex items-center gap-1.5">
+                    <ProviderIcon company={m.company} size={20} />
+                    {m.company}
+                  </div>
                 </td>
                 <td className="py-3 px-4">
                   <span
@@ -225,6 +229,7 @@ export default function ModelsTable() {
               </span>
             </div>
             <div className="flex items-center gap-2 text-xs text-text/40">
+              <ProviderIcon company={m.company} size={16} />
               <span>{m.company}</span>
               <span className="text-text/10">|</span>
               <span
