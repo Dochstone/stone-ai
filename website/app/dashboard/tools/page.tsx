@@ -1,12 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import {
+  BotMessageSquare, FileText, Store, Sparkles, Bot, FolderKanban, ImageIcon,
+  Camera, Presentation, Megaphone, Search, FileEdit, BarChart3, SplitSquareHorizontal, Tags,
+  type LucideIcon,
+} from "lucide-react";
 
 interface Tool {
   href: string;
-  icon?: string;    // PNG path
-  emoji?: string;   // Unicode emoji as fallback/alternative
-  bgColor?: string; // used with emoji
+  Icon: LucideIcon;
+  color: string;
   title: string;
   description: string;
   badge?: string;
@@ -18,24 +22,24 @@ const TOOLS: { group: string; items: Tool[] }[] = [
   {
     group: "Рабочее пространство",
     items: [
-      { href: "/dashboard/chat", icon: "/tool-icons/tool-chat.png", title: "AI Чат", description: "Общение с 65+ нейросетями в одном окне", popular: true },
-      { href: "/dashboard/templates", icon: "/tool-icons/tool-templates.png", title: "AI-шаблоны", description: "50+ готовых шаблонов для промптов", badge: "50+" },
-      { href: "/dashboard/marketplace", icon: "/tool-icons/tool-marketplace.png", title: "Маркетплейс", description: "Боты и ассистенты от сообщества", badge: "NEW" },
-      { href: "/dashboard/agent", icon: "/tool-icons/tool-agent.png", title: "AI-Агент", description: "Автономный агент для сложных задач", badge: "NEW", popular: true },
-      { href: "/dashboard/bots", icon: "/tool-icons/tool-bots.png", title: "Мои боты", description: "Создавайте своих ботов с system prompt", badge: "NEW" },
-      { href: "/dashboard/projects", icon: "/tool-icons/tool-projects.png", title: "Мои проекты", description: "Организуйте чаты и файлы по проектам" },
+      { href: "/dashboard/chat",          Icon: BotMessageSquare, color: "#22D3EE", title: "AI Чат",         description: "Общение с 65+ нейросетями в одном окне", popular: true },
+      { href: "/dashboard/templates",     Icon: FileText,         color: "#14B8A6", title: "AI-шаблоны",      description: "50+ готовых шаблонов для промптов", badge: "50+" },
+      { href: "/dashboard/marketplace",   Icon: Store,            color: "#F97316", title: "Маркетплейс",     description: "Боты и ассистенты от сообщества", badge: "NEW" },
+      { href: "/dashboard/agent",         Icon: Sparkles,         color: "#C4623D", title: "AI-Агент",        description: "Автономный агент для сложных задач", badge: "NEW", popular: true },
+      { href: "/dashboard/bots",          Icon: Bot,              color: "#A855F7", title: "Мои боты",        description: "Создавайте своих ботов с system prompt", badge: "NEW" },
+      { href: "/dashboard/projects",      Icon: FolderKanban,     color: "#0EA5E9", title: "Мои проекты",     description: "Организуйте чаты и файлы по проектам" },
       {
-        href: "/dashboard/gallery", icon: "/tool-icons/tool-gallery.png", title: "Галерея",
+        href: "/dashboard/gallery",       Icon: ImageIcon,        color: "#EC4899", title: "Галерея",
         description: "История сгенерированных изображений и видео",
         preview: ["/demo/img-cosmos.webp", "/demo/img-portrait.webp", "/demo/img-cyberpunk.webp"],
       },
       {
-        href: "/dashboard/photo-session", icon: "/tool-icons/tool-photo-session.png", title: "Фотосессия",
+        href: "/dashboard/photo-session", Icon: Camera,           color: "#F43F5E", title: "Фотосессия",
         description: "Серия консистентных фото одного персонажа", popular: true,
         preview: ["/demo/avatar-maria.webp", "/demo/avatar-elena.webp", "/demo/avatar-dmitry.webp"],
       },
       {
-        href: "/dashboard/presentations", icon: "/tool-icons/tool-presentations.png", title: "Презентации",
+        href: "/dashboard/presentations", Icon: Presentation,     color: "#3B82F6", title: "Презентации",
         description: "Генерация слайдов за 10 минут",
         preview: ["/demo/hero-1.webp", "/demo/hero-2.webp", "/demo/hero-3.webp"],
       },
@@ -44,36 +48,22 @@ const TOOLS: { group: string; items: Tool[] }[] = [
   {
     group: "SEO и маркетинг",
     items: [
-      { href: "/dashboard/campaigns", icon: "/tool-icons/tool-campaigns.png", title: "Рекламные кампании", description: "Креативы и тексты для Директа, ВК, МТ", badge: "NEW" },
-      { href: "/dashboard/seo", icon: "/tool-icons/tool-seo.png", title: "SEO-модуль", description: "Анализ позиций и подбор ключей", popular: true },
-      { href: "/dashboard/seo/article", icon: "/tool-icons/tool-seo-article.png", title: "SEO-статьи", description: "Генерация длинных статей под ключи" },
-      { href: "/dashboard/seo/analyze", icon: "/tool-icons/tool-seo-analyze.png", title: "Анализ текста", description: "Оценка уникальности и качества текста" },
-      { href: "/dashboard/seo/ab-test", icon: "/tool-icons/tool-ab-test.png", title: "A/B тест", description: "Сравнение заголовков и лендингов" },
-      { href: "/dashboard/seo/meta", icon: "/tool-icons/tool-meta.png", title: "Мета-теги", description: "Генерация title, description, Open Graph" },
+      { href: "/dashboard/campaigns",   Icon: Megaphone,              color: "#F59E0B", title: "Рекламные кампании", description: "Креативы и тексты для Директа, ВК, МТ", badge: "NEW" },
+      { href: "/dashboard/seo",         Icon: Search,                 color: "#10B981", title: "SEO-модуль",         description: "Анализ позиций и подбор ключей", popular: true },
+      { href: "/dashboard/seo/article", Icon: FileEdit,               color: "#6366F1", title: "SEO-статьи",         description: "Генерация длинных статей под ключи" },
+      { href: "/dashboard/seo/analyze", Icon: BarChart3,              color: "#0891B2", title: "Анализ текста",      description: "Оценка уникальности и качества текста" },
+      { href: "/dashboard/seo/ab-test", Icon: SplitSquareHorizontal,  color: "#D946EF", title: "A/B тест",           description: "Сравнение заголовков и лендингов" },
+      { href: "/dashboard/seo/meta",    Icon: Tags,                   color: "#8B5CF6", title: "Мета-теги",          description: "Генерация title, description, Open Graph" },
     ],
   },
 ];
 
 function ToolIcon({ tool }: { tool: Tool }) {
-  if (tool.emoji) {
-    return (
-      <div
-        className="shrink-0 flex items-center justify-center rounded-2xl group-hover:scale-105 transition-transform"
-        style={{ width: 72, height: 72, background: tool.bgColor, fontSize: 40, lineHeight: 1 }}
-      >
-        {tool.emoji}
-      </div>
-    );
-  }
+  const Icon = tool.Icon;
   return (
-    <img
-      src={tool.icon}
-      alt={tool.title}
-      width={72}
-      height={72}
-      className="shrink-0 rounded-2xl group-hover:scale-105 transition-transform"
-      loading="lazy"
-    />
+    <span className="glass-pad tile-icon flex items-center justify-center w-16 h-16 rounded-2xl shrink-0" style={{ ["--pad-c" as string]: tool.color }}>
+      <Icon size={30} strokeWidth={2.2} />
+    </span>
   );
 }
 
@@ -100,10 +90,11 @@ export default function ToolsPage() {
                 <Link
                   key={tool.href}
                   href={tool.href}
-                  className={`group relative flex flex-col rounded-2xl transition-all overflow-hidden ${
+                  style={{ ["--pad-c" as string]: tool.color }}
+                  className={`tile-hover group relative flex flex-col rounded-2xl overflow-hidden ${
                     tool.popular
-                      ? "bg-gradient-to-br from-accent/10 via-surface-2 to-surface-2 border-2 border-accent/30 hover:border-accent/60 hover:shadow-lg hover:shadow-accent/10"
-                      : "bg-surface-2 hover:bg-surface-3 border border-transparent hover:border-accent/30"
+                      ? "bg-gradient-to-br from-accent/10 via-surface-2 to-surface-2 border-2 border-accent/30"
+                      : "bg-surface-2 border border-text/5"
                   }`}
                 >
                   {tool.popular && (
