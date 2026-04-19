@@ -116,7 +116,7 @@ export default function PartnersTab({ token }: Props) {
         },
         body: JSON.stringify({
           referral_percent: editPercent,
-          name: editName.trim() || undefined,
+          name: editName.trim(),
         }),
       });
       const data = await res.json();
