@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stone-ai-v5';
+const CACHE_NAME = 'stone-ai-v7';
 const STATIC_ASSETS = [
   '/offline.html',
   '/manifest.json',
