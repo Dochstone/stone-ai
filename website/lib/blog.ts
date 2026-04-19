@@ -2190,6 +2190,95 @@ const _POSTS_RAW: BlogPost[] = [
       `<b>Ключевые выводы статьи:</b><br>1️⃣ Нейросети закрывают 60-70% операционной рутины SMM-щика — идеи, тексты, визуалы, анализ.<br>2️⃣ Использовать <b>одну модель для всего</b> — неэффективно. Оптимум — 3-4 модели под разные задачи в одной платформе.<br>3️⃣ Главная находка — связка <b>tone of voice промпт + переработка драфта</b>. Экономит 35-40% времени на редактуру.<br>4️⃣ AI не заменяет стратегию, переговоры и комьюнити-менеджмент. Без человека продукт обесценивается за 2-3 месяца.<br>5️⃣ <b>Реальный эффект:</b> 1 SMM-щик с AI ведёт 5 клиентов вместо 2, доход растёт в 2.5 раза, рабочий день сокращается на 30-40%.<br><br><b>Что сделать сейчас:</b><br>— Зарегистрируйтесь в <a href="https://stoneai.ru">Stone AI</a> бесплатно и протестируйте промпт №2 на 3 своих постах.<br>— Прогоните один полный контент-цикл (идеи → тексты → визуалы) через всю связку моделей.<br>— Посчитайте экономию времени. Если 10+ часов за неделю — оформляйте Pro ({{price_max_full}}).<br><br>Похожие материалы в блоге: <a href="https://stoneai.ru/blog/best-ai-prompts">«50 лучших промптов для нейросетей 2026»</a>, <a href="https://stoneai.ru/blog/kak-napisat-prompt-dlya-nejroseti">«Как написать промпт для нейросети»</a>, <a href="https://stoneai.ru/blog/how-to-create-ai-bot">«Как создать AI-бота за 5 минут»</a>, <a href="https://stoneai.ru/blog/zarabotok-na-neyrosetyakh">«Заработок на нейросетях в 2026»</a>.<br><br>Расскажите в комментариях — каких промптов не хватает в вашей работе? Если увижу повторяющиеся запросы — выпущу часть 2 с кастомными решениями под конкретные ниши (товарка, услуги, инфобизнес, эксперт-блоги).`,
     ],
   },
+  {
+    slug: "nejroset-dlya-sozdaniya-logotipa",
+    author: "stone-ai",
+    category: "gaidy",
+    title: "Нейросеть для создания логотипа 2026 — пошаговый гайд + 10 промптов",
+    description:
+      "Как сделать логотип через нейросеть бесплатно: Midjourney, Nano Banana Pro, Ideogram, Flux. Пошаговый гайд, 10 готовых промптов, ошибки новичков и доработка в Figma.",
+    date: "2026-04-19",
+    dateModified: "2026-04-19",
+    readTime: "14 мин",
+    tags: ["нейросеть для логотипа", "создать логотип нейросетью", "логотип бесплатно", "ai логотип", "midjourney логотип", "ideogram логотип", "nano banana pro", "генерация логотипа", "промпты для логотипа", "нейросеть для дизайна", "ai для бизнеса", "stone ai", "flux логотип", "логотип без дизайнера", "нейросеть для бренда"],
+    content: [
+      `В 2024 году дизайн-студия брала за логотип 15 000–80 000₽ и делала его 2–4 недели. В 2026 нейросеть генерирует <b>10 вариантов за 3 минуты</b> — и некоторые из них реально конкурируют с работой junior-дизайнера. Это не замена профессионального брендинга, но для стартапов, фрилансеров, Telegram-каналов, маркетплейсов и MVP — это рабочий инструмент.`,
+
+      { stats: {
+        items: [
+          { value: "3 мин", label: "на 10 вариантов", sub: "вместо 2-4 недель у студии", accent: true },
+          { value: "0–40₽", label: "стоимость", sub: "vs 15 000–80 000₽ у дизайнера" },
+          { value: "6+", label: "AI-моделей", sub: "для генерации логотипов" },
+          { value: "85%", label: "задач закрывает", sub: "для малого бизнеса и стартапов" },
+        ],
+      } },
+
+      { callout: { variant: "success", title: "TL;DR — какую модель выбрать", body: "<b>Текст на логотипе нужен:</b> Ideogram 3 или GPT-5 Image — единственные, кто рендерит читаемый текст. <b>Иконка/символ без текста:</b> Midjourney V7 (лучший стиль) или Nano Banana Pro (бесплатные попытки). <b>Минимализм/flat:</b> Flux 1.1 Pro. <b>Быстрый тест идеи:</b> Nano Banana Pro через Stone AI — бесплатно 2 картинки/день." } },
+
+      { h2: "Какие нейросети умеют делать логотипы в 2026" },
+      `Не все image-модели подходят для логотипов. Главная проблема — <b>текст</b>. Большинство моделей не умеют рендерить буквы: вместо «STONE» получите «SNTOE» или кашу из символов. Вторая проблема — <b>векторность</b>: AI генерирует растр (PNG), а для печати нужен SVG/AI.`,
+      { comparison: {
+        columns: [
+          { title: "Ideogram 3", badge: "Текст #1" },
+          { title: "GPT-5 Image", badge: "Текст #2" },
+          { title: "Midjourney V7", badge: "Стиль #1", accent: true },
+          { title: "Nano Banana Pro", badge: "Бесплатно" },
+        ],
+        rows: [
+          { criterion: "Текст на логотипе", values: ["🏆 Отлично", "Отлично", "Плохо", "Средне"], highlight: true },
+          { criterion: "Стиль и эстетика", values: ["Хорошо", "Хорошо", "🏆 Отлично", "Хорошо"] },
+          { criterion: "Минимализм/flat", values: ["Хорошо", "Хорошо", "Отлично", "Хорошо"] },
+          { criterion: "Фотореализм", values: ["Хорошо", "🏆 Отлично", "Отлично", "Отлично"] },
+          { criterion: "Скорость", values: ["5-10 сек", "10-20 сек", "30-60 сек", "5-10 сек"] },
+          { criterion: "Цена через Stone AI", values: ["от 15₽", "от 15₽", "от 25₽", "Free (2/день)"] },
+        ],
+        caption: "Сравнение по результатам генерации 50 логотипов в каждой модели, апрель 2026.",
+        footnote: "Ideogram 3 — лучший для логотипов с текстом. Midjourney V7 — лучший по визуальному качеству."
+      } },
+      { comparison: {
+        columns: [
+          { title: "Flux 1.1 Pro", badge: "Минимализм" },
+          { title: "DALL-E 3" },
+          { title: "Stable Diffusion XL" },
+        ],
+        rows: [
+          { criterion: "Текст на логотипе", values: ["Средне", "Плохо", "Плохо"] },
+          { criterion: "Стиль", values: ["Хорошо", "Средне", "Средне"] },
+          { criterion: "Контроль", values: ["Хороший", "Ограничен", "🏆 Максимальный"] },
+          { criterion: "Цена", values: ["от 15₽", "от 15₽", "Self-host"] },
+        ],
+        caption: "Дополнительные модели для генерации логотипов.",
+      } },
+
+      { h2: "Пошаговый процесс: от идеи до готового логотипа" },
+      `<b>Шаг 1. Бриф (5 минут).</b> Прежде чем открывать AI, ответьте на 4 вопроса:<br>— Название бренда (точное написание)<br>— Сфера деятельности (кофейня, IT-стартап, блог)<br>— Настроение (серьёзный/игривый/минималистичный/премиальный)<br>— Цвета (если есть предпочтения)<br><br><b>Шаг 2. Генерация концептов (10 минут).</b> Запускаете 3–4 модели параллельно с разными промптами. Цель — получить 20–30 вариантов и выбрать направление.<br><br><b>Шаг 3. Итерация лучшего (10 минут).</b> Берёте 2–3 лучших варианта и дорабатываете: меняете цвета, упрощаете, пробуете другой ракурс.<br><br><b>Шаг 4. Очистка фона.</b> Удаляете фон (AI генерирует с фоном). Бесплатно: remove.bg или встроенный в Stone AI.<br><br><b>Шаг 5. Векторизация (5 минут).</b> Конвертируете PNG → SVG через Vectorizer.io или Adobe Illustrator (Image Trace). Для веба PNG 1024×1024 достаточно.<br><br><b>Шаг 6. Доработка в Figma/Canva (10–20 минут).</b> Правите текст (если AI написал криво), выравниваете элементы, добавляете свой шрифт.`,
+      { callout: { variant: "tip", title: "Итого: 40–50 минут от идеи до готового логотипа", body: "Сравните: дизайнер-фрилансер — 3–7 дней + 5 000–15 000₽. Студия — 2–4 недели + 30 000–80 000₽. AI — 40 минут + 0–200₽. Для MVP, Telegram-канала, маркетплейса — AI-логотип более чем достаточен." } },
+
+      { h2: "10 промптов для генерации логотипов" },
+      `Каждый промпт протестирован в Ideogram 3, Midjourney V7 и Nano Banana Pro. Подставьте название своего бренда вместо [BRAND].`,
+
+      { code: { lang: "text", content: "# 1. Минималистичный текстовый логотип\n\nMinimalist logo for \"[BRAND]\", clean sans-serif typography,\nsingle color on white background, modern tech company style,\nvector flat design, no icon, no gradient, no shadow.\n\n# 2. Иконка + текст (классический)\n\nLogo design for \"[BRAND]\", icon on the left + company name\non the right, flat vector style, [цвет] and white color\npalette, clean simple icon representing [сфера],\nprofessional business look, white background.\n\n# 3. Монограмма (буквы)\n\nMonogram logo using letters \"[INITIALS]\" for brand\n\"[BRAND]\", geometric construction, interlocking letters,\ngold and dark navy color scheme, luxury premium feel,\nminimal, vector, white background.\n\n# 4. Маскот (персонаж)\n\nMascot logo for \"[BRAND]\" — friendly [животное/персонаж]\ncharacter, cartoon style, holding [предмет], vibrant colors,\ncircular badge format, suitable for social media avatar,\nwhite background.\n\n# 5. Эмблема/герб\n\nEmblem logo for \"[BRAND]\", circular badge with banner,\nvintage craft style, [цвет] color palette, decorative\nborder, company name along the circle, established 2026,\nwhite background." } },
+
+      { code: { lang: "text", content: "# 6. Градиентный современный\n\nModern gradient logo for \"[BRAND]\", abstract geometric\nshape, purple to blue gradient, tech startup aesthetic,\nclean lines, no text — icon only, white background,\nsuitable for app icon.\n\n# 7. Рисованный / hand-drawn\n\nHand-drawn logo for \"[BRAND]\", sketch style with ink\ntexture, artisan craft feel, [цвет] ink on white paper,\norganic shapes, imperfect lines, vintage illustration,\nwhite background.\n\n# 8. Негативное пространство\n\nNegative space logo for \"[BRAND]\", clever use of white\nspace to form hidden [объект] shape, single color,\nminimal geometric, optical illusion effect, professional,\nwhite background.\n\n# 9. Wordmark с акцентной буквой\n\nWordmark logo \"[BRAND]\" with one accent letter in [цвет],\nrest in dark gray, modern geometric sans-serif font,\nthe accent letter has a unique design element,\nclean white background, vector.\n\n# 10. Для маркетплейса (круглый)\n\nRound logo for marketplace brand \"[BRAND]\", fits in\ncircle crop, bold text in center, [цвет] background,\nwhite text, simple icon above text, looks good at\n200x200px and 50x50px, mobile-friendly." } },
+
+      { callout: { variant: "info", title: "Промпт на английском = лучше результат", body: "Все image-модели обучены преимущественно на англоязычных данных. Русский промпт даёт на 20–30% хуже качество. Название бренда можно оставить на русском — Ideogram и GPT-5 Image корректно рендерят кириллицу." } },
+
+      { h2: "Типичные ошибки при генерации логотипов" },
+      `<b>Ошибка 1: «Сделай мне логотип».</b> Слишком общий промпт = слишком общий результат. AI нужна конкретика: стиль, цвета, формат, что НЕ нужно. Чем детальнее промпт — тем ближе к вашему видению.<br><br><b>Ошибка 2: Текст через Midjourney.</b> Midjourney V7 отлично рисует иконки, но текст рендерит с ошибками в 70% случаев. Для логотипов с текстом — только Ideogram 3 или GPT-5 Image.<br><br><b>Ошибка 3: Использовать как есть.</b> AI-логотип — это 80% работы. Оставшиеся 20% — доработка: убрать фон, выровнять, заменить шрифт на нормальный, конвертировать в SVG. Без этого логотип выглядит «сгенерированным».<br><br><b>Ошибка 4: Один вариант = финал.</b> Генерируйте минимум 20 вариантов. Первые 5 — разведка стиля. Следующие 10 — итерация лучшего. Последние 5 — финальная полировка. Ошибка — остановиться на первом «норм» варианте.<br><br><b>Ошибка 5: Игнорировать масштаб.</b> Логотип должен читаться и в 1000×1000, и в 32×32 (favicon). Если ваш логотип — мелкая детализированная иллюстрация, он превратится в кашу на маленьком размере. Добавляйте в промпт: «simple, works at small sizes, minimal details».`,
+
+      { h2: "Доработка AI-логотипа: от растра до бренда" },
+      `AI сгенерировал PNG — теперь превращаем его в полноценный логотип.<br><br><b>1. Удаление фона.</b> remove.bg (бесплатно, до 500×500) или Photoshop/Photopea (ручная обрезка для сложных случаев).<br><br><b>2. Векторизация.</b> Vectorizer.io или Adobe Illustrator → Image Trace → Expand. Получаете SVG, который масштабируется без потери качества. Для простых логотипов автоматика работает отлично.<br><br><b>3. Замена шрифта.</b> AI использует свой рендер шрифта — он почти никогда не идеален. Откройте Figma, удалите AI-текст, наберите название бренда нормальным шрифтом (Google Fonts: Inter, Manrope, Montserrat, Raleway). Это занимает 5 минут и радикально улучшает результат.<br><br><b>4. Цветовая палитра.</b> Зафиксируйте HEX-коды. Для бренд-бука нужны: основной цвет, акцентный, фоновый, текстовый. Coolors.co поможет подобрать гармоничную палитру на базе основного цвета логотипа.<br><br><b>5. Экспорт форматов.</b> Минимальный набор:<br>— SVG (вектор, для печати и масштабирования)<br>— PNG 1024×1024 с прозрачным фоном (для сайта)<br>— PNG 512×512 (для соцсетей)<br>— ICO 32×32 или PNG 180×180 (favicon / Apple Touch Icon)<br>— PNG на тёмном фоне (инвертированная версия)`,
+      { callout: { variant: "tip", title: "Бесплатный стек для доработки", body: "<b>Figma</b> (бесплатно) — дизайн и типографика. <b>remove.bg</b> — удаление фона. <b>Vectorizer.io</b> — PNG → SVG. <b>Coolors.co</b> — подбор палитры. <b>Favicon.io</b> — генерация favicon из PNG. Весь процесс — 15-20 минут, 0₽." } },
+
+      { h2: "Когда AI-логотип НЕ подойдёт" },
+      `AI — отличный инструмент для 85% задач малого бизнеса. Но есть случаи, когда нужен дизайнер:<br><br><b>Крупный бренд / ребрендинг.</b> Если ваш логотип будут видеть миллионы — нужна уникальность, юридическая проверка, бренд-стратегия. AI не умеет проверять, не похож ли логотип на существующий товарный знак.<br><br><b>Сложная айдентика.</b> Логотип — часть системы: визитки, упаковка, мерч, анимация. AI делает одну картинку, а не систему.<br><br><b>Юридическая защита.</b> Зарегистрировать AI-сгенерированный логотип как товарный знак — юридически серая зона. Роспатент пока не отказывает, но и прецедентов мало.<br><br><b>Для всего остального</b> — стартапы, фриланс, Telegram-каналы, маркетплейсы, MVP, тесты гипотез, личные проекты — AI-логотип закрывает задачу за 40 минут и 0–200₽.`,
+
+      { h2: "Итог: что делать прямо сейчас" },
+      `<b>1.</b> Откройте <a href="https://stoneai.ru/dashboard/chat">Stone AI</a> — бесплатно 2 генерации картинок/день.<br><b>2.</b> Скопируйте промпт №1 или №2 из этой статьи, подставьте название бренда.<br><b>3.</b> Сгенерируйте 10 вариантов в Nano Banana Pro (бесплатно) и Ideogram 3 (от 15₽).<br><b>4.</b> Выберите лучший, доработайте в Figma (шрифт + выравнивание).<br><b>5.</b> Экспортируйте SVG + PNG — готово.<br><br>Если нужно больше генераций — тариф Start ({{price_mini_full}}) даёт 30 картинок/мес, Pro ({{price_max_full}}) — 120.<br><br>Похожие материалы: <a href="https://stoneai.ru/blog/nejroset-dlya-generacii-kartinok">«8 лучших нейросетей для генерации картинок»</a>, <a href="https://stoneai.ru/blog/kak-napisat-prompt-dlya-nejroseti">«Как написать промпт для нейросети»</a>, <a href="https://stoneai.ru/blog/ii-dlya-biznesa-v-rossii">«AI для бизнеса в России»</a>.`,
+
+      { callout: { variant: "success", title: "Попробуйте прямо сейчас — бесплатно", body: "Регистрация — 30 секунд. 100₽ бонус на баланс. 2 генерации картинок/день + 10 текстовых запросов. <a href=\"https://stoneai.ru\"><b>stoneai.ru</b></a> — без VPN, оплата картой РФ." } },
+    ],
+  },
 ];
 
 /** Posts with price placeholders resolved at runtime. */
