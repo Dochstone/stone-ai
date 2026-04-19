@@ -67,7 +67,7 @@ export default function ToolsGallery() {
 
         <div className="text-center mt-10">
           <a
-            href="/dashboard"
+            href="/dashboard/tools"
             className="inline-flex items-center gap-2 bg-accent text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25"
           >
             Открыть все инструменты
