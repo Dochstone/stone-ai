@@ -153,25 +153,43 @@ async def get_referral_stats(
 
     # Get referred users details
     refs_result = await db.execute(
-        select(User.username, User.first_name, User.joined_at, User.total_deposited_usd)
+        select(
+            User.username, User.first_name, User.joined_at,
+            User.total_deposited_usd, User.subscription_tier,
+            User.total_requests, User.last_ip,
+        )
         .where(User.referrer_id == tg_id)
         .order_by(User.id.desc())
-        .limit(50)
+        .limit(100)
     )
-    referrals = [
-        {
+    referrals = []
+    total_deposits = 0.0
+    paid_count = 0
+    for row in refs_result.all():
+        dep = round(float(row.total_deposited_usd or 0), 2)
+        total_deposits += dep
+        if dep > 0:
+            paid_count += 1
+        referrals.append({
             "name": row.first_name or row.username or "User",
             "joined": row.joined_at.isoformat() if row.joined_at else None,
-            "deposited_usd": round(float(row.total_deposited_usd or 0), 2),
-        }
-        for row in refs_result.all()
-    ]
+            "deposited_usd": dep,
+            "plan": row.subscription_tier or "free",
+            "requests": row.total_requests or 0,
+        })
+
+    percent = user.referral_percent if user.referral_percent is not None else REFERRAL_PERCENT
+    is_partner = user.referral_percent is not None
 
     return {
         "referral_code": user.referral_code,
         "referral_count": referral_count,
         "referral_balance": round(float(user.referral_balance or 0), 2),
-        "referral_percent": user.referral_percent if user.referral_percent is not None else REFERRAL_PERCENT,
+        "referral_percent": percent,
+        "is_partner": is_partner,
+        "total_deposits_usd": round(total_deposits, 2),
+        "paid_count": paid_count,
+        "conversion_pct": round(paid_count / referral_count * 100, 1) if referral_count > 0 else 0,
         "referrals": referrals,
     }
 
