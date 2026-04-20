@@ -20,12 +20,12 @@ export const PROVIDER_STYLES: Record<string, ProviderStyle> = {
   Google:     { gradient: "linear-gradient(135deg, #4285f4 0%, #3367d6 100%)",       color: "#4285f4", letter: "G",  logo: "/logos/google.svg",    icon: "/logos/google-icon.jpg",    darkBg: true },
   Meta:       { gradient: "linear-gradient(135deg, #0668E1 0%, #0553b8 100%)",       color: "#0668E1", letter: "M",  logo: "/logos/meta.svg",      darkBg: true },
   Mistral:    { gradient: "linear-gradient(135deg, #1a1a1a 0%, #333333 100%)",       color: "#1a1a1a", letter: "M",  logo: "/logos/mistral.svg",   darkBg: true },
-  DeepSeek:   { gradient: "linear-gradient(135deg, #0891b2 0%, #06b6d4 100%)",       color: "#06b6d4", letter: "D",  logo: "/logos/deepseek.svg",  darkBg: true },
-  xAI:        { gradient: "linear-gradient(135deg, #1a1a1a 0%, #374151 100%)",       color: "#64748b", letter: "X",  logo: "/logos/xai.svg",       darkBg: true },
+  DeepSeek:   { gradient: "linear-gradient(135deg, #0891b2 0%, #06b6d4 100%)",       color: "#06b6d4", letter: "D",  logo: "/logos/deepseek.svg",  icon: "/logos/deepseek-icon.png", darkBg: true },
+  xAI:        { gradient: "linear-gradient(135deg, #1a1a1a 0%, #374151 100%)",       color: "#64748b", letter: "X",  logo: "/logos/xai.svg",       icon: "/logos/grok-icon.png",     darkBg: true },
   Perplexity: { gradient: "linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)",       color: "#6366f1", letter: "P",  logo: "/logos/perplexity.svg",darkBg: true },
-  Alibaba:    { gradient: "linear-gradient(135deg, #ff6a00 0%, #ee5a24 100%)",       color: "#ff6a00", letter: "Q",  logo: "/logos/alibaba.svg",   darkBg: true },
+  Alibaba:    { gradient: "linear-gradient(135deg, #ff6a00 0%, #ee5a24 100%)",       color: "#ff6a00", letter: "Q",  logo: "/logos/alibaba.svg",   icon: "/logos/qwen-icon.png",    darkBg: true },
   MiniMax:    { gradient: "linear-gradient(135deg, #ec4899 0%, #db2777 100%)",       color: "#ec4899", letter: "M",  logo: "/logos/minimax.svg",   darkBg: true },
-  Cohere:     { gradient: "linear-gradient(135deg, #22c55e 0%, #39d353 100%)",       color: "#39d353", letter: "C",  logo: "/logos/cohere.svg",    darkBg: true },
+  Cohere:     { gradient: "linear-gradient(135deg, #22c55e 0%, #39d353 100%)",       color: "#39d353", letter: "C",  logo: "/logos/cohere.svg",    icon: "/logos/cohere-icon.png",  darkBg: true },
   Microsoft:  { gradient: "linear-gradient(135deg, #00a4ef 0%, #0078d4 100%)",       color: "#00a4ef", letter: "M",                                darkBg: true },
   NVIDIA:     { gradient: "linear-gradient(135deg, #76b900 0%, #5a8f00 100%)",       color: "#76b900", letter: "N",  logo: "/logos/nvidia.svg",    darkBg: true },
   Zhipu:      { gradient: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)",       color: "#0ea5e9", letter: "Z",                                darkBg: true },
@@ -39,7 +39,7 @@ export const PROVIDER_STYLES: Record<string, ProviderStyle> = {
   PixVerse:   { gradient: "linear-gradient(135deg, #A855F7 0%, #9333ea 100%)",       color: "#A855F7", letter: "P",                                darkBg: true },
   Pika:       { gradient: "linear-gradient(135deg, #F97316 0%, #ea580c 100%)",       color: "#F97316", letter: "P",                                darkBg: true },
   Lightricks: { gradient: "linear-gradient(135deg, #3B82F6 0%, #2563eb 100%)",       color: "#3B82F6", letter: "L",                                darkBg: true },
-  Kuaishou:   { gradient: "linear-gradient(135deg, #ff4f00 0%, #e53e00 100%)",       color: "#ff4f00", letter: "K",  logo: "/logos/kuaishou.svg",  darkBg: true },
+  Kuaishou:   { gradient: "linear-gradient(135deg, #ff4f00 0%, #e53e00 100%)",       color: "#ff4f00", letter: "K",  logo: "/logos/kuaishou.svg",  icon: "/logos/kling-icon.png", darkBg: true },
 };
 
 const DEFAULT_STYLE: ProviderStyle = {
