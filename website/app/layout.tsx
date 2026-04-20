@@ -298,8 +298,9 @@ export default function RootLayout({
           }}
         />
 
-        {/* Service Worker registration */}
-        <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js')})}` }} />
+        {/* Unregister any previously installed service worker + wipe its caches.
+            Stone AI is a cloud-only tool, offline support caused stale-cache bugs. */}
+        <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister()})});if(typeof caches!=='undefined'){caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k)})})}}` }} />
 
         {/* Google Analytics */}
         {GA_ID && (
