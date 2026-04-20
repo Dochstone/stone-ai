@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { cookies } from "next/headers";
 import { Manrope } from "next/font/google";
 import "./globals.css";
 import LayoutShell from "@/components/LayoutShell";
@@ -275,8 +276,10 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const themeCookie = cookies().get("theme")?.value;
+  const htmlClass = `${manrope.variable}${themeCookie === "dark" ? " dark" : ""}`;
   return (
-    <html lang="ru" className={manrope.variable} suppressHydrationWarning>
+    <html lang="ru" className={htmlClass} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('theme');var d=t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(d){document.documentElement.classList.add('dark')};var c=d?'#1a1a1e':'#FAF9F5';var m=document.querySelector('meta[name="theme-color"]');if(m){m.setAttribute('content',c)}else{m=document.createElement('meta');m.name='theme-color';m.content=c;document.head.appendChild(m)}}catch(e){}})()` }} />
         {/* icons, manifest, apple-web-app, theme-color — via Metadata API export above */}

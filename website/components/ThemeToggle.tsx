@@ -24,7 +24,9 @@ export default function ThemeToggle({ compact }: { compact?: boolean } = {}) {
     const next = !dark;
     setDark(next);
     document.documentElement.classList.toggle("dark", next);
-    localStorage.setItem("theme", next ? "dark" : "light");
+    const value = next ? "dark" : "light";
+    localStorage.setItem("theme", value);
+    document.cookie = `theme=${value}; path=/; max-age=31536000; SameSite=Lax`;
     updateThemeColor(next);
   };
 
