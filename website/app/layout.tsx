@@ -22,11 +22,15 @@ import { SITE_URL, SITE_RATING } from "@/lib/constants";
 import { planPrice, planPriceFull, planPriceNum } from "@/lib/pricing";
 const OG_IMAGE = `${SITE_URL}/opengraph-image?v=2`;
 
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  viewportFit: "cover",
-};
+export function generateViewport(): Viewport {
+  const theme = cookies().get("theme")?.value;
+  return {
+    width: "device-width",
+    initialScale: 1,
+    viewportFit: "cover",
+    themeColor: theme === "dark" ? "#1a1a1e" : "#FAF9F5",
+  };
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -111,7 +115,6 @@ export const metadata: Metadata = {
     google: "PpzANTmpi-gEDEFk0SFPtyDzyTJ93D640gChtmgw10o",
   },
   other: {
-    "theme-color": "#FAF9F5",
     "mobile-web-app-capable": "yes",
   },
 };
