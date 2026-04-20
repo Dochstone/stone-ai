@@ -26,6 +26,7 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      { source: "/webchat", destination: "/dashboard/chat", permanent: false },
       { source: "/models/kling-v3", destination: "/models/kling-v2", permanent: true },
       { source: "/models/runway-gen3", destination: "/video", permanent: true },
       { source: "/models/flux-schnell", destination: "/models", permanent: true },
