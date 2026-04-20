@@ -39,7 +39,7 @@ export const PRICES_OLD: Record<PaidPlanId, number> = {
 
 export const PRICES_CURRENT: Record<PaidPlanId, number> = {
   mini: 990,
-  max: 1890,
+  max: 1690,
   "max-pro": 3990,
 };
 
@@ -78,7 +78,7 @@ export const YEARLY_DISCOUNT = 0.2; // marketing-rounded label only
 
 export const PRICES_YEARLY: Record<PaidPlanId, number> = {
   mini: 9480,        // 790₽/мес × 12
-  max: 17988,        // 1 499₽/мес × 12
+  max: 16200,        // 1 350₽/мес × 12
   "max-pro": 38388,  // 3 199₽/мес × 12
 };
 

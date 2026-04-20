@@ -187,7 +187,7 @@ const jsonLdOrganization = {
   makesOffer: [
     { "@type": "Offer", name: "Free", priceCurrency: "RUB", price: "0" },
     { "@type": "Offer", name: "Start", priceCurrency: "RUB", price: "990", url: `${SITE_URL}/pricing` },
-    { "@type": "Offer", name: "Pro", priceCurrency: "RUB", price: "1890", url: `${SITE_URL}/pricing` },
+    { "@type": "Offer", name: "Pro", priceCurrency: "RUB", price: "1690", url: `${SITE_URL}/pricing` },
     { "@type": "Offer", name: "Elite", priceCurrency: "RUB", price: "3990", url: `${SITE_URL}/pricing` },
   ],
   contactPoint: [
