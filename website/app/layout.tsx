@@ -24,6 +24,7 @@ const OG_IMAGE = `${SITE_URL}/opengraph-image?v=2`;
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
 };
 
 export const metadata: Metadata = {
