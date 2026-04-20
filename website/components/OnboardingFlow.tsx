@@ -9,19 +9,20 @@ interface Step {
 }
 
 const M = "/mascots/stone-mascot-";
+const V = ".webp?v=2";
 
 const GUEST_STEPS: Step[] = [
-  { mascot: `${M}idle.png`, title: "Привет! Я Stone — твой AI-помощник 👋", desc: "Помогу с текстами, картинками, видео и рекламой. 65+ нейросетей в одном месте — бесплатно." },
-  { mascot: `${M}chat.png`, title: "Попробуй написать что-нибудь ✍️", desc: "Просто напиши вопрос в поле ввода внизу. Первые 10 запросов в день — бесплатно!", highlight: "[data-onboard='chat-input']" },
-  { mascot: `${M}success.png`, title: "Понравилось? Создай аккаунт 🎁", desc: "Регистрация за 10 секунд — и все инструменты твои. Плюс 100\u20BD на баланс в подарок.", registerCta: true },
+  { mascot: `${M}idle${V}`, title: "Привет! Я Stone — твой AI-помощник 👋", desc: "Помогу с текстами, картинками, видео и рекламой. 65+ нейросетей в одном месте — бесплатно." },
+  { mascot: `${M}chat${V}`, title: "Попробуй написать что-нибудь ✍️", desc: "Просто напиши вопрос в поле ввода внизу. Первые 10 запросов в день — бесплатно!", highlight: "[data-onboard='chat-input']" },
+  { mascot: `${M}success${V}`, title: "Понравилось? Создай аккаунт 🎁", desc: "Регистрация за 10 секунд — и все инструменты твои. Плюс 100\u20BD на баланс в подарок.", registerCta: true },
 ];
 
 const USER_STEPS: Step[] = [
-  { mascot: `${M}success.png`, title: "Добро пожаловать! 🎁 100\u20BD на балансе", desc: "Мы начислили бонус — используй его на любые AI-инструменты." },
-  { mascot: `${M}chat.png`, title: "🧠 Чат бесплатный — 10 запросов в день", desc: "Выбирай модель в меню слева. GPT-5, Claude, Gemini и другие — каждая со своей суперсилой.", highlight: "[data-onboard='model-picker']" },
-  { mascot: `${M}bot.png`, title: "✨ Попробуй AI-шаблоны", desc: "50+ готовых промптов для маркетинга, SEO и бизнеса. Заполни форму — получи результат. От 3\u20BD.", highlight: "[data-onboard='templates-link']", cta: { label: "Открыть шаблоны", href: "/dashboard/templates" } },
-  { mascot: `${M}image.png`, title: "🖼️ Сгенерируй картинку или видео", desc: "2 бесплатные картинки + 1 видео в подарок. Остальное — от 5\u20BD за генерацию.", highlight: "[data-onboard='media-tabs']" },
-  { mascot: `${M}idle.png`, title: "🚀 Твоя AI-студия готова!", desc: "Всё настроено. Начни с чата, шаблонов или создай рекламную кампанию.", cta: { label: "Начать работу", href: "/dashboard" } },
+  { mascot: `${M}success${V}`, title: "Добро пожаловать! 🎁 100\u20BD на балансе", desc: "Мы начислили бонус — используй его на любые AI-инструменты." },
+  { mascot: `${M}chat${V}`, title: "🧠 Чат бесплатный — 10 запросов в день", desc: "Выбирай модель в меню слева. GPT-5, Claude, Gemini и другие — каждая со своей суперсилой.", highlight: "[data-onboard='model-picker']" },
+  { mascot: `${M}chat${V}`, title: "✨ Попробуй AI-шаблоны", desc: "50+ готовых промптов для маркетинга, SEO и бизнеса. Заполни форму — получи результат. От 3\u20BD.", highlight: "[data-onboard='templates-link']", cta: { label: "Открыть шаблоны", href: "/dashboard/templates" } },
+  { mascot: `${M}idle${V}`, title: "🖼️ Сгенерируй картинку или видео", desc: "2 бесплатные картинки + 1 видео в подарок. Остальное — от 5\u20BD за генерацию.", highlight: "[data-onboard='media-tabs']" },
+  { mascot: `${M}idle${V}`, title: "🚀 Твоя AI-студия готова!", desc: "Всё настроено. Начни с чата, шаблонов или создай рекламную кампанию.", cta: { label: "Начать работу", href: "/dashboard" } },
 ];
 
 interface Props { mode: "guest" | "user"; onComplete: () => void; onRegister?: () => void }
