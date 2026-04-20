@@ -281,7 +281,7 @@ export default function RootLayout({
   return (
     <html lang="ru" className={htmlClass} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('theme');var d=t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(d){document.documentElement.classList.add('dark')};var c=d?'#1a1a1e':'#FAF9F5';var m=document.querySelector('meta[name="theme-color"]');if(m){m.setAttribute('content',c)}else{m=document.createElement('meta');m.name='theme-color';m.content=c;document.head.appendChild(m)}}catch(e){}})()` }} />
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('theme');var d=t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(d){document.documentElement.classList.add('dark')};var v=d?'dark':'light';if(!document.cookie.split('; ').some(function(c){return c.indexOf('theme=')===0})){document.cookie='theme='+v+'; path=/; max-age=31536000; SameSite=Lax'}var c=d?'#1a1a1e':'#FAF9F5';var m=document.querySelector('meta[name="theme-color"]');if(m){m.setAttribute('content',c)}else{m=document.createElement('meta');m.name='theme-color';m.content=c;document.head.appendChild(m)}}catch(e){}})()` }} />
         {/* icons, manifest, apple-web-app, theme-color — via Metadata API export above */}
         <script
           type="application/ld+json"
