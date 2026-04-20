@@ -67,7 +67,7 @@ export default function Nav() {
       {/* Bonus banner removed from nav — shown in WebChat for guests */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-14 md:h-16">
         <a href="/" className="flex items-center gap-2 shrink-0 min-w-0">
-          <img src="/mascots/stone-mascot-idle.webp" alt="Stone AI маскот" width="28" height="28" className="inline-block" />
+          <img src="/mascots/stone-mascot-idle.webp?v=2" alt="Stone AI маскот" width="28" height="28" className="inline-block" />
           <span className="text-xl font-extrabold text-text">Stone AI</span>
           <span className="hidden sm:inline-flex items-center bg-accent/8 text-accent text-[9px] font-bold px-2 py-0.5 rounded-full border border-accent/15">
             65+ нейросетей

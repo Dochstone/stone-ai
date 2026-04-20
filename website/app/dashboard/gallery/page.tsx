@@ -198,7 +198,7 @@ export default function GalleryPage() {
           <SkeletonGrid cols={4} count={8} aspectSquare />
         ) : gens.length === 0 && !loading ? (
           <div className="text-center py-20 bg-text/[0.02] border border-text/5 rounded-2xl">
-            <img src="/mascots/stone-mascot-idle.webp" alt="Stone" width="100" height="100" className="mx-auto mb-4" />
+            <img src="/mascots/stone-mascot-idle.webp?v=2" alt="Stone" width="100" height="100" className="mx-auto mb-4" />
             <h3 className="text-lg font-bold text-text mb-2">Здесь появятся ваши генерации</h3>
             <p className="text-sm text-text/40 mb-6">Попробуйте создать первую картинку или видео!</p>
             <a href="/dashboard/chat" className="bg-accent text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-accent/90">Открыть чат</a>

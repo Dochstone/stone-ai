@@ -222,7 +222,7 @@ export default function AboutPage() {
             65+ нейросетей и 15+ инструментов для бизнеса в одном интерфейсе. Без VPN, с оплатой в рублях, с историей чатов на русском.
           </p>
           <div className="mt-6">
-            <img src="/mascots/stone-mascot-idle.webp" alt="Stone AI маскот" width="120" height="120" className="mx-auto" />
+            <img src="/mascots/stone-mascot-idle.webp?v=2" alt="Stone AI маскот" width="120" height="120" className="mx-auto" />
           </div>
         </div>
 
@@ -368,7 +368,7 @@ export default function AboutPage() {
 
         {/* Contact */}
         <section className="bg-gradient-to-r from-accent/10 to-teal/10 rounded-2xl border border-accent/10 p-8 md:p-12 text-center mt-16">
-          <img src="/mascots/stone-mascot-chat.webp" alt="Stone AI маскот в чате" width="80" height="80" className="mx-auto mb-4" />
+          <img src="/mascots/stone-mascot-chat.webp?v=2" alt="Stone AI маскот в чате" width="80" height="80" className="mx-auto mb-4" />
           <h2 className="text-2xl font-extrabold mb-4">Связаться с нами</h2>
           <p className="text-text/50 text-sm mb-8 max-w-md mx-auto">
             Вопросы, предложения, сотрудничество, баг-репорты, корпоративные тарифы

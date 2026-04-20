@@ -167,7 +167,7 @@ export default function ProjectsPage() {
         {projects.length === 0 ? (
           <div className="py-12 bg-text/[0.02] border border-text/5 rounded-2xl">
             <div className="text-center px-6">
-              <img src="/mascots/stone-mascot-idle.webp" alt="Stone" width="80" height="80" className="mx-auto mb-4" />
+              <img src="/mascots/stone-mascot-idle.webp?v=2" alt="Stone" width="80" height="80" className="mx-auto mb-4" />
               <h3 className="text-lg font-bold text-text mb-2">Настройте AI под ваш бизнес</h3>
               <p className="text-sm text-text/40 mb-6 max-w-lg mx-auto">
                 Создайте проект — и AI будет знать ваш бренд, аудиторию и стиль общения.

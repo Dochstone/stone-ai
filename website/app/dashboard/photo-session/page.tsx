@@ -206,7 +206,7 @@ export default function PhotoSessionPage() {
         {/* First time hint */}
         {!imagePreview && !resultUrl && (
           <div className="bg-gradient-to-r from-accent/5 to-teal/5 border border-accent/10 rounded-2xl p-5 mb-6 flex items-start gap-4">
-            <img src="/mascots/stone-mascot-idle.webp" alt="" width="56" height="56" className="shrink-0 mt-1 hidden sm:block" />
+            <img src="/mascots/stone-mascot-idle.webp?v=2" alt="" width="56" height="56" className="shrink-0 mt-1 hidden sm:block" />
             <div>
               <h3 className="font-bold text-text text-sm mb-1">Как это работает</h3>
               <p className="text-xs text-text/50 leading-relaxed">

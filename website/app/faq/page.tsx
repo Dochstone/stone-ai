@@ -69,7 +69,7 @@ export default function FaqPage() {
           <div className="relative w-36 h-36 sm:w-44 sm:h-44 mx-auto mb-5">
             <div className="absolute inset-0 rounded-full bg-gradient-to-br from-accent/15 to-teal/10 blur-2xl" aria-hidden="true" />
             <img
-              src="/mascots/stone-mascot-chat.webp"
+              src="/mascots/stone-mascot-chat.webp?v=2"
               alt="Маскот Stone AI отвечает на вопросы"
               width={176}
               height={176}

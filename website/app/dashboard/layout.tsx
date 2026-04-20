@@ -275,7 +275,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 {/* Header */}
                 <div className="px-3 pb-2 mb-1 border-b border-text/[0.06] flex items-center" style={{ paddingTop: "max(8px, env(safe-area-inset-top))" }}>
                   <a href="/" className="flex items-center gap-1.5">
-                    <img src="/mascots/stone-mascot-idle.webp" alt="" width="24" height="24" />
+                    <img src="/mascots/stone-mascot-idle.webp?v=2" alt="" width="24" height="24" />
                     <span className="text-sm font-extrabold text-text">Stone AI</span>
                   </a>
                   <span className="text-[9px] text-accent font-bold ml-1.5">65+</span>

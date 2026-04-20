@@ -198,7 +198,7 @@ export default function BotsPage() {
           bots.length === 0 && !creating ? (
             <div className="py-12 bg-text/[0.02] border border-text/5 rounded-2xl">
               <div className="text-center px-6">
-                <img src="/mascots/stone-mascot-chat.webp" alt="Stone" width="72" height="72" className="mx-auto mb-3" />
+                <img src="/mascots/stone-mascot-chat.webp?v=2" alt="Stone" width="72" height="72" className="mx-auto mb-3" />
                 <h3 className="text-lg font-bold text-text mb-2">Создайте своего AI-бота</h3>
                 <p className="text-sm text-text/40 mb-5 max-w-md mx-auto">
                   Задайте инструкции, загрузите базу знаний (PDF/TXT) — бот будет отвечать по вашим данным.

@@ -26,7 +26,7 @@ export default function WelcomeScreen({ onSuggestion, activeTab, plan }: { onSug
     <div className="flex-1 flex items-start justify-center px-4 overflow-y-auto">
       <div className="text-center max-w-2xl w-full py-6 sm:py-8">
         <div className="mb-6">
-          <img src="/mascots/stone-mascot-chat.webp" alt="Stone AI" width="72" height="72" className="mx-auto mb-3" />
+          <img src="/mascots/stone-mascot-chat.webp?v=2" alt="Stone AI" width="72" height="72" className="mx-auto mb-3" />
           <h1 className="text-xl sm:text-2xl font-extrabold text-text mb-1">{cfg.title}</h1>
           <p className="text-xs sm:text-sm text-text/40">{cfg.subtitle}</p>
         </div>

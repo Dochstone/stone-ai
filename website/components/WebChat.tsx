@@ -457,7 +457,7 @@ function Sidebar({
             </div>
           ) : sessions.length === 0 ? (
             <div className="px-3 py-8 text-center">
-              <img src="/mascots/stone-mascot-chat.webp" alt="Stone" width="64" height="64" className="mx-auto mb-2 opacity-60" />
+              <img src="/mascots/stone-mascot-chat.webp?v=2" alt="Stone" width="64" height="64" className="mx-auto mb-2 opacity-60" />
               <p className="text-[11px] text-text/20">Здесь появятся ваши чаты</p>
             </div>
           ) : (
@@ -484,7 +484,7 @@ function Sidebar({
                 if (filtered.length === 0) {
                   return (
                     <div className="px-3 py-8 text-center">
-                      <img src="/mascots/stone-mascot-chat.webp" alt="Stone" width="56" height="56" className="mx-auto mb-2 opacity-50" />
+                      <img src="/mascots/stone-mascot-chat.webp?v=2" alt="Stone" width="56" height="56" className="mx-auto mb-2 opacity-50" />
                       <p className="text-[11px] text-text/40 leading-snug">
                         В этой категории ещё нет чатов.<br />
                         Напишите сообщение, чтобы начать.
@@ -2127,7 +2127,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                       )
                     ) : (
                       <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full ring-2 ring-text/[0.06] bg-bg overflow-hidden flex items-center justify-center">
-                        <img src="/mascots/stone-mascot-chat.webp" alt="Stone AI" className="w-6 h-6 sm:w-7 sm:h-7 object-contain" />
+                        <img src="/mascots/stone-mascot-chat.webp?v=2" alt="Stone AI" className="w-6 h-6 sm:w-7 sm:h-7 object-contain" />
                       </div>
                     )}
                   </div>

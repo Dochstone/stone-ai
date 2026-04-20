@@ -355,7 +355,7 @@ export default function Hero() {
             Чат · Картинки · Видео · Реклама · SEO · Презентации · Боты · Агенты
           </p>
 
-          <img src="/mascots/stone-mascot-idle.webp" alt="Stone AI" width="80" height="80" className="mx-auto mt-5 mb-2" />
+          <img src="/mascots/stone-mascot-idle.webp?v=2" alt="Stone AI" width="80" height="80" className="mx-auto mt-5 mb-2" />
 
           <p className="text-lg md:text-xl text-text/60 font-semibold">
             Создавай. Продвигай. Автоматизируй.
