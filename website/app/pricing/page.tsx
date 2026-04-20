@@ -288,20 +288,26 @@ export default function PricingPage() {
             <tbody>
               {comparisonRows.map((row, i) => {
                 const { Icon } = row;
+                const renderVal = (v: string, bold?: boolean) => {
+                  if (v === "—") return <span className="text-text/15">—</span>;
+                  if (v === "✓") return <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-500"><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg></span>;
+                  if (v === "✗") return <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-500/15 text-red-400"><svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></span>;
+                  return <span className={bold ? "font-semibold" : ""}>{v}</span>;
+                };
                 return (
                 <tr key={row.feature} className={`border-t border-text/[0.04] ${i % 2 === 0 ? "" : "bg-text/[0.01]"} hover:bg-accent/[0.02] transition-colors`}>
                   <td className="py-3.5 px-5">
-                    <div className="flex items-center gap-2.5" style={{ ["--pad-c" as string]: row.color }}>
-                      <span className="glass-pad flex items-center justify-center w-6 h-6 rounded-lg shrink-0">
-                        <Icon className="block" size={13} strokeWidth={2.4} />
+                    <div className="flex items-center gap-2.5">
+                      <span className="flex items-center justify-center w-7 h-7 rounded-xl shrink-0" style={{ background: `${row.color}18` }}>
+                        <Icon className="block" size={14} strokeWidth={2.2} style={{ color: row.color }} />
                       </span>
                       <span className="text-[13px] font-medium text-text/70">{row.feature}</span>
                     </div>
                   </td>
-                  <td className="py-3.5 px-4 text-center text-[13px] text-text/50">{row.free === "—" ? <span className="text-text/15">—</span> : row.free}</td>
-                  <td className="py-3.5 px-4 text-center text-[13px] text-text/60">{row.mini === "—" ? <span className="text-text/15">—</span> : row.mini}</td>
-                  <td className="py-3.5 px-4 text-center text-[13px] font-semibold text-text/80 bg-[#A855F7]/[0.03]">{row.max === "—" ? <span className="text-text/15">—</span> : row.max}</td>
-                  <td className="py-3.5 px-4 text-center text-[13px] font-semibold text-text/80">{row.maxpro === "✓" ? <span className="text-accent text-base">✓</span> : row.maxpro}</td>
+                  <td className="py-3.5 px-4 text-center text-[13px] text-text/50">{renderVal(row.free)}</td>
+                  <td className="py-3.5 px-4 text-center text-[13px] text-text/60">{renderVal(row.mini)}</td>
+                  <td className="py-3.5 px-4 text-center text-[13px] text-text/80 bg-[#A855F7]/[0.03]">{renderVal(row.max, true)}</td>
+                  <td className="py-3.5 px-4 text-center text-[13px] text-text/80">{renderVal(row.maxpro, true)}</td>
                 </tr>
                 );
               })}
