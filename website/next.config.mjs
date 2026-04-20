@@ -2,7 +2,6 @@
 const nextConfig = {
   output: "standalone",
   poweredByHeader: false,
-  productionBrowserSourceMaps: true,
   // Skip on-demand /_next/image optimizer — sharp is missing on this
   // standalone host (it was returning 500 for /demo/avatar-*.webp). Our
   // images are pre-sized small webp/jpg, nginx serves them directly.
