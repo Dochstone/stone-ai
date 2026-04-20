@@ -1,9 +1,9 @@
-const CACHE_NAME = 'stone-ai-v7';
+const CACHE_NAME = 'stone-ai-v8';
 const STATIC_ASSETS = [
   '/offline.html',
   '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png',
+  '/icon-192x192.png',
+  '/icon-512x512.png',
 ];
 
 self.addEventListener('install', (event) => {
