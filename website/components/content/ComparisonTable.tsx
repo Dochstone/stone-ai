@@ -28,7 +28,8 @@ interface Props {
 const ICON_MAP: [RegExp, string][] = [
   [/GPT|OpenAI|o3|o4/i, "/logos/openai-icon.png"],
   [/Claude|Anthropic|Sonnet|Opus|Haiku/i, "/logos/claude-icon.png"],
-  [/Gemini|Google/i, "/logos/google-icon.jpg"],
+  [/Gemini/i, "/logos/gemini-pro-icon.png"],
+  [/Google/i, "/logos/google-icon.jpg"],
   [/DeepSeek/i, "/logos/deepseek-icon.png"],
   [/Midjourney/i, "/logos/midjourney-icon.jpg"],
   [/Grok|xAI/i, "/logos/grok-icon.png"],
@@ -105,7 +106,7 @@ export default function ComparisonTable({ columns, rows, caption, footnote, show
                         <img
                           src={iconSrc}
                           alt={c.title}
-                          className="w-8 h-8 rounded-lg object-contain bg-white border border-text/5 p-0.5"
+                          className="w-10 h-10 rounded-xl object-contain p-1 bg-text/[0.03]"
                           loading="lazy"
                         />
                       )}
