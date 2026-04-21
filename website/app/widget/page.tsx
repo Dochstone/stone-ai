@@ -10,7 +10,7 @@ interface Message { role: "user" | "assistant"; content: string }
 function WidgetInner() {
   const params = useSearchParams();
   const botId = params.get("bot");
-  const [botConfig, setBotConfig] = useState<{ name: string; avatar_emoji: string; model_id: string } | null>(null);
+  const [botConfig, setBotConfig] = useState<{ name: string; avatar_emoji: string; model_id: string; system_prompt?: string } | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
@@ -39,7 +39,7 @@ function WidgetInner() {
         body: JSON.stringify({
           model_id: botConfig.model_id,
           messages: [...messages, userMsg].map(m => ({ role: m.role, content: m.content })),
-          system_prompt: `Ты AI-ассистент "${botConfig.name}". Отвечай кратко и по делу.`,
+          system_prompt: botConfig.system_prompt || `Ты AI-ассистент "${botConfig.name}". Отвечай кратко и по делу.`,
         }),
       });
 

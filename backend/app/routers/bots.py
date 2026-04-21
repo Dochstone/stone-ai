@@ -270,6 +270,7 @@ async def get_widget_config(
         "id": bot.id,
         "name": bot.name,
         "description": bot.description,
+        "system_prompt": bot.system_prompt,
         "avatar_emoji": bot.avatar_emoji,
         "model_id": bot.model_id,
     }

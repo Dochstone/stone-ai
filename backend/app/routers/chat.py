@@ -106,6 +106,7 @@ class ChatRequest(BaseModel):
     messages: list[dict]
     system_prompt: str | None = None
     project_id: str | None = None
+    bot_id: int | None = None  # if set, system_prompt loaded from DB (not client)
 
     @field_validator("messages")
     @classmethod
@@ -274,7 +275,42 @@ async def chat(
                 yield "data: [DONE]\n\n"
             return StreamingResponse(blocked_gen(), media_type="text/event-stream")
     default_system = "Always respond in the same language as the user's message. Match the user's language exactly."
-    system_prompt = inject_safety(req.system_prompt if req.system_prompt else default_system)
+
+    # If bot_id provided, load system_prompt from DB (ignore client-side system_prompt)
+    bot_system_prompt = None
+    if req.bot_id:
+        from app.models.custom_bot import CustomBot
+        bot_result = await db.execute(
+            select(CustomBot).where(CustomBot.id == req.bot_id)
+        )
+        bot_obj = bot_result.scalar_one_or_none()
+        if bot_obj and (bot_obj.user_tg_id == tg_id or bot_obj.is_public):
+            bot_system_prompt = bot_obj.system_prompt
+            # Server-side RAG: search knowledge base and append context
+            try:
+                from app.models.knowledge_base import KnowledgeChunk
+                from app.services.rag import get_embeddings, search_chunks, build_rag_context
+                chunks_result = await db.execute(
+                    select(KnowledgeChunk).where(KnowledgeChunk.bot_id == req.bot_id)
+                )
+                all_chunks = chunks_result.scalars().all()
+                if all_chunks:
+                    last_user_msg = ""
+                    for m in reversed(req.messages):
+                        if m.get("role") == "user" and isinstance(m.get("content"), str):
+                            last_user_msg = m["content"]
+                            break
+                    if last_user_msg:
+                        chunk_dicts = [{"content": c.content, "embedding": c.embedding} for c in all_chunks]
+                        query_emb = (await get_embeddings([last_user_msg]))[0]
+                        relevant = search_chunks(query_emb, chunk_dicts)
+                        if relevant:
+                            rag_ctx = build_rag_context(relevant)
+                            bot_system_prompt = (bot_system_prompt or "") + rag_ctx
+            except Exception as e:
+                logger.warning(f"Server-side RAG failed for bot {req.bot_id}: {e}")
+
+    system_prompt = inject_safety(bot_system_prompt or req.system_prompt or default_system)
 
     # Inject project context if project_id provided
     if req.project_id:

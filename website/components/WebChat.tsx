@@ -1658,29 +1658,6 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
     });
 
     try {
-      // RAG: if bot has knowledge base, fetch context
-      let ragSystemPrompt = activeBotConfig?.system_prompt || null;
-      if (activeBotConfig?.id && auth?.token) {
-        try {
-          const lastUserMsg = apiMessages.filter((m: { role: string }) => m.role === "user").pop();
-          if (lastUserMsg) {
-            const ragRes = await fetch(`${API_URL}/api/knowledge/search`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
-              body: JSON.stringify({ bot_id: activeBotConfig.id, query: lastUserMsg.content }),
-            });
-            if (ragRes.ok) {
-              const ragData = await ragRes.json();
-              if (ragData.context) {
-                ragSystemPrompt = (ragSystemPrompt || "") + `\n\nКонтекст из базы знаний:\n${ragData.context}\n\nОтвечай на основе этого контекста когда он релевантен вопросу.`;
-              }
-            }
-          }
-        } catch (err) {
-          console.warn("RAG knowledge search failed, proceeding without context:", err);
-        }
-      }
-
       const chatUrl = isGuest ? `${API_URL}/api/chat/guest` : `${API_URL}/api/chat`;
       const headers: Record<string, string> = { "Content-Type": "application/json" };
       if (!isGuest) headers["Authorization"] = `Bearer ${auth.token}`;
@@ -1692,7 +1669,8 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
           model_id: isGuest ? DEFAULT_MODEL : selectedModel,
           messages: apiMessages,
           ...(selectedProjectId && !isGuest ? { project_id: selectedProjectId } : {}),
-          ...(ragSystemPrompt ? { system_prompt: ragSystemPrompt } : modelCatFilter === "health" ? { system_prompt: "Ты — AI-ассистент по общим вопросам здоровья. Ты НЕ врач и НЕ ставишь диагнозы. Анализируй фото и описания симптомов, предлагай возможные причины (2-3 варианта), рекомендуй к какому специалисту обратиться. Заверши: \"Для точного диагноза обратитесь к врачу.\" Отвечай на русском." } : {}),
+          ...(activeBotConfig?.id && !isGuest ? { bot_id: activeBotConfig.id } : {}),
+          ...(!activeBotConfig?.id && modelCatFilter === "health" ? { system_prompt: "Ты — AI-ассистент по общим вопросам здоровья. Ты НЕ врач и НЕ ставишь диагнозы. Анализируй фото и описания симптомов, предлагай возможные причины (2-3 варианта), рекомендуй к какому специалисту обратиться. Заверши: \"Для точного диагноза обратитесь к врачу.\" Отвечай на русском." } : {}),
         }),
         signal: abort.signal,
       });
