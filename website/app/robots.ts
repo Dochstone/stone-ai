@@ -8,15 +8,13 @@ import { SITE_URL } from "@/lib/constants";
 // because broader brand recognition outweighs the IP cost.
 // Only auth / dashboard / payment routes are gated everywhere.
 export default function robots(): MetadataRoute.Robots {
+  // Only paths we genuinely don't want crawled at all. Pages that should not
+  // be indexed but may be followed (profile, topup, dashboard, payment, admin,
+  // test-landing) are handled via per-page `metadata.robots = { index: false }`
+  // instead — robots.txt is for crawling, not indexing.
   const privateDisallow = [
+    "/api/",
     "/auth/",
-    "/profile",
-    "/topup",
-    "/_next/",
-    "/admin",
-    "/dashboard/",
-    "/payment/",
-    "/test-landing",
   ];
 
   // Same allow/disallow shape for everyone; just enumerated explicitly so
