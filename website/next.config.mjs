@@ -30,6 +30,7 @@ const nextConfig = {
       { source: "/models/runway-gen3", destination: "/video", permanent: true },
       { source: "/models/flux-schnell", destination: "/models", permanent: true },
       { source: "/models/stable-diffusion-xl", destination: "/models", permanent: true },
+      { source: "/blog/chatgpt-bez-vpn-rossiya", destination: "/blog/chatgpt-bez-vpn-russia", permanent: true },
     ];
   },
   async headers() {

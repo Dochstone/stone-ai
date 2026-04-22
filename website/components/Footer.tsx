@@ -54,7 +54,7 @@ export default function Footer() {
             <ul className="space-y-2.5 text-[13px] text-text/50">
               <li><a href="/models" className="hover:text-text transition-colors">Каталог 65+ моделей</a></li>
               <li><a href="/chat" className="hover:text-text transition-colors">AI Чат</a></li>
-              <li><a href="/webchat" className="hover:text-text transition-colors">Веб-чат со всеми моделями</a></li>
+              <li><a href="/dashboard/chat" className="hover:text-text transition-colors">Веб-чат со всеми моделями</a></li>
               <li><a href="/tools/image-generation" className="hover:text-text transition-colors">Генерация картинок</a></li>
               <li><a href="/tools/video-generation" className="hover:text-text transition-colors">Генерация видео</a></li>
               <li><a href="/tools/text-generation" className="hover:text-text transition-colors">Генерация текста</a></li>
