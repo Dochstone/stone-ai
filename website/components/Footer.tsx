@@ -53,12 +53,15 @@ export default function Footer() {
             <h4 className="font-bold text-xs uppercase tracking-wider text-text/30 mb-4">Нейросети</h4>
             <ul className="space-y-2.5 text-[13px] text-text/50">
               <li><a href="/models" className="hover:text-text transition-colors">Каталог 65+ моделей</a></li>
+              <li><a href="/chat" className="hover:text-text transition-colors">AI Чат</a></li>
+              <li><a href="/webchat" className="hover:text-text transition-colors">Веб-чат со всеми моделями</a></li>
               <li><a href="/tools/image-generation" className="hover:text-text transition-colors">Генерация картинок</a></li>
               <li><a href="/tools/video-generation" className="hover:text-text transition-colors">Генерация видео</a></li>
               <li><a href="/tools/text-generation" className="hover:text-text transition-colors">Генерация текста</a></li>
               <li><a href="/tools/code-generation" className="hover:text-text transition-colors">Генерация кода</a></li>
+              <li><a href="/translate" className="hover:text-text transition-colors">Переводчик</a></li>
               <li><a href="/compare" className="hover:text-text transition-colors">Сравнение моделей</a></li>
-              <li><a href="/hub/image-ai" className="hover:text-text transition-colors">Pillar: AI для картинок</a></li>
+              <li><a href="/glossary" className="hover:text-text transition-colors">Глоссарий AI-терминов</a></li>
             </ul>
           </div>
 
@@ -109,6 +112,20 @@ export default function Footer() {
               <li><a href="/llms.txt" className="hover:text-text transition-colors" target="_blank" rel="noopener">llms.txt</a></li>
               <li><a href="/sitemap.xml" className="hover:text-text transition-colors" target="_blank" rel="noopener">Sitemap</a></li>
             </ul>
+          </div>
+        </div>
+
+        {/* Pillar topic hubs — инлайн для SEO-перелинковки */}
+        <div className="mt-10 pt-6 border-t border-text/5">
+          <h4 className="font-bold text-xs uppercase tracking-wider text-text/30 mb-3">Тематические хабы</h4>
+          <div className="flex flex-wrap gap-x-5 gap-y-2 text-[13px] text-text/50">
+            <a href="/hub/chat-models" className="hover:text-text transition-colors">AI для общения</a>
+            <a href="/hub/image-ai" className="hover:text-text transition-colors">AI для картинок</a>
+            <a href="/hub/video-ai" className="hover:text-text transition-colors">AI для видео</a>
+            <a href="/hub/coding-ai" className="hover:text-text transition-colors">AI для кода</a>
+            <a href="/hub/business-ai" className="hover:text-text transition-colors">AI для бизнеса</a>
+            <a href="/hub/education-ai" className="hover:text-text transition-colors">AI для учёбы</a>
+            <a href="/hub/reasoning-ai" className="hover:text-text transition-colors">Reasoning-модели</a>
           </div>
         </div>
 
