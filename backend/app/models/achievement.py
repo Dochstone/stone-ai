@@ -31,3 +31,4 @@ class UserAchievement(Base):
     is_completed: Mapped[bool] = mapped_column(Boolean, default=False)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     reward_claimed: Mapped[bool] = mapped_column(Boolean, default=False)
+    notified: Mapped[bool] = mapped_column(Boolean, default=False)  # True after frontend showed toast

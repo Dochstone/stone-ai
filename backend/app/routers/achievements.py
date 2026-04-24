@@ -138,6 +138,51 @@ async def claim_reward(slug: str, user: dict = Depends(get_current_user), db: As
     }
 
 
+@router.get("/pending")
+async def get_pending_achievements(user: dict = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    """Get newly unlocked achievements that haven't been shown as toast yet."""
+    tg_id = user["id"]
+    result = await db.execute(
+        select(UserAchievement, Achievement)
+        .join(Achievement, Achievement.slug == UserAchievement.achievement_slug)
+        .where(
+            UserAchievement.user_tg_id == tg_id,
+            UserAchievement.is_completed == True,
+            UserAchievement.notified == False,
+        )
+    )
+    rows = result.all()
+    return {
+        "pending": [
+            {
+                "slug": ua.achievement_slug,
+                "title": ach.title,
+                "icon": ach.icon,
+                "reward_rub": ach.reward_rub,
+                "completed_at": ua.completed_at.isoformat() if ua.completed_at else None,
+            }
+            for ua, ach in rows
+        ]
+    }
+
+
+@router.post("/pending/dismiss")
+async def dismiss_pending(user: dict = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    """Mark all pending achievement notifications as shown."""
+    tg_id = user["id"]
+    result = await db.execute(
+        select(UserAchievement).where(
+            UserAchievement.user_tg_id == tg_id,
+            UserAchievement.is_completed == True,
+            UserAchievement.notified == False,
+        )
+    )
+    for ua in result.scalars().all():
+        ua.notified = True
+    await db.commit()
+    return {"ok": True}
+
+
 @router.post("/seed")
 async def seed_achievements(db: AsyncSession = Depends(get_db)):
     """Seed achievements (idempotent)."""

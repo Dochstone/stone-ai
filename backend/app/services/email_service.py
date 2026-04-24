@@ -49,6 +49,9 @@ FOOTER = """
         <a href="https://t.me/stonetgbot" style="color:#999">Telegram</a> ·
         <a href="https://t.me/StoneAIsupport" style="color:#999">Поддержка</a>
     </p>
+    <p style="color:#ccc;font-size:10px;margin-top:12px">
+        <a href="https://stoneai.ru/profile" style="color:#ccc">Отписаться от рассылки</a>
+    </p>
 </div>
 """
 
@@ -57,30 +60,41 @@ def generate_code() -> str:
     return str(random.randint(100000, 999999))
 
 
+MAX_RETRIES = 3
+RETRY_DELAYS = [2, 5, 10]  # seconds between retries
+
+
 def _send_email(to_email: str, subject: str, html_body: str):
-    try:
-        if not EMAIL_PROXY_KEY:
-            logger.error("EMAIL_PROXY_KEY is not configured")
-            return False
-        r = httpx.post(
-            EMAIL_PROXY_URL,
-            json={"to": to_email, "subject": subject, "html": html_body},
-            headers={"X-API-Key": EMAIL_PROXY_KEY, "Content-Type": "application/json"},
-            timeout=10,
-        )
-        if r.status_code == 200:
-            logger.info(f"Email sent to {to_email}: {subject}")
-            return True
-        else:
-            logger.error(f"Email proxy error {r.status_code}: {r.text}")
-            return False
-    except Exception as e:
-        logger.error(f"Failed to send email to {to_email}: {e}")
+    import time
+    if not EMAIL_PROXY_KEY:
+        logger.error("EMAIL_PROXY_KEY is not configured")
         return False
+
+    for attempt in range(MAX_RETRIES):
+        try:
+            r = httpx.post(
+                EMAIL_PROXY_URL,
+                json={"to": to_email, "subject": subject, "html": html_body},
+                headers={"X-API-Key": EMAIL_PROXY_KEY, "Content-Type": "application/json"},
+                timeout=10,
+            )
+            if r.status_code == 200:
+                logger.info(f"Email sent to {to_email}: {subject}")
+                return True
+            else:
+                logger.error(f"Email proxy error {r.status_code} (attempt {attempt + 1}): {r.text}")
+        except Exception as e:
+            logger.error(f"Email send failed (attempt {attempt + 1}) to {to_email}: {e}")
+
+        if attempt < MAX_RETRIES - 1:
+            time.sleep(RETRY_DELAYS[attempt])
+
+    logger.error(f"Email permanently failed after {MAX_RETRIES} attempts: {to_email} — {subject}")
+    return False
 
 
 def send_email_background(to_email: str, subject: str, html_body: str):
-    """Send email in a background thread to avoid blocking the request."""
+    """Send email in a background thread with retry."""
     t = threading.Thread(target=_send_email, args=(to_email, subject, html_body), daemon=True)
     t.start()
 

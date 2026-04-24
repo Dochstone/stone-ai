@@ -720,6 +720,30 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
   const [toast, setToast] = useState<{ msg: string; type: "error" | "success" | "info" } | null>(null);
   const [sessionsLoading, setSessionsLoading] = useState(true);
 
+  // Check for pending achievement toasts on load
+  useEffect(() => {
+    if (!auth?.token) return;
+    const checkAchievements = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/achievements/pending`, {
+          headers: { Authorization: `Bearer ${auth.token}` },
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.pending?.length > 0) {
+          const a = data.pending[0];
+          setToast({ msg: `${a.icon} ${a.title}! +${a.reward_rub}₽`, type: "success" });
+          fetch(`${API_URL}/api/achievements/pending/dismiss`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${auth.token}` },
+          }).catch(() => {});
+        }
+      } catch {}
+    };
+    const t = setTimeout(checkAchievements, 2000);
+    return () => clearTimeout(t);
+  }, [auth?.token]);
+
   // Debounce model search (200ms)
   useEffect(() => {
     const t = setTimeout(() => setModelSearch(modelSearchRaw), 200);
