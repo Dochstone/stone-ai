@@ -54,25 +54,23 @@ function autoIcon(title: string): string | undefined {
 function renderCell(v: Cell) {
   if (typeof v === "boolean") {
     return v ? (
-      <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-500 font-bold text-sm" aria-label="Да">
+      <span className="inline-flex items-center text-emerald-500" aria-label="Да">
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
       </span>
     ) : (
-      <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-red-500/15 text-red-400 text-sm" aria-label="Нет">
+      <span className="inline-flex items-center text-red-400/70" aria-label="Нет">
         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
       </span>
     );
   }
   const str = String(v);
-  // Replace trophy emoji with styled badge
+  // Replace trophy emoji with compact inline text (no round badge — keeps rows even)
   if (str.startsWith("🏆")) {
     const label = str.replace("🏆", "").trim();
     return (
-      <span className="inline-flex items-center gap-1.5">
-        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-400/20">
-          <svg className="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 24 24"><path d="M5 3h14l-1.5 5H20a1 1 0 011 1v1a5 5 0 01-4 4.9V17h2a1 1 0 110 2H5a1 1 0 110-2h2v-2.1A5 5 0 013 10V9a1 1 0 011-1h1.5L4 3h1zm2.34 0L8.5 7h7l1.16-4H7.34zM5 9v1a3 3 0 003 3h8a3 3 0 003-3V9H5z"/></svg>
-        </span>
-        <span className="text-[14px] font-semibold text-amber-600">{label}</span>
+      <span className="inline-flex items-baseline gap-1 text-[14px] font-semibold text-amber-600">
+        <span className="text-amber-500">🏆</span>
+        <span>{label}</span>
       </span>
     );
   }
@@ -80,7 +78,7 @@ function renderCell(v: Cell) {
 }
 
 export default function ComparisonTable({ columns, rows, caption, footnote, showIcons = true }: Props) {
-  const dataColWidth = `${(70 / columns.length).toFixed(2)}%`;
+  const dataColWidth = `${(80 / columns.length).toFixed(2)}%`;
   return (
     <figure className="my-8">
       {caption && (
@@ -90,7 +88,7 @@ export default function ComparisonTable({ columns, rows, caption, footnote, show
         <table className="w-full border-collapse text-left min-w-[520px] table-fixed">
           <thead>
             <tr className="bg-gradient-to-r from-text/[0.06] to-text/[0.03]">
-              <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-wider text-text/50 w-[30%] border-b-2 border-text/15 align-top">
+              <th className="px-3 py-4 text-[11px] font-bold uppercase tracking-wider text-text/50 w-[20%] border-b-2 border-text/15 align-top">
                 Критерий
               </th>
               {columns.map((c, i) => {
@@ -99,7 +97,7 @@ export default function ComparisonTable({ columns, rows, caption, footnote, show
                   <th
                     key={i}
                     style={{ width: dataColWidth }}
-                    className={`px-5 py-4 text-[11px] font-bold uppercase tracking-wider border-b-2 border-text/15 align-top ${
+                    className={`px-3 py-4 text-[11px] font-bold uppercase tracking-wider border-b-2 border-text/15 align-top ${
                       c.accent ? "text-accent" : "text-text/60"
                     }`}
                   >
@@ -137,9 +135,9 @@ export default function ComparisonTable({ columns, rows, caption, footnote, show
                       : ""
                 }`}
               >
-                <td className="px-5 py-3.5 text-[14px] font-semibold text-text/75 align-middle h-[52px]">{r.criterion}</td>
+                <td className="px-3 py-3 text-[14px] font-semibold text-text/75 align-middle h-[48px]">{r.criterion}</td>
                 {r.values.map((v, ci) => (
-                  <td key={ci} className="px-5 py-3.5 align-middle h-[52px]">
+                  <td key={ci} className="px-3 py-3 align-middle h-[48px]">
                     {renderCell(v)}
                   </td>
                 ))}
