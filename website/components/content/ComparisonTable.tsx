@@ -103,12 +103,14 @@ export default function ComparisonTable({ columns, rows, caption, footnote, show
                   >
                     <div className="flex flex-col items-center gap-2">
                       {iconSrc && (
-                        <img
-                          src={iconSrc}
-                          alt={c.title}
-                          className="w-12 h-12 rounded-xl object-contain bg-text/[0.03]"
-                          loading="lazy"
-                        />
+                        <span className="w-10 h-10 rounded-xl bg-text/[0.03] flex items-center justify-center overflow-hidden">
+                          <img
+                            src={iconSrc}
+                            alt={c.title}
+                            className={`object-contain ${iconSrc.includes("openai") ? "w-9 h-9" : "w-8 h-8"}`}
+                            loading="lazy"
+                          />
+                        </span>
                       )}
                       <span className="text-[13px] text-center">{c.title}</span>
                       {c.subtitle && <span className="text-[10px] text-text/40 normal-case font-normal text-center">{c.subtitle}</span>}
