@@ -113,13 +113,11 @@ export default function ComparisonTable({ columns, rows, caption, footnote, show
                           />
                         </span>
                       )}
-                      <span className="text-[13px] text-center">{c.title}</span>
-                      {c.subtitle && <span className="text-[10px] text-text/40 normal-case font-normal text-center">{c.subtitle}</span>}
-                      {c.badge && (
-                        <span className="inline-flex w-fit text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-accent/20 text-accent border border-accent/20">
-                          {c.badge}
-                        </span>
-                      )}
+                      <span className="text-[13px] text-center leading-tight min-h-[2.2rem] flex items-center justify-center">{c.title}</span>
+                      <span className="text-[10px] text-text/40 normal-case font-normal text-center min-h-[1rem] flex items-center justify-center">{c.subtitle || " "}</span>
+                      <span className={`inline-flex w-fit text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${c.badge ? "bg-accent/20 text-accent border-accent/20" : "invisible"}`}>
+                        {c.badge || " "}
+                      </span>
                     </div>
                   </th>
                 );
