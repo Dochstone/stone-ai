@@ -80,16 +80,17 @@ function renderCell(v: Cell) {
 }
 
 export default function ComparisonTable({ columns, rows, caption, footnote, showIcons = true }: Props) {
+  const dataColWidth = `${(70 / columns.length).toFixed(2)}%`;
   return (
     <figure className="my-8">
       {caption && (
         <p className="text-xs font-medium text-text/50 mb-3 px-4 sm:px-0">{caption}</p>
       )}
       <div className="overflow-x-auto -mx-4 sm:mx-0 rounded-xl border border-text/15 shadow-md">
-        <table className="w-full border-collapse text-left min-w-[520px]">
+        <table className="w-full border-collapse text-left min-w-[520px] table-fixed">
           <thead>
             <tr className="bg-gradient-to-r from-text/[0.06] to-text/[0.03]">
-              <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-wider text-text/50 w-[30%] border-b-2 border-text/15">
+              <th className="px-5 py-4 text-[11px] font-bold uppercase tracking-wider text-text/50 w-[30%] border-b-2 border-text/15 align-top">
                 Критерий
               </th>
               {columns.map((c, i) => {
@@ -97,7 +98,8 @@ export default function ComparisonTable({ columns, rows, caption, footnote, show
                 return (
                   <th
                     key={i}
-                    className={`px-5 py-4 text-[11px] font-bold uppercase tracking-wider border-b-2 border-text/15 ${
+                    style={{ width: dataColWidth }}
+                    className={`px-5 py-4 text-[11px] font-bold uppercase tracking-wider border-b-2 border-text/15 align-top ${
                       c.accent ? "text-accent" : "text-text/60"
                     }`}
                   >
@@ -110,8 +112,8 @@ export default function ComparisonTable({ columns, rows, caption, footnote, show
                           loading="lazy"
                         />
                       )}
-                      <span className="text-[13px]">{c.title}</span>
-                      {c.subtitle && <span className="text-[10px] text-text/40 normal-case font-normal">{c.subtitle}</span>}
+                      <span className="text-[13px] text-center">{c.title}</span>
+                      {c.subtitle && <span className="text-[10px] text-text/40 normal-case font-normal text-center">{c.subtitle}</span>}
                       {c.badge && (
                         <span className="inline-flex w-fit text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-accent/20 text-accent border border-accent/20">
                           {c.badge}
@@ -135,9 +137,9 @@ export default function ComparisonTable({ columns, rows, caption, footnote, show
                       : ""
                 }`}
               >
-                <td className="px-5 py-3.5 text-[14px] font-semibold text-text/75">{r.criterion}</td>
+                <td className="px-5 py-3.5 text-[14px] font-semibold text-text/75 align-middle h-[52px]">{r.criterion}</td>
                 {r.values.map((v, ci) => (
-                  <td key={ci} className="px-5 py-3.5">
+                  <td key={ci} className="px-5 py-3.5 align-middle h-[52px]">
                     {renderCell(v)}
                   </td>
                 ))}
