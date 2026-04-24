@@ -26,7 +26,8 @@ interface Props {
 
 /** Map model/provider keywords to icon paths. */
 const ICON_MAP: [RegExp, string][] = [
-  [/GPT|OpenAI|o3|o4/i, "/logos/openai-icon.png"],
+  [/Stone\s*AI/i, "/stone-logo.png"],
+  [/GPT|OpenAI|o3|o4|ChatGPT|DALL/i, "/logos/openai-icon.png"],
   [/Claude|Anthropic|Sonnet|Opus|Haiku/i, "/logos/claude-icon.png"],
   [/Gemini/i, "/logos/gemini-pro-icon.png"],
   [/Google/i, "/logos/google-icon.jpg"],
