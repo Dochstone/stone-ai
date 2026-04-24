@@ -106,7 +106,7 @@ export default function ComparisonTable({ columns, rows, caption, footnote, show
                         <img
                           src={iconSrc}
                           alt={c.title}
-                          className="w-10 h-10 rounded-xl object-contain p-1 bg-text/[0.03]"
+                          className="w-12 h-12 rounded-xl object-contain bg-text/[0.03]"
                           loading="lazy"
                         />
                       )}
