@@ -40,7 +40,7 @@ const ICON_MAP: [RegExp, string][] = [
   [/Ideogram/i, "/logos/midjourney-icon.jpg"],
   [/Flux|Stable|SDXL/i, "/logos/openai-icon.png"],
   [/Kling|Kuaishou/i, "/logos/kling-icon.png"],
-  [/Sora|DALL/i, "/logos/sora-icon.png"],
+  [/Sora/i, "/logos/sora-icon.png"],
   [/Llama|Meta/i, "/logos/openai-icon.png"],
   [/Mistral|Devstral/i, "/logos/openai-icon.png"],
 ];
@@ -65,7 +65,6 @@ function renderCell(v: Cell) {
     );
   }
   const str = String(v);
-  // Replace trophy emoji with compact inline text (no round badge — keeps rows even)
   if (str.startsWith("🏆")) {
     const label = str.replace("🏆", "").trim();
     return (
@@ -80,6 +79,9 @@ function renderCell(v: Cell) {
 
 export default function ComparisonTable({ columns, rows, caption, footnote, showIcons = true }: Props) {
   const dataColWidth = `${(80 / columns.length).toFixed(2)}%`;
+  const hasAnySubtitle = columns.some((col) => col.subtitle);
+  const hasAnyBadge = columns.some((col) => col.badge);
+
   return (
     <figure className="my-8">
       {caption && (
@@ -89,7 +91,7 @@ export default function ComparisonTable({ columns, rows, caption, footnote, show
         <table className="w-full border-collapse text-left min-w-[520px] table-fixed">
           <thead>
             <tr className="bg-gradient-to-r from-text/[0.06] to-text/[0.03]">
-              <th className="px-3 py-4 text-[11px] font-bold uppercase tracking-wider text-text/50 w-[20%] border-b-2 border-text/15 align-top">
+              <th className="px-3 py-3 text-[11px] font-bold uppercase tracking-wider text-text/50 w-[20%] border-b-2 border-text/15 align-middle">
                 Критерий
               </th>
               {columns.map((c, i) => {
@@ -98,26 +100,30 @@ export default function ComparisonTable({ columns, rows, caption, footnote, show
                   <th
                     key={i}
                     style={{ width: dataColWidth }}
-                    className={`px-3 py-4 text-[11px] font-bold uppercase tracking-wider border-b-2 border-text/15 align-top ${
+                    className={`px-3 py-3 text-[11px] font-bold uppercase tracking-wider border-b-2 border-text/15 align-top ${
                       c.accent ? "text-accent" : "text-text/60"
                     }`}
                   >
-                    <div className="flex flex-col items-center gap-2">
+                    <div className="flex flex-col items-center gap-1.5">
                       {iconSrc && (
-                        <span className="w-10 h-10 rounded-xl bg-text/[0.03] flex items-center justify-center overflow-hidden">
+                        <span className="w-9 h-9 rounded-lg bg-text/[0.03] flex items-center justify-center overflow-hidden">
                           <img
                             src={iconSrc}
                             alt={c.title}
-                            className={`object-contain ${iconSrc.includes("openai") ? "w-9 h-9" : "w-8 h-8"}`}
+                            className={`object-contain ${iconSrc.includes("openai") ? "w-8 h-8" : "w-7 h-7"}`}
                             loading="lazy"
                           />
                         </span>
                       )}
-                      <span className="text-[13px] text-center leading-tight min-h-[2.2rem] flex items-center justify-center">{c.title}</span>
-                      <span className="text-[10px] text-text/40 normal-case font-normal text-center min-h-[1rem] flex items-center justify-center">{c.subtitle || " "}</span>
-                      <span className={`inline-flex w-fit text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${c.badge ? "bg-accent/20 text-accent border-accent/20" : "invisible"}`}>
-                        {c.badge || " "}
-                      </span>
+                      <span className="text-[12px] text-center leading-tight min-h-[2rem] flex items-center justify-center">{c.title}</span>
+                      {hasAnySubtitle && (
+                        <span className="text-[10px] text-text/40 normal-case font-normal text-center min-h-[0.9rem]">{c.subtitle || " "}</span>
+                      )}
+                      {hasAnyBadge && (
+                        <span className={`inline-flex w-fit text-[10px] font-bold px-2 py-0.5 rounded-full border ${c.badge ? "bg-accent/20 text-accent border-accent/20" : "border-transparent text-transparent"}`}>
+                          {c.badge || "—"}
+                        </span>
+                      )}
                     </div>
                   </th>
                 );
