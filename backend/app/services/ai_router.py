@@ -55,7 +55,7 @@ MODELS_REGISTRY = [
     {"id": "o4-mini",          "name": "o4-mini",           "company": "OpenAI",    "tier": 3, "openrouter_id": "openai/o4-mini",                 "icon": "🤖", "desc": "Reasoning compact",    "category": "reason", "context_length": "200K", "price_input": 4.40,  "price_output": 17.60,  "price_weighted": 12.32,  "active": True},
     {"id": "o3",               "name": "o3",                "company": "OpenAI",    "tier": 3, "openrouter_id": "openai/o3",                      "icon": "🤖", "desc": "Reasoning flagship",   "category": "reason", "context_length": "200K", "price_input": 7.00,  "price_output": 28.00,  "price_weighted": 19.60,  "active": True},
     {"id": "claude-haiku-4.5-think", "name": "Claude Haiku Think", "company": "Anthropic", "tier": 3, "openrouter_id": "anthropic/claude-haiku-4.5:thinking", "icon": "🧠", "desc": "Reasoning Haiku", "category": "reason", "context_length": "200K", "price_input": 3.50, "price_output": 17.50, "price_weighted": 11.90, "active": True},
-    {"id": "gemini-2.5-flash-think", "name": "Gemini Flash Think", "company": "Google", "tier": 3, "openrouter_id": "google/gemini-2.5-flash-thinking", "icon": "💎", "desc": "Reasoning Flash", "category": "reason", "context_length": "1M", "price_input": 0.60, "price_output": 14.00, "price_weighted": 8.64, "active": True},
+    {"id": "gemini-2.5-flash-think", "name": "Gemini Flash Think", "company": "Google", "tier": 3, "openrouter_id": "google/gemini-2.5-flash", "icon": "💎", "desc": "Reasoning Flash", "category": "reason", "context_length": "1M", "price_input": 0.60, "price_output": 14.00, "price_weighted": 8.64, "active": True},
     {"id": "devstral",         "name": "Devstral",          "company": "Mistral",   "tier": 3, "openrouter_id": "mistralai/devstral-2512",              "icon": "🌀", "desc": "Код-специалист",       "category": "code",   "context_length": "128K", "price_input": 0.75,  "price_output": 3.00,   "price_weighted": 2.10,   "active": True},
 
     # ═══ TIER 4: IMAGE GENERATION (6 models) ═══
@@ -243,6 +243,9 @@ async def stream_chat_response(
         "max_tokens": max_tokens,
     }
 
+    if model_id == "gemini-2.5-flash-think":
+        payload["reasoning"] = {"effort": "high"}
+
     total_tokens_in = 0
     total_tokens_out = 0
 
@@ -315,6 +318,7 @@ async def non_stream_chat(model_id: str, messages: list[dict], system_prompt: st
                 "model": openrouter_model,
                 "messages": api_messages,
                 "max_tokens": 4096,
+                **({"reasoning": {"effort": "high"}} if model_id == "gemini-2.5-flash-think" else {}),
             },
         )
         response.raise_for_status()
