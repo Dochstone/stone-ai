@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { MODELS } from "@/lib/models";
 import { SITE_URL, USD_TO_RUB } from "@/lib/constants";
-import { PLAN_SUMMARY, planPriceNum } from "@/lib/pricing";
+import { PLAN_SUMMARY, planPriceNum, effectivePlanPrice } from "@/lib/pricing";
 import dynamic from "next/dynamic";
 
 const TonWalletProfile = dynamic(() => import("./TonWalletProfile"), { ssr: false });
@@ -358,9 +358,9 @@ function BalanceTab({ profile, transactions, auth, onRefresh }: { profile: UserP
   const [subMsg, setSubMsg] = useState("");
 
   const plans = [
-    { tier: "mini", name: "Start", price: planPriceNum("mini"), features: PLAN_SUMMARY.mini },
-    { tier: "max", name: "Pro", price: planPriceNum("max"), features: PLAN_SUMMARY.max },
-    { tier: "max-pro", name: "Elite", price: planPriceNum("max-pro"), features: PLAN_SUMMARY["max-pro"] },
+    { tier: "mini", name: "Start", price: effectivePlanPrice("mini"), basePrice: planPriceNum("mini"), features: PLAN_SUMMARY.mini },
+    { tier: "max", name: "Pro", price: effectivePlanPrice("max"), basePrice: planPriceNum("max"), features: PLAN_SUMMARY.max },
+    { tier: "max-pro", name: "Elite", price: effectivePlanPrice("max-pro"), basePrice: planPriceNum("max-pro"), features: PLAN_SUMMARY["max-pro"] },
   ];
 
   const planFeaturesByTier = {

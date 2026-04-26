@@ -4,6 +4,7 @@ import logging
 import os
 from datetime import date, datetime, timedelta
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel
 from sqlalchemy import select, func, case, and_, cast, Date
@@ -900,6 +901,80 @@ async def send_newsletter_admin(
     threading.Thread(target=send_batch, daemon=True).start()
 
     return {"status": "ok", "queued": len(emails)}
+
+
+class TelegramBroadcastRequest(BaseModel):
+    text: str
+    parse_mode: str | None = "HTML"
+    disable_web_page_preview: bool = False
+    test_tg_id: int | None = None  # if set, send only to this telegram_id
+
+
+@router.post("/telegram-broadcast")
+async def send_telegram_broadcast(
+    body: TelegramBroadcastRequest,
+    _admin: dict = Depends(require_web_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Broadcast a Telegram message to all users with telegram_id (or test target)."""
+    from app.config import get_settings
+    settings = get_settings()
+    if not settings.bot_token:
+        raise HTTPException(503, "Bot is not configured")
+
+    if body.test_tg_id:
+        async with httpx.AsyncClient(timeout=10) as client:
+            r = await client.post(
+                f"https://api.telegram.org/bot{settings.bot_token}/sendMessage",
+                json={
+                    "chat_id": body.test_tg_id,
+                    "text": body.text,
+                    "parse_mode": body.parse_mode,
+                    "disable_web_page_preview": body.disable_web_page_preview,
+                },
+            )
+        return {"status": "ok", "sent": 1 if r.status_code == 200 else 0, "test": True, "response": r.text[:300]}
+
+    result = await db.execute(
+        select(User.telegram_id).where(User.telegram_id.isnot(None))
+    )
+    tg_ids = [int(t) for t in result.scalars().all() if t]
+
+    import threading
+    import time as _time
+
+    bot_token = settings.bot_token
+    payload_text = body.text
+    parse_mode = body.parse_mode
+    disable_preview = body.disable_web_page_preview
+
+    def send_batch():
+        sent = 0
+        failed = 0
+        with httpx.Client(timeout=10) as client:
+            for chat_id in tg_ids:
+                try:
+                    r = client.post(
+                        f"https://api.telegram.org/bot{bot_token}/sendMessage",
+                        json={
+                            "chat_id": chat_id,
+                            "text": payload_text,
+                            "parse_mode": parse_mode,
+                            "disable_web_page_preview": disable_preview,
+                        },
+                    )
+                    if r.status_code == 200:
+                        sent += 1
+                    else:
+                        failed += 1
+                except Exception:
+                    failed += 1
+                _time.sleep(0.05)  # ~20 msg/s — under Telegram global 30/s limit
+        logger.info(f"TG broadcast complete: sent={sent} failed={failed} total={len(tg_ids)}")
+
+    threading.Thread(target=send_batch, daemon=True).start()
+
+    return {"status": "ok", "queued": len(tg_ids)}
 
 
 # ─── Violations & Banning ───

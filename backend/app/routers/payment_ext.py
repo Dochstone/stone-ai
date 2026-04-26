@@ -63,7 +63,7 @@ class TopUpRequest(BaseModel):
     period: str | None = None  # "month" (default) or "year" — yearly = 20% off, charges 12 mo upfront
 
 
-from app.pricing import PLAN_PRICES_YEARLY_RUB
+from app.pricing import PLAN_PRICES_YEARLY_RUB, effective_plan_price
 
 
 async def _get_user_by_external_id(db: AsyncSession, external_id: int, *, lock: bool = False):
@@ -189,7 +189,7 @@ async def create_platega_order(
         if req.tier not in PLANS:
             raise HTTPException(status_code=400, detail="Недопустимый тариф")
         plan = PLANS[req.tier]
-        rub_amount = float(PLAN_PRICES_YEARLY_RUB[req.tier]) if is_yearly else float(plan["price_rub"])
+        rub_amount = float(effective_plan_price(req.tier, "year" if is_yearly else "month"))
         usd_amount = round(rub_amount / USD_TO_RUB, 2)
         tier_label = plan.get("name", req.tier)
         period_label = "Год" if is_yearly else "1 мес"
@@ -570,7 +570,7 @@ async def create_subscribe_payment(
     user = user.scalar_one_or_none()
 
     is_yearly = (req.period or "month") == "year"
-    price_rub = PLAN_PRICES_YEARLY_RUB[req.tier] if is_yearly else PLAN_PRICES_RUB[req.tier]
+    price_rub = effective_plan_price(req.tier, "year" if is_yearly else "month")
     discount_desc = None
     if user:
         price_rub, discount_desc = apply_discount(price_rub, user)
@@ -710,7 +710,7 @@ async def create_ton_order(
     order_id = _uuid.uuid4().hex[:12]
     comment = f"stone_{order_id}"
     is_yearly = (req.period or "month") == "year"
-    price_rub = PLAN_PRICES_YEARLY_RUB[req.tier] if is_yearly else PLAN_PRICES_RUB[req.tier]
+    price_rub = effective_plan_price(req.tier, "year" if is_yearly else "month")
     if user:
         price_rub, _ = apply_discount(price_rub, user)
         if _ is not None:

@@ -4,6 +4,8 @@ Mirror of `website/lib/pricing.ts`. When you change a price here, also bump
 the TypeScript constants so frontend and backend stay aligned.
 """
 
+from datetime import datetime, timezone
+
 PLAN_PRICES_RUB: dict[str, int] = {
     "mini": 990,
     "max": 1690,
@@ -17,3 +19,33 @@ PLAN_PRICES_YEARLY_RUB: dict[str, int] = {
     "max": 16200,        # 1 350 × 12
     "max-pro": 38388,    # 3 199 × 12
 }
+
+# Time-bound promo campaign. Auto-applies a fixed-rouble discount on a single
+# tier's monthly price during the window. Mirror in `website/lib/pricing.ts`.
+PROMO_CAMPAIGN: dict[str, object] = {
+    "tier": "max",
+    "discount_rub": 190,                     # 1690 → 1500
+    "label_pct": 10,                         # marketed as "−10%"
+    "valid_from": "2026-04-26T00:00:00+03:00",
+    "valid_until": "2026-04-30T23:59:59+03:00",
+}
+
+
+def is_promo_active(now: datetime | None = None) -> bool:
+    now = now or datetime.now(timezone.utc)
+    start = datetime.fromisoformat(str(PROMO_CAMPAIGN["valid_from"])).astimezone(timezone.utc)
+    end = datetime.fromisoformat(str(PROMO_CAMPAIGN["valid_until"])).astimezone(timezone.utc)
+    return start <= now <= end
+
+
+def effective_plan_price(tier: str, period: str = "month") -> int:
+    """Return checkout price in RUB with active campaign discount applied.
+
+    Yearly prices are not discounted by this campaign — use raw mapping.
+    """
+    if period == "year":
+        return PLAN_PRICES_YEARLY_RUB[tier]
+    base = PLAN_PRICES_RUB[tier]
+    if is_promo_active() and PROMO_CAMPAIGN["tier"] == tier:
+        return max(1, base - int(PROMO_CAMPAIGN["discount_rub"]))
+    return base

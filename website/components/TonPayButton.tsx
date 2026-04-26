@@ -2,7 +2,7 @@
 
 import { TonConnectButton, useTonConnectUI, useTonWallet } from "@tonconnect/ui-react";
 import { useState, useEffect, useCallback } from "react";
-import { PLAN_PRICES_RUB, planYearlyPriceNum, type PaidPlanId } from "@/lib/pricing";
+import { effectivePlanPrice, type PaidPlanId } from "@/lib/pricing";
 import { USD_TO_RUB } from "@/lib/constants";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
@@ -25,9 +25,7 @@ export default function TonPayButton({
   const [tonRate, setTonRate] = useState<number>(0);
 
   const tierPaid = (tier === "mini" || tier === "max" || tier === "max-pro") ? (tier as PaidPlanId) : null;
-  const rub = tierPaid
-    ? (period === "year" ? planYearlyPriceNum(tierPaid) : PLAN_PRICES_RUB[tierPaid])
-    : 0;
+  const rub = tierPaid ? effectivePlanPrice(tierPaid, period) : 0;
   const priceUsd = rub > 0 ? rub / USD_TO_RUB : 0;
 
   useEffect(() => {

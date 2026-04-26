@@ -13,6 +13,9 @@ import {
   planYearlyPrice,
   planYearlyOldPrice,
   planYearlyMonthlyEquivalent,
+  PROMO_CAMPAIGN,
+  isPromoActive,
+  effectivePlanPrice,
 } from "@/lib/pricing";
 import { Wallet, Zap, Flame, Crown, type LucideIcon } from "lucide-react";
 
@@ -301,6 +304,17 @@ export default function Pricing() {
           Бесплатный старт. Апгрейд когда нужно больше.
         </p>
 
+        {isPromoActive() && (
+          <div className="max-w-2xl mx-auto mb-8 px-4 py-3 rounded-2xl bg-gradient-to-r from-[#A855F7]/15 via-[#F43F5E]/10 to-[#A855F7]/15 border border-[#A855F7]/30 text-center">
+            <p className="text-sm md:text-base font-bold">
+              🔥 −{PROMO_CAMPAIGN.labelPct}% на Pro до 30 апреля
+              <span className="ml-2 text-text/60 line-through">{PLAN_PRICES_RUB[PROMO_CAMPAIGN.tier].toLocaleString("ru-RU").replace(/,/g, " ")}₽</span>
+              <span className="ml-2 text-[#A855F7]">{effectivePlanPrice(PROMO_CAMPAIGN.tier).toLocaleString("ru-RU").replace(/,/g, " ")}₽/мес</span>
+            </p>
+            <p className="text-xs text-text/50 mt-1">Скидка применяется автоматически при оплате</p>
+          </div>
+        )}
+
         <div className="flex justify-center mb-10">
           <div className="inline-flex items-center bg-text/[0.06] border border-text/10 rounded-full p-1 text-sm font-semibold">
             <button
@@ -387,12 +401,20 @@ export default function Pricing() {
                 {(() => {
                   const isPaid = plan.id === "mini" || plan.id === "max" || plan.id === "max-pro";
                   const showYearly = isPaid && billing === "year";
+                  const isCampaign = isPaid && billing === "month" && plan.id === PROMO_CAMPAIGN.tier && isPromoActive();
+                  const formatRub = (n: number) => `${n.toLocaleString("ru-RU").replace(/,/g, " ")}₽`;
                   const displayPrice = showYearly
                     ? planYearlyMonthlyEquivalent(plan.id as PaidPlanId)
+                    : isCampaign
+                    ? formatRub(effectivePlanPrice(plan.id as PaidPlanId))
                     : plan.price;
                   const displayPeriod = showYearly ? "/мес" : plan.period;
-                  const monthlyOld = isPaid && showYearly ? planPrice(plan.id as PaidPlanId) : plan.oldPrice;
-                  const showDiscount = showYearly && isPaid;
+                  const monthlyOld = isPaid && showYearly
+                    ? planPrice(plan.id as PaidPlanId)
+                    : isCampaign
+                    ? formatRub(PLAN_PRICES_RUB[plan.id as PaidPlanId])
+                    : plan.oldPrice;
+                  const showYearlyDiscount = showYearly && isPaid;
                   return (
                     <>
                       <div className="mt-1 flex items-baseline gap-2 flex-wrap">
@@ -401,14 +423,22 @@ export default function Pricing() {
                         )}
                         <span className={`text-2xl font-extrabold ${plan.premium ? "text-amber-400" : ""}`}>{displayPrice}</span>
                         {displayPeriod && <span className={`text-sm ${plan.premium ? "text-white/40" : "text-text/40"}`}>{displayPeriod}</span>}
-                        {showDiscount && (
+                        {showYearlyDiscount && (
                           <span className="text-[10px] font-bold bg-accent/15 text-accent px-1.5 py-0.5 rounded-full">−{Math.round(YEARLY_DISCOUNT * 100)}%</span>
+                        )}
+                        {isCampaign && (
+                          <span className="text-[10px] font-bold bg-[#A855F7]/15 text-[#A855F7] px-1.5 py-0.5 rounded-full">−{PROMO_CAMPAIGN.labelPct}%</span>
                         )}
                       </div>
                       {showYearly && (
                         <p className={`text-[11px] mt-0.5 ${plan.premium ? "text-white/40" : "text-text/40"}`}>
                           оплата {planYearlyPrice(plan.id as PaidPlanId)} раз в год
                           <span className="text-text/30"> · вместо {planYearlyOldPrice(plan.id as PaidPlanId)}</span>
+                        </p>
+                      )}
+                      {isCampaign && (
+                        <p className={`text-[11px] mt-0.5 ${plan.premium ? "text-white/40" : "text-text/40"}`}>
+                          до 30 апреля · применяется автоматически
                         </p>
                       )}
                     </>

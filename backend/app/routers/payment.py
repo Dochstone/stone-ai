@@ -193,9 +193,10 @@ async def create_stars_subscription(
     if req.tier not in PLAN_PRICES_RUB:
         raise HTTPException(400, "Недопустимый тариф")
 
-    from app.bot.payments import STARS_PRODUCTS
+    from app.bot.payments import get_stars_product
+    from app.pricing import effective_plan_price
     product_key = f"sub_{req.tier.replace('-', '_')}"
-    product = STARS_PRODUCTS.get(product_key)
+    product = get_stars_product(product_key)
     if not product:
         raise HTTPException(400, "Тариф не найден")
 
@@ -219,7 +220,7 @@ async def create_stars_subscription(
             "invoice_url": invoice_url,
             "stars": product["price"],
             "tier": req.tier,
-            "price_rub": PLAN_PRICES_RUB[req.tier],
+            "price_rub": effective_plan_price(req.tier, "month"),
         }
     except Exception as e:
         logger.error(f"Stars subscription invoice error: {e}")
@@ -259,7 +260,8 @@ async def confirm_stars_subscription(
     from app.services.subscription import activate_subscription
     activate_subscription(user, tier)
 
-    price_rub = PLAN_PRICES_RUB[tier]
+    from app.pricing import effective_plan_price
+    price_rub = effective_plan_price(tier, "month")
     price_usd = round(price_rub / USD_TO_RUB, 2)
 
     tx = Transaction(

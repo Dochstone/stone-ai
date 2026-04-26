@@ -12,8 +12,8 @@ from app.config import get_settings
 router = Router()
 
 # Stars products — subscription plans
-# Price in Stars: RUB price / ~1.3 RUB per Star (derived from PLAN_PRICES_RUB)
-from app.pricing import PLAN_PRICES_RUB
+# Price in Stars: RUB price / ~1.3 RUB per Star (derived from effective_plan_price)
+from app.pricing import effective_plan_price
 
 _STARS_PER_RUB = 1 / 1.3  # 1.3 RUB per Star
 
@@ -22,16 +22,25 @@ def _to_stars(rub: int) -> int:
     return int(round(rub * _STARS_PER_RUB))
 
 
-STARS_PRODUCTS = {
-    "sub_mini":    {"tier": "mini",    "price": _to_stars(PLAN_PRICES_RUB["mini"]),    "name": "Start подписка (1 мес)"},
-    "sub_max":     {"tier": "max",     "price": _to_stars(PLAN_PRICES_RUB["max"]),     "name": "Pro подписка (1 мес)"},
-    "sub_max_pro": {"tier": "max-pro", "price": _to_stars(PLAN_PRICES_RUB["max-pro"]), "name": "Elite подписка (1 мес)"},
+_STARS_PRODUCT_META = {
+    "sub_mini":    {"tier": "mini",    "name": "Start подписка (1 мес)"},
+    "sub_max":     {"tier": "max",     "name": "Pro подписка (1 мес)"},
+    "sub_max_pro": {"tier": "max-pro", "name": "Elite подписка (1 мес)"},
 }
+
+
+def get_stars_product(product_id: str) -> dict | None:
+    """Resolve product with current effective price (campaign-aware)."""
+    meta = _STARS_PRODUCT_META.get(product_id)
+    if not meta:
+        return None
+    rub = effective_plan_price(meta["tier"], "month")
+    return {**meta, "price": _to_stars(rub)}
 
 
 async def create_invoice_link(bot: Bot, product_id: str, user_id: int) -> str:
     """Create a Telegram Stars invoice link for a product."""
-    product = STARS_PRODUCTS.get(product_id)
+    product = get_stars_product(product_id)
     if not product:
         raise ValueError(f"Unknown product: {product_id}")
 

@@ -46,6 +46,35 @@ export const PRICES_CURRENT: Record<PaidPlanId, number> = {
 /** Back-compat alias — everything numeric should import this. */
 export const PLAN_PRICES_RUB: Record<PaidPlanId, number> = PRICES_CURRENT;
 
+/**
+ * Time-bound promo campaign — auto-applies a fixed-rouble discount on a
+ * single tier's monthly price during the window. Mirror of
+ * `backend/app/pricing.py:PROMO_CAMPAIGN` — keep in sync.
+ */
+export const PROMO_CAMPAIGN = {
+  tier: "max" as PaidPlanId,
+  discountRub: 190,            // 1690 → 1500
+  labelPct: 10,                // marketed as "−10%"
+  validFrom: "2026-04-26T00:00:00+03:00",
+  validUntil: "2026-04-30T23:59:59+03:00",
+} as const;
+
+export function isPromoActive(now: Date = new Date()): boolean {
+  const start = new Date(PROMO_CAMPAIGN.validFrom).getTime();
+  const end = new Date(PROMO_CAMPAIGN.validUntil).getTime();
+  const t = now.getTime();
+  return t >= start && t <= end;
+}
+
+export function effectivePlanPrice(id: PaidPlanId, period: "month" | "year" = "month"): number {
+  if (period === "year") return PRICES_YEARLY[id];
+  const base = PRICES_CURRENT[id];
+  if (isPromoActive() && PROMO_CAMPAIGN.tier === id) {
+    return Math.max(1, base - PROMO_CAMPAIGN.discountRub);
+  }
+  return base;
+}
+
 function formatRub(n: number): string {
   return n.toLocaleString("ru-RU").replace(/,/g, " ");
 }
