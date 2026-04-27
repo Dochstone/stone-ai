@@ -48,6 +48,13 @@ video-originals/
 # User uploads
 media/
 
+# Server-side secrets (service account keys, etc.) — must NEVER enter git,
+# AND must survive `git clean -fd` so we don't lose them on a reset.
+secrets/
+**/secrets/
+*.serviceaccount.json
+*-sa.json
+
 # Session handoff docs and TZ drafts (work-in-progress notes, not tracked)
 CLAUDE_CODE_*.md
 CODEX_TASK_*.md
