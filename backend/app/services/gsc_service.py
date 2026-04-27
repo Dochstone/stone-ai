@@ -1,7 +1,10 @@
 """Google Search Console API client — read-only metrics for the admin dashboard.
 
-Requires a service account JSON at GSC_SA_KEY_PATH and the service account
-added as a user on the GSC property (Search Console → Settings → Users).
+Auth: prefers OAuth user credentials (GSC_OAUTH_TOKEN_PATH +
+GSC_OAUTH_CLIENT_PATH); falls back to service account JSON at
+GSC_SA_KEY_PATH if OAuth files are missing. OAuth is the canonical path
+because GSC has a known bug where SA emails sometimes can't be added
+to a property's user list.
 """
 
 import logging
@@ -14,6 +17,8 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 GSC_SA_KEY_PATH = os.getenv("GSC_SA_KEY_PATH", "/var/www/stone-ai/backend/secrets/gsc-sa.json")
+GSC_OAUTH_TOKEN_PATH = os.getenv("GSC_OAUTH_TOKEN_PATH", "/var/www/stone-ai/backend/secrets/gsc_token.json")
+GSC_OAUTH_CLIENT_PATH = os.getenv("GSC_OAUTH_CLIENT_PATH", "/var/www/stone-ai/backend/secrets/oauth_client.json")
 GSC_SITE_URL = os.getenv("GSC_SITE_URL", "https://stoneai.ru/")
 GSC_CACHE_TTL = int(os.getenv("GSC_CACHE_TTL", "3600"))
 GSC_DATA_LAG_DAYS = 3  # GSC data lags ~2-3 days
@@ -34,15 +39,34 @@ def _cached(key: str, fn, ttl: int = GSC_CACHE_TTL):
     return value
 
 
-def _client():
-    from google.oauth2 import service_account
-    from googleapiclient.discovery import build
+SCOPES = ["https://www.googleapis.com/auth/webmasters.readonly"]
 
-    creds = service_account.Credentials.from_service_account_file(
-        GSC_SA_KEY_PATH,
-        scopes=["https://www.googleapis.com/auth/webmasters.readonly"],
+
+def _load_credentials():
+    """Prefer OAuth user creds; fall back to service account if absent."""
+    if os.path.isfile(GSC_OAUTH_TOKEN_PATH):
+        from google.oauth2.credentials import Credentials
+        from google.auth.transport.requests import Request
+
+        creds = Credentials.from_authorized_user_file(GSC_OAUTH_TOKEN_PATH, scopes=SCOPES)
+        if creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+            try:
+                with open(GSC_OAUTH_TOKEN_PATH, "w", encoding="utf-8") as f:
+                    f.write(creds.to_json())
+            except OSError as exc:
+                logger.warning("could not persist refreshed token: %s", exc)
+        return creds
+
+    from google.oauth2 import service_account
+    return service_account.Credentials.from_service_account_file(
+        GSC_SA_KEY_PATH, scopes=SCOPES
     )
-    return build("searchconsole", "v1", credentials=creds, cache_discovery=False)
+
+
+def _client():
+    from googleapiclient.discovery import build
+    return build("searchconsole", "v1", credentials=_load_credentials(), cache_discovery=False)
 
 
 def _date_range(days: int) -> tuple[str, str]:
@@ -52,7 +76,7 @@ def _date_range(days: int) -> tuple[str, str]:
 
 
 def is_configured() -> bool:
-    return os.path.isfile(GSC_SA_KEY_PATH)
+    return os.path.isfile(GSC_OAUTH_TOKEN_PATH) or os.path.isfile(GSC_SA_KEY_PATH)
 
 
 def list_sites() -> list[str]:
