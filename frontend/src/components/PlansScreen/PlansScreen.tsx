@@ -314,6 +314,28 @@ export function PlansScreen() {
         </div>
       </div>
 
+      {/* ═══ Campaign banner — Pro -10% till Apr 30 ═══ */}
+      {Date.now() <= new Date('2026-04-30T23:59:59+03:00').getTime() && (
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(255,149,0,0.18), rgba(255,107,0,0.10))',
+          border: '1px solid rgba(255,149,0,0.4)',
+          borderRadius: 16, padding: '14px 16px',
+          marginBottom: 20, textAlign: 'center',
+          animation: 'cardAppear 0.5s ease both 0.15s',
+        }}>
+          <div style={{ fontSize: 13, fontWeight: 800, color: '#ff9500', marginBottom: 4 }}>
+            🔥 −10% на Pro до 30 апреля
+          </div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>
+            <span style={{ textDecoration: 'line-through', color: '#668877', marginRight: 8 }}>1 690₽</span>
+            <span>1 500₽/мес</span>
+          </div>
+          <div style={{ fontSize: 11, color: '#5a8a70', marginTop: 4 }}>
+            Скидка применяется автоматически при оплате
+          </div>
+        </div>
+      )}
+
       {/* ═══ Plan Cards ═══ */}
       {PLANS.map((plan, idx) => {
         const current = isCurrent(plan.id)
