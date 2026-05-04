@@ -26,7 +26,7 @@ interface Message {
 }
 
 type HealthScenario = "general" | "skin" | "eyes" | "mouth" | "nails" | "moles";
-type HealthModel = "claude-opus-4.5" | "gpt-5.1" | "gemini-2.5-pro";
+type HealthModel = "claude-opus-4.5" | "gpt-5.5" | "gemini-3.1-pro-preview";
 type HealthResponseMode = "short" | "balanced" | "detailed" | "doctor";
 
 const SCENARIOS: { id: HealthScenario; title: string; description: string }[] = [
@@ -39,9 +39,9 @@ const SCENARIOS: { id: HealthScenario; title: string; description: string }[] = 
 ];
 
 const MODELS: { id: HealthModel; title: string; description: string }[] = [
+  { id: "gpt-5.5", title: "GPT-5.5", description: "Флагман OpenAI для сложных задач" },
   { id: "claude-opus-4.5", title: "Claude Opus 4.5", description: "Максимум качества и аккуратности" },
-  { id: "gpt-5.1", title: "GPT-5.1", description: "Сильный универсальный вариант" },
-  { id: "gemini-2.5-pro", title: "Gemini 2.5 Pro", description: "Хорошо читает изображения и детали" },
+  { id: "gemini-3.1-pro-preview", title: "Gemini 3.1 Pro", description: "Сильная мультимодальная модель Google" },
 ];
 
 const RESPONSE_MODES: { id: HealthResponseMode; title: string; description: string }[] = [
@@ -62,7 +62,7 @@ export default function HealthChat() {
   const [auth, setAuth] = useState<AuthState | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [scenario, setScenario] = useState<HealthScenario>("general");
-  const [modelId, setModelId] = useState<HealthModel>("claude-opus-4.5");
+  const [modelId, setModelId] = useState<HealthModel>("gpt-5.5");
   const [responseMode, setResponseMode] = useState<HealthResponseMode>("balanced");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");

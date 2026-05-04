@@ -30,8 +30,8 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/health", tags=["health"])
 
-DEFAULT_HEALTH_MODEL = "claude-opus-4.5"
-ALLOWED_HEALTH_MODELS = {"claude-opus-4.5", "gpt-5.1", "gemini-2.5-pro"}
+DEFAULT_HEALTH_MODEL = "gpt-5.5"
+ALLOWED_HEALTH_MODELS = {"claude-opus-4.5", "gpt-5.5", "gemini-3.1-pro-preview"}
 HEALTH_SCENARIOS = ("general", "skin", "eyes", "mouth", "nails", "moles")
 HEALTH_RESPONSE_MODES = ("short", "balanced", "detailed", "doctor")
 
