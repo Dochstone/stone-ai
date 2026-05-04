@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/health", tags=["health"])
 
-HEALTH_MODEL = "gpt-5.1"
+HEALTH_MODEL = "claude-opus-4.5"
 HEALTH_SCENARIOS = ("general", "skin", "eyes", "mouth", "nails", "moles")
 
 SCENARIO_GUIDES: dict[str, str] = {
