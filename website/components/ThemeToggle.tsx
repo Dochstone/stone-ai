@@ -4,13 +4,12 @@ import { useEffect, useState } from "react";
 
 export default function ThemeToggle({ compact }: { compact?: boolean } = {}) {
   const [dark, setDark] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const isDark = saved === "dark" || (!saved && prefersDark);
+    const isDark = document.documentElement.classList.contains("dark");
     setDark(isDark);
-    document.documentElement.classList.toggle("dark", isDark);
+    setMounted(true);
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute("content", isDark ? "#1a1a1e" : "#FAF9F5");
   }, []);
@@ -35,7 +34,7 @@ export default function ThemeToggle({ compact }: { compact?: boolean } = {}) {
     return (
       <button
         onClick={toggle}
-        className="w-8 h-8 rounded-lg flex items-center justify-center text-text/30 hover:text-text/60 hover:bg-text/[0.05] transition-colors"
+        className={`w-8 h-8 rounded-lg flex items-center justify-center text-text/30 hover:text-text/60 hover:bg-text/[0.05] transition-colors ${mounted ? "opacity-100" : "opacity-0 pointer-events-none"}`}
         title={dark ? "Светлая тема" : "Тёмная тема"}
         aria-label="Toggle theme"
       >
@@ -56,7 +55,7 @@ export default function ThemeToggle({ compact }: { compact?: boolean } = {}) {
   return (
     <button
       onClick={toggle}
-      className={`relative w-11 h-6 rounded-full transition-colors duration-300 shrink-0 ${
+      className={`relative w-11 h-6 rounded-full transition-colors duration-300 shrink-0 ${mounted ? "opacity-100" : "opacity-0 pointer-events-none"} ${
         dark ? "bg-accent/30" : "bg-text/20 border border-text/10"
       }`}
       title={dark ? "Светлая тема" : "Тёмная тема"}

@@ -24,17 +24,10 @@ const tools = [
 ];
 
 export default function Nav() {
-  const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
   const [authEmail, setAuthEmail] = useState<string | null>(null);
   const [avatar, setAvatar] = useState<string | null>(null);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     if (menuOpen) {
@@ -61,9 +54,7 @@ export default function Nav() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all ${
-        menuOpen ? "bg-bg shadow-sm" : scrolled ? "bg-bg/90 backdrop-blur-md shadow-sm" : "bg-transparent"
-      }`}
+      className="fixed top-0 left-0 right-0 z-50 bg-bg/90 backdrop-blur-md shadow-sm"
     >
       {/* Bonus banner removed from nav — shown in WebChat for guests */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-14 md:h-16">
