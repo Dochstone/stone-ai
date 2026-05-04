@@ -72,10 +72,12 @@ export default function HealthChat() {
   const [uploading, setUploading] = useState(false);
   const [dragging, setDragging] = useState(false);
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dragCounterRef = useRef(0);
+  const autoScrollRef = useRef(true);
 
   useEffect(() => {
     try {
@@ -86,7 +88,9 @@ export default function HealthChat() {
   }, []);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (autoScrollRef.current) {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages, streaming]);
 
   const handleFileSelect = useCallback(async (file: File) => {
@@ -117,6 +121,8 @@ export default function HealthChat() {
     const text = promptOverride || input.trim();
     if (!text && !pendingImage) return;
     if (streaming) return;
+
+    autoScrollRef.current = true;
 
     const userMsg: Message = {
       role: "user",
@@ -204,6 +210,13 @@ export default function HealthChat() {
     }
   }, [auth, input, streaming, messages, pendingImage, scenario, modelId, responseMode]);
 
+  const handleChatScroll = useCallback(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    autoScrollRef.current = distanceFromBottom < 120;
+  }, []);
+
   if (!loaded) return null;
   if (!auth) {
     return (
@@ -280,7 +293,7 @@ export default function HealthChat() {
       )}
 
       {/* Messages / Welcome */}
-      <div className="flex-1 overflow-y-auto">
+      <div ref={scrollContainerRef} onScroll={handleChatScroll} className="flex-1 overflow-y-auto">
         {!hasMessages ? (
           /* Welcome screen */
           <div className="max-w-3xl mx-auto px-4 py-10 sm:py-12">
