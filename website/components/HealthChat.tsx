@@ -270,8 +270,8 @@ export default function HealthChat() {
 
       {/* Header */}
       <header className="border-b border-text/[0.06] bg-bg/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="max-w-3xl mx-auto px-4 py-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3 min-w-0">
             <a href="/" className="text-text/30 hover:text-text/60 transition-colors">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
@@ -280,12 +280,12 @@ export default function HealthChat() {
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
               <span className="text-lg">🏥</span>
             </div>
-            <div>
-              <h1 className="text-sm font-bold text-text leading-tight">AI Консультант</h1>
-              <p className="text-[10px] text-text/30">Общие вопросы здоровья</p>
+            <div className="min-w-0">
+              <h1 className="text-sm sm:text-base font-bold text-text leading-tight">AI Консультант</h1>
+              <p className="text-[11px] text-text/30 leading-tight">Общие вопросы здоровья</p>
             </div>
           </div>
-          <a href="/studio" className="text-[11px] text-accent font-semibold hover:underline">
+          <a href="/studio" className="text-[11px] text-accent font-semibold hover:underline sm:shrink-0">
             Обычный чат
           </a>
         </div>
