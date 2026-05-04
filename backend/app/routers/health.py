@@ -33,7 +33,7 @@ router = APIRouter(prefix="/api/health", tags=["health"])
 DEFAULT_HEALTH_MODEL = "claude-opus-4.5"
 ALLOWED_HEALTH_MODELS = {"claude-opus-4.5", "gpt-5.1", "gemini-2.5-pro"}
 HEALTH_SCENARIOS = ("general", "skin", "eyes", "mouth", "nails", "moles")
-HEALTH_RESPONSE_MODES = ("short", "balanced", "detailed")
+HEALTH_RESPONSE_MODES = ("short", "balanced", "detailed", "doctor")
 
 SCENARIO_GUIDES: dict[str, str] = {
     "general": (
@@ -93,7 +93,7 @@ RED_FLAG_PATTERNS: tuple[re.Pattern[str], ...] = (
 class HealthAnalyzeRequest(BaseModel):
     scenario: Literal["general", "skin", "eyes", "mouth", "nails", "moles"] = "general"
     model_id: str = DEFAULT_HEALTH_MODEL
-    response_mode: Literal["short", "balanced", "detailed"] = "balanced"
+    response_mode: Literal["short", "balanced", "detailed", "doctor"] = "balanced"
     messages: list[dict]
 
     @field_validator("messages")
@@ -194,6 +194,14 @@ def _build_response_mode_instruction(response_mode: str) -> str:
             "Формат ответа: очень коротко и по делу. "
             "3-6 буллетов максимум. "
             "Без длинных пояснений, только суть."
+        )
+    if response_mode == "doctor":
+        return (
+            "Формат ответа: для врача. "
+            "Пиши клинически, сухо и структурно. "
+            "Используй краткие медицинские формулировки, отмечай ключевые признаки, "
+            "красные флаги, наиболее вероятные варианты и что важно уточнить очно. "
+            "Без эмоциональных фраз и без лишних пояснений для пациента."
         )
     if response_mode == "detailed":
         return (

@@ -27,7 +27,7 @@ interface Message {
 
 type HealthScenario = "general" | "skin" | "eyes" | "mouth" | "nails" | "moles";
 type HealthModel = "claude-opus-4.5" | "gpt-5.1" | "gemini-2.5-pro";
-type HealthResponseMode = "short" | "balanced" | "detailed";
+type HealthResponseMode = "short" | "balanced" | "detailed" | "doctor";
 
 const SCENARIOS: { id: HealthScenario; title: string; description: string }[] = [
   { id: "general", title: "Общий", description: "Общие симптомы и жалобы" },
@@ -48,6 +48,7 @@ const RESPONSE_MODES: { id: HealthResponseMode; title: string; description: stri
   { id: "short", title: "Кратко", description: "Максимум сжатия, только суть" },
   { id: "balanced", title: "Стандарт", description: "Нормальный баланс краткости и деталей" },
   { id: "detailed", title: "Подробно", description: "Больше объяснений и контекста" },
+  { id: "doctor", title: "Для врача", description: "Сухой клинический формат для специалиста" },
 ];
 
 const QUICK_PROMPTS: { Icon: LucideIcon; color: string; text: string; description: string; scenario: HealthScenario }[] = [
@@ -206,7 +207,7 @@ export default function HealthChat() {
   if (!loaded) return null;
   if (!auth) {
     return (
-      <div className="min-h-screen bg-bg px-4 py-8">
+      <div className="min-h-screen bg-bg px-4 pt-24 sm:pt-28 pb-8">
         <div className="max-w-6xl mx-auto grid gap-6 lg:grid-cols-[1.1fr_0.9fr] items-start">
           <div className="rounded-3xl border border-text/[0.06] bg-gradient-to-br from-emerald-600 via-teal-700 to-emerald-900 p-6 sm:p-8 text-white overflow-hidden relative">
             <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-white/10 blur-3xl" />
@@ -263,7 +264,7 @@ export default function HealthChat() {
 
   return (
     <div
-      className="min-h-screen bg-bg flex flex-col"
+      className="min-h-screen bg-bg flex flex-col pt-24 sm:pt-28"
       onDragEnter={(e) => { e.preventDefault(); dragCounterRef.current++; setDragging(true); }}
       onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; }}
       onDragLeave={(e) => { e.preventDefault(); dragCounterRef.current--; if (dragCounterRef.current === 0) setDragging(false); }}
