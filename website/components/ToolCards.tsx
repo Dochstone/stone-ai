@@ -515,6 +515,21 @@ export default function ToolCards() {
           {/* ── Audio — interactive equalizer ── */}
           <AudioCard />
 
+          {/* ── Health — visible entry point to symptom photo analysis ── */}
+          <a href="/health" className="bg-gradient-to-br from-emerald-600 via-teal-700 to-emerald-900 rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative min-h-[220px]">
+            <span className="inline-block bg-white/15 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide mb-3">Vision AI</span>
+            <h3 className="font-bold text-lg text-white mb-1">AI Консультант</h3>
+            <p className="text-white/70 text-[13px] mb-4">Загрузите фото симптома или опишите жалобу. AI подскажет возможные причины и к какому врачу обратиться.</p>
+            <div className="flex items-center gap-3 mt-auto">
+              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-xl">👁</div>
+              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-xl">🩹</div>
+              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-xl">🦷</div>
+              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-xl">💅</div>
+            </div>
+            <div className="absolute top-4 right-4 w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center">
+              <span className="text-3xl">🔬</span>
+            </div>
+          </a>
 
           {/* ── Deep Analysis — live reasoning chain, FIXED HEIGHT ── */}
           <a href="/chat" className="bg-[var(--color-card-dark)] rounded-2xl p-6 block group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl overflow-hidden relative" style={{ height: 320 }}>

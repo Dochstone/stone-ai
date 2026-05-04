@@ -196,16 +196,54 @@ export default function HealthChat() {
   if (!loaded) return null;
   if (!auth) {
     return (
-      <div className="min-h-screen bg-bg flex items-center justify-center px-4">
-        <div className="max-w-md w-full">
-          <div className="text-center mb-6">
-            <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg mb-4">
-              <span className="text-3xl">🏥</span>
+      <div className="min-h-screen bg-bg px-4 py-8">
+        <div className="max-w-6xl mx-auto grid gap-6 lg:grid-cols-[1.1fr_0.9fr] items-start">
+          <div className="rounded-3xl border border-text/[0.06] bg-gradient-to-br from-emerald-600 via-teal-700 to-emerald-900 p-6 sm:p-8 text-white overflow-hidden relative">
+            <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-white/10 blur-3xl" />
+            <div className="absolute -bottom-20 -left-12 w-56 h-56 rounded-full bg-black/10 blur-3xl" />
+            <div className="relative">
+              <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center shadow-lg mb-5">
+                <span className="text-3xl">🏥</span>
+              </div>
+              <h1 className="text-3xl sm:text-4xl font-extrabold mb-3">AI Консультант</h1>
+              <p className="text-white/80 text-sm sm:text-base max-w-xl leading-relaxed">
+                Загрузите фото симптома или опишите жалобу. AI поможет структурировать наблюдения, назвать возможные причины и подсказать, к какому врачу обратиться.
+              </p>
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                {[
+                  "Фото кожи, глаз, полости рта и ногтей",
+                  "Подсказка по профильному специалисту",
+                  "Понятное объяснение медицинских терминов",
+                  "Быстрый старт после входа в аккаунт",
+                ].map((item) => (
+                  <div key={item} className="rounded-2xl bg-white/10 border border-white/10 px-4 py-3 text-sm text-white/90">
+                    {item}
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 rounded-2xl bg-amber-50/10 border border-amber-200/20 px-4 py-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-lg leading-none">⚠</span>
+                  <div>
+                    <p className="font-semibold text-sm">Не заменяет врача</p>
+                    <p className="text-xs sm:text-sm text-white/75 leading-relaxed mt-1">
+                      Сервис даёт только общую информацию. При сильной боли, проблемах с дыханием, кровотечении,
+                      внезапном ухудшении состояния или высокой температуре нужна срочная медицинская помощь.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
-            <h1 className="text-2xl font-extrabold text-text mb-2">AI Консультант</h1>
-            <p className="text-text/50 text-sm">Войдите, чтобы начать консультацию</p>
           </div>
-          <AuthFormComponent onAuth={setAuth} />
+
+          <div className="w-full max-w-md lg:max-w-none lg:ml-auto">
+            <div className="text-center mb-5">
+              <p className="text-text/60 text-sm">Войдите, чтобы начать консультацию и загрузить фото</p>
+            </div>
+            <AuthFormComponent onAuth={setAuth} subtitle="Войдите, чтобы начать AI-консультацию" />
+          </div>
         </div>
       </div>
     );

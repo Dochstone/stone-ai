@@ -13,6 +13,7 @@ import {
   Store,
   Search,
   Zap,
+  HeartPulse,
   type LucideIcon,
 } from "lucide-react";
 
@@ -28,6 +29,7 @@ const POPULAR_TASKS: Task[] = [
   { label: "Фотосессия товаров",     href: "/dashboard/photo-session",      Icon: Camera,         color: "#F43F5E" },
   { label: "AI Чат-бот",             href: "/dashboard/bots",               Icon: Bot,            color: "#6366F1" },
   { label: "AI-Агент",               href: "/dashboard/agent",              Icon: Sparkles,       color: "#C4623D" },
+  { label: "AI Консультант",         href: "/health",                       Icon: HeartPulse,     color: "#10B981" },
   { label: "Маркетплейс шаблонов",   href: "/dashboard/marketplace",        Icon: Store,          color: "#10B981" },
   { label: "Анализ текста",          href: "/dashboard/seo/analyze",        Icon: Search,         color: "#22D3EE" },
   { label: "A/B тест",               href: "/dashboard/seo/ab-test",        Icon: Zap,            color: "#EAB308" },

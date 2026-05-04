@@ -55,7 +55,7 @@ stone-ai/
 │   └── src/
 ├── backend/               ← FastAPI сервер (существующий)
 │   └── app/
-└── website/               ← [БУДЕТ СОЗДАН] Next.js сайт
+└── website/               ← Next.js сайт (уже существует и работает)
 ```
 
 ### Положи файлы из нашего чата в корень
@@ -82,7 +82,7 @@ claude
 ```
 
 Claude Code автоматически прочитает `CLAUDE.md` и будет знать:
-- Архитектуру проекта (React + Vite frontend, FastAPI backend)
+- Архитектуру проекта (React + Vite frontend, FastAPI backend, Next.js website)
 - Правила кодирования (inline CSS в TG-аппе, Tailwind на сайте)
 - Текущий приоритет (Phase 1 — per-token billing)
 - Где какой файл лежит
@@ -120,8 +120,8 @@ Claude Code:
 Обнови ai_router.py с полным MODEL_MAP из STRATEGY.md.
 
 # Этап 7: Сайт
-Создай Next.js проект в папке website/ по Этапу 7 из ТЗ.
-Используй дизайн из StoneAI_Landing_v2.jsx как референс.
+Продолжи развитие Next.js сайта в папке website/ по Этапу 7 из ТЗ.
+Сохраняй существующую структуру App Router и текущий visual language сайта.
 ```
 
 ### Полезные команды Claude Code
@@ -243,7 +243,7 @@ $ARGUMENTS
   /implement Этап 6 — ChatScreen с показом расхода
 
 Сессия 7 (website — параллельно с 1-3):
-  /implement Этап 7 — Next.js лендинг (использовать StoneAI_Landing_v2.jsx)
+  /implement Этап 7 — развивать Next.js лендинг и продуктовые страницы в существующей папке website/
 
 Сессия 8 (website):
   /implement Этап 8 — /models и /pricing страницы
