@@ -33,6 +33,7 @@ type HealthScenario =
   | "teeth"
   | "throat"
   | "ears"
+  | "surgery"
   | "nails"
   | "hair"
   | "wounds"
@@ -48,6 +49,7 @@ const SCENARIOS: { id: HealthScenario; title: string; description: string }[] = 
   { id: "teeth", title: "Зубы", description: "Кариес, боль, дёсны, отёк" },
   { id: "throat", title: "Горло", description: "Налёт, боль, миндалины, отёк" },
   { id: "ears", title: "Уши", description: "Боль, выделения, отёк, покраснение" },
+  { id: "surgery", title: "Хирургия", description: "Швы, раны, отёк, выделения, заживление" },
   { id: "nails", title: "Ногти", description: "Цвет, форма, ломкость, воспаление" },
   { id: "hair", title: "Волосы", description: "Выпадение, ломкость, зуд, кожа головы" },
   { id: "wounds", title: "Раны", description: "Порезы, ссадины, ожоги, заживление" },
@@ -72,6 +74,7 @@ const QUICK_PROMPTS: { Icon: LucideIcon; color: string; text: string; descriptio
   { Icon: Bandage, color: "#F97316", text: "Высыпания или покраснения на коже", description: "Анализ кожных проявлений", scenario: "skin" },
   { Icon: Smile,   color: "#06B6D4", text: "Проблемы с полостью рта",           description: "Осмотр ротовой полости", scenario: "mouth" },
   { Icon: Smile,   color: "#14B8A6", text: "Боль или налёт в горле",             description: "Анализ горла и миндалин", scenario: "throat" },
+  { Icon: Bandage, color: "#10B981", text: "Швы, раны или послеоперационный отёк", description: "Хирургический осмотр", scenario: "surgery" },
   { Icon: Hand,    color: "#EAB308", text: "Изменение цвета или формы ногтей",  description: "Анализ состояния ногтей", scenario: "nails" },
   { Icon: Bandage, color: "#22C55E", text: "Порезы, раны или ожоги",            description: "Оценка заживления и рисков", scenario: "wounds" },
 ];
