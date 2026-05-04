@@ -33,6 +33,7 @@ router = APIRouter(prefix="/api/health", tags=["health"])
 DEFAULT_HEALTH_MODEL = "claude-opus-4.5"
 ALLOWED_HEALTH_MODELS = {"claude-opus-4.5", "gpt-5.1", "gemini-2.5-pro"}
 HEALTH_SCENARIOS = ("general", "skin", "eyes", "mouth", "nails", "moles")
+HEALTH_RESPONSE_MODES = ("short", "balanced", "detailed")
 
 SCENARIO_GUIDES: dict[str, str] = {
     "general": (
@@ -92,6 +93,7 @@ RED_FLAG_PATTERNS: tuple[re.Pattern[str], ...] = (
 class HealthAnalyzeRequest(BaseModel):
     scenario: Literal["general", "skin", "eyes", "mouth", "nails", "moles"] = "general"
     model_id: str = DEFAULT_HEALTH_MODEL
+    response_mode: Literal["short", "balanced", "detailed"] = "balanced"
     messages: list[dict]
 
     @field_validator("messages")
@@ -184,6 +186,25 @@ def _build_health_system_prompt(scenario: str) -> str:
 - внезапное ухудшение состояния, обморок, судороги.
 """
     return inject_safety(prompt.strip())
+
+
+def _build_response_mode_instruction(response_mode: str) -> str:
+    if response_mode == "short":
+        return (
+            "Формат ответа: очень коротко и по делу. "
+            "3-6 буллетов максимум. "
+            "Без длинных пояснений, только суть."
+        )
+    if response_mode == "detailed":
+        return (
+            "Формат ответа: подробно и структурно. "
+            "Можно добавить краткое объяснение причин, признаки, риски и что уточнить у врача. "
+            "Не уходи в воду."
+        )
+    return (
+        "Формат ответа: стандартно. "
+        "Коротко, структурно, без лишней воды."
+    )
 
 
 def _detect_red_flag(text: str) -> str | None:
@@ -289,7 +310,7 @@ async def analyze_health(
     max_tokens = get_max_tokens_for(model_id, user_tier)
     max_input_tokens = get_max_input_tokens_for(model_id, user_tier)
 
-    system_prompt = _build_health_system_prompt(req.scenario)
+    system_prompt = _build_health_system_prompt(req.scenario) + "\n\n" + _build_response_mode_instruction(req.response_mode)
 
     async def generate():
         usage_data = {"tokens_in": 0, "tokens_out": 0}

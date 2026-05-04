@@ -27,6 +27,7 @@ interface Message {
 
 type HealthScenario = "general" | "skin" | "eyes" | "mouth" | "nails" | "moles";
 type HealthModel = "claude-opus-4.5" | "gpt-5.1" | "gemini-2.5-pro";
+type HealthResponseMode = "short" | "balanced" | "detailed";
 
 const SCENARIOS: { id: HealthScenario; title: string; description: string }[] = [
   { id: "general", title: "Общий", description: "Общие симптомы и жалобы" },
@@ -43,6 +44,12 @@ const MODELS: { id: HealthModel; title: string; description: string }[] = [
   { id: "gemini-2.5-pro", title: "Gemini 2.5 Pro", description: "Хорошо читает изображения и детали" },
 ];
 
+const RESPONSE_MODES: { id: HealthResponseMode; title: string; description: string }[] = [
+  { id: "short", title: "Кратко", description: "Максимум сжатия, только суть" },
+  { id: "balanced", title: "Стандарт", description: "Нормальный баланс краткости и деталей" },
+  { id: "detailed", title: "Подробно", description: "Больше объяснений и контекста" },
+];
+
 const QUICK_PROMPTS: { Icon: LucideIcon; color: string; text: string; description: string; scenario: HealthScenario }[] = [
   { Icon: Eye,     color: "#EF4444", text: "Покраснение и раздражение глаза",   description: "Анализ фото глаза", scenario: "eyes" },
   { Icon: Bandage, color: "#F97316", text: "Высыпания или покраснения на коже", description: "Анализ кожных проявлений", scenario: "skin" },
@@ -55,6 +62,7 @@ export default function HealthChat() {
   const [loaded, setLoaded] = useState(false);
   const [scenario, setScenario] = useState<HealthScenario>("general");
   const [modelId, setModelId] = useState<HealthModel>("claude-opus-4.5");
+  const [responseMode, setResponseMode] = useState<HealthResponseMode>("balanced");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
@@ -146,6 +154,7 @@ export default function HealthChat() {
         body: JSON.stringify({
           scenario,
           model_id: modelId,
+          response_mode: responseMode,
           messages: apiMessages,
         }),
       });
@@ -192,7 +201,7 @@ export default function HealthChat() {
     } finally {
       setStreaming(false);
     }
-  }, [auth, input, streaming, messages, pendingImage, scenario, modelId]);
+  }, [auth, input, streaming, messages, pendingImage, scenario, modelId, responseMode]);
 
   if (!loaded) return null;
   if (!auth) {
@@ -286,6 +295,33 @@ export default function HealthChat() {
 
             <div className="mb-6">
               <div className="flex items-center justify-between gap-3 mb-3">
+                <p className="text-sm font-semibold text-text/70">Формат ответа</p>
+                <p className="text-xs text-text/35">Пользователь сам выбирает глубину</p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-5">
+                {RESPONSE_MODES.map((item) => {
+                  const active = responseMode === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setResponseMode(item.id)}
+                      className={`text-left rounded-2xl border px-4 py-3 transition-all ${
+                        active
+                          ? "border-amber-500/30 bg-amber-500/10 shadow-sm"
+                          : "border-text/[0.06] bg-bg hover:border-amber-300 hover:bg-amber-50/50"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <span className={`text-sm font-semibold ${active ? "text-amber-700" : "text-text/80"}`}>{item.title}</span>
+                        {active && <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600">Выбрано</span>}
+                      </div>
+                      <p className="text-[11px] leading-tight text-text/45">{item.description}</p>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="flex items-center justify-between gap-3 mb-3">
                 <p className="text-sm font-semibold text-text/70">Модель ответа</p>
                 <p className="text-xs text-text/35">Можно переключать под задачу</p>
               </div>
@@ -371,13 +407,13 @@ export default function HealthChat() {
               </div>
 
               <div className="rounded-3xl border border-amber-200/60 bg-amber-50/70 dark:bg-amber-900/15 dark:border-amber-800/30 p-5">
-                <p className="text-sm font-bold text-amber-700 dark:text-amber-400 mb-3">Нельзя ожидать от модуля</p>
+                <p className="text-sm font-bold text-amber-700 dark:text-amber-400 mb-3">Границы модуля</p>
                 <div className="space-y-2">
                   {[
-                    "точный диагноз по одному фото",
-                    "рецепт, дозировку или схему лечения",
-                    "замену очного осмотра врача",
-                    "гарантию, что всё безопасно",
+                    "не ставит окончательный диагноз по одному фото",
+                    "не назначает лекарства, дозировки и схемы лечения",
+                    "не заменяет очный осмотр, анализы и клиническое решение врача",
+                    "не подтверждает безопасность состояния, если есть тревожные симптомы",
                   ].map((item) => (
                     <div key={item} className="text-[13px] leading-relaxed text-text/65">• {item}</div>
                   ))}
@@ -480,6 +516,26 @@ export default function HealthChat() {
       {/* Input area */}
       <div className="border-t border-text/[0.06] bg-bg px-4 py-2 shrink-0">
         <div className="max-w-3xl mx-auto">
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-text/35">Формат</span>
+            {RESPONSE_MODES.map((item) => {
+              const active = responseMode === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setResponseMode(item.id)}
+                  className={`rounded-full px-3 py-1.5 text-[12px] font-medium transition-colors ${
+                    active
+                      ? "bg-amber-500 text-white"
+                      : "bg-text/[0.04] text-text/55 hover:bg-text/[0.07]"
+                  }`}
+                >
+                  {item.title}
+                </button>
+              );
+            })}
+          </div>
+
           <div className="flex flex-wrap items-center gap-2 mb-2">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-text/35">Модель</span>
             {MODELS.map((item) => {
