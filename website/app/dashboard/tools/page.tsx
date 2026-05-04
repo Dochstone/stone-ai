@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   BotMessageSquare, FileText, Store, Sparkles, Bot, FolderKanban, ImageIcon,
   Camera, Presentation, Megaphone, Search, FileEdit, BarChart3, SplitSquareHorizontal, Tags,
+  HeartPulse,
   type LucideIcon,
 } from "lucide-react";
 
@@ -23,6 +24,7 @@ const TOOLS: { group: string; items: Tool[] }[] = [
     group: "Рабочее пространство",
     items: [
       { href: "/dashboard/chat",          Icon: BotMessageSquare, color: "#22D3EE", title: "AI Чат",         description: "Общение с 65+ нейросетями в одном окне", popular: true },
+      { href: "/health",                  Icon: HeartPulse,       color: "#10B981", title: "AI Консультант", description: "Анализ фото симптомов и общая health-консультация", popular: true, badge: "NEW" },
       { href: "/dashboard/templates",     Icon: FileText,         color: "#14B8A6", title: "AI-шаблоны",      description: "50+ готовых шаблонов для промптов", badge: "50+" },
       { href: "/dashboard/marketplace",   Icon: Store,            color: "#F97316", title: "Маркетплейс",     description: "Боты и ассистенты от сообщества", badge: "NEW" },
       { href: "/dashboard/agent",         Icon: Sparkles,         color: "#C4623D", title: "AI-Агент",        description: "Автономный агент для сложных задач", badge: "NEW", popular: true },

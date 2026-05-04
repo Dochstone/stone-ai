@@ -8,6 +8,7 @@ interface Tool {
 
 const TOOLS: Tool[] = [
   { href: "/dashboard/chat", icon: "/tool-icons/tool-chat.png", title: "AI Чат", description: "65+ нейросетей в одном окне" },
+  { href: "/health", icon: "/tool-icons/tool-seo.png", title: "AI Консультант", description: "Анализ фото симптомов и общая health-консультация", badge: "NEW" },
   { href: "/dashboard/templates", icon: "/tool-icons/tool-templates.png", title: "AI-шаблоны", description: "Готовые промпты под задачи", badge: "50+" },
   { href: "/dashboard/photo-session", icon: "/tool-icons/tool-photo-session.png", title: "Фотосессия", description: "Серия фото одного персонажа" },
   { href: "/dashboard/presentations", icon: "/tool-icons/tool-presentations.png", title: "Презентации", description: "Слайды с текстом и дизайном" },
