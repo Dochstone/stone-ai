@@ -20,7 +20,7 @@ from app.config import get_settings
 from app.database import init_db
 
 # Routers
-from app.routers import chat, user, models, payment, byok, ads, admin, auth, referral, chats, video, threed, audio, prompts, projects, generations, games, achievements, presentations, photo_session, image
+from app.routers import chat, health, user, models, payment, byok, ads, admin, auth, referral, chats, video, threed, audio, prompts, projects, generations, games, achievements, presentations, photo_session, image
 from app.routers import payment_ext
 from app.routers import reconciliation
 
@@ -310,6 +310,7 @@ app.add_middleware(
 
 # Include API routers
 app.include_router(chat.router)
+app.include_router(health.router)
 app.include_router(user.router)
 app.include_router(models.router)
 app.include_router(payment.router)

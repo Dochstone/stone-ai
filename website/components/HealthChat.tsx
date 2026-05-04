@@ -5,26 +5,7 @@ import AuthFormComponent, { type AuthState } from "@/components/AuthForm";
 import { Eye, Bandage, Smile, Hand, type LucideIcon } from "lucide-react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
-
-const HEALTH_SYSTEM_PROMPT = `Ты — AI-ассистент по общим вопросам здоровья. Ты НЕ врач и НЕ ставишь диагнозы.
-
-Твоя роль:
-1. Анализировать загруженные фото (кожа, глаза, высыпания и т.д.) и описывать что ты видишь
-2. Предлагать ВОЗМОЖНЫЕ причины симптомов (не диагноз)
-3. Рекомендовать к какому специалисту обратиться
-4. Давать общие советы по уходу и профилактике
-5. Объяснять медицинские термины простым языком
-
-ОБЯЗАТЕЛЬНО в каждом ответе:
-- Начинай с "На основе фото я могу отметить следующее:" или подобной формулировки
-- Перечисли наблюдения (что видно на фото)
-- Укажи возможные причины (2-3 варианта)
-- Порекомендуй специалиста
-- Заверши фразой: "Для точного диагноза обратитесь к врачу. Эта информация не заменяет медицинскую консультацию."
-
-Отвечай на русском языке. Будь внимателен, подробен и заботлив.`;
-
-const VISION_MODEL = "gpt-4o-mini"; // Free vision-capable model
+const HEALTH_API_URL = `${API_URL}/api/health/analyze`;
 
 // Markdown renderer (simplified)
 function renderMarkdown(text: string): string {
@@ -44,16 +25,28 @@ interface Message {
   image?: string; // base64 data URL
 }
 
-const QUICK_PROMPTS: { Icon: LucideIcon; color: string; text: string; description: string }[] = [
-  { Icon: Eye,     color: "#EF4444", text: "Покраснение и раздражение глаза",   description: "Анализ фото глаза" },
-  { Icon: Bandage, color: "#F97316", text: "Высыпания или покраснения на коже", description: "Анализ кожных проявлений" },
-  { Icon: Smile,   color: "#06B6D4", text: "Проблемы с полостью рта",           description: "Осмотр ротовой полости" },
-  { Icon: Hand,    color: "#EAB308", text: "Изменение цвета или формы ногтей",  description: "Анализ состояния ногтей" },
+type HealthScenario = "general" | "skin" | "eyes" | "mouth" | "nails" | "moles";
+
+const SCENARIOS: { id: HealthScenario; title: string; description: string }[] = [
+  { id: "general", title: "Общий", description: "Общие симптомы и жалобы" },
+  { id: "skin", title: "Кожа", description: "Сыпь, покраснение, воспаление" },
+  { id: "eyes", title: "Глаза", description: "Покраснение, боль, отёк, зрение" },
+  { id: "mouth", title: "Рот", description: "Язык, дёсны, губы, горло" },
+  { id: "nails", title: "Ногти", description: "Цвет, форма, ломкость, воспаление" },
+  { id: "moles", title: "Родинки", description: "Пятна, асимметрия, изменения" },
+];
+
+const QUICK_PROMPTS: { Icon: LucideIcon; color: string; text: string; description: string; scenario: HealthScenario }[] = [
+  { Icon: Eye,     color: "#EF4444", text: "Покраснение и раздражение глаза",   description: "Анализ фото глаза", scenario: "eyes" },
+  { Icon: Bandage, color: "#F97316", text: "Высыпания или покраснения на коже", description: "Анализ кожных проявлений", scenario: "skin" },
+  { Icon: Smile,   color: "#06B6D4", text: "Проблемы с полостью рта",           description: "Осмотр ротовой полости", scenario: "mouth" },
+  { Icon: Hand,    color: "#EAB308", text: "Изменение цвета или формы ногтей",  description: "Анализ состояния ногтей", scenario: "nails" },
 ];
 
 export default function HealthChat() {
   const [auth, setAuth] = useState<AuthState | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [scenario, setScenario] = useState<HealthScenario>("general");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
@@ -136,16 +129,15 @@ export default function HealthChat() {
     });
 
     try {
-      const res = await fetch(`${API_URL}/api/chat`, {
+      const res = await fetch(HEALTH_API_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${auth.token}`,
         },
         body: JSON.stringify({
-          model_id: VISION_MODEL,
+          scenario,
           messages: apiMessages,
-          system_prompt: HEALTH_SYSTEM_PROMPT,
         }),
       });
 
@@ -191,7 +183,7 @@ export default function HealthChat() {
     } finally {
       setStreaming(false);
     }
-  }, [auth, input, streaming, messages, pendingImage]);
+  }, [auth, input, streaming, messages, pendingImage, scenario]);
 
   if (!loaded) return null;
   if (!auth) {
@@ -279,8 +271,37 @@ export default function HealthChat() {
               </div>
               <h2 className="text-xl sm:text-2xl font-extrabold text-text mb-2">Загрузите фото для анализа</h2>
               <p className="text-sm sm:text-base text-text/40 max-w-xl mx-auto leading-relaxed">
-                Загрузите фото (глаз, кожи, полости рта и т.д.) — AI проанализирует изображение и даст общую информацию о возможных причинах
+                Выберите сценарий, загрузите фото и добавьте короткое описание. Модуль описывает наблюдения, даёт вероятные причины и подсказывает, когда нужен врач.
               </p>
+            </div>
+
+            <div className="mb-6">
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <p className="text-sm font-semibold text-text/70">Сценарий анализа</p>
+                <p className="text-xs text-text/35">Можно переключать перед каждым запросом</p>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {SCENARIOS.map((item) => {
+                  const active = scenario === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setScenario(item.id)}
+                      className={`text-left rounded-2xl border px-4 py-3 transition-all ${
+                        active
+                          ? "border-emerald-500/30 bg-emerald-500/10 shadow-sm"
+                          : "border-text/[0.06] bg-bg hover:border-emerald-300 hover:bg-emerald-50/50"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <span className={`text-sm font-semibold ${active ? "text-emerald-700" : "text-text/80"}`}>{item.title}</span>
+                        {active && <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Выбрано</span>}
+                      </div>
+                      <p className="text-[11px] leading-tight text-text/45">{item.description}</p>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Upload area */}
@@ -297,6 +318,37 @@ export default function HealthChat() {
               <p className="text-text/20 text-[10px] mt-2">JPEG, PNG, WebP до 10MB</p>
             </div>
 
+            <div className="grid gap-3 sm:grid-cols-2 mb-6">
+              <div className="rounded-3xl border border-emerald-200/60 bg-emerald-50/60 dark:bg-emerald-900/15 dark:border-emerald-800/30 p-5">
+                <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400 mb-3">Можно анализировать</p>
+                <div className="space-y-2">
+                  {[
+                    "кожу, сыпь, покраснение, раздражение",
+                    "глаза и веки",
+                    "рот, язык, дёсны, горло",
+                    "ногти и кожу вокруг них",
+                    "родинки и пигментные пятна",
+                  ].map((item) => (
+                    <div key={item} className="text-[13px] leading-relaxed text-text/65">• {item}</div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-amber-200/60 bg-amber-50/70 dark:bg-amber-900/15 dark:border-amber-800/30 p-5">
+                <p className="text-sm font-bold text-amber-700 dark:text-amber-400 mb-3">Нельзя ожидать от модуля</p>
+                <div className="space-y-2">
+                  {[
+                    "точный диагноз по одному фото",
+                    "рецепт, дозировку или схему лечения",
+                    "замену очного осмотра врача",
+                    "гарантию, что всё безопасно",
+                  ].map((item) => (
+                    <div key={item} className="text-[13px] leading-relaxed text-text/65">• {item}</div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             {/* Quick prompts */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {QUICK_PROMPTS.map((p) => {
@@ -305,6 +357,7 @@ export default function HealthChat() {
                   <button
                     key={p.text}
                     onClick={() => {
+                      setScenario(p.scenario);
                       setInput(p.text);
                       fileInputRef.current?.click();
                     }}
@@ -321,24 +374,6 @@ export default function HealthChat() {
                   </button>
                 );
               })}
-            </div>
-
-            {/* How it works */}
-            <div className="mt-8 p-5 rounded-3xl bg-text/[0.02] border border-text/[0.04]">
-              <h3 className="text-sm font-bold text-text/60 mb-3">Как это работает</h3>
-              <div className="space-y-2">
-                {[
-                  { step: "1", text: "Загрузите фото проблемной зоны (глаз, кожа, ногти и т.д.)" },
-                  { step: "2", text: "Опишите симптомы — когда появились, что беспокоит" },
-                  { step: "3", text: "AI проанализирует фото и даст общую информацию" },
-                  { step: "4", text: "Получите рекомендации по специалисту для обращения" },
-                ].map((s) => (
-                  <div key={s.step} className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0 text-xs font-bold">{s.step}</div>
-                    <p className="text-[13px] text-text/50 leading-relaxed">{s.text}</p>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
         ) : (
@@ -409,6 +444,26 @@ export default function HealthChat() {
       {/* Input area */}
       <div className="border-t border-text/[0.06] bg-bg px-4 py-2 shrink-0">
         <div className="max-w-3xl mx-auto">
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-text/35">Сценарий</span>
+            {SCENARIOS.map((item) => {
+              const active = scenario === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setScenario(item.id)}
+                  className={`rounded-full px-3 py-1.5 text-[12px] font-medium transition-colors ${
+                    active
+                      ? "bg-emerald-500 text-white"
+                      : "bg-text/[0.04] text-text/55 hover:bg-text/[0.07]"
+                  }`}
+                >
+                  {item.title}
+                </button>
+              );
+            })}
+          </div>
+
           {/* Pending image preview */}
           {pendingImage && (
             <div className="flex items-center gap-3 mb-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-200/50 dark:border-emerald-800/30">
