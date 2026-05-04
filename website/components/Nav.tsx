@@ -13,6 +13,7 @@ import { getAvatarColor, getSavedAvatar, syncAvatarFromProfile } from "@/lib/ava
 
 const tools = [
   { href: "/dashboard/chat", label: "AI Чат" },
+  { href: "/health", label: "AI Консультант" },
   { href: "/dashboard/templates", label: "AI-шаблоны" },
   { href: "/dashboard/presentations", label: "Презентации" },
   { href: "/dashboard/campaigns", label: "Рекламные кампании" },
@@ -110,6 +111,9 @@ export default function Nav() {
 
           <a href="/models" className="text-text/70 hover:text-text font-medium text-sm transition-colors">
             Модели
+          </a>
+          <a href="/health" className="text-emerald-500 hover:text-emerald-400 font-semibold text-sm transition-colors">
+            AI Консультант
           </a>
           <a href="/pricing" className="text-text/70 hover:text-text font-medium text-sm transition-colors">
             Цены
@@ -224,6 +228,9 @@ export default function Nav() {
             <div className="border-t border-text/5 my-2" />
             <a href="/models" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
               Модели
+            </a>
+            <a href="/health" onClick={() => setMenuOpen(false)} className="text-emerald-500 hover:text-emerald-400 font-semibold py-2.5 px-2 min-h-[44px] flex items-center">
+              AI Консультант
             </a>
             <a href="/pricing" onClick={() => setMenuOpen(false)} className="text-text/70 hover:text-text font-medium py-2.5 px-2 min-h-[44px] flex items-center">
               Тарифы

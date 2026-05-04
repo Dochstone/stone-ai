@@ -282,13 +282,13 @@ export default function HealthChat() {
       <div className="flex-1 overflow-y-auto">
         {!hasMessages ? (
           /* Welcome screen */
-          <div className="max-w-2xl mx-auto px-4 py-8">
-            <div className="text-center mb-8">
+          <div className="max-w-3xl mx-auto px-4 py-10 sm:py-12">
+            <div className="text-center mb-10">
               <div className="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-xl shadow-emerald-500/20 mb-4">
                 <span className="text-4xl">🔬</span>
               </div>
               <h2 className="text-xl sm:text-2xl font-extrabold text-text mb-2">Загрузите фото для анализа</h2>
-              <p className="text-sm text-text/40 max-w-md mx-auto">
+              <p className="text-sm sm:text-base text-text/40 max-w-xl mx-auto leading-relaxed">
                 Загрузите фото (глаз, кожи, полости рта и т.д.) — AI проанализирует изображение и даст общую информацию о возможных причинах
               </p>
             </div>
@@ -296,7 +296,7 @@ export default function HealthChat() {
             {/* Upload area */}
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-emerald-300 dark:border-emerald-700 rounded-2xl p-8 text-center cursor-pointer hover:border-emerald-500 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10 transition-all mb-6"
+              className="border-2 border-dashed border-emerald-300 dark:border-emerald-700 rounded-3xl p-8 sm:p-10 text-center cursor-pointer hover:border-emerald-500 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10 transition-all mb-8"
             >
               <svg className="w-12 h-12 text-emerald-400 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
@@ -308,7 +308,7 @@ export default function HealthChat() {
             </div>
 
             {/* Quick prompts */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {QUICK_PROMPTS.map((p) => {
                 const { Icon } = p;
                 return (
@@ -319,7 +319,7 @@ export default function HealthChat() {
                       fileInputRef.current?.click();
                     }}
                     style={{ ["--pad-c" as string]: p.color }}
-                    className="flex items-start gap-3 p-3 rounded-xl border border-text/[0.06] bg-bg hover:border-emerald-300 hover:shadow-sm transition-all text-left group"
+                    className="flex items-start gap-3 p-4 rounded-2xl border border-text/[0.06] bg-bg hover:border-emerald-300 hover:shadow-sm transition-all text-left group"
                   >
                     <span className="glass-pad flex items-center justify-center w-10 h-10 rounded-xl shrink-0">
                       <Icon className="block" size={20} strokeWidth={2.4} />
@@ -334,7 +334,7 @@ export default function HealthChat() {
             </div>
 
             {/* How it works */}
-            <div className="mt-8 p-4 rounded-2xl bg-text/[0.02] border border-text/[0.04]">
+            <div className="mt-8 p-5 rounded-3xl bg-text/[0.02] border border-text/[0.04]">
               <h3 className="text-sm font-bold text-text/60 mb-3">Как это работает</h3>
               <div className="space-y-2">
                 {[
