@@ -25,7 +25,18 @@ interface Message {
   image?: string; // base64 data URL
 }
 
-type HealthScenario = "general" | "skin" | "eyes" | "mouth" | "nails" | "moles";
+type HealthScenario =
+  | "general"
+  | "skin"
+  | "eyes"
+  | "mouth"
+  | "teeth"
+  | "throat"
+  | "ears"
+  | "nails"
+  | "hair"
+  | "wounds"
+  | "moles";
 type HealthModel = "claude-opus-4.5" | "gpt-5.5" | "gemini-3.1-pro-preview";
 type HealthResponseMode = "short" | "balanced" | "detailed" | "doctor";
 
@@ -34,7 +45,12 @@ const SCENARIOS: { id: HealthScenario; title: string; description: string }[] = 
   { id: "skin", title: "Кожа", description: "Сыпь, покраснение, воспаление" },
   { id: "eyes", title: "Глаза", description: "Покраснение, боль, отёк, зрение" },
   { id: "mouth", title: "Рот", description: "Язык, дёсны, губы, горло" },
+  { id: "teeth", title: "Зубы", description: "Кариес, боль, дёсны, отёк" },
+  { id: "throat", title: "Горло", description: "Налёт, боль, миндалины, отёк" },
+  { id: "ears", title: "Уши", description: "Боль, выделения, отёк, покраснение" },
   { id: "nails", title: "Ногти", description: "Цвет, форма, ломкость, воспаление" },
+  { id: "hair", title: "Волосы", description: "Выпадение, ломкость, зуд, кожа головы" },
+  { id: "wounds", title: "Раны", description: "Порезы, ссадины, ожоги, заживление" },
   { id: "moles", title: "Родинки", description: "Пятна, асимметрия, изменения" },
 ];
 
@@ -48,14 +64,16 @@ const RESPONSE_MODES: { id: HealthResponseMode; title: string; description: stri
   { id: "short", title: "Кратко", description: "Максимум сжатия, только суть" },
   { id: "balanced", title: "Стандарт", description: "Нормальный баланс краткости и деталей" },
   { id: "detailed", title: "Подробно", description: "Больше объяснений и контекста" },
-  { id: "doctor", title: "Для врача", description: "Сухой клинический формат для специалиста" },
+  { id: "doctor", title: "Для врача", description: "Клиническая сводка: признаки, дифференциал, красные флаги" },
 ];
 
 const QUICK_PROMPTS: { Icon: LucideIcon; color: string; text: string; description: string; scenario: HealthScenario }[] = [
   { Icon: Eye,     color: "#EF4444", text: "Покраснение и раздражение глаза",   description: "Анализ фото глаза", scenario: "eyes" },
   { Icon: Bandage, color: "#F97316", text: "Высыпания или покраснения на коже", description: "Анализ кожных проявлений", scenario: "skin" },
   { Icon: Smile,   color: "#06B6D4", text: "Проблемы с полостью рта",           description: "Осмотр ротовой полости", scenario: "mouth" },
+  { Icon: Smile,   color: "#14B8A6", text: "Боль или налёт в горле",             description: "Анализ горла и миндалин", scenario: "throat" },
   { Icon: Hand,    color: "#EAB308", text: "Изменение цвета или формы ногтей",  description: "Анализ состояния ногтей", scenario: "nails" },
+  { Icon: Bandage, color: "#22C55E", text: "Порезы, раны или ожоги",            description: "Оценка заживления и рисков", scenario: "wounds" },
 ];
 
 export default function HealthChat() {
