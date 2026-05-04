@@ -30,7 +30,8 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/health", tags=["health"])
 
-HEALTH_MODEL = "claude-opus-4.5"
+DEFAULT_HEALTH_MODEL = "claude-opus-4.5"
+ALLOWED_HEALTH_MODELS = {"claude-opus-4.5", "gpt-5.1", "gemini-2.5-pro"}
 HEALTH_SCENARIOS = ("general", "skin", "eyes", "mouth", "nails", "moles")
 
 SCENARIO_GUIDES: dict[str, str] = {
@@ -90,6 +91,7 @@ RED_FLAG_PATTERNS: tuple[re.Pattern[str], ...] = (
 
 class HealthAnalyzeRequest(BaseModel):
     scenario: Literal["general", "skin", "eyes", "mouth", "nails", "moles"] = "general"
+    model_id: str = DEFAULT_HEALTH_MODEL
     messages: list[dict]
 
     @field_validator("messages")
@@ -101,6 +103,13 @@ class HealthAnalyzeRequest(BaseModel):
             content = msg.get("content")
             if isinstance(content, str) and len(content) > 100_000:
                 raise ValueError("Message too long (max 100K chars)")
+        return v
+
+    @field_validator("model_id")
+    @classmethod
+    def validate_model_id(cls, v):
+        if v not in ALLOWED_HEALTH_MODELS:
+            return DEFAULT_HEALTH_MODEL
         return v
 
 
@@ -234,8 +243,10 @@ async def analyze_health(
 
         return StreamingResponse(emergency_gen(), media_type="text/event-stream")
 
+    model_id = req.model_id if req.model_id in ALLOWED_HEALTH_MODELS else DEFAULT_HEALTH_MODEL
+
     if not using_byok:
-        check = await check_can_request(db, tg_id, HEALTH_MODEL)
+        check = await check_can_request(db, tg_id, model_id)
         if not check["allowed"]:
             is_locked = check.get("error") == "model_locked"
             status = 403 if is_locked else 429
@@ -265,8 +276,8 @@ async def analyze_health(
         billing_mode = "byok"
 
     user_tier = (db_user.subscription_tier or "free") if db_user else "free"
-    max_tokens = get_max_tokens_for(HEALTH_MODEL, user_tier)
-    max_input_tokens = get_max_input_tokens_for(HEALTH_MODEL, user_tier)
+    max_tokens = get_max_tokens_for(model_id, user_tier)
+    max_input_tokens = get_max_input_tokens_for(model_id, user_tier)
 
     system_prompt = _build_health_system_prompt(req.scenario)
 
@@ -275,7 +286,7 @@ async def analyze_health(
         had_error = False
 
         async for chunk in stream_chat_response(
-            HEALTH_MODEL,
+            model_id,
             req.messages,
             system_prompt,
             byok_key=byok_key,
@@ -313,12 +324,12 @@ async def analyze_health(
                     from app.database import async_session
                     from app.services.provider_costs import calculate_chat_provider_cost
 
-                    provider_cost = calculate_chat_provider_cost(HEALTH_MODEL, tokens_in, tokens_out)
+                    provider_cost = calculate_chat_provider_cost(model_id, tokens_in, tokens_out)
                     async with async_session() as bg_db:
                         await record_usage(
                             bg_db,
                             tg_id,
-                            HEALTH_MODEL,
+                            model_id,
                             tokens_in=tokens_in,
                             tokens_out=tokens_out,
                             cost_usd=0.0,

@@ -26,6 +26,7 @@ interface Message {
 }
 
 type HealthScenario = "general" | "skin" | "eyes" | "mouth" | "nails" | "moles";
+type HealthModel = "claude-opus-4.5" | "gpt-5.1" | "gemini-2.5-pro";
 
 const SCENARIOS: { id: HealthScenario; title: string; description: string }[] = [
   { id: "general", title: "Общий", description: "Общие симптомы и жалобы" },
@@ -34,6 +35,12 @@ const SCENARIOS: { id: HealthScenario; title: string; description: string }[] = 
   { id: "mouth", title: "Рот", description: "Язык, дёсны, губы, горло" },
   { id: "nails", title: "Ногти", description: "Цвет, форма, ломкость, воспаление" },
   { id: "moles", title: "Родинки", description: "Пятна, асимметрия, изменения" },
+];
+
+const MODELS: { id: HealthModel; title: string; description: string }[] = [
+  { id: "claude-opus-4.5", title: "Claude Opus 4.5", description: "Максимум качества и аккуратности" },
+  { id: "gpt-5.1", title: "GPT-5.1", description: "Сильный универсальный вариант" },
+  { id: "gemini-2.5-pro", title: "Gemini 2.5 Pro", description: "Хорошо читает изображения и детали" },
 ];
 
 const QUICK_PROMPTS: { Icon: LucideIcon; color: string; text: string; description: string; scenario: HealthScenario }[] = [
@@ -47,6 +54,7 @@ export default function HealthChat() {
   const [auth, setAuth] = useState<AuthState | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [scenario, setScenario] = useState<HealthScenario>("general");
+  const [modelId, setModelId] = useState<HealthModel>("claude-opus-4.5");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
@@ -137,6 +145,7 @@ export default function HealthChat() {
         },
         body: JSON.stringify({
           scenario,
+          model_id: modelId,
           messages: apiMessages,
         }),
       });
@@ -183,7 +192,7 @@ export default function HealthChat() {
     } finally {
       setStreaming(false);
     }
-  }, [auth, input, streaming, messages, pendingImage, scenario]);
+  }, [auth, input, streaming, messages, pendingImage, scenario, modelId]);
 
   if (!loaded) return null;
   if (!auth) {
@@ -276,6 +285,33 @@ export default function HealthChat() {
             </div>
 
             <div className="mb-6">
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <p className="text-sm font-semibold text-text/70">Модель ответа</p>
+                <p className="text-xs text-text/35">Можно переключать под задачу</p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-5">
+                {MODELS.map((item) => {
+                  const active = modelId === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setModelId(item.id)}
+                      className={`text-left rounded-2xl border px-4 py-3 transition-all ${
+                        active
+                          ? "border-accent/30 bg-accent/10 shadow-sm"
+                          : "border-text/[0.06] bg-bg hover:border-accent/20 hover:bg-accent/5"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <span className={`text-sm font-semibold ${active ? "text-accent" : "text-text/80"}`}>{item.title}</span>
+                        {active && <span className="text-[10px] font-bold uppercase tracking-wider text-accent">Выбрано</span>}
+                      </div>
+                      <p className="text-[11px] leading-tight text-text/45">{item.description}</p>
+                    </button>
+                  );
+                })}
+              </div>
+
               <div className="flex items-center justify-between gap-3 mb-3">
                 <p className="text-sm font-semibold text-text/70">Сценарий анализа</p>
                 <p className="text-xs text-text/35">Можно переключать перед каждым запросом</p>
@@ -444,6 +480,26 @@ export default function HealthChat() {
       {/* Input area */}
       <div className="border-t border-text/[0.06] bg-bg px-4 py-2 shrink-0">
         <div className="max-w-3xl mx-auto">
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-text/35">Модель</span>
+            {MODELS.map((item) => {
+              const active = modelId === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setModelId(item.id)}
+                  className={`rounded-full px-3 py-1.5 text-[12px] font-medium transition-colors ${
+                    active
+                      ? "bg-accent text-white"
+                      : "bg-text/[0.04] text-text/55 hover:bg-text/[0.07]"
+                  }`}
+                >
+                  {item.title}
+                </button>
+              );
+            })}
+          </div>
+
           <div className="flex flex-wrap items-center gap-2 mb-2">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-text/35">Сценарий</span>
             {SCENARIOS.map((item) => {
