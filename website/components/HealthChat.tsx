@@ -268,16 +268,6 @@ export default function HealthChat() {
         </div>
       )}
 
-      {/* Disclaimer */}
-      <div className="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200/50 dark:border-amber-800/30">
-        <div className="max-w-3xl mx-auto px-4 py-2 flex items-start gap-2">
-          <span className="text-amber-500 shrink-0 mt-0.5">&#9888;</span>
-          <p className="text-[11px] text-amber-700 dark:text-amber-400 leading-relaxed">
-            AI-ассистент даёт <strong>общую информацию</strong>, а не медицинский диагноз. Не заменяет консультацию врача. При острых симптомах обратитесь в скорую помощь.
-          </p>
-        </div>
-      </div>
-
       {/* Messages / Welcome */}
       <div className="flex-1 overflow-y-auto">
         {!hasMessages ? (
