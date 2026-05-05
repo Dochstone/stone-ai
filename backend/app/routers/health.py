@@ -46,7 +46,7 @@ HEALTH_SCENARIOS = (
     "wounds",
     "moles",
 )
-HEALTH_RESPONSE_MODES = ("short", "balanced", "detailed", "doctor")
+HEALTH_RESPONSE_MODES = ("short", "balanced", "detailed", "doctor", "surgeon")
 
 SCENARIO_GUIDES: dict[str, str] = {
     "general": (
@@ -147,7 +147,7 @@ class HealthAnalyzeRequest(BaseModel):
         "moles",
     ] = "general"
     model_id: str = DEFAULT_HEALTH_MODEL
-    response_mode: Literal["short", "balanced", "detailed", "doctor"] = "balanced"
+    response_mode: Literal["short", "balanced", "detailed", "doctor", "surgeon"] = "balanced"
     messages: list[dict]
 
     @field_validator("messages")
@@ -257,6 +257,16 @@ def _build_response_mode_instruction(response_mode: str) -> str:
             "4) красные флаги, 5) что уточнить при очном осмотре, 6) следующий практический шаг. "
             "Формулируй профессионально, кратко и конкретно. "
             "Не расплывайся в общем описании и не делай длинных вступлений."
+        )
+    if response_mode == "surgeon":
+        return (
+            "Формат ответа: для хирурга. "
+            "Пиши как хирургическую клиническую заметку по ране/послеоперационной зоне. "
+            "Обязательно оцени: края раны, расхождение швов, отделяемое, запах, кровотечение, гематому, серому, "
+            "эритему, локальный отёк, некроз, боль, флюктуацию и признаки инфекции. "
+            "Структура: 1) рабочее впечатление, 2) состояние раны/швов, 3) вероятные осложнения, "
+            "4) что исключить в первую очередь, 5) нужен ли срочный очный осмотр/ревизия, 6) что уточнить у пациента. "
+            "Без общих фраз, без пациентского тона, максимально прикладно."
         )
     if response_mode == "detailed":
         return (

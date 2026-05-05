@@ -39,7 +39,7 @@ type HealthScenario =
   | "wounds"
   | "moles";
 type HealthModel = "claude-opus-4.5" | "gpt-5.5" | "gemini-3.1-pro-preview";
-type HealthResponseMode = "short" | "balanced" | "detailed" | "doctor";
+type HealthResponseMode = "short" | "balanced" | "detailed" | "doctor" | "surgeon";
 
 const SCENARIOS: { id: HealthScenario; title: string; description: string }[] = [
   { id: "general", title: "Общий", description: "Общие симптомы и жалобы" },
@@ -67,6 +67,7 @@ const RESPONSE_MODES: { id: HealthResponseMode; title: string; description: stri
   { id: "balanced", title: "Стандарт", description: "Нормальный баланс краткости и деталей" },
   { id: "detailed", title: "Подробно", description: "Больше объяснений и контекста" },
   { id: "doctor", title: "Для врача", description: "Клиническая сводка: признаки, дифференциал, красные флаги" },
+  { id: "surgeon", title: "Для хирурга", description: "Раны, швы, осложнения, срочность, ревизия" },
 ];
 
 const QUICK_PROMPTS: { Icon: LucideIcon; color: string; text: string; description: string; scenario: HealthScenario }[] = [
