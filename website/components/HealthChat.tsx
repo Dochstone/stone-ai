@@ -92,6 +92,16 @@ const QUICK_PROMPTS: { Icon: LucideIcon; color: string; text: string; descriptio
   { Icon: Bandage, color: "#22C55E", text: "Порезы, раны или ожоги",            description: "Оценка заживления и рисков", scenario: "wounds" },
 ];
 
+const HEALTH_PREFS_KEY = "stone_health_prefs";
+
+type HealthPrefs = {
+  scenario?: HealthScenario;
+  modelId?: HealthModel;
+  compareMode?: boolean;
+  compareModelId?: HealthModel;
+  responseMode?: HealthResponseMode;
+};
+
 export default function HealthChat() {
   const [auth, setAuth] = useState<AuthState | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -121,9 +131,32 @@ export default function HealthChat() {
     try {
       const saved = localStorage.getItem("stone_auth");
       if (saved) setAuth(JSON.parse(saved));
+      const prefsRaw = localStorage.getItem(HEALTH_PREFS_KEY);
+      if (prefsRaw) {
+        const prefs = JSON.parse(prefsRaw) as HealthPrefs;
+        if (prefs.scenario && SCENARIOS.some((item) => item.id === prefs.scenario)) setScenario(prefs.scenario);
+        if (prefs.modelId && MODELS.some((item) => item.id === prefs.modelId)) setModelId(prefs.modelId);
+        if (typeof prefs.compareMode === "boolean") setCompareMode(prefs.compareMode);
+        if (prefs.compareModelId && MODELS.some((item) => item.id === prefs.compareModelId)) setCompareModelId(prefs.compareModelId);
+        if (prefs.responseMode && RESPONSE_MODES.some((item) => item.id === prefs.responseMode)) setResponseMode(prefs.responseMode);
+      }
     } catch {}
     setLoaded(true);
   }, []);
+
+  useEffect(() => {
+    if (!loaded) return;
+    try {
+      const prefs: HealthPrefs = {
+        scenario,
+        modelId,
+        compareMode,
+        compareModelId,
+        responseMode,
+      };
+      localStorage.setItem(HEALTH_PREFS_KEY, JSON.stringify(prefs));
+    } catch {}
+  }, [compareMode, compareModelId, loaded, modelId, responseMode, scenario]);
 
   useEffect(() => {
     if (autoScrollRef.current) {
