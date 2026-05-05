@@ -194,10 +194,22 @@ def _latest_user_text(messages: list[dict]) -> str:
     return ""
 
 
+def _build_scenario_override(scenario: str) -> str:
+    if scenario == "surgery":
+        return (
+            "- Сначала оцени, есть ли признаки осложнения после операции или раневого процесса, а не просто кожного раздражения.\n"
+            "- В приоритете: расхождение краёв, несостоятельность швов, некроз, гной, серома, гематома, абсцесс, целлюлит, кровотечение.\n"
+            "- Отдельно укажи, выглядит ли состояние как нормальное заживление, пограничное наблюдение или ситуация, требующая срочного очного осмотра.\n"
+            "- Если данных мало, прямо скажи, каких признаков не хватает для хирургической оценки."
+        )
+    return ""
+
+
 def _build_health_system_prompt(scenario: str) -> str:
     can_analyze = "\n".join(f"- {item}" for item in CAN_ANALYZE)
     cannot_analyze = "\n".join(f"- {item}" for item in CANNOT_ANALYZE)
     scenario_guide = SCENARIO_GUIDES.get(scenario, SCENARIO_GUIDES["general"])
+    scenario_override = _build_scenario_override(scenario)
 
     prompt = f"""
 Ты медицинский AI-ассистент для предварительной оценки симптомов по фото и короткому описанию.
@@ -231,6 +243,9 @@ def _build_health_system_prompt(scenario: str) -> str:
 - Для врача пиши более клинически и конкретно, но без постановки диагноза.
 - Если уместно, добавь 1-2 уточняющих вопроса в конце.
 - Пиши на русском языке, чётко и практично.
+
+Специально для этого сценария:
+{scenario_override}
 
 Красные флаги для срочного обращения:
 - боль в груди, одышка, выраженный отёк, нарушение сознания;

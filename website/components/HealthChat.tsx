@@ -40,6 +40,10 @@ type HealthScenario =
   | "moles";
 type HealthModel = "claude-opus-4.5" | "gpt-5.5" | "gemini-3.1-pro-preview";
 type HealthResponseMode = "short" | "balanced" | "detailed" | "doctor" | "surgeon";
+type CompareResult = {
+  left: { modelId: HealthModel; title: string; content: string };
+  right: { modelId: HealthModel; title: string; content: string };
+};
 
 const SCENARIOS: { id: HealthScenario; title: string; description: string }[] = [
   { id: "general", title: "Общий", description: "Общие симптомы и жалобы" },
@@ -85,10 +89,14 @@ export default function HealthChat() {
   const [loaded, setLoaded] = useState(false);
   const [scenario, setScenario] = useState<HealthScenario>("general");
   const [modelId, setModelId] = useState<HealthModel>("gpt-5.5");
+  const [compareMode, setCompareMode] = useState(false);
+  const [compareModelId, setCompareModelId] = useState<HealthModel>("claude-opus-4.5");
   const [responseMode, setResponseMode] = useState<HealthResponseMode>("balanced");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
+  const [comparisonLoading, setComparisonLoading] = useState(false);
+  const [comparisonResult, setComparisonResult] = useState<CompareResult | null>(null);
   const [pendingImage, setPendingImage] = useState<string | null>(null);
   const [pendingFileName, setPendingFileName] = useState<string>("");
   const [uploading, setUploading] = useState(false);
@@ -138,11 +146,13 @@ export default function HealthChat() {
     }
   }, []);
 
+  const getModelTitle = (id: HealthModel) => MODELS.find((item) => item.id === id)?.title ?? id;
+
   const sendMessage = useCallback(async (promptOverride?: string) => {
     if (!auth) return;
     const text = promptOverride || input.trim();
     if (!text && !pendingImage) return;
-    if (streaming) return;
+    if (streaming || comparisonLoading) return;
 
     autoScrollRef.current = true;
 
@@ -157,9 +167,8 @@ export default function HealthChat() {
     setInput("");
     setPendingImage(null);
     setPendingFileName("");
-    setStreaming(true);
+    setComparisonResult(null);
 
-    // Build API messages
     const apiMessages = history.slice(-10).map((m) => {
       if (m.image) {
         return {
@@ -173,6 +182,95 @@ export default function HealthChat() {
       return { role: m.role, content: m.content };
     });
 
+    const requestAnswer = async (targetModel: HealthModel) => {
+      const res = await fetch(HEALTH_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${auth.token}`,
+        },
+        body: JSON.stringify({
+          scenario,
+          model_id: targetModel,
+          response_mode: responseMode,
+          messages: apiMessages,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: "Ошибка сервера" }));
+        const errMsg = typeof err.detail === "string" ? err.detail : "Ошибка";
+        throw new Error(errMsg);
+      }
+
+      const reader = res.body?.getReader();
+      if (!reader) {
+        throw new Error("Пустой ответ сервера");
+      }
+
+      const decoder = new TextDecoder();
+      let assistantContent = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const text = decoder.decode(value, { stream: true });
+        for (const line of text.split("\n")) {
+          if (!line.startsWith("data: ")) continue;
+          const payload = line.slice(6).trim();
+          if (payload === "[DONE]") continue;
+          try {
+            const data = JSON.parse(payload);
+            if (data.billing || data.usage) continue;
+            if (data.error) {
+              throw new Error(data.error);
+            }
+            const c = data.content || data.choices?.[0]?.delta?.content;
+            if (c) {
+              assistantContent += c;
+            }
+          } catch {
+            // Ignore malformed SSE chunks.
+          }
+        }
+      }
+
+      return assistantContent;
+    };
+
+    if (compareMode) {
+      const primaryModel = modelId;
+      const secondaryModel = compareModelId === modelId ? (modelId === "gpt-5.5" ? "claude-opus-4.5" : "gpt-5.5") : compareModelId;
+      setComparisonLoading(true);
+      setStreaming(false);
+      try {
+        const [primaryContent, secondaryContent] = await Promise.all([
+          requestAnswer(primaryModel),
+          requestAnswer(secondaryModel),
+        ]);
+
+        setComparisonResult({
+          left: {
+            modelId: primaryModel,
+            title: getModelTitle(primaryModel),
+            content: primaryContent || "Ответ не получен.",
+          },
+          right: {
+            modelId: secondaryModel,
+            title: getModelTitle(secondaryModel),
+            content: secondaryContent || "Ответ не получен.",
+          },
+        });
+      } catch (error) {
+        const errMsg = error instanceof Error ? error.message : "Ошибка сравнения моделей";
+        setMessages([...history, { role: "assistant", content: errMsg }]);
+      } finally {
+        setComparisonLoading(false);
+      }
+      return;
+    }
+
+    setStreaming(true);
     try {
       const res = await fetch(HEALTH_API_URL, {
         method: "POST",
@@ -214,7 +312,10 @@ export default function HealthChat() {
           try {
             const data = JSON.parse(payload);
             if (data.billing || data.usage) continue;
-            if (data.error) { assistantContent = data.error; break; }
+            if (data.error) {
+              assistantContent = data.error;
+              break;
+            }
             const c = data.content || data.choices?.[0]?.delta?.content;
             if (c) {
               assistantContent += c;
@@ -230,7 +331,7 @@ export default function HealthChat() {
     } finally {
       setStreaming(false);
     }
-  }, [auth, input, streaming, messages, pendingImage, scenario, modelId, responseMode]);
+  }, [auth, comparisonLoading, compareMode, compareModelId, input, messages, modelId, pendingImage, responseMode, scenario, streaming]);
 
   const handleChatScroll = useCallback(() => {
     const el = scrollContainerRef.current;
@@ -384,6 +485,55 @@ export default function HealthChat() {
                 })}
               </div>
 
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+                <button
+                  onClick={() => setCompareMode((v) => !v)}
+                  className={`rounded-full px-3 py-1.5 text-[12px] font-medium transition-colors ${
+                    compareMode
+                      ? "bg-emerald-500 text-white"
+                      : "bg-text/[0.04] text-text/55 hover:bg-text/[0.07]"
+                  }`}
+                >
+                  Сравнить модели
+                </button>
+                <p className="text-xs text-text/35">Покажет ответы двух моделей рядом</p>
+              </div>
+
+              {compareMode && (
+                <div className="mb-5">
+                  <div className="flex items-center justify-between gap-3 mb-3">
+                    <p className="text-sm font-semibold text-text/70">Вторая модель</p>
+                    <p className="text-xs text-text/35">Для сравнения с основной</p>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {MODELS.map((item) => {
+                      const active = compareModelId === item.id;
+                      const blocked = item.id === modelId;
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => setCompareModelId(item.id)}
+                          disabled={blocked}
+                          className={`text-left rounded-2xl border px-4 py-3 transition-all ${
+                            active
+                              ? "border-amber-500/30 bg-amber-500/10 shadow-sm"
+                              : blocked
+                                ? "border-text/[0.04] bg-text/[0.03] text-text/25 cursor-not-allowed"
+                                : "border-text/[0.06] bg-bg hover:border-amber-300 hover:bg-amber-50/50"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <span className={`text-sm font-semibold ${active ? "text-amber-700" : "text-text/80"}`}>{item.title}</span>
+                            {active && <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600">Выбрано</span>}
+                          </div>
+                          <p className="text-[11px] leading-tight text-text/45">{item.description}</p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center justify-between gap-3 mb-3">
                 <p className="text-sm font-semibold text-text/70">Сценарий анализа</p>
                 <p className="text-xs text-text/35">Можно переключать перед каждым запросом</p>
@@ -487,6 +637,50 @@ export default function HealthChat() {
         ) : (
           /* Chat messages */
           <div className="max-w-3xl mx-auto px-4 py-6 space-y-4">
+            {compareMode && (
+              <div className="rounded-3xl border border-emerald-500/15 bg-emerald-50/60 dark:bg-emerald-900/10 p-4 sm:p-5">
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div>
+                    <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300">Сравнение моделей</p>
+                    <p className="text-xs text-text/45 mt-1">Ниже показываются ответы двух моделей рядом. Это удобно, если нужен второй взгляд на фото или клиническое описание.</p>
+                  </div>
+                  {comparisonLoading && (
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-emerald-600">Анализируем...</span>
+                  )}
+                </div>
+
+                {comparisonResult ? (
+                  <div className="grid gap-3 lg:grid-cols-2">
+                    {([comparisonResult.left, comparisonResult.right] as const).map((item) => (
+                      <div key={item.modelId} className="rounded-2xl border border-text/[0.06] bg-bg p-4">
+                        <div className="flex items-center justify-between gap-3 mb-3">
+                          <div>
+                            <p className="text-sm font-semibold text-text/80">{item.title}</p>
+                            <p className="text-[11px] text-text/35">{item.modelId}</p>
+                          </div>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Ответ</span>
+                        </div>
+                        <div className="md-content text-[14px] leading-relaxed break-words" dangerouslySetInnerHTML={{ __html: renderMarkdown(item.content) }} />
+                      </div>
+                    ))}
+                  </div>
+                ) : comparisonLoading ? (
+                  <div className="grid gap-3 lg:grid-cols-2">
+                    {["Claude Opus 4.5", "GPT-5.5"].map((label) => (
+                      <div key={label} className="rounded-2xl border border-text/[0.06] bg-bg p-4 animate-pulse">
+                        <div className="h-4 w-32 bg-text/[0.08] rounded mb-4" />
+                        <div className="space-y-2">
+                          <div className="h-3 bg-text/[0.06] rounded w-5/6" />
+                          <div className="h-3 bg-text/[0.06] rounded w-full" />
+                          <div className="h-3 bg-text/[0.06] rounded w-4/5" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            )}
+
             {messages.map((msg, i) => (
               <div key={i} className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
                 <div className="shrink-0 mt-0.5">
@@ -592,6 +786,46 @@ export default function HealthChat() {
             })}
           </div>
 
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <button
+              onClick={() => setCompareMode((v) => !v)}
+              className={`rounded-full px-3 py-1.5 text-[12px] font-medium transition-colors ${
+                compareMode
+                  ? "bg-emerald-500 text-white"
+                  : "bg-text/[0.04] text-text/55 hover:bg-text/[0.07]"
+              }`}
+            >
+              Сравнить модели
+            </button>
+            <p className="text-[11px] text-text/35">Два ответа рядом, без переключения вручную</p>
+          </div>
+
+          {compareMode && (
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-text/35">Вторая модель</span>
+              {MODELS.map((item) => {
+                const active = compareModelId === item.id;
+                const blocked = item.id === modelId;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setCompareModelId(item.id)}
+                    disabled={blocked}
+                    className={`rounded-full px-3 py-1.5 text-[12px] font-medium transition-colors ${
+                      active
+                        ? "bg-amber-500 text-white"
+                        : blocked
+                          ? "bg-text/[0.03] text-text/25 cursor-not-allowed"
+                          : "bg-text/[0.04] text-text/55 hover:bg-text/[0.07]"
+                    }`}
+                  >
+                    {item.title}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
           <div className="flex flex-wrap items-center gap-2 mb-2">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-text/35">Сценарий</span>
             {SCENARIOS.map((item) => {
@@ -638,7 +872,7 @@ export default function HealthChat() {
             {/* Photo button */}
             <button
               onClick={() => fileInputRef.current?.click()}
-              disabled={uploading || streaming}
+              disabled={uploading || streaming || comparisonLoading}
               className="flex items-center justify-center w-10 h-10 text-text/25 hover:text-emerald-600 transition-colors disabled:opacity-30 shrink-0"
               title="Загрузить фото"
             >
@@ -664,7 +898,7 @@ export default function HealthChat() {
             {(input.trim() || pendingImage) ? (
               <button
                 onClick={() => sendMessage()}
-                disabled={streaming}
+                disabled={streaming || comparisonLoading}
                 className="w-10 h-10 rounded-lg bg-emerald-500 text-white flex items-center justify-center hover:bg-emerald-600 transition-colors disabled:opacity-30 shrink-0"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
