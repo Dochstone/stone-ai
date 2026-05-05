@@ -105,7 +105,7 @@ FAST_MODELS = {
 }
 
 OPUS_MODELS = {
-    "claude-opus-4", "claude-opus-4.5", "o3",
+    "claude-opus-4", "claude-opus-4.5", "claude-opus-4-7", "o3",
 }
 
 # Everything not in FAST or OPUS is PREMIUM
@@ -149,6 +149,7 @@ MODEL_WEIGHTS: dict[str, int] = {
     # OPUS tier — $15/$75 is ~5x of typical premium models
     "claude-opus-4": 5,
     "claude-opus-4.5": 5,
+    "claude-opus-4-7": 5,
 
     # IMAGE — nano-banana-pro and gpt-5-image are most expensive
     "gpt-5-image": 3,

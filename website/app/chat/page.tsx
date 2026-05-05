@@ -21,6 +21,7 @@ export const metadata: Metadata = {
 const modelIds = [
   "gpt-5.1",
   "claude-opus-4",
+  "claude-opus-4-7",
   "gemini-2.5-pro",
   "deepseek-r1",
   "grok-3",
@@ -33,6 +34,7 @@ const modelIds = [
 const modelDescriptions: Record<string, string> = {
   "gpt-5.1": "Топовая модель OpenAI. Лучшая для сложных задач и длинных текстов.",
   "claude-opus-4": "Самая мощная модель Anthropic. Глубокий анализ и творческие задачи.",
+  "claude-opus-4-7": "Новейший Opus 4.7. Самый мощный Claude для сложнейших задач.",
   "gemini-2.5-pro": "Флагман Google с контекстом 1M токенов. Идеален для больших документов.",
   "deepseek-r1": "Reasoning-модель с пошаговым рассуждением. Отлично для логики и математики.",
   "grok-3": "Флагман xAI. Прямой, неформальный стиль. Хорош для брейнсторма.",

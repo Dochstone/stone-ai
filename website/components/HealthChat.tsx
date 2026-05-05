@@ -40,7 +40,7 @@ type HealthScenario =
   | "hair"
   | "wounds"
   | "moles";
-type HealthModel = "claude-opus-4.5" | "gpt-5.5" | "gemini-3.1-pro-preview";
+type HealthModel = "claude-opus-4.5" | "claude-opus-4-7" | "gpt-5.5" | "gemini-3.1-pro-preview";
 type HealthResponseMode = "short" | "balanced" | "detailed" | "doctor" | "surgeon" | "lor" | "dentistry";
 type CompareResult = {
   left: { modelId: HealthModel; title: string; content: string };
@@ -67,6 +67,7 @@ const SCENARIOS: { id: HealthScenario; title: string; description: string }[] = 
 const MODELS: { id: HealthModel; title: string; description: string }[] = [
   { id: "gpt-5.5", title: "GPT-5.5", description: "Флагман OpenAI для сложных задач" },
   { id: "claude-opus-4.5", title: "Claude Opus 4.5", description: "Максимум качества и аккуратности" },
+  { id: "claude-opus-4-7", title: "Claude Opus 4.7", description: "Новейший флагман Anthropic" },
   { id: "gemini-3.1-pro-preview", title: "Gemini 3.1 Pro", description: "Сильная мультимодальная модель Google" },
 ];
 

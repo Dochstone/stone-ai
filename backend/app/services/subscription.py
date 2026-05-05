@@ -125,7 +125,7 @@ MINI_MODELS = FREE_MODELS | {
 } | BUDGET_VIDEO_MODELS
 
 # Opus model IDs (for sub-limit checking)
-OPUS_MODEL_IDS = {"claude-opus-4", "claude-opus-4.5"}
+OPUS_MODEL_IDS = {"claude-opus-4", "claude-opus-4.5", "claude-opus-4-7"}
 
 # max and max-pro have access to ALL models
 FULL_ACCESS_TIERS = {"max", "max-pro"}

@@ -26,6 +26,7 @@ OPENROUTER_COSTS: dict[str, dict[str, float]] = {
     "mistral-small": {"input": 0.10, "output": 0.30},
     "claude-opus-4": {"input": 15.00, "output": 75.00},
     "claude-opus-4.5": {"input": 15.00, "output": 75.00},
+    "claude-opus-4-7": {"input": 15.00, "output": 75.00},
     "gpt-4.1": {"input": 2.00, "output": 8.00},
     "gpt-5.1": {"input": 2.00, "output": 16.00},
     "gpt-5.4": {"input": 2.50, "output": 15.00},
