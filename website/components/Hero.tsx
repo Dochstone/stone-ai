@@ -333,7 +333,7 @@ export default function Hero() {
               <span className="text-accent uppercase tracking-wider text-[10px] font-bold">Новое</span>
             </span>
             <span className="text-text/90">
-              <b>Claude Opus 4.7</b> — флагман Anthropic только что вышел, скоро в Stone AI
+              <b>Claude Opus 4.7</b> уже доступен в Stone AI — попробуй прямо сейчас
             </span>
             <svg className="w-4 h-4 text-accent group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
