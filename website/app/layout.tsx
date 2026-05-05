@@ -27,6 +27,8 @@ export function generateViewport(): Viewport {
   return {
     width: "device-width",
     initialScale: 1,
+    minimumScale: 1,
+    maximumScale: 5,
     viewportFit: "cover",
     themeColor: theme === "dark" ? "#1a1a1e" : "#FAF9F5",
   };
