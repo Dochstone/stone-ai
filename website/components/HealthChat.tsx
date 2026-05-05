@@ -74,7 +74,7 @@ const RESPONSE_MODES: { id: HealthResponseMode; title: string; description: stri
   { id: "short", title: "Кратко", description: "Максимум сжатия, только суть" },
   { id: "balanced", title: "Стандарт", description: "Нормальный баланс краткости и деталей" },
   { id: "detailed", title: "Подробно", description: "Больше объяснений и контекста" },
-  { id: "doctor", title: "Для врача", description: "Клиническая сводка: признаки, дифференциал, красные флаги" },
+  { id: "doctor", title: "Для терапевта", description: "Клиническая сводка: признаки, дифференциал, красные флаги" },
   { id: "surgeon", title: "Для хирурга", description: "Раны, швы, осложнения, срочность, ревизия" },
   { id: "lor", title: "Для ЛОР", description: "Горло, нос, уши, слух, голос, срочность" },
   { id: "dentistry", title: "Для стоматолога", description: "Зубы, дёсны, слизистая, абсцесс, боль" },
