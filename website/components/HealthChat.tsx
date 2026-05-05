@@ -41,7 +41,7 @@ type HealthScenario =
   | "wounds"
   | "moles";
 type HealthModel = "claude-opus-4.5" | "gpt-5.5" | "gemini-3.1-pro-preview";
-type HealthResponseMode = "short" | "balanced" | "detailed" | "doctor" | "surgeon";
+type HealthResponseMode = "short" | "balanced" | "detailed" | "doctor" | "surgeon" | "lor" | "dentistry";
 type CompareResult = {
   left: { modelId: HealthModel; title: string; content: string };
   right: { modelId: HealthModel; title: string; content: string };
@@ -76,6 +76,8 @@ const RESPONSE_MODES: { id: HealthResponseMode; title: string; description: stri
   { id: "detailed", title: "Подробно", description: "Больше объяснений и контекста" },
   { id: "doctor", title: "Для врача", description: "Клиническая сводка: признаки, дифференциал, красные флаги" },
   { id: "surgeon", title: "Для хирурга", description: "Раны, швы, осложнения, срочность, ревизия" },
+  { id: "lor", title: "Для ЛОР", description: "Горло, нос, уши, слух, голос, срочность" },
+  { id: "dentistry", title: "Для стоматолога", description: "Зубы, дёсны, слизистая, абсцесс, боль" },
 ];
 
 const QUICK_PROMPTS: { Icon: LucideIcon; color: string; text: string; description: string; scenario: HealthScenario }[] = [
