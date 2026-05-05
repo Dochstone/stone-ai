@@ -75,6 +75,7 @@ export interface AIModel {
 export const MODEL_WEIGHTS: Record<string, number> = {
   "claude-opus-4": 5,
   "claude-opus-4.5": 5,
+  "claude-opus-4-7": 5,
   "mistral-large-25": 3,
   "claude-sonnet-4": 2,
   "claude-sonnet-4.5": 2,
@@ -120,6 +121,7 @@ export const MODELS: AIModel[] = [
   // TIER 3: PREMIUM (15 models)
   { id: "claude-opus-4", name: "Claude Opus 4", company: "Anthropic", tier: "pro", category: "chat", context: "200K", speed: "slow", description: "Флагман Anthropic — лучший для текстового анализа и творчества. 200К контекст, глубокое понимание нюансов.", strengths: ["Текстовый анализ", "Творчество", "200K контекст"] },
   { id: "claude-opus-4.5", name: "Claude Opus 4.5", company: "Anthropic", tier: "pro", category: "chat", context: "200K", speed: "slow", description: "Обновлённый Opus с улучшенным кодингом и мультимодальностью.", strengths: ["Кодинг", "Мультимодальность", "200K"] },
+  { id: "claude-opus-4-7", name: "Claude Opus 4.7", company: "Anthropic", tier: "pro", category: "chat", context: "200K", speed: "slow", description: "Новейший флагман Anthropic. Максимальная мощь для самых сложных задач.", strengths: ["Анализ", "Код", "200K контекст"] },
   { id: "gpt-4.1", name: "GPT-4.1", company: "OpenAI", tier: "pro", category: "chat", context: "1M", speed: "medium", description: "Мощная модель OpenAI с 1М контекстом. Отличный кодинг и длинные документы.", strengths: ["1M контекст", "Кодинг", "Документы"] },
   { id: "gpt-5.1", name: "GPT-5.1", company: "OpenAI", tier: "pro", category: "chat", context: "400K", speed: "medium", description: "Флагман OpenAI. Отличное качество для сложных задач и глубокого анализа.", strengths: ["Флагман", "400K контекст", "Сложные задачи"] },
   { id: "gpt-5.4", name: "GPT-5.4", company: "OpenAI", tier: "pro", category: "chat", context: "1M", speed: "medium", description: "Новейшая модель OpenAI с контекстом 1М токенов. Объединяет Codex и GPT. Встроенное управление компьютером.", strengths: ["1M контекст", "Computer Use", "Codex внутри"] },
