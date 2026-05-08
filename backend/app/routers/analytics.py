@@ -22,6 +22,10 @@ class TrackRequest(BaseModel):
     referrer: str | None = Field(default=None, max_length=500)
     duration_sec: float | None = None
     screen_width: int | None = None
+    ref_code: str | None = Field(default=None, max_length=32)
+    utm_source: str | None = Field(default=None, max_length=64)
+    utm_medium: str | None = Field(default=None, max_length=64)
+    utm_campaign: str | None = Field(default=None, max_length=128)
 
 
 @router.post("/track")
@@ -49,6 +53,8 @@ async def track_page_view(
         except Exception:
             pass
 
+    ref_code = body.ref_code.strip().upper()[:32] if body.ref_code else None
+
     pv = PageView(
         path=body.path[:500],
         referrer=body.referrer[:500] if body.referrer else None,
@@ -57,6 +63,10 @@ async def track_page_view(
         user_tg_id=user_tg_id,
         duration_sec=body.duration_sec,
         screen_width=body.screen_width,
+        ref_code=ref_code or None,
+        utm_source=(body.utm_source or "")[:64] or None,
+        utm_medium=(body.utm_medium or "")[:64] or None,
+        utm_campaign=(body.utm_campaign or "")[:128] or None,
     )
     db.add(pv)
     return {"ok": True}

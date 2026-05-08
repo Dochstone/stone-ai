@@ -4,15 +4,17 @@ import asyncio
 import logging
 import secrets
 import string
+from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
-from sqlalchemy import select, func
+from sqlalchemy import select, func, cast, Date
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.middleware.auth import get_current_user
 from app.models import User
+from app.models.page_view import PageView
 from app.routers.achievements import check_and_update
 
 logger = logging.getLogger(__name__)
@@ -191,6 +193,111 @@ async def get_referral_stats(
         "paid_count": paid_count,
         "conversion_pct": round(paid_count / referral_count * 100, 1) if referral_count > 0 else 0,
         "referrals": referrals,
+    }
+
+
+@router.get("/clicks")
+async def get_referral_clicks(
+    days: int = Query(30, ge=1, le=180),
+    tg_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Click stats for the partner's referral code: total/unique/daily/by_campaign/by_source."""
+    tg_id = tg_user["id"]
+
+    result = await db.execute(select(User).where(User.telegram_id == tg_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(404, "User not found")
+    if not user.referral_code:
+        return {
+            "period_days": days,
+            "total_clicks": 0,
+            "unique_clicks": 0,
+            "registrations": 0,
+            "conversion_pct": 0,
+            "daily": [],
+            "by_campaign": [],
+            "by_source": [],
+        }
+
+    code = user.referral_code
+    cutoff = datetime.utcnow() - timedelta(days=days)
+
+    total_clicks = await db.scalar(
+        select(func.count()).select_from(PageView).where(
+            PageView.ref_code == code, PageView.created_at >= cutoff
+        )
+    ) or 0
+
+    unique_clicks = await db.scalar(
+        select(func.count(func.distinct(PageView.ip_hash))).select_from(PageView).where(
+            PageView.ref_code == code, PageView.created_at >= cutoff, PageView.ip_hash.isnot(None)
+        )
+    ) or 0
+
+    registrations = await db.scalar(
+        select(func.count(User.id)).where(
+            User.referrer_id == tg_id, User.joined_at >= cutoff
+        )
+    ) or 0
+
+    daily_result = await db.execute(
+        select(
+            cast(PageView.created_at, Date).label("day"),
+            func.count().label("clicks"),
+            func.count(func.distinct(PageView.ip_hash)).label("unique"),
+        )
+        .where(PageView.ref_code == code, PageView.created_at >= cutoff)
+        .group_by(cast(PageView.created_at, Date))
+        .order_by(cast(PageView.created_at, Date))
+    )
+    daily = [{"date": str(r.day), "clicks": r.clicks, "unique": r.unique} for r in daily_result]
+
+    campaign_result = await db.execute(
+        select(
+            func.coalesce(PageView.utm_campaign, "(none)").label("campaign"),
+            func.coalesce(PageView.utm_source, "(none)").label("source"),
+            func.count().label("clicks"),
+            func.count(func.distinct(PageView.ip_hash)).label("unique"),
+        )
+        .where(PageView.ref_code == code, PageView.created_at >= cutoff)
+        .group_by(PageView.utm_campaign, PageView.utm_source)
+        .order_by(func.count().desc())
+        .limit(50)
+    )
+    by_campaign = [
+        {"campaign": r.campaign, "source": r.source, "clicks": r.clicks, "unique": r.unique}
+        for r in campaign_result
+    ]
+
+    source_result = await db.execute(
+        select(
+            func.coalesce(PageView.utm_source, "(none)").label("source"),
+            func.count().label("clicks"),
+            func.count(func.distinct(PageView.ip_hash)).label("unique"),
+        )
+        .where(PageView.ref_code == code, PageView.created_at >= cutoff)
+        .group_by(PageView.utm_source)
+        .order_by(func.count().desc())
+        .limit(20)
+    )
+    by_source = [
+        {"source": r.source, "clicks": r.clicks, "unique": r.unique}
+        for r in source_result
+    ]
+
+    conversion = round(registrations / unique_clicks * 100, 1) if unique_clicks > 0 else 0.0
+
+    return {
+        "period_days": days,
+        "total_clicks": total_clicks,
+        "unique_clicks": unique_clicks,
+        "registrations": registrations,
+        "conversion_pct": conversion,
+        "daily": daily,
+        "by_campaign": by_campaign,
+        "by_source": by_source,
     }
 
 

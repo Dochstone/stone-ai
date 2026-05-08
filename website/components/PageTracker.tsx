@@ -5,6 +5,31 @@ import { usePathname } from "next/navigation";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stoneai.ru";
 
+interface RefUtm {
+  ref_code?: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+}
+
+function readRefUtm(): RefUtm {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const out: RefUtm = {};
+    const ref = params.get("ref");
+    if (ref) out.ref_code = ref.trim().toUpperCase().slice(0, 32);
+    const src = params.get("utm_source");
+    if (src) out.utm_source = src.slice(0, 64);
+    const med = params.get("utm_medium");
+    if (med) out.utm_medium = med.slice(0, 64);
+    const cmp = params.get("utm_campaign");
+    if (cmp) out.utm_campaign = cmp.slice(0, 128);
+    return out;
+  } catch {
+    return {};
+  }
+}
+
 export default function PageTracker() {
   const pathname = usePathname();
   const startRef = useRef(Date.now());
@@ -37,6 +62,8 @@ export default function PageTracker() {
   }, []);
 
   useEffect(() => {
+    const refUtm = readRefUtm();
+
     // Send previous page duration
     if (lastPathRef.current && lastPathRef.current !== pathname) {
       const duration = (Date.now() - startRef.current) / 1000;
@@ -67,7 +94,7 @@ export default function PageTracker() {
     fetch(`${API_URL}/api/analytics/track`, {
       method: "POST",
       headers: { "Content-Type": "application/json", ...(auth.token ? { Authorization: `Bearer ${auth.token}` } : {}) },
-      body: JSON.stringify({ path: pathname, referrer: document.referrer || null, screen_width: window.innerWidth }),
+      body: JSON.stringify({ path: pathname, referrer: document.referrer || null, screen_width: window.innerWidth, ...refUtm }),
     }).catch(() => {});
 
     // Send duration on page unload
