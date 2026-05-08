@@ -43,39 +43,59 @@ const FREE_MODEL_IDS = new Set([
   "gpt-4o-mini", "gemini-2.0-flash", "claude-haiku-4.5", "deepseek-v3",
   "llama-4-maverick", "mistral-large-25", "nano-banana", "veo-3",
 ]);
+// Source of truth for what "Start" actually unlocks visually in the model picker.
+// IMPORTANT: this is *labelling only* — gating uses category-based rules below
+// to stay in sync with backend daily_limits.py (FAST/PREMIUM/OPUS/IMAGE/VIDEO).
 const MINI_MODEL_IDS = new Set([
-  "gpt-4o-mini", "gemini-2.0-flash", "deepseek-v3",
-  "llama-4-maverick", "mistral-small", "qwen-turbo", "nano-banana",
-  "claude-haiku-4.5", "claude-sonnet-4", "gpt-4.1-mini", "gpt-5.1",
-  "gemini-2.5-flash", "grok-3-mini", "deepseek-r1", "deepseek-v3.2",
-  "nano-banana-pro", "gpt-5-image-mini", "gpt-5-image",
+  "gpt-4o-mini", "gpt-4.1-nano", "gemini-2.0-flash", "gemini-2.5-flash",
+  "claude-haiku-4.5", "deepseek-v3", "deepseek-v3.2", "llama-4-maverick",
+  "mistral-large-25", "mistral-small", "qwen-turbo", "qwen-3-235b", "qwen-qwq",
+  "command-r7", "minimax-m2.5", "grok-3-mini",
+  "gpt-4.1-mini", "claude-sonnet-4", "claude-sonnet-4.5", "gpt-5.1", "gpt-5.4",
+  "gpt-5.5", "gpt-4.1", "gemini-2.5-pro", "gemini-3-pro", "gemini-3.1-pro-preview",
+  "grok-3", "perplexity-sonar", "perplexity-sonar-pro", "perplexity-sonar-deep",
+  "deepseek-r1", "kimi-k2.5", "o4-mini", "claude-haiku-4.5-think",
+  "gemini-2.5-flash-think", "devstral",
+  "nano-banana", "nano-banana-pro", "gpt-5-image", "gpt-5-image-mini",
+]);
+// Models gated above Start — drives both lock icon and the upsell modal.
+// Mirrors OPUS_MODELS in backend/app/services/daily_limits.py.
+const OPUS_MODEL_IDS = new Set([
+  "claude-opus-4", "claude-opus-4.5", "claude-opus-4-7", "o3",
 ]);
 
 function getModelLockInfo(modelId: string, balance: number, plan?: string): { locked: boolean; tier: string; price: string } | null {
   if (!plan) return null; // plan not loaded yet — don't block
   if (plan === "max-pro" || plan === "max") return null; // full access
-  if (plan === "mini" && MINI_MODEL_IDS.has(modelId)) return null;
-  if (FREE_MODEL_IDS.has(modelId)) return null;
-  // Video/3D — need at least Mini
-  if (VIDEO_MODEL_IDS.has(modelId)) return null;
-  if (THREED_MODEL_IDS.has(modelId)) {
-    if (!plan || plan === "free") return { locked: true, tier: PLAN_DISPLAY.mini.name, price: PLAN_DISPLAY.mini.price };
-    return null;
-  }
-  // Images — nano-banana is free, rest follow normal tier logic
-  if (IMAGE_MODEL_IDS.has(modelId) && !FREE_MODEL_IDS.has(modelId)) {
-    if (!plan || plan === "free") {
-      if (MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: PLAN_DISPLAY.mini.name, price: PLAN_DISPLAY.mini.price };
+
+  // Start (mini): everything except Opus chat models and 3D is allowed.
+  // Daily/monthly volume limits are enforced by the backend, not here.
+  if (plan === "mini") {
+    if (OPUS_MODEL_IDS.has(modelId)) {
       return { locked: true, tier: PLAN_DISPLAY.max.name, price: PLAN_DISPLAY.max.price };
     }
-    if (plan === "mini" && !MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: PLAN_DISPLAY.max.name, price: PLAN_DISPLAY.max.price };
+    if (THREED_MODEL_IDS.has(modelId)) {
+      return { locked: true, tier: PLAN_DISPLAY.max.name, price: PLAN_DISPLAY.max.price };
+    }
     return null;
   }
-  if (IMAGE_MODEL_IDS.has(modelId)) return null;
-  // Premium models — free users get 2/day, don't lock on frontend (backend checks)
-  if (plan === "free") return null;
-  if (MINI_MODEL_IDS.has(modelId)) return { locked: true, tier: PLAN_DISPLAY.mini.name, price: PLAN_DISPLAY.mini.price };
-  return { locked: true, tier: PLAN_DISPLAY.max.name, price: PLAN_DISPLAY.max.price };
+
+  // Free
+  if (FREE_MODEL_IDS.has(modelId)) return null;
+  if (OPUS_MODEL_IDS.has(modelId)) {
+    return { locked: true, tier: PLAN_DISPLAY.max.name, price: PLAN_DISPLAY.max.price };
+  }
+  if (THREED_MODEL_IDS.has(modelId)) {
+    return { locked: true, tier: PLAN_DISPLAY.mini.name, price: PLAN_DISPLAY.mini.price };
+  }
+  // Free has 1 trial video — let the backend decide which.
+  if (VIDEO_MODEL_IDS.has(modelId)) return null;
+  // Paid image models require Start.
+  if (IMAGE_MODEL_IDS.has(modelId)) {
+    return { locked: true, tier: PLAN_DISPLAY.mini.name, price: PLAN_DISPLAY.mini.price };
+  }
+  // Premium chat models — backend gives free users 2/day, don't pre-block.
+  return null;
 }
 
 // ─── Helpers ───
