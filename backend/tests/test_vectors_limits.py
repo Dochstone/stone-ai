@@ -14,13 +14,18 @@ import ast
 from pathlib import Path
 
 BACKEND = Path(__file__).parent.parent
+ROOT = BACKEND.parent
 ROUTER_SRC = BACKEND / "app" / "services" / "ai_router.py"
 LIMITER_SRC = BACKEND / "app" / "services" / "limiter.py"
 CHAT_SRC = BACKEND / "app" / "routers" / "chat.py"
+SUBSCRIPTION_SRC = BACKEND / "app" / "services" / "subscription.py"
+WEBCHAT_SRC = ROOT / "website" / "components" / "WebChat.tsx"
 
 _limiter_src = LIMITER_SRC.read_text(encoding="utf-8")
 _chat_src = CHAT_SRC.read_text(encoding="utf-8")
 _router_src = ROUTER_SRC.read_text(encoding="utf-8")
+_subscription_src = SUBSCRIPTION_SRC.read_text(encoding="utf-8")
+_webchat_src = WEBCHAT_SRC.read_text(encoding="utf-8")
 
 
 # ── Load constants from source ──
@@ -304,3 +309,25 @@ class TestMaxTokensLite:
     def test_stream_function_accepts_max_tokens(self):
         """stream_chat_response has max_tokens parameter."""
         assert "max_tokens" in _router_src
+
+
+class TestStartAccess:
+    def test_start_plan_includes_gpt51_in_subscription_source(self):
+        assert '"gpt-5.1"' in _subscription_src
+
+    def test_start_plan_does_not_include_gpt54_in_subscription_source(self):
+        mini_chunk = _subscription_src[_subscription_src.index("MINI_MODELS"): _subscription_src.index("OPUS_MODEL_IDS")]
+        assert '"gpt-5.4"' not in mini_chunk
+
+    def test_daily_limits_consult_subscription_source_for_mini(self):
+        assert 'get_accessible_models("mini")' in _limiter_src or 'get_accessible_models("mini")' in (BACKEND / "app" / "services" / "daily_limits.py").read_text(encoding="utf-8")
+
+    def test_webchat_start_list_includes_gpt51(self):
+        mini_idx = _webchat_src.index("const MINI_MODEL_IDS")
+        mini_chunk = _webchat_src[mini_idx:_webchat_src.index("const OPUS_MODEL_IDS")]
+        assert '"gpt-5.1"' in mini_chunk
+
+    def test_webchat_start_list_does_not_include_gpt54(self):
+        mini_idx = _webchat_src.index("const MINI_MODEL_IDS")
+        mini_chunk = _webchat_src[mini_idx:_webchat_src.index("const OPUS_MODEL_IDS")]
+        assert '"gpt-5.4"' not in mini_chunk

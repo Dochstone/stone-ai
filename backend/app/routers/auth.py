@@ -37,6 +37,40 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 CODE_TTL = 600  # 10 minutes
 MAX_CODE_ATTEMPTS = 5
 verification_request_limiter = RateLimiter(max_requests=3, window_seconds=300)
+TIER_RANK = {"free": 0, "mini": 1, "max": 2, "max-pro": 3}
+
+
+def _should_keep_subscription(source: User, target: User) -> bool:
+    """Prefer the higher active tier; for equal tiers prefer the later expiry."""
+    source_tier = source.subscription_tier or "free"
+    target_tier = target.subscription_tier or "free"
+    source_rank = TIER_RANK.get(source_tier, 0)
+    target_rank = TIER_RANK.get(target_tier, 0)
+    if source_rank != target_rank:
+        return source_rank > target_rank
+    source_expiry = source.credits_reset_date or datetime.min
+    target_expiry = target.credits_reset_date or datetime.min
+    return source_expiry > target_expiry
+
+
+def _copy_subscription_state(target: User, source: User) -> None:
+    """Copy subscription-related state during account merge."""
+    target.subscription_tier = source.subscription_tier
+    target.subscription_started = source.subscription_started
+    target.credits_reset_date = source.credits_reset_date
+    target.credits_balance = source.credits_balance
+    target.monthly_fast_used = source.monthly_fast_used
+    target.monthly_premium_used = source.monthly_premium_used
+    target.monthly_images_used = source.monthly_images_used
+    target.monthly_videos_used = source.monthly_videos_used
+    target.monthly_3d_used = source.monthly_3d_used
+    target.monthly_audio_used = source.monthly_audio_used
+    target.opus_requests_used = source.opus_requests_used
+    target.video_points_used = source.video_points_used
+    target.video_points_reset_date = source.video_points_reset_date
+    target.trial_video_points_used = source.trial_video_points_used
+    target.trial_start_standard_used = source.trial_start_standard_used
+    target.trial_start_premium_used = source.trial_start_premium_used
 
 
 class RegisterRequest(BaseModel):
@@ -654,22 +688,50 @@ async def telegram_link(
 
     if tg_existing:
         # Merge: transfer TG user's balance and stats into web user
+        old_web_tg_id = web_user.telegram_id
         web_user.balance_usd = min(1.0, max(float(web_user.balance_usd or 0), float(tg_existing.balance_usd or 0)))
         web_user.total_deposited_usd = float(web_user.total_deposited_usd or 0) + float(tg_existing.total_deposited_usd or 0)
         web_user.total_requests = (web_user.total_requests or 0) + (tg_existing.total_requests or 0)
         web_user.total_tokens_used = (web_user.total_tokens_used or 0) + (tg_existing.total_tokens_used or 0)
+        if _should_keep_subscription(tg_existing, web_user):
+            _copy_subscription_state(web_user, tg_existing)
+
+        # Set the final telegram_id before moving rows keyed by user_tg_id.
+        web_user.telegram_id = tg_id
 
         # Update all usage/transaction records to point to web user
+        from app.models.daily_usage import DailyUsage
+        from app.models.generation import Generation
         from app.models.usage import Usage
         from app.models.transaction import Transaction
         from sqlalchemy import update
 
         await db.execute(
-            update(Usage).where(Usage.user_tg_id == tg_id).values(user_tg_id=web_user.telegram_id)
+            update(Usage).where(Usage.user_tg_id == tg_id).values(user_tg_id=tg_id)
         )
         await db.execute(
-            update(Transaction).where(Transaction.user_tg_id == tg_id).values(user_tg_id=web_user.telegram_id)
+            update(Transaction).where(Transaction.user_tg_id == tg_id).values(user_tg_id=tg_id)
         )
+        await db.execute(
+            update(DailyUsage).where(DailyUsage.user_tg_id == tg_id).values(user_tg_id=tg_id)
+        )
+        await db.execute(
+            update(Generation).where(Generation.user_tg_id == tg_id).values(user_tg_id=tg_id)
+        )
+
+        if old_web_tg_id and old_web_tg_id != tg_id:
+            await db.execute(
+                update(Usage).where(Usage.user_tg_id == old_web_tg_id).values(user_tg_id=tg_id)
+            )
+            await db.execute(
+                update(Transaction).where(Transaction.user_tg_id == old_web_tg_id).values(user_tg_id=tg_id)
+            )
+            await db.execute(
+                update(DailyUsage).where(DailyUsage.user_tg_id == old_web_tg_id).values(user_tg_id=tg_id)
+            )
+            await db.execute(
+                update(Generation).where(Generation.user_tg_id == old_web_tg_id).values(user_tg_id=tg_id)
+            )
 
         # Delete old TG-only user
         await db.delete(tg_existing)

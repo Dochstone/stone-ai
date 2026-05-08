@@ -11,6 +11,7 @@ from app.config import get_settings
 from app.pricing import PLAN_PRICES_RUB
 
 router = Router()
+TIER_RANK = {"free": 0, "mini": 1, "max": 2, "max-pro": 3}
 
 
 def _fmt_rub(n: int) -> str:
@@ -27,6 +28,41 @@ PRICE_FROM_MIN = PRICE_MINI  # "от X₽" anchor
 PLAN_SUMMARY_MINI = "20+ моделей · 600 быстрых · 90 премиум · 60 картинок · 13 видео-поинтов"
 PLAN_SUMMARY_MAX = "65+ нейросетей · 1 500 быстрых · 112 премиум · 28 Opus · 140 картинок · 33 видео-поинта"
 PLAN_SUMMARY_ELITE = "65+ нейросетей · 4 500 быстрых · 336 премиум · 56 Opus · 280 картинок · 80 видео-поинтов · API"
+
+
+def _should_keep_subscription(source, target) -> bool:
+    source_tier = getattr(source, "subscription_tier", None) or "free"
+    target_tier = getattr(target, "subscription_tier", None) or "free"
+    source_rank = TIER_RANK.get(source_tier, 0)
+    target_rank = TIER_RANK.get(target_tier, 0)
+    if source_rank != target_rank:
+        return source_rank > target_rank
+    source_expiry = getattr(source, "credits_reset_date", None)
+    target_expiry = getattr(target, "credits_reset_date", None)
+    if source_expiry and not target_expiry:
+        return True
+    if source_expiry and target_expiry:
+        return source_expiry > target_expiry
+    return False
+
+
+def _copy_subscription_state(target, source) -> None:
+    target.subscription_tier = source.subscription_tier
+    target.subscription_started = source.subscription_started
+    target.credits_reset_date = source.credits_reset_date
+    target.credits_balance = source.credits_balance
+    target.monthly_fast_used = source.monthly_fast_used
+    target.monthly_premium_used = source.monthly_premium_used
+    target.monthly_images_used = source.monthly_images_used
+    target.monthly_videos_used = source.monthly_videos_used
+    target.monthly_3d_used = source.monthly_3d_used
+    target.monthly_audio_used = source.monthly_audio_used
+    target.opus_requests_used = source.opus_requests_used
+    target.video_points_used = source.video_points_used
+    target.video_points_reset_date = source.video_points_reset_date
+    target.trial_video_points_used = source.trial_video_points_used
+    target.trial_start_standard_used = source.trial_start_standard_used
+    target.trial_start_premium_used = source.trial_start_premium_used
 
 
 @router.message(Command("start"))
@@ -60,6 +96,9 @@ async def cmd_start(message: Message):
                             # Merge TG user into web user
                             web_user.balance_usd = float(web_user.balance_usd or 0) + float(tg_existing.balance_usd or 0)
                             web_user.total_requests = (web_user.total_requests or 0) + (tg_existing.total_requests or 0)
+                            web_user.total_tokens_used = (web_user.total_tokens_used or 0) + (tg_existing.total_tokens_used or 0)
+                            if _should_keep_subscription(tg_existing, web_user):
+                                _copy_subscription_state(web_user, tg_existing)
                             await db.delete(tg_existing)
 
                         web_user.telegram_id = tg_id

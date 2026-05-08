@@ -47,16 +47,12 @@ const FREE_MODEL_IDS = new Set([
 // IMPORTANT: this is *labelling only* — gating uses category-based rules below
 // to stay in sync with backend daily_limits.py (FAST/PREMIUM/OPUS/IMAGE/VIDEO).
 const MINI_MODEL_IDS = new Set([
-  "gpt-4o-mini", "gpt-4.1-nano", "gemini-2.0-flash", "gemini-2.5-flash",
-  "claude-haiku-4.5", "deepseek-v3", "deepseek-v3.2", "llama-4-maverick",
-  "mistral-large-25", "mistral-small", "qwen-turbo", "qwen-3-235b", "qwen-qwq",
-  "command-r7", "minimax-m2.5", "grok-3-mini",
-  "gpt-4.1-mini", "claude-sonnet-4", "claude-sonnet-4.5", "gpt-5.1", "gpt-5.4",
-  "gpt-5.5", "gpt-4.1", "gemini-2.5-pro", "gemini-3-pro", "gemini-3.1-pro-preview",
-  "grok-3", "perplexity-sonar", "perplexity-sonar-pro", "perplexity-sonar-deep",
-  "deepseek-r1", "kimi-k2.5", "o4-mini", "claude-haiku-4.5-think",
-  "gemini-2.5-flash-think", "devstral",
-  "nano-banana", "nano-banana-pro", "gpt-5-image", "gpt-5-image-mini",
+  "gpt-4o-mini", "claude-haiku-4.5", "gemini-2.0-flash", "deepseek-v3",
+  "llama-4-maverick", "mistral-large-25", "nano-banana",
+  "claude-sonnet-4", "gpt-4.1-mini", "gpt-5.1", "gemini-2.5-flash",
+  "grok-3-mini", "deepseek-r1", "deepseek-v3.2",
+  "nano-banana-pro", "gpt-5-image-mini", "gpt-5-image",
+  "wan-2", "hunyuan", "ltx-video",
 ]);
 // Models gated above Start — drives both lock icon and the upsell modal.
 // Mirrors OPUS_MODELS in backend/app/services/daily_limits.py.
@@ -68,16 +64,10 @@ function getModelLockInfo(modelId: string, balance: number, plan?: string): { lo
   if (!plan) return null; // plan not loaded yet — don't block
   if (plan === "max-pro" || plan === "max") return null; // full access
 
-  // Start (mini): everything except Opus chat models and 3D is allowed.
-  // Daily/monthly volume limits are enforced by the backend, not here.
+  // Start (mini): mirror the backend's curated Start access list.
   if (plan === "mini") {
-    if (OPUS_MODEL_IDS.has(modelId)) {
-      return { locked: true, tier: PLAN_DISPLAY.max.name, price: PLAN_DISPLAY.max.price };
-    }
-    if (THREED_MODEL_IDS.has(modelId)) {
-      return { locked: true, tier: PLAN_DISPLAY.max.name, price: PLAN_DISPLAY.max.price };
-    }
-    return null;
+    if (MINI_MODEL_IDS.has(modelId)) return null;
+    return { locked: true, tier: PLAN_DISPLAY.max.name, price: PLAN_DISPLAY.max.price };
   }
 
   // Free

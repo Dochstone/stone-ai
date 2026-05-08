@@ -15,6 +15,7 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from app.models.user import User
 from app.models.daily_usage import DailyUsage
 from app.pricing import PLAN_PRICES_RUB
+from app.services.subscription import get_accessible_models, get_required_tier
 
 logger = logging.getLogger(__name__)
 
@@ -470,6 +471,25 @@ async def check_daily_limit(
     # Chat always uses daily limits — balance is for dashboard tools only.
     category = get_model_category(model_id)
     limits = DAILY_LIMITS.get(tier, DAILY_LIMITS["free"])
+    if tier == "mini":
+        mini_models = get_accessible_models("mini") or set()
+        if model_id not in mini_models:
+            required_tier = get_required_tier(model_id)
+            required_price = PLAN_PRICES_RUB["max"] if required_tier == "max" else PLAN_PRICES_RUB["mini"]
+            reason = (
+                f"Claude Opus РґРѕСЃС‚СѓРїРµРЅ РЅР° С‚Р°СЂРёС„Рµ Pro РѕС‚ {required_price}в‚Ѕ/РјРµСЃ"
+                if category == "opus"
+                else f"Р­С‚Р° РјРѕРґРµР»СЊ РґРѕСЃС‚СѓРїРЅР° РїРѕ РїРѕРґРїРёСЃРєРµ РѕС‚ {required_price}в‚Ѕ/РјРµСЃ"
+            )
+            return {
+                "allowed": False,
+                "error": "model_locked",
+                "reason": reason,
+                "required_tier": required_tier,
+                "plan": tier,
+                "tier": tier,
+                "category": category,
+            }
 
     # Free users: FREE_PLAN_MODELS always allowed, premium models allowed within daily limit
     if tier == "free" and model_id not in FREE_PLAN_MODELS:
