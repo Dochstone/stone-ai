@@ -3,7 +3,7 @@
 import logging
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select, func as sqlfunc
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import USD_TO_RUB
@@ -51,6 +51,27 @@ ACHIEVEMENTS = [
     {"slug": "collector_10", "title": "Коллекционер", "description": "Откройте 10 достижений", "icon": "🏅", "category": "milestone", "condition": {"type": "count", "target": 10, "metric": "achievements_total"}, "reward_rub": 50},
     {"slug": "collector_20", "title": "Легенда", "description": "Откройте 20 достижений", "icon": "🏆", "category": "milestone", "condition": {"type": "count", "target": 20, "metric": "achievements_total"}, "reward_rub": 100},
 ]
+
+
+async def sync_achievements_catalog(db: AsyncSession) -> int:
+    """Upsert achievement metadata from code into the DB."""
+    result = await db.execute(select(Achievement))
+    existing = {a.slug: a for a in result.scalars().all()}
+
+    for data in ACHIEVEMENTS:
+        row = existing.get(data["slug"])
+        if row:
+            row.title = data["title"]
+            row.description = data["description"]
+            row.icon = data["icon"]
+            row.category = data["category"]
+            row.condition = data["condition"]
+            row.reward_rub = data["reward_rub"]
+        else:
+            db.add(Achievement(**data))
+
+    await db.flush()
+    return len(ACHIEVEMENTS)
 
 
 @router.get("/")
@@ -185,17 +206,10 @@ async def dismiss_pending(user: dict = Depends(get_current_user), db: AsyncSessi
 
 @router.post("/seed")
 async def seed_achievements(db: AsyncSession = Depends(get_db)):
-    """Seed achievements (idempotent)."""
-    existing = await db.execute(select(sqlfunc.count()).select_from(Achievement))
-    count = existing.scalar()
-    if count >= len(ACHIEVEMENTS):
-        return {"message": f"Already seeded ({count})", "count": count}
-
-    await db.execute(Achievement.__table__.delete())
-    for a in ACHIEVEMENTS:
-        db.add(Achievement(**a))
+    """Sync achievements in DB with the source-of-truth catalog."""
+    count = await sync_achievements_catalog(db)
     await db.commit()
-    return {"message": f"Seeded {len(ACHIEVEMENTS)} achievements", "count": len(ACHIEVEMENTS)}
+    return {"message": f"Synchronized {count} achievements", "count": count}
 
 
 # ─── Achievement checker (call from other services) ───

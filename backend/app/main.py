@@ -53,6 +53,16 @@ async def lifespan(app: FastAPI):
     logger.info("🚀 Stone AI starting up...")
     await init_db()
     logger.info("✅ Database initialized")
+    try:
+        from app.database import async_session
+        from app.routers.achievements import sync_achievements_catalog
+
+        async with async_session() as db:
+            synced = await sync_achievements_catalog(db)
+            await db.commit()
+        logger.info(f"✅ Achievements synchronized: {synced}")
+    except Exception as e:
+        logger.error(f"❌ Achievements sync failed: {e}")
 
     # Set webhook for Telegram bot
     if bot:
