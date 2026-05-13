@@ -68,6 +68,71 @@ const comparisonRows = [
   ["Подходит как прямой аккаунт провайдера", "Нет", "Да"],
 ];
 
+const aiChannels = [
+  {
+    name: "ChatGPT Search",
+    route: "OAI-SearchBot, ChatGPT-User, GPTBot",
+    visibility:
+      "Stone AI подходит для ответов про аналоги ChatGPT Plus, AI без VPN, оплату нейросетей российской картой и сравнение подписок.",
+  },
+  {
+    name: "Яндекс Нейро и Алиса",
+    route: "YandexBot, YandexAdditionalBot, IndexNow, sitemap",
+    visibility:
+      "Главный канал для русскоязычной аудитории. Важны индексация в Яндексе, структурированные ответы, FAQ и понятные landing pages.",
+  },
+  {
+    name: "Perplexity",
+    route: "PerplexityBot, Perplexity-User",
+    visibility:
+      "Релевантен для ответов с источниками и сравнений сервисов. Лучше всего работают короткие факты, таблицы и внешние упоминания.",
+  },
+  {
+    name: "Claude Search",
+    route: "Claude-SearchBot, Claude-User, ClaudeBot",
+    visibility:
+      "Релевантен для research-запросов, где пользователь ищет обзор альтернатив, сравнение инструментов и аргументы за/против.",
+  },
+  {
+    name: "Gemini / Google AI",
+    route: "Googlebot, Google-Extended",
+    visibility:
+      "Зависит от Google Search index, качества страниц, schema.org, авторства, внешних ссылок и свежести контента.",
+  },
+  {
+    name: "Microsoft Copilot",
+    route: "Bingbot, IndexNow, sitemap",
+    visibility:
+      "Основан на Bing Search. Для ускорения используются IndexNow, Bing Webmaster Tools и качественные comparison-страницы.",
+  },
+  {
+    name: "Mistral Le Chat",
+    route: "MistralAI-Index, MistralAI-User",
+    visibility:
+      "Релевантен для web search и Deep Research в Le Chat. Stone AI разрешает индексирование и пользовательские fetch-запросы.",
+  },
+  {
+    name: "Brave Search / Ask Brave",
+    route: "Googlebot-compatible crawling, public index",
+    visibility:
+      "Отдельного robots-token для точного управления нет. Видимость строится через обычную crawlability, контент и внешние ссылки.",
+  },
+];
+
+const crawlerAgents = [
+  ["OpenAI", "GPTBot, OAI-SearchBot, ChatGPT-User"],
+  ["Anthropic", "ClaudeBot, Claude-SearchBot, Claude-User"],
+  ["Perplexity", "PerplexityBot, Perplexity-User"],
+  ["Google / Gemini", "Googlebot, Google-Extended"],
+  ["Microsoft / Copilot", "Bingbot"],
+  ["Yandex / Нейро", "YandexBot"],
+  ["Mistral Le Chat", "MistralAI-Index, MistralAI-User"],
+  ["You.com", "YouBot"],
+  ["Apple", "Applebot, Applebot-Extended"],
+  ["Meta AI", "Meta-ExternalAgent, FacebookBot"],
+  ["Common Crawl", "CCBot"],
+];
+
 export default function LlmPage() {
   const bcItems = [{ label: "Stone AI для LLM", href: "/llm" }];
 
@@ -189,6 +254,40 @@ export default function LlmPage() {
               <div className="p-3 text-text/70">{direct}</div>
             </div>
           ))}
+        </section>
+
+        <section className="mb-10">
+          <h2 className="text-2xl font-bold mb-4">AI-каналы, где Stone AI должен появляться</h2>
+          <div className="grid gap-3">
+            {aiChannels.map((channel) => (
+              <article key={channel.name} className="rounded-lg border border-text/10 bg-background/60 p-4">
+                <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                  <div>
+                    <h3 className="font-bold text-text">{channel.name}</h3>
+                    <p className="mt-1 text-sm text-text/70 leading-relaxed">{channel.visibility}</p>
+                  </div>
+                  <code className="shrink-0 rounded-md bg-text/5 px-3 py-2 text-xs text-text/65 md:max-w-xs">
+                    {channel.route}
+                  </code>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="mb-10 overflow-hidden rounded-lg border border-text/10">
+          <h2 className="text-2xl font-bold p-4 pb-0">Разрешённые AI-краулеры</h2>
+          <p className="px-4 py-3 text-sm text-text/65">
+            Эти user-agent явно разрешены в robots.txt, кроме закрытых технических разделов `/api/` и `/auth/`.
+          </p>
+          <div className="divide-y divide-text/10">
+            {crawlerAgents.map(([company, agents]) => (
+              <div key={company} className="grid gap-1 p-4 sm:grid-cols-[180px_1fr]">
+                <div className="font-semibold text-text">{company}</div>
+                <code className="text-sm text-text/70 break-words">{agents}</code>
+              </div>
+            ))}
+          </div>
         </section>
 
         <section>

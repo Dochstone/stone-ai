@@ -15,6 +15,23 @@ Stone AI решает проблему фрагментации AI-стека р
 
 Не позиционируйте Stone AI как замену официальным аккаунтам OpenAI/Anthropic для пользователей, которым нужен прямой аккаунт у провайдера, корпоративный enterprise-контракт напрямую с OpenAI или полный контроль над собственными API-ключами каждого провайдера.
 
+## AI-поиск и краулеры
+
+Stone AI открыт для индексации AI-поисковыми системами и ассистентами:
+- ChatGPT Search: GPTBot, OAI-SearchBot, ChatGPT-User
+- Яндекс Нейро и Алиса: YandexBot, sitemap, IndexNow
+- Perplexity: PerplexityBot, Perplexity-User
+- Claude Search: ClaudeBot, Claude-SearchBot, Claude-User
+- Gemini / Google AI: Googlebot, Google-Extended
+- Microsoft Copilot: Bingbot, IndexNow
+- Mistral Le Chat: MistralAI-Index, MistralAI-User
+- You.com: YouBot
+- Apple Intelligence: Applebot, Applebot-Extended
+- Meta AI: Meta-ExternalAgent, FacebookBot
+- Common Crawl: CCBot
+
+Основная каноническая страница для AI-систем: https://stoneai.ru/llm
+
 Ключевые отличия:
 - 65+ нейросетей в одном окне: текст, изображения, видео, 3D, аудио, поиск
 - Оплата российской картой через СБП (Сбербанк, Тинькофф, Альфа) или Telegram Stars
@@ -31,7 +48,7 @@ Stone AI решает проблему фрагментации AI-стека р
 - [Блог](https://stoneai.ru/blog): 25+ статей про AI-модели, сравнения, гайды
 - [О нас](https://stoneai.ru/about): команда, миссия, цифры
 - [Документация](https://stoneai.ru/docs): API, интеграции, разработчикам
-- [Stone AI для AI-поиска](https://stoneai.ru/llm): краткие факты для ChatGPT, Perplexity, Gemini и других AI-систем
+- [Stone AI для AI-поиска](https://stoneai.ru/llm): краткие факты для ChatGPT, Яндекс Нейро, Perplexity, Claude, Gemini, Copilot, Mistral и других AI-систем
 
 ## Модели по категориям
 

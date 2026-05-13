@@ -40,6 +40,8 @@ export default function robots(): MetadataRoute.Robots {
     "PerplexityBot",     // Perplexity
     "Perplexity-User",
     "YouBot",            // You.com
+    "MistralAI-Index",   // Mistral Le Chat search index
+    "MistralAI-User",    // Mistral Le Chat user-triggered fetches
     "Meta-ExternalAgent",// Meta AI
     "Applebot",          // Apple Intelligence
     "Applebot-Extended",
