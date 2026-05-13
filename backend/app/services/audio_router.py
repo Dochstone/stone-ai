@@ -25,7 +25,7 @@ STT_PRICE_PER_MINUTE = 0.02
 
 async def text_to_speech(
     text: str,
-    voice: str = "alloy",
+    voice: str = "nova",
     openrouter_key: str | None = None,
 ) -> dict:
     """
@@ -49,7 +49,7 @@ async def text_to_speech(
         "model": "openai/gpt-4o-mini-tts",
         "messages": [{"role": "user", "content": text}],
         "modalities": ["audio"],
-        "audio": {"voice": voice if voice in TTS_VOICES else "alloy", "format": "mp3"},
+        "audio": {"voice": voice if voice in TTS_VOICES else "nova", "format": "mp3"},
         "max_tokens": 8192,
     }
 

@@ -30,7 +30,7 @@ router = APIRouter(prefix="/api/audio", tags=["audio"])
 
 class TTSRequest(BaseModel):
     text: str
-    voice: str = "alloy"
+    voice: str = "nova"
 
 
 @router.get("/voices")
