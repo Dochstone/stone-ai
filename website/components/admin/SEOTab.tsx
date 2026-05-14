@@ -26,6 +26,36 @@ interface PageRow {
   position: number;
 }
 
+interface IndexNowHistoryItem {
+  ts: string;
+  source: string;
+  ok: boolean;
+  status: number;
+  count: number;
+  message: string;
+  sample_urls: string[];
+}
+
+interface IndexNowStats {
+  site_host: string;
+  endpoint: string;
+  key_configured: boolean;
+  key_location: string;
+  sitemap: { url: string; status: number; url_count: number; error?: string };
+  checks: {
+    indexnow_key?: { url: string; status: number; ok: boolean; error?: string };
+    bing_auth?: { url: string; status: number; ok: boolean; error?: string };
+  };
+  history: {
+    submissions: number;
+    accepted: number;
+    failed: number;
+    total_urls: number;
+    last_submission: IndexNowHistoryItem | null;
+    recent: IndexNowHistoryItem[];
+  };
+}
+
 type RangeKey = "7" | "28" | "90";
 
 interface Props {
@@ -45,11 +75,27 @@ export default function SEOTab({ token }: Props) {
   const [pages, setPages] = useState<PageRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [indexNowStats, setIndexNowStats] = useState<IndexNowStats | null>(null);
+  const [indexNowStatsError, setIndexNowStatsError] = useState("");
   const [indexNowText, setIndexNowText] = useState("");
   const [indexNowResult, setIndexNowResult] = useState<string>("");
   const [indexNowBusy, setIndexNowBusy] = useState(false);
+  const [indexNowSitemapBusy, setIndexNowSitemapBusy] = useState(false);
 
   const headers = { Authorization: `Bearer ${token}` };
+
+  const loadIndexNowStats = useCallback(async () => {
+    if (!token) return;
+    setIndexNowStatsError("");
+    try {
+      const res = await fetch(`${API_URL}/api/admin/seo/indexnow/stats`, { headers });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.detail || `IndexNow stats ${res.status}`);
+      setIndexNowStats(data);
+    } catch (e: unknown) {
+      setIndexNowStatsError(e instanceof Error ? e.message : "РћС€РёР±РєР° IndexNow stats");
+    }
+  }, [token]);
 
   const load = useCallback(async () => {
     if (!token) return;
@@ -84,6 +130,10 @@ export default function SEOTab({ token }: Props) {
     load();
   }, [load]);
 
+  useEffect(() => {
+    loadIndexNowStats();
+  }, [loadIndexNowStats]);
+
   const submitIndexNow = useCallback(async () => {
     const urls = indexNowText
       .split(/\s+/)
@@ -117,8 +167,42 @@ export default function SEOTab({ token }: Props) {
     }
   }, [indexNowText, token]);
 
+  const submitSitemapIndexNow = useCallback(async () => {
+    setIndexNowSitemapBusy(true);
+    setIndexNowResult("");
+    try {
+      const res = await fetch(`${API_URL}/api/admin/seo/indexnow/sitemap`, {
+        method: "POST",
+        headers,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.detail || `HTTP ${res.status}`);
+      }
+      setIndexNowResult(
+        data.ok
+          ? `вњ… Sitemap РѕС‚РїСЂР°РІР»РµРЅ: ${data.count} URL (HTTP ${data.status})`
+          : `вљ пёЏ ${data.message} (HTTP ${data.status}, count=${data.count})`,
+      );
+      loadIndexNowStats();
+    } catch (e: unknown) {
+      setIndexNowResult(`вќЊ ${e instanceof Error ? e.message : "РћС€РёР±РєР°"}`);
+    } finally {
+      setIndexNowSitemapBusy(false);
+    }
+  }, [token, loadIndexNowStats]);
+
   const fmtNum = (n: number) => n.toLocaleString("ru-RU");
   const fmtPct = (n: number) => `${n.toFixed(2)}%`;
+  const fmtDate = (value?: string | null) => {
+    if (!value) return "—";
+    return new Date(value).toLocaleString("ru-RU", {
+      day: "2-digit",
+      month: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
   const shortPath = (url: string) => {
     try {
       const u = new URL(url);
@@ -246,6 +330,54 @@ export default function SEOTab({ token }: Props) {
           Вставь URLs (по одному в строке или через пробел). Google игнорирует IndexNow — для Google
           используй URL Inspection в GSC вручную (~10 в день).
         </p>
+        {indexNowStatsError && (
+          <div className="bg-red-500/10 border border-red-500/20 text-red-700 rounded-xl px-4 py-3 text-sm mb-4">
+            {indexNowStatsError}
+          </div>
+        )}
+        {indexNowStats && (
+          <>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+              <KPI label="URL в sitemap" value={fmtNum(indexNowStats.sitemap.url_count)} />
+              <KPI label="Отправлено URL" value={fmtNum(indexNowStats.history.total_urls)} />
+              <KPI label="Успешных push" value={fmtNum(indexNowStats.history.accepted)} />
+              <KPI label="Последний push" value={fmtDate(indexNowStats.history.last_submission?.ts)} />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4 text-xs">
+              <StatusPill label="Sitemap" ok={indexNowStats.sitemap.status === 200} detail={`${indexNowStats.sitemap.status || "ERR"} · ${indexNowStats.sitemap.url}`} />
+              <StatusPill label="IndexNow key" ok={!!indexNowStats.checks.indexnow_key?.ok} detail={`${indexNowStats.checks.indexnow_key?.status || "ERR"} · ${indexNowStats.key_location}`} />
+              <StatusPill label="Bing verify" ok={!!indexNowStats.checks.bing_auth?.ok} detail={`${indexNowStats.checks.bing_auth?.status || "ERR"} · /BingSiteAuth.xml`} />
+            </div>
+            {indexNowStats.history.recent.length > 0 && (
+              <div className="overflow-x-auto mb-4">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="text-text/40 uppercase">
+                      <th className="text-left font-semibold py-2">Когда</th>
+                      <th className="text-left font-semibold py-2">Источник</th>
+                      <th className="text-right font-semibold py-2">URL</th>
+                      <th className="text-right font-semibold py-2">HTTP</th>
+                      <th className="text-left font-semibold py-2 pl-3">Статус</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {indexNowStats.history.recent.map((item) => (
+                      <tr key={`${item.ts}-${item.source}-${item.count}`} className="border-t border-text/[0.04]">
+                        <td className="py-2 whitespace-nowrap">{fmtDate(item.ts)}</td>
+                        <td className="py-2 text-text/60">{item.source}</td>
+                        <td className="py-2 text-right font-mono">{item.count}</td>
+                        <td className="py-2 text-right font-mono">{item.status}</td>
+                        <td className={`py-2 pl-3 ${item.ok ? "text-emerald-600" : "text-red-600"}`}>
+                          {item.ok ? "accepted" : item.message || "failed"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
+        )}
         <textarea
           value={indexNowText}
           onChange={(e) => setIndexNowText(e.target.value)}
@@ -255,6 +387,13 @@ export default function SEOTab({ token }: Props) {
         />
         <div className="flex items-center justify-between mt-3 gap-3 flex-wrap">
           <div className="text-xs text-text/40">{indexNowResult}</div>
+          <button
+            onClick={submitSitemapIndexNow}
+            disabled={indexNowSitemapBusy}
+            className="px-4 py-2 rounded-xl bg-text/[0.06] text-text/70 text-sm font-bold hover:bg-text/[0.1] disabled:opacity-50"
+          >
+            {indexNowSitemapBusy ? "РћС‚РїСЂР°РІРєР°..." : "Push sitemap"}
+          </button>
           <button
             onClick={submitIndexNow}
             disabled={indexNowBusy}
@@ -273,6 +412,17 @@ function KPI({ label, value }: { label: string; value: string }) {
     <div className="bg-surface rounded-2xl border border-text/5 p-4">
       <div className="text-xs text-text/40 mb-1">{label}</div>
       <div className="text-2xl font-extrabold tabular-nums">{value}</div>
+    </div>
+  );
+}
+
+function StatusPill({ label, ok, detail }: { label: string; ok: boolean; detail: string }) {
+  return (
+    <div className={`rounded-xl border px-3 py-2 ${ok ? "border-emerald-500/20 bg-emerald-500/5" : "border-red-500/20 bg-red-500/5"}`}>
+      <div className={`font-bold ${ok ? "text-emerald-600" : "text-red-600"}`}>
+        {label}: {ok ? "OK" : "ERR"}
+      </div>
+      <div className="text-text/40 truncate mt-0.5">{detail}</div>
     </div>
   );
 }

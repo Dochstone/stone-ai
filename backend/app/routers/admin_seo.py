@@ -25,6 +25,21 @@ def push_indexnow(body: IndexNowRequest, _admin: dict = Depends(require_web_admi
     return result
 
 
+@router.post("/indexnow/sitemap")
+def push_indexnow_sitemap(_admin: dict = Depends(require_web_admin)) -> dict:
+    """Submit all URLs from sitemap.xml to IndexNow."""
+    result = indexnow_service.submit_sitemap()
+    if not result["ok"] and result["status"] == 0 and result["count"] == 0:
+        raise HTTPException(400, result["message"])
+    return result
+
+
+@router.get("/indexnow/stats")
+def indexnow_stats(_admin: dict = Depends(require_web_admin)) -> dict:
+    """Return IndexNow/Bing verification status and local submission history."""
+    return indexnow_service.get_stats()
+
+
 @router.get("/overview")
 def gsc_overview(
     days: int = Query(28, ge=1, le=90),
