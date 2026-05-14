@@ -56,6 +56,20 @@ interface IndexNowStats {
   };
 }
 
+interface GscStatus {
+  configured: boolean;
+  site_url: string;
+  ok: boolean;
+  auth_email: string | null;
+  available_sites: string[];
+  message: string;
+  files: {
+    oauth_token: boolean;
+    oauth_client: boolean;
+    service_account: boolean;
+  };
+}
+
 type RangeKey = "7" | "28" | "90";
 
 interface Props {
@@ -75,6 +89,7 @@ export default function SEOTab({ token }: Props) {
   const [pages, setPages] = useState<PageRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [gscStatus, setGscStatus] = useState<GscStatus | null>(null);
   const [indexNowStats, setIndexNowStats] = useState<IndexNowStats | null>(null);
   const [indexNowStatsError, setIndexNowStatsError] = useState("");
   const [indexNowText, setIndexNowText] = useState("");
@@ -83,6 +98,17 @@ export default function SEOTab({ token }: Props) {
   const [indexNowSitemapBusy, setIndexNowSitemapBusy] = useState(false);
 
   const headers = { Authorization: `Bearer ${token}` };
+
+  const loadGscStatus = useCallback(async () => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_URL}/api/admin/seo/gsc/status`, { headers });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) setGscStatus(data);
+    } catch {
+      setGscStatus(null);
+    }
+  }, [token]);
 
   const loadIndexNowStats = useCallback(async () => {
     if (!token) return;
@@ -129,6 +155,10 @@ export default function SEOTab({ token }: Props) {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    loadGscStatus();
+  }, [loadGscStatus]);
 
   useEffect(() => {
     loadIndexNowStats();
@@ -244,6 +274,26 @@ export default function SEOTab({ token }: Props) {
           </button>
         </div>
       </div>
+
+      {gscStatus && (
+        <div className={`rounded-2xl border p-4 ${gscStatus.ok ? "bg-emerald-500/5 border-emerald-500/20" : "bg-amber-500/5 border-amber-500/20"}`}>
+          <div className={`text-sm font-bold mb-2 ${gscStatus.ok ? "text-emerald-700" : "text-amber-700"}`}>
+            Google Search Console: {gscStatus.ok ? "OK" : "нужен доступ"}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-text/55">
+            <div>Property: <span className="font-mono">{gscStatus.site_url}</span></div>
+            <div>Auth: <span className="font-mono">{gscStatus.auth_email || "n/a"}</span></div>
+            <div>OAuth token: {gscStatus.files.oauth_token ? "есть" : "нет"}</div>
+            <div>Service account: {gscStatus.files.service_account ? "есть" : "нет"}</div>
+          </div>
+          <div className="text-xs text-text/50 mt-2">{gscStatus.message}</div>
+          {!gscStatus.ok && gscStatus.auth_email && (
+            <div className="text-xs text-text/50 mt-2">
+              Добавь этот email пользователем в GSC: <span className="font-mono text-text">{gscStatus.auth_email}</span>
+            </div>
+          )}
+        </div>
+      )}
 
       {error && (
         <div className="bg-red-500/10 border border-red-500/20 text-red-700 rounded-xl px-4 py-3 text-sm">

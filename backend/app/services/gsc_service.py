@@ -45,18 +45,23 @@ SCOPES = ["https://www.googleapis.com/auth/webmasters.readonly"]
 def _load_credentials():
     """Prefer OAuth user creds; fall back to service account if absent."""
     if os.path.isfile(GSC_OAUTH_TOKEN_PATH):
-        from google.oauth2.credentials import Credentials
-        from google.auth.transport.requests import Request
+        try:
+            from google.oauth2.credentials import Credentials
+            from google.auth.transport.requests import Request
 
-        creds = Credentials.from_authorized_user_file(GSC_OAUTH_TOKEN_PATH, scopes=SCOPES)
-        if creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-            try:
-                with open(GSC_OAUTH_TOKEN_PATH, "w", encoding="utf-8") as f:
-                    f.write(creds.to_json())
-            except OSError as exc:
-                logger.warning("could not persist refreshed token: %s", exc)
-        return creds
+            creds = Credentials.from_authorized_user_file(GSC_OAUTH_TOKEN_PATH, scopes=SCOPES)
+            if creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+                try:
+                    with open(GSC_OAUTH_TOKEN_PATH, "w", encoding="utf-8") as f:
+                        f.write(creds.to_json())
+                except OSError as exc:
+                    logger.warning("could not persist refreshed token: %s", exc)
+            return creds
+        except Exception as exc:
+            if not os.path.isfile(GSC_SA_KEY_PATH):
+                raise
+            logger.warning("GSC OAuth credentials failed, falling back to service account: %s", exc)
 
     from google.oauth2 import service_account
     return service_account.Credentials.from_service_account_file(
@@ -77,6 +82,43 @@ def _date_range(days: int) -> tuple[str, str]:
 
 def is_configured() -> bool:
     return os.path.isfile(GSC_OAUTH_TOKEN_PATH) or os.path.isfile(GSC_SA_KEY_PATH)
+
+
+def get_status() -> dict:
+    files = {
+        "oauth_token": os.path.isfile(GSC_OAUTH_TOKEN_PATH),
+        "oauth_client": os.path.isfile(GSC_OAUTH_CLIENT_PATH),
+        "service_account": os.path.isfile(GSC_SA_KEY_PATH),
+    }
+    status: dict[str, Any] = {
+        "configured": is_configured(),
+        "site_url": GSC_SITE_URL,
+        "files": files,
+        "ok": False,
+        "auth_email": None,
+        "available_sites": [],
+        "message": "",
+    }
+    if not status["configured"]:
+        status["message"] = "GSC credentials not configured"
+        return status
+
+    try:
+        creds = _load_credentials()
+        status["auth_email"] = getattr(creds, "service_account_email", None) or getattr(creds, "client_id", None)
+        sc = _client()
+        sites = sc.sites().list().execute().get("siteEntry", [])
+        available_sites = [s.get("siteUrl") for s in sites if s.get("siteUrl")]
+        status["available_sites"] = available_sites
+        status["ok"] = GSC_SITE_URL in available_sites
+        if status["ok"]:
+            status["message"] = "GSC access OK"
+        else:
+            status["message"] = f"No permission for {GSC_SITE_URL}"
+        return status
+    except Exception as e:
+        status["message"] = str(e)[:500]
+        return status
 
 
 def list_sites() -> list[str]:

@@ -54,6 +54,11 @@ def gsc_overview(
         raise HTTPException(502, f"GSC error: {e}")
 
 
+@router.get("/gsc/status")
+def gsc_status(_admin: dict = Depends(require_web_admin)) -> dict:
+    return gsc_service.get_status()
+
+
 @router.get("/queries")
 def gsc_queries(
     days: int = Query(28, ge=1, le=90),
