@@ -45,7 +45,7 @@ function ImageCarousel({ images, interval = 3000 }: { images: string[]; interval
       <img src={images[idx]} alt="AI-сгенерированное изображение" loading="lazy"
         className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
         style={{ opacity: fading ? 0 : 1 }} />
-      <img src={images[nextIdx]} alt="" loading="lazy"
+      <img src={images[nextIdx]} alt="AI-сгенерированное изображение" loading="lazy"
         className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
         style={{ opacity: fading ? 1 : 0 }} />
     </div>

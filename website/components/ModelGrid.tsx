@@ -130,7 +130,7 @@ export default function ModelGrid() {
                           <div className="p-5">
                             <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center gap-1.5">
-                                {(() => { const s = getModelIconSrc(model.id, model.company); return s ? <img src={s} alt="" width={36} height={36} className="rounded-lg shrink-0 shadow-sm" /> : null; })()}
+                                {(() => { const s = getModelIconSrc(model.id, model.company); return s ? <img src={s} alt={`${model.company} ${model.name}`} width={36} height={36} className="rounded-lg shrink-0 shadow-sm" /> : null; })()}
                                 <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold ${companyColors[model.company] ?? "bg-gray-100 text-gray-700"}`}>{model.company}</span>
                               </div>
                               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${model.tier === "free" ? "bg-teal-light text-teal" : "bg-accent/10 text-accent"}`}>{formatPrice(model)}</span>
@@ -192,7 +192,7 @@ export default function ModelGrid() {
                         <div className="flex-1 space-y-4">
                           <div className="flex items-center gap-3">
                             <div className="flex items-center gap-2">
-                          {(() => { const s = getModelIconSrc(expandedInRow.id, expandedInRow.company); return s ? <img src={s} alt="" width={44} height={44} className="rounded-lg shrink-0 shadow-sm" /> : null; })()}
+                          {(() => { const s = getModelIconSrc(expandedInRow.id, expandedInRow.company); return s ? <img src={s} alt={`${expandedInRow.company} ${expandedInRow.name}`} width={44} height={44} className="rounded-lg shrink-0 shadow-sm" /> : null; })()}
                           <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${companyColors[expandedInRow.company] ?? "bg-gray-100 text-gray-700"}`}>{expandedInRow.company}</span>
                         </div>
                             <h3 className="font-extrabold text-lg">{expandedInRow.name}</h3>

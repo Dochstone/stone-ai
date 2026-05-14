@@ -147,7 +147,7 @@ export default function Nav() {
                 title="Личный кабинет"
               >
                 {avatar ? (
-                  <img src={avatar} alt="" className="w-9 h-9 rounded-full object-cover shrink-0 ring-2 ring-text/[0.06]" />
+                  <img src={avatar} alt="Аватар пользователя" className="w-9 h-9 rounded-full object-cover shrink-0 ring-2 ring-text/[0.06]" />
                 ) : (
                   <div
                     className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 ring-2 ring-text/[0.06]"
@@ -252,7 +252,7 @@ export default function Nav() {
                 <a href="/profile" onClick={() => setMenuOpen(false)}
                   className="flex items-center gap-3 py-2.5 px-2 min-h-[44px] text-text/70 hover:text-text font-medium">
                   {avatar ? (
-                    <img src={avatar} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
+                    <img src={avatar} alt="Аватар пользователя" className="w-8 h-8 rounded-full object-cover shrink-0" />
                   ) : (
                     <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
                       style={{ backgroundColor: getAvatarColor(authEmail) }}>

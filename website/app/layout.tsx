@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     template: "%s | Stone AI",
   },
   description:
-    "Агрегатор 65+ нейросетей в одном чате: GPT-5, Claude Opus, Midjourney, Sora. Плюс панель инструментов — SEO, презентации, фотосессии. Без VPN, оплата рублями. Бесплатный старт — 10 запросов/день + 100₽ бонус.",
+    "Stone AI — агрегатор 65+ нейросетей: GPT-5, Claude, Midjourney и Sora в одном чате. Без VPN, оплата рублями.",
   keywords: [
     "агрегатор нейросетей",
     "все нейросети в одном месте",
@@ -71,7 +71,7 @@ export const metadata: Metadata = {
     siteName: "Stone AI",
     title: "Stone AI — агрегатор 65+ нейросетей в одном чате без VPN",
     description:
-      "Агрегатор 65+ нейросетей в одном чате: GPT-5, Claude Opus, Midjourney, Sora. Без VPN, оплата картой РФ. Бесплатный старт + 100₽ на баланс.",
+      "Stone AI — агрегатор 65+ нейросетей: GPT-5, Claude, Midjourney и Sora в одном чате. Без VPN, оплата рублями.",
     images: [
       {
         url: OG_IMAGE,
@@ -336,7 +336,7 @@ export default function RootLayout({
               <img
                 src={`https://mc.yandex.ru/watch/${YM_ID}`}
                 style={{ position: "absolute", left: "-9999px" }}
-                alt=""
+                alt="Yandex Metrika"
               />
             </div>
           </noscript>

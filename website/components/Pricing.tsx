@@ -600,7 +600,7 @@ export default function Pricing() {
                 <div className="relative sm:w-[280px] h-[300px] sm:h-auto shrink-0 overflow-hidden">
                   <img
                     src={modal.img}
-                    alt=""
+                    alt={`Тариф Stone AI ${modal.name}`}
                     className="w-full h-full object-cover"
                     style={{ objectPosition: "center 25%", animation: "pricingStagger 0.5s ease both 0.05s" }}
                   />
