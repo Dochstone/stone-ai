@@ -83,7 +83,7 @@ async def generate_threed(
     balance = float(user.balance_usd or 0)
 
     # 3D uses image limits
-    check = await check_daily_limit(db, tg_id, req.model_id, tier, balance)
+    check = await check_daily_limit(db, tg_id, req.model_id, tier, balance, user)
     if not check.get("allowed"):
         raise HTTPException(
             429 if check.get("error") == "daily_limit_exceeded" else 403,

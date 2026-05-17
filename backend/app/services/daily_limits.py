@@ -196,6 +196,34 @@ def get_msk_reset_at() -> str:
     return tomorrow.isoformat()
 
 
+def _as_msk_date(dt: datetime | None) -> date | None:
+    if dt is None:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(MSK).date()
+
+
+def get_weekly_period_start(user: User | None = None, today: date | None = None) -> date:
+    """Start date for the current weekly quota window.
+
+    Paid weekly quotas reset in 7-day windows anchored to subscription start.
+    If the start date is unavailable, fall back to the current calendar week.
+    """
+    current = today or get_msk_today()
+    subscription_start = _as_msk_date(getattr(user, "subscription_started", None))
+    if subscription_start and subscription_start <= current:
+        days_elapsed = (current - subscription_start).days
+        return subscription_start + timedelta(days=(days_elapsed // 7) * 7)
+    return current - timedelta(days=current.weekday())
+
+
+def get_weekly_reset_at(user: User | None = None) -> str:
+    """Next weekly quota reset as ISO string in MSK."""
+    reset_date = get_weekly_period_start(user) + timedelta(days=7)
+    return datetime.combine(reset_date, time.min, tzinfo=MSK).isoformat()
+
+
 def get_video_points_reset_date(now_utc: datetime | None = None, user: User | None = None) -> date:
     """Next video-points reset date.
 
@@ -371,15 +399,20 @@ def apply_video_points_charge(user: User, charge: dict) -> None:
         user.trial_start_premium_used = True
 
 
-async def get_weekly_usage(db: AsyncSession, tg_id: int, category: str) -> int:
-    """Sum usage for a category over the last 7 days."""
+async def get_weekly_usage(
+    db: AsyncSession,
+    tg_id: int,
+    category: str,
+    week_start: date | None = None,
+) -> int:
+    """Sum usage for a category in the current weekly quota window."""
     today = get_msk_today()
-    week_ago = today - timedelta(days=6)  # today + 6 previous days = 7 days
+    period_start = week_start or get_weekly_period_start()
     col = f"{category}_used"
     result = await db.execute(
         select(func.coalesce(func.sum(getattr(DailyUsage, col)), 0)).where(
             DailyUsage.user_tg_id == tg_id,
-            DailyUsage.date >= week_ago,
+            DailyUsage.date >= period_start,
             DailyUsage.date <= today,
         )
     )
@@ -465,7 +498,12 @@ async def get_or_create_today(db: AsyncSession, tg_id: int, tier: str, *, lock_f
 
 
 async def check_daily_limit(
-    db: AsyncSession, tg_id: int, model_id: str, tier: str, balance: float = 0
+    db: AsyncSession,
+    tg_id: int,
+    model_id: str,
+    tier: str,
+    balance: float = 0,
+    user: User | None = None,
 ) -> dict:
     """Check if user can make a request. Returns allow/deny with details."""
     # Chat always uses daily limits — balance is for dashboard tools only.
@@ -519,6 +557,7 @@ async def check_daily_limit(
 
     row = await get_or_create_today(db, tg_id, tier, lock_for_update=True)
     weight = get_model_weight(model_id)
+    week_start = get_weekly_period_start(user) if tier in WEEKLY_TIERS else None
 
     # Check by category — must have ENOUGH room for the model's weight, not just any room
     if category == "fast":
@@ -529,9 +568,9 @@ async def check_daily_limit(
     elif category == "premium":
         if tier in WEEKLY_TIERS:
             weekly_limit = WEEKLY_LIMITS[tier]["premium"]
-            weekly_used = await get_weekly_usage(db, tg_id, "premium")
+            weekly_used = await get_weekly_usage(db, tg_id, "premium", week_start)
             if weekly_used + weight > weekly_limit:
-                return _denied(tier, "premium", weekly_used, weekly_limit, 0, weekly_limit, weekly=True)
+                return _denied(tier, "premium", weekly_used, weekly_limit, 0, weekly_limit, weekly=True, user=user)
         else:
             effective = limits["premium"] + row.rollover_premium
             if row.premium_used + weight > effective:
@@ -541,12 +580,12 @@ async def check_daily_limit(
         if tier in WEEKLY_TIERS:
             opus_weekly = WEEKLY_LIMITS[tier]["opus"]
             premium_weekly = WEEKLY_LIMITS[tier]["premium"]
-            opus_used = await get_weekly_usage(db, tg_id, "opus")
-            premium_used = await get_weekly_usage(db, tg_id, "premium")
+            opus_used = await get_weekly_usage(db, tg_id, "opus", week_start)
+            premium_used = await get_weekly_usage(db, tg_id, "premium", week_start)
             if opus_used + weight > opus_weekly:
-                return _denied(tier, "opus", opus_used, opus_weekly, 0, opus_weekly, weekly=True)
+                return _denied(tier, "opus", opus_used, opus_weekly, 0, opus_weekly, weekly=True, user=user)
             if premium_used + weight > premium_weekly:
-                return _denied(tier, "premium", premium_used, premium_weekly, 0, premium_weekly, weekly=True)
+                return _denied(tier, "premium", premium_used, premium_weekly, 0, premium_weekly, weekly=True, user=user)
         else:
             opus_effective = limits["opus"] + row.rollover_opus
             premium_effective = limits["premium"] + row.rollover_premium
@@ -558,9 +597,9 @@ async def check_daily_limit(
     elif category == "image":
         if tier in WEEKLY_TIERS:
             weekly_limit = WEEKLY_LIMITS[tier]["image"]
-            weekly_used = await get_weekly_usage(db, tg_id, "image")
+            weekly_used = await get_weekly_usage(db, tg_id, "image", week_start)
             if weekly_used + weight > weekly_limit:
-                return _denied(tier, "image", weekly_used, weekly_limit, 0, weekly_limit, weekly=True)
+                return _denied(tier, "image", weekly_used, weekly_limit, 0, weekly_limit, weekly=True, user=user)
         else:
             if row.image_used + weight > limits["image"]:
                 return _denied(tier, "image", row.image_used, limits["image"], 0, limits["image"])
@@ -568,9 +607,9 @@ async def check_daily_limit(
     elif category == "video":
         if tier in WEEKLY_TIERS:
             weekly_limit = WEEKLY_LIMITS[tier]["video"]
-            weekly_used = await get_weekly_usage(db, tg_id, "video")
+            weekly_used = await get_weekly_usage(db, tg_id, "video", week_start)
             if weekly_used >= weekly_limit:
-                return _denied(tier, "video", weekly_used, weekly_limit, 0, weekly_limit, weekly=True)
+                return _denied(tier, "video", weekly_used, weekly_limit, 0, weekly_limit, weekly=True, user=user)
         else:
             if row.video_used >= limits["video"]:
                 return _denied(tier, "video", row.video_used, limits["video"], 0, limits["video"])
@@ -587,16 +626,23 @@ async def check_daily_limit(
     }
 
 
-def _denied(tier: str, category: str, used: int, effective: int, rollover: int, daily_base: int, weekly: bool = False) -> dict:
+def _denied(
+    tier: str,
+    category: str,
+    used: int,
+    effective: int,
+    rollover: int,
+    daily_base: int,
+    weekly: bool = False,
+    user: User | None = None,
+) -> dict:
     """Build informative denial response."""
     cat_names = {"fast": "быстрых", "premium": "премиум", "opus": "Opus", "image": "картинок", "video": "видео"}
-    reset_at = get_msk_reset_at()
+    reset_at = get_weekly_reset_at(user) if weekly else get_msk_reset_at()
 
     now = datetime.now(MSK)
     if weekly:
-        # Weekly reset: next Monday 00:00 MSK
-        days_until_monday = (7 - now.weekday()) % 7 or 7
-        reset_point = (now + timedelta(days=days_until_monday)).replace(hour=0, minute=0, second=0, microsecond=0)
+        reset_point = datetime.fromisoformat(reset_at)
         hours_left = int((reset_point - now).total_seconds() // 3600)
         mins_left = int(((reset_point - now).total_seconds() % 3600) // 60)
     else:
@@ -672,9 +718,10 @@ async def get_limits_info(db: AsyncSession, user: User) -> dict:
     # For Pro/Elite: get weekly usage
     weekly_cache: dict[str, int] = {}
     is_weekly = tier in WEEKLY_TIERS
+    week_start = get_weekly_period_start(user) if is_weekly else None
     if is_weekly:
         for cat in ("premium", "opus", "image", "video"):
-            weekly_cache[cat] = await get_weekly_usage(db, tg_id, cat)
+            weekly_cache[cat] = await get_weekly_usage(db, tg_id, cat, week_start)
 
     def cat_info(cat: str) -> dict:
         # Pro/Elite: premium, opus, image, video = weekly
@@ -688,6 +735,8 @@ async def get_limits_info(db: AsyncSession, user: User) -> dict:
                 "rollover": 0,
                 "available": max(0, wlimit - wused),
                 "period": "weekly",
+                "period_start": week_start.isoformat() if week_start else None,
+                "reset_at": get_weekly_reset_at(user),
             }
         base = limits.get(cat, 0)
         rollover = getattr(row, f"rollover_{cat}", 0) if cat in ("fast", "premium", "opus") else 0
@@ -707,7 +756,7 @@ async def get_limits_info(db: AsyncSession, user: User) -> dict:
     return {
         "plan": tier,
         "date": get_msk_today().isoformat(),
-        "reset_at": get_msk_reset_at(),
+        "reset_at": get_weekly_reset_at(user) if is_weekly else get_msk_reset_at(),
         "fast": cat_info("fast"),
         "premium": cat_info("premium"),
         "opus": cat_info("opus"),

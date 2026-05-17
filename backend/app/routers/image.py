@@ -67,7 +67,7 @@ async def submit_image(
     # Check daily limits
     from app.services.daily_limits import check_daily_limit
     balance = float(user.balance_usd or 0)
-    check = await check_daily_limit(db, tg_id, req.model_id, tier, balance)
+    check = await check_daily_limit(db, tg_id, req.model_id, tier, balance, user)
     if not check.get("allowed"):
         raise HTTPException(
             429 if check.get("error") == "daily_limit_exceeded" else 403,
