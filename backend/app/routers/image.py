@@ -26,6 +26,7 @@ router = APIRouter(prefix="/api/image", tags=["image"])
 class ImageGenRequest(BaseModel):
     prompt: str
     model_id: str = "nano-banana"
+    source_image_url: str | None = None
 
 
 @router.post("/generate")
@@ -86,7 +87,7 @@ async def submit_image(
     await db.refresh(task)
 
     # Start generation in background
-    asyncio.create_task(_generate_image_bg(task.id, tg_id, req.model_id, req.prompt, tier))
+    asyncio.create_task(_generate_image_bg(task.id, tg_id, req.model_id, req.prompt, tier, req.source_image_url))
 
     return {"task_id": task.id, "status": "generating"}
 
@@ -148,7 +149,14 @@ async def image_history(
     ]
 
 
-async def _generate_image_bg(task_id: int, tg_id: int, model_id: str, prompt: str, tier: str):
+async def _generate_image_bg(
+    task_id: int,
+    tg_id: int,
+    model_id: str,
+    prompt: str,
+    tier: str,
+    source_image_url: str | None = None,
+):
     """Background task: generate image, save to disk, update task."""
     import httpx
 
@@ -159,7 +167,7 @@ async def _generate_image_bg(task_id: int, tg_id: int, model_id: str, prompt: st
         OPENROUTER_MODELS = {"nano-banana", "nano-banana-pro", "gpt-5-image", "gpt-5-image-mini"}
 
         if model_id in OPENROUTER_MODELS:
-            image_bytes = await _gen_openrouter(settings, model_id, prompt)
+            image_bytes = await _gen_openrouter(settings, model_id, prompt, source_image_url)
         elif model_id in ("kolors-v2", "kolors-v3"):
             image_bytes = await _gen_kolors(settings, model_id, prompt)
         else:
@@ -255,14 +263,27 @@ async def _update_task(task_id: int, status: str, error: str | None = None, imag
         logger.error(f"Failed to update task {task_id}: {e}")
 
 
-async def _gen_openrouter(settings, model_id: str, prompt: str) -> bytes | None:
+async def _gen_openrouter(settings, model_id: str, prompt: str, source_image_url: str | None = None) -> bytes | None:
     """Generate via OpenRouter."""
     import httpx
     import re
     from app.services.ai_router import get_openrouter_model
 
     openrouter_model = get_openrouter_model(model_id)
-    prompt_text = f"Generate an image based on this description. You MUST output ONLY the generated image, absolutely no text or commentary. Description: {prompt}"
+    if source_image_url:
+        prompt_text = (
+            "Edit the provided reference image according to the user's instructions. "
+            "Preserve the same main subject, identity, composition, and visual continuity unless the user explicitly asks to change them. "
+            "You MUST output ONLY the edited/generated image, absolutely no text or commentary. "
+            f"Instructions: {prompt}"
+        )
+        message_content: str | list[dict] = [
+            {"type": "text", "text": prompt_text},
+            {"type": "image_url", "image_url": {"url": source_image_url}},
+        ]
+    else:
+        prompt_text = f"Generate an image based on this description. You MUST output ONLY the generated image, absolutely no text or commentary. Description: {prompt}"
+        message_content = prompt_text
 
     async with httpx.AsyncClient(timeout=120.0) as client:
         resp = await client.post(
@@ -275,7 +296,7 @@ async def _gen_openrouter(settings, model_id: str, prompt: str) -> bytes | None:
             },
             json={
                 "model": openrouter_model,
-                "messages": [{"role": "user", "content": prompt_text}],
+                "messages": [{"role": "user", "content": message_content}],
                 "max_tokens": 8192,
             },
         )

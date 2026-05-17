@@ -99,6 +99,33 @@ function formatSpeed(m: AIModel) {
   return "Средняя";
 }
 
+function extractGeneratedImageUrl(content?: string): string | null {
+  if (!content) return null;
+  const trimmed = content.trim();
+  if (trimmed.startsWith("data:image/")) return trimmed;
+  const direct = trimmed.match(/^https?:\/\/\S+\.(?:png|jpe?g|webp|gif)(?:\?\S*)?$/i);
+  if (direct) return direct[0];
+  const embedded = trimmed.match(/(https?:\/\/\S+\.(?:png|jpe?g|webp|gif)(?:\?\S*)?)/i);
+  return embedded ? embedded[1] : null;
+}
+
+function findLastGeneratedImage(messages: Message[]): string | null {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const msg = messages[i];
+    if (msg.role !== "assistant") continue;
+    const url = extractGeneratedImageUrl(msg.content);
+    if (url) return url;
+  }
+  return null;
+}
+
+function looksLikeImageEdit(prompt: string): boolean {
+  const text = prompt.trim().toLowerCase();
+  if (!text) return false;
+  if (/(нов(ую|ое|ый|ая)|с нуля|друг(ую|ое|ой)|new image|from scratch)/i.test(text)) return false;
+  return /(измени|поменяй|замени|добавь|убери|удали|оставь|сохрани|переделай|сделай (?:его|ее|её|это|фон)|фон|цвет|стиль|поза|лицо|персонаж|логотип|текст|edit|change|replace|add|remove|keep|preserve|same)/i.test(text);
+}
+
 // ─── Types ───
 
 interface FileAttachment {
@@ -1564,10 +1591,22 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
     const imgLock = getModelLockInfo(selectedModel, auth.balanceUsd || 0, limits?.plan);
     if (imgLock) { setUpsellModal({ type: "locked", model: MODELS_MAP.get(selectedModel)?.name, tier: imgLock.tier }); return; }
     const prompt = input.trim();
-    const userMsg: Message = { role: "user", content: prompt, ts: Date.now() };
+    const attachedImage = pendingFile?.file_type === "image" ? pendingFile : null;
+    const lastGeneratedImage = !attachedImage && looksLikeImageEdit(prompt) ? findLastGeneratedImage(messages) : null;
+    const sourceImageUrl = attachedImage?.content || lastGeneratedImage || undefined;
+    const sourceFile: FileAttachment | undefined = attachedImage || (lastGeneratedImage ? {
+      file_id: "last-generated-image",
+      file_name: "Предыдущее изображение",
+      file_type: "image",
+      mime_type: "image/webp",
+      size: 0,
+      content: lastGeneratedImage,
+    } : undefined);
+    const userMsg: Message = { role: "user", content: prompt, ts: Date.now(), file: sourceFile };
     const history = [...messages, userMsg];
     setMessages(history);
     setInput("");
+    if (attachedImage) setPendingFile(null);
     setStreaming(true);
     setImageGenerating(true);
     setOverlayMinimized(false);
@@ -1578,7 +1617,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
       const res = await fetch(`${API_URL}/api/image/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
-        body: JSON.stringify({ prompt, model_id: selectedModel }),
+        body: JSON.stringify({ prompt, model_id: selectedModel, source_image_url: sourceImageUrl }),
       });
 
       if (!res.ok) {
@@ -1633,7 +1672,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
       setStreaming(false);
       setImageGenerating(false);
     }
-  }, [auth, input, streaming, messages, selectedModel, saveToSession, resetTextarea]);
+  }, [auth, input, streaming, messages, selectedModel, pendingFile, saveToSession, resetTextarea, limits?.plan]);
 
   const isImageModel = IMAGE_MODEL_IDS.has(selectedModel);
 
