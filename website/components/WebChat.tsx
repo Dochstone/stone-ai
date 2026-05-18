@@ -126,6 +126,17 @@ function looksLikeImageEdit(prompt: string): boolean {
   return /(измени|поменяй|замени|добавь|убери|удали|оставь|сохрани|переделай|сделай (?:его|ее|её|это|фон)|фон|цвет|стиль|поза|лицо|персонаж|логотип|текст|edit|change|replace|add|remove|keep|preserve|same)/i.test(text);
 }
 
+function isTransientAssistantError(content?: string): boolean {
+  const text = (content || "").trim();
+  return (
+    text === "Ошибка генерации. Попробуйте ещё раз." ||
+    text === "Ошибка соединения" ||
+    text === "Ошибка сервера" ||
+    text.startsWith("Таймаут генерации") ||
+    text.startsWith("Слишком длинный диалог")
+  );
+}
+
 // ─── Types ───
 
 interface FileAttachment {
@@ -1712,7 +1723,10 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
     const abort = new AbortController();
     abortRef.current = abort;
 
-    const apiMessages = history.slice(isGuest ? -6 : -15).map((m) => {
+    const apiMessages = history
+      .filter((m) => !(m.role === "assistant" && isTransientAssistantError(m.content)))
+      .slice(isGuest ? -6 : -15)
+      .map((m) => {
       if (m.file) {
         if (m.file.file_type === "image") {
           return {
@@ -1777,6 +1791,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
       const decoder = new TextDecoder();
       let assistantContent = "";
       let billing: Message["billing"] | undefined;
+      let streamHadError = false;
 
       setMessages([...history, { role: "assistant", content: "", ts: Date.now(), modelId: isGuest ? DEFAULT_MODEL : selectedModel }]);
 
@@ -1812,6 +1827,7 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
             if (data.usage) continue;
 
             if (data.error) {
+              streamHadError = true;
               const errStr = typeof data.error === "string" ? data.error : JSON.stringify(data.error);
               if (errStr.includes("context length") || errStr.includes("maximum")) {
                 assistantContent = "Слишком длинный диалог. Начните новый чат для продолжения.";
@@ -1835,7 +1851,9 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
       setMessages([...history, { role: "assistant", content: assistantContent, ts: Date.now(), billing }]);
 
       const userText = history[history.length - 1]?.content || "";
-      if (assistantContent) saveToSession(userText, assistantContent, billing);
+      if (assistantContent && !streamHadError && !isTransientAssistantError(assistantContent)) {
+        saveToSession(userText, assistantContent, billing);
+      }
     } catch (e: any) {
       if (e?.name === "AbortError") {
         // Stopped by user — keep what we have
