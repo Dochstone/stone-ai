@@ -110,7 +110,7 @@ const PLANS = [
   },
   {
     id: 'mini', name: 'Start', price: '990₽', priceSub: '/мес', stars: 762, tier: 'mini',
-    features: ['20+ моделей', '600 быстрых · 90 премиум /мес', '60 картинок · 13 видео-поинтов', 'GPT-5.1, Claude Sonnet'],
+    features: ['20+ моделей', '600 быстрых · 150 премиум /мес', '60 картинок · 13 видео-поинтов', 'GPT-5.1, Claude Sonnet'],
     color: '#007aff', gradient: 'linear-gradient(135deg, #007aff, #5856d6)',
     icon: '⚡',
   },

@@ -32,7 +32,7 @@ PLANS = {
         "credits": 1000,
         "limits": {
             "text_fast": 600,        # 20/day × 30
-            "text_premium": 90,      # 3/day × 30
+            "text_premium": 150,     # 5/day × 30
             "opus_limit": 0,         # locked on Start
             "images": 60,            # 2/day × 30
             "videos": 30,            # 1/day × 30
@@ -119,8 +119,9 @@ BUDGET_VIDEO_MODELS = {"ltx-video", "wan-2", "hunyuan"}
 MINI_MODELS = FREE_MODELS | {
     "claude-haiku-4.5", "claude-sonnet-4", "gpt-4.1-mini", "gpt-5.1",
     "gemini-2.5-flash", "grok-3-mini", "deepseek-r1", "deepseek-v3.2",
-    # All image models
-    "nano-banana-pro", "gpt-5-image-mini", "gpt-5-image",
+    # Start image models. Pro image models stay on max+ because their
+    # request weights exceed the Start image quota.
+    "gpt-5-image-mini",
     # Budget video models
 } | BUDGET_VIDEO_MODELS
 

@@ -68,7 +68,7 @@ MSK = timezone(timedelta(hours=3))
 
 DAILY_LIMITS = {
     "free":     {"fast": 10, "premium": 2,  "opus": 0,  "image": 0, "video": 0},  # free uses trial limits (2 img + 1 vid TOTAL), not daily
-    "mini":     {"fast": 20, "premium": 3,  "opus": 0,  "image": 2, "video": 1},
+    "mini":     {"fast": 20, "premium": 5,  "opus": 0,  "image": 2, "video": 1},
     "max":      {"fast": 50, "premium": 4,  "opus": 1,  "image": 5, "video": 1},
     "max-pro":  {"fast": 150, "premium": 12, "opus": 2, "image": 10, "video": 3},
 }
@@ -90,7 +90,7 @@ ROLLOVER_RATE = {
 
 ROLLOVER_CAP = {
     "free":    {"fast": 0,   "premium": 0, "opus": 0},
-    "mini":    {"fast": 25,  "premium": 2, "opus": 0},
+    "mini":    {"fast": 25,  "premium": 4, "opus": 0},
     "max":     {"fast": 35,  "premium": 4, "opus": 1},
     "max-pro": {"fast": 175, "premium": 9, "opus": 2},
 }
@@ -139,10 +139,10 @@ MODEL_WEIGHTS: dict[str, int] = {
     # FAST tier — most cost weight 1, mistral-large is 15x flash so weight 3
     "mistral-large-25": 3,
 
-    # PREMIUM tier — Sonnet ($3/$15) and gpt-5.1 ($2/$16) are 2x of typical premium
+    # PREMIUM tier — Sonnet-class and newer flagship models can consume
+    # multiple units. GPT-5.1 is intentionally 1x because Start advertises it.
     "claude-sonnet-4": 2,
     "claude-sonnet-4.5": 2,
-    "gpt-5.1": 2,
     "gpt-5.4": 2,
     "grok-3": 2,
     "perplexity-sonar-pro": 2,

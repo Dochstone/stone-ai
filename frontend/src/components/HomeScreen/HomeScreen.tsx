@@ -31,8 +31,8 @@ const FILTERS: { id: FilterId; label: string }[] = [
 function applyFilter(models: any[], filter: FilterId) {
   switch (filter) {
     case 'all': return models
-    case 'free': return models.filter(m => m.tier === 'lite')
-    case 'pro': return models.filter(m => m.tier === 'premium')
+    case 'free': return models.filter(m => (m.required_tier || (m.tier === 'lite' ? 'free' : 'max')) === 'free')
+    case 'pro': return models.filter(m => (m.required_tier || (m.tier === 'lite' ? 'free' : 'max')) === 'max')
     case 'image': return models.filter(m => m.category === 'image')
     case 'search': return models.filter(m => m.category === 'search')
     case 'reason': return models.filter(m => m.category === 'reason')
@@ -99,7 +99,8 @@ export function HomeScreen() {
 
   const handleModelClick = (model: typeof models[0]) => {
     haptic('medium')
-    if (model.tier === 'premium') {
+    const requiredTier = model.required_tier || (model.tier === 'premium' ? 'max' : 'free')
+    if (requiredTier !== 'free') {
       setSelectedModel(model)
       setScreen('model_detail')
     } else {
@@ -276,7 +277,8 @@ function ModelCard({
   model: any; palette: any; priceWeighted?: number; onClick: () => void
 }) {
   const p = palette
-  const isPremium = model.tier === 'premium'
+  const requiredTier = model.required_tier || (model.tier === 'premium' ? 'max' : 'free')
+  const accessLabel = model.access_label || (requiredTier === 'mini' ? 'Start' : requiredTier === 'max' ? 'Pro' : 'Free')
 
   const catColors: Record<string, string> = {
     image: '#f5a623',
@@ -291,8 +293,10 @@ function ModelCard({
       onClick={onClick}
       style={{
         background: 'rgba(8,16,12,0.95)',
-        border: `1px solid ${isPremium
+        border: `1px solid ${requiredTier === 'max'
           ? 'rgba(191,90,242,0.25)'
+          : requiredTier === 'mini'
+            ? 'rgba(69,174,245,0.25)'
           : `rgba(${p.primaryRgb},0.25)`}`,
         borderRadius: 14, padding: '12px 8px 10px',
         textAlign: 'center', cursor: 'pointer',
@@ -306,10 +310,10 @@ function ModelCard({
       <div style={{
         position: 'absolute', top: 6, right: 6,
         fontSize: 8, fontWeight: 700, padding: '2px 5px', borderRadius: 4,
-        background: isPremium ? 'rgba(191,90,242,0.2)' : `rgba(${p.primaryRgb},0.15)`,
-        color: isPremium ? '#bf5af2' : p.primary,
+        background: requiredTier === 'max' ? 'rgba(191,90,242,0.2)' : requiredTier === 'mini' ? 'rgba(69,174,245,0.18)' : `rgba(${p.primaryRgb},0.15)`,
+        color: requiredTier === 'max' ? '#bf5af2' : requiredTier === 'mini' ? '#45AEF5' : p.primary,
       }}>
-        {isPremium ? 'PRO' : 'FREE'}
+        {accessLabel.toUpperCase()}
       </div>
 
       {/* Category badge (for non-chat) */}
@@ -337,11 +341,11 @@ function ModelCard({
       {/* Tier badge */}
       <div style={{
         fontSize: 9, fontWeight: 800, marginTop: 'auto', paddingTop: 6,
-        color: isPremium ? '#bf5af2' : '#00cc66',
-        background: isPremium ? 'rgba(191,90,242,0.1)' : `rgba(${p.primaryRgb},0.1)`,
+        color: requiredTier === 'max' ? '#bf5af2' : requiredTier === 'mini' ? '#45AEF5' : '#00cc66',
+        background: requiredTier === 'max' ? 'rgba(191,90,242,0.1)' : requiredTier === 'mini' ? 'rgba(69,174,245,0.1)' : `rgba(${p.primaryRgb},0.1)`,
         padding: '2px 6px', borderRadius: 5, display: 'inline-block',
       }}>
-        {isPremium ? 'PRO' : 'FREE'}
+        {accessLabel.toUpperCase()}
       </div>
     </div>
   )

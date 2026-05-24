@@ -20,6 +20,9 @@ export interface Model {
   price_output?: number
   context_length?: string
   category?: string
+  required_tier?: 'free' | 'mini' | 'max'
+  access_label?: string
+  weight?: number
 }
 
 export interface ChatMsg {

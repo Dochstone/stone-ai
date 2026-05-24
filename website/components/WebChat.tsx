@@ -51,7 +51,7 @@ const MINI_MODEL_IDS = new Set([
   "llama-4-maverick", "mistral-large-25", "nano-banana",
   "claude-sonnet-4", "gpt-4.1-mini", "gpt-5.1", "gemini-2.5-flash",
   "grok-3-mini", "deepseek-r1", "deepseek-v3.2",
-  "nano-banana-pro", "gpt-5-image-mini", "gpt-5-image",
+  "gpt-5-image-mini",
   "wan-2", "hunyuan", "ltx-video",
 ]);
 // Models gated above Start — drives both lock icon and the upsell modal.

@@ -276,7 +276,7 @@ def send_subscription_activated(to_email: str, tier: str, price_rub: float, tg_i
     tier_features = {
         "mini": [
             "20+ моделей, включая GPT-5 и Claude 4.5 Sonnet",
-            "600 быстрых + 90 премиум-запросов в месяц",
+            "600 быстрых + 150 премиум-запросов в месяц",
             "60 картинок и 13 видео-поинтов + триалы новых моделей",
         ],
         "max": [

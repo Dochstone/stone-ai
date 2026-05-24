@@ -99,6 +99,19 @@ def _model_weight(model_id: str) -> int:
         return 1
 
 
+def _required_tier(model_id: str) -> str:
+    """Return the minimum subscription tier that can use this model."""
+    try:
+        from app.services.subscription import get_required_tier
+        return get_required_tier(model_id)
+    except Exception:
+        return "max"
+
+
+def _access_label(required_tier: str) -> str:
+    return {"free": "Free", "mini": "Start", "max": "Pro"}.get(required_tier, "Pro")
+
+
 MODELS_INFO = [
     {
         "id": m["id"],
@@ -113,6 +126,8 @@ MODELS_INFO = [
         "context_length": m["context_length"],
         "category": m["category"],
         "weight": _model_weight(m["id"]),
+        "required_tier": _required_tier(m["id"]),
+        "access_label": _access_label(_required_tier(m["id"])),
         **({"price_per_image": m["price_per_image"]} if "price_per_image" in m else {}),
     }
     for m in MODELS_REGISTRY

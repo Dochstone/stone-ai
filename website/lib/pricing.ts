@@ -222,7 +222,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     features: [
       "20+ моделей включая GPT-5.1 и Claude Sonnet",
       "600 быстрых запросов в месяц",
-      "90 премиум запросов в месяц",
+      "150 премиум запросов в месяц",
       "60 картинок · 13 видео-поинтов в месяц",
       "+ 1 пробное Standard и 1 Premium видео в месяц",
       "Инструменты оплачиваются с баланса",
@@ -232,7 +232,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     icon: "⚡",
     color: "#22D3EE",
     img: "/plan-mini.jpg?v=2",
-    compactSummary: "20+ моделей · 600 быстрых · 90 премиум · 60 картинок · 13 видео-поинтов",
+    compactSummary: "20+ моделей · 600 быстрых · 150 премиум · 60 картинок · 13 видео-поинтов",
   },
   {
     id: "max",
@@ -339,7 +339,7 @@ export const PLAN_LIMIT_LABELS = {
   mini: {
     models: "20+",
     chat: "600/мес",
-    premium: "90/мес",
+    premium: "150/мес",
     opus: "—",
     images: "60/мес",
     video: "13 поинтов + триалы",

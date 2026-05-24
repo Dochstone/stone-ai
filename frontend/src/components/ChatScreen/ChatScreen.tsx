@@ -92,8 +92,14 @@ export function ChatScreen() {
         </div>
 
         <Tag
-          text={currentModel?.tier === 'premium' ? 'PRO' : 'FREE'}
-          accent={currentModel?.tier === 'premium' ? '#bf5af2' : p.primary}
+          text={currentModel?.access_label?.toUpperCase() || (currentModel?.tier === 'premium' ? 'PRO' : 'FREE')}
+          accent={
+            currentModel?.required_tier === 'max'
+              ? '#bf5af2'
+              : currentModel?.required_tier === 'mini'
+                ? '#45AEF5'
+                : p.primary
+          }
         />
       </div>
 
@@ -110,7 +116,8 @@ export function ChatScreen() {
         }}>
           <div style={{ fontSize: 10, color: '#5a8a70', padding: '6px 10px', textTransform: 'uppercase', fontFamily: 'monospace' }}>select model</div>
           {models.map(md => {
-            const isPremium = md.tier === 'premium'
+            const accessLabel = md.access_label || (md.tier === 'premium' ? 'Pro' : 'Free')
+            const accessColor = md.required_tier === 'max' ? '#bf5af2' : md.required_tier === 'mini' ? '#45AEF5' : p.primary
             return (
               <div
                 key={md.id}
@@ -127,13 +134,16 @@ export function ChatScreen() {
                   <div style={{ fontSize: 13, fontWeight: 600, color: '#e0f0e8' }}>{md.name}</div>
                   <div style={{ fontSize: 10, color: '#5a8a70', fontFamily: 'monospace' }}>{md.company}</div>
                 </div>
-                {isPremium && md.price_weighted ? (
-                  <span style={{ fontSize: 9, color: '#bf5af2', fontWeight: 700 }}>
+                {md.tier === 'premium' && md.price_weighted ? (
+                  <span style={{ fontSize: 9, color: accessColor, fontWeight: 700 }}>
                     ${md.price_weighted.toFixed(1)}/M
                   </span>
                 ) : (
                   <span style={{ fontSize: 9, color: p.primary, fontWeight: 700 }}>FREE</span>
                 )}
+                <span style={{ fontSize: 9, color: accessColor, fontWeight: 800 }}>
+                  {accessLabel.toUpperCase()}
+                </span>
                 {modelId === md.id && (
                   <div style={{ width: 8, height: 8, borderRadius: '50%', background: p.primary, boxShadow: `0 0 8px ${p.primary}` }} />
                 )}

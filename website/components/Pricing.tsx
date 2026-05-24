@@ -39,7 +39,7 @@ const plans = PRICING_PLANS; /*
   {
     id: "mini", name: "Start", price: "590₽", oldPrice: "890₽", priceNum: 590, premium: false, period: "/мес", desc: "20+ моделей",
     badge: "Старт", accent: false,
-    features: ["20+ моделей включая GPT-5.1 и Claude Sonnet", "600 запросов к быстрым моделям", "3 премиум запроса в день", "60 картинок и 30 видео в месяц", "Все инструменты со скидкой"],
+    features: ["20+ моделей включая GPT-5.1 и Claude Sonnet", "600 запросов к быстрым моделям", "5 премиум запросов в день", "60 картинок и 30 видео в месяц", "Все инструменты со скидкой"],
     locked: ["Claude Opus", "3D модели"],
     cta: "Выбрать Start", icon: "⚡", color: "#22D3EE", img: "/plan-mini.jpg?v=2",
   },

@@ -50,16 +50,21 @@ export function ModelDetailScreen() {
   }
 
   const model = selectedModel
-  const isPremium = model.tier === 'premium'
-  const hasSub = user.plan === 'mini' || user.plan === 'max' || user.plan === 'max-pro'
+  const requiredTier = model.required_tier || (model.tier === 'premium' ? 'max' : 'free')
+  const isPremium = requiredTier !== 'free'
+  const hasStart = user.plan === 'mini' || user.plan === 'max' || user.plan === 'max-pro'
+  const hasPro = user.plan === 'max' || user.plan === 'max-pro'
   const hasPass = user.hasPass
-  const canUsePremium = hasSub || hasPass
+  const canUseModel = requiredTier === 'free'
+    || (requiredTier === 'mini' && (hasStart || hasPass))
+    || (requiredTier === 'max' && (hasPro || hasPass))
+  const accessLabel = model.access_label || (requiredTier === 'mini' ? 'Start' : requiredTier === 'max' ? 'Pro' : 'Free')
   const descKey = MODEL_DESC_KEY[model.id] || 'mdesc_gpt4o_mini'
   const description = (t as any)[descKey] || model.desc || ''
 
   const handleUse = () => {
     haptic('medium')
-    if (isPremium && !canUsePremium) {
+    if (!canUseModel) {
       // No subscription — redirect to plans
       setScreen('plans')
     } else {
@@ -150,11 +155,11 @@ export function ModelDetailScreen() {
           fontSize: 11,
           fontWeight: 800,
           letterSpacing: '0.5px',
-          background: isPremium ? 'rgba(191,90,242,0.12)' : 'rgba(0,255,136,0.12)',
-          color: isPremium ? '#bf5af2' : '#00ff88',
-          border: `1px solid ${isPremium ? 'rgba(191,90,242,0.25)' : 'rgba(0,255,136,0.25)'}`,
+          background: requiredTier === 'max' ? 'rgba(191,90,242,0.12)' : requiredTier === 'mini' ? 'rgba(69,174,245,0.12)' : 'rgba(0,255,136,0.12)',
+          color: requiredTier === 'max' ? '#bf5af2' : requiredTier === 'mini' ? '#45AEF5' : '#00ff88',
+          border: `1px solid ${requiredTier === 'max' ? 'rgba(191,90,242,0.25)' : requiredTier === 'mini' ? 'rgba(69,174,245,0.25)' : 'rgba(0,255,136,0.25)'}`,
         }}>
-          {isPremium ? 'PRO' : 'FREE'}
+          {accessLabel.toUpperCase()}
         </span>
         <span style={{
           padding: '5px 14px',
@@ -189,7 +194,7 @@ export function ModelDetailScreen() {
       </div>
 
       {/* Premium warning if needed */}
-      {isPremium && !canUsePremium && (
+      {!canUseModel && (
         <div
           className="glass-card"
           style={{
@@ -226,7 +231,7 @@ export function ModelDetailScreen() {
             cursor: 'pointer',
           }}
         >
-          {isPremium && !canUsePremium
+          {!canUseModel
             ? `\ud83d\udc8e ${t.model_detail_buy_sub}`
             : `\u26a1 ${t.model_detail_use}`
           }
