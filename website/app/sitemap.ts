@@ -9,7 +9,7 @@ import { AUTHORS } from "@/lib/authors";
 import { SITE_URL } from "@/lib/constants";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const now = new Date("2026-05-13");
+  const now = new Date();
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: `${SITE_URL}/`, lastModified: now, changeFrequency: "weekly", priority: 1.0 },

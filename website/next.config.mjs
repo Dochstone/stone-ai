@@ -36,6 +36,20 @@ const nextConfig = {
   async headers() {
     return [
       {
+        source: "/llms.txt",
+        headers: [
+          { key: "Content-Type", value: "text/plain; charset=utf-8" },
+          { key: "Cache-Control", value: "public, max-age=3600, must-revalidate" },
+        ],
+      },
+      {
+        source: "/llms-full.txt",
+        headers: [
+          { key: "Content-Type", value: "text/plain; charset=utf-8" },
+          { key: "Cache-Control", value: "public, max-age=3600, must-revalidate" },
+        ],
+      },
+      {
         source: "/:all*(svg|jpg|jpeg|png|webp|avif|ico|gif)",
         headers: [
           { key: "Cache-Control", value: "public, max-age=31536000, immutable" },

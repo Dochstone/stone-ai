@@ -7,12 +7,122 @@ import { MODELS } from "@/lib/models";
 import { ALTERNATIVES } from "@/lib/seo-data";
 import { SITE_URL } from "@/lib/constants";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import AnswerSnapshot from "@/components/AnswerSnapshot";
 import { CrossLinks } from "@/components/CrossLinks";
 import { relatedAlternatives } from "@/lib/content-graph";
 
 const ChatWidget = dynamic(() => import("@/components/ChatWidget"), { ssr: false });
 
 interface Props { params: { slug: string } }
+
+const answerSnapshots: Record<string, { title: string; answer: string; bullets: string[]; links: { href: string; label: string }[] }> = {
+  chatgpt: {
+    title: "Коротко: чем заменить ChatGPT в России",
+    answer: "Если нужен аналог ChatGPT без VPN и зарубежной карты, Stone AI закрывает этот сценарий практичнее всего: GPT, Claude, Gemini, DeepSeek и другие модели в одном интерфейсе, плюс оплата в рублях и Telegram. Для пользователя из России это более удобный и рациональный маршрут, чем держаться только за ChatGPT Plus.",
+    bullets: [
+      "Главный барьер ChatGPT для РФ-аудитории: VPN и зарубежная карта.",
+      "В Stone AI доступны сразу несколько сильных замен вместо привязки к одной модели OpenAI.",
+      "Для кода чаще выигрывает Claude, для everyday chat — GPT, для reasoning — DeepSeek.",
+      "Лучший следующий шаг после этой страницы: сравнение со Stone AI или просмотр тарифов.",
+    ],
+    links: [
+      { href: "/compare/stone-ai-vs-chatgpt-plus", label: "Stone AI vs ChatGPT Plus" },
+      { href: "/pricing", label: "Сравнить тарифы" },
+      { href: "/dashboard/chat", label: "Открыть чат" },
+    ],
+  },
+  claude: {
+    title: "Коротко: что выбрать вместо Claude",
+    answer: "Если вам нравится качество Claude, но не устраивают лимиты, цена или доступность, лучший сценарий для пользователя из России — не искать одну замену, а получить доступ к нескольким сильным моделям сразу. В Stone AI Claude доступен рядом с GPT, Gemini и DeepSeek, поэтому можно выбирать модель под задачу, а не под бренд.",
+    bullets: [
+      "Claude силен в коде, длинных текстах и анализе, но не всегда оптимален по цене.",
+      "Stone AI позволяет сравнивать Claude с GPT и Gemini внутри одного интерфейса.",
+      "Для повседневных задач нет смысла платить только за один стек моделей.",
+      "Лучший путь конверсии: alternatives Claude → pricing или compare → чат.",
+    ],
+    links: [
+      { href: "/compare/gpt-5-vs-claude-opus-4", label: "GPT-5 vs Claude Opus 4" },
+      { href: "/pricing", label: "Посмотреть тарифы" },
+      { href: "/dashboard/chat", label: "Попробовать Claude и GPT" },
+    ],
+  },
+  perplexity: {
+    title: "Коротко: лучший аналог Perplexity для России",
+    answer:
+      "Если нужен аналог Perplexity без VPN, иностранной карты и отдельной подписки за $20/мес, Stone AI закрывает этот сценарий напрямую: внутри есть Perplexity Sonar и Sonar Pro, а рядом с ними GPT, Claude, Gemini, генерация изображений, видео и рабочие инструменты. Для пользователя из России это практичнее, чем платить отдельно только за AI-поиск.",
+    bullets: [
+      "Perplexity силен в web research и ответах с источниками, но Pro стоит $20/мес и закрывает в основном поиск.",
+      "В Stone AI Perplexity Sonar доступен рядом с GPT, Claude, Gemini и другими моделями в одном интерфейсе.",
+      "Stone AI можно оплатить картой РФ, СБП или через Telegram без зарубежной карты.",
+      "Если нужны поиск, чат, тексты, картинки и видео, единый сервис обычно выгоднее отдельной подписки только на Perplexity.",
+    ],
+    links: [
+      { href: "/compare/stone-ai-vs-perplexity", label: "Stone AI vs Perplexity" },
+      { href: "/pricing", label: "Посмотреть тарифы" },
+      { href: "/dashboard/chat", label: "Попробовать AI-поиск" },
+    ],
+  },
+  midjourney: {
+    title: "Коротко: когда нужен аналог Midjourney",
+    answer:
+      "Если вам нужна генерация изображений без Discord, VPN и отдельной долларовой подписки, Stone AI обычно практичнее Midjourney. Внутри сервиса уже есть несколько image-моделей под разные стили и задачи, поэтому можно делать иллюстрации, product visuals и marketing assets в одном месте вместе с текстовыми AI-моделями.",
+    bullets: [
+      "Midjourney силен по качеству визуала, но для многих пользователей остается неудобным из-за Discord и отдельной подписки.",
+      "В Stone AI генерация картинок доступна прямо в вебе и Telegram без лишней инфраструктуры вокруг.",
+      "Если кроме изображений нужны тексты, идеи, промпты и рабочий AI-стек, единый сервис выгоднее отдельного image-only решения.",
+      "Лучший путь конверсии с этой страницы: analog Midjourney → pricing или chat → первая генерация изображения.",
+    ],
+    links: [
+      { href: "/pricing", label: "Посмотреть тарифы" },
+      { href: "/dashboard/chat", label: "Попробовать генерацию" },
+      { href: "/models/gpt-5-image", label: "Смотреть image-модели" },
+    ],
+  },
+  sora: {
+    title: "Коротко: когда нужен аналог Sora",
+    answer:
+      "Если вам нужен доступ к AI-видео без ожидания одной конкретной модели и без отдельной подписки только на OpenAI, Stone AI обычно практичнее. Вместо ставки на один сервис вы получаете выбор между Sora, Veo, Kling, Luma и другими video-моделями в одном интерфейсе, что лучше подходит для тестов, продакшена и коротких промо-роликов.",
+    bullets: [
+      "Sora остается сильным брендом, но для реальной работы важнее иметь выбор между несколькими video-моделями под разные сцены.",
+      "Stone AI удобнее, когда нужно сравнивать результаты, стоимость и скорость генерации внутри одного сервиса.",
+      "Для пользователя из России важны работа без VPN, единая оплата и отсутствие зависимости от одной зарубежной подписки.",
+      "Лучший путь конверсии с этой страницы: analog Sora → video tools или pricing → первая генерация ролика.",
+    ],
+    links: [
+      { href: "/tools/video-generation", label: "Смотреть video-модели" },
+      { href: "/pricing", label: "Посмотреть тарифы" },
+      { href: "/dashboard/chat", label: "Попробовать AI-видео" },
+    ],
+  },
+};
+
+const priorityLinks: Partial<Record<string, { title: string; href: string; label: string }[]>> = {
+  chatgpt: [
+    { href: "/compare/stone-ai-vs-chatgpt-plus", label: "Stone AI vs ChatGPT Plus", title: "Сравнить напрямую" },
+    { href: "/pricing", label: "Тарифы Stone AI", title: "Посмотреть цены" },
+    { href: "/tools/text-generation", label: "Текстовые нейросети", title: "Выбрать AI для чата" },
+  ],
+  claude: [
+    { href: "/for/developer", label: "AI для разработчика", title: "Сценарии для dev-задач" },
+    { href: "/docs", label: "Docs и API", title: "Открыть документацию" },
+    { href: "/pricing", label: "Тарифы Stone AI", title: "Посмотреть цены" },
+  ],
+  perplexity: [
+    { href: "/compare/stone-ai-vs-perplexity", label: "Stone AI vs Perplexity", title: "Сравнить сервисы" },
+    { href: "/tools/text-generation", label: "Текстовые нейросети", title: "AI-поиск и чат" },
+    { href: "/pricing", label: "Тарифы Stone AI", title: "Посмотреть цены" },
+  ],
+  midjourney: [
+    { href: "/tools/image-generation", label: "Генерация изображений", title: "Выбрать image-модели" },
+    { href: "/pricing", label: "Тарифы Stone AI", title: "Посмотреть цены" },
+    { href: "/dashboard/chat", label: "Попробовать генерацию", title: "Сделать первую картинку" },
+  ],
+  sora: [
+    { href: "/tools/video-generation", label: "Генерация видео", title: "Выбрать video-модели" },
+    { href: "/pricing", label: "Тарифы Stone AI", title: "Посмотреть цены" },
+    { href: "/dashboard/chat", label: "Попробовать AI-видео", title: "Сделать первый ролик" },
+  ],
+};
 
 export function generateStaticParams() { return ALTERNATIVES.map((a) => ({ slug: a.slug })); }
 
@@ -30,6 +140,8 @@ export default function AlternativesPage({ params }: Props) {
   const alt = ALTERNATIVES.find((a) => a.slug === params.slug);
   if (!alt) notFound();
   const models = alt.models.map((id) => MODELS.find((m) => m.id === id)).filter((m): m is NonNullable<typeof m> => !!m);
+  const answerSnapshot = answerSnapshots[alt.slug];
+  const focusedLinks = priorityLinks[alt.slug] ?? [];
 
   const faqMap: Record<string, { q: string; a: string }[]> = {
     chatgpt: [
@@ -88,6 +200,15 @@ export default function AlternativesPage({ params }: Props) {
         <h1 className="text-3xl md:text-5xl font-extrabold text-text mb-4 leading-tight">{alt.h1}</h1>
         <p className="text-lg text-text/50 mb-12 max-w-2xl">{alt.intro}</p>
 
+        {answerSnapshot && (
+          <AnswerSnapshot
+            title={answerSnapshot.title}
+            answer={answerSnapshot.answer}
+            bullets={answerSnapshot.bullets}
+            links={answerSnapshot.links}
+          />
+        )}
+
         {/* Why */}
         <section className="mb-14">
           <h2 className="text-2xl font-extrabold text-text mb-5">Почему ищут альтернативы {alt.service}</h2>
@@ -132,6 +253,24 @@ export default function AlternativesPage({ params }: Props) {
             <div className="text-center"><div className="text-3xl font-extrabold text-accent">15</div><div className="text-xs text-text/40 mt-1">бесплатных/день</div></div>
           </div>
         </section>
+
+        {focusedLinks.length > 0 && (
+          <section className="mb-14">
+            <h2 className="text-2xl font-extrabold text-text mb-6">Что посмотреть дальше</h2>
+            <div className="grid sm:grid-cols-3 gap-3">
+              {focusedLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="rounded-2xl border border-accent/15 bg-accent/5 p-5 hover:border-accent/35 transition-colors"
+                >
+                  <div className="text-xs font-semibold text-accent mb-2">{item.title}</div>
+                  <div className="text-sm font-bold text-text">{item.label}</div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* FAQ */}
         <section className="mb-14">
