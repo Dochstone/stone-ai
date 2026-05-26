@@ -96,6 +96,7 @@ export default function Footer() {
             <ul className="space-y-2.5 text-[13px] text-text/50">
               <li><a href="/about" className="hover:text-text transition-colors">О Stone AI</a></li>
               <li><a href="/pricing" className="hover:text-text transition-colors">Тарифы</a></li>
+              <li><a href="/answers" className="hover:text-text transition-colors">AI-ответы</a></li>
               <li><a href="/blog" className="hover:text-text transition-colors">Блог</a></li>
               <li><a href="/referral" className="hover:text-text transition-colors">Рефералы</a></li>
               <li><a href="/docs" className="hover:text-text transition-colors">API Docs</a></li>

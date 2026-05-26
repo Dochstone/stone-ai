@@ -10,6 +10,8 @@ interface RefUtm {
   utm_source?: string;
   utm_medium?: string;
   utm_campaign?: string;
+  utm_content?: string;
+  utm_term?: string;
 }
 
 function readRefUtm(): RefUtm {
@@ -24,6 +26,10 @@ function readRefUtm(): RefUtm {
     if (med) out.utm_medium = med.slice(0, 64);
     const cmp = params.get("utm_campaign");
     if (cmp) out.utm_campaign = cmp.slice(0, 128);
+    const content = params.get("utm_content");
+    if (content) out.utm_content = content.slice(0, 128);
+    const term = params.get("utm_term");
+    if (term) out.utm_term = term.slice(0, 128);
     return out;
   } catch {
     return {};
@@ -54,10 +60,17 @@ export default function PageTracker() {
       }
       if (document.referrer && !document.referrer.includes("stoneai.ru")) {
         utm.first_referrer = document.referrer;
+        if (!utm.utm_source) {
+          const refHost = new URL(document.referrer).hostname.replace(/^www\./, "");
+          if (refHost) {
+            utm.utm_source = refHost.slice(0, 64);
+            utm.utm_medium = utm.utm_medium || "referral";
+          }
+        }
       }
-      if (Object.keys(utm).length > 0) {
-        localStorage.setItem("stone_utm", JSON.stringify(utm));
-      }
+      utm.first_landing_path = window.location.pathname;
+      utm.first_landing_url = window.location.href.slice(0, 700);
+      localStorage.setItem("stone_utm", JSON.stringify(utm));
     } catch {}
   }, []);
 

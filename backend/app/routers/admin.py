@@ -1227,7 +1227,11 @@ async def web_admin_user_detail(
             "utm_source": getattr(user, "utm_source", None),
             "utm_medium": getattr(user, "utm_medium", None),
             "utm_campaign": getattr(user, "utm_campaign", None),
+            "utm_content": getattr(user, "utm_content", None),
+            "utm_term": getattr(user, "utm_term", None),
             "first_referrer": getattr(user, "first_referrer", None),
+            "first_landing_path": getattr(user, "first_landing_path", None),
+            "first_landing_url": getattr(user, "first_landing_url", None),
         },
         "recent_usage": [
             {"date": str(u.date), "fast": u.fast_used, "premium": u.premium_used, "opus": u.opus_used, "image": u.image_used, "video": u.video_used}

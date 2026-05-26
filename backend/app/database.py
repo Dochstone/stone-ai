@@ -65,6 +65,15 @@ async def migrate_users_table():
         # Anti-abuse
         ("last_ip", "VARCHAR(45)"),
         ("fingerprint", "VARCHAR(64)"),
+        # Acquisition analytics
+        ("utm_source", "VARCHAR(128)"),
+        ("utm_medium", "VARCHAR(128)"),
+        ("utm_campaign", "VARCHAR(128)"),
+        ("utm_content", "VARCHAR(128)"),
+        ("utm_term", "VARCHAR(128)"),
+        ("first_referrer", "VARCHAR(512)"),
+        ("first_landing_path", "VARCHAR(500)"),
+        ("first_landing_url", "VARCHAR(700)"),
         # Subscription tier
         ("subscription_tier", "VARCHAR(20) DEFAULT 'free'"),
         ("credits_balance", "INTEGER DEFAULT 0"),
@@ -168,6 +177,10 @@ async def init_db():
         for sql in [
             "ALTER TABLE video_tasks ADD COLUMN IF NOT EXISTS options_json TEXT",
             "ALTER TABLE video_tasks ADD COLUMN IF NOT EXISTS points_charged INTEGER DEFAULT 0",
+            "ALTER TABLE page_views ADD COLUMN IF NOT EXISTS utm_content VARCHAR(128)",
+            "ALTER TABLE page_views ADD COLUMN IF NOT EXISTS utm_term VARCHAR(128)",
+            "CREATE INDEX IF NOT EXISTS ix_page_views_utm_source_created ON page_views(utm_source, created_at DESC) WHERE utm_source IS NOT NULL",
+            "CREATE INDEX IF NOT EXISTS ix_users_utm_source_joined ON users(utm_source, joined_at DESC) WHERE utm_source IS NOT NULL",
         ]:
             try:
                 await conn.execute(text(sql))

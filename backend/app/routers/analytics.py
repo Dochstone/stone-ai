@@ -26,6 +26,8 @@ class TrackRequest(BaseModel):
     utm_source: str | None = Field(default=None, max_length=64)
     utm_medium: str | None = Field(default=None, max_length=64)
     utm_campaign: str | None = Field(default=None, max_length=128)
+    utm_content: str | None = Field(default=None, max_length=128)
+    utm_term: str | None = Field(default=None, max_length=128)
 
 
 @router.post("/track")
@@ -67,6 +69,8 @@ async def track_page_view(
         utm_source=(body.utm_source or "")[:64] or None,
         utm_medium=(body.utm_medium or "")[:64] or None,
         utm_campaign=(body.utm_campaign or "")[:128] or None,
+        utm_content=(body.utm_content or "")[:128] or None,
+        utm_term=(body.utm_term or "")[:128] or None,
     )
     db.add(pv)
     return {"ok": True}

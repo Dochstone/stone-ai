@@ -95,7 +95,11 @@ class GoogleAuthRequest(BaseModel):
     utm_source: str | None = None
     utm_medium: str | None = None
     utm_campaign: str | None = None
+    utm_content: str | None = None
+    utm_term: str | None = None
     first_referrer: str | None = None
+    first_landing_path: str | None = None
+    first_landing_url: str | None = None
 
 
 class YandexAuthRequest(BaseModel):
@@ -104,7 +108,11 @@ class YandexAuthRequest(BaseModel):
     utm_source: str | None = None
     utm_medium: str | None = None
     utm_campaign: str | None = None
+    utm_content: str | None = None
+    utm_term: str | None = None
     first_referrer: str | None = None
+    first_landing_path: str | None = None
+    first_landing_url: str | None = None
 
 
 class VerifyEmailRequest(BaseModel):
@@ -113,7 +121,11 @@ class VerifyEmailRequest(BaseModel):
     utm_source: str | None = None
     utm_medium: str | None = None
     utm_campaign: str | None = None
+    utm_content: str | None = None
+    utm_term: str | None = None
     first_referrer: str | None = None
+    first_landing_path: str | None = None
+    first_landing_url: str | None = None
     ref_code: str | None = None
 
 
@@ -319,7 +331,11 @@ async def verify_email(body: VerifyEmailRequest, request: Request, db: AsyncSess
         utm_source=body.utm_source,
         utm_medium=body.utm_medium,
         utm_campaign=body.utm_campaign,
+        utm_content=body.utm_content,
+        utm_term=body.utm_term,
         first_referrer=body.first_referrer,
+        first_landing_path=body.first_landing_path,
+        first_landing_url=body.first_landing_url,
     )
     db.add(user)
     await db.flush()
@@ -457,7 +473,9 @@ async def logout():
 async def _get_or_create_oauth_user(
     db: AsyncSession, email: str, first_name: str, provider: str,
     utm_source: str | None = None, utm_medium: str | None = None,
-    utm_campaign: str | None = None, first_referrer: str | None = None,
+    utm_campaign: str | None = None, utm_content: str | None = None,
+    utm_term: str | None = None, first_referrer: str | None = None,
+    first_landing_path: str | None = None, first_landing_url: str | None = None,
     ref_code: str | None = None,
 ) -> tuple:
     """Find existing user by email or create new one. Returns (user, token)."""
@@ -467,6 +485,23 @@ async def _get_or_create_oauth_user(
     if user:
         # Existing user — update provider if needed
         add_linked_providers(user, provider)
+        # Preserve first-touch attribution, but fill missing fields on later OAuth login.
+        if not user.utm_source and utm_source:
+            user.utm_source = utm_source
+        if not user.utm_medium and utm_medium:
+            user.utm_medium = utm_medium
+        if not user.utm_campaign and utm_campaign:
+            user.utm_campaign = utm_campaign
+        if not getattr(user, "utm_content", None) and utm_content:
+            user.utm_content = utm_content
+        if not getattr(user, "utm_term", None) and utm_term:
+            user.utm_term = utm_term
+        if not user.first_referrer and first_referrer:
+            user.first_referrer = first_referrer
+        if not getattr(user, "first_landing_path", None) and first_landing_path:
+            user.first_landing_path = first_landing_path
+        if not getattr(user, "first_landing_url", None) and first_landing_url:
+            user.first_landing_url = first_landing_url
         await db.flush()
         token = create_jwt(user.id, email)
         return user, token
@@ -486,7 +521,11 @@ async def _get_or_create_oauth_user(
         utm_source=utm_source,
         utm_medium=utm_medium,
         utm_campaign=utm_campaign,
+        utm_content=utm_content,
+        utm_term=utm_term,
         first_referrer=first_referrer,
+        first_landing_path=first_landing_path,
+        first_landing_url=first_landing_url,
     )
     db.add(user)
     await db.flush()
@@ -567,7 +606,9 @@ async def google_auth(body: GoogleAuthRequest, request: Request, db: AsyncSessio
     user, token = await _get_or_create_oauth_user(
         db, email.lower(), first_name, "google",
         utm_source=body.utm_source, utm_medium=body.utm_medium,
-        utm_campaign=body.utm_campaign, first_referrer=body.first_referrer,
+        utm_campaign=body.utm_campaign, utm_content=body.utm_content,
+        utm_term=body.utm_term, first_referrer=body.first_referrer,
+        first_landing_path=body.first_landing_path, first_landing_url=body.first_landing_url,
         ref_code=body.ref_code,
     )
     user.last_ip = request.client.host if request.client else None
@@ -633,7 +674,9 @@ async def yandex_auth(body: YandexAuthRequest, request: Request, db: AsyncSessio
     user, token = await _get_or_create_oauth_user(
         db, email.lower(), first_name, "yandex",
         utm_source=body.utm_source, utm_medium=body.utm_medium,
-        utm_campaign=body.utm_campaign, first_referrer=body.first_referrer,
+        utm_campaign=body.utm_campaign, utm_content=body.utm_content,
+        utm_term=body.utm_term, first_referrer=body.first_referrer,
+        first_landing_path=body.first_landing_path, first_landing_url=body.first_landing_url,
         ref_code=body.ref_code,
     )
     user.last_ip = request.client.host if request.client else None

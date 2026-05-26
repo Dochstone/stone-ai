@@ -74,7 +74,11 @@ class User(Base):
     utm_source: Mapped[str | None] = mapped_column(String(128), nullable=True)
     utm_medium: Mapped[str | None] = mapped_column(String(128), nullable=True)
     utm_campaign: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    utm_content: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    utm_term: Mapped[str | None] = mapped_column(String(128), nullable=True)
     first_referrer: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    first_landing_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    first_landing_url: Mapped[str | None] = mapped_column(String(700), nullable=True)
     used_promo_codes: Mapped[str | None] = mapped_column(String(512), nullable=True)
     pending_discount: Mapped[str | None] = mapped_column(String(256), nullable=True)  # JSON: {"type":"percent","value":20} or {"type":"rub","value":200}
     referral_percent: Mapped[int | None] = mapped_column(Integer, nullable=True)  # custom partner %, NULL = global default

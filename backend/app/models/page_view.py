@@ -29,4 +29,6 @@ class PageView(Base):
     utm_source: Mapped[str | None] = mapped_column(String(64), nullable=True)
     utm_medium: Mapped[str | None] = mapped_column(String(64), nullable=True)
     utm_campaign: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    utm_content: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    utm_term: Mapped[str | None] = mapped_column(String(128), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
