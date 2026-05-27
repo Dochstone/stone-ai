@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import User, Subscription, Pass, Usage
 from app.config import WELCOME_BONUS_USD
 from app.services.ai_router import get_model_tier, get_model_category, MODELS_REGISTRY
+from app.services.acquisition import apply_user_acquisition, parse_telegram_start_param
 from app.services.subscription import FREE_MODELS, get_accessible_models, get_required_tier, get_plan, PLANS
 
 # ─── Free plan constants ───
@@ -99,17 +100,9 @@ async def get_or_create_user(db: AsyncSession, tg_user: dict, start_param: str |
     result = await db.execute(select(User).where(User.telegram_id == tg_id))
     user = result.scalar_one_or_none()
 
-    if not user:
-        utm_source = None
-        utm_medium = None
-        utm_campaign = None
-        if start_param and start_param.startswith("src_"):
-            utm_source = start_param[4:]
-            utm_medium = "telegram"
-        elif start_param:
-            utm_source = start_param
-            utm_medium = "telegram"
+    attribution = parse_telegram_start_param(start_param)
 
+    if not user:
         user = User(
             telegram_id=tg_id,
             username=tg_user.get("username"),
@@ -119,12 +112,12 @@ async def get_or_create_user(db: AsyncSession, tg_user: dict, start_param: str |
             auth_provider="telegram",
             linked_providers="telegram",
             balance_usd=WELCOME_BONUS_USD,
-            utm_source=utm_source,
-            utm_medium=utm_medium,
-            utm_campaign=utm_campaign,
         )
+        apply_user_acquisition(user, attribution)
         db.add(user)
         await db.flush()
+    else:
+        apply_user_acquisition(user, attribution)
 
     return user
 

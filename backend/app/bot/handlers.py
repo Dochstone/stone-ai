@@ -71,6 +71,7 @@ async def cmd_start(message: Message):
     webapp_url = settings.webapp_url
 
     args = message.text.split(maxsplit=1)
+    start_param = args[1].strip() if len(args) > 1 else None
 
     # Handle account linking deep link: /start link_{user_db_id}
     if len(args) > 1 and args[1].startswith("link_"):
@@ -160,6 +161,28 @@ async def cmd_start(message: Message):
                     parse_mode="HTML",
                 )
                 return
+
+    # Persist Telegram acquisition source for /start src_* and referral payloads.
+    try:
+        from app.database import async_session
+        from app.services.limiter import get_or_create_user
+
+        tg_user = message.from_user
+        async with async_session() as db:
+            await get_or_create_user(
+                db,
+                {
+                    "id": tg_user.id,
+                    "username": tg_user.username,
+                    "first_name": tg_user.first_name,
+                    "language_code": tg_user.language_code or "ru",
+                },
+                start_param=start_param,
+            )
+            await db.commit()
+    except Exception:
+        import logging
+        logging.getLogger(__name__).exception("Failed to persist Telegram start attribution")
 
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(

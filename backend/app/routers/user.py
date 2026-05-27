@@ -178,7 +178,7 @@ async def get_me(
         try:
             tg_user = await get_current_user(request)
             tg_id = tg_user["id"]
-            start_param = request.headers.get("X-Start-Param")
+            start_param = request.headers.get("X-Start-Param") or tg_user.get("start_param")
             user = await get_or_create_user(db, tg_user, start_param=start_param)
         except Exception:
             raise HTTPException(401, "Not authenticated")

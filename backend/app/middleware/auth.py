@@ -54,7 +54,10 @@ def validate_init_data(init_data: str, bot_token: str, max_age: int = 300) -> di
 
     user_data = parsed.get("user")
     if user_data:
-        return json.loads(user_data)
+        user = json.loads(user_data)
+        if parsed.get("start_param"):
+            user["start_param"] = parsed["start_param"]
+        return user
 
     raise ValueError("No user data in initData")
 

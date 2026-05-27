@@ -93,7 +93,12 @@ export default function AuthForm({ onAuth, subtitle }: { onAuth: (auth: AuthStat
   const telegramLogin = async () => {
     setError("");
     try {
-      const res = await fetch(`${API_URL}/api/auth/telegram-web-start`, { method: "POST" });
+      const utm = (() => { try { return JSON.parse(localStorage.getItem("stone_utm") || "{}"); } catch { return {}; } })();
+      const res = await fetch(`${API_URL}/api/auth/telegram-web-start`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(utm),
+      });
       const data = await res.json();
       const sid = data.session_id;
       setTgSessionId(sid);

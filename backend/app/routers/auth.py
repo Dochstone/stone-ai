@@ -28,6 +28,7 @@ from app.config import get_settings, WELCOME_BONUS_USD, WELCOME_BONUS_RUB
 from app.services.email_service import generate_code, send_verification_code, send_reset_code
 from app.services.linked_providers import add_linked_providers, get_linked_providers
 from app.services.streak import update_login_streak
+from app.services.acquisition import apply_user_acquisition, parse_telegram_start_param
 from app.routers.achievements import check_and_update
 
 logger = logging.getLogger(__name__)
@@ -86,6 +87,17 @@ class LoginRequest(BaseModel):
 class TelegramLinkRequest(BaseModel):
     init_data: str
     password: str
+
+
+class AttributionRequest(BaseModel):
+    utm_source: str | None = None
+    utm_medium: str | None = None
+    utm_campaign: str | None = None
+    utm_content: str | None = None
+    utm_term: str | None = None
+    first_referrer: str | None = None
+    first_landing_path: str | None = None
+    first_landing_url: str | None = None
 
 
 class GoogleAuthRequest(BaseModel):
@@ -830,7 +842,7 @@ def _cleanup_old_sessions():
 
 
 @router.post("/telegram-web-start")
-async def telegram_web_start():
+async def telegram_web_start(body: AttributionRequest | None = None):
     """Generate a session ID for Telegram web login.
 
     Returns session_id that the website will use to poll for completion.
@@ -848,7 +860,12 @@ async def telegram_web_start():
     except Exception as e:
         logger.warning(f"DB session save failed: {e}")
     # Also keep in memory for fast lookups
-    _tg_web_sessions[session_id] = {"status": "pending", "created_at": time.time()}
+    attribution = body.dict(exclude_none=True) if body else {}
+    _tg_web_sessions[session_id] = {
+        "status": "pending",
+        "created_at": time.time(),
+        "attribution": attribution,
+    }
     logger.info(f"TG web session CREATED: {session_id}")
     return {"session_id": session_id}
 
@@ -914,7 +931,7 @@ async def confirm_tg_web_session(session_id: str, tg_id: int, tg_user_data: dict
             async with get_session() as db:
                 row = await db.execute(text("SELECT session_id FROM tg_web_sessions WHERE session_id = :sid AND created_at > NOW() - INTERVAL '10 minutes'"), {"sid": session_id})
                 if row.scalar_one_or_none():
-                    _tg_web_sessions[session_id] = {"status": "pending", "created_at": time.time()}
+                    _tg_web_sessions[session_id] = {"status": "pending", "created_at": time.time(), "attribution": {}}
                     logger.info(f"TG web session {session_id} restored from DB")
                 else:
                     logger.warning(f"TG web session {session_id} NOT FOUND in memory or DB")
@@ -926,6 +943,8 @@ async def confirm_tg_web_session(session_id: str, tg_id: int, tg_user_data: dict
             raise ValueError("Session not found or expired")
 
     logger.info(f"TG web login confirmed: session={session_id}, tg_id={tg_id}")
+    session_data = _tg_web_sessions.get(session_id)
+    attribution = session_data.get("attribution", {}) if isinstance(session_data, dict) else {}
 
     async with get_session() as db:
         # Find or create user by telegram_id
@@ -943,6 +962,7 @@ async def confirm_tg_web_session(session_id: str, tg_id: int, tg_user_data: dict
                 linked_providers="telegram",
                 balance_usd=WELCOME_BONUS_USD,
             )
+            apply_user_acquisition(user, attribution)
             db.add(user)
             await db.flush()
             logger.info(f"Welcome bonus {WELCOME_BONUS_RUB}₽ credited to new TG web user {tg_id}")
@@ -956,6 +976,8 @@ async def confirm_tg_web_session(session_id: str, tg_id: int, tg_user_data: dict
                 send_welcome(None, tg_user_data.get("first_name", ""), tg_id=tg_id)
             except Exception:
                 pass
+        else:
+            apply_user_acquisition(user, attribution)
 
         _tg_web_sessions[session_id] = {
             "status": "confirmed",
@@ -1004,6 +1026,7 @@ async def telegram_webapp_login(
         raise HTTPException(401, f"Invalid initData: {e}")
 
     tg_id = tg_user["id"]
+    attribution = parse_telegram_start_param(tg_user.get("start_param"))
 
     result = await db.execute(select(User).where(User.telegram_id == tg_id))
     user = result.scalar_one_or_none()
@@ -1019,10 +1042,12 @@ async def telegram_webapp_login(
             linked_providers="telegram",
             balance_usd=WELCOME_BONUS_USD,
         )
+        apply_user_acquisition(user, attribution)
         db.add(user)
         await db.flush()
         logger.info(f"Welcome bonus {WELCOME_BONUS_RUB}₽ credited to new TG WebApp user {tg_id}")
 
+    apply_user_acquisition(user, attribution)
     await update_login_streak(db, user)
     token = create_jwt(user.id, user.email or "")
     await db.commit()

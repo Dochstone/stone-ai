@@ -2864,7 +2864,12 @@ export default function WebChat({ initialModel, initialCategory, embedded }: { i
                       </a>
                       <button onClick={async () => {
                         try {
-                          const res = await fetch(`${API_URL}/api/auth/telegram-web-start`, { method: "POST" });
+                          const utm = (() => { try { return JSON.parse(localStorage.getItem("stone_utm") || "{}"); } catch { return {}; } })();
+                          const res = await fetch(`${API_URL}/api/auth/telegram-web-start`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(utm),
+                          });
                           const data = await res.json();
                           const tgUrl = `https://t.me/stonetgbot?start=web_${data.session_id}`;
                           window.location.href = tgUrl;
