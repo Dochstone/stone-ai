@@ -87,6 +87,7 @@ export default function Footer() {
               <li><a href="/for/developer" className="hover:text-text transition-colors">Для программиста</a></li>
               <li><a href="/for/designer" className="hover:text-text transition-colors">Для дизайнера</a></li>
               <li><a href="/for/business" className="hover:text-text transition-colors">Для бизнеса</a></li>
+              <li><a href="/locations" className="hover:text-text transition-colors">AI в городах</a></li>
               <li><a href="/for/student" className="hover:text-text transition-colors">Для студента</a></li>
             </ul>
           </div>

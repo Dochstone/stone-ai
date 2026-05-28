@@ -6,6 +6,7 @@ import { USE_CASES } from "@/lib/use-cases";
 import { GLOSSARY } from "@/lib/glossary";
 import { AUTHORS } from "@/lib/authors";
 import { AEO_PAGES } from "@/lib/aeo-pages";
+import { LOCATIONS } from "@/lib/locations";
 
 import { SITE_URL } from "@/lib/constants";
 
@@ -36,6 +37,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/faq`, lastModified: now, changeFrequency: "monthly", priority: 0.75 },
     { url: `${SITE_URL}/answers`, lastModified: now, changeFrequency: "weekly", priority: 0.82 },
     { url: `${SITE_URL}/llm`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${SITE_URL}/locations`, lastModified: now, changeFrequency: "weekly", priority: 0.75 },
     { url: `${SITE_URL}/docs`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${SITE_URL}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${SITE_URL}/health`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
@@ -125,6 +127,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.82,
   }));
 
+  const locationPages: MetadataRoute.Sitemap = LOCATIONS.map((location) => ({
+    url: `${SITE_URL}/locations/${location.slug}`,
+    lastModified: new Date(location.updatedAt),
+    changeFrequency: "monthly",
+    priority: 0.72,
+  }));
+
   // Pillar topics — update list when new pillars are added to PILLAR_CONTENT.
   const pillarPages: MetadataRoute.Sitemap = [
     "image-ai",
@@ -154,6 +163,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...glossaryPages,
     ...authorPages,
     ...answerPages,
+    ...locationPages,
     ...pillarPages,
   ];
 }
