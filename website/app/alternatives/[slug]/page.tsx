@@ -94,6 +94,171 @@ const answerSnapshots: Record<string, { title: string; answer: string; bullets: 
       { href: "/dashboard/chat", label: "Попробовать AI-видео" },
     ],
   },
+  gemini: {
+    title: "Коротко: что выбрать вместо Gemini в России",
+    answer: "Если Gemini Advanced не подходит из-за цены $20/мес, привязки к Google-аккаунту или недоступности из России, практичнее получить доступ сразу к нескольким моделям. В Stone AI Gemini доступен рядом с GPT, Claude и DeepSeek — с оплатой картой РФ и без VPN, поэтому можно выбирать модель под задачу, а не под экосистему.",
+    bullets: [
+      "Главный барьер Gemini Advanced для РФ — оплата зарубежной картой и привязка к Google.",
+      "В Stone AI Gemini 3 Pro доступен вместе с GPT-5, Claude и DeepSeek в одном интерфейсе.",
+      "Для анализа и длинного контекста силён Gemini, для кода — Claude, для reasoning — DeepSeek.",
+      "Лучший следующий шаг: сравнить тарифы или открыть чат.",
+    ],
+    links: [
+      { href: "/compare/claude-opus-4-vs-gemini-3-pro", label: "Claude Opus 4 vs Gemini 3 Pro" },
+      { href: "/pricing", label: "Сравнить тарифы" },
+      { href: "/dashboard/chat", label: "Попробовать Gemini и GPT" },
+    ],
+  },
+  deepseek: {
+    title: "Коротко: лучшая замена DeepSeek без очередей",
+    answer: "DeepSeek R1 — сильная reasoning-модель, но публичные серверы часто перегружены, а API нестабилен. В Stone AI DeepSeek R1 доступен без очередей рядом с GPT, Claude и Gemini — можно переключаться между ними в один клик, с оплатой в рублях и без VPN.",
+    bullets: [
+      "Главная проблема DeepSeek — перегруженные серверы и нестабильный доступ.",
+      "В Stone AI DeepSeek R1 и V3 работают без очередей рядом с 60+ моделями.",
+      "Для математики и логики силён DeepSeek, для кода — Claude, для мультимодальности — GPT.",
+      "Лучший следующий шаг: посмотреть тарифы или открыть чат.",
+    ],
+    links: [
+      { href: "/compare/deepseek-r1-vs-gpt-4", label: "DeepSeek R1 vs GPT-4" },
+      { href: "/pricing", label: "Посмотреть тарифы" },
+      { href: "/dashboard/chat", label: "Попробовать DeepSeek и Claude" },
+    ],
+  },
+  grok: {
+    title: "Коротко: чем заменить Grok без подписки X",
+    answer: "Grok доступен только через X Premium ($16/мес) или SuperGrok ($30/мес) и требует VPN из России. В Stone AI Grok 3 доступен наряду с GPT, Claude, Gemini и DeepSeek без привязки к Twitter, с оплатой картой РФ и без VPN.",
+    bullets: [
+      "Главный барьер Grok для РФ — подписка X Premium и VPN.",
+      "В Stone AI Grok 3 доступен рядом с 60+ моделями без привязки к Twitter/X.",
+      "Если нужны не только данные X, но и сильный reasoning и код, выбор моделей важнее одного бренда.",
+      "Лучший следующий шаг: сравнить тарифы или открыть чат.",
+    ],
+    links: [
+      { href: "/compare/grok-3-vs-gpt-5", label: "Grok 3 vs GPT-5" },
+      { href: "/pricing", label: "Сравнить тарифы" },
+      { href: "/dashboard/chat", label: "Попробовать Grok и GPT" },
+    ],
+  },
+  kandinsky: {
+    title: "Коротко: что выбрать вместо Kandinsky",
+    answer: "Kandinsky от Сбера — неплохой старт, но детализация, рендер текста и фотореализм отстают от мировых моделей. В Stone AI доступны Nano Banana Pro (4K, фотореализм) и GPT-5 Image — с русскими промптами, оплатой картой РФ и без VPN.",
+    bullets: [
+      "Kandinsky уступает по детализации, 4K и рендеру текста на картинке.",
+      "В Stone AI image-генерация работает на Nano Banana Pro и GPT-5 Image прямо в браузере и Telegram.",
+      "Русские промпты поддерживаются всеми моделями — Discord и иностранная карта не нужны.",
+      "Лучший следующий шаг: смотреть image-модели или тарифы.",
+    ],
+    links: [
+      { href: "/tools/image-generation", label: "Смотреть image-модели" },
+      { href: "/pricing", label: "Посмотреть тарифы" },
+      { href: "/dashboard/chat", label: "Сделать первую картинку" },
+    ],
+  },
+  gigachat: {
+    title: "Коротко: лучшая замена GigaChat",
+    answer: "GigaChat от Сбера удобен внутри экосистемы, но по качеству ответов и мультимодальности отстаёт от топовых моделей. В Stone AI доступны GPT-5, Claude Opus 4.5, Gemini 3 Pro и 60+ других моделей — все на русском, с оплатой в рублях и без VPN.",
+    bullets: [
+      "GigaChat уступает GPT-5 и Claude по качеству и глубине ответов.",
+      "В Stone AI можно переключаться между 60+ моделями под конкретную задачу.",
+      "Помимо текста доступны генерация картинок, видео, 3D и аудио в одной подписке.",
+      "Лучший следующий шаг: сравнить тарифы или открыть чат.",
+    ],
+    links: [
+      { href: "/pricing", label: "Сравнить тарифы" },
+      { href: "/tools/text-generation", label: "Текстовые нейросети" },
+      { href: "/dashboard/chat", label: "Попробовать GPT и Claude" },
+    ],
+  },
+  yandexgpt: {
+    title: "Коротко: что выбрать вместо YandexGPT и Алисы",
+    answer: "YandexGPT (Алиса AI Pro) удобен внутри экосистемы Яндекса, но по качеству и глубине ответов уступает мировым моделям. В Stone AI доступны GPT-5, Claude Opus 4.5, Gemini 3 Pro и DeepSeek R1 — все на русском, с оплатой картой РФ и без привязки к одному вендору.",
+    bullets: [
+      "YandexGPT ограничен экосистемой Яндекса и уступает GPT-5/Claude по качеству.",
+      "В Stone AI 60+ моделей в одном интерфейсе — выбор под задачу, а не под бренд.",
+      "Доступны текст, код, картинки, видео и 3D в одной подписке, оплата в рублях.",
+      "Лучший следующий шаг: сравнить тарифы или открыть чат.",
+    ],
+    links: [
+      { href: "/pricing", label: "Сравнить тарифы" },
+      { href: "/tools/text-generation", label: "Текстовые нейросети" },
+      { href: "/dashboard/chat", label: "Попробовать GPT и Claude" },
+    ],
+  },
+  dalle: {
+    title: "Коротко: чем заменить DALL-E в России",
+    answer: "DALL-E 3 доступен только внутри ChatGPT и требует VPN и зарубежной карты. В Stone AI генерация картинок работает на Nano Banana Pro и GPT-5 Image — с русскими промптами, оплатой картой РФ и без VPN, поэтому это практичнее, чем держать подписку ради одной image-модели.",
+    bullets: [
+      "Главный барьер DALL-E для РФ — VPN и зарубежная подписка ChatGPT.",
+      "В Stone AI Nano Banana Pro даёт 4K и фотореализм, GPT-5 Image — точный рендер текста.",
+      "Русские промпты поддерживаются, генерация работает в браузере и Telegram.",
+      "Лучший следующий шаг: смотреть image-модели или тарифы.",
+    ],
+    links: [
+      { href: "/tools/image-generation", label: "Смотреть image-модели" },
+      { href: "/pricing", label: "Посмотреть тарифы" },
+      { href: "/dashboard/chat", label: "Сделать первую картинку" },
+    ],
+  },
+  "stable-diffusion": {
+    title: "Коротко: Stable Diffusion без видеокарты и установки",
+    answer: "Stable Diffusion бесплатна, но требует мощную видеокарту, установку и настройку. В Stone AI те же задачи решают Nano Banana Pro и GPT-5 Image прямо в браузере — без локального железа, с русскими промптами и оплатой картой РФ.",
+    bullets: [
+      "Локальная SD требует видеокарту, установку и настройку моделей.",
+      "В Stone AI генерация работает онлайн без железа — на Nano Banana Pro и GPT-5 Image.",
+      "Готовый интерфейс, русские промпты и предсказуемое качество без тонкой настройки.",
+      "Лучший следующий шаг: смотреть image-модели или тарифы.",
+    ],
+    links: [
+      { href: "/tools/image-generation", label: "Смотреть image-модели" },
+      { href: "/pricing", label: "Посмотреть тарифы" },
+      { href: "/dashboard/chat", label: "Сделать первую картинку" },
+    ],
+  },
+  "leonardo-ai": {
+    title: "Коротко: что выбрать вместо Leonardo AI",
+    answer: "Leonardo AI ограничен по доступу из России и работает на запутанной системе кредитов. В Stone AI генерация артов и иллюстраций доступна на Nano Banana Pro и GPT-5 Image — без VPN, с русскими промптами и понятными тарифами.",
+    bullets: [
+      "Главный барьер Leonardo для РФ — ограниченный доступ и зарубежная карта.",
+      "В Stone AI image-генерация работает на Nano Banana Pro и GPT-5 Image без кредитной путаницы.",
+      "Рядом с картинками доступны текстовые модели для промптов и идей.",
+      "Лучший следующий шаг: смотреть image-модели или тарифы.",
+    ],
+    links: [
+      { href: "/tools/image-generation", label: "Смотреть image-модели" },
+      { href: "/pricing", label: "Посмотреть тарифы" },
+      { href: "/dashboard/chat", label: "Сделать первую картинку" },
+    ],
+  },
+  copilot: {
+    title: "Коротко: чем заменить Microsoft Copilot",
+    answer: "Microsoft Copilot привязан к подписке Microsoft 365 и ограничен из России. В Stone AI доступны GPT-5, Claude Opus 4.5 и DeepSeek R1 для кода, текстов и документов — без VPN, без привязки к Microsoft и с оплатой картой РФ.",
+    bullets: [
+      "Главный барьер Copilot для РФ — подписка Microsoft 365 и ограниченный доступ.",
+      "В Stone AI можно выбирать модель под задачу: Claude для кода, GPT для текста, DeepSeek для логики.",
+      "Помимо текста и кода доступны картинки, видео и 3D в одной подписке.",
+      "Лучший следующий шаг: AI для разработчика или тарифы.",
+    ],
+    links: [
+      { href: "/for/developer", label: "AI для разработчика" },
+      { href: "/pricing", label: "Посмотреть тарифы" },
+      { href: "/dashboard/chat", label: "Попробовать GPT и Claude" },
+    ],
+  },
+  mistral: {
+    title: "Коротко: что выбрать вместо Mistral Le Chat",
+    answer: "Mistral Le Chat быстрый, но на сложных задачах уступает топовым моделям. В Stone AI Mistral Large доступен рядом с GPT-5, Claude Opus 4.5 и Gemini 3 Pro — все на русском, без VPN и с оплатой картой РФ, поэтому можно выбирать модель под задачу.",
+    bullets: [
+      "Mistral силён в скорости, но уступает GPT-5 и Claude на сложных задачах.",
+      "В Stone AI Mistral Large доступен рядом с 60+ моделями в одном интерфейсе.",
+      "Доступны текст, код, картинки и видео в одной подписке, оплата в рублях.",
+      "Лучший следующий шаг: сравнить тарифы или открыть чат.",
+    ],
+    links: [
+      { href: "/pricing", label: "Сравнить тарифы" },
+      { href: "/tools/text-generation", label: "Текстовые нейросети" },
+      { href: "/dashboard/chat", label: "Попробовать Mistral и GPT" },
+    ],
+  },
 };
 
 const priorityLinks: Partial<Record<string, { title: string; href: string; label: string }[]>> = {
@@ -121,6 +286,31 @@ const priorityLinks: Partial<Record<string, { title: string; href: string; label
     { href: "/tools/video-generation", label: "Генерация видео", title: "Выбрать video-модели" },
     { href: "/pricing", label: "Тарифы Stone AI", title: "Посмотреть цены" },
     { href: "/dashboard/chat", label: "Попробовать AI-видео", title: "Сделать первый ролик" },
+  ],
+  dalle: [
+    { href: "/tools/image-generation", label: "Генерация изображений", title: "Выбрать image-модели" },
+    { href: "/pricing", label: "Тарифы Stone AI", title: "Посмотреть цены" },
+    { href: "/dashboard/chat", label: "Попробовать генерацию", title: "Сделать первую картинку" },
+  ],
+  "stable-diffusion": [
+    { href: "/tools/image-generation", label: "Генерация изображений", title: "Выбрать image-модели" },
+    { href: "/pricing", label: "Тарифы Stone AI", title: "Посмотреть цены" },
+    { href: "/dashboard/chat", label: "Попробовать генерацию", title: "Сделать первую картинку" },
+  ],
+  "leonardo-ai": [
+    { href: "/tools/image-generation", label: "Генерация изображений", title: "Выбрать image-модели" },
+    { href: "/pricing", label: "Тарифы Stone AI", title: "Посмотреть цены" },
+    { href: "/dashboard/chat", label: "Попробовать генерацию", title: "Сделать первую картинку" },
+  ],
+  copilot: [
+    { href: "/for/developer", label: "AI для разработчика", title: "Сценарии для dev-задач" },
+    { href: "/tools/code-generation", label: "Нейросети для кода", title: "Выбрать модель для кода" },
+    { href: "/pricing", label: "Тарифы Stone AI", title: "Посмотреть цены" },
+  ],
+  mistral: [
+    { href: "/tools/text-generation", label: "Текстовые нейросети", title: "AI для чата и текстов" },
+    { href: "/pricing", label: "Тарифы Stone AI", title: "Посмотреть цены" },
+    { href: "/dashboard/chat", label: "Попробовать модели", title: "Открыть чат" },
   ],
 };
 
@@ -295,9 +485,14 @@ export default function AlternativesPage({ params }: Props) {
         <section className="bg-dark text-white rounded-2xl p-8 sm:p-10 text-center">
           <h2 className="text-xl font-extrabold mb-3">Попробуйте Stone AI бесплатно</h2>
           <p className="text-white/40 text-sm mb-6">65+ нейросетей. Без VPN. На русском. 10 запросов/день бесплатно.</p>
-          <Link href="/dashboard/chat" className="inline-flex items-center gap-2 bg-accent text-white font-bold px-8 py-4 rounded-xl hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25">
-            Начать бесплатно <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-          </Link>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link href="/dashboard/chat" className="inline-flex items-center gap-2 bg-accent text-white font-bold px-8 py-4 rounded-xl hover:bg-accent/90 transition-all hover:shadow-lg hover:shadow-accent/25">
+              Начать бесплатно <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+            </Link>
+            <Link href="/pricing" className="inline-flex items-center gap-2 border border-white/20 text-white font-bold px-8 py-4 rounded-xl hover:bg-white/5 transition-colors">
+              Посмотреть тарифы
+            </Link>
+          </div>
         </section>
 
         {/* Related alternatives — prioritised by shared model set */}
