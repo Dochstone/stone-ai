@@ -259,6 +259,66 @@ const answerSnapshots: Record<string, { title: string; answer: string; bullets: 
       { href: "/dashboard/chat", label: "Попробовать Mistral и GPT" },
     ],
   },
+  runway: {
+    title: "Коротко: чем заменить Runway в России",
+    answer: "Runway Gen-4 мощный, но дорогой и требует VPN и зарубежной карты. В Stone AI доступны Veo 3, Kling v2, Luma Ray 2 и ещё 9 видео-моделей — без VPN, с оплатой картой РФ, поэтому можно сравнивать результат разных моделей вместо ставки на одну линейку.",
+    bullets: [
+      "Главный барьер Runway для РФ — VPN, зарубежная карта и цена $15–95/мес.",
+      "В Stone AI 12+ видео-моделей в одном интерфейсе: Veo 3, Kling, Luma, MiniMax.",
+      "Для лиц и lip-sync силён Kling, для 4K и звука — Veo 3, для скорости — Pika и MiniMax.",
+      "Лучший следующий шаг: смотреть video-модели или тарифы.",
+    ],
+    links: [
+      { href: "/tools/video-generation", label: "Смотреть video-модели" },
+      { href: "/pricing", label: "Посмотреть тарифы" },
+      { href: "/dashboard/chat", label: "Сделать первый ролик" },
+    ],
+  },
+  kling: {
+    title: "Коротко: Kling AI без VPN в России",
+    answer: "Kling от Kuaishou — топ по лицам и lip-sync, но официальный доступ из России ограничен. В Stone AI Kling v2.1 Master доступен рядом с Veo 3, Luma Ray 2 и MiniMax — без VPN, с оплатой картой РФ и без отдельной зарубежной подписки.",
+    bullets: [
+      "Главный барьер Kling для РФ — ограниченный доступ и зарубежная оплата.",
+      "В Stone AI Kling v2.1 Master доступен вместе с Veo 3, Luma и MiniMax в одном месте.",
+      "Kling силён в лицах и кинематографичных сценах, Veo — в 4K и звуке.",
+      "Лучший следующий шаг: смотреть video-модели или тарифы.",
+    ],
+    links: [
+      { href: "/tools/video-generation", label: "Смотреть video-модели" },
+      { href: "/pricing", label: "Посмотреть тарифы" },
+      { href: "/dashboard/chat", label: "Сделать первый ролик" },
+    ],
+  },
+  veo: {
+    title: "Коротко: Google Veo 3 без VPN",
+    answer: "Veo 3 от Google даёт 4K, lip-sync и звук, но требует Google-подписки с зарубежной оплатой. В Stone AI Veo 3 доступен рядом с Kling, Luma и Sora — без VPN, с оплатой картой РФ, поэтому можно выбирать модель под конкретную сцену.",
+    bullets: [
+      "Главный барьер Veo для РФ — Google-подписка и зарубежная карта.",
+      "В Stone AI Veo 3 доступен вместе с Kling, Luma Ray 2 и Sora 2.",
+      "Veo силён в 4K, lip-sync и звуке, Kling — в лицах, MiniMax — в скорости.",
+      "Лучший следующий шаг: смотреть video-модели или тарифы.",
+    ],
+    links: [
+      { href: "/tools/video-generation", label: "Смотреть video-модели" },
+      { href: "/pricing", label: "Посмотреть тарифы" },
+      { href: "/dashboard/chat", label: "Сделать первый ролик" },
+    ],
+  },
+  pika: {
+    title: "Коротко: чем заменить Pika в России",
+    answer: "Pika 2.0 удобна для быстрых клипов, но доступ из России ограничен. В Stone AI Pika 2.0 доступна рядом с MiniMax, Kling и Veo — быстрая генерация коротких роликов для Reels и Shorts без VPN и с оплатой картой РФ.",
+    bullets: [
+      "Главный барьер Pika для РФ — ограниченный доступ и зарубежная карта.",
+      "В Stone AI Pika 2.0 и MiniMax дают ролики для соцсетей за секунды.",
+      "Для коротких клипов важна скорость, для качества сцен — Kling и Veo.",
+      "Лучший следующий шаг: смотреть video-модели или тарифы.",
+    ],
+    links: [
+      { href: "/tools/video-generation", label: "Смотреть video-модели" },
+      { href: "/pricing", label: "Посмотреть тарифы" },
+      { href: "/dashboard/chat", label: "Сделать первый ролик" },
+    ],
+  },
 };
 
 const priorityLinks: Partial<Record<string, { title: string; href: string; label: string }[]>> = {
@@ -311,6 +371,26 @@ const priorityLinks: Partial<Record<string, { title: string; href: string; label
     { href: "/tools/text-generation", label: "Текстовые нейросети", title: "AI для чата и текстов" },
     { href: "/pricing", label: "Тарифы Stone AI", title: "Посмотреть цены" },
     { href: "/dashboard/chat", label: "Попробовать модели", title: "Открыть чат" },
+  ],
+  runway: [
+    { href: "/tools/video-generation", label: "Генерация видео", title: "Выбрать video-модели" },
+    { href: "/pricing", label: "Тарифы Stone AI", title: "Посмотреть цены" },
+    { href: "/dashboard/chat", label: "Попробовать AI-видео", title: "Сделать первый ролик" },
+  ],
+  kling: [
+    { href: "/tools/video-generation", label: "Генерация видео", title: "Выбрать video-модели" },
+    { href: "/pricing", label: "Тарифы Stone AI", title: "Посмотреть цены" },
+    { href: "/dashboard/chat", label: "Попробовать AI-видео", title: "Сделать первый ролик" },
+  ],
+  veo: [
+    { href: "/tools/video-generation", label: "Генерация видео", title: "Выбрать video-модели" },
+    { href: "/pricing", label: "Тарифы Stone AI", title: "Посмотреть цены" },
+    { href: "/dashboard/chat", label: "Попробовать AI-видео", title: "Сделать первый ролик" },
+  ],
+  pika: [
+    { href: "/tools/video-generation", label: "Генерация видео", title: "Выбрать video-модели" },
+    { href: "/pricing", label: "Тарифы Stone AI", title: "Посмотреть цены" },
+    { href: "/dashboard/chat", label: "Попробовать AI-видео", title: "Сделать первый ролик" },
   ],
 };
 
