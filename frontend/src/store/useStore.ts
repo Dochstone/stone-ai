@@ -36,6 +36,13 @@ export interface ModelPrice {
   weighted: number
 }
 
+export interface PremiumWeekly {
+  used: number
+  limit: number
+  available: number
+  resetAt: string
+}
+
 export interface UserState {
   tgId: number
   username: string
@@ -46,6 +53,7 @@ export interface UserState {
   modelPrices: Record<string, ModelPrice>
   liteToday: number
   liteLimitDay: number
+  premiumWeekly: PremiumWeekly | null
   totalRequests: number
   totalTokens: number
   lastRequestCost: number | null
@@ -251,6 +259,7 @@ export const useStore = create<AppState>((set, get) => ({
     modelPrices: {},
     liteToday: 0,
     liteLimitDay: 10,
+    premiumWeekly: null,
     totalRequests: 0,
     totalTokens: 0,
     lastRequestCost: null,

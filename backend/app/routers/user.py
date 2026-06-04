@@ -187,6 +187,28 @@ async def get_me(
     lite_today = await get_today_usage(db, tg_id, "lite")
     rewarded_bonus = int(user.rewarded_today or 0) if hasattr(user, 'rewarded_today') else 0
 
+    # Premium weekly quota (Pro/Elite): reset window is anchored to subscription start.
+    from app.services.daily_limits import (
+        WEEKLY_TIERS,
+        WEEKLY_LIMITS,
+        get_weekly_period_start,
+        get_weekly_usage,
+        get_weekly_reset_at,
+    )
+
+    tier = user.subscription_tier or "free"
+    premium_weekly = None
+    if tier in WEEKLY_TIERS:
+        week_start = get_weekly_period_start(user)
+        premium_used = await get_weekly_usage(db, tg_id, "premium", week_start)
+        premium_limit = WEEKLY_LIMITS[tier]["premium"]
+        premium_weekly = {
+            "used": premium_used,
+            "limit": premium_limit,
+            "available": max(0, premium_limit - premium_used),
+            "reset_at": get_weekly_reset_at(user),
+        }
+
     # Build model prices map for frontend
     model_prices = {}
     for model_id, prices in TOKEN_PRICES.items():
@@ -219,6 +241,7 @@ async def get_me(
         "model_prices": model_prices,
         "usage": {
             "lite_today": lite_today,
+            "premium_weekly": premium_weekly,
         },
         "limits": {
             "lite": FREE_DAILY_LIMIT + rewarded_bonus,

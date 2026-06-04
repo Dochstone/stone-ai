@@ -18,6 +18,12 @@ function fmt(n: number) {
   return n.toLocaleString('ru-RU')
 }
 
+function formatResetDate(iso: string): string {
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return ''
+  return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })
+}
+
 export function ProfileScreen() {
   const { user, palette, setPaletteId, models, setScreen, lang, setLang, setUser } = useStore()
   const { t } = useTranslation()
@@ -95,6 +101,29 @@ export function ProfileScreen() {
           </div>
         ))}
       </div>
+
+      {/* Premium weekly quota — Pro/Elite only; window anchored to subscription start */}
+      {user.premiumWeekly && (
+        <>
+          <div style={{ height: 10 }} />
+          <div style={{
+            background: 'rgba(8,16,12,0.95)',
+            border: `1px solid rgba(${p.primaryRgb},0.15)`,
+            borderRadius: 14, padding: '14px 16px',
+            display: 'flex', alignItems: 'center', gap: 12,
+          }}>
+            <span style={{ fontSize: 20 }}>💎</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#e0f0e8' }}>
+                Premium-запросы: {fmt(user.premiumWeekly.used)} из {fmt(user.premiumWeekly.limit)}
+              </div>
+              <div style={{ fontSize: 10, color: '#5a8a70', marginTop: 3 }}>
+                Обновятся {formatResetDate(user.premiumWeekly.resetAt)}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       <div style={{ height: 12 }} />
 

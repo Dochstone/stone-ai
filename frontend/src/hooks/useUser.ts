@@ -54,6 +54,14 @@ export function useUser() {
           modelPrices,
           liteToday: userData.usage.lite_today,
           liteLimitDay: userData.limits.lite,
+          premiumWeekly: userData.usage.premium_weekly
+            ? {
+                used: userData.usage.premium_weekly.used,
+                limit: userData.usage.premium_weekly.limit,
+                available: userData.usage.premium_weekly.available,
+                resetAt: userData.usage.premium_weekly.reset_at,
+              }
+            : null,
           totalRequests: userData.stats.total_requests,
           totalTokens: userData.stats.total_tokens ?? 0,
           lastRequestCost: null,
