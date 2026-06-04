@@ -149,7 +149,7 @@ def send_welcome(to_email: str, name: str = "", tg_id: int | None = None):
         </div>
 
         <p style="font-size:15px;line-height:1.6;color:#333;margin:20px 0 12px 0">
-            Stone AI объединяет <b>65+ топовых нейросетей</b> в одном интерфейсе: GPT-5, Claude 4.5 Sonnet, Gemini 2.5, Midjourney, Runway, Suno и десятки других. Без VPN, с оплатой в рублях, с общим балансом на все модели.
+            Stone AI объединяет <b>65+ топовых нейросетей</b> в одном интерфейсе: GPT-5, Claude Opus, Gemini 3 Pro, Nano Banana Pro, Sora 2, Kling и десятки других. Без VPN, с оплатой в рублях, с общим балансом на все модели.
         </p>
 
         <div style="background:#f9fafb;border-radius:14px;padding:20px;margin:20px 0">
@@ -157,7 +157,7 @@ def send_welcome(to_email: str, name: str = "", tg_id: int | None = None):
             <table style="width:100%;font-size:13px;color:#444;line-height:1.5">
                 <tr><td style="padding:7px 0;width:28px;vertical-align:top">💬</td><td style="padding:7px 6px"><b>10 быстрых запросов/день</b> к GPT-4o mini, Gemini Flash, Llama 3</td></tr>
                 <tr><td style="padding:7px 0;vertical-align:top">🧠</td><td style="padding:7px 6px"><b>2 премиум-запроса/день</b> к GPT-5, Claude 4.5 Sonnet, Gemini 2.5 Pro</td></tr>
-                <tr><td style="padding:7px 0;vertical-align:top">🎨</td><td style="padding:7px 6px"><b>2 картинки + 2 видео-поинта</b> — Midjourney, Flux, Runway Gen-3</td></tr>
+                <tr><td style="padding:7px 0;vertical-align:top">🎨</td><td style="padding:7px 6px"><b>2 картинки + 2 видео-поинта</b> — Nano Banana, GPT-5 Image, Veo 3</td></tr>
                 <tr><td style="padding:7px 0;vertical-align:top">🎁</td><td style="padding:7px 6px"><b>100 ₽ на баланс</b> в подарок — хватит на десятки дополнительных запросов</td></tr>
                 <tr><td style="padding:7px 0;vertical-align:top">🏆</td><td style="padding:7px 6px"><b>27 достижений</b> с денежными наградами — до <b>360 ₽</b> дополнительно</td></tr>
             </table>
@@ -167,8 +167,8 @@ def send_welcome(to_email: str, name: str = "", tg_id: int | None = None):
             <p style="font-size:14px;color:#333;margin:0 0 12px 0;font-weight:700">💡 С чего начать — три идеи на вечер:</p>
             <ol style="font-size:13px;color:#555;line-height:1.7;padding-left:20px;margin:0">
                 <li><b>Сравните модели на одной задаче.</b> Задайте один и тот же вопрос GPT-5 и Claude — увидите, у кого язык живее, а кто глубже копает.</li>
-                <li><b>Сделайте картинку в Midjourney V7</b> — опишите сцену в 2-3 предложениях, получите результат уровня профессиональной иллюстрации.</li>
-                <li><b>Превратите фото в видео</b> через Runway Gen-3 или Kling — оживите любой кадр за 10 секунд.</li>
+                <li><b>Сделайте картинку в Nano Banana Pro</b> — опишите сцену в 2-3 предложениях, получите результат уровня профессиональной иллюстрации.</li>
+                <li><b>Превратите фото в видео</b> через Kling или Veo 3 — оживите любой кадр за 10 секунд.</li>
             </ol>
         </div>
 
@@ -239,7 +239,7 @@ def send_payment_confirmation(to_email: str, amount_rub: float, new_balance_rub:
         <div style="background:#fff8f3;border:1px solid #f0e1d3;border-radius:14px;padding:18px 20px;margin:20px 0">
             <p style="font-size:14px;color:#333;margin:0 0 10px 0;font-weight:700">💡 На что потратить эффективнее всего</p>
             <p style="font-size:13px;color:#555;line-height:1.6;margin:0">
-                По балансу доступны <b>все 65+ моделей</b> — включая GPT-5, Claude 4.5 Opus, Midjourney V7 и Runway Gen-3. Дорогие модели (Opus, Veo 3) выгоднее использовать с подпиской <b>Pro</b> — там они стоят в 2-5 раз меньше.
+                По балансу доступны <b>все 65+ моделей</b> — включая GPT-5, Claude Opus, Nano Banana Pro и Sora 2. Дорогие модели (Opus, Veo 3) выгоднее использовать с подпиской <b>Pro</b> — там они стоят в 2-5 раз меньше.
             </p>
         </div>
 

@@ -232,7 +232,7 @@ async def cmd_start(message: Message):
         "GPT-5.4 · Claude Opus · Gemini 3 · DeepSeek R1\n\n"
 
         "🖼️ <b>Генерация картинок</b>\n"
-        "Nano Banana Pro · Flux · GPT-5 Image · Midjourney\n\n"
+        "Nano Banana Pro · GPT-5 Image · Nano Banana · GPT-5 Image Mini\n\n"
 
         "🎥 <b>Генерация видео</b>\n"
         "Sora 2 · Veo 3 · Kling v2 · Luma Ray 2\n\n"
