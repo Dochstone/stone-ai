@@ -126,10 +126,33 @@ export default function BlogPostPage({ params }: Props) {
   const ogUrl = `${SITE_URL}/blog/${post.slug}/opengraph-image`;
   const category = post.category ? BLOG_CATEGORY_BY_SLUG[post.category] : null;
 
-  // Approximate word count for BlogPosting schema
+  // Approximate word count for BlogPosting schema — counts all block types
+  const stripTags = (s: string) => s.replace(/<[^>]+>/g, " ").trim().split(/\s+/).filter(Boolean).length;
   const wordCount = post.content.reduce((acc, b) => {
-    const text = typeof b === "string" ? b : "";
-    return acc + text.replace(/<[^>]+>/g, " ").trim().split(/\s+/).filter(Boolean).length;
+    if (typeof b === "string") return acc + stripTags(b);
+    if (typeof b !== "object" || b === null) return acc;
+    if ("callout" in b) return acc + stripTags(b.callout.body) + stripTags(b.callout.title ?? "");
+    if ("quote" in b) return acc + stripTags(b.quote.text);
+    if ("comparison" in b) {
+      let n = 0;
+      for (const c of b.comparison.columns) n += stripTags(c.title) + stripTags(c.subtitle ?? "");
+      for (const r of b.comparison.rows) {
+        n += stripTags(r.criterion);
+        for (const v of r.values) n += typeof v === "string" ? stripTags(v) : 0;
+      }
+      n += stripTags(b.comparison.caption ?? "") + stripTags(b.comparison.footnote ?? "");
+      return acc + n;
+    }
+    if ("stats" in b) {
+      let n = 0;
+      for (const it of b.stats.items) n += stripTags(it.label) + stripTags(it.sub ?? "");
+      return acc + n + stripTags(b.stats.source ?? "");
+    }
+    if ("code" in b) return acc + stripTags(b.code.content);
+    if ("img" in b) return acc + stripTags(b.img.caption ?? "") + stripTags(b.img.alt);
+    if ("h2" in b) return acc + stripTags(b.h2);
+    if ("h3" in b) return acc + stripTags(b.h3);
+    return acc;
   }, 0);
 
   const articleJsonLd = {
@@ -146,6 +169,40 @@ export default function BlogPostPage({ params }: Props) {
     wordCount,
     ...(category ? { articleSection: category.name } : {}),
     ...(post.tags && post.tags.length ? { keywords: post.tags.join(", ") } : {}),
+    ...(post.entities?.about?.length
+      ? {
+          about: post.entities.about.map((name) => ({
+            "@type": "Thing",
+            name,
+          })),
+        }
+      : {}),
+    ...(post.entities?.mentions?.length
+      ? {
+          mentions: post.entities.mentions.map((name) => ({
+            "@type": "Thing",
+            name,
+          })),
+        }
+      : {}),
+    ...(post.citations?.length
+      ? {
+          citation: post.citations.map((c) => ({
+            "@type": "CreativeWork",
+            name: c.title,
+            url: c.url,
+            ...(c.publisher
+              ? {
+                  publisher: { "@type": "Organization", name: c.publisher },
+                }
+              : {}),
+          })),
+        }
+      : {}),
+    speakable: {
+      "@type": "SpeakableSpecification",
+      cssSelector: ["h1", ".lead", "[data-speakable]", "h2"],
+    },
     isPartOf: { "@type": "Blog", "@id": `${SITE_URL}/blog#blog`, name: "Блог Stone AI" },
     author: {
       "@type": "Organization",
