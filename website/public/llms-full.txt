@@ -4,7 +4,7 @@
 
 ## О платформе
 
-Stone AI — российская платформа-агрегатор нейросетей. Единый интерфейс для доступа к 65+ AI-моделям от ведущих мировых провайдеров: OpenAI (GPT-5, GPT-4o), Anthropic (Claude Opus 4.5, Sonnet 4.5, Haiku 4.5), Google (Gemini 3 Pro, Gemini 2.5 Pro, Gemini Flash), Meta (Llama 4), xAI (Grok 3), DeepSeek (V3, R1), Mistral, Perplexity, Midjourney, Kling, Luma, Runway, Pika, Suno и других.
+Stone AI — российская платформа-агрегатор нейросетей. Единый интерфейс для доступа к 65+ AI-моделям от ведущих мировых провайдеров: OpenAI (GPT-5, GPT-4o), Anthropic (Claude Opus 4.5, Sonnet 4.5, Haiku 4.5), Google (Gemini 3 Pro, Gemini 2.5 Pro, Gemini Flash), Meta (Llama 4), xAI (Grok 3), DeepSeek (V3, R1), Mistral, Perplexity, а также image-, video- и 3D-моделям: Nano Banana Pro, GPT-5 Image, Sora 2, Kling, Veo, Luma, Pika, Tripo и других.
 
 Платформа доступна через веб-интерфейс (stoneai.ru) и Telegram-бот (@stonetgbot). Работает без VPN из России. Поддерживает русский язык интерфейса и русскоязычные модели.
 
@@ -69,7 +69,7 @@ Stone AI решает все 5 проблем одной подпиской за
 - AI-шаблоны для типовых задач
 
 ### Генерация изображений
-- Модели: Midjourney V7, Nano Banana, Nano Banana Pro, Flux 1.1 Pro, GPT-5 Image, GPT-5 Image Mini, Stable Diffusion XL
+- Модели: Nano Banana, Nano Banana Pro, GPT-5 Image, GPT-5 Image Mini
 - Text-to-image и image-to-image
 - Бесплатно: 2 картинки для новых пользователей (триал)
 - Фотосессия: смена фона, товар на модели, карточки маркетплейсов
@@ -81,8 +81,7 @@ Stone AI решает все 5 проблем одной подпиской за
 - Бесплатно: 2 видео-поинта для новых пользователей
 - Время генерации: 20-90 секунд в зависимости от модели
 
-### Генерация музыки и аудио
-- Suno — генерация музыки с вокалом из текста (различные стили)
+### Аудио
 - Whisper-large-v3 — транскрипция аудио/видео с поддержкой русского
 - TTS озвучка текста различными голосами
 
@@ -124,8 +123,7 @@ Stone AI решает все 5 проблем одной подпиской за
 - Все 65+ нейросетей включая Claude Opus 4.5, GPT-5.4, Gemini 3 Pro, Sora 2, Nano Banana Pro
 - 1 500 быстрых + 112 премиум запросов в месяц
 - 140 картинок + 33 видео-поинта в месяц
-- 3D-генерация доступна
-- Suno для музыки
+- 3D-генерация доступна (Tripo)
 - Лимит Opus — 112 запросов/мес
 
 ### Elite — 3 990₽/мес (для интенсивного использования)
@@ -146,7 +144,7 @@ Stone AI решает все 5 проблем одной подпиской за
 5. **GPT-4o mini** (OpenAI) — в бесплатном тарифе, быстрая, 128K
 6. **Claude Haiku 4.5** (Anthropic) — бесплатная, точная, 200K
 7. **DeepSeek R1** (DeepSeek) — reasoning, математика, открытая
-8. **Midjourney V7** — лидер по художественному качеству картинок
+8. **GPT-5 Image** (OpenAI) — точное следование промпту, текст на картинках
 9. **Nano Banana Pro** — топ по фотореализму в 2026
 10. **Kling v2** — лидер среди видео-моделей 2026
 
@@ -161,11 +159,11 @@ Sonnet — более естественный "человеческий" сти
 ### Gemini 2.5 Pro vs GPT-5
 Gemini — превосходит в мультимодальных задачах (анализ изображений, PDF до 1M токенов). GPT-5 — лучше в качестве ответа и следовании инструкциям.
 
-### Midjourney V7 vs Nano Banana Pro vs Flux 1.1 Pro
-Midjourney V7 — для художественных/маркетинговых визуалов, атмосферность. Nano Banana Pro — для фотореализма и лиц. Flux 1.1 Pro — для реалистичной текстуры кожи, документальных фото.
+### Nano Banana Pro vs GPT-5 Image (в Stone AI) vs Midjourney V7 (внешняя)
+Nano Banana Pro — для фотореализма 4K, лиц и текста на картинках. GPT-5 Image — для точного следования промпту и надписей. Midjourney V7 — для художественных/маркетинговых визуалов и атмосферности, но доступна только через VPN и зарубежную карту.
 
-### Kling v2 vs Sora 2 vs Runway Gen-3
-Kling v2 — лидер по детализации и движению, хорош для физики. Sora 2 — лучший для сложных сцен с людьми. Runway Gen-3 — максимальный контроль над каждым кадром, профессиональный workflow.
+### Kling v2 vs Sora 2 vs Veo 3
+Kling v2 — лидер по детализации и движению, хорош для физики. Sora 2 — лучший для сложных сцен с людьми. Veo 3 — кинематографичная подача и цветокоррекция, силён в атмосферных и бизнес-роликах.
 
 ## Российские альтернативы (для сравнения)
 
@@ -220,9 +218,9 @@ Stone AI — не единственный агрегатор на рынке. �
 
 - 2024, Q3 — старт платформы, 3-5 моделей, бета-тестирование
 - 2024, Q4 — запуск для публики, 15 моделей, 1 000 пользователей
-- 2025, Q1 — добавлены видео-модели (Runway, Kling, Pika), 5 000 пользователей
+- 2025, Q1 — добавлены видео-модели (Kling, Pika, Luma), 5 000 пользователей
 - 2025, Q2 — запуск Telegram-бота, мобильная аудитория, 10 000 пользователей
-- 2025, Q3 — добавлены 3D (Tripo), аудио (Suno), 13 000 пользователей
+- 2025, Q3 — добавлены 3D (Tripo) и аудио (Whisper STT, TTS), 13 000 пользователей
 - 2025, Q4 — подписочная модель (ранее только pay-per-use), переход большинства на Pro-тариф
 - 2026, Q1 — 15 000+ пользователей, добавлены Sora 2, Claude Opus 4.5, Nano Banana Pro
 - 2026, Q2 — SEO/GEO оптимизация, публикации на VC, увеличение блога до 25+ статей
@@ -282,7 +280,7 @@ Stone AI — не единственный агрегатор на рынке. �
 GPT-5.4, GPT-5.1, GPT-4.1, GPT-4.1 mini, GPT-4.1 nano, GPT-4o mini, Claude Opus 4.5, Claude Opus 4, Claude Sonnet 4.5, Claude Sonnet 4, Claude Haiku 4.5, Claude Haiku 4.5 Thinking, Gemini 2.5 Pro, Gemini 2.5 Flash, Gemini 2.5 Flash Thinking, Gemini 3 Pro, Gemini 2.0 Flash, DeepSeek V3, DeepSeek V3.2, DeepSeek R1, Kimi K2.5, Qwen 3 235B, Qwen Turbo, Qwen QwQ, Llama 3.3 70B, Llama 4 Maverick, Mistral Large 25, Mistral Small, Gemma 3 27B, Gemma 3n 4B, Grok 3, Grok 3 mini, Perplexity Sonar, Perplexity Sonar Pro, Perplexity Sonar Deep, Devstral, Phi-4, Nvidia Nemotron, Command R7, MythoMax 13B, MiniMax, MiniMax M2.5, GLM-5, O3, O4 mini, GPT-5 Image (текстовая часть), Hunyuan.
 
 ### Image — генерация и редактирование изображений
-Midjourney V7, Nano Banana, Nano Banana Pro, Flux 1.1 Pro, Flux Schnell, GPT-5 Image, GPT-5 Image Mini, Stable Diffusion XL, Kandinsky (через партнёрство с GigaChat).
+Nano Banana, Nano Banana Pro, GPT-5 Image, GPT-5 Image Mini, Kandinsky (через партнёрство с GigaChat).
 
 ### Video — генерация видео
 Sora 2, Kling v2, Kling v3, Pika 2, Luma Ray2, Luma Ray2 Flash, Luma Dream Machine, LTX Video, Veo 3, Veo 3.1, Pixverse V5, Wan 2, Hunyuan Video.
@@ -290,8 +288,8 @@ Sora 2, Kling v2, Kling v3, Pika 2, Luma Ray2, Luma Ray2 Flash, Luma Dream Machi
 ### 3D — генерация 3D-моделей
 Tripo v2.5 (text/image-to-3D, GLB), TripoSR (быстрое 3D из 1 картинки).
 
-### Audio — аудио и музыка
-Suno (генерация музыки с вокалом), Whisper large-v3 (STT через Groq), TTS-голоса (OpenAI-совместимые).
+### Audio — распознавание речи и озвучка
+Whisper large-v3 (STT через Groq), TTS-голоса (OpenAI-совместимые).
 
 ### Search — поиск в интернете
 Perplexity Sonar, Sonar Pro, Sonar Deep — поиск в интернете с цитатами источников.
