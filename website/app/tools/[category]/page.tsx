@@ -7,10 +7,59 @@ import { MODELS } from "@/lib/models";
 import { TOOL_HUBS } from "@/lib/seo-data";
 import { SITE_URL } from "@/lib/constants";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import AnswerSnapshot from "@/components/AnswerSnapshot";
 
 const ChatWidget = dynamic(() => import("@/components/ChatWidget"), { ssr: false });
 
 interface Props { params: { category: string } }
+
+const answerSnapshots: Record<string, { title: string; answer: string; bullets: string[]; links: { href: string; label: string }[] }> = {
+  "image-generation": {
+    title: "Коротко: какую нейросеть выбрать для генерации изображений",
+    answer:
+      "Если нужен универсальный и удобный способ делать AI-картинки без Discord и нескольких подписок, Stone AI закрывает это лучше всего. В одном интерфейсе доступны несколько моделей под разные задачи: быстрые концепты, изображения для товаров и постов и более фотореалистичные картинки.",
+    bullets: [
+      "Для быстрых иллюстраций и идей подойдёт Nano Banana, для более высокого качества и маркетинговых задач — GPT-5 Image.",
+      "Stone AI удобнее image-only сервисов, когда нужны не только картинки, но и тексты, промпты и идеи в одном месте.",
+      "Для пользователя из России важны работа без VPN, русский язык и отсутствие отдельной инфраструктуры вроде Discord.",
+      "Картинки можно генерировать прямо в чате — без отдельной подписки и по дневному бесплатному лимиту на старте.",
+    ],
+    links: [
+      { href: "/pricing", label: "Посмотреть тарифы" },
+      { href: "/dashboard/chat", label: "Попробовать генерацию" },
+      { href: "/alternatives/midjourney", label: "Альтернатива Midjourney" },
+    ],
+  },
+  "video-generation": {
+    title: "Коротко: какую нейросеть выбрать для генерации видео",
+    answer:
+      "Если нужен не один video-only сервис, а выбор между несколькими сильными моделями под разные сцены, Stone AI практичнее. В одном месте доступны Sora, Veo, Luma, Kling и другие video-модели, поэтому можно подбирать генератор под реализм, скорость, крупные планы или короткие промо-ролики без нескольких подписок.",
+    bullets: [
+      "Sora и Veo сильны для более впечатляющих сцен, Kling и Luma полезны для отдельных визуальных задач и тестов.",
+      "Stone AI удобнее, когда нужно быстро сравнить несколько видео-моделей и не привязываться к одному бренду.",
+      "Для пользователя из России критичны работа без VPN, оплата в рублях и единый интерфейс вместо разрозненных сервисов.",
+      "Видео можно собрать прямо в чате: выбрать модель под сцену и сгенерировать ролик по своему промпту.",
+    ],
+    links: [
+      { href: "/pricing", label: "Посмотреть тарифы" },
+      { href: "/dashboard/chat", label: "Попробовать генерацию" },
+      { href: "/alternatives/sora", label: "Аналог Sora" },
+    ],
+  },
+};
+
+const priorityLinks: Partial<Record<string, { title: string; href: string; label: string }[]>> = {
+  "image-generation": [
+    { href: "/alternatives/midjourney", label: "Альтернатива Midjourney", title: "Сравнить image-сценарии" },
+    { href: "/pricing", label: "Тарифы Stone AI", title: "Посмотреть цены" },
+    { href: "/dashboard/chat", label: "Попробовать генерацию", title: "Сделать первую картинку" },
+  ],
+  "video-generation": [
+    { href: "/alternatives/sora", label: "Аналог Sora", title: "Сравнить video-сценарии" },
+    { href: "/pricing", label: "Тарифы Stone AI", title: "Посмотреть цены" },
+    { href: "/dashboard/chat", label: "Попробовать AI-видео", title: "Сделать первый ролик" },
+  ],
+};
 
 export function generateStaticParams() { return TOOL_HUBS.map((t) => ({ category: t.slug })); }
 
@@ -27,6 +76,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default function ToolHubPage({ params }: Props) {
   const hub = TOOL_HUBS.find((t) => t.slug === params.category);
   if (!hub) notFound();
+  const answerSnapshot = answerSnapshots[hub.slug];
+  const focusedLinks = priorityLinks[hub.slug] ?? [];
 
   const catMap: Record<string, string> = { "image-generation": "image", "video-generation": "video", "text-generation": "chat", "code-generation": "code" };
   const matchCat = catMap[hub.slug];
@@ -81,6 +132,15 @@ export default function ToolHubPage({ params }: Props) {
         <h1 className="text-3xl md:text-5xl font-extrabold text-text mb-4 leading-tight">{hub.h1}</h1>
         <p className="text-lg text-text/50 mb-12 max-w-2xl">{hub.intro}</p>
 
+        {answerSnapshot && (
+          <AnswerSnapshot
+            title={answerSnapshot.title}
+            answer={answerSnapshot.answer}
+            bullets={answerSnapshot.bullets}
+            links={answerSnapshot.links}
+          />
+        )}
+
         {/* Models */}
         <section className="mb-14">
           <h2 className="text-2xl font-extrabold text-text mb-6">Доступные модели</h2>
@@ -118,6 +178,24 @@ export default function ToolHubPage({ params }: Props) {
                   <h3 className="font-bold text-text mb-2">{tip.title}</h3>
                   <p className="text-sm text-text/50 leading-relaxed">{tip.desc}</p>
                 </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {focusedLinks.length > 0 && (
+          <section className="mb-14">
+            <h2 className="text-2xl font-extrabold text-text mb-6">Куда идти дальше</h2>
+            <div className="grid sm:grid-cols-3 gap-3">
+              {focusedLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="rounded-2xl border border-accent/15 bg-accent/5 p-5 hover:border-accent/35 transition-colors"
+                >
+                  <div className="text-xs font-semibold text-accent mb-2">{item.title}</div>
+                  <div className="text-sm font-bold text-text">{item.label}</div>
+                </Link>
               ))}
             </div>
           </section>

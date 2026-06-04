@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import AnswerSnapshot from "@/components/AnswerSnapshot";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import ModelComparison from "@/components/ModelComparison";
 import ModelsTable from "@/components/ModelsTable";
@@ -160,6 +161,13 @@ const pricingFaqJsonLd = {
   })),
 };
 
+const pricingDecisionBullets = [
+  "Free / Pay-per-Use — если хотите начать без подписки и платить только за отдельные задачи.",
+  "Start — если нужен регулярный AI для текста, чата и базовых рабочих сценариев.",
+  "Pro — если AI используется каждый день и нужны все 65+ моделей, картинки и видео.",
+  "Elite — если AI встроен в рабочий процесс команды и нужен API, приоритет и большие лимиты.",
+];
+
 export default function PricingPage() {
   const [hasPaidPlan, setHasPaidPlan] = useState(false);
 
@@ -193,6 +201,17 @@ export default function PricingPage() {
               : `Бесплатный старт — 10 запросов в день. Подписка от ${planPriceFull("mini")} открывает GPT-5, Claude Opus, генерацию картинок и видео.`}
           </p>
         </div>
+
+        <AnswerSnapshot
+          title="Какой тариф Stone AI выбрать"
+          answer="Если коротко: Start подходит для регулярного AI-чата и рабочих задач, Pro — оптимален по соотношению цена/возможности для ежедневного использования со всеми моделями, картинками и видео, Elite — для команд и тех, кто работает с AI на полную. Большинству пользователей подходит Pro."
+          bullets={pricingDecisionBullets}
+          links={[
+            { href: "#pricing", label: "Сравнить тарифы ниже" },
+            { href: "/compare/stone-ai-vs-chatgpt-plus", label: "Сравнение с ChatGPT Plus" },
+            { href: "/dashboard/chat", label: "Попробовать бесплатно" },
+          ]}
+        />
       </div>
 
       <Pricing />

@@ -7,12 +7,40 @@ import { MODELS } from "@/lib/models";
 import { PROFESSIONS } from "@/lib/seo-data";
 import { SITE_URL } from "@/lib/constants";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import AnswerSnapshot from "@/components/AnswerSnapshot";
 import { CrossLinks } from "@/components/CrossLinks";
 
 const ChatWidget = dynamic(() => import("@/components/ChatWidget"), { ssr: false });
 const CopyButton = dynamic(() => import("@/components/CopyButton"), { ssr: false });
 
 interface Props { params: { role: string } }
+
+const answerSnapshots: Record<string, { title: string; answer: string; bullets: string[]; links: { href: string; label: string }[] }> = {
+  developer: {
+    title: "Коротко: какой AI нужен разработчику",
+    answer:
+      "Если нужен не просто чат для кода, а рабочий набор под разные инженерные задачи, Stone AI практичнее одиночного сервиса. Здесь можно переключаться между Claude для сложного рефакторинга, GPT для повседневного кода и DeepSeek для задач на рассуждение, не покупая несколько подписок отдельно.",
+    bullets: [
+      "Для code review, архитектуры и длинного контекста удобнее иметь доступ сразу к нескольким моделям, а не к одной.",
+      "Stone AI закрывает типичные задачи разработки: генерацию кода, дебаг, тесты, SQL, рефакторинг и разбор trade-offs.",
+      "Для команды или активного solo-разработчика доступ без VPN и с оплатой в рублях снижает порог входа.",
+      "Начать можно с готового кейса прямо в чате, а документация и тарифы помогут встроить AI в рабочий процесс.",
+    ],
+    links: [
+      { href: "/docs", label: "Открыть docs" },
+      { href: "/pricing", label: "Посмотреть тарифы" },
+      { href: "/dashboard/chat", label: "Попробовать в чате" },
+    ],
+  },
+};
+
+const priorityLinks: Partial<Record<string, { title: string; href: string; label: string }[]>> = {
+  developer: [
+    { href: "/docs", label: "Docs и API", title: "Подключить в продукт" },
+    { href: "/pricing", label: "Тарифы Stone AI", title: "Посмотреть цены" },
+    { href: "/compare/stone-ai-vs-chatgpt-plus", label: "Stone AI vs ChatGPT Plus", title: "Сравнить сервисы" },
+  ],
+};
 
 export function generateStaticParams() { return PROFESSIONS.map((p) => ({ role: p.slug })); }
 
@@ -29,6 +57,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default function ProfessionPage({ params }: Props) {
   const prof = PROFESSIONS.find((p) => p.slug === params.role);
   if (!prof) notFound();
+  const answerSnapshot = answerSnapshots[prof.slug];
+  const focusedLinks = priorityLinks[prof.slug] ?? [];
 
   const benefitsMap: Record<string, string[]> = {
     marketer: ["Пост для соцсетей за 30 секунд — текст + картинка + хештеги", "SEO-статья на 3000 слов за 10 минут с ключами и FAQ", "5 рекламных объявлений для Директа за 30 секунд", "Баннер или карточка товара за 15₽ — без дизайнера", "Промо-видео для Reels за 150₽ — вместо 50 000₽ у агентства", "Анализ конкурента с рекомендациями — за 2 минуты"],
@@ -232,6 +262,15 @@ export default function ProfessionPage({ params }: Props) {
         <h1 className="text-3xl md:text-5xl font-extrabold text-text mb-4 leading-tight">{prof.h1}</h1>
         <p className="text-lg text-text/50 mb-12 max-w-2xl">{prof.intro}</p>
 
+        {answerSnapshot && (
+          <AnswerSnapshot
+            title={answerSnapshot.title}
+            answer={answerSnapshot.answer}
+            bullets={answerSnapshot.bullets}
+            links={answerSnapshot.links}
+          />
+        )}
+
         {/* Benefits */}
         <section className="mb-14">
           <h2 className="text-2xl font-extrabold text-text mb-6">Что даёт AI {prof.role.toLowerCase()}у</h2>
@@ -387,7 +426,25 @@ export default function ProfessionPage({ params }: Props) {
           </Link>
         </section>
 
-        <CrossLinks exclude={["for", "pricing"]} />
+        {focusedLinks.length > 0 && (
+          <section className="mt-14 mb-14">
+            <h2 className="text-lg font-bold text-text mb-4">Следующий шаг</h2>
+            <div className="grid sm:grid-cols-3 gap-3">
+              {focusedLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="rounded-2xl border border-accent/15 bg-accent/5 p-5 hover:border-accent/35 transition-colors"
+                >
+                  <div className="text-xs font-semibold text-accent mb-2">{item.title}</div>
+                  <div className="text-sm font-bold text-text">{item.label}</div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <CrossLinks prefer={["compare", "pricing", "models"]} exclude={["for"]} />
 
         {/* Other */}
         <section className="mt-14">

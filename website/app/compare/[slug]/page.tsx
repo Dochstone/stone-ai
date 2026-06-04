@@ -7,6 +7,7 @@ import { COMPARISONS } from "@/lib/seo-data";
 import { SITE_URL } from "@/lib/constants";
 import { planPriceFull } from "@/lib/pricing";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import AnswerSnapshot from "@/components/AnswerSnapshot";
 import { buildItemList } from "@/lib/schema";
 import { getAuthor, DEFAULT_AUTHOR_SLUG } from "@/lib/authors";
 
@@ -58,6 +59,24 @@ const companyLogo: Record<string, string> = {
 const catEmoji: Record<string, string> = { chat: "💬", image: "🎨", video: "📹", reason: "🧠", code: "💻", search: "🔍", "3d": "🧊" };
 const catLabel: Record<string, string> = { chat: "Чат", image: "Картинки", video: "Видео", reason: "Reasoning", code: "Код", search: "Поиск", "3d": "3D" };
 const speedLabel: Record<string, string> = { instant: "Мгновенная", fast: "Быстрая", medium: "Средняя", slow: "Медленная" };
+
+const compareSnapshots: Record<string, { title: string; answer: string; bullets: string[]; links: { href: string; label: string }[] }> = {
+  "stone-ai-vs-chatgpt-plus": {
+    title: "Коротко: что выгоднее для пользователя из России",
+    answer: "Если сравнивать не бренд, а практическую полезность за деньги, Stone AI для пользователя из России обычно выгоднее ChatGPT Plus. Причина простая: больше моделей, больше сценариев, нет VPN, есть оплата в рублях и доступ к GPT, Claude, Gemini и DeepSeek в одной подписке.",
+    bullets: [
+      "ChatGPT Plus хорош, если вам нужны только модели OpenAI и вы уже решили вопрос с VPN и оплатой.",
+      "Stone AI сильнее как рабочая платформа: чат, картинки, видео, SEO и переключение между провайдерами.",
+      "Для рынка РФ важны не только качество модели, но и доступность, оплата и ширина сценариев.",
+      "Сравнивайте по всему набору возможностей за деньги, а не только по одной модели GPT.",
+    ],
+    links: [
+      { href: "/pricing", label: "Посмотреть тарифы" },
+      { href: "/alternatives/chatgpt", label: "Аналоги ChatGPT" },
+      { href: "/dashboard/chat", label: "Открыть Stone AI" },
+    ],
+  },
+};
 
 function ModelCard({ id, side }: { id: string; side: "left" | "right" }) {
   const m = MODELS.find((x) => x.id === id);
@@ -146,6 +165,7 @@ export default function ComparePage({ params }: Props) {
 
   const name1 = isPlatformCompare ? comp.platform1!.name : (m1?.name || comp.model1);
   const name2 = isPlatformCompare ? comp.platform2!.name : (m2?.name || comp.model2);
+  const compareSnapshot = compareSnapshots[comp.slug];
 
   const faqItems = [
     { q: `Что лучше: ${name1} или ${name2}?`, a: comp.verdict },
@@ -217,6 +237,15 @@ export default function ComparePage({ params }: Props) {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-28 pb-20">
         <h1 className="text-3xl md:text-5xl font-extrabold text-text mb-4 leading-tight">{comp.h1}</h1>
         <p className="text-lg text-text/50 mb-12 max-w-2xl">{comp.description}</p>
+
+        {compareSnapshot && (
+          <AnswerSnapshot
+            title={compareSnapshot.title}
+            answer={compareSnapshot.answer}
+            bullets={compareSnapshot.bullets}
+            links={compareSnapshot.links}
+          />
+        )}
 
         {/* VS badge */}
         <div className="flex items-center justify-center mb-6">
