@@ -164,6 +164,12 @@ function LimitBar({ label, used, limit, emoji }: { label: string; used: number; 
   );
 }
 
+function formatResetDate(iso: string): string {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
+}
+
 function OverviewTab({ profile, usage, limits }: { profile: UserProfile; usage: UsageItem[]; limits: any }) {
   // Favorite model
   const modelCounts: Record<string, number> = {};
@@ -253,7 +259,9 @@ function OverviewTab({ profile, usage, limits }: { profile: UserProfile; usage: 
             </h3>
             {limits.reset_at && (
               <span className="text-[10px] text-text/30">
-                {profile.plan === "max" || profile.plan === "max-pro" ? "Недельный лимит" : "Обновится в 00:00 МСК"}
+                {profile.plan === "max" || profile.plan === "max-pro"
+                  ? `Обновится ${formatResetDate(limits.reset_at)}`
+                  : "Обновится в 00:00 МСК"}
               </span>
             )}
           </div>
