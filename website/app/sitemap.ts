@@ -7,6 +7,7 @@ import { GLOSSARY } from "@/lib/glossary";
 import { AUTHORS } from "@/lib/authors";
 import { AEO_PAGES } from "@/lib/aeo-pages";
 import { LOCATIONS } from "@/lib/locations";
+import { HOW_TO_GUIDES } from "@/lib/how-to";
 
 import { SITE_URL } from "@/lib/constants";
 
@@ -33,6 +34,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/for`, lastModified: now, changeFrequency: "weekly", priority: 0.75 },
     { url: `${SITE_URL}/tools`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${SITE_URL}/use-cases`, lastModified: now, changeFrequency: "weekly", priority: 0.75 },
+    { url: `${SITE_URL}/how-to`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${SITE_URL}/glossary`, lastModified: now, changeFrequency: "monthly", priority: 0.65 },
     { url: `${SITE_URL}/faq`, lastModified: now, changeFrequency: "monthly", priority: 0.75 },
     { url: `${SITE_URL}/answers`, lastModified: now, changeFrequency: "weekly", priority: 0.82 },
@@ -134,6 +136,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.72,
   }));
 
+  const howToPages: MetadataRoute.Sitemap = HOW_TO_GUIDES.map((guide) => ({
+    url: `${SITE_URL}/how-to/${guide.slug}`,
+    lastModified: now,
+    changeFrequency: "monthly",
+    priority: 0.78,
+  }));
+
   // Pillar topics — update list when new pillars are added to PILLAR_CONTENT.
   const pillarPages: MetadataRoute.Sitemap = [
     "image-ai",
@@ -164,6 +173,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...authorPages,
     ...answerPages,
     ...locationPages,
+    ...howToPages,
     ...pillarPages,
   ];
 }
