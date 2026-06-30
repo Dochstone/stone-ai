@@ -69,6 +69,14 @@ PROMO_CODES = {
         "valid_until": "2026-05-11T23:59:59+03:00",
         "desc": "−10% на любой тариф (акция в честь 9 мая, 2 дня)",
     },
+    "JULY25": {
+        "type": "discount_percent",
+        "discount_value": 25,
+        "max_uses": 50000,
+        "one_per_user": True,
+        "valid_until": "2026-07-07T23:59:59+03:00",
+        "desc": "−25% на любой тариф (акция 30 июня — 7 июля)",
+    },
 }
 
 from sqlalchemy import func, select, text

@@ -24,10 +24,10 @@ PLAN_PRICES_YEARLY_RUB: dict[str, int] = {
 # tier's monthly price during the window. Mirror in `website/lib/pricing.ts`.
 PROMO_CAMPAIGN: dict[str, object] = {
     "tier": "max",
-    "discount_rub": 190,                     # 1690 → 1500
-    "label_pct": 10,                         # marketed as "−10%"
-    "valid_from": "2026-04-26T00:00:00+03:00",
-    "valid_until": "2026-04-30T23:59:59+03:00",
+    "discount_rub": 422,                     # 1690 → 1268 (−25%)
+    "label_pct": 25,                         # marketed as "−25%"
+    "valid_from": "2026-06-30T00:00:00+03:00",
+    "valid_until": "2026-07-07T23:59:59+03:00",
 }
 
 

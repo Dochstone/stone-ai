@@ -307,7 +307,7 @@ export default function Pricing() {
         {isPromoActive() && (
           <div className="max-w-2xl mx-auto mb-8 px-4 py-3 rounded-2xl bg-gradient-to-r from-[#A855F7]/15 via-[#F43F5E]/10 to-[#A855F7]/15 border border-[#A855F7]/30 text-center">
             <p className="text-sm md:text-base font-bold">
-              🔥 −{PROMO_CAMPAIGN.labelPct}% на Pro до 30 апреля
+              🔥 −{PROMO_CAMPAIGN.labelPct}% на Pro до 7 июля
               <span className="ml-2 text-text/60 line-through">{PLAN_PRICES_RUB[PROMO_CAMPAIGN.tier].toLocaleString("ru-RU").replace(/,/g, " ")}₽</span>
               <span className="ml-2 text-[#A855F7]">{effectivePlanPrice(PROMO_CAMPAIGN.tier).toLocaleString("ru-RU").replace(/,/g, " ")}₽/мес</span>
             </p>
@@ -438,7 +438,7 @@ export default function Pricing() {
                       )}
                       {isCampaign && (
                         <p className={`text-[11px] mt-0.5 ${plan.premium ? "text-white/40" : "text-text/40"}`}>
-                          до 30 апреля · применяется автоматически
+                          до 7 июля · применяется автоматически
                         </p>
                       )}
                     </>

@@ -53,10 +53,10 @@ export const PLAN_PRICES_RUB: Record<PaidPlanId, number> = PRICES_CURRENT;
  */
 export const PROMO_CAMPAIGN = {
   tier: "max" as PaidPlanId,
-  discountRub: 190,            // 1690 → 1500
-  labelPct: 10,                // marketed as "−10%"
-  validFrom: "2026-04-26T00:00:00+03:00",
-  validUntil: "2026-04-30T23:59:59+03:00",
+  discountRub: 422,            // 1690 → 1268 (−25%)
+  labelPct: 25,                // marketed as "−25%"
+  validFrom: "2026-06-30T00:00:00+03:00",
+  validUntil: "2026-07-07T23:59:59+03:00",
 } as const;
 
 export function isPromoActive(now: Date = new Date()): boolean {
