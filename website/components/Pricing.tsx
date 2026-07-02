@@ -144,7 +144,7 @@ const KEYFRAMES = `
 
 export default function Pricing() {
   const [loading, setLoading] = useState(false);
-  const [billing, setBilling] = useState<"month" | "year">("month");
+  const billing = "month" as const;
   const [modal, setModal] = useState<PricingPlan | null>(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
@@ -260,8 +260,8 @@ export default function Pricing() {
     setLoading(true);
     setResult(null);
     try {
-      const period = billing;
-      const rub = period === "year" ? planYearlyPriceNum(tier) : PLAN_PRICES_RUB[tier];
+      const period = "month";
+      const rub = PLAN_PRICES_RUB[tier];
       const usdAmount = rub / USD_TO_RUB;
 
       if (method === "platega") {
@@ -315,39 +315,6 @@ export default function Pricing() {
           </div>
         )}
 
-        <div className="flex justify-center mb-10">
-          <div className="inline-flex items-center bg-text/[0.06] border border-text/10 rounded-full p-1 text-sm font-semibold">
-            <button
-              type="button"
-              onClick={() => setBilling("month")}
-              className={`px-6 py-2 rounded-full transition-all duration-150 ${
-                billing === "month"
-                  ? "bg-accent text-white shadow-md shadow-accent/25"
-                  : "text-text/60 hover:text-text hover:bg-text/5"
-              }`}
-              aria-pressed={billing === "month"}
-            >
-              Месяц
-            </button>
-            <button
-              type="button"
-              onClick={() => setBilling("year")}
-              className={`px-6 py-2 rounded-full transition-all duration-150 flex items-center gap-2 ${
-                billing === "year"
-                  ? "bg-accent text-white shadow-md shadow-accent/25"
-                  : "text-text/60 hover:text-text hover:bg-text/5"
-              }`}
-              aria-pressed={billing === "year"}
-            >
-              Год
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition-colors ${
-                billing === "year" ? "bg-white/25 text-white" : "bg-accent/15 text-accent"
-              }`}>
-                −{Math.round(YEARLY_DISCOUNT * 100)}%
-              </span>
-            </button>
-          </div>
-        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto">
           {plans.map((plan) => (
@@ -400,21 +367,14 @@ export default function Pricing() {
                 </div>
                 {(() => {
                   const isPaid = plan.id === "mini" || plan.id === "max" || plan.id === "max-pro";
-                  const showYearly = isPaid && billing === "year";
-                  const isCampaign = isPaid && billing === "month" && plan.id === PROMO_CAMPAIGN.tier && isPromoActive();
+                  const isCampaign = isPaid && plan.id === PROMO_CAMPAIGN.tier && isPromoActive();
                   const formatRub = (n: number) => `${n.toLocaleString("ru-RU").replace(/,/g, " ")}₽`;
-                  const displayPrice = showYearly
-                    ? planYearlyMonthlyEquivalent(plan.id as PaidPlanId)
-                    : isCampaign
+                  const displayPrice = isCampaign
                     ? formatRub(effectivePlanPrice(plan.id as PaidPlanId))
                     : plan.price;
-                  const displayPeriod = showYearly ? "/мес" : plan.period;
-                  const monthlyOld = isPaid && showYearly
-                    ? planPrice(plan.id as PaidPlanId)
-                    : isCampaign
+                  const monthlyOld = isCampaign
                     ? formatRub(PLAN_PRICES_RUB[plan.id as PaidPlanId])
                     : plan.oldPrice;
-                  const showYearlyDiscount = showYearly && isPaid;
                   return (
                     <>
                       <div className="mt-1 flex items-baseline gap-2 flex-wrap">
@@ -422,20 +382,11 @@ export default function Pricing() {
                           <span className={`text-sm line-through ${plan.premium ? "text-white/30" : "text-text/30"}`}>{monthlyOld}</span>
                         )}
                         <span className={`text-2xl font-extrabold ${plan.premium ? "text-amber-400" : ""}`}>{displayPrice}</span>
-                        {displayPeriod && <span className={`text-sm ${plan.premium ? "text-white/40" : "text-text/40"}`}>{displayPeriod}</span>}
-                        {showYearlyDiscount && (
-                          <span className="text-[10px] font-bold bg-accent/15 text-accent px-1.5 py-0.5 rounded-full">−{Math.round(YEARLY_DISCOUNT * 100)}%</span>
-                        )}
+                        {plan.period && <span className={`text-sm ${plan.premium ? "text-white/40" : "text-text/40"}`}>{plan.period}</span>}
                         {isCampaign && (
                           <span className="text-[10px] font-bold bg-[#A855F7]/15 text-[#A855F7] px-1.5 py-0.5 rounded-full">−{PROMO_CAMPAIGN.labelPct}%</span>
                         )}
                       </div>
-                      {showYearly && (
-                        <p className={`text-[11px] mt-0.5 ${plan.premium ? "text-white/40" : "text-text/40"}`}>
-                          оплата {planYearlyPrice(plan.id as PaidPlanId)} раз в год
-                          <span className="text-text/30"> · вместо {planYearlyOldPrice(plan.id as PaidPlanId)}</span>
-                        </p>
-                      )}
                       {isCampaign && (
                         <p className={`text-[11px] mt-0.5 ${plan.premium ? "text-white/40" : "text-text/40"}`}>
                           до 7 июля · применяется автоматически
@@ -580,18 +531,12 @@ export default function Pricing() {
             </button>
 
             {(() => {
-              // Compute display values based on current billing toggle.
-              const isPaidTier = modal.id === "mini" || modal.id === "max" || modal.id === "max-pro";
-              const showYearly = isPaidTier && billing === "year";
-              const dPrice = showYearly ? planYearlyPrice(modal.id as PaidPlanId) : modal.price;
-              const dPeriod = showYearly ? "/год" : modal.period;
-              const dOldPrice = showYearly ? planYearlyOldPrice(modal.id as PaidPlanId) : modal.oldPrice;
-              const dDiscountPct = showYearly
-                ? Math.round((1 - planYearlyPriceNum(modal.id as PaidPlanId) / (PLAN_PRICES_RUB[modal.id as PaidPlanId] * 12)) * 100)
-                : modal.oldPrice
-                  ? Math.round((1 - modal.priceNum / parseInt(modal.oldPrice.replace(/\s/g, ""))) * 100)
-                  : 0;
-              const dPerMonthHint = showYearly ? planYearlyMonthlyEquivalent(modal.id as PaidPlanId) : null;
+              const dPrice = modal.price;
+              const dPeriod = modal.period;
+              const dOldPrice = modal.oldPrice;
+              const dDiscountPct = modal.oldPrice
+                ? Math.round((1 - modal.priceNum / parseInt(modal.oldPrice.replace(/\s/g, ""))) * 100)
+                : 0;
               return (
             <div className="flex flex-col sm:flex-row">
 
@@ -637,9 +582,6 @@ export default function Pricing() {
                           <span className="text-2xl font-extrabold drop-shadow-lg" style={{ color: modal.color }}>{dPrice}</span>
                           <span className="text-xs text-white/60 font-semibold">{dPeriod}</span>
                         </div>
-                        {dPerMonthHint && (
-                          <div className="text-[10px] text-white/55 mt-0.5">≈ {dPerMonthHint}/мес</div>
-                        )}
                       </div>
                     </div>
                   </div>
@@ -676,9 +618,6 @@ export default function Pricing() {
                     <span className="text-sm text-text/40 font-semibold">{dPeriod}</span>
                     {dDiscountPct > 0 && <span className="text-[10px] font-bold bg-accent/10 text-accent px-2 py-0.5 rounded-full">−{dDiscountPct}%</span>}
                   </div>
-                  {dPerMonthHint && (
-                    <p className="text-xs text-text/45 mb-2">≈ {dPerMonthHint}/мес при оплате за год</p>
-                  )}
                 </div>
 
                 {/* Features */}
@@ -884,7 +823,7 @@ export default function Pricing() {
                       <div className="rounded-xl border border-text/[0.06] overflow-hidden">
                         <TonPayButton
                           tier={modal.id}
-                          period={billing}
+                          period="month"
                           onSuccess={() => {
                             setSuccessAnim(true);
                             setTimeout(() => {
