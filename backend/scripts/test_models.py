@@ -70,7 +70,12 @@ async def test_model(client: httpx.AsyncClient, model: dict, api_key: str, webap
         if not choices:
             return {"id": model["id"], "ok": False, "elapsed": elapsed, "error": "empty choices"}
 
-        content = choices[0].get("message", {}).get("content", "").strip()
+        message = choices[0].get("message", {})
+        content = (message.get("content") or "").strip()
+        # Reasoning models (o3, o4-mini, deepseek-r1, etc.) may return content=null
+        # and put their actual output in reasoning_content
+        if not content:
+            content = (message.get("reasoning_content") or "").strip()
         if not content:
             return {"id": model["id"], "ok": False, "elapsed": elapsed, "error": "empty content"}
 
