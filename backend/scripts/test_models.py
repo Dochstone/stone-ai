@@ -29,6 +29,8 @@ OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 TIMEOUT = 30.0
 CONCURRENCY = 10  # параллельных запросов одновременно
 TEST_MESSAGE = [{"role": "user", "content": "Reply with exactly one word: OK"}]
+REASONING_CATEGORIES = {"reason"}  # these models need more tokens for their thinking phase
+SKIP_CATEGORIES = {"search"}  # slow deep-research models — skip in default test run
 
 GREEN  = "\033[92m"
 RED    = "\033[91m"
@@ -41,8 +43,8 @@ RESET  = "\033[0m"
 async def test_model(client: httpx.AsyncClient, model: dict, api_key: str, webapp_url: str) -> dict:
     start = time.monotonic()
     try:
-        messages = TEST_MESSAGE
-        # Reasoning models don't support system role — safe for user-only messages
+        # Reasoning models need more tokens to finish their thinking phase before outputting
+        max_tokens = 200 if model.get("category") in REASONING_CATEGORIES else 24
         resp = await client.post(
             OPENROUTER_URL,
             headers={
@@ -53,8 +55,8 @@ async def test_model(client: httpx.AsyncClient, model: dict, api_key: str, webap
             },
             json={
                 "model": model["openrouter_id"],
-                "messages": messages,
-                "max_tokens": 16,
+                "messages": TEST_MESSAGE,
+                "max_tokens": max_tokens,
                 "stream": False,
             },
             timeout=TIMEOUT,
@@ -93,6 +95,7 @@ async def main():
     webapp_url = getattr(settings, "webapp_url", "https://stoneai.ru")
 
     fast_only = "--fast" in sys.argv
+    include_search = "--search" in sys.argv
     specific = [a for a in sys.argv[1:] if not a.startswith("--")]
 
     # Выбираем модели для теста
@@ -100,10 +103,11 @@ async def main():
         m for m in MODELS_REGISTRY
         if m.get("active", True)
         and m.get("category") != "image"
+        and (include_search or m.get("category") not in SKIP_CATEGORIES)
     ]
 
     if specific:
-        models = [m for m in models if m["id"] in specific]
+        models = [m for m in MODELS_REGISTRY if m["id"] in specific]
     elif fast_only:
         models = [m for m in models if m["tier"] in (1, 5)]
 
