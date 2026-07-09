@@ -82,14 +82,15 @@ export default function PageTracker() {
       const duration = (Date.now() - startRef.current) / 1000;
       if (duration > 1 && duration < 1800) {
         const auth = (() => { try { return JSON.parse(localStorage.getItem("stone_auth") || "{}"); } catch { return {}; } })();
+        const durationPayload = JSON.stringify({
+          path: lastPathRef.current,
+          referrer: document.referrer || null,
+          duration_sec: Math.round(duration),
+          screen_width: window.innerWidth,
+        });
         navigator.sendBeacon?.(
           `${API_URL}/api/analytics/track`,
-          JSON.stringify({
-            path: lastPathRef.current,
-            referrer: document.referrer || null,
-            duration_sec: Math.round(duration),
-            screen_width: window.innerWidth,
-          })
+          new Blob([durationPayload], { type: "application/json" })
         ) || fetch(`${API_URL}/api/analytics/track`, {
           method: "POST",
           headers: { "Content-Type": "application/json", ...(auth.token ? { Authorization: `Bearer ${auth.token}` } : {}) },
@@ -116,7 +117,7 @@ export default function PageTracker() {
       if (duration > 1 && duration < 1800) {
         navigator.sendBeacon?.(
           `${API_URL}/api/analytics/track`,
-          JSON.stringify({ path: pathname, duration_sec: Math.round(duration), screen_width: window.innerWidth })
+          new Blob([JSON.stringify({ path: pathname, duration_sec: Math.round(duration), screen_width: window.innerWidth })], { type: "application/json" })
         );
       }
     };
